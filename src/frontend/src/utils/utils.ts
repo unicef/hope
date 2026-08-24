@@ -197,8 +197,6 @@ export function targetPopulationStatusDisplayMap(status: string): string {
       return 'READY FOR PAYMENT MODULE';
     case PaymentPlanStatus.TP_LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.PROCESSING:
-      return 'PROCESSING';
     case PaymentPlanStatus.STEFICON_WAIT:
       return 'STEFICON WAIT';
     case PaymentPlanStatus.STEFICON_RUN:
@@ -300,7 +298,6 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
     [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,

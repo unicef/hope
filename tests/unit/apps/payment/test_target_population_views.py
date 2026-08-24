@@ -484,7 +484,7 @@ def test_target_population_caching(
         assert etag_second_call == etag
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        target_population_list_context["tp"].status = PaymentPlan.Status.TP_PROCESSING
+        target_population_list_context["tp"].status = PaymentPlan.Status.TP_LOCKED
         target_population_list_context["tp"].save()
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])

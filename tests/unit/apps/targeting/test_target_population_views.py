@@ -318,7 +318,7 @@ def test_list_target_populations_caching(
         assert response.headers["etag"] == etag
 
     with TestCase.captureOnCommitCallbacks(execute=True):
-        tp1.status = PaymentPlan.Status.TP_PROCESSING
+        tp1.status = PaymentPlan.Status.TP_LOCKED
         tp1.save()
 
     with CaptureQueriesContext(connection) as ctx:

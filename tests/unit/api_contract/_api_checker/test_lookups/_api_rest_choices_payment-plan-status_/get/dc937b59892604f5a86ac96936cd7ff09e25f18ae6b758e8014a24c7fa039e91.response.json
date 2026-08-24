@@ -64,10 +64,6 @@
             "value": "OPEN"
         },
         {
-            "name": "Processing",
-            "value": "PROCESSING"
-        },
-        {
             "name": "Steficon Completed",
             "value": "STEFICON_COMPLETED"
         },

@@ -58,7 +58,6 @@ export const TargetPopulationTableFilters = ({
     PaymentPlanStatusEnum.DRAFT,
     PaymentPlanStatusEnum.TP_OPEN,
     PaymentPlanStatusEnum.TP_LOCKED,
-    PaymentPlanStatusEnum.PROCESSING,
     PaymentPlanStatusEnum.STEFICON_RUN,
     PaymentPlanStatusEnum.STEFICON_WAIT,
     PaymentPlanStatusEnum.STEFICON_COMPLETED,

@@ -131,7 +131,6 @@ class PaymentPlan(
         # new from TP
         TP_OPEN = "TP_OPEN", "Open"
         TP_LOCKED = "TP_LOCKED", "Locked"
-        TP_PROCESSING = "PROCESSING", "Processing"  # TODO: do we need this one?
         TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
         TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
         TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
@@ -161,7 +160,6 @@ class PaymentPlan(
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
-        Status.TP_PROCESSING,
         Status.TP_STEFICON_WAIT,
         Status.TP_STEFICON_RUN,
         Status.TP_STEFICON_COMPLETED,
@@ -751,9 +749,6 @@ class PaymentPlan(
 
     def is_population_open(self) -> bool:
         return self.status == self.Status.TP_OPEN
-
-    def is_population_finalized(self) -> bool:
-        return self.status == self.Status.TP_PROCESSING
 
     def is_population_locked(self) -> bool:
         return self.status in (
