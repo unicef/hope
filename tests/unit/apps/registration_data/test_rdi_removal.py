@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.test.utils import override_settings
@@ -17,6 +18,10 @@ from extras.test_utils.factories import (
     PendingIndividualFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
+)
+from hope.apps.household.api.caches import (
+    get_household_list_program_key,
+    get_individual_list_program_key,
 )
 from hope.apps.registration_data.services.rdi_removal import remove_rdi_population
 from hope.models import (
@@ -166,6 +171,29 @@ def test_delete_rdi_true_removes_population_and_sends_captured_ids_to_elasticsea
     households_call = mock_remove_es.call_args_list[1][0]
     assert set(households_call[0]) == {household.id}
     assert households_call[1].__name__ == f"HouseholdDocument_{ba_slug}_{code}"
+
+
+def test_delete_rdi_true_bumps_each_list_cache_key_once_instead_of_once_per_row(
+    rdi: RegistrationDataImport,
+    household: Household,
+    active_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    """The wipe mutes the per-row delete receivers, so the cascade bumps each key once.
+
+    Unmuted, increment_household_list_cache_version fires on pre_delete for both the Household
+    and the Individual senders (signals.py:59, :61) — once per deleted row — and
+    increment_individual_list_cache_version once per Individual (signals.py:79).
+    """
+    cache.clear()
+    initial_household_version = get_household_list_program_key(active_program.id)
+    initial_individual_version = get_individual_list_program_key(active_program.id)
+
+    with patch(ES_REMOVE), django_capture_on_commit_callbacks(execute=True):
+        remove_rdi_population(rdi, delete_rdi=True)
+
+    assert get_household_list_program_key(active_program.id) - initial_household_version == 1
+    assert get_individual_list_program_key(active_program.id) - initial_individual_version == 1
 
 
 def test_delete_rdi_false_keeps_rdi_row_and_removes_population(

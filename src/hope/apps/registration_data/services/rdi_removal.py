@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
+from hope.apps.household.signals import population_delete_signals_muted
 from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import Household, Individual, Program, RegistrationDataImport
 
@@ -30,6 +31,10 @@ def remove_rdi_population(
 
     When ``delete_rdi`` is True it also drops the RDI row.
 
+    The deletes run with the per-row Household/Individual delete receivers muted: the cascade
+    would otherwise queue one cache increment and one Elasticsearch delete-by-query per row,
+    duplicating the bulk cleanup below. The list caches are invalidated once on block exit.
+
     ``swallow_es_errors`` keeps an Elasticsearch cleanup failure from rolling back the surrounding
     transaction.
     """
@@ -51,11 +56,12 @@ def remove_rdi_population(
     )
     Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
 
-    if delete_rdi:
-        rdi.delete()
-    else:
-        Individual.all_objects.filter(id__in=hoh_ids).delete()
-        Household.all_objects.filter(registration_data_import=rdi).delete()
+    with population_delete_signals_muted([program.id] if program else []):
+        if delete_rdi:
+            rdi.delete()
+        else:
+            Individual.all_objects.filter(id__in=hoh_ids).delete()
+            Household.all_objects.filter(registration_data_import=rdi).delete()
 
     try:
         _remove_rdi_elasticsearch_documents(program, individual_ids, household_ids)
