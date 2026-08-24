@@ -692,7 +692,11 @@ class PaymentVerificationRecordViewSet(
         return self.payment_plan
 
     def get_verification_record(self) -> Payment:
-        return get_object_or_404(Payment, id=self.kwargs.get("pk"), parent=self.payment_plan)
+        return get_object_or_404(
+            _with_payment_related_data(Payment.objects.all()),
+            id=self.kwargs.get("pk"),
+            parent=self.payment_plan,
+        )
 
     def get_queryset(self) -> QuerySet:
         return self.payment_plan.eligible_payments.exclude(
@@ -716,10 +720,7 @@ class PaymentVerificationRecordViewSet(
         return Response(serializer.data)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment = get_object_or_404(
-            _with_payment_related_data(Payment.objects.all()),
-            id=self.kwargs.get("pk"),
-        )
+        payment = self.get_verification_record()
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
