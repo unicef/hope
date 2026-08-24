@@ -75,7 +75,12 @@ def test_wipe_action_calls_wipe_and_notifies(program) -> None:
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
 
     with (
@@ -87,7 +92,7 @@ def test_wipe_action_calls_wipe_and_notifies(program) -> None:
     wipe.assert_called_once()
     assert wipe.call_args.args[0].id == rdi.id
     assert wipe.call_args.kwargs == {"delete_rdi": True, "swallow_es_errors": True}
-    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN)
+    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN, program)
 
 
 def test_wipe_action_keeps_scheduled_status_during_wipe(program) -> None:
@@ -95,7 +100,12 @@ def test_wipe_action_keeps_scheduled_status_during_wipe(program) -> None:
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
     seen = {}
 
@@ -109,15 +119,16 @@ def test_wipe_action_keeps_scheduled_status_during_wipe(program) -> None:
         remove_rdi_population_async_task_action(job)
 
     assert seen.get("status") == RegistrationDataImport.DELETE_SCHEDULED  # no transient marker; row stays until gone
-    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN)
+    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN, program)
 
 
-def test_wipe_action_idempotent_when_row_gone() -> None:
+def test_wipe_action_idempotent_when_row_gone(program) -> None:
     job = AsyncRetryJob(
         config={
             "registration_data_import_id": "00000000-0000-0000-0000-000000000000",
             "callback_url": CALLBACK_URL,
             "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
         }
     )
 
@@ -128,7 +139,7 @@ def test_wipe_action_idempotent_when_row_gone() -> None:
         remove_rdi_population_async_task_action(job)
 
     wipe.assert_not_called()
-    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN)
+    notify.assert_called_once_with(CALLBACK_URL, SIGNED_TOKEN, program)
 
 
 def test_wipe_action_merged_under_lock_fails(program) -> None:
@@ -136,7 +147,12 @@ def test_wipe_action_merged_under_lock_fails(program) -> None:
         business_area=program.business_area, program=program, status=RegistrationDataImport.MERGED
     )
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
 
     with (
@@ -157,7 +173,12 @@ def test_wipe_action_protected_error_sets_failed(program) -> None:
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
 
     with (
@@ -181,7 +202,12 @@ def test_wipe_action_transient_error_retries(program) -> None:
         business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
 
     with (
@@ -263,7 +289,12 @@ def test_wipe_blocks_on_a_held_row_lock() -> None:
         business_area=ba, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
     )
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
 
     db = connections["default"].settings_dict

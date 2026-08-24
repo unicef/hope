@@ -370,7 +370,12 @@ def test_reset_frees_country_workspace_id_for_recreate(
     assert reset.status_code == status.HTTP_202_ACCEPTED, str(reset.content)
 
     job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
+        config={
+            "registration_data_import_id": str(rdi.id),
+            "callback_url": CALLBACK_URL,
+            "signed_token": SIGNED_TOKEN,
+            "program_id": str(program.id),
+        }
     )
     with (
         patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids"),

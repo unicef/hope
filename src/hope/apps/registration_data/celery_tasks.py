@@ -543,6 +543,7 @@ def remove_rdi_population_async_task(
             "registration_data_import_id": str(registration_data_import.id),
             "callback_url": callback_url,
             "signed_token": signed_token,
+            "program_id": str(registration_data_import.program_id),
             "on_failure_action": "hope.apps.registration_data.celery_tasks.remove_rdi_population_on_failure",
         },
         group_key="registration_data",
@@ -555,7 +556,10 @@ def remove_rdi_population_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 
     RdiPopulationRemoval().execute(
-        job.config["registration_data_import_id"], job.config["callback_url"], job.config["signed_token"]
+        job.config["registration_data_import_id"],
+        job.config["callback_url"],
+        job.config["signed_token"],
+        job.config["program_id"],
     )
 
 
@@ -566,11 +570,17 @@ def remove_rdi_population_on_failure(job: AsyncRetryJob, exc: Exception) -> None
     RdiPopulationRemoval.mark_failed(job.config["registration_data_import_id"], reason=str(exc))
 
 
-def notify_rdi_deleted_async_task(callback_url: str, signed_token: str) -> None:
+def notify_rdi_deleted_async_task(callback_url: str, signed_token: str, program: Program) -> None:
     AsyncRetryJob.queue_task(
+        instance=program,
         job_name=notify_rdi_deleted_async_task.__name__,
+        program=program,
         action="hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task_action",
-        config={"callback_url": callback_url, "signed_token": signed_token},
+        config={
+            "callback_url": callback_url,
+            "signed_token": signed_token,
+            "on_failure_action": "hope.apps.registration_data.celery_tasks.notify_rdi_deleted_on_failure",
+        },
         group_key="registration_data",
         description="Notify Country Workspace: RDI reset succeeded",
     )
@@ -580,6 +590,16 @@ def notify_rdi_deleted_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.registration_data.api.country_workspace import CountryWorkspaceAPI
 
     CountryWorkspaceAPI(api_url=job.config["callback_url"]).notify_rdi_deleted(job.config["signed_token"])
+
+
+def notify_rdi_deleted_on_failure(job: AsyncRetryJob, exc: Exception) -> None:
+    """on_failure_action target — retries exhausted; Country Workspace was never told the RDI is gone."""
+    logger.error(
+        "Country Workspace was never notified of RDI deletion (job %s, callback_url=%s): %s",
+        job.pk,
+        job.config.get("callback_url"),
+        exc,
+    )
 
 
 def rdi_dispatcher_task(program: Program) -> None:

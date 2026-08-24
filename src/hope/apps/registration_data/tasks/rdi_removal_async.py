@@ -7,7 +7,7 @@ from hope.apps.core.celery_tasks import NonRetriableTaskError
 from hope.apps.registration_data.services.rdi_removal import remove_rdi_population
 from hope.apps.registration_data.signals import invalidate_rdi_cache
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import RegistrationDataImport
+from hope.models import Program, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -29,14 +29,14 @@ class RdiPopulationRemoval:
                                       spent, the on_failure hook marks DELETE_FAILED.
     """
 
-    def execute(self, rdi_id: str, callback_url: str, signed_token: str) -> None:
+    def execute(self, rdi_id: str, callback_url: str, signed_token: str, program_id: str) -> None:
         from hope.apps.registration_data.celery_tasks import notify_rdi_deleted_async_task
 
         logger.info("RDI reset job started for %s", rdi_id)
         try:
             if not self._wipe(rdi_id):
                 logger.info("RDI wipe for %s: row already gone.", rdi_id)
-                notify_rdi_deleted_async_task(callback_url, signed_token)
+                notify_rdi_deleted_async_task(callback_url, signed_token, Program.objects.get(id=program_id))
                 return
         except NonRetriableTaskError:  # MERGED
             logger.warning("RDI wipe for %s aborted: RDI already MERGED.", rdi_id)
@@ -47,7 +47,7 @@ class RdiPopulationRemoval:
             raise NonRetriableTaskError(str(exc)) from exc
 
         logger.info("RDI wipe for %s succeeded → notifying CW", rdi_id)
-        notify_rdi_deleted_async_task(callback_url, signed_token)
+        notify_rdi_deleted_async_task(callback_url, signed_token, Program.objects.get(id=program_id))
 
     @staticmethod
     def _wipe(rdi_id: str) -> bool:
