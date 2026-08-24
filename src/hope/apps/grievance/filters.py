@@ -17,6 +17,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.constants import PRIORITY_CHOICES, SUBMISSION_CHANNEL_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.utils import overdue_q
 from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Individual, Program
 
@@ -109,6 +110,7 @@ class GrievanceTicketFilter(FilterSet):
     household_id = CharFilter(method="filter_by_household")
     individual_id = CharFilter(method="filter_by_individual")
     payment_record_ids = filters.BaseInFilter(method="filter_by_payment_record")
+    overdue = BooleanFilter(method="filter_overdue")
 
     class Meta:
         fields = {
@@ -138,6 +140,13 @@ class GrievanceTicketFilter(FilterSet):
             "total_days",
         )
     )
+
+    def filter_overdue(self, qs: QuerySet, name: str, value: bool | None) -> QuerySet:
+        # the threshold differs per category, so this cannot be expressed as a plain lookup
+        if value is None:
+            return qs
+        overdue = overdue_q()
+        return qs.filter(overdue) if value else qs.exclude(overdue)
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:

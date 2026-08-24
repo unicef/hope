@@ -1,11 +1,14 @@
+from datetime import datetime, timedelta
 import logging
 import os
 
+from constance import config
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import (
@@ -19,9 +22,24 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hope.apps.grievance.validators import validate_file
-from hope.models import Individual, Partner
+from hope.models import BusinessArea, Individual, Partner
 
 logger = logging.getLogger(__name__)
+
+
+def overdue_q(now: "datetime | None" = None) -> Q:
+    """Tickets past their overdue threshold, which differs by category."""
+    now = now or timezone.now()
+    sensitive_cutoff = now - timedelta(days=config.GRIEVANCE_OVERDUE_THRESHOLD_SENSITIVE)
+    other_cutoff = now - timedelta(days=config.GRIEVANCE_OVERDUE_THRESHOLD_NON_SENSITIVE)
+    is_sensitive = Q(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
+    return (is_sensitive & Q(created_at__lte=sensitive_cutoff)) | (~is_sensitive & Q(created_at__lte=other_cutoff))
+
+
+def grievance_tickets_page_url(business_area: "BusinessArea", tab: str) -> str:
+    """Link to a grievance ticket list tab, e.g. "my-tickets". Not ticket-specific, so no sensitive restriction."""
+    protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+    return f"{protocol}://{settings.FRONTEND_HOST}/{business_area.slug}/programs/all/grievance/tickets/{tab}"
 
 
 def grievance_ticket_url(grievance_ticket: GrievanceTicket) -> str | None:
