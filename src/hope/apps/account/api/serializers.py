@@ -241,8 +241,6 @@ class UserChoicesSerializer(serializers.Serializer):
         )
 
     def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        # TODO: can be removed after proper solution is applied; this is the temp solution to skip the user input in
-        #  program mutations and retrieve partners already with a role in BA
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(

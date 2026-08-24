@@ -101,12 +101,6 @@ def area2(country) -> Area:
 def partners_with_role_assignments(
     partner: Partner, partner1_for_assignment: Partner, partner2_for_assignment: Partner, afghanistan: BusinessArea
 ) -> Partner:
-    # TODO: due to temporary solution in program mutations,
-    # Partners need to already have a role in the BA to be able to be granted access to program
-    # (created role in program is the same role as the Partner already held in the BA.
-    # For each held role, the same role is now applied for the new program.
-    # After removing this solution, below lines of setup can be deleted.
-    # The Role for RoleAssignment will be passed in input.
     RoleAssignmentFactory(partner=partner, business_area=afghanistan, program=None)
     RoleAssignmentFactory(partner=partner1_for_assignment, business_area=afghanistan, program=None)
     RoleAssignmentFactory(partner=partner2_for_assignment, business_area=afghanistan, program=None)
@@ -584,9 +578,7 @@ def test_update_partner_access_all_partners_refresh(
     partner_new = PartnerFactory(name="Test Partner New")
     partner_new.allowed_business_areas.add(afghanistan)
 
-    # TODO: temporary solution to remove below
     RoleAssignmentFactory(partner=partner_new, business_area=afghanistan, program=None)
-    # TODO: remove above when the partners access in program actions is implemented properly
 
     response = authenticated_client.post(update_partner_access_url, payload)
     assert response.status_code == status.HTTP_200_OK

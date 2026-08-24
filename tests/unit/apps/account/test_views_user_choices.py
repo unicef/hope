@@ -100,7 +100,6 @@ def test_get_choices(
                 unicef_partner_in_afghanistan,
             ]
         ],
-        # TODO: below assert can be removed after temporary solution is removed for partners
         "partner_choices_temp": [
             {"name": partner.name, "value": partner.id} for partner in [unicef_hq, unicef_partner_in_afghanistan]
         ],
