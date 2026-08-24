@@ -80,3 +80,35 @@ def test_handle_assignment_change_same_assignee_for_approval(
     assert mock_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
     assert len(messages) == 1
     assert messages[0].action == GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS
+
+
+@pytest.mark.django_db
+def test_list_without_pagination_falls_back_to_default_list():
+    from rest_framework import serializers
+    from rest_framework.mixins import ListModelMixin
+    from rest_framework.test import APIRequestFactory
+    from rest_framework.viewsets import GenericViewSet
+
+    from extras.test_utils.factories.grievance import GrievanceTicketFactory
+    from hope.apps.grievance.api.mixins import GrievanceListBatchMixin
+
+    ticket = GrievanceTicketFactory(household_unicef_id="HH-0000-0000.0009")
+
+    class UnicefIdSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = GrievanceTicket
+            fields = ("unicef_id",)
+
+    class UnpaginatedViewSet(GrievanceListBatchMixin, ListModelMixin, GenericViewSet):
+        queryset = GrievanceTicket.objects.all()
+        serializer_class = UnicefIdSerializer
+        pagination_class = None
+
+    view = UnpaginatedViewSet(kwargs={}, args=(), format_kwarg=None)
+    view.request = APIRequestFactory().get("/")
+
+    response = view.list(view.request)
+
+    assert response.data == [{"unicef_id": ticket.unicef_id}]
+    assert view.fallback_individual_unicef_ids is None
+    assert view.existing_tickets_counts is None

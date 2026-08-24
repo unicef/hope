@@ -1488,8 +1488,27 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 
+class PaymentDetailParentSerializer(serializers.ModelSerializer):
+    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    is_payment_gateway = serializers.BooleanField(read_only=True)
+    payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "plan_type",
+            "is_payment_gateway",
+            "delivery_mechanism",
+            "payment_verification_plans",
+        )
+
+
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
-    parent = PaymentPlanDetailSerializer()
+    parent = PaymentDetailParentSerializer()
     source_payment = PaymentListSerializer()
     household = HouseholdDetailSerializer()
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")

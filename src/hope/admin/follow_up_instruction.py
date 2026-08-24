@@ -5,12 +5,12 @@ from django.contrib import admin
 from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.models import FollowUpInstruction
 
 
 @admin.register(FollowUpInstruction)
-class FollowUpInstructionAdmin(HOPEModelAdminBase):
+class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "business_area",
@@ -32,6 +32,9 @@ class FollowUpInstructionAdmin(HOPEModelAdminBase):
         "created_by",
         "status",
     )
+
+    def frontend_url(self, obj: FollowUpInstruction) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/follow-up-instructions/{obj.id}"
 
     @button(permission="payment.view_followupinstruction")
     def payment_plans(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:

@@ -11,16 +11,14 @@ from django.db.models import (
     DateTimeField,
     Exists,
     F,
-    IntegerField,
     OuterRef,
     Prefetch,
     Q,
     QuerySet,
-    Subquery,
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Extract
+from django.db.models.functions import Extract
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -61,6 +59,7 @@ from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import check_concurrency_version_in_mutation, sort_by_attr
 from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
+    GrievanceListBatchMixin,
     GrievanceMutationMixin,
     GrievancePermissionsMixin,
 )
@@ -134,6 +133,8 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from django.contrib.auth.models import AbstractUser
 
 
@@ -298,6 +299,7 @@ class GrievanceTicketViewSet(
     ProgramVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
+    GrievanceListBatchMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
@@ -337,7 +339,8 @@ class GrievanceTicketViewSet(
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(
-                "programs",
+                # the path prefetches both levels: programs for the serializer's get_programs,
+                # sanction_lists for Program.screen_beneficiary (one exists() per program per row without it).
                 "programs__sanction_lists",
                 *to_prefetch,
                 Prefetch(
@@ -352,11 +355,6 @@ class GrievanceTicketViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id_annotated=Subquery(
-                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
-                        :1
-                    ]
-                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -364,20 +362,6 @@ class GrievanceTicketViewSet(
                     ),
                     default=Value(timezone.now(), output_field=DateTimeField()) - F("created_at"),
                     output_field=DateField(),
-                ),
-                existing_tickets_count=Coalesce(
-                    Subquery(
-                        GrievanceTicket.objects.filter(
-                            household_unicef_id=OuterRef("household_unicef_id"),
-                            household_unicef_id__gt="",
-                        )
-                        .exclude(pk=OuterRef("pk"))
-                        .values("household_unicef_id")
-                        .annotate(c=Count("pk"))
-                        .values("c")[:1],
-                        output_field=IntegerField(),
-                    ),
-                    Value(0),
                 ),
             )
             .annotate(total_days=F("total__day"))
@@ -402,6 +386,7 @@ class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
+    GrievanceListBatchMixin,
     SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
@@ -577,10 +562,12 @@ class GrievanceTicketGlobalViewSet(
         return {**super().get_serializer_context(), "business_area": self.business_area}
 
     def get_count_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(self.grievance_permissions_query).distinct()
+        # no distinct(): visibility and the program filters are Exists subqueries, the ticket detail
+        # relations are OneToOne, and the office_search filters that do join m2m add their own distinct()
+        return super().get_queryset().filter(self.grievance_permissions_query)
 
     def get_queryset(self) -> QuerySet:
-        to_prefetch = []
+        to_prefetch: list[str | Prefetch] = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
             to_prefetch.append(key)
             if "household" in value:
@@ -610,13 +597,25 @@ class GrievanceTicketGlobalViewSet(
             # the loop above already asks for some of these as plain lookups, which would clash
             to_prefetch = [path for path in to_prefetch if path not in annotated_paths]
             to_prefetch += [Prefetch(path, queryset=households) for path in annotated_paths]
+
+        if self.action == "list":
+            # only the fields get_related_tickets_count reads, mirroring the program-scoped list
+            to_prefetch.append(
+                Prefetch(
+                    "linked_tickets",
+                    queryset=GrievanceTicket.objects.only("id", "household_unicef_id"),
+                )
+            )
+
         return (
             super()
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(
-                "programs",
+                # the path prefetches both levels: programs for the serializer's get_programs,
+                # sanction_lists for Program.screen_beneficiary (one exists() per program per row without it).
+                "programs__sanction_lists",
                 *to_prefetch,
                 # feeds TicketNeedsAdjudicationDetails.documents_no_longer_conflict() (can_close_as_unique)
                 "needs_adjudication_ticket_details__golden_records_individual__documents__type",
@@ -629,11 +628,6 @@ class GrievanceTicketGlobalViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id_annotated=Subquery(
-                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
-                        :1
-                    ]
-                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -645,7 +639,6 @@ class GrievanceTicketGlobalViewSet(
             )
             .annotate(total_days=F("total__day"))
             .order_by("-created_at")
-            .distinct()
         )
 
     @action(detail=False, methods=["get"])
@@ -803,13 +796,19 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
             partner = user.partner
-            for selected_individual in grievance_ticket.ticket_details.selected_individuals.select_related(
-                "household__admin2", "program"
-            ).all():
-                if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id,
-                    program_id=selected_individual.program.id,
-                ):
+            limits_by_program: dict["UUID", set["UUID"]] = {}
+            selected_individuals = grievance_ticket.ticket_details.selected_individuals.values_list(
+                "household__admin2_id", "program_id"
+            )
+            for admin2_id, program_id in selected_individuals:
+                if not admin2_id:
+                    continue
+                if program_id not in limits_by_program:
+                    limits_by_program[program_id] = set(
+                        partner.get_area_limits_for_program(program_id).values_list("id", flat=True)
+                    )
+                allowed_area_ids = limits_by_program[program_id]
+                if allowed_area_ids and admin2_id not in allowed_area_ids:
                     raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
         if not grievance_ticket.can_change_status(new_status):

@@ -635,6 +635,39 @@ class PaymentVerificationViewSet(
         )
 
 
+def _with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
+    role_prefetch = Prefetch(
+        "households_and_roles",
+        queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
+        to_attr="prefetched_roles",
+    )
+    individual_prefetch = Prefetch(
+        "household__individuals",
+        queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
+        to_attr="prefetched_individuals",
+    )
+    return (
+        queryset.select_related(
+            "currency",
+            "head_of_household",
+            "collector",
+            "household_snapshot",
+            "financial_service_provider",
+            "business_area",
+            "program__business_area",
+            "parent__program_cycle__program__data_collecting_type",
+            "parent__delivery_mechanism",
+            "parent__financial_service_provider",
+        )
+        .prefetch_related(
+            individual_prefetch,
+            "parent__payment_verification_plans",
+            "payment_verifications",
+        )
+        .all()
+    )
+
+
 class PaymentVerificationRecordViewSet(
     CountActionMixin, ProgramMixin, SerializerActionMixin, ScopedPaymentPlanMixin, BaseViewSet
 ):
@@ -683,7 +716,10 @@ class PaymentVerificationRecordViewSet(
         return Response(serializer.data)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment = self.get_verification_record()
+        payment = get_object_or_404(
+            _with_payment_related_data(Payment.objects.all()),
+            id=self.kwargs.get("pk"),
+        )
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -2558,40 +2594,19 @@ class PaymentViewSet(
 
     def get_object(self) -> Payment:
         # the details page is reached by a plain link with no plan id, so scope to the program instead
-        return get_object_or_404(Payment, id=self.kwargs["payment_id"], parent__program_cycle__program=self.program)
+        return get_object_or_404(
+            _with_payment_related_data(Payment.objects.all()),
+            id=self.kwargs["payment_id"],
+            parent__program_cycle__program=self.program,
+        )
 
     def get_queryset(self) -> QuerySet:
         parent = self.payment_plan
-        # Prefetch roles for each individual's household
-        role_prefetch = Prefetch(
-            "households_and_roles",
-            queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
-            to_attr="prefetched_roles",
-        )
-        # Prefetch individuals within households, including their roles
-        individual_prefetch = Prefetch(
-            "household__individuals",
-            queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
-            to_attr="prefetched_individuals",
-        )
         if parent.status == PaymentPlan.Status.OPEN:
-            qs = parent.eligible_payments_with_conflicts
+            queryset = parent.eligible_payments_with_conflicts
         else:
-            qs = parent.eligible_payments
-        return (
-            qs.select_related(
-                "currency",
-                "head_of_household",
-                "collector",
-                "household_snapshot",
-                "financial_service_provider",
-                "business_area",
-                "program__business_area",
-                "parent__program_cycle__program__data_collecting_type",
-            )
-            .prefetch_related(individual_prefetch, "payment_verifications")
-            .all()
-        )
+            queryset = parent.eligible_payments
+        return _with_payment_related_data(queryset)
 
     @action(
         detail=True,
