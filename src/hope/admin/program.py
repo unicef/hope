@@ -30,6 +30,7 @@ from hope.admin.utils import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
+    ViewOnUiMixin,
 )
 from hope.apps.household.celery_tasks import rebuild_program_indexes_async_task
 from hope.apps.household.forms import CreateTargetPopulationTextForm
@@ -52,7 +53,7 @@ from hope.models import (
 
 
 @admin.register(ProgramCycle)
-class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+class ProgramCycleAdmin(ViewOnUiMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = (
         "title",
         "program",
@@ -70,6 +71,9 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     )
     search_fields = ("title", "program__name")
     exclude = ("unicef_id",)
+
+    def frontend_url(self, obj: ProgramCycle) -> str | None:
+        return f"/{obj.program.business_area.slug}/programs/{obj.program.code}/payment-module/program-cycles/{obj.id}"
 
     @button(permission="payment.view_paymentplangroup")
     def payment_plan_groups(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -213,6 +217,7 @@ class ProgramAdmin(
     LastSyncDateResetMixin,
     AdminAutoCompleteSearchMixin,
     HOPEModelAdminBase,
+    ViewOnUiMixin,
 ):
     form = ProgramAdminForm
     list_display = (
@@ -257,6 +262,9 @@ class ProgramAdmin(
             "QuerySet[Program]",
             super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group"),
         )
+
+    def frontend_url(self, obj: Program) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.code}/details/{obj.code}"
 
     @button(
         permission="payment.add_paymentplan",

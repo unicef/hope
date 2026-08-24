@@ -7,6 +7,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.db import connection
 from django.http import Http404
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 import psycopg2
@@ -772,10 +773,16 @@ def test_verification_details(
         verification_context["business_area"],
         verification_context["program_active"],
     )
-    response = verification_context["client"].get(url)
+    with CaptureQueriesContext(connection) as captured_queries:
+        response = verification_context["client"].get(url)
 
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
+        assert any(
+            'JOIN "payment_paymentplan"' in query["sql"]
+            for query in captured_queries.captured_queries
+            if 'FROM "payment_payment"' in query["sql"]
+        )
         resp_data = response.json()
         assert "id" in resp_data
         assert "verification" in resp_data
