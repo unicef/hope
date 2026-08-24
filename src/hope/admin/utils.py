@@ -3,7 +3,7 @@ from typing import Any, TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import StandardButton
-from admin_extra_buttons.decorators import button
+from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.mixin import AdminFiltersMixin
@@ -22,7 +22,7 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.payment.utils import generate_cache_key
+from hope.apps.payment.utils import generate_cache_key, get_link
 from hope.apps.utils.security import is_root
 from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
@@ -166,6 +166,32 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
     def count_queryset(self, request: HttpRequest, queryset: QuerySet) -> None:
         count = queryset.count()
         self.message_user(request, f"Selection contains {count} records")
+
+
+class ViewOnUiMixin:
+    """Add a "View on UI" button that links to the object page on the frontend.
+
+    Subclasses must implement :meth:`frontend_url` returning the frontend path
+    (without protocol/host) for the given object, or ``None`` when not available.
+    """
+
+    @link(
+        label="View on UI",
+        html_attrs={"target": "_blank", "class": "aeb-green"},
+        change_list=False,
+    )
+    def view_on_ui(self, button: Any) -> None:
+        button.href = None
+        obj = button.original
+        if self is None or obj is None:
+            return
+        path = self.frontend_url(obj)
+        if not path:
+            return
+        button.href = get_link(path)
+
+    def frontend_url(self, obj: Any) -> str | None:
+        raise NotImplementedError
 
 
 class HUBBusinessAreaFilter(SimpleListFilter):
