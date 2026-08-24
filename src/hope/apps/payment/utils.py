@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 def _log_update(
     instance: Any,
-    old_instance: Any,
+    changes: dict,
     *,
     business_area: Any,
     program_pk: Any,
@@ -39,17 +39,16 @@ def _log_update(
 ) -> None:
     """Write an UPDATE LogEntry for a change applied outside a logging view.
 
-    Diffs against the model's own ``ACTIVITY_LOG_MAPPING``, so the mapping can never be mismatched
-    to the instance. Does by hand what log_entry.log_create() does - diff, build the LogEntry,
-    attach the program M2M - so the diff runs once instead of twice and an unchanged object writes
-    no row at all, the same guard the admin save_model uses. Keep in step with log_create if it
-    changes how it detects actions or resolves programs.
+    Callers diff their own model against its ``ACTIVITY_LOG_MAPPING`` and pass the result in. Does
+    by hand what log_entry.log_create() does - build the LogEntry, attach the program M2M - so the
+    diff runs once instead of twice and an unchanged object writes no row at all, the same guard
+    the admin save_model uses. Keep in step with log_create if it changes how it detects actions or
+    resolves programs.
 
     The mappings include FK fields, which the diff dereferences to get a readable label, so each
     call costs a few extra SELECTs - fine for writes that happen once per plan or group, never per
     payment. ``user_id`` is None when a system task made the change.
     """
-    changes = create_diff(old_instance, instance, type(instance).ACTIVITY_LOG_MAPPING)
     if not changes:
         return
     log = LogEntry.objects.create(
@@ -76,7 +75,7 @@ def log_payment_plan_change(
     """
     _log_update(
         payment_plan,
-        old_payment_plan,
+        create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING),
         business_area=payment_plan.business_area,
         program_pk=payment_plan.program.pk,
         user_id=user_id,
@@ -97,7 +96,7 @@ def log_payment_plan_group_change(
     program = payment_plan_group.cycle.program
     _log_update(
         payment_plan_group,
-        old_payment_plan_group,
+        create_diff(old_payment_plan_group, payment_plan_group, PaymentPlanGroup.ACTIVITY_LOG_MAPPING),
         business_area=program.business_area,
         program_pk=program.pk,
         user_id=user_id,
