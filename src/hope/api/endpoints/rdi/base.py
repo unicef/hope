@@ -9,6 +9,7 @@ from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
 from django.utils.functional import cached_property
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, UpdateAPIView
@@ -266,6 +267,7 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
 
     permission = Grant.API_RDI_DELETE
 
+    @extend_schema(request=RDIResetSerializer)
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         rdi_id = self.kwargs["rdi"]
         serializer = RDIResetSerializer(data=request.data)
