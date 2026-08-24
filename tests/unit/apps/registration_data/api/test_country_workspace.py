@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from requests.exceptions import ReadTimeout
 import responses
 
 from hope.apps.registration_data.api.country_workspace import CountryWorkspaceAPI
@@ -44,3 +45,20 @@ def test_notify_reads_no_body() -> None:
     CountryWorkspaceAPI(api_url=CALLBACK_URL).notify_rdi_deleted(SIGNED_TOKEN)
 
     assert len(responses.calls) == 1
+
+
+@responses.activate
+def test_notify_sends_explicit_timeout() -> None:
+    responses.add(responses.POST, CALLBACK_URL, status=200)
+
+    CountryWorkspaceAPI(api_url=CALLBACK_URL).notify_rdi_deleted(SIGNED_TOKEN)
+
+    assert responses.calls[0].request.req_kwargs["timeout"] == (5, 30)
+
+
+@responses.activate
+def test_notify_propagates_read_timeout() -> None:
+    responses.add(responses.POST, CALLBACK_URL, body=ReadTimeout("read timed out"))
+
+    with pytest.raises(ReadTimeout):
+        CountryWorkspaceAPI(api_url=CALLBACK_URL).notify_rdi_deleted(SIGNED_TOKEN)

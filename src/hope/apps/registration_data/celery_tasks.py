@@ -551,7 +551,7 @@ def remove_rdi_population_async_task(
 
 
 def remove_rdi_population_async_task_action(job: AsyncRetryJob) -> None:
-    """Retriable wipe worker (REWORK #3): wipe the population, then success-callback CW on success only."""
+    """Wipe the population, then success-callback CW on success only."""
     from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 
     RdiPopulationRemoval().execute(

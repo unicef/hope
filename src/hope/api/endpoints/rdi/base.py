@@ -300,8 +300,8 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
 
             rdi.status = RegistrationDataImport.DELETE_SCHEDULED
             rdi.save(update_fields=["status"])
-            # The RDI just left the merge queue; nothing else advances it, so a newer RDI waiting
-            # behind it would stall until an admin retry. Let the dispatcher pick the next head.
+            # The RDI just left the merge queue; we need to trigger the queue, so a newer RDI waiting
+            # behind will start being processed.
             rdi_dispatcher_task(cast("Program", rdi.program))
             logger.info("RDI reset scheduled for %s: delete rdi job %s queued", rdi_id, job.pk)
 

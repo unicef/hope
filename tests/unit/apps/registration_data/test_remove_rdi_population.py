@@ -1,7 +1,5 @@
-import threading
 from unittest.mock import PropertyMock, patch
 
-from django.core.cache import cache
 from django.db import OperationalError, connection, connections
 from django.db.models.deletion import ProtectedError
 from django.test.utils import CaptureQueriesContext
@@ -13,19 +11,12 @@ from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.celery_tasks import NonRetriableTaskError
 from hope.apps.registration_data.celery_tasks import (
-    merge_registration_data_import_async_task_action,
     remove_rdi_population_async_task,
     remove_rdi_population_async_task_action,
     remove_rdi_population_on_failure,
 )
-from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.apps.registration_data.tasks.rdi_removal_async import RdiPopulationRemoval
 from hope.models import AsyncRetryJob, RegistrationDataImport
-
-
-def _merge_key(rdi_id: object) -> str:
-    return f"merge_registration_data_import_async_task-{rdi_id}"
-
 
 pytestmark = pytest.mark.django_db
 
@@ -270,111 +261,3 @@ def test_wipe_blocks_on_a_held_row_lock() -> None:
 
     rdi.refresh_from_db()
     assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED  # never advanced past the blocked lock
-
-
-def test_wipe_action_skips_when_merge_holds_lock(program) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
-    )
-    job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
-    )
-    cache.set(_merge_key(rdi.id), "held")  # simulate a merge holding the shared lock for this RDI
-
-    with (
-        patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population") as wipe,
-        patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task") as notify,
-        pytest.raises(RuntimeError, match="rdi_merge_in_progress"),
-    ):
-        remove_rdi_population_async_task_action(job)
-
-    rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.DELETE_SCHEDULED
-    wipe.assert_not_called()
-    notify.assert_not_called()
-
-
-def test_wipe_action_holds_merge_lock_during_wipe(program) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
-    )
-    job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
-    )
-    seen = {}
-
-    def capture_lock(*args: object, **kwargs: object) -> None:
-        seen["held"] = cache.get(_merge_key(rdi.id)) is not None
-
-    with (
-        patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population", side_effect=capture_lock),
-        patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task"),
-    ):
-        remove_rdi_population_async_task_action(job)
-
-    assert seen.get("held") is True
-
-
-def test_wipe_action_releases_merge_lock_after_success(program) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=program.business_area, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
-    )
-    job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
-    )
-
-    with (
-        patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population"),
-        patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task"),
-    ):
-        remove_rdi_population_async_task_action(job)
-
-    assert cache.get(_merge_key(rdi.id)) is None
-
-
-@pytest.mark.django_db(transaction=True)
-def test_wipe_backs_off_while_a_real_merge_holds_the_lock() -> None:
-    ba = BusinessAreaFactory(name="Afghanistan")
-    program = ProgramFactory(business_area=ba)
-    rdi = RegistrationDataImportFactory(
-        business_area=ba, program=program, status=RegistrationDataImport.DELETE_SCHEDULED
-    )
-    wipe_job = AsyncRetryJob(
-        config={"registration_data_import_id": str(rdi.id), "callback_url": CALLBACK_URL, "signed_token": SIGNED_TOKEN}
-    )
-    merge_job = AsyncRetryJob(config={"registration_data_import_id": str(rdi.id)})
-
-    merge_holding = threading.Event()  # set once the real merge has acquired the cache lock
-    release_merge = threading.Event()  # set by the main thread once the wipe has tried
-
-    def blocking_execute(_self: object, _rdi_id: str) -> None:
-        # stand in for the real merge body: signal we hold the lock, then hold it until released
-        merge_holding.set()
-        release_merge.wait(timeout=5)
-
-    def run_merge() -> None:
-        # a failure here leaves merge_holding unset → the wait() assert below fails loudly
-        try:
-            with patch.object(RdiMergeTask, "execute", blocking_execute):
-                merge_registration_data_import_async_task_action(merge_job)
-        finally:
-            connections.close_all()
-
-    merge_thread = threading.Thread(target=run_merge)
-    merge_thread.start()
-    try:
-        assert merge_holding.wait(timeout=5), "merge never acquired the cache lock"
-        with (
-            patch("hope.apps.registration_data.tasks.rdi_removal_async.remove_rdi_population") as wipe,
-            patch("hope.apps.registration_data.celery_tasks.notify_rdi_deleted_async_task") as notify,
-            pytest.raises(RuntimeError, match="rdi_merge_in_progress"),
-        ):
-            remove_rdi_population_async_task_action(wipe_job)
-        wipe.assert_not_called()  # the real merge's lock excluded the wipe
-        notify.assert_not_called()
-    finally:
-        release_merge.set()
-        merge_thread.join(timeout=5)
-
-    rdi.refresh_from_db()
-    assert rdi.status == RegistrationDataImport.MERGING  # merge advanced; the wipe never ran under its lock
