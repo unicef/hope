@@ -74,7 +74,7 @@ def test_reset_400_missing_required_field(
         "javascript:alert(1)",
         "ftp://cw/cb",
         "ftps://cw/cb",
-        "https://cw//api//cb",
+        "https://cw.example.com//api//cb",
     ],
 )
 def test_reset_400_invalid_callback_url(
