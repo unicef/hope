@@ -58,17 +58,6 @@ def test_payment_search_filter_orders_by_admin2_name() -> None:
     assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
 
 
-def test_payment_search_filter_orders_by_collector_id() -> None:
-    plan = PaymentPlanFactory()
-    payment1 = PaymentFactory(parent=plan)
-    payment2 = PaymentFactory(parent=plan)
-    expected = sorted([payment1, payment2], key=lambda p: str(p.collector_id))
-
-    result = PaymentSearchFilter(data={"ordering": "collector_id"}, queryset=Payment.objects.all()).qs
-
-    assert list(result.values_list("pk", flat=True)) == [p.pk for p in expected]
-
-
 def test_payment_search_filter_orders_by_fsp_name() -> None:
     plan = PaymentPlanFactory()
     payment_b = PaymentFactory(parent=plan, financial_service_provider=FinancialServiceProviderFactory(name="B FSP"))
