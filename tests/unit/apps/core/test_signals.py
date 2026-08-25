@@ -28,7 +28,7 @@ def test_create_business_area_signal_creates_partner_and_assigns_roles(
 ):
     partner_count = Partner.objects.count()
 
-    new_ba = BusinessArea.objects.create(name="Test Business Area", code="TBA", active=True)
+    new_ba = BusinessArea.objects.create(name="Test Business Area", code="TBA", active=True, timezone="UTC")
 
     assert Partner.objects.count() == partner_count + 1
 

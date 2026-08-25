@@ -191,6 +191,7 @@ def generate_business_areas() -> None:
                     "has_data_sharing_agreement": True,
                     "active": True,
                     "is_accountability_applicable": True,
+                    "timezone": "UTC",
                 },
             )
             business_area.countries.add(country)
@@ -204,6 +205,7 @@ def generate_business_areas() -> None:
             "region_code": "GLOBAL",
             "region_name": "GLOBAL",
             "has_data_sharing_agreement": True,
+            "timezone": "UTC",
         },
     )
 

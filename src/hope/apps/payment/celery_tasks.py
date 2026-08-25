@@ -1356,7 +1356,7 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         payment_plan,
         job.config["action"],
         action_user,
-        job.config["action_date_formatted"],
+        datetime.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -1364,14 +1364,14 @@ def send_payment_notification_emails_async_task(
     payment_plan: PaymentPlan,
     action: str,
     action_user_id: str,
-    action_date_formatted: str,
+    action_date: str,
 ) -> None:
     payment_plan_id = str(payment_plan.id)
     config = {
         "payment_plan_id": payment_plan_id,
         "action": action,
         "action_user_id": action_user_id,
-        "action_date_formatted": action_date_formatted,
+        "action_date": action_date,
     }
     AsyncJob.queue_task(
         instance=payment_plan,

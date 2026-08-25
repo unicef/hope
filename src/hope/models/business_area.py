@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField
 from natural_keys import NaturalKeyModel
+from timezone_field import TimeZoneField
 
 from hope.apps.core.utils import unique_slugify
 from hope.models.utils import (
@@ -48,6 +49,9 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+    )
+    timezone = TimeZoneField(
+        help_text="Required operational IANA timezone.",
     )
     payment_countries = models.ManyToManyField("geo.Country", related_name="payment_business_areas")
 

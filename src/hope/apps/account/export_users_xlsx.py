@@ -24,6 +24,11 @@ class PartnerField(GenericField):
         return user.partner.name
 
 
+class TimezoneField(GenericField):
+    def value(self, user: User, business_area: str) -> str:
+        return str(user.timezone) if user.timezone else ""
+
+
 class RoleAssignmentField(GenericField):
     def value(self, user: User, business_area: str) -> str:
         roles = getattr(user, "prefetched_role_assignments", [])
@@ -38,6 +43,7 @@ class ExportUsersXlsx:
             "last_name": GenericField("last_name", "LAST NAME"),
             "email": GenericField("email", "E-MAIL"),
             "status": GenericField("status", "ACCOUNT STATUS"),
+            "timezone": TimezoneField("timezone", "TIMEZONE"),
             "partner": PartnerField("partner", "PARTNER"),
             "user_roles": RoleAssignmentField("user_roles", "USER ROLES"),
         }

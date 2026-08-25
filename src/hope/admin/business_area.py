@@ -60,7 +60,7 @@ class BusinessOfficeForm(forms.ModelForm):
 
     class Meta:
         model = BusinessArea
-        fields = ("code", "name")
+        fields = ("code", "name", "timezone")
 
 
 class BusinessofficeFilter(SimpleListFilter):
@@ -162,6 +162,7 @@ class BusinessAreaAdmin(
         "name",
         "slug",
         "code",
+        "timezone",
         "region_name",
         "region_code",
         "active",
@@ -217,6 +218,7 @@ class BusinessAreaAdmin(
                         region_name=self.object.region_name,
                         long_name=f"Business Office: {name}",
                         slug=slugify(name),
+                        timezone=form.cleaned_data["timezone"],
                     )
                 preserved_filters = self.get_preserved_filters(request)
 

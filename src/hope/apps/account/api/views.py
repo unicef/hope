@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Any
+from zoneinfo import available_timezones
 
 from django.contrib.auth.models import Group
 from django.db import models
@@ -20,8 +21,10 @@ from hope.apps.account.api.serializers import (
     GroupListSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
+    TimezoneChoiceSerializer,
     UserChoicesSerializer,
     UserSerializer,
+    UserTimezoneSerializer,
 )
 from hope.apps.account.filters import UsersFilter
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
@@ -50,6 +53,8 @@ class UserViewSet(
 ):
     permission_classes_by_action = {
         "profile": [IsAuthenticated],
+        "profile_timezone": [IsAuthenticated],
+        "timezone_choices": [IsAuthenticated],
     }
     permissions_by_action = {
         "list": [
@@ -78,6 +83,7 @@ class UserViewSet(
 
     serializer_classes_by_action = {
         "profile": ProfileSerializer,
+        "profile_timezone": UserTimezoneSerializer,
         "list": UserSerializer,
         "choices": UserChoicesSerializer,
     }
@@ -90,10 +96,16 @@ class UserViewSet(
     def get_serializer_context(self) -> dict[str, Any]:
         context = dict(super().get_serializer_context())
 
-        if self.request and self.action == "profile" and (program_code := self.request.query_params.get("program")):
-            context["program"] = get_object_or_404(
-                Program, code=program_code, business_area__slug=self.kwargs.get("business_area_slug")
-            )
+        if self.request and self.action in {"profile", "profile_timezone"}:
+            business_area_slug = self.kwargs.get("business_area_slug")
+            if business_area_slug and business_area_slug not in {"global", "undefined"}:
+                context["business_area"] = get_object_or_404(
+                    BusinessArea.objects.only("id", "slug", "timezone"), slug=business_area_slug
+                )
+            if program_code := self.request.query_params.get("program"):
+                context["program"] = get_object_or_404(
+                    Program, code=program_code, business_area__slug=business_area_slug
+                )
 
         return context
 
@@ -151,6 +163,24 @@ class UserViewSet(
         user = request.user
         data = self.get_serializer(user).data
         return Response(data)
+
+    @extend_schema(request=UserTimezoneSerializer, responses=UserTimezoneSerializer)
+    @action(detail=False, methods=["patch"], url_path="profile-timezone", url_name="profile-timezone")
+    def profile_timezone(self, request: "Request", *args: object, **kwargs: object) -> Response:
+        serializer = self.get_serializer(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @extend_schema(responses=TimezoneChoiceSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="timezone-choices", url_name="timezone-choices")
+    def timezone_choices(self, request: "Request", *args: object, **kwargs: object) -> Response:
+        # "Factory" is a tzdb test entry with an unspecified -00 offset, not a user-selectable timezone.
+        choices = [
+            {"name": timezone_name, "value": timezone_name}
+            for timezone_name in sorted(available_timezones() - {"Factory"})
+        ]
+        return Response(TimezoneChoiceSerializer(choices, many=True).data)
 
     @extend_schema(
         parameters=[

@@ -1,11 +1,13 @@
+from collections import defaultdict
+from datetime import datetime
 import logging
-from typing import Any
 
 from constance import config
 from django.conf import settings
 from django.db.models import QuerySet
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.timezones import format_human_datetime, resolve_timezone_name
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
 from hope.models import PaymentPlan, User
@@ -68,7 +70,7 @@ class PaymentNotification:
         payment_plan: PaymentPlan,
         action: str,
         action_user: User,
-        action_date: str,
+        action_date: datetime,
     ) -> None:
         self.payment_plan = payment_plan
         self.action = action
@@ -80,7 +82,7 @@ class PaymentNotification:
         self.action_name = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["action_name"]
         self.recipient_title = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["recipient_title"]
         self.user_recipients = self._prepare_user_recipients()
-        self.email = self._prepare_email()
+        self.emails = self._prepare_emails()
         self.enable_email_notification = self.payment_plan.business_area.enable_email_notification
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
@@ -92,24 +94,60 @@ class PaymentNotification:
             exclude_staff=True,
         ).exclude(id=self.action_user.id)
 
-    def _prepare_email(self) -> MailjetClient:
-        body_variables = self._prepare_body_variables()
-        return MailjetClient(
-            mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
-            subject=self.email_subject,
-            recipients=[user_recipient.email for user_recipient in self.user_recipients],
-            ccs=[self.action_user.email],
-            variables=body_variables,
+    def _prepare_emails(self) -> list[MailjetClient]:
+        recipients_by_timezone: dict[str, list[str]] = defaultdict(list)
+        for user_recipient in self.user_recipients:
+            timezone_name = resolve_timezone_name(
+                user=user_recipient,
+                business_area=self.payment_plan.business_area,
+            )
+            recipients_by_timezone[timezone_name].append(user_recipient.email)
+
+        action_user_timezone = resolve_timezone_name(
+            user=self.action_user,
+            business_area=self.payment_plan.business_area,
         )
+        emails = [
+            MailjetClient(
+                mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
+                subject=self.email_subject,
+                recipients=recipients,
+                ccs=[self.action_user.email] if timezone_name == action_user_timezone else [],
+                variables=self._prepare_body_variables(timezone_name),
+            )
+            for timezone_name, recipients in recipients_by_timezone.items()
+        ]
+        if emails:
+            if action_user_timezone not in recipients_by_timezone:
+                emails.append(
+                    MailjetClient(
+                        mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
+                        subject=self.email_subject,
+                        recipients=[self.action_user.email],
+                        variables=self._prepare_body_variables(action_user_timezone),
+                    )
+                )
+            return emails
+
+        return [
+            MailjetClient(
+                mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
+                subject=self.email_subject,
+                recipients=[],
+                ccs=[self.action_user.email],
+                variables=self._prepare_body_variables(action_user_timezone),
+            )
+        ]
 
     def send_email_notification(self) -> None:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
-                self.email.send_email()
+                for email in self.emails:
+                    email.send_email()
             except Exception:  # pragma: no cover
                 logger.exception("Failed to send payment plan notification")
 
-    def _prepare_body_variables(self) -> dict[str, Any]:
+    def _prepare_body_variables(self, timezone_name: str) -> dict[str, str | None]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         return {
             "first_name": "Payment Plan",
@@ -124,8 +162,14 @@ class PaymentNotification:
             "payment_plan_creator": self.payment_plan_creator.get_full_name()
             if self.payment_plan_creator
             else "Unknown",
-            "payment_plan_creation_date": f"{self.payment_plan_creation_date:%-d %B %Y}",
+            "payment_plan_creation_date": format_human_datetime(
+                self.payment_plan_creation_date,
+                timezone_name=timezone_name,
+            ),
             "action_user": self.action_user.get_full_name(),
-            "action_date": self.action_date,
+            "action_date": format_human_datetime(
+                self.action_date,
+                timezone_name=timezone_name,
+            ),
             "program_name": self.payment_plan.program.name,
         }

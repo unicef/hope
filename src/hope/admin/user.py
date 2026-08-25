@@ -246,7 +246,14 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         (None, {"fields": (("username", "azure_id"))}),
         (
             _("Personal info"),
-            {"fields": (("first_name", "last_name"), ("email", "display_name"), ("job_title", "partner", "is_active"))},
+            {
+                "fields": (
+                    ("first_name", "last_name"),
+                    ("email", "display_name"),
+                    ("job_title", "partner", "is_active"),
+                    "timezone",
+                )
+            },
         ),
         (
             _("Important dates"),

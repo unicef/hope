@@ -22,6 +22,7 @@
                 "code": "BA9000",
                 "long_name": "Business Area 0 Long Name",
                 "slug": "business-area-contract",
+                "timezone": "UTC",
                 "parent": null,
                 "is_split": false,
                 "active": true,
