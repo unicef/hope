@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Q, QuerySet
+from django.db.models import Case, IntegerField, Q, QuerySet, Value, When
 import django_filters
 from django_filters import FilterSet, OrderingFilter
 
@@ -297,9 +297,31 @@ class PaymentSearchFilter(FilterSet):
             ("household__size", "household__size"),
             ("collector__full_name", "collector__full_name"),
             ("created_at", "created_at"),
+            ("household__admin2__name", "household__admin2__name"),
+            ("collector_id", "collector_id"),
+            ("financial_service_provider__name", "financial_service_provider__name"),
+            ("entitlement_quantity_usd", "entitlement_quantity_usd"),
+            ("delivered_quantity", "delivered_quantity"),
+            ("fsp_auth_code", "fsp_auth_code"),
+            ("mark", "mark"),
         )
     )
 
     class Meta:
         model = Payment
         fields = []
+
+    def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
+        queryset = queryset.annotate(
+            mark=Case(
+                When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
+                When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
+                When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
+                When(status=Payment.STATUS_ERROR, then=Value(4)),
+                When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
+                When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
+                When(status=Payment.STATUS_PENDING, then=Value(7)),
+                output_field=IntegerField(),
+            )
+        )
+        return super().filter_queryset(queryset)

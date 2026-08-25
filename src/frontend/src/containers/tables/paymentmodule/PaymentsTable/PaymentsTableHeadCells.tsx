@@ -39,6 +39,7 @@ export const headCells: HeadCell<PaymentList>[] = [
     label: 'Collector',
     id: 'collector_id',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,

@@ -3,7 +3,12 @@ from datetime import timedelta
 from django.utils import timezone
 import pytest
 
-from extras.test_utils.factories import PaymentFactory, PaymentPlanFactory
+from extras.test_utils.factories import (
+    AreaFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
 from hope.apps.payment.api.filters import PaymentSearchFilter
 from hope.models import Payment
 
@@ -41,3 +46,83 @@ def test_payment_search_filter_orders_by_created_at_descending(
     result = PaymentSearchFilter(data={"ordering": "-created_at"}, queryset=Payment.objects.all()).qs
 
     assert list(result.values_list("pk", flat=True)) == [newest.pk, middle.pk, oldest.pk]
+
+
+def test_payment_search_filter_orders_by_admin2_name() -> None:
+    plan = PaymentPlanFactory()
+    payment_b = PaymentFactory(parent=plan, household__admin2=AreaFactory(name="B District"))
+    payment_a = PaymentFactory(parent=plan, household__admin2=AreaFactory(name="A District"))
+
+    result = PaymentSearchFilter(data={"ordering": "household__admin2__name"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
+
+
+def test_payment_search_filter_orders_by_collector_id() -> None:
+    plan = PaymentPlanFactory()
+    payment1 = PaymentFactory(parent=plan)
+    payment2 = PaymentFactory(parent=plan)
+    expected = sorted([payment1, payment2], key=lambda p: str(p.collector_id))
+
+    result = PaymentSearchFilter(data={"ordering": "collector_id"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == [p.pk for p in expected]
+
+
+def test_payment_search_filter_orders_by_fsp_name() -> None:
+    plan = PaymentPlanFactory()
+    payment_b = PaymentFactory(parent=plan, financial_service_provider=FinancialServiceProviderFactory(name="B FSP"))
+    payment_a = PaymentFactory(parent=plan, financial_service_provider=FinancialServiceProviderFactory(name="A FSP"))
+
+    result = PaymentSearchFilter(
+        data={"ordering": "financial_service_provider__name"}, queryset=Payment.objects.all()
+    ).qs
+
+    assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
+
+
+def test_payment_search_filter_orders_by_entitlement_quantity_usd() -> None:
+    plan = PaymentPlanFactory()
+    high = PaymentFactory(parent=plan, entitlement_quantity_usd=100)
+    low = PaymentFactory(parent=plan, entitlement_quantity_usd=10)
+
+    result = PaymentSearchFilter(data={"ordering": "entitlement_quantity_usd"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == [low.pk, high.pk]
+
+
+def test_payment_search_filter_orders_by_delivered_quantity() -> None:
+    plan = PaymentPlanFactory()
+    high = PaymentFactory(parent=plan, delivered_quantity=100)
+    low = PaymentFactory(parent=plan, delivered_quantity=10)
+
+    result = PaymentSearchFilter(data={"ordering": "delivered_quantity"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == [low.pk, high.pk]
+
+
+def test_payment_search_filter_orders_by_fsp_auth_code() -> None:
+    plan = PaymentPlanFactory()
+    payment_b = PaymentFactory(parent=plan, fsp_auth_code="B-CODE")
+    payment_a = PaymentFactory(parent=plan, fsp_auth_code="A-CODE")
+
+    result = PaymentSearchFilter(data={"ordering": "fsp_auth_code"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
+
+
+def test_payment_search_filter_orders_by_mark() -> None:
+    plan = PaymentPlanFactory()
+    success = PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+    partial = PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_PARTIAL)
+    not_distributed = PaymentFactory(parent=plan, status=Payment.STATUS_NOT_DISTRIBUTED)
+    pending = PaymentFactory(parent=plan, status=Payment.STATUS_PENDING)
+
+    result = PaymentSearchFilter(data={"ordering": "mark"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == [
+        success.pk,
+        partial.pk,
+        not_distributed.pk,
+        pending.pk,
+    ]
