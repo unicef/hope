@@ -250,8 +250,8 @@ def test_search_by_individual_unicef_id_ignores_individuals_in_another_business_
     list_url: str,
     create_user_role_with_permissions: Callable,
 ) -> None:
-    # The `IND-` branch has its own shape - `istartswith` plus `DISTINCT ON` - so it needs
-    # its own case rather than riding on the free-text one.
+    # The `IND-` branch has its own shape - `istartswith` inside a correlated `EXISTS` - so
+    # it needs its own case rather than riding on the free-text one.
     create_user_role_with_permissions(user, LIST_PERMISSIONS, afghanistan, whole_business_area_access=True)
 
     response = api_client(user).get(list_url, {"search": "IND-SCOPE-0002"})
@@ -394,3 +394,67 @@ def test_business_area_is_resolved_once_however_many_filters_need_it(
     assert response_one.status_code == status.HTTP_200_OK
     assert response_three.status_code == status.HTTP_200_OK
     assert count_business_area_slug_lookups(captured_three) == count_business_area_slug_lookups(captured_one)
+
+
+@pytest.fixture
+def second_local_individual_in_the_same_household(
+    afghanistan: BusinessArea, program_afghanistan: Program, local_head_of_household: Individual
+) -> Individual:
+    """A second individual under the household the ticket points at, matching the same prefix.
+
+    The `IND-` branch used to dedupe with `DISTINCT ON (household__unicef_id)` before feeding
+    an `IN` list; the `EXISTS` rewrite has no such step, so this is what proves it does not
+    need one.
+    """
+    individual = IndividualFactory(
+        business_area=afghanistan,
+        program=program_afghanistan,
+        household=local_head_of_household.household,
+        full_name="Local Dependant",
+    )
+    individual.unicef_id = "IND-SCOPE-0001-B"
+    individual.save(update_fields=["unicef_id"])
+    return individual
+
+
+def test_search_by_individual_unicef_id_returns_a_ticket_once_per_matching_household(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program_afghanistan: Program,
+    local_head_of_household: Individual,
+    second_local_individual_in_the_same_household: Individual,
+    ticket: GrievanceTicket,
+    list_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, LIST_PERMISSIONS, afghanistan, whole_business_area_access=True)
+
+    response = api_client(user).get(list_url, {"search": "IND-SCOPE-0001"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["id"] for result in response.data["results"]] == [str(ticket.id)]
+
+
+def test_search_by_individual_unicef_id_correlates_on_household_unicef_id(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program_afghanistan: Program,
+    local_head_of_household: Individual,
+    ticket: GrievanceTicket,
+    list_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, LIST_PERMISSIONS, afghanistan, whole_business_area_access=True)
+
+    with CaptureQueriesContext(connection) as captured:
+        response = api_client(user).get(list_url, {"search": "IND-SCOPE-0001"})
+
+    assert response.status_code == status.HTTP_200_OK
+    main_statement = main_list_statement(captured, "grievance_grievanceticket")
+    assert '"household_unicef_id" IN (SELECT' not in main_statement, main_statement
+    assert "DISTINCT ON" not in main_statement, main_statement
+    assert re.search(
+        r'"unicef_id" = \("grievance_grievanceticket"\."household_unicef_id"\)', main_statement
+    ), main_statement

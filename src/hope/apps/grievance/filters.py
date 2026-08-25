@@ -185,13 +185,15 @@ class GrievanceTicketFilter(FilterSet):
             if search.startswith("HH-"):
                 return qs.filter(household_unicef_id__istartswith=search)
             if search.startswith("IND-"):
-                household_unicef_ids = (
-                    Individual.objects.filter(business_area=self.business_area, unicef_id__istartswith=search)
-                    .order_by("household__unicef_id")
-                    .distinct("household__unicef_id")
-                    .values_list("household__unicef_id", flat=True)
+                return qs.filter(
+                    Exists(
+                        Individual.objects.filter(
+                            business_area=self.business_area,
+                            unicef_id__istartswith=search,
+                            household__unicef_id=OuterRef("household_unicef_id"),
+                        )
+                    )
                 )
-                return qs.filter(household_unicef_id__in=household_unicef_ids)
             if search.startswith("GRV-"):
                 return qs.filter(unicef_id__istartswith=search)
 
@@ -206,7 +208,6 @@ class GrievanceTicketFilter(FilterSet):
                 | Q(phone_no_alternative__icontains=search)
                 | Q(unicef_id=search)
             )
-            .select_related("household")
             .values_list("household__unicef_id", flat=True)
         )
         query |= Q(household_unicef_id__in=unicef_ids)
@@ -218,16 +219,12 @@ class GrievanceTicketFilter(FilterSet):
     def document_number_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         document_number = value.strip()
         document_type = self.data.get("document_type")
-        unicef_ids = (
-            Individual.objects.filter(
-                Q(business_area=self.business_area)
-                & Q(relationship=HEAD)
-                & Q(documents__type__key=document_type)
-                & Q(documents__document_number__icontains=document_number)
-            )
-            .select_related("household")
-            .values_list("household__unicef_id", flat=True)
-        )
+        unicef_ids = Individual.objects.filter(
+            Q(business_area=self.business_area)
+            & Q(relationship=HEAD)
+            & Q(documents__type__key=document_type)
+            & Q(documents__document_number__icontains=document_number)
+        ).values_list("household__unicef_id", flat=True)
         return qs.filter(household_unicef_id__in=unicef_ids)
 
     def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
