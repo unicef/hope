@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.request import Request
@@ -24,7 +24,7 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, User
+from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, Program, User
 
 
 def get_fallback_individual_unicef_ids(
@@ -279,6 +279,28 @@ class GrievancePermissionsMixin:
         if can_view_sensitive_owner:
             filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         return filters
+
+
+class GrievanceDashboardMixin:
+    """Common dashboard logic for grievance tickets."""
+
+    def get_dashboard_base_queryset(self, program: Program | None = None) -> QuerySet:
+        """Get base queryset for dashboard data with optional program filtering."""
+        through = GrievanceTicket.programs.through
+        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area=self.business_area)
+
+        if program:
+            return base_queryset.filter(id__in=through.objects.filter(program=program).values("grievanceticket_id"))
+
+        # evaluated on purpose: passing a subquery here brings the `program_program` join back.
+        active_program_ids = list(
+            Program.objects.filter(business_area=self.business_area, status=Program.ACTIVE).values_list("id", flat=True)
+        )
+        has_active_program = Exists(
+            through.objects.filter(grievanceticket_id=OuterRef("pk"), program_id__in=active_program_ids)
+        )
+        has_no_program = ~Exists(through.objects.filter(grievanceticket_id=OuterRef("pk")))
+        return base_queryset.filter(has_active_program | has_no_program)
 
 
 class GrievanceMutationMixin:
