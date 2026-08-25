@@ -1428,6 +1428,74 @@ def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None
     assert payment_plan.status == PaymentPlan.Status.LOCKED
 
 
+@pytest.fixture
+def payment_plan_importing_fsp_extra_fields(user: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS,
+    )
+
+
+@pytest.fixture
+def payment_plan_with_fsp_extra_fields_import_error(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+    )
+
+
+def test_unlock_fsp_rejects_active_fsp_extra_fields_import(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan_importing_fsp_extra_fields).unlock_fsp()
+
+
+def test_send_for_approval_rejects_active_fsp_extra_fields_import(
+    payment_plan_importing_fsp_extra_fields: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan_importing_fsp_extra_fields).send_for_approval()
+
+
+def test_unlock_fsp_allows_retryable_background_error(
+    payment_plan_with_fsp_extra_fields_import_error: PaymentPlan,
+) -> None:
+    PaymentPlanService(payment_plan_with_fsp_extra_fields_import_error).unlock_fsp()
+
+    assert payment_plan_with_fsp_extra_fields_import_error.status == PaymentPlan.Status.LOCKED
+    assert payment_plan_with_fsp_extra_fields_import_error.background_action_status is None
+
+
+def test_send_for_approval_allows_retryable_background_error(
+    payment_plan_with_fsp_extra_fields_import_error: PaymentPlan,
+    user: User,
+    mocker: Any,
+) -> None:
+    notification_task = mocker.patch(
+        "hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task"
+    )
+
+    PaymentPlanService(payment_plan_with_fsp_extra_fields_import_error).execute_update_status_action(
+        {"action": PaymentPlan.Action.SEND_FOR_APPROVAL},
+        user,
+    )
+
+    assert payment_plan_with_fsp_extra_fields_import_error.status == PaymentPlan.Status.IN_APPROVAL
+    assert payment_plan_with_fsp_extra_fields_import_error.background_action_status is None
+    notification_task.assert_called_once()
+
+
 def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program, title="New Cycle ABC")
     new_group = PaymentPlanGroupFactory(cycle=new_cycle)

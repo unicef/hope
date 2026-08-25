@@ -44,6 +44,7 @@ class Migration(migrations.Migration):
             model_name="account",
             name="individual",
             field=models.ForeignKey(
+                help_text="The individual this account belongs to",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="accounts",
                 to="household.individual",

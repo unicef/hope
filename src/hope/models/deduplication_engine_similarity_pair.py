@@ -28,6 +28,12 @@ class DeduplicationEngineSimilarityPair(models.Model):
         def _status_code_choices() -> list[tuple[str, str]]:
             return DeduplicationEngineSimilarityPair.StatusCode.choices
 
+        @classmethod
+        def photo_error_codes(cls) -> tuple[str, ...]:
+            # The photo was unusable, so no valid biometric comparison was possible
+            # (score 0). These pairs are rerouted to a photo-fix Data Change ticket.
+            return (cls.STATUS_412.value, cls.STATUS_416.value, cls.STATUS_418.value, cls.STATUS_429.value)
+
     program = models.ForeignKey(
         "program.Program",
         related_name="deduplication_engine_similarity_pairs",

@@ -1487,13 +1487,34 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 
+class PaymentDetailParentSerializer(serializers.ModelSerializer):
+    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    is_payment_gateway = serializers.BooleanField(read_only=True)
+    payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "plan_type",
+            "is_payment_gateway",
+            "delivery_mechanism",
+            "payment_verification_plans",
+        )
+
+
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
-    parent = PaymentPlanDetailSerializer()
+    parent = PaymentDetailParentSerializer()
     source_payment = PaymentListSerializer()
     household = HouseholdDetailSerializer()
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
     collector = IndividualDetailSerializer()
     snapshot_collector_account_data = serializers.SerializerMethodField()
+    extra_fields = serializers.SerializerMethodField()
+    fsp_extra_fields = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
@@ -1509,12 +1530,21 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "additional_collector_name",
             "transaction_reference_id",
             "snapshot_collector_account_data",
-            "extras",
+            "extra_fields",
+            "fsp_extra_fields",
             "sent_to_fsp_date",
         )
 
     def get_snapshot_collector_account_data(self, obj: Payment) -> dict | None:
         return PaymentListSerializer.get_collector_field(obj, "account_data")
+
+    @extend_schema_field(serializers.DictField())
+    def get_extra_fields(self, obj: Payment) -> dict[str, object]:
+        return obj.extra_fields
+
+    @extend_schema_field(serializers.DictField())
+    def get_fsp_extra_fields(self, obj: Payment) -> dict[str, object]:
+        return obj.fsp_extra_fields
 
 
 class PaymentPlanSmallSerializer(serializers.ModelSerializer):

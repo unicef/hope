@@ -1,11 +1,11 @@
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from django_elasticsearch_dsl import Document, fields
 from elasticsearch.dsl import AttrDict
 
 from hope.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hope.apps.utils.elasticsearch_utils import DEFAULT_SCRIPT
-from hope.models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
+from hope.models import Document as DocumentModel, Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
 type RelatedInstanceType = Document | Household | IndividualIdentity | IndividualRoleInHousehold
 
@@ -226,7 +226,18 @@ def get_individual_doc(program_id: str) -> type[IndividualDocument]:
             pass
 
         def get_queryset(self) -> QuerySet[Individual]:
-            return Individual.all_merge_status_objects.filter(program_id=program_id)
+            # select/prefetch mirror exactly what prepare() touches - without them every row
+            # costs ~6 extra queries, which dominates populate time on a remote database.
+            # Prefetch querysets MUST filter like the related managers (MERGED, not removed)
+            # or the prefetch cache would change which documents/identities get indexed.
+            return (
+                Individual.all_merge_status_objects.filter(program_id=program_id)
+                .select_related("household__admin1", "household__admin2", "business_area")
+                .prefetch_related(
+                    Prefetch("documents", queryset=DocumentModel.objects.select_related("type", "country")),
+                    Prefetch("identities", queryset=IndividualIdentity.objects.select_related("partner")),
+                )
+            )
 
     ProgramIndividualDocument.__name__ = f"IndividualDocument_{program.business_area.slug}_{program.code}"
     _set_django_attr(ProgramIndividualDocument, ProgramIndividualDocument.Django)
@@ -256,7 +267,16 @@ def get_household_doc(program_id: str) -> type[HouseholdDocument]:
             pass
 
         def get_queryset(self) -> QuerySet[Household]:
-            return Household.objects.filter(program_id=program_id)
+            return (
+                Household.objects.filter(program_id=program_id)
+                .select_related("head_of_household", "admin1", "admin2", "business_area")
+                .prefetch_related(
+                    Prefetch(
+                        "head_of_household__documents",
+                        queryset=DocumentModel.objects.select_related("type", "country"),
+                    )
+                )
+            )
 
     ProgramHouseholdDocument.__name__ = f"HouseholdDocument_{program.business_area.slug}_{program.code}"
     _set_django_attr(ProgramHouseholdDocument, ProgramHouseholdDocument.Django)
