@@ -6,7 +6,7 @@ from django.db.models import Sum
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.payment.delivery_dates import delivery_date_to_datetime
+from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.payment.utils import get_quantity_in_usd, log_payment_change
 from hope.models import Payment
 
@@ -36,7 +36,7 @@ def revert_mark_as_failed(
         raise DRFValidationError("Payments in payment gateway plans cannot be manually marked as failed")
 
     old_payment = cast("Payment", copy_model_object(payment_item))
-    stored_delivery_date = delivery_date_to_datetime(delivery_date)
+    stored_delivery_date = to_utc_midnight(delivery_date)
     payment_item.revert_mark_as_failed(delivered_quantity, stored_delivery_date)
     payment_item.delivered_quantity_usd = get_quantity_in_usd(
         amount=delivered_quantity,

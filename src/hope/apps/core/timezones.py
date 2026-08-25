@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, time
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -20,6 +20,13 @@ def utc_date(value: date | datetime) -> date:
             value = value.astimezone(UTC)
         return value.date()
     return value
+
+
+def to_utc_midnight(value: date | datetime | str) -> datetime:
+    """Normalize a date-like value to midnight UTC."""
+    if isinstance(value, str):
+        value = date.fromisoformat(value)
+    return datetime.combine(utc_date(value), time.min, tzinfo=UTC)
 
 
 def get_country_timezone_name(iso_code2: str | None) -> str:
