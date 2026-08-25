@@ -967,6 +967,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def _delete_child_plan(self) -> PaymentPlan:
+        """Soft-delete the most recent child plan (Top-Up / Follow-Up / Amendment) together with its payments."""
         payment_plan = self.payment_plan
         if (
             PaymentPlan.objects.filter(
