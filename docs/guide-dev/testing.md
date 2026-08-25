@@ -18,46 +18,18 @@ All tests run through the `tests` tox env — unit and e2e are the same env with
 different paths.
 
 ```bash
-# Everything, with the default flags from tox.ini
-tox -e tests
-```
-
-Anything after `--` **replaces** the default command rather than extending it —
-`tox.ini` wraps it in `{posargs:pytest ... tests}`, so `tox -e tests -- tests/unit`
-tries to execute `tests/unit` as a program and fails with `Permission denied`.
-To narrow a run, pass a complete `pytest` invocation. The baseline flags are:
-
-```
-pytest -q -rfE --no-header --tb=short --no-migrations --randomly-seed=42 \
-  --dist=loadgroup --create-db
-```
-
-```bash
 # All unit tests
-tox -e tests -- pytest -q --no-header --tb=short --no-migrations --randomly-seed=42 \
-  --create-db tests/unit
+tox -e tests -- tests/unit
 
 # All e2e (Selenium) tests
-tox -e tests -- pytest -q --no-header --tb=short --no-migrations --randomly-seed=42 \
-  --create-db tests/e2e
+tox -e tests -- tests/e2e
 
 # A specific file, class, or method (pytest node-id syntax)
-tox -e tests -- pytest -q --no-header --no-migrations --randomly-seed=42 --create-db \
-  tests/unit/apps/household/test_models.py::TestHousehold::test_create
+tox -e tests -- tests/unit/apps/household/test_models.py::TestHousehold::test_create
 
 # Filter by name pattern
-tox -e tests -- pytest -q --no-header --no-migrations --randomly-seed=42 --create-db \
-  tests/unit -k "test_create"
+tox -e tests -- tests/unit -k "test_create"
 ```
-
-Keep `--randomly-seed=42` in anything you rerun: without it `pytest-randomly` picks a
-fresh seed each run, so test order changes every invocation and a CI failure cannot be
-reproduced by running the same command twice. CI passes the seed
-(`.github/workflows/tests.yml`). `--dist=loadgroup` is inert without `-n`, so the
-examples above leave it out.
-
-CI does the same — see the `pytest ./tests -m unit ...` and `-m selenium ...`
-invocations in `.github/workflows/tests.yml`.
 
 E2E tests require Postgres, Redis, and Elasticsearch to be running locally — see
 `development_tools/compose.yml`.
