@@ -19,6 +19,7 @@ export const headCells: HeadCell<PaymentList>[] = [
     label: 'Payment Purpose',
     id: 'paymentPlanPurposes',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,
@@ -35,7 +36,7 @@ export const headCells: HeadCell<PaymentList>[] = [
   {
     disablePadding: false,
     label: 'Head of Household',
-    id: 'headOfHousehold',
+    id: 'hohFullName',
     numeric: false,
   },
 
@@ -77,6 +78,7 @@ export const headCellsPeople: HeadCell<any>[] = [
     label: 'Payment Purpose',
     id: 'paymentPlanPurposes',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,

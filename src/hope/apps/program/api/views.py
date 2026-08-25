@@ -35,6 +35,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.payment.api.filters import PaymentSearchFilter
+from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
@@ -456,11 +457,7 @@ class ProgramViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
-        payments = (
-            Payment.objects.filter(parent__program_cycle__program=program)
-            .select_related("parent__program_cycle", "parent__payment_plan_group")
-            .prefetch_related("parent__payment_plan_purposes")
-        )
+        payments = with_payment_related_data(Payment.objects.filter(parent__program_cycle__program=program))
         filterset = PaymentSearchFilter(
             request.GET,
             queryset=payments,

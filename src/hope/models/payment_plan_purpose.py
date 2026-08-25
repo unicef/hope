@@ -25,6 +25,7 @@ class PaymentPlanPurpose(TimeStampedUUIDModel, UnicefIdentifiedModel):
     class Meta:
         app_label = "payment"
         verbose_name = _("Payment Plan Purpose")
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name

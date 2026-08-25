@@ -1326,8 +1326,8 @@ class PaymentListSerializer(serializers.ModelSerializer):
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
     program_code = serializers.CharField(source="parent.program.code")
-    payment_plan_cycle = serializers.SerializerMethodField()
-    payment_plan_group = serializers.SerializerMethodField()
+    payment_plan_cycle = serializers.CharField(source="parent.program_cycle.title", read_only=True)
+    payment_plan_group = serializers.CharField(source="parent.payment_plan_group.name", read_only=True, allow_null=True)
     payment_plan_purposes = serializers.SerializerMethodField()
 
     status_display = serializers.CharField(
@@ -1491,14 +1491,6 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     def get_collector_phone_no_alt(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
-
-    @extend_schema_field(serializers.CharField(allow_null=True))
-    def get_payment_plan_cycle(self, obj: Payment) -> str | None:
-        return self._safe_get(obj, "parent.program_cycle.title")
-
-    @extend_schema_field(serializers.CharField(allow_null=True))
-    def get_payment_plan_group(self, obj: Payment) -> str | None:
-        return self._safe_get(obj, "parent.payment_plan_group.name")
 
     def get_payment_plan_purposes(self, obj: Payment) -> list[str]:
         return [purpose.name for purpose in obj.parent.payment_plan_purposes.all()]
