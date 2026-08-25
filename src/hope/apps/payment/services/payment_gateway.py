@@ -13,6 +13,7 @@ from rest_framework import serializers
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.utils import chunks
+from hope.apps.payment.delivery_dates import delivery_date_to_datetime
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
@@ -720,7 +721,7 @@ class PaymentGatewayService:
                 delivery_date = None
 
             update_fields.extend(["delivered_quantity", "delivered_quantity_usd", "delivery_date"])
-            payment.delivery_date = delivery_date
+            payment.delivery_date = delivery_date_to_datetime(delivery_date) if delivery_date else None
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=Decimal(delivered_quantity),  # type: ignore[arg-type]

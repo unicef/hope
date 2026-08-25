@@ -12,6 +12,7 @@ import openpyxl
 import pytz
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.payment.delivery_dates import delivery_date_to_datetime
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
@@ -415,9 +416,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 )
                 payment.status = status
                 if delivery_date:
-                    payment.delivery_date = delivery_date
+                    payment.delivery_date = delivery_date_to_datetime(delivery_date)
                 elif payment.delivered_quantity and not payment.delivery_date:
-                    payment.delivery_date = timezone.now()
+                    payment.delivery_date = delivery_date_to_datetime(timezone.now())
                 elif not payment.delivered_quantity:
                     payment.delivery_date = None
                 payment.reason_for_unsuccessful_payment = reason_for_unsuccessful_payment

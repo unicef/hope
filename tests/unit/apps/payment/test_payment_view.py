@@ -329,7 +329,7 @@ def test_revert_mark_as_failed(
         assert "id" in resp_data
         assert resp_data["delivered_quantity"] == "111.00"
         assert resp_data["status"] == "Partially Distributed"
-        assert resp_data["delivery_date"] == "2024-01-01T00:00:00Z"
+        assert resp_data["delivery_date"] == "2024-01-01"
 
 
 def test_filter_by_household_unicef_id(

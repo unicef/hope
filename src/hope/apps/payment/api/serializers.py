@@ -32,6 +32,7 @@ from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
+from hope.apps.payment.delivery_dates import delivery_date_to_date
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -1327,6 +1328,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
     program_code = serializers.CharField(source="parent.program.code")
+    delivery_date = serializers.SerializerMethodField()
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1381,6 +1383,13 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "program_code",
             "collector_type_display",
         )
+
+    @extend_schema_field(serializers.DateField(allow_null=True))
+    def get_delivery_date(self, obj: Payment) -> str | None:
+        if obj.delivery_date is None:
+            return None
+        delivery_date = delivery_date_to_date(obj.delivery_date)
+        return delivery_date.isoformat()
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str | None = None) -> dict | None:

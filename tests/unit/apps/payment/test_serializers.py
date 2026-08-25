@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import Mock
 
@@ -97,6 +98,7 @@ def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
         vulnerability_score=123.012,
         entitlement_quantity=99,
         delivered_quantity=88,
+        delivery_date=datetime(2024, 1, 2, 13, 30, tzinfo=UTC),
         financial_service_provider=FinancialServiceProviderFactory(name="FSP 1"),
         fsp_auth_code="AUTH_123",
     )
@@ -267,6 +269,7 @@ def test_payment_list_serializer_all_data(payment_list_context: dict[str, Any]) 
     assert data["household_admin2"] == "New admin22"
     assert data["entitlement_quantity"] == "99.00"
     assert data["delivered_quantity"] == "88.00"
+    assert data["delivery_date"] == "2024-01-02"
     assert data["status"] == payment.get_status_display()
     assert data["fsp_name"] == "FSP 1"
     assert data["fsp_auth_code"] == ""
