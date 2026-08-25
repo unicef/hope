@@ -312,6 +312,7 @@ def test_program_detail(
         "household_filters_available": program.data_collecting_type.household_filters_available,
         "individual_filters_available": program.data_collecting_type.individual_filters_available,
         "collects_individual_data": program.data_collecting_type.collects_individual_data,
+        "recalculate_composition": program.data_collecting_type.recalculate_composition,
     }
     assert response_data["beneficiary_group"] == {
         "id": str(program.beneficiary_group.id),

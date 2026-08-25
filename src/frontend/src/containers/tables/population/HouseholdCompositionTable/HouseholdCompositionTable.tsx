@@ -43,15 +43,18 @@ export function HouseholdCompositionTable({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  // Deviation from AB#336514: when the programme does not collect individual
-  // data, KAB values can only be a copy of the declared composition (or NULL),
-  // so the ticket's verbatim title/tooltip would be untrue - see _recalculate_kab.
-  const collectsIndividualData =
-    selectedProgram?.dataCollectingType?.collectsIndividualData;
-  const title = collectsIndividualData
+  // Deviation from AB#336514: KAB values can derive from individual records
+  // only when the programme collects individual data or recalculates the
+  // composition from individuals; otherwise they are a copy of the declared
+  // composition (or NULL) and the ticket's verbatim title/tooltip would be
+  // untrue - see _recalculate_kab / recalculate_data.
+  const kabFromIndividuals =
+    selectedProgram?.dataCollectingType?.collectsIndividualData ||
+    selectedProgram?.dataCollectingType?.recalculateComposition;
+  const title = kabFromIndividuals
     ? t('Known Affected Beneficiaries')
     : `${beneficiaryGroup?.groupLabel} Composition`;
-  const tooltip = collectsIndividualData
+  const tooltip = kabFromIndividuals
     ? t(
         'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
       )
