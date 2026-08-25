@@ -177,6 +177,8 @@ describe('ProgrammesTable', () => {
       crossAreaFilterAvailable: false,
       status: undefined,
       lastLogin: null,
+      timezone: null,
+      effectiveTimezone: 'UTC',
     });
   });
 
