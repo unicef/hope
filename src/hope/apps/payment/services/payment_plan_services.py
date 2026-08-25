@@ -945,6 +945,9 @@ class PaymentPlanService:
         ]:
             raise ValidationError("Deletion is only allowed when the status is 'Open'")
 
+        if self.payment_plan.plan_type != PaymentPlan.PlanType.REGULAR:
+            return self._delete_child_plan()
+
         if self.payment_plan.status == PaymentPlan.Status.OPEN:
             if self.payment_plan.program_cycle.payment_plans.count() == 1:
                 # if it's the last Payment Plan in this Cycle need to update Cycle status
@@ -962,6 +965,39 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         return self.payment_plan
+
+    def _delete_child_plan(self) -> PaymentPlan:
+        """Soft-delete a child plan (Top-Up / Follow-Up / Top-Up Amendment) together with its payments.
+
+        Child plans were never a targeting, so pushing them back to DRAFT (the Regular-plan delete
+        path) would leave them on the Targeting list and keep their payments blocking the source
+        plan's eligibility pools. Only the most recent non-removed plan of its category may be
+        deleted, so the remaining plans stay chronologically consistent.
+        """
+        payment_plan = self.payment_plan
+        if (
+            PaymentPlan.objects.filter(
+                source_payment_plan=payment_plan.source_payment_plan,
+                plan_type=payment_plan.plan_type,
+                created_at__gt=payment_plan.created_at,
+            )
+            .exclude(pk=payment_plan.pk)
+            .exists()
+        ):
+            raise ValidationError(
+                f"Only the most recent {payment_plan.get_plan_type_display()} of this Payment Plan can be deleted"
+            )
+        if (
+            payment_plan.plan_type == PaymentPlan.PlanType.TOP_UP
+            and PaymentPlan.objects.filter(
+                source_payment_plan=payment_plan, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT
+            ).exists()
+        ):
+            raise ValidationError("Cannot delete a Top Up that has a Top Up Amendment; delete the Amendment first")
+
+        payment_plan.payment_items.all().delete()
+        payment_plan.delete()
+        return payment_plan
 
     def export_xlsx(self, user_id: str) -> PaymentPlan:
         flow = PaymentPlanFlow(self.payment_plan)
