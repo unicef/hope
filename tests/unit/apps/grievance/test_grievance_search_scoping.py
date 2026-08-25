@@ -455,6 +455,6 @@ def test_search_by_individual_unicef_id_correlates_on_household_unicef_id(
     main_statement = main_list_statement(captured, "grievance_grievanceticket")
     assert '"household_unicef_id" IN (SELECT' not in main_statement, main_statement
     assert "DISTINCT ON" not in main_statement, main_statement
-    assert re.search(
-        r'"unicef_id" = \("grievance_grievanceticket"\."household_unicef_id"\)', main_statement
-    ), main_statement
+    assert re.search(r'"unicef_id" = \("grievance_grievanceticket"\."household_unicef_id"\)', main_statement), (
+        main_statement
+    )
