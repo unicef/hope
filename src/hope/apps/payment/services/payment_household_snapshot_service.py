@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch
 from phonenumber_field.phonenumber import PhoneNumber
 
+from hope.apps.core.timezones import utc_date
 from hope.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
@@ -249,8 +250,8 @@ def get_individual_snapshot(
         document_data = {
             "type": document.type.key,
             "document_number": document.document_number,
-            "expiry_date": handle_type_mapping(document.expiry_date),
-            "issuance_date": handle_type_mapping(document.issuance_date),
+            "expiry_date": utc_date(document.expiry_date).isoformat() if document.expiry_date else None,
+            "issuance_date": utc_date(document.issuance_date).isoformat() if document.issuance_date else None,
             "country": handle_type_mapping(document.country),
             "status": document.status,
             "cleared": document.cleared,

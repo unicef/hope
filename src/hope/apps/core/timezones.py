@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -7,11 +8,18 @@ from django.utils import timezone
 import pytz
 
 if TYPE_CHECKING:
-    from datetime import date, datetime
-
     from hope.models import BusinessArea, User
 
 UTC_TIMEZONE_NAME = "UTC"
+
+
+def utc_date(value: date | datetime) -> date:
+    """Return a date unchanged or take the UTC calendar date from a legacy datetime-backed date."""
+    if isinstance(value, datetime):
+        if timezone.is_aware(value):
+            value = value.astimezone(UTC)
+        return value.date()
+    return value
 
 
 def get_country_timezone_name(iso_code2: str | None) -> str:

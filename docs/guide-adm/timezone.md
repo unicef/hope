@@ -178,9 +178,17 @@ For example, `2026-08-24T10:30:00Z` displayed in `Europe/Warsaw` is `24 August 2
 True date-only values such as `2026-08-24` have no time or timezone and must not be converted. Converting a date-only
 value as though it were midnight UTC can incorrectly move it to the previous or next calendar day.
 
-`Payment.delivery_date` remains backed by a legacy datetime database column, but its REST and interchange contract
-is date-only. HOPE returns it as `YYYY-MM-DD`, converts existing stored timestamps to their UTC calendar date when
-reading them, and stores newly supplied dates as midnight UTC. Clients must not localize this field.
+Some date-only values remain backed by legacy datetime database columns. Their human-facing and REST contracts are
+still date-only: HOPE converts the stored value to its UTC calendar date and returns `YYYY-MM-DD`. Clients must not
+localize these fields:
+
+- Payment `delivery_date`.
+- Payment Plan `start_date` and `end_date`.
+- Document `issuance_date` and `expiry_date`.
+- Sanction-list individual `listed_on`.
+
+New Payment delivery dates are stored as midnight UTC. The other legacy columns retain their existing storage and
+write behavior; the explicit date-only conversion occurs at their approved presentation boundaries.
 
 ## Human-facing notifications and outputs
 

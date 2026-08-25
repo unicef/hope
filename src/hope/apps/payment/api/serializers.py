@@ -15,6 +15,7 @@ from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.api.fields import UTCDateField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
@@ -32,7 +33,6 @@ from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
-from hope.apps.payment.delivery_dates import delivery_date_to_date
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -269,7 +269,9 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True)
     payment_verification_summary = PaymentVerificationSummarySerializer()
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
-    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     program_name = serializers.CharField(source="program_cycle.program.name")
     program_id = serializers.CharField(source="program_cycle.program_id")
     available_payment_records_count = serializers.SerializerMethodField()
@@ -332,7 +334,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
 
 class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
-    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
     program_cycle_title = serializers.CharField(source="program_cycle.title")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
@@ -872,6 +874,8 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
     is_payment_gateway = serializers.BooleanField(read_only=True)
@@ -1199,6 +1203,8 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 
 
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
@@ -1328,7 +1334,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
     program_code = serializers.CharField(source="parent.program.code")
-    delivery_date = serializers.SerializerMethodField()
+    delivery_date = UTCDateField(read_only=True, allow_null=True)
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1383,13 +1389,6 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "program_code",
             "collector_type_display",
         )
-
-    @extend_schema_field(serializers.DateField(allow_null=True))
-    def get_delivery_date(self, obj: Payment) -> str | None:
-        if obj.delivery_date is None:
-            return None
-        delivery_date = delivery_date_to_date(obj.delivery_date)
-        return delivery_date.isoformat()
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str, collector_type: str | None = None) -> dict | None:
