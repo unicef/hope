@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from django.db.models import Count, F, Func, Q, QuerySet, Window
+from django.db.models import Count, Exists, F, Func, OuterRef, Q, QuerySet, Window
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -25,6 +25,21 @@ logger = logging.getLogger(__name__)
 
 class IsNull(Func):
     template = "%(expressions)s IS NULL"
+
+
+def program_with_status_exists(program_status: str) -> Exists:
+    through_model = GrievanceTicket.programs.through
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__status=program_status))
+
+
+def program_with_code_exists(program_code: str) -> Exists:
+    through_model = GrievanceTicket.programs.through
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__code=program_code))
+
+
+def without_program_q() -> Q:
+    through_model = GrievanceTicket.programs.through
+    return ~Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
 
 
 class GrievanceOrderingFilter(OrderingFilter):
@@ -141,7 +156,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__code=value)
+            return qs.filter(program_with_code_exists(value))
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
@@ -236,9 +251,9 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
-            return qs.filter(Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True))
+            return qs.filter(program_with_status_exists(Program.ACTIVE) | without_program_q())
         if value is False:
-            return qs.filter(programs__status=Program.FINISHED)
+            return qs.filter(program_with_status_exists(Program.FINISHED))
         return qs
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
@@ -346,7 +361,7 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:
-            return queryset.filter(programs__status=Program.ACTIVE).order_by("-created_at").distinct()
+            return queryset.filter(program_with_status_exists(Program.ACTIVE)).order_by("-created_at")
         return queryset
 
 
