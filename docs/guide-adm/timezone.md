@@ -11,18 +11,20 @@ for a timezone because it does not contain daylight-saving rules.
 
 ## Business Area timezone
 
-Every persisted Business Area has a non-empty `timezone`. Administrators configure it in Django admin by opening the
-Business Area and selecting its operational IANA timezone. The field is required, and the timezone is also visible
-in the Business Area list. The custom **Create Business Office** form also requires explicit timezone selection;
-child Business Offices do not inherit their parent's timezone.
+Every persisted Business Area has a non-empty `timezone`, which is visible and editable in Django admin. When a new
+Business Area is saved without an explicit timezone, HOPE initializes it from `office_country.iso_code2`. The first
+IANA timezone in the country mapping is used, with UTC as the fallback when the country is missing or unmapped. An
+explicitly selected timezone takes precedence.
 
-`office_country` does not automatically select or change the timezone for new Business Areas. Country alone cannot
-reliably identify the operational timezone for countries spanning multiple timezones.
+The custom **Create Business Office** form follows the same rule. The new Business Office copies its parent's
+`office_country` and derives its timezone from that country when no explicit timezone is selected. Changing an
+existing Business Area's `office_country` does not overwrite its current timezone.
 
-Existing Business Areas are initialized during migration using the first timezone mapped to
+Existing Business Areas are initialized during migration using the same first timezone mapped to
 `office_country.iso_code2`, with UTC used when the country is missing or unmapped. This is a provisional migration
 value: administrators must review migrated Business Areas, especially in multi-timezone countries, and explicitly
-select the correct operational value. The normal Business Area and Business Office forms reject an omitted value.
+select the correct operational value. Country-derived values for newly created Business Areas in multi-timezone
+countries require the same review.
 
 ## User timezone
 
@@ -230,7 +232,7 @@ request because doing so could change the UTC REST serialization contract.
 
 When creating or maintaining a Business Area:
 
-1. Select the operational timezone explicitly.
+1. Select the `office_country`; select an explicit timezone when the derived country default is not appropriate.
 2. Save the Business Area and verify that the timezone column is populated.
 3. Update the timezone manually if the Business Area's operational location changes.
 

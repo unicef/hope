@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 from django.utils import timezone
+import pytz
 
 if TYPE_CHECKING:
     from datetime import date, datetime
@@ -11,6 +12,14 @@ if TYPE_CHECKING:
     from hope.models import BusinessArea, User
 
 UTC_TIMEZONE_NAME = "UTC"
+
+
+def get_country_timezone_name(iso_code2: str | None) -> str:
+    if not iso_code2:
+        return UTC_TIMEZONE_NAME
+
+    country_timezones = pytz.country_timezones.get(iso_code2.upper(), ())
+    return country_timezones[0] if country_timezones else UTC_TIMEZONE_NAME
 
 
 def resolve_timezone_name(*, user: User | None = None, business_area: BusinessArea | None = None) -> str:

@@ -33,7 +33,8 @@ class Migration(migrations.Migration):
             model_name="businessarea",
             name="timezone",
             field=timezone_field.fields.TimeZoneField(
-                help_text="Required operational IANA timezone.",
+                blank=True,
+                help_text="Operational IANA timezone. When omitted, it is initialized from the office country or UTC.",
             ),
         ),
     ]

@@ -218,6 +218,7 @@ class BusinessAreaAdmin(
                         region_name=self.object.region_name,
                         long_name=f"Business Office: {name}",
                         slug=slugify(name),
+                        office_country=self.object.office_country,
                         timezone=form.cleaned_data["timezone"],
                     )
                 preserved_filters = self.get_preserved_filters(request)
