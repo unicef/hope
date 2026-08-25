@@ -967,13 +967,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def _delete_child_plan(self) -> PaymentPlan:
-        """Soft-delete a child plan (Top-Up / Follow-Up / Top-Up Amendment) together with its payments.
-
-        Child plans were never a targeting, so pushing them back to DRAFT (the Regular-plan delete
-        path) would leave them on the Targeting list and keep their payments blocking the source
-        plan's eligibility pools. Only the most recent non-removed plan of its category may be
-        deleted, so the remaining plans stay chronologically consistent.
-        """
         payment_plan = self.payment_plan
         if (
             PaymentPlan.objects.filter(

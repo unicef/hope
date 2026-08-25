@@ -253,8 +253,6 @@ def test_delete_child_plan_wrong_status_raises(top_up: PaymentPlan) -> None:
 def test_delete_top_up_query_count(
     top_up: PaymentPlan, top_up_payment: Payment, django_assert_num_queries: Callable
 ) -> None:
-    # 2x guard SELECT (newer sibling, live amendment), payments UPDATE, plan soft-delete save
-    # (+3 purpose-validation queries from the PaymentPlan save signal)
     with django_assert_num_queries(7):
         PaymentPlanService(payment_plan=top_up).delete()
 
