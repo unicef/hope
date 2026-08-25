@@ -46,6 +46,7 @@ from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import (
+    Account,
     AccountAttachment,
     Approval,
     ApprovalProcess,
@@ -107,11 +108,12 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> AccountAttachment:
-        # validate() counted before this insert, so a concurrent upload can take the last slot.
-        # The model still refuses, but with Django's ValidationError, which DRF returns as a 500.
+        # Serializes uploads to one account so clean()'s count cannot miss a concurrent insert.
+        Account.all_objects.select_for_update().get(pk=validated_data["account"].pk)
         try:
             return super().create(validated_data)
         except DjangoValidationError as e:
+            # clean() raises Django's ValidationError, which DRF would return as a 500.
             raise serializers.ValidationError(e.messages) from e
 
 
