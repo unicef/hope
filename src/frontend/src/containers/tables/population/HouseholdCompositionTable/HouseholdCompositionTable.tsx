@@ -16,6 +16,7 @@ import {
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 
 const GreyTableCell = styled(TableCell)`
@@ -40,6 +41,23 @@ export function HouseholdCompositionTable({
   household,
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  // Deviation from AB#336514: when the programme does not collect individual
+  // data, KAB values can only be a copy of the declared composition (or NULL),
+  // so the ticket's verbatim title/tooltip would be untrue - see _recalculate_kab.
+  const collectsIndividualData =
+    selectedProgram?.dataCollectingType?.collectsIndividualData;
+  const title = collectsIndividualData
+    ? t('Known Affected Beneficiaries')
+    : `${beneficiaryGroup?.groupLabel} Composition`;
+  const tooltip = collectsIndividualData
+    ? t(
+        'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
+      )
+    : t(
+        'Figures represent the declared composition reported during registration. This programme does not collect individual records.',
+      );
   const rows: {
     ageGroup: string;
     female: Count;
@@ -104,19 +122,9 @@ export function HouseholdCompositionTable({
     <OverviewPaper data-cy="known-affected-beneficiaries">
       <Title>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h6">
-            {t('Known Affected Beneficiaries')}
-          </Typography>
-          <Tooltip
-            title={t(
-              'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
-            )}
-          >
-            <IconButton
-              color="primary"
-              aria-label={t('Known Affected Beneficiaries')}
-              data-cy="kab-info"
-            >
+          <Typography variant="h6">{title}</Typography>
+          <Tooltip title={tooltip}>
+            <IconButton color="primary" aria-label={title} data-cy="kab-info">
               <Info />
             </IconButton>
           </Tooltip>
