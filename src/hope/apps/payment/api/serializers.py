@@ -362,6 +362,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_code = serializers.CharField(source="program_cycle.program.code", read_only=True)
     program_cycle_id = serializers.UUIDField(read_only=True)
+    last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 

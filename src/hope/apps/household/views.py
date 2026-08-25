@@ -1,6 +1,7 @@
 import logging
 from typing import cast
 
+from drf_spectacular.utils import extend_schema
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -13,6 +14,7 @@ from hope.apps.household.const import (
 )
 from hope.apps.household.filters import _prepare_kobo_asset_id_value
 from hope.apps.household.serializers import (
+    HouseholdStatusResponseSerializer,
     serialize_by_household,
     serialize_by_individual,
 )
@@ -85,6 +87,7 @@ def get_household_or_individual(tax_id: str | None, detail_id: str | None, busin
 class HouseholdStatusView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @extend_schema(responses=HouseholdStatusResponseSerializer)
     @profiling(name="Household status")
     def get(self, request: Request) -> Response:
         query_params = request.query_params
@@ -94,5 +97,6 @@ class HouseholdStatusView(APIView):
         business_area_code: str | None = query_params.get("business_area_code")
 
         data = get_household_or_individual(tax_id, detail_id, business_area_code)
+        response_serializer = HouseholdStatusResponseSerializer(instance=data)
 
-        return Response(data, status=200)
+        return Response(response_serializer.data, status=200)
