@@ -408,7 +408,9 @@ def test_batch_deduplication(
 
     task = DeduplicateTask(business_area.slug, program.id)
 
-    with django_assert_num_queries(22):
+    # 22 + 3 constant prefetch queries (documents+type/country, identities+partner) added to
+    # the per-program get_queryset so populate's prepare() stops doing per-row lookups
+    with django_assert_num_queries(25):
         task.deduplicate_pending_individuals(registration_data_import)
 
     duplicate_in_batch = PendingIndividual.objects.order_by("full_name").filter(

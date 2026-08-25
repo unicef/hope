@@ -11,19 +11,22 @@ interface GrievanceIndividualPhotoModalProps {
   isCurrent?: boolean;
   individualId?: string;
   photoPath?: string;
+  programCode?: string;
 }
 
 export function GrievanceIndividualPhotoModal({
   isCurrent,
   individualId,
   photoPath,
+  programCode,
 }: GrievanceIndividualPhotoModalProps): ReactElement {
   const { businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
+  const effectiveProgramCode = programCode || selectedProgram?.code || '';
   const individualPhotosParams = {
     businessAreaSlug: businessArea,
-    programCode: selectedProgram?.code || '',
+    programCode: effectiveProgramCode,
     id: individualId || '',
   };
   const { data } = useQuery<IndividualPhotoDetail>({
@@ -38,7 +41,7 @@ export function GrievanceIndividualPhotoModal({
     enabled:
       !!isCurrent &&
       !!businessArea &&
-      !!selectedProgram?.code &&
+      !!effectiveProgramCode &&
       !!individualId,
   });
 

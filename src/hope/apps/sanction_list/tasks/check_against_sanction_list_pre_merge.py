@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
 from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
@@ -86,6 +87,7 @@ def _generate_ticket(
     area = getattr(household, "village", "")
     ticket = GrievanceTicket(
         category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        submission_channel=SUBMISSION_CHANNEL_HOPE,
         business_area=marked_individual.business_area,
         admin2=admin_level_2,
         area=area,
