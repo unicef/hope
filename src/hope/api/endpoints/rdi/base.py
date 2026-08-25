@@ -1,11 +1,15 @@
 from dataclasses import asdict
+import logging
 from typing import TYPE_CHECKING, Any, cast
+from urllib.parse import urlsplit
 
+from django.core.validators import URLValidator
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
 from django.utils.functional import cached_property
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, UpdateAPIView
@@ -16,11 +20,24 @@ from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusine
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
-from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
+from hope.apps.registration_data.celery_tasks import (
+    rdi_dispatcher_task,
+    remove_rdi_population_async_task,
+)
+from hope.models import (
+    Country,
+    Grant,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+    User,
+)
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 class RDISerializer(serializers.ModelSerializer):
@@ -226,3 +243,68 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
                 {"id": self.selected_rdi.pk, "status": self.selected_rdi.status},
             ]
         )
+
+
+class RDIResetSerializer(serializers.Serializer):
+    callback_url = serializers.URLField(
+        required=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+    )
+    signed_token = serializers.CharField(required=True)
+
+    def validate_callback_url(self, value: str) -> str:
+        if "//" in urlsplit(value).path:
+            raise serializers.ValidationError("callback_url path must not contain '//'")
+        return value
+
+
+class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
+    """Async reset (hard-delete) of a CW-managed RDI.
+
+    RDI is resettable in every status except ``MERGED`` (terminal -> 409). An in-flight
+    merge holding the row lock is not waited on -> 409 ``rdi_merge_in_progress`` (retryable).
+    """
+
+    permission = Grant.API_RDI_DELETE
+
+    @extend_schema(request=RDIResetSerializer)
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        rdi_id = self.kwargs["rdi"]
+        serializer = RDIResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        callback_url = serializer.validated_data["callback_url"]
+        signed_token = serializer.validated_data["signed_token"]
+        logger.debug("RDI reset requested for %s (callback_url=%s)", rdi_id, callback_url)
+
+        with atomic():
+            base_qs = RegistrationDataImport.objects.filter(
+                id=rdi_id,
+                business_area=self.selected_business_area,
+                country_workspace_id__isnull=False,
+            )
+            try:
+                rdi = base_qs.select_for_update(skip_locked=True, of=("self",)).select_related("program").get()
+            except RegistrationDataImport.DoesNotExist:
+                if base_qs.exists():
+                    logger.info("RDI reset conflict for %s: row lock held by an in-flight merge", rdi_id)
+                    return Response({"error": "rdi_merge_in_progress"}, status=status.HTTP_409_CONFLICT)
+                logger.info("RDI reset 404 for %s: unknown or not CW-managed", rdi_id)
+                raise Http404
+
+            if rdi.status == RegistrationDataImport.MERGED:
+                logger.info("RDI reset conflict for %s: already MERGED (terminal)", rdi_id)
+                return Response({"error": "rdi_already_merged"}, status=status.HTTP_409_CONFLICT)
+
+            job = remove_rdi_population_async_task(rdi, callback_url=callback_url, signed_token=signed_token)
+            if job is None:
+                logger.info("RDI reset for %s is already in progress (status %s)", rdi_id, rdi.status)
+                return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)
+
+            rdi.status = RegistrationDataImport.DELETE_SCHEDULED
+            rdi.save(update_fields=["status"])
+            # The RDI just left the merge queue; we need to trigger the queue, so a newer RDI waiting
+            # behind will start being processed.
+            rdi_dispatcher_task(cast("Program", rdi.program))
+            logger.info("RDI reset scheduled for %s: delete rdi job %s queued", rdi_id, job.pk)
+
+        return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)

@@ -113,3 +113,14 @@ def test_dispatcher_is_scoped_to_its_program(mock_fetch: Mock, program: Program)
 
     mock_fetch.assert_called_once()
     assert mock_fetch.call_args.args[0].pk == own.pk
+
+
+@patch(DISPATCH_TARGET)
+def test_dispatcher_skips_delete_scheduled_head_and_takes_next_scheduled(mock_fetch: Mock, program: Program) -> None:
+    _rdi(program, RegistrationDataImport.DELETE_SCHEDULED, arrived_hours_ago=3)
+    scheduled = _rdi(program, RegistrationDataImport.MERGE_SCHEDULED, arrived_hours_ago=1)
+
+    RdiMergeDispatcher().execute(str(program.id))
+
+    mock_fetch.assert_called_once()
+    assert mock_fetch.call_args.args[0].pk == scheduled.pk

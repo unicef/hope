@@ -35,11 +35,15 @@ class FetchFindingsAndMergeRdi:
             with transaction.atomic():
                 locked_rdi = self._lock_rdi(registration_data_import_id)
                 if locked_rdi is None:
+                    logger.info(f"RDI:{registration_data_import_id} is locked by another worker, skipping merge.")
                     return False
                 self._transition_to_merging(locked_rdi)
                 self._store_deduplication_results(locked_rdi, dedupe_service, findings)
                 RdiMergeTask().execute(str(locked_rdi.id))
         except Exception:
+            logger.exception(
+                f"RDI:{registration_data_import_id} failed during merge, removing Elasticsearch documents."
+            )
             self._remove_es_docs(rdi)
             raise
         return True
@@ -67,6 +71,7 @@ class FetchFindingsAndMergeRdi:
         if rdi.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationService()
             findings = dedupe_service.get_rdi_findings(cast("str", rdi.country_workspace_id))
+            logger.info(f"RDI:{rdi.id} fetched {len(findings)} biometric findings from Deduplication Engine")
         return dedupe_service, findings
 
     def _lock_rdi(self, registration_data_import_id: str) -> RegistrationDataImport | None:

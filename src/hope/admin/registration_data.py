@@ -100,7 +100,7 @@ class RegistrationDataImportAdmin(ViewOnUiMixin, AdminAutoCompleteSearchMixin, H
         "excluded",
         "erased",
     )
-    readonly_fields = ("business_area", "program", "imported_by", "import_date")
+    readonly_fields = ("business_area", "program", "imported_by", "import_date", "country_workspace_id")
     date_hierarchy = "updated_at"
     advanced_filter_fields = (
         "status",

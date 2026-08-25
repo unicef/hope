@@ -26,7 +26,6 @@ from hope.apps.core.api.mixins import (
 )
 from hope.apps.core.api.serializers import ChoiceSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
-from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
@@ -44,11 +43,9 @@ from hope.apps.registration_data.celery_tasks import (
     registration_xlsx_import_async_task,
 )
 from hope.apps.registration_data.filters import RegistrationDataImportFilter
-from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
+from hope.apps.registration_data.services.rdi_removal import remove_rdi_population
 from hope.models import (
-    Household,
     ImportData,
-    Individual,
     KoboImportData,
     Program,
     RegistrationDataImport,
@@ -160,27 +157,10 @@ class RegistrationDataImportViewSet(
             logger.warning(msg)
             raise ValidationError(msg)
 
-        individuals_to_remove = list(
-            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-        )
-        households_to_remove = list(
-            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-        )
-        hoh_to_remove = list(
-            Household.all_objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
-        )
-        Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
-        Individual.all_objects.filter(id__in=hoh_to_remove).delete()
-        Household.all_objects.filter(registration_data_import=rdi).delete()
+        remove_rdi_population(rdi, delete_rdi=False)
 
         rdi.erased = True
         rdi.save()
-
-        if rdi.program.status == Program.ACTIVE:
-            remove_elasticsearch_documents_by_matching_ids(
-                individuals_to_remove, get_individual_doc(str(rdi.program.id))
-            )
-            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
@@ -212,27 +192,10 @@ class RegistrationDataImportViewSet(
             logger.warning("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
-        individuals_to_remove = list(
-            Individual.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-        )
-        households_to_remove = list(
-            Household.all_objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-        )
-        hoh_to_remove = list(
-            Household.all_objects.filter(registration_data_import=rdi).values_list("head_of_household_id", flat=True)
-        )
-        Household.all_objects.filter(registration_data_import=rdi).update(head_of_household=None)
-        Individual.all_objects.filter(id__in=hoh_to_remove).delete()
-        Household.all_objects.filter(registration_data_import=rdi).delete()
+        remove_rdi_population(rdi, delete_rdi=False)
         rdi.status = RegistrationDataImport.REFUSED_IMPORT
         rdi.refuse_reason = serializer.validated_data["reason"]
         rdi.save()
-
-        if rdi.program.status == Program.ACTIVE:
-            remove_elasticsearch_documents_by_matching_ids(
-                individuals_to_remove, get_individual_doc(str(rdi.program.id))
-            )
-            remove_elasticsearch_documents_by_matching_ids(households_to_remove, get_household_doc(str(rdi.program.id)))
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,

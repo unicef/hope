@@ -96,6 +96,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     REFUSED_IMPORT = "REFUSED"
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
+    DELETE_SCHEDULED = "DELETE_SCHEDULED"
+    DELETE_FAILED = "DELETE_FAILED"
     STATUS_CHOICE = (
         (LOADING, _("Loading")),
         (DEDUPLICATION, _("Deduplication")),
@@ -109,6 +111,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         (MERGING, _("Merging")),
         (MERGE_ERROR, _("Merge Error")),
         (REFUSED_IMPORT, _("Refused import")),
+        (DELETE_SCHEDULED, _("Delete Scheduled")),
+        (DELETE_FAILED, _("Delete Failed")),
     )
     XLS = "XLS"
     KOBO = "KOBO"
