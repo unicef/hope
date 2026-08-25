@@ -18,6 +18,13 @@ DEFAULTS = {
         "",
         "https://django-environ.readthedocs.io/en/latest/types.html#environ-env-db-url",
     ),
+    "DB_CLIENT_CONNECTION_CHECK_INTERVAL_MS": (
+        int,
+        5000,
+        5000,
+        False,
+        "https://www.postgresql.org/docs/current/runtime-config-connection.html#GUC-CLIENT-CONNECTION-CHECK-INTERVAL",
+    ),
     "DEBUG": (bool, False),
     "ENV": (str, "dev"),
     "DOMAIN": (str, "localhost:8000"),
