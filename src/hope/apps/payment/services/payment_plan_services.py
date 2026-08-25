@@ -345,7 +345,9 @@ class PaymentPlanService:
     def acceptance_process(self) -> PaymentPlan | None:
         with transaction.atomic():
             self.payment_plan = (
-                PaymentPlan.objects.select_for_update().select_related("program_cycle").get(pk=self.payment_plan.pk)
+                PaymentPlan.objects.select_for_update(of=("self",))
+                .select_related("program_cycle")
+                .get(pk=self.payment_plan.pk)
             )
             self.validate_payment_plan_status_to_acceptance_process_approval_type()
 
