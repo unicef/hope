@@ -1,8 +1,12 @@
+from collections.abc import Iterable
 from typing import Any
 
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
@@ -23,16 +27,84 @@ from hope.apps.utils.exceptions import log_and_raise
 from hope.models import Household, Individual, IndividualRoleInHousehold, User
 
 
+def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> dict[str, str]:
+    """Map household unicef id -> individual unicef id, for one page of tickets.
+
+    Only social worker programme tickets need it, so the rest of the page is skipped.
+    """
+    household_unicef_ids = {
+        ticket.household_unicef_id
+        for ticket in tickets
+        if ticket.household_unicef_id and getattr(ticket, "has_social_worker_program_annotated", False)
+    }
+
+    if not household_unicef_ids:
+        return {}
+
+    return dict(
+        Individual.objects.filter(household__unicef_id__in=household_unicef_ids)
+        # Lowest id per household, the same individual the old per-ticket subquery picked.
+        .order_by("household__unicef_id", "id")
+        .distinct("household__unicef_id")
+        .values_list("household__unicef_id", "unicef_id")
+    )
+
+
+def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str, int]:
+    """Map household unicef id -> number of *other* tickets for that household, for one page."""
+    household_unicef_ids = {ticket.household_unicef_id for ticket in tickets if ticket.household_unicef_id}
+
+    if not household_unicef_ids:
+        return {}
+
+    return {
+        row["household_unicef_id"]: row["ticket_count"] - 1
+        for row in GrievanceTicket.objects.filter(household_unicef_id__in=household_unicef_ids)
+        .values("household_unicef_id")
+        .annotate(ticket_count=Count("pk"))
+    }
+
+
+class GrievanceListBatchMixin:
+    """Resolves per page what the list serializer used to resolve per row.
+
+    `target_id`'s fallback was a queryset annotation, which joined household into the
+    main list query and made it lock that table; `related_tickets_count` was a
+    correlated subquery on the program-nested list and a COUNT per row on the global
+    one (ticket 331051).
+
+    Batching is per page, so with pagination disabled list() falls back to DRF's
+    default and the serializer resolves both fields per row.
+    """
+
+    fallback_individual_unicef_ids: dict[str, str] | None = None
+    existing_tickets_counts: dict[str, int] | None = None
+
+    def get_serializer_context(self) -> dict:
+        context = super().get_serializer_context()
+        context["fallback_individual_unicef_ids"] = self.fallback_individual_unicef_ids
+        context["existing_tickets_counts"] = self.existing_tickets_counts
+        return context
+
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        if page is None:  # pagination disabled - nothing to batch per page
+            return super().list(request, *args, **kwargs)
+        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
+        self.existing_tickets_counts = get_existing_tickets_counts(page)
+        return self.get_paginated_response(self.get_serializer(page, many=True).data)
+
+
 class GrievancePermissionsMixin:
     @staticmethod
     def _tickets_without_programs_query() -> Q:
         through_model = GrievanceTicket.programs.through
-        return ~Q(id__in=through_model.objects.values("grievanceticket_id"))
+        return Q(~Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
 
     @staticmethod
     def _tickets_for_program_ids_query(program_ids: set) -> Q:
         through_model = GrievanceTicket.programs.through
-        return Q(id__in=through_model.objects.filter(program_id__in=program_ids).values("grievanceticket_id"))
+        return Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program_id__in=program_ids)))
 
     @property
     def grievance_permissions_query(self) -> Q:
@@ -463,7 +535,7 @@ class GrievanceMutationMixin:
             create_grievance_documents(approver, ticket, documents)
 
     @staticmethod
-    def _apply_ticket_field_updates(ticket: GrievanceTicket, input_data: dict) -> None:
+    def _apply_ticket_field_updates(ticket: GrievanceTicket, input_data: dict, editor: User) -> None:
         priority = input_data.pop("priority", ticket.priority)
         if priority != ticket.priority:
             ticket.priority = priority
@@ -471,6 +543,8 @@ class GrievanceMutationMixin:
         urgency = input_data.pop("urgency", ticket.urgency)
         if urgency != ticket.urgency:
             ticket.urgency = urgency
+
+        ticket.submission_channel = input_data.pop("submission_channel", ticket.submission_channel)
 
         if partner := input_data.pop("partner", None):
             ticket.partner = partner
@@ -482,6 +556,7 @@ class GrievanceMutationMixin:
         linked_tickets = input_data.pop("linked_tickets", [])
         ticket.linked_tickets.set(linked_tickets)
         ticket.user_modified = timezone.now()
+        ticket.user_modified_by = editor
 
         for field, value in input_data.items():
             current_value = getattr(ticket, field, None)
@@ -492,9 +567,10 @@ class GrievanceMutationMixin:
         self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
     ) -> None:
         if assigned_to != ticket.assigned_to:
-            messages.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
             self._set_status_based_on_assigned_to(approver, ticket, messages)
             ticket.assigned_to = assigned_to
+            ticket.assigned_at = timezone.now()
+            ticket.assigned_by = approver
         elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
             messages.append(
@@ -502,6 +578,7 @@ class GrievanceMutationMixin:
                     ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
+                    editor=approver,
                 )
             )
 
@@ -509,13 +586,13 @@ class GrievanceMutationMixin:
         messages = []
         self._handle_document_operations(approver, grievance_ticket, input_data)
         assigned_to = input_data.pop("assigned_to", None)
-        self._apply_ticket_field_updates(grievance_ticket, input_data)
+        self._apply_ticket_field_updates(grievance_ticket, input_data, editor=approver)
         self._handle_assignment_change(approver, grievance_ticket, assigned_to, messages)
 
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
 
-        GrievanceNotification.send_all_notifications(messages)
+        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(messages))
         return grievance_ticket
 
     def _set_status_based_on_assigned_to(
@@ -534,6 +611,7 @@ class GrievanceMutationMixin:
                     grievance_ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
+                    editor=approver,
                 )
             )
 

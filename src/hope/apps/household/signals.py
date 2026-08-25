@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
+from contextvars import ContextVar
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -11,6 +13,9 @@ from django.dispatch import Signal, receiver
 from hope.apps.core.signals import post_bulk_create, post_bulk_update
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+    from uuid import UUID
+
     from hope.models import Household, Individual, Program
 
 individual_withdrawn = Signal()
@@ -18,6 +23,36 @@ household_withdrawn = Signal()
 household_deleted = Signal()
 individual_deleted = Signal()
 logger = logging.getLogger(__name__)
+
+_bulk_population_delete: ContextVar[bool] = ContextVar("bulk_population_delete", default=False)
+
+
+@contextmanager
+def population_delete_signals_muted(program_ids: Iterable[UUID]) -> Iterator[None]:
+    """Skip the per-row Household/Individual delete receivers for a bulk wipe.
+
+    Invalidates the list caches for ``program_ids`` on exit, so the caller only
+    still owes one bulk Elasticsearch delete per document type. Scoped to the
+    current context, so it does not reach threads started inside the block.
+    """
+    from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
+
+    programs = set(program_ids)
+    token = _bulk_population_delete.set(True)
+    try:
+        yield
+    finally:
+        _bulk_population_delete.reset(token)
+        for program_id in programs:
+            invalidate_household_and_individual_list_cache(program_id)
+
+
+def _should_skip_bulk_delete(kwargs: dict[str, Any]) -> bool:
+    """Report whether a bulk wipe is muting this delete signal.
+
+    Delete signals only, so post_save keeps firing inside the block.
+    """
+    return kwargs.get("signal") in (pre_delete, post_delete) and _bulk_population_delete.get()
 
 
 @receiver(post_save, sender="household.Household")
@@ -31,6 +66,9 @@ logger = logging.getLogger(__name__)
 def increment_household_list_cache_version(
     sender: type[Household | Individual], instance: Household | Individual, **kwargs: Any
 ) -> None:
+    if _should_skip_bulk_delete(kwargs):
+        return
+
     from hope.apps.household.api.caches import increment_household_list_program_key
 
     program_id = instance.program_id
@@ -42,6 +80,9 @@ def increment_household_list_cache_version(
 @receiver(post_save, sender="household.PendingIndividual")
 @receiver(pre_delete, sender="household.PendingIndividual")
 def increment_individual_list_cache_version(sender: type[Individual], instance: Individual, **kwargs: Any) -> None:
+    if _should_skip_bulk_delete(kwargs):
+        return
+
     from hope.apps.household.api.caches import increment_individual_list_program_key
 
     program_id = instance.program_id
@@ -130,7 +171,7 @@ def capture_program_old_status(sender: type[Program], instance: Program, **kwarg
 @receiver(post_save, sender="program.Program")
 def handle_program_status_change(sender: type[Program], instance: Program, created: bool, **kwargs: Any) -> None:
     """Manage Elasticsearch indexes based on Program status changes."""
-    from hope.apps.household.services.index_management import rebuild_program_indexes
+    from hope.apps.household.services.index_management import ensure_program_indexes
     from hope.models import Program
 
     if not _is_elasticsearch_enabled():
@@ -140,7 +181,7 @@ def handle_program_status_change(sender: type[Program], instance: Program, creat
     current_status = instance.status
     try:
         if old_status != current_status and current_status == Program.ACTIVE:
-            rebuild_program_indexes(str(instance.pk))
+            ensure_program_indexes(str(instance.pk))
     except Exception as e:  # pragma: no cover  # noqa
         logger.error(f"Failed to manage indexes for program {instance.id}: {e}")
     instance.__dict__.pop("_old_status", None)
@@ -189,6 +230,9 @@ def sync_individual_to_elasticsearch(sender: type[Individual], instance: Individ
 
 @receiver(post_delete, sender="household.Individual")
 def remove_individual_from_elasticsearch(sender: type[Individual], instance: Individual, **kwargs: Any) -> None:
+    if _should_skip_bulk_delete(kwargs):
+        return
+
     if not _is_elasticsearch_enabled():
         return
 
@@ -229,6 +273,9 @@ def sync_household_to_elasticsearch(sender: type[Household], instance: Household
 
 @receiver(post_delete, sender="household.Household")
 def remove_household_from_elasticsearch(sender: type[Household], instance: Household, **kwargs: Any) -> None:
+    if _should_skip_bulk_delete(kwargs):
+        return
+
     if not _is_elasticsearch_enabled():
         return
 

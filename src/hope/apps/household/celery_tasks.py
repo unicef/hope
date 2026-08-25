@@ -2,6 +2,7 @@ from datetime import timedelta
 import hashlib
 import json
 import logging
+from typing import Any
 from uuid import UUID
 
 from concurrency.api import disable_concurrency
@@ -20,7 +21,7 @@ from hope.apps.household.services.household_recalculate_data import (
     aggregate_composition_by_household_id,
     recalculate_data,
 )
-from hope.apps.household.services.index_management import delete_program_indexes
+from hope.apps.household.services.index_management import delete_program_indexes, rebuild_program_indexes
 from hope.apps.program.utils import enroll_households_to_program
 from hope.apps.utils.elasticsearch_utils import populate_index
 from hope.apps.utils.phone import calculate_phone_numbers_validity
@@ -270,6 +271,29 @@ def mass_unwithdraw_households_async_task(
         config={"household_ids": household_ids, "program_id": program_id, "reopen_tickets": reopen_tickets},
         group_key="household",
         description=f"Mass unwithdraw households for program {program_id}",
+    )
+
+
+def rebuild_program_indexes_async_task_action(job: AsyncJob) -> None:
+    ok, msg = rebuild_program_indexes(str(job.program_id))
+    if not ok:
+        raise RuntimeError(msg)  # surfaces as the job's failure state
+
+
+def rebuild_program_indexes_async_task(program_id: str, owner: Any = None) -> AsyncJob | None:
+    """Admin "Rebuild Index" button: destructive delete -> create -> populate of one program's indexes.
+
+    requeue, not queue_task: a second concurrent run for the same program would race the
+    delete -> create -> populate sequence. Returns None when a rebuild is already running.
+    """
+    program = Program.objects.get(id=program_id)
+    return AsyncJob.requeue(
+        action="hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action",
+        instance=program,
+        program=program,
+        owner=owner,
+        group_key="household",
+        description=f"Rebuild ES indexes for program {program_id}",
     )
 
 

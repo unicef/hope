@@ -217,7 +217,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         if not payload.is_valid():
             raise PaymentGatewayAPI.PaymentGatewayAPIError(payload.errors)
 
-        return payload.data
+        fsp_extra_fields = {key: value for key, value in obj.fsp_extra_fields.items() if key not in payload.fields}
+        return {**fsp_extra_fields, **payload.data}
 
     class Meta:
         model = Payment
@@ -682,6 +683,7 @@ class PaymentGatewayService:
 
     @staticmethod
     def update_payment(  # noqa: PLR0913
+        *,
         payment: Payment,
         payment_records_by_remote_id: dict[str, PaymentRecordData],
         container: PaymentPlanSplit,
@@ -740,54 +742,70 @@ class PaymentGatewayService:
             )
 
     def sync_records(self) -> None:
-        payment_plans = PaymentPlan.objects.prefetch_related(
-            "splits",
-            Prefetch(
-                "splits__split_payment_items",
-                queryset=Payment.objects.eligible()
-                .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
-                .order_by("unicef_id")
-                .select_related("household_snapshot", "delivery_type", "currency"),
-                to_attr="eligible_items",
-            ),
-        ).filter(
-            Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
-            Q(use_payment_gateway=True)
-            | Q(financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
-            status=PaymentPlan.Status.ACCEPTED,
-            financial_service_provider__isnull=False,
+        payment_plans = (
+            PaymentPlan.objects.annotate(
+                has_eligible_payments=Exists(Payment.objects.eligible().filter(parent_id=OuterRef("pk"))),
+            )
+            .select_related("currency", "financial_service_provider")
+            .prefetch_related(
+                "splits",
+                Prefetch(
+                    "payment_items",
+                    queryset=Payment.objects.eligible()
+                    .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
+                    .order_by("unicef_id")
+                    .select_related("household_snapshot", "delivery_type", "currency"),
+                    to_attr="eligible_pending_payments",
+                ),
+            )
+            .filter(
+                Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
+                Q(use_payment_gateway=True)
+                | Q(
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+                ),
+                status=PaymentPlan.Status.ACCEPTED,
+                financial_service_provider__isnull=False,
+            )
         )
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.exchange_rate
+            has_eligible_payments: bool = payment_plan.__dict__.pop("has_eligible_payments")
+            pending_payments: list[Payment] = payment_plan.__dict__.pop("eligible_pending_payments", [])
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             payment_log_pairs: list = []
 
-            if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
+            if (not has_eligible_payments or pending_payments) and payment_plan.is_payment_gateway:
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
+                pending_payments_by_split: dict[Any, list[Payment]] = {}
+                payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
+                for payment in pending_payments:
+                    pending_payments_by_split.setdefault(payment.parent_split_id, []).append(payment)
 
                 for instruction in payment_instructions:
-                    pending_payments = getattr(instruction, "eligible_items", [])
-                    if pending_payments:
+                    instruction_payments = pending_payments_by_split.get(instruction.id, [])
+                    if instruction_payments:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         payment_records_by_remote_id = self._payment_records_by_remote_id(pg_payment_records)
-                        payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
-                        for payment in pending_payments:
+                        for payment in instruction_payments:
                             update_fields = self.update_payment(
-                                payment,
-                                payment_records_by_remote_id,
-                                instruction,
-                                payment_plan,
-                                exchange_rate,
-                                payment_log_pairs,
+                                payment=payment,
+                                payment_records_by_remote_id=payment_records_by_remote_id,
+                                container=instruction,
+                                payment_plan=payment_plan,
+                                exchange_rate=exchange_rate,
+                                log_pairs=payment_log_pairs,
                             )
                             if update_fields:
                                 payments_by_update_fields.setdefault(update_fields, []).append(payment)
-                        self._bulk_update_payments(payments_by_update_fields)
 
+                self._bulk_update_payments(payments_by_update_fields)
                 bulk_log_payment_changes(payment_log_pairs, self.user)
                 payment_plan.update_money_fields()
-                if payment_plan.is_reconciled:
+                if has_eligible_payments and all(
+                    payment.status not in Payment.PENDING_STATUSES for payment in pending_payments
+                ):
                     flow = PaymentPlanFlow(payment_plan)
                     flow.status_finished()
                     payment_plan.save()
@@ -805,12 +823,12 @@ class PaymentGatewayService:
         if pg_payment_record:
             payment_log_pairs: list = []
             update_fields = self.update_payment(
-                payment,
-                {pg_payment_record.remote_id: pg_payment_record},
-                payment.parent_split,  # type: ignore[arg-type]
-                payment_plan,
-                payment_plan.exchange_rate,
-                payment_log_pairs,
+                payment=payment,
+                payment_records_by_remote_id={pg_payment_record.remote_id: pg_payment_record},
+                container=payment.parent_split,  # type: ignore[arg-type]
+                payment_plan=payment_plan,
+                exchange_rate=payment_plan.exchange_rate,
+                log_pairs=payment_log_pairs,
             )
             if update_fields:
                 self._bulk_update_payments({update_fields: [payment]})
@@ -850,12 +868,12 @@ class PaymentGatewayService:
             payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
             for payment in payments:
                 update_fields = self.update_payment(
-                    payment,
-                    payment_records_by_remote_id,
-                    instruction,
-                    payment_plan,
-                    exchange_rate,
-                    instruction_log_pairs,
+                    payment=payment,
+                    payment_records_by_remote_id=payment_records_by_remote_id,
+                    container=instruction,
+                    payment_plan=payment_plan,
+                    exchange_rate=exchange_rate,
+                    log_pairs=instruction_log_pairs,
                 )
                 if update_fields:
                     payments_by_update_fields.setdefault(update_fields, []).append(payment)
@@ -882,18 +900,23 @@ class PaymentGatewayService:
             "id", "payment_gateway_id"
         )
         account_type_map = {str(account_type.payment_gateway_id): account_type for account_type in account_types}
-
-        for dm in delivery_mechanisms:
-            DeliveryMechanism.objects.update_or_create(
-                payment_gateway_id=dm.id,
-                defaults={
-                    "code": dm.code,
-                    "name": dm.name,
-                    "transfer_type": dm.transfer_type,
-                    "is_active": True,
-                    "account_type": account_type_map.get(str(dm.account_type)) if dm.account_type else None,
-                },
+        delivery_mechanism_objects = [
+            DeliveryMechanism(
+                payment_gateway_id=str(dm.id),
+                code=dm.code,
+                name=dm.name,
+                transfer_type=dm.transfer_type,
+                is_active=True,
+                account_type=account_type_map.get(str(dm.account_type)) if dm.account_type else None,
             )
+            for dm in delivery_mechanisms
+        ]
+        DeliveryMechanism.objects.bulk_create(
+            delivery_mechanism_objects,
+            update_conflicts=True,
+            update_fields=["code", "name", "transfer_type", "is_active", "account_type", "updated_at"],
+            unique_fields=["payment_gateway_id"],
+        )
 
     def add_missing_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         record_ids: list[str] = []

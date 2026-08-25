@@ -17,6 +17,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.payment.services.verification_plan_status_change_services import VerificationPlanStatusChangeServices
 from hope.models import Household, Payment, PaymentVerification, PaymentVerificationPlan
@@ -47,7 +48,15 @@ def user():
 
 @pytest.fixture
 def role_assignment(user, business_area):
-    role = RoleFactory(name="Releaser")
+    role = RoleFactory(
+        name="Releaser",
+        permissions=[
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value,
+            Permissions.PAYMENT_VERIFICATION_VIEW_LIST.value,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS.value,
+        ],
+    )
     return RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
 

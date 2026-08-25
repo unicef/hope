@@ -18,8 +18,10 @@ from model_utils.models import UUIDModel
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.grievance.constants import (
     PRIORITY_NOT_SET,
+    SUBMISSION_CHANNEL_HOPE,
     URGENCY_NOT_SET,
     get_priority_choices,
+    get_submission_channel_choices,
     get_urgency_choices,
 )
 from hope.models import Individual, Payment, User
@@ -184,6 +186,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
     ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
     ISSUE_TYPE_UPDATE_DELEGATE = 26
+    ISSUE_TYPE_BIOMETRICS_PHOTO = 27
 
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
@@ -193,6 +196,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
             ISSUE_TYPE_UPDATE_DELEGATE: _("Update Delegate"),
+            ISSUE_TYPE_BIOMETRICS_PHOTO: _("Biometric Photo Error"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
@@ -245,6 +249,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
+    SYSTEM_CATEGORY_CODES = frozenset(code for code, _label in SYSTEM_CATEGORIES)
+    SYSTEM_ISSUE_TYPES = frozenset({ISSUE_TYPE_BIOMETRICS_PHOTO})
     CATEGORY_CHOICES = SYSTEM_CATEGORIES + MANUAL_CATEGORIES
 
     CREATE_CATEGORY_CHOICES = (
@@ -316,6 +322,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
             ISSUE_TYPE_UPDATE_DELEGATE: "household_data_update_ticket_details",
+            ISSUE_TYPE_BIOMETRICS_PHOTO: "individual_data_update_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
@@ -359,6 +366,13 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=get_urgency_choices, default=URGENCY_NOT_SET)
     category = models.IntegerField(verbose_name=_("Category"), choices=get_grievance_category_choices)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
+    submission_channel = models.IntegerField(
+        verbose_name=_("Submission Channel"),
+        choices=get_submission_channel_choices,
+        null=True,
+        blank=True,
+        help_text=_("Submission channel; empty for system-generated tickets."),
+    )
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True,
@@ -410,6 +424,32 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         null=True,
         blank=True,
         verbose_name=_("Assigned to"),
+    )
+    user_modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="modified_tickets",
+        null=True,
+        blank=True,
+        db_index=False,
+        verbose_name=_("Modified by"),
+        help_text=_("User who last edited this ticket through the update endpoint."),
+    )
+    assigned_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Assignee changed at"),
+        help_text=_("When the assignee of this ticket last changed."),
+    )
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="assigned_tickets_by",
+        null=True,
+        blank=True,
+        db_index=False,
+        verbose_name=_("Assigned by"),
+        help_text=_("User who last changed the assignee of this ticket."),
     )
 
     objects = GrievanceTicketManager()
@@ -515,6 +555,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 condition=models.Q(ignored=False),
                 name="idx_gt_ba_updated_not_ign",
             ),
+            models.Index(fields=["assigned_at"], name="idx_gt_assigned_at"),
         ]
 
     def clean(self) -> None:
@@ -526,6 +567,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        # System-generated tickets always use the HOPE channel; users cannot set it to anything else.
+        if self.category in self.SYSTEM_CATEGORY_CODES or self.issue_type in self.SYSTEM_ISSUE_TYPES:
+            self.submission_channel = SUBMISSION_CHANNEL_HOPE
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id

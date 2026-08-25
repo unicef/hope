@@ -11,16 +11,14 @@ from django.db.models import (
     DateTimeField,
     Exists,
     F,
-    IntegerField,
     OuterRef,
     Prefetch,
     Q,
     QuerySet,
-    Subquery,
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Extract
+from django.db.models.functions import Extract
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -61,12 +59,16 @@ from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import check_concurrency_version_in_mutation, sort_by_attr
 from hope.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hope.apps.grievance.api.mixins import (
+    GrievanceListBatchMixin,
     GrievanceMutationMixin,
     GrievancePermissionsMixin,
 )
 from hope.apps.grievance.api.serializers.dashboard import GrievanceDashboardSerializer
 from hope.apps.grievance.api.serializers.grievance_ticket import (
+    BulkCloseGrievanceTicketsSerializer,
     BulkGrievanceTicketsAddNoteSerializer,
+    BulkNeedsAdjudicationResultSerializer,
+    BulkNeedsAdjudicationSerializer,
     BulkUpdateGrievanceTicketsAssigneesSerializer,
     BulkUpdateGrievanceTicketsPrioritySerializer,
     BulkUpdateGrievanceTicketsUrgencySerializer,
@@ -131,6 +133,8 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from django.contrib.auth.models import AbstractUser
 
 
@@ -177,14 +181,16 @@ def display_value(choices: tuple, field: str, default_field: Any = None) -> Case
 
 
 def create_type_generated_queries() -> tuple[Q, Q]:
-    user_generated, system_generated = Q(), Q()
-    for category in GrievanceTicket.CATEGORY_CHOICES:
-        category_num, category_str = category
+    is_user_category, is_system_category = Q(), Q()
+    for category_num, category_str in GrievanceTicket.CATEGORY_CHOICES:
         if category_num in dict(GrievanceTicket.MANUAL_CATEGORIES):
-            user_generated |= Q(category_name=force_str(category_str))
+            is_user_category |= Q(category_name=force_str(category_str))
         else:
-            system_generated |= Q(category_name=force_str(category_str))
-    return user_generated, system_generated
+            is_system_category |= Q(category_name=force_str(category_str))
+    is_system_issue_type = Q(issue_type__in=GrievanceTicket.SYSTEM_ISSUE_TYPES)
+    is_user_generated = is_user_category & ~is_system_issue_type
+    is_system_generated = is_system_category | is_system_issue_type
+    return is_user_generated, is_system_generated
 
 
 class GrievanceDashboardMixin:
@@ -195,9 +201,12 @@ class GrievanceDashboardMixin:
         base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area__slug=self.business_area_slug)
 
         if program:
-            base_queryset = base_queryset.filter(programs__in=[program])
+            return base_queryset.filter(programs__in=[program])
 
-        return base_queryset
+        active_or_no_program = base_queryset.filter(
+            Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True)
+        ).values("pk")
+        return base_queryset.filter(pk__in=active_or_no_program)
 
     def get_dashboard_data(self, base_queryset: QuerySet) -> dict[str, Any]:
         """Generate dashboard data from base queryset."""
@@ -290,6 +299,7 @@ class GrievanceTicketViewSet(
     ProgramVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
+    GrievanceListBatchMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
@@ -329,7 +339,8 @@ class GrievanceTicketViewSet(
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(
-                "programs",
+                # the path prefetches both levels: programs for the serializer's get_programs,
+                # sanction_lists for Program.screen_beneficiary (one exists() per program per row without it).
                 "programs__sanction_lists",
                 *to_prefetch,
                 Prefetch(
@@ -344,11 +355,6 @@ class GrievanceTicketViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id_annotated=Subquery(
-                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
-                        :1
-                    ]
-                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -356,20 +362,6 @@ class GrievanceTicketViewSet(
                     ),
                     default=Value(timezone.now(), output_field=DateTimeField()) - F("created_at"),
                     output_field=DateField(),
-                ),
-                existing_tickets_count=Coalesce(
-                    Subquery(
-                        GrievanceTicket.objects.filter(
-                            household_unicef_id=OuterRef("household_unicef_id"),
-                            household_unicef_id__gt="",
-                        )
-                        .exclude(pk=OuterRef("pk"))
-                        .values("household_unicef_id")
-                        .annotate(c=Count("pk"))
-                        .values("c")[:1],
-                        output_field=IntegerField(),
-                    ),
-                    Value(0),
                 ),
             )
             .annotate(total_days=F("total__day"))
@@ -394,6 +386,7 @@ class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
     GrievanceDashboardMixin,
+    GrievanceListBatchMixin,
     SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
@@ -426,6 +419,8 @@ class GrievanceTicketGlobalViewSet(
         "bulk_update_priority": BulkUpdateGrievanceTicketsPrioritySerializer,
         "bulk_update_urgency": BulkUpdateGrievanceTicketsUrgencySerializer,
         "bulk_add_note": BulkGrievanceTicketsAddNoteSerializer,
+        "bulk_close": BulkCloseGrievanceTicketsSerializer,
+        "bulk_needs_adjudication": BulkNeedsAdjudicationSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -536,6 +531,12 @@ class GrievanceTicketGlobalViewSet(
         "bulk_update_priority": [Permissions.GRIEVANCES_UPDATE],
         "bulk_update_urgency": [Permissions.GRIEVANCES_UPDATE],
         "bulk_add_note": [Permissions.GRIEVANCES_UPDATE],
+        "bulk_close": [
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ],
+        "bulk_needs_adjudication": [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
         "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
         "all_add_individuals_fields_attributes": [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCES_UPDATE],
@@ -558,10 +559,12 @@ class GrievanceTicketGlobalViewSet(
     parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_count_queryset(self) -> QuerySet:
+        # no distinct(): visibility and the program filters are Exists subqueries, the ticket detail
+        # relations are OneToOne, and the office_search filters that do join m2m add their own distinct()
         return super().get_queryset().filter(self.grievance_permissions_query)
 
     def get_queryset(self) -> QuerySet:
-        to_prefetch = []
+        to_prefetch: list[str | Prefetch] = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
             to_prefetch.append(key)
             if "household" in value:
@@ -570,13 +573,46 @@ class GrievanceTicketGlobalViewSet(
                 to_prefetch.append(f"{key}__{value['individual']}")
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
+        if self.action == "retrieve":
+            # The comparison panel renders active_individuals_count per household, and
+            # Household.active_individuals is a property, so DRF would otherwise issue one COUNT
+            # per rendered household.
+            households = Household.objects.annotate(
+                active_individuals_count_annotated=Count(
+                    "individuals",
+                    filter=Q(individuals__withdrawn=False, individuals__duplicate=False),
+                )
+            )
+            annotated_paths = [
+                "needs_adjudication_ticket_details__golden_records_individual__household",
+                "needs_adjudication_ticket_details__golden_records_individual__households_and_roles__household",
+                "needs_adjudication_ticket_details__possible_duplicates__household",
+                "needs_adjudication_ticket_details__possible_duplicates__households_and_roles__household",
+                "needs_adjudication_ticket_details__possible_duplicate__household",
+                "needs_adjudication_ticket_details__possible_duplicate__households_and_roles__household",
+            ]
+            # the loop above already asks for some of these as plain lookups, which would clash
+            to_prefetch = [path for path in to_prefetch if path not in annotated_paths]
+            to_prefetch += [Prefetch(path, queryset=households) for path in annotated_paths]
+
+        if self.action == "list":
+            # only the fields get_related_tickets_count reads, mirroring the program-scoped list
+            to_prefetch.append(
+                Prefetch(
+                    "linked_tickets",
+                    queryset=GrievanceTicket.objects.only("id", "household_unicef_id"),
+                )
+            )
+
         return (
             super()
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(
-                "programs",
+                # the path prefetches both levels: programs for the serializer's get_programs,
+                # sanction_lists for Program.screen_beneficiary (one exists() per program per row without it).
+                "programs__sanction_lists",
                 *to_prefetch,
                 # feeds TicketNeedsAdjudicationDetails.documents_no_longer_conflict() (can_close_as_unique)
                 "needs_adjudication_ticket_details__golden_records_individual__documents__type",
@@ -589,11 +625,6 @@ class GrievanceTicketGlobalViewSet(
                         data_collecting_type__type=DataCollectingType.Type.SOCIAL,
                     )
                 ),
-                fallback_individual_unicef_id_annotated=Subquery(
-                    Individual.objects.filter(household__unicef_id=OuterRef("household_unicef_id")).values("unicef_id")[
-                        :1
-                    ]
-                ),
                 total=Case(
                     When(
                         status=GrievanceTicket.STATUS_CLOSED,
@@ -605,7 +636,6 @@ class GrievanceTicketGlobalViewSet(
             )
             .annotate(total_days=F("total__day"))
             .order_by("-created_at")
-            .distinct()
         )
 
     @action(detail=False, methods=["get"])
@@ -736,7 +766,7 @@ class GrievanceTicketGlobalViewSet(
         return Response(resp.data, status.HTTP_200_OK)
 
     def _validate_status_change_preconditions(
-        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int, notifications: list
+        self, user: Any, grievance_ticket: GrievanceTicket, new_status: int
     ) -> None:
         if permissions_to_use := self.get_permissions_for_status_change(
             new_status, grievance_ticket.status, grievance_ticket.is_feedback
@@ -748,29 +778,34 @@ class GrievanceTicketGlobalViewSet(
                 grievance_ticket,
             )
 
-        if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
-            if not check_permissions(
+        if (
+            new_status == GrievanceTicket.STATUS_ASSIGNED
+            and not grievance_ticket.assigned_to
+            and not check_permissions(
                 user,
                 [Permissions.GRIEVANCE_ASSIGN],
                 business_area=self.business_area,
                 program=grievance_ticket.programs.first(),
-            ):
-                raise PermissionDenied
-
-            notifications.append(
-                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
             )
+        ):
+            raise PermissionDenied
         if new_status == GrievanceTicket.STATUS_CLOSED and isinstance(
             grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails
         ):
             partner = user.partner
-            for selected_individual in grievance_ticket.ticket_details.selected_individuals.select_related(
-                "household__admin2", "program"
-            ).all():
-                if not partner.has_area_access(
-                    area_id=selected_individual.household.admin2.id,
-                    program_id=selected_individual.program.id,
-                ):
+            limits_by_program: dict["UUID", set["UUID"]] = {}
+            selected_individuals = grievance_ticket.ticket_details.selected_individuals.values_list(
+                "household__admin2_id", "program_id"
+            )
+            for admin2_id, program_id in selected_individuals:
+                if not admin2_id:
+                    continue
+                if program_id not in limits_by_program:
+                    limits_by_program[program_id] = set(
+                        partner.get_area_limits_for_program(program_id).values_list("id", flat=True)
+                    )
+                allowed_area_ids = limits_by_program[program_id]
+                if allowed_area_ids and admin2_id not in allowed_area_ids:
                     raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
         if not grievance_ticket.can_change_status(new_status):
@@ -781,7 +816,9 @@ class GrievanceTicketGlobalViewSet(
         user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
     ) -> None:
         if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            notifications.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+            notifications.append(
+                GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=user)
+            )
         if ticket.status == GrievanceTicket.STATUS_CLOSED:
             clear_cache(ticket.ticket_details, ticket.business_area.slug)
         if (
@@ -793,6 +830,7 @@ class GrievanceTicketGlobalViewSet(
                     ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=user,
+                    editor=user,
                 )
             )
 
@@ -825,7 +863,7 @@ class GrievanceTicketGlobalViewSet(
                 status=status.HTTP_202_ACCEPTED,
             )
 
-        self._validate_status_change_preconditions(user, grievance_ticket, new_status, notifications)
+        self._validate_status_change_preconditions(user, grievance_ticket, new_status)
 
         status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
         status_changer.change_status(new_status)
@@ -842,7 +880,7 @@ class GrievanceTicketGlobalViewSet(
             new_object=grievance_ticket,
         )
 
-        GrievanceNotification.send_all_notifications(notifications)
+        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(notifications))
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
@@ -943,9 +981,10 @@ class GrievanceTicketGlobalViewSet(
             grievance_ticket,
             GrievanceNotification.ACTION_NOTES_ADDED,
             created_by=user,
+            editor=user,
             ticket_note=ticket_note,
         )
-        notification.send_email_notification()
+        transaction.on_commit(notification.send_email_notification)
 
         return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
 
@@ -1383,6 +1422,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["assigned_to"],
             self.business_area_slug,  # type: ignore
+            action_user=request.user,  # type: ignore[arg-type]
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
@@ -1444,6 +1484,44 @@ class GrievanceTicketGlobalViewSet(
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @transaction.atomic
+    @extend_schema(
+        request=BulkCloseGrievanceTicketsSerializer,
+        responses={202: GrievanceTicketDetailSerializer(many=True)},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-close")
+    def bulk_close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tickets = BulkActionService().bulk_close(
+            request.user,  # type: ignore
+            serializer.validated_data["grievance_ticket_ids"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @transaction.atomic
+    @extend_schema(
+        request=BulkNeedsAdjudicationSerializer,
+        responses={202: BulkNeedsAdjudicationResultSerializer},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-needs-adjudication")
+    def bulk_needs_adjudication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        resolved, skipped_closed = BulkActionService().bulk_resolve_needs_adjudication(
+            request.user,  # type: ignore
+            serializer.validated_data["tickets"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            BulkNeedsAdjudicationResultSerializer({"resolved": resolved, "skipped_closed": skipped_closed}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 

@@ -51,6 +51,8 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
     'XLSX Importing Reconciliation',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
     'XLSX Import Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
+    'XLSX Importing FSP Extra Fields',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
     'Applying Custom Exchange Rate',
   [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
@@ -128,6 +130,7 @@ export const GRIEVANCE_ISSUE_TYPES = {
   BIOGRAPHICAL_DATA_SIMILARITY: '24',
   BIOMETRICS_SIMILARITY: '25',
   UPDATE_DELEGATE: '26',
+  BIOMETRIC_PHOTO_ERROR: '27',
 };
 
 export const GRIEVANCE_ISSUE_TYPES_NAMES = {
@@ -157,6 +160,7 @@ export const GRIEVANCE_ISSUE_TYPES_NAMES = {
   24: 'BIOGRAPHICAL_DATA_SIMILARITY',
   25: 'BIOMETRICS_SIMILARITY',
   26: 'UPDATE_DELEGATE',
+  27: 'BIOMETRIC_PHOTO_ERROR',
 };
 
 export const getGrievanceCategoryDescriptions = (beneficiaryGroup) => ({

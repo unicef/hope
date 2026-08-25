@@ -29,6 +29,8 @@ from hope.apps.household.celery_tasks import (
     mass_unwithdraw_households_async_task_action,
     mass_withdraw_households_async_task,
     mass_withdraw_households_async_task_action,
+    rebuild_program_indexes_async_task,
+    rebuild_program_indexes_async_task_action,
     recalculate_population_fields_async_task,
     recalculate_population_fields_async_task_action,
     recalculate_population_fields_chunk_async_task,
@@ -551,6 +553,45 @@ def test_enroll_households_to_program_task_action_returns_early_when_already_run
 
     mock_cache_get.assert_called_once()
     mock_enroll.assert_not_called()
+
+
+@patch("hope.apps.household.celery_tasks.rebuild_program_indexes", return_value=(True, "ok"))
+def test_rebuild_program_indexes_action_rebuilds_the_jobs_program(mock_rebuild):
+    program = ProgramFactory(status=Program.ACTIVE)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action", {}, program=program
+    )
+
+    rebuild_program_indexes_async_task_action(job)
+
+    mock_rebuild.assert_called_once_with(str(program.id))
+
+
+@patch("hope.apps.household.celery_tasks.rebuild_program_indexes", return_value=(False, "es exploded"))
+def test_rebuild_program_indexes_action_raises_on_failure(mock_rebuild):
+    # the (ok, msg) contract must become an exception, or the AsyncJob would report success
+    program = ProgramFactory(status=Program.ACTIVE)
+    job = create_async_job(
+        "hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action", {}, program=program
+    )
+
+    with pytest.raises(RuntimeError, match="es exploded"):
+        rebuild_program_indexes_async_task_action(job)
+
+
+@patch.object(AsyncJob, "queue")
+def test_rebuild_program_indexes_task_schedules_async_job(mock_queue, user, django_capture_on_commit_callbacks):
+    program = ProgramFactory(status=Program.ACTIVE)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        job = rebuild_program_indexes_async_task(str(program.id), owner=user)
+
+    assert job == AsyncJob.objects.get()
+    assert job.action == "hope.apps.household.celery_tasks.rebuild_program_indexes_async_task_action"
+    assert job.program == program
+    assert job.owner == user
+    assert job.group_key == "household"
+    mock_queue.assert_called_once_with()
 
 
 @patch("hope.apps.household.celery_tasks.delete_program_indexes", side_effect=RuntimeError("cleanup failed"))

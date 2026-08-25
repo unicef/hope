@@ -3,9 +3,9 @@
 from django.db import migrations
 
 
-def migrate_processing_to_draft(apps, schema_editor):  # pragma no cover
+def migrate_preparing_to_open(apps, schema_editor):  # pragma no cover
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
-    PaymentPlan.objects.filter(status="PROCESSING").update(status="DRAFT")
+    PaymentPlan.objects.filter(status="PREPARING").update(status="OPEN")
 
 
 class Migration(migrations.Migration):
@@ -14,5 +14,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_processing_to_draft, migrations.RunPython.noop),
+        migrations.RunPython(migrate_preparing_to_open, migrations.RunPython.noop),
     ]

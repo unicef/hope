@@ -374,20 +374,28 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]: theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+      theme.palette.error.main,
     [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+      theme.palette.error.main,
     [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY]:
+      theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
