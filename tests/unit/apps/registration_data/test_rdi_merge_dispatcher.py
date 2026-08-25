@@ -10,8 +10,9 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from hope.apps.registration_data.celery_tasks import rdi_dispatcher_task
 from hope.apps.registration_data.tasks.rdi_merge_dispatcher import RdiMergeDispatcher
-from hope.models import Program, RegistrationDataImport
+from hope.models import AsyncRetryJob, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 
@@ -124,3 +125,9 @@ def test_dispatcher_skips_delete_scheduled_head_and_takes_next_scheduled(mock_fe
 
     mock_fetch.assert_called_once()
     assert mock_fetch.call_args.args[0].pk == scheduled.pk
+
+
+def test_dispatcher_task_not_enqueued_when_program_is_none() -> None:
+    rdi_dispatcher_task(None)
+
+    assert AsyncRetryJob.objects.count() == 0

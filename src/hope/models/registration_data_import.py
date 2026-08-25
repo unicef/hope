@@ -55,18 +55,6 @@ def get_status_choices() -> tuple:
     return RegistrationDataImport.STATUS_CHOICE
 
 
-def get_dedup_engine_status_choices() -> tuple:
-    return (
-        ("PENDING", "Pending"),
-        ("UPLOADED", "Uploaded"),
-        ("IN_PROGRESS", "Started"),
-        ("PROCESSING", "Processing"),
-        ("FINISHED", "Finished"),
-        ("ERROR", "Error"),
-        ("UPLOAD_ERROR", "Upload Error"),
-    )
-
-
 def get_data_source_choices() -> tuple:
     return RegistrationDataImport.DATA_SOURCE_CHOICE
 
