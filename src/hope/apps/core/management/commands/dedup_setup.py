@@ -1,15 +1,8 @@
 """dedup_setup — build the dedup-regression test substrate.
 
 Creates two fresh BusinessAreas (one non-CW, one CW-only), each carrying a
-MERGED golden-record population (B/D/E) on its own program, indexed into
-Elasticsearch (autosync is OFF, so the explicit index is mandatory).
-
-The CW-only BA additionally gets a second, master-detail program (STANDARD DCT +
-master_detail beneficiary group, biometric on, NO golden population) so the CW
-household+individual dedup test has somewhere to import households into — the
-primary program is SOCIAL / non-master_detail on demo data and merges 0
-households. ``dedup_teardown`` removes it automatically (it deletes every program
-under the run's BAs), so no teardown change is needed.
+MERGED golden-record population on its own program, indexed into
+Elasticsearch.
 
 Everything is stamped with a short ``run_id`` in ``BusinessArea.custom_fields``
 so ``dedup_teardown`` can remove exactly what this command created.
