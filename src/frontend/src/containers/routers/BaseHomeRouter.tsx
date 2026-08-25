@@ -11,6 +11,7 @@ import { FC, useState } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { TimezoneProvider } from 'src/timezoneContext';
 
 const Root = styled.div`
   display: flex;
@@ -85,19 +86,21 @@ export const BaseHomeRouter: FC = () => {
   }
 
   return (
-    <Root>
-      <CssBaseline />
-      <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
-      <Drawer
-        open={open}
-        handleDrawerClose={handleDrawerClose}
-        currentLocation={location.pathname}
-        dataCy="side-nav"
-      />
-      <MainContent data-cy="main-content">
-        <AppBarSpacer />
-        <Outlet />
-      </MainContent>
-    </Root>
+    <TimezoneProvider timezone={businessAreaData.effectiveTimezone ?? 'UTC'}>
+      <Root>
+        <CssBaseline />
+        <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
+        <Drawer
+          open={open}
+          handleDrawerClose={handleDrawerClose}
+          currentLocation={location.pathname}
+          dataCy="side-nav"
+        />
+        <MainContent data-cy="main-content">
+          <AppBarSpacer />
+          <Outlet />
+        </MainContent>
+      </Root>
+    </TimezoneProvider>
   );
 };
