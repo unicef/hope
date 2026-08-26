@@ -9,11 +9,9 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from hope.api.auth import HOPEPermission
 from hope.api.caches import cached_response, etag_decorator
 from hope.api.endpoints.base import BusinessAreaIngestAllExceptCWMixin
 from hope.apps.account.permissions import Permissions
@@ -93,14 +91,8 @@ class RegistrationDataImportViewSet(
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
     }
+    token_permission = None
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-
-    def get_permissions(self) -> list[BasePermission]:
-        if self.is_external_request():
-            self.permission_classes = [HOPEPermission]
-            self.permission = self.token_permissions_by_action.get(self.action)
-            return [permission() for permission in self.permission_classes]
-        return super().get_permissions()
 
     filterset_class = RegistrationDataImportFilter
 

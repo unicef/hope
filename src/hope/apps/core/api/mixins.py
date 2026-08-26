@@ -410,7 +410,7 @@ class PermissionsMixin:
 
     permission_classes: list[type[BasePermission]]
     permission: "Grant | None" = None
-    token_permission = Grant.API_READ_ONLY
+    token_permission: "Grant | None" = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
         # condition for the swagger

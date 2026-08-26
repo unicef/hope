@@ -149,7 +149,7 @@ def api_client_no_permissions(user_no_permissions: User) -> APIClient:
 def api_token(user: User, business_area: BusinessArea) -> APIToken:
     token = APITokenFactory(
         user=user,
-        grants=[Grant.API_DEDUP_FETCH_FINDINGS.name],
+        grants=[Grant.API_RDI_CREATE.name],
     )
     token.valid_for.add(business_area)
     return token
@@ -173,6 +173,16 @@ def program_with_sanction_list(business_area: BusinessArea) -> Program:
     return program
 
 
+@pytest.fixture
+def rdi(business_area: BusinessArea, program: Program) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+    )
+
+
 def test_merge_rdi_without_permission(
     api_client_no_permissions: APIClient,
     business_area: BusinessArea,
@@ -190,6 +200,21 @@ def test_merge_rdi_without_permission(
         args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_merge_rdi_with_api_token_returns_403(
+    token_api_client: APIClient,
+    program: Program,
+    rdi: RegistrationDataImport,
+) -> None:
+    url = reverse(
+        "api:registration-data:registration-data-imports-merge",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = token_api_client.post(url, {}, format="json")
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -686,6 +711,17 @@ def test_status_choices_without_permission(
         args=["afghanistan", program.code],
     )
     response = api_client_no_permissions.get(url)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_status_choices_with_api_token_returns_403(token_api_client: APIClient, program: Program) -> None:
+    url = reverse(
+        "api:registration-data:registration-data-imports-status-choices",
+        args=["afghanistan", program.code],
+    )
+
+    response = token_api_client.get(url)
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
