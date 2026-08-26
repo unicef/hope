@@ -12,7 +12,7 @@ def with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
     )
     individual_prefetch = Prefetch(
         "household__individuals",
-        queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
+        queryset=Individual.objects.select_related("program", "household").prefetch_related(role_prefetch),
         to_attr="prefetched_individuals",
     )
     return (
