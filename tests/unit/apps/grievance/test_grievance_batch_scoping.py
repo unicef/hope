@@ -1,14 +1,3 @@
-"""`get_fallback_individual_unicef_ids` and `get_existing_tickets_counts`
-(`src/hope/apps/grievance/api/mixins.py`) resolve one page of tickets through the
-denormalised `household_unicef_id` string. Both used to match that string across every
-business area.
-
-Household unicef ids are globally unique today, so the unscoped versions never actually
-answered with a foreign row -- nothing enforces that uniqueness, though, and the second
-helper feeds a count the list renders. These cases force the collision the invariant
-forbids and pin that neither helper looks outside the request's business area.
-"""
-
 from typing import Any, Callable
 from uuid import UUID
 

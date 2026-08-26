@@ -30,13 +30,9 @@ from hope.models import BusinessArea, Household, Individual, IndividualRoleInHou
 def get_fallback_individual_unicef_ids(
     tickets: Iterable[GrievanceTicket], business_area: BusinessArea
 ) -> dict[str, str]:
-    """Map household unicef id -> individual unicef id, for one page of tickets.
+    """Map household unicef id -> individual unicef id, for one page of tickets. Scoped to the business area.
 
     Only social worker programme tickets need it, so the rest of the page is skipped.
-
-    Scoped to the business area for the same reason the search filters are (ticket 331051):
-    household unicef ids are unique across business areas today, but nothing enforces it, and
-    an unscoped lookup would answer with a foreign individual if that ever stopped holding.
     """
     household_unicef_ids = {
         ticket.household_unicef_id
@@ -57,12 +53,7 @@ def get_fallback_individual_unicef_ids(
 
 
 def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket], business_area: BusinessArea) -> dict[str, int]:
-    """Map household unicef id -> number of *other* tickets in this business area, for one page.
-
-    Scoped like the lookup above. Here the scoping also bounds what the number can mean: this
-    count is rendered to the user, so counting a foreign business area's tickets would show
-    them a total they have no way to reconcile with the list in front of them.
-    """
+    """Map household unicef id -> number of *other* tickets in this business area, for one page."""
     household_unicef_ids = {ticket.household_unicef_id for ticket in tickets if ticket.household_unicef_id}
 
     if not household_unicef_ids:

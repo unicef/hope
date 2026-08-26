@@ -2,9 +2,6 @@
 no longer ends in `.distinct()`. Dropping it is only safe while nothing upstream of the
 count can multiply a ticket into several rows, and the two things that historically did
 were the `programs` m2m and the office-search joins.
-
-These cases pin that: every one of them puts a ticket on **two** programs — the shape that
-inflated `/count` before A2/A3 — and asserts the endpoint still reports it once.
 """
 
 from typing import Any, Callable

@@ -1,10 +1,3 @@
-"""`GrievanceTicketFilter.search_filter` and `.document_number_filter`
-(`src/hope/apps/grievance/filters.py`) match tickets through the denormalised
-`household_unicef_id` column. The subquery that produces those ids used to scan
-`household_individual` globally, so at prod scale one search read the whole table to
-filter down to a single business area.
-"""
-
 import re
 from typing import Any, Callable
 
@@ -44,11 +37,7 @@ SHARED_HOUSEHOLD_UNICEF_ID = "HH-SCOPE-0001"
 
 
 def assert_individual_subquery_is_business_area_scoped(main_statement: str) -> None:
-    """Fail unless the `household_individual` subquery carries a business-area predicate.
-
-    The alias Django gives the table (`U0`, `U1`, ...) depends on how many other subqueries
-    the compiled statement holds, so it is read off the statement rather than hard-coded.
-    """
+    """Fail unless the `household_individual` subquery carries a business-area predicate."""
     alias_match = re.search(r'FROM "household_individual" (\w+)', main_statement)
     assert alias_match, f"no household_individual subquery in:\n{main_statement}"
     alias = alias_match.group(1)
