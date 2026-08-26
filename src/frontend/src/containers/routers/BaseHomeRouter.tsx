@@ -49,9 +49,9 @@ export const BaseHomeRouter: FC = () => {
   };
 
   const {
-    data: businessAreaData,
-    isLoading: businessAreaLoading,
-    isError: businessAreaError,
+    data: profileData,
+    isLoading: profileLoading,
+    isError: profileError,
   } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasUsersProfileRetrieve,
@@ -66,16 +66,16 @@ export const BaseHomeRouter: FC = () => {
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
-  if (businessAreaError) {
+  if (profileError) {
     navigate('/404');
     return null;
   }
 
-  if (!businessAreaData || businessAreaLoading) {
+  if (!profileData || profileLoading) {
     return <LoadingComponent />;
   }
 
-  const allBusinessAreasSlugs = businessAreaData.businessAreas.map(
+  const allBusinessAreasSlugs = profileData.businessAreas.map(
     (el) => el.slug,
   );
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
@@ -86,7 +86,7 @@ export const BaseHomeRouter: FC = () => {
   }
 
   return (
-    <TimezoneProvider timezone={businessAreaData.effectiveTimezone ?? 'UTC'}>
+    <TimezoneProvider timezone={profileData.effectiveTimezone ?? 'UTC'}>
       <Root>
         <CssBaseline />
         <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
