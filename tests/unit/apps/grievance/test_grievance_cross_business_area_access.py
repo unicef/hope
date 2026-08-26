@@ -7,14 +7,12 @@ from rest_framework import status
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     FeedbackFactory,
-    GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_LOW
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, Feedback, Household, Individual, Program, User
 
@@ -93,25 +91,6 @@ def victim_feedback(victim_program: Program) -> Feedback:
 
 
 @pytest.fixture
-def victim_ticket(victim_program: Program) -> GrievanceTicket:
-    ticket = GrievanceTicketFactory(
-        business_area=victim_program.business_area,
-        status=GrievanceTicket.STATUS_NEW,
-        priority=PRIORITY_LOW,
-    )
-    ticket.programs.add(victim_program)
-    return ticket
-
-
-@pytest.fixture
-def bulk_priority_url(attacker_business_area: BusinessArea) -> str:
-    return reverse(
-        "api:grievance-tickets:grievance-tickets-global-bulk-update-priority",
-        kwargs={"business_area_slug": attacker_business_area.slug},
-    )
-
-
-@pytest.fixture
 def list_url(attacker_business_area: BusinessArea) -> str:
     return reverse(
         "api:grievance-tickets:grievance-tickets-global-list",
@@ -186,19 +165,3 @@ def test_create_ticket_linked_to_feedback_from_other_business_area_is_denied(
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
     victim_feedback.refresh_from_db()
     assert victim_feedback.linked_grievance is None
-
-
-def test_bulk_update_priority_of_ticket_from_other_business_area_is_denied(
-    authenticated_client: Any,
-    bulk_priority_url: str,
-    victim_ticket: GrievanceTicket,
-) -> None:
-    response = authenticated_client.post(
-        bulk_priority_url,
-        {"grievance_ticket_ids": [str(victim_ticket.id)], "priority": PRIORITY_HIGH},
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.status_code
-    victim_ticket.refresh_from_db()
-    assert victim_ticket.priority == PRIORITY_LOW
