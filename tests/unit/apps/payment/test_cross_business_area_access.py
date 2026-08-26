@@ -21,6 +21,7 @@ from extras.test_utils.factories import (
     PaymentVerificationSummaryFactory,
     ProgramFactory,
     RuleCommitFactory,
+    TargetingCriteriaRuleFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
@@ -678,6 +679,48 @@ def test_move_target_population_into_cycle_of_other_business_area_is_denied(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     attacker_target_population.refresh_from_db()
     assert attacker_target_population.program_cycle_id == own_cycle_id
+
+
+def test_update_target_population_with_fsp_of_other_business_area_keeps_the_old_rules(
+    api_client: APIClient,
+    cross_ba_kwargs: dict[str, str],
+    attacker_payment_plan: PaymentPlan,
+    attacker_target_population: PaymentPlan,
+    victim_fsp: Any,
+) -> None:
+    """The foreign fsp is rejected after the rules are rewritten, so the whole update must roll back."""
+    old_rule = TargetingCriteriaRuleFactory(payment_plan=attacker_target_population, household_ids="HH-0000001")
+    household = HouseholdFactory(
+        business_area=attacker_payment_plan.business_area,
+        program=attacker_payment_plan.program,
+        create_role=False,
+    )
+    url = reverse(
+        "api:payments:target-populations-detail",
+        kwargs={**cross_ba_kwargs, "pk": str(attacker_target_population.id)},
+    )
+
+    response = api_client.patch(
+        url,
+        {
+            "fsp_id": str(victim_fsp.id),
+            "delivery_mechanism_code": victim_fsp.delivery_mechanisms.first().code,
+            "rules": [
+                {
+                    "household_filters_blocks": [],
+                    "household_ids": household.unicef_id,
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
+    assert list(attacker_target_population.rules.values_list("id", flat=True)) == [old_rule.id]
+    attacker_target_population.refresh_from_db()
+    assert attacker_target_population.financial_service_provider is None
 
 
 @pytest.fixture

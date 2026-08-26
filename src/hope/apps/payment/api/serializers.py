@@ -1786,6 +1786,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         )
         return payment_plan
 
+    @transaction.atomic
     def update(self, payment_plan: PaymentPlan, validated_data: dict) -> PaymentPlan:
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
