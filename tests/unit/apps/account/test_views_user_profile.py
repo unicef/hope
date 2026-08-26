@@ -674,7 +674,11 @@ def test_timezone_choices_returns_sorted_iana_identifiers(
     response = authenticated_client.get(timezone_choices_url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert {"name": "Europe/Warsaw", "value": "Europe/Warsaw"} in response.data
+    # The picker renders this payload directly, so it must stay an unpaginated list holding
+    # the whole tzdb — a paginated envelope or a truncated page silently empties the dropdown.
+    assert isinstance(response.data, list)
+    for timezone_name in ("Europe/Warsaw", "America/New_York", "Pacific/Auckland", "Asia/Kabul"):
+        assert {"name": timezone_name, "value": timezone_name} in response.data
     assert response.data == sorted(response.data, key=lambda choice: choice["name"])
 
 

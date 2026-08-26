@@ -214,7 +214,7 @@ export function UserProfileMenu({
 
   const timezoneOptions: TimezoneOption[] = [
     inheritanceOption,
-    ...(timezoneChoicesData?.results ?? []),
+    ...(timezoneChoicesData ?? []),
   ];
 
   const selectedTimezoneOption =

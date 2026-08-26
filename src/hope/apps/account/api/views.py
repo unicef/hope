@@ -172,8 +172,14 @@ class UserViewSet(
         serializer.save()
         return Response(serializer.data)
 
-    @extend_schema(responses=TimezoneChoiceSerializer(many=True))
-    @action(detail=False, methods=["get"], url_path="timezone-choices", url_name="timezone-choices")
+    @extend_schema(responses=TimezoneChoiceSerializer(many=True), filters=False)
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="timezone-choices",
+        url_name="timezone-choices",
+        pagination_class=None,
+    )
     def timezone_choices(self, request: "Request", *args: object, **kwargs: object) -> Response:
         # "Factory" is a tzdb test entry with an unspecified -00 offset, not a user-selectable timezone.
         choices = [

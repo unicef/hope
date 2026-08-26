@@ -43,12 +43,12 @@ const businessArea = {
   countries: [],
 } as any;
 
-const timezoneChoices = {
-  results: [
-    { name: 'Asia/Kabul', value: 'Asia/Kabul' },
-    { name: 'Europe/Warsaw', value: 'Europe/Warsaw' },
-  ],
-};
+// The endpoint returns a bare, unpaginated array — not a {results: [...]} envelope.
+const timezoneChoices = [
+  { name: 'Asia/Kabul', value: 'Asia/Kabul' },
+  { name: 'Europe/Warsaw', value: 'Europe/Warsaw' },
+  { name: 'Pacific/Auckland', value: 'Pacific/Auckland' },
+];
 
 const openMenu = () => {
   fireEvent.click(screen.getByText('user1@example.com'));
@@ -79,7 +79,7 @@ describe('UserProfileMenu timezone picker', () => {
     );
     vi.mocked(
       RestService.restBusinessAreasUsersTimezoneChoicesList,
-    ).mockResolvedValue(timezoneChoices as any);
+    ).mockResolvedValue(timezoneChoices);
   });
 
   const renderMenu = (meData: Profile) => {
@@ -125,6 +125,25 @@ describe('UserProfileMenu timezone picker', () => {
     expect(
       RestService.restBusinessAreasUsersTimezoneChoicesList,
     ).toHaveBeenCalledTimes(1);
+  });
+
+  // Regression: the endpoint's bare array was read as `data.results`, so every fetched
+  // zone was dropped and the inheritance option was the only thing left to pick.
+  it('offers every fetched zone alongside the inheritance option', async () => {
+    renderMenu(buildProfile({ timezone: null }));
+    openMenu();
+    await openPicker();
+
+    const optionLabels = screen
+      .getAllByRole('option')
+      .map((option) => option.textContent);
+
+    expect(optionLabels).toEqual([
+      'Use Afghanistan timezone (Asia/Kabul)',
+      'Asia/Kabul',
+      'Europe/Warsaw',
+      'Pacific/Auckland',
+    ]);
   });
 
   it('preselects the existing explicit preference', async () => {
