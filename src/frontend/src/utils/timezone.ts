@@ -49,17 +49,17 @@ export function getFormatter(
 
   let formatter: Intl.DateTimeFormat;
   try {
-    formatter = new Intl.DateTimeFormat('en-GB', options);
+    formatter = new Intl.DateTimeFormat('en-US', options);
   } catch {
-    formatter = new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'UTC' });
+    formatter = new Intl.DateTimeFormat('en-US', {
+      ...options,
+      timeZone: 'UTC',
+    });
   }
   formatterCache.set(cacheKey, formatter);
   return formatter;
 }
 
-// Assembled from parts (not `.format()`) so the output matches the existing
-// date-fns `d MMM yyyy` / `d MMM yyyy h:mm a` byte-for-byte — locale formatting
-// inserts commas and lowercases am/pm in ways `.format()` alone can't avoid.
 export function formatInstant(
   date: Date,
   timeZone: string,

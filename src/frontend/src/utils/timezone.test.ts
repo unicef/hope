@@ -93,6 +93,17 @@ describe('formatInstant', () => {
       '3 Nov 2024 1:30 AM',
     );
   });
+
+  it('renders 3-letter month abbreviations matching date-fns MMM', () => {
+    const expected = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    expected.forEach((abbr, month) => {
+      const d = new Date(Date.UTC(2026, month, 15, 12, 0, 0));
+      expect(formatInstant(d, 'UTC', 'date')).toBe(`15 ${abbr} 2026`);
+    });
+  });
 });
 
 describe('formatTooltip', () => {
