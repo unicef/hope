@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     DocumentFactory,
+    GrievanceDocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -1681,3 +1682,81 @@ def test_status_change_back_to_in_progress_does_not_notify_the_owner_who_sent_it
         for recipient in notification.user_recipients
     ]
     assert send_back_recipients == []
+
+
+@pytest.fixture
+def complaint_ticket_document(complaint_ticket: GrievanceTicket) -> Any:
+    return GrievanceDocumentFactory(
+        grievance_ticket=complaint_ticket,
+        name="old name",
+        file=SimpleUploadedFile("old.jpg", b"old-bytes", content_type="image/jpeg"),
+        file_size=9,
+    )
+
+
+@pytest.fixture
+def other_ticket_document(afghanistan: BusinessArea) -> Any:
+    return GrievanceDocumentFactory(
+        grievance_ticket=GrievanceTicketFactory(business_area=afghanistan),
+        name="old name",
+        file=SimpleUploadedFile("old.jpg", b"old-bytes", content_type="image/jpeg"),
+        file_size=9,
+    )
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_documentation(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket_detail_url: str,
+    complaint_ticket_document: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(
+        complaint_ticket_detail_url,
+        {
+            "documentation_to_update[0].id": str(complaint_ticket_document.id),
+            "documentation_to_update[0].name": "new name",
+            "documentation_to_update[0].file": SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    complaint_ticket_document.refresh_from_db()
+    assert complaint_ticket_document.name == "new name"
+    assert complaint_ticket_document.file_size == 10
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_documentation_of_other_ticket_is_denied(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket_detail_url: str,
+    other_ticket_document: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(
+        complaint_ticket_detail_url,
+        {
+            "documentation_to_update[0].id": str(other_ticket_document.id),
+            "documentation_to_update[0].name": "new name",
+            "documentation_to_update[0].file": SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    other_ticket_document.refresh_from_db()
+    assert other_ticket_document.name == "old name"
+    assert other_ticket_document.file_size == 9
