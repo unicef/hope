@@ -23,6 +23,13 @@ def test_missing_vision_url_raises_error(settings) -> None:
         VisionAPI()
 
 
+def test_urls_are_built_from_a_base_with_a_trailing_slash() -> None:
+    api = VisionAPI()
+
+    assert api.token_url == "https://test.example.com/v1/OAuthService/GenerateToken"
+    assert api.payment_plan_creation_url == "https://test.example.com/ps/ezcash/PaymentPlan"
+
+
 def test_ensure_token_skips_when_valid() -> None:
     api = VisionAPI()
     api._token_expiry = datetime.now() + timedelta(hours=1)

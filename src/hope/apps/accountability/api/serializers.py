@@ -12,6 +12,7 @@ from hope.apps.payment.api.serializers import (
 from hope.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
+from hope.apps.utils.external_urls import build_url
 from hope.models import Feedback, FeedbackMessage, Household, Message, PaymentPlan, RegistrationDataImport, Survey
 from hope.models.survey import SampleFileExpiredError
 
@@ -273,7 +274,7 @@ class SurveySerializer(serializers.ModelSerializer):
     def get_rapid_pro_url(self, obj: Survey) -> str | None:
         if not obj.flow_id:
             return None
-        return f"{settings.RAPID_PRO_URL}/flow/results/{obj.flow_id}/"
+        return build_url(settings.RAPID_PRO_URL, f"flow/results/{obj.flow_id}/")
 
     def get_created_by(self, obj: Feedback) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"

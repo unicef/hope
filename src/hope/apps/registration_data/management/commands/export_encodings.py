@@ -39,6 +39,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q, QuerySet
 import requests
 
+from hope.apps.utils.external_urls import build_url, normalize_base_url
 from hope.models import BusinessArea, Individual
 
 DEFAULT_UPLOAD_BATCH_SIZE = 5000
@@ -60,12 +61,12 @@ class DedupEngineClient:
         pass
 
     def __init__(self, base_url: str, token: str) -> None:
-        self.base_url = base_url.rstrip("/")
+        self.base_url = normalize_base_url(base_url)
         self.session = requests.Session()
         self.session.headers["Authorization"] = f"Token {token}"
 
     def _request(self, method: str, path: str, **kwargs: Any) -> requests.Response:
-        url = f"{self.base_url}/{path}"
+        url = build_url(self.base_url, path)
         last_error: Exception | None = None
         for attempt in range(1, self.MAX_ATTEMPTS + 1):
             try:

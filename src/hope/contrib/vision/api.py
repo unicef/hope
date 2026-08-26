@@ -5,6 +5,7 @@ from django.utils import timezone
 import requests
 
 from hope.apps.core.api.mixins import BaseAPI
+from hope.apps.utils.external_urls import build_url
 from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
 from hope.contrib.vision.choices import VisionLogEntryType
 from hope.models import PaymentPlan
@@ -26,9 +27,8 @@ class VisionAPI(BaseAPI):
 
     def __init__(self) -> None:
         super().__init__()
-        base_url = self.api_url.rstrip("/")
-        self.token_url = f"{base_url}/v1/OAuthService/GenerateToken"
-        self.payment_plan_creation_url = f"{base_url}/ps/ezcash/PaymentPlan"
+        self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
+        self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
