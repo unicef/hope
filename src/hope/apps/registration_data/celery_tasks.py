@@ -485,6 +485,28 @@ def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
     return True
 
 
+def merge_still_owns_rdi(rdi_id: str) -> bool:
+    """Report whether the merge may still write a failure status to this RDI.
+
+    False once the RDI has left the merge queue, and once the row itself is gone.
+    The Deduplication Engine findings fetch runs before ``_lock_rdi``, so a CW reset can land in
+    that unlocked window and a competing job can merge the RDI. Writing ``MERGE_ERROR`` over
+    ``DELETE_SCHEDULED`` would put the RDI back in ``_PROCESSABLE_STATUSES`` and let the celery
+    retry merge data CW already asked us to destroy.
+    """
+    return (
+        RegistrationDataImport.objects.filter(id=rdi_id)
+        .exclude(
+            status__in=(
+                RegistrationDataImport.DELETE_SCHEDULED,
+                RegistrationDataImport.DELETE_FAILED,
+                RegistrationDataImport.MERGED,
+            )
+        )
+        .exists()
+    )
+
+
 def fetch_findings_and_merge_rdi_action(job: AsyncRetryJob) -> bool:
     from hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi import FetchFindingsAndMergeRdi
 
@@ -500,7 +522,12 @@ def fetch_findings_and_merge_rdi_action(job: AsyncRetryJob) -> bool:
                 return True
             merged = FetchFindingsAndMergeRdi().execute(registration_data_import_id)
     except Exception as exc:  # noqa
-        handle_rdi_exception(registration_data_import_id, exc, new_status=RegistrationDataImport.MERGE_ERROR)
+        if merge_still_owns_rdi(registration_data_import_id):
+            handle_rdi_exception(registration_data_import_id, exc, new_status=RegistrationDataImport.MERGE_ERROR)
+        else:
+            logger.warning(
+                f"RDI:{registration_data_import_id} left the merge queue mid-failure; MERGE_ERROR not written"
+            )
         raise
     if merged:
         rdi_dispatcher_task(Program.objects.get(id=program_id))
