@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+from django.db import transaction
 from django.http.response import Http404
 from django.utils.functional import cached_property
 from drf_spectacular.utils import extend_schema
@@ -23,22 +24,32 @@ class DelegateSerializer(serializers.Serializer):
 class DelegatePeopleSerializer(serializers.Serializer):
     delegates = DelegateSerializer(many=True, required=True, allow_empty=False, allow_null=False)
 
+    def validate_delegates(self, delegates: list[dict]) -> list[dict]:
+        """Reject a delegate from outside this import before any role is reassigned."""
+        rdi = self.context["registration_data_import"]
+        delegate_ids = {delegate["delegate_id"] for delegate in delegates}
+        ids_in_import = set(
+            PendingIndividual.objects.filter(id__in=delegate_ids, registration_data_import=rdi).values_list(
+                "id", flat=True
+            )
+        )
+        for delegate_id in delegate_ids - ids_in_import:
+            raise serializers.ValidationError(f"Delegate {delegate_id} does not belong to this import.")
+        return delegates
+
+    @transaction.atomic
     def create(self, validated_data: dict) -> dict:
         rdi = self.context["registration_data_import"]
         delegates = validated_data.pop("delegates")
         updated = 0
         for delegate in delegates:
-            delegate_id = delegate["delegate_id"]
-            delegated_for = delegate["delegated_for"]
-            if not PendingIndividual.objects.filter(id=delegate_id, registration_data_import=rdi).exists():
-                raise serializers.ValidationError(f"Delegate {delegate_id} does not belong to this import.")
-            for delegated_for_id in delegated_for:
+            for delegated_for_id in delegate["delegated_for"]:
                 updated += PendingIndividualRoleInHousehold.objects.filter(
                     household__registration_data_import=rdi,
                     household__individuals__in=[delegated_for_id],
                     individual_id=delegated_for_id,
                     role=ROLE_PRIMARY,
-                ).update(individual_id=delegate_id)
+                ).update(individual_id=delegate["delegate_id"])
         return {"updated": updated}
 
 
