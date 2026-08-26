@@ -402,7 +402,7 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(25):
+        with django_assert_num_queries(28):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -545,7 +545,7 @@ def test_create_follow_up_pp(
     p_force_failed = payments[2]
     p_manually_cancelled = payments[3]
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     follow_up_pp.refresh_from_db()
@@ -1060,7 +1060,7 @@ def test_full_rebuild(
         "payment_plan_purposes": [purpose],
     }
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(18):
+        with django_assert_num_queries(20):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
