@@ -89,8 +89,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_pk"]
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        payment_plan = self.context["payment_plan"]
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
 
@@ -1774,11 +1773,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program = self.get_program()
         data["program"] = program
         data["created_by"] = request.user
-        business_area = program.business_area
 
-        payment_plan = PaymentPlanService.create(
-            input_data=data, user=request.user, business_area_slug=business_area.slug
-        )
+        payment_plan = PaymentPlanService.create(input_data=data, user=request.user, program=program)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1788,6 +1784,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         )
         return payment_plan
 
+    @transaction.atomic
     def update(self, payment_plan: PaymentPlan, validated_data: dict) -> PaymentPlan:
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
