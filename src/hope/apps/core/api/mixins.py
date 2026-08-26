@@ -204,7 +204,7 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
 
         program_ids = self.request.user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
-            self.PERMISSIONS,
+            self.get_permissions_for_action(),
         )
 
         if self.program_model_field_is_many:
