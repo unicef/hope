@@ -33,7 +33,7 @@ def with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
         .prefetch_related(
             individual_prefetch,
             "parent__payment_verification_plans",
-            "payment_verifications",
+            "payment_verifications__payment_verification_plan",
             "parent__payment_plan_purposes",
         )
         .all()
