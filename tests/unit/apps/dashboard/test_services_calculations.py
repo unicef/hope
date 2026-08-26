@@ -1,6 +1,7 @@
 from datetime import timezone as dt_timezone
 from typing import Optional
 from unittest.mock import patch
+from uuid import uuid4
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -23,6 +24,7 @@ from hope.apps.dashboard.services import (
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
+    _count_household,
     get_kab_pwd_count_expression,
     get_pwd_count_expression,
 )
@@ -158,23 +160,60 @@ def households_for_kab_pwd_test(db):
     return hh_kab_pwd, hh_kab_none
 
 
+@pytest.mark.parametrize(
+    ("household_index", "expected_kab_pwd_count"),
+    [
+        (0, 4),  # hh_kab_pwd (1 + 3, NULL treated as 0)
+        (1, 0),  # hh_kab_none
+    ],
+    ids=["some_kab_pwds", "all_none"],
+)
 @pytest.mark.django_db
-def test_kab_pwd_count_expression(households_for_kab_pwd_test) -> None:
+def test_kab_pwd_count_expression(
+    household_index: int, expected_kab_pwd_count: int, households_for_kab_pwd_test
+) -> None:
     hh_kab_pwd, hh_kab_none = households_for_kab_pwd_test
+    households = [hh_kab_pwd, hh_kab_none]
+    target_household = households[household_index]
 
     hh_annotated = (
-        Household.objects.filter(id=hh_kab_pwd.id)
+        Household.objects.filter(id=target_household.id)
         .annotate(calculated_kab_pwd_count=get_kab_pwd_count_expression())
         .first()
     )
-    assert hh_annotated.calculated_kab_pwd_count == 4  # 1 + 3 (NULL treated as 0)
+    assert hh_annotated.calculated_kab_pwd_count == expected_kab_pwd_count
 
-    hh_none_annotated = (
-        Household.objects.filter(id=hh_kab_none.id)
-        .annotate(calculated_kab_pwd_count=get_kab_pwd_count_expression())
-        .first()
-    )
-    assert hh_none_annotated.calculated_kab_pwd_count == 0
+
+@pytest.mark.parametrize(
+    ("household_data", "expected_individuals", "expected_pwd"),
+    [
+        ({"kab_size": 8, "kab_pwd_known": True, "kab_pwd_count": 2, "legacy_pwd": 99, "dct_type": "STANDARD"}, 8, 2),
+        ({"kab_size": 8, "kab_pwd_known": False, "kab_pwd_count": 0, "legacy_pwd": 3, "dct_type": "STANDARD"}, 8, 3),
+        ({"kab_size": None, "kab_pwd_known": False, "kab_pwd_count": 0, "legacy_pwd": 3, "dct_type": "STANDARD"}, 5, 3),
+        ({"kab_size": 8, "kab_pwd_known": True, "kab_pwd_count": 2, "legacy_pwd": 99, "dct_type": "SOCIAL"}, 1, 2),
+    ],
+    ids=["kab_known", "kab_disabled_null_fallback", "kab_unknown", "social_kab"],
+)
+def test_count_household_kab_individuals_and_pwd(
+    household_data: dict, expected_individuals: int, expected_pwd: int
+) -> None:
+    hh_id = uuid4()
+    summary = DashboardDataCache._create_empty_country_summary()
+    household_map = {
+        hh_id: {
+            "size": 5,
+            "children_count": None,
+            "pwd_count": household_data["legacy_pwd"],
+            "kab_size": household_data["kab_size"],
+            "kab_children_count": None,
+            "kab_pwd_count": household_data["kab_pwd_count"],
+            "kab_pwd_known": household_data["kab_pwd_known"],
+            "dct_type": household_data["dct_type"],
+        }
+    }
+    _count_household(summary, hh_id, household_map, set())
+    assert summary["individuals"] == expected_individuals
+    assert summary["pwd_counts"] == expected_pwd
 
 
 # ============================================================================
@@ -341,10 +380,16 @@ def individuals_count_test_data(afghanistan):
     ("test_id", "dct_type", "household_size", "kab_size", "expected_individuals"),
     [
         ("social_program_size", "SOCIAL", 5, None, 1),
+        ("social_program_kab_size", "SOCIAL", 5, 8, 1),
         ("standard_program_size", "STANDARD", 5, None, 5),
         ("standard_program_kab_size", "STANDARD", 5, 8, 8),
     ],
-    ids=["social_program_size", "standard_program_size", "standard_program_kab_size"],
+    ids=[
+        "social_program_size",
+        "social_program_kab_size",
+        "standard_program_size",
+        "standard_program_kab_size",
+    ],
 )
 @pytest.mark.django_db
 def test_individuals_count_calculation_scenarios(
@@ -353,6 +398,7 @@ def test_individuals_count_calculation_scenarios(
     household_size: int,
     kab_size: Optional[int],
     expected_individuals: int,
+    *,
     individuals_count_test_data,
 ) -> None:
     data = individuals_count_test_data(test_id, dct_type, household_size, expected_individuals, kab_size=kab_size)
@@ -446,6 +492,7 @@ def test_children_count_calculation_scenarios(
     children_count: Optional[int],
     kab_children_count: Optional[int],
     expected_children: int,
+    *,
     children_count_test_data,
 ) -> None:
     data = children_count_test_data(test_id, dct_type, children_count, kab_children_count, expected_children)

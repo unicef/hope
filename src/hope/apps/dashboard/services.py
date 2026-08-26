@@ -17,7 +17,7 @@ from uuid import UUID
 from django.conf import settings
 from django.core.cache import cache
 from django.db import models
-from django.db.models import Case, Count, DecimalField, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import BooleanField, Case, Count, DecimalField, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 
 from hope.apps.dashboard.serializers import DashboardBaseSerializer
@@ -71,6 +71,15 @@ def get_kab_pwd_count_expression() -> models.Expression:
     return get_pwd_count_expression(prefix="kab_")
 
 
+def get_kab_pwd_known_expression() -> Case:
+
+    any_declared = functools.reduce(
+        operator.or_,
+        (Q(**{f"kab_{field_name}__isnull": False}) for field_name in DISABLED_COUNT_FIELDS),
+    )
+    return Case(When(any_declared, then=Value(True)), default=Value(False), output_field=BooleanField())
+
+
 def _dimension_annotations(date_field: Coalesce) -> dict[str, Any]:
     """Shared dimension annotations used to group payments in country/global aggregation."""
     return {
@@ -100,17 +109,17 @@ def _count_household(
     h_data = household_map.get(household_id, {})
     current_summary["households"] += 1
 
-    kab_size = h_data.get("kab_size")
-    if kab_size is not None:
-        # KAB known: use the true affected-beneficiary counts.
-        current_summary["individuals"] += int(kab_size)
-        pwd_count = h_data.get("kab_pwd_count", 0)
-    else:
-        # KAB unknown: fall back to the legacy denormalised counts.
-        current_summary["individuals"] += int(h_data.get("size", 0))
-        pwd_count = h_data.get("pwd_count", 0)
-
     is_sw_program = h_data.get("dct_type") == DataCollectingType.Type.SOCIAL
+
+    if is_sw_program:
+        current_summary["individuals"] += 1
+    else:
+        kab_size = h_data.get("kab_size")
+        if kab_size is not None:
+            current_summary["individuals"] += int(kab_size)
+        else:
+            current_summary["individuals"] += int(h_data.get("size", 0))
+
     if not is_sw_program:
         children_count = h_data.get("kab_children_count")
         if children_count is None:
@@ -118,6 +127,7 @@ def _count_household(
         if children_count is not None:
             current_summary["children_counts"] += children_count
 
+    pwd_count = h_data.get("kab_pwd_count", 0) if h_data.get("kab_pwd_known") else h_data.get("pwd_count", 0)
     current_summary["pwd_counts"] += int(pwd_count)
 
     current_summary["_seen_households"].add(household_id)
@@ -325,6 +335,7 @@ class DashboardCacheBase:
                         output_field=models.IntegerField(),
                     ),
                     kab_pwd_count_calc=get_kab_pwd_count_expression(),
+                    kab_pwd_known=get_kab_pwd_known_expression(),
                     admin1_name_hh=Coalesce(F("admin1__name"), Value("Unknown Admin1")),
                     country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
                 )
@@ -336,6 +347,7 @@ class DashboardCacheBase:
                     "kab_children_count",
                     "pwd_count_calc",
                     "kab_pwd_count_calc",
+                    "kab_pwd_known",
                     "admin1_name_hh",
                     "country_name_hh",
                     "program__data_collecting_type__type",
@@ -354,6 +366,7 @@ class DashboardCacheBase:
                     "kab_size": hh.get("kab_size"),
                     "kab_children_count": hh.get("kab_children_count"),
                     "kab_pwd_count": hh.get("kab_pwd_count_calc"),
+                    "kab_pwd_known": hh.get("kab_pwd_known"),
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
                     "country": hh.get("country_name_hh", "Unknown Country"),
                     "dct_type": dct_type,

@@ -36,6 +36,8 @@ def update_dashboard_figures() -> None:
         lock_acquired = cache.add(lock_key, True, timeout=60 * 60)
         try:
             DashboardDataCache.refresh_data(business_area.slug)
+        except (OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName):
+            raise
         except Exception as e:
             logger.error(f"Error refreshing dashboard data for {business_area.slug}: {e}", exc_info=True)
         finally:
@@ -47,6 +49,8 @@ def update_dashboard_figures() -> None:
     global_lock_acquired = cache.add(global_lock_key, True, timeout=60 * 60)
     try:
         DashboardGlobalDataCache.refresh_data()
+    except (OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName):
+        raise
     except Exception as e:
         logger.error(f"Error refreshing global dashboard data: {e}", exc_info=True)
     finally:
