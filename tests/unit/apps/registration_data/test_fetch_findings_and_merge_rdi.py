@@ -1041,6 +1041,137 @@ def test_action_does_not_reenqueue_dispatcher_on_failure(
     mock_dispatcher.assert_not_called()
 
 
+def _status_flips_then_engine_fails(rdi: RegistrationDataImport, new_status: str) -> object:
+    """execute() side effect: a concurrent actor commits `new_status`, then the DE call fails.
+
+    The findings fetch runs before `_lock_rdi`, so this window is real: nothing holds the row.
+    """
+
+    def side_effect(*args: object, **kwargs: object) -> None:
+        RegistrationDataImport.objects.filter(pk=rdi.pk).update(status=new_status)
+        raise RequestException("engine 503")
+
+    return side_effect
+
+
+@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
+def test_action_fetch_failure_does_not_overwrite_delete_scheduled(
+    mock_task_cls: Mock,
+    mock_dispatcher: Mock,
+    cw_rdi: RegistrationDataImport,
+) -> None:
+    # B3: ResetRDIView already committed DELETE_SCHEDULED and answered CW with 202 while this
+    # worker was on the wire. MERGE_ERROR here would re-enter _PROCESSABLE_STATUSES and let the
+    # celery retry merge data CW asked us to destroy.
+    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(
+        cw_rdi, RegistrationDataImport.DELETE_SCHEDULED
+    )
+    job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
+
+    with pytest.raises(RequestException, match="engine 503"):
+        fetch_findings_and_merge_rdi_action(job)
+
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.DELETE_SCHEDULED
+    assert cw_rdi.error_message == ""
+    mock_dispatcher.assert_not_called()
+
+
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
+@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
+def test_action_delete_scheduled_rdi_is_not_picked_up_by_retry(
+    mock_dispatcher: Mock,
+    mock_rdi_merge: Mock,
+    cw_rdi: RegistrationDataImport,
+) -> None:
+    # The payoff of the guard: after the failure above, celery retries the same job. With the real
+    # FetchFindingsAndMergeRdi the entry guard drops the RDI, so no merge is ever attempted.
+    job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
+    with patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi") as mocked:
+        mocked.return_value.execute.side_effect = _status_flips_then_engine_fails(
+            cw_rdi, RegistrationDataImport.DELETE_SCHEDULED
+        )
+        with pytest.raises(RequestException):
+            fetch_findings_and_merge_rdi_action(job)
+
+    assert fetch_findings_and_merge_rdi_action(job) is True
+
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.DELETE_SCHEDULED
+    mock_rdi_merge.return_value.execute.assert_not_called()
+    mock_dispatcher.assert_not_called()
+
+
+@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
+def test_action_fetch_failure_does_not_overwrite_merged(
+    mock_task_cls: Mock,
+    mock_dispatcher: Mock,
+    cw_rdi: RegistrationDataImport,
+) -> None:
+    # A competing job for the same RDI already merged it (queue_task, not requeue, so two jobs
+    # are possible). The slow loser must not drag a successful merge back to MERGE_ERROR.
+    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(
+        cw_rdi, RegistrationDataImport.MERGED
+    )
+    job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
+
+    with pytest.raises(RequestException, match="engine 503"):
+        fetch_findings_and_merge_rdi_action(job)
+
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.MERGED
+    mock_dispatcher.assert_not_called()
+
+
+@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
+def test_action_fetch_failure_does_not_overwrite_delete_failed(
+    mock_task_cls: Mock,
+    mock_dispatcher: Mock,
+    cw_rdi: RegistrationDataImport,
+) -> None:
+    # The wipe job hit protected dependents and parked the RDI in DELETE_FAILED. Flipping that
+    # back to MERGE_ERROR would hand a failed delete to the merge queue.
+    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(
+        cw_rdi, RegistrationDataImport.DELETE_FAILED
+    )
+    job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
+
+    with pytest.raises(RequestException, match="engine 503"):
+        fetch_findings_and_merge_rdi_action(job)
+
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == RegistrationDataImport.DELETE_FAILED
+    mock_dispatcher.assert_not_called()
+
+
+@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
+def test_action_fetch_failure_with_deleted_row_propagates_original_error(
+    mock_task_cls: Mock,
+    mock_dispatcher: Mock,
+    cw_rdi: RegistrationDataImport,
+) -> None:
+    # The wipe won the race and the row is gone. handle_rdi_exception's bare .get() would raise
+    # DoesNotExist and mask the real engine error on every retry; the guard skips it instead.
+    rdi_pk = cw_rdi.pk
+
+    def delete_row_then_engine_fails(*args: object, **kwargs: object) -> None:
+        RegistrationDataImport.objects.filter(pk=rdi_pk).delete()
+        raise RequestException("engine 503")
+
+    mock_task_cls.return_value.execute.side_effect = delete_row_then_engine_fails
+    job = AsyncRetryJob(config={"registration_data_import_id": str(rdi_pk), "program_id": str(cw_rdi.program_id)})
+
+    with pytest.raises(RequestException, match="engine 503"):
+        fetch_findings_and_merge_rdi_action(job)
+
+    assert not RegistrationDataImport.objects.filter(pk=rdi_pk).exists()
+    mock_dispatcher.assert_not_called()
+
+
 @pytest.mark.skip(
     reason="N1b — E2E/ES: full merge side effects need real Elasticsearch (make services); "
     "dispatcher enqueue is covered by test_action_reenqueues_dispatcher_when_merge_succeeds"
