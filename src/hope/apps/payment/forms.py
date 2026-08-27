@@ -2,11 +2,31 @@ from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib.postgres.forms import DecimalRangeField
+from django.db.models import Q
 
+from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import AcceptanceProcessThreshold, FinancialServiceProviderXlsxTemplate
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlanGroup
+    from hope.models import PaymentPlan, PaymentPlanGroup
+
+
+class VisionFundsCommitmentItemAssignmentForm(forms.Form):
+    funds_commitment_items = forms.ModelMultipleChoiceField(
+        queryset=FundsCommitmentItem.objects.none(),
+        label="Funds Commitment Items",
+    )
+
+    def __init__(self, *args: Any, payment_plan: "PaymentPlan", **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["funds_commitment_items"].queryset = (
+            FundsCommitmentItem.objects.filter(
+                Q(payment_plan__isnull=True) | Q(payment_plan=payment_plan),
+                office=payment_plan.business_area,
+            )
+            .select_related("funds_commitment_group")
+            .order_by("funds_commitment_group__funds_commitment_number", "funds_commitment_item")
+        )
 
 
 class AcceptanceProcessThresholdForm(forms.ModelForm):

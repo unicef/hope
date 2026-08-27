@@ -50,3 +50,31 @@ def send_payment_plan_to_vision_async_task(payment_plan: PaymentPlan, user_id: s
         group_key="payment",
         description=f"Send payment plan {payment_plan.pk} to Vision",
     )
+
+
+def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> None:
+    payment_plan = PaymentPlan.objects.select_related(
+        "business_area",
+        "currency",
+        "financial_service_provider",
+    ).get(pk=job.config["payment_plan_id"])
+    VisionAPI().notify_payment_plan_status(payment_plan, job.config["vision_status"])
+
+
+def notify_payment_plan_status_to_vision_async_task(
+    payment_plan: PaymentPlan,
+    user_id: str,
+    vision_status: str,
+) -> AsyncJob | None:
+    return AsyncJob.requeue(
+        instance=payment_plan,
+        owner_id=user_id,
+        job_name=f"notify_payment_plan_{vision_status.lower()}_to_vision",
+        action="hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task_action",
+        config={
+            "payment_plan_id": str(payment_plan.pk),
+            "vision_status": vision_status,
+        },
+        group_key="payment",
+        description=f"Notify Vision that payment plan {payment_plan.pk} is {vision_status}",
+    )

@@ -901,7 +901,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
-    can_send_to_vision = serializers.BooleanField()
     vision_integration_enabled = serializers.BooleanField(read_only=True)
     vision_managed = serializers.BooleanField(read_only=True)
     vision = serializers.SerializerMethodField()
@@ -954,7 +953,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
-            "can_send_to_vision",
             "vision_integration_enabled",
             "vision_managed",
             "vision",
@@ -1150,16 +1148,19 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
+    @extend_schema_field(FundsCommitmentSerializer(allow_null=True))
     def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
-        available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
+        assigned_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj)
 
         group = (
-            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            FundsCommitmentGroup.objects.filter(
+                funds_commitment_items__in=assigned_items_qs,
+            )
             .distinct()
             .prefetch_related(
                 Prefetch(
                     "funds_commitment_items",
-                    queryset=available_items_qs,
+                    queryset=assigned_items_qs,
                     to_attr="filtered_items",
                 )
             )
@@ -1171,17 +1172,20 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
         return FundsCommitmentSerializer(
             {
+                "id": group.pk,
                 "funds_commitment_number": group.funds_commitment_number,
                 "funds_commitment_items": group.filtered_items,
             }
         ).data
 
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         if obj.vision_managed:
             return []
 
         available_items_qs = FundsCommitmentItem.objects.filter(
-            Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
+            Q(payment_plan__isnull=True) | Q(payment_plan=obj),
+            office=obj.business_area,
         )
 
         groups = (
@@ -1199,6 +1203,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return [
             FundsCommitmentSerializer(
                 {
+                    "id": group.pk,
                     "funds_commitment_number": group.funds_commitment_number,
                     "funds_commitment_items": group.filtered_items,
                 }
@@ -1885,7 +1890,10 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
 
 
 class AssignFundsCommitmentsSerializer(serializers.Serializer):
-    fund_commitment_items_ids = serializers.ListSerializer(child=serializers.CharField(), required=False)
+    fund_commitment_items_ids = serializers.ListSerializer(
+        child=serializers.CharField(),
+        allow_empty=False,
+    )
 
 
 class PaymentPlanAbortSerializer(serializers.Serializer):

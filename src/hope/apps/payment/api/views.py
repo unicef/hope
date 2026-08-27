@@ -161,9 +161,7 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
-from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
     BusinessArea,
     DeliveryMechanism,
@@ -834,7 +832,6 @@ class PaymentPlanViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
-        "send_to_vision": [Permissions.PM_SEND_TO_VISION],
         "custom_exchange_rate": [
             Permissions.PM_CUSTOM_EXCHANGE_RATE,
         ],
@@ -1558,20 +1555,6 @@ class PaymentPlanViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["post"], url_path="send-to-vision")
-    def send_to_vision(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.vision_status == VisionStatus.SEND_FAILED.value:
-            raise PermissionDenied("Failed Vision sends can only be retried in Django admin")
-        if not payment_plan.can_send_to_vision:
-            raise PermissionDenied("Payment plan cannot be sent to Vision")
-
-        send_payment_plan_to_vision_async_task(payment_plan, str(request.user.pk))
-        return Response(
-            {"message": "Sending Payment Plan to Vision started"},
-            status=status.HTTP_202_ACCEPTED,
-        )
-
     @action(detail=True, methods=["post"])
     @transaction.atomic
     def split(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1646,15 +1629,22 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             raise ValidationError("Payment plan must be in review")
 
-        funds_commitment_items = FundsCommitmentItem.objects.filter(rec_serial_number__in=fund_commitment_items_ids)
-        if funds_commitment_items.filter(payment_plan_id__isnull=False).exclude(payment_plan=payment_plan).exists():
-            raise ValidationError("Chosen Funds Commitments are already assigned to different Payment Plan")
-
-        if funds_commitment_items.exclude(office=payment_plan.business_area).exists():
-            raise ValidationError("Chosen Funds Commitments have wrong Business Area")
+        funds_commitment_items = list(
+            FundsCommitmentItem.objects.select_for_update().filter(
+                rec_serial_number__in=fund_commitment_items_ids,
+            )
+        )
+        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in funds_commitment_items):
+            raise ValidationError("Chosen Funds Commitments are already assigned to a different Payment Plan")
+        if any(item.office_id != payment_plan.business_area_id for item in funds_commitment_items):
+            raise ValidationError("Chosen Funds Commitments have the wrong Business Area")
+        if len({item.funds_commitment_group_id for item in funds_commitment_items}) != 1:
+            raise ValidationError("Chosen Funds Commitment Items must belong to the same Funds Commitment Group")
 
         FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
-        funds_commitment_items.update(payment_plan=payment_plan)
+        FundsCommitmentItem.objects.filter(pk__in=[item.pk for item in funds_commitment_items]).update(
+            payment_plan=payment_plan
+        )
 
         payment_plan.refresh_from_db()
         return Response(
@@ -1724,7 +1714,7 @@ class PaymentPlanViewSet(
 
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).abort(abort_comment)
+        payment_plan = PaymentPlanService(payment_plan).abort(abort_comment, user_id=str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

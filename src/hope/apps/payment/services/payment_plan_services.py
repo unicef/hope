@@ -50,6 +50,7 @@ from hope.apps.payment.utils import get_link, get_quantity_in_usd, log_payment_p
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.apps.utils.recipients import users_with_permissions
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     Approval,
     ApprovalProcess,
@@ -216,8 +217,7 @@ class PaymentPlanService:
         if not approval_process:
             raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
 
-        # TODO(Vision decision): The creator is a provisional actor for this automated action. This automatic release
-        # also bypasses the configured finance reviewer count until the business confirms how it should be represented.
+        # Automatic Vision release uses the required, protected Payment Plan creator as its finance-release actor.
         release_actor = self.payment_plan.created_by
         Approval.objects.create(
             approval_process=approval_process,
@@ -250,6 +250,19 @@ class PaymentPlanService:
             f"{timezone.now():%-d %B %Y}",
         )
         return self.payment_plan
+
+    def _invalidate_vision_attempt_before_manual_release(self) -> None:
+        has_pending_attempt = (
+            self.payment_plan.sent_to_vision or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value
+        )
+        if not has_pending_attempt or self.payment_plan.vision_integration_enabled:
+            return
+
+        from hope.contrib.vision.services import VisionService
+
+        # Manual release while Vision is disabled replaces the pending automatic workflow. Reset the attempt so that
+        # re-enabling Vision later does not treat the accepted plan as Vision-managed and block manual delivery.
+        VisionService.invalidate_attempt(self.payment_plan)
 
     def tp_lock(self) -> PaymentPlan:
         if self.payment_plan.build_status != PaymentPlan.BuildStatus.BUILD_STATUS_OK:
@@ -470,6 +483,7 @@ class PaymentPlanService:
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
             notification_action = None
+            should_notify_vision_of_rejection = False
             if approval_type == Approval.APPROVAL:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_approve()
@@ -489,6 +503,7 @@ class PaymentPlanService:
                 send_to_vision = self.payment_plan.vision_integration_enabled
 
             if approval_type == Approval.FINANCE_RELEASE:
+                self._invalidate_vision_attempt_before_manual_release()
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
@@ -499,12 +514,13 @@ class PaymentPlanService:
                 )
 
             if approval_type == Approval.REJECT:
-                if self.payment_plan.vision_managed:
+                should_notify_vision_of_rejection = self.payment_plan.sent_to_vision
+
+                # Reset every started attempt, including local SEND_FAILED state that Vision never received, so a
+                # later authorization starts a clean workflow.
+                if should_notify_vision_of_rejection or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
                     from hope.contrib.vision.services import VisionService
 
-                    # TODO(Vision decision): Abort/reject invalidates the current attempt. A callback from that attempt
-                    # is ignored unless it arrives after a later attempt has already started; cross-attempt correlation
-                    # requires a Vision-provided identifier and remains intentionally unsupported for now.
                     VisionService.invalidate_attempt(self.payment_plan)
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_reject()
@@ -518,6 +534,19 @@ class PaymentPlanService:
                 )
 
             self.payment_plan.save()
+            if should_notify_vision_of_rejection:
+                from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
+
+                payment_plan = self.payment_plan
+                user_id = str(self.user.pk)
+                transaction.on_commit(
+                    lambda: notify_payment_plan_status_to_vision_async_task(
+                        payment_plan,
+                        user_id,
+                        "REJECTED",
+                    ),
+                    robust=True,
+                )
             if send_to_vision:
                 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 
@@ -1571,7 +1600,7 @@ class PaymentPlanService:
         )
         return self.payment_plan
 
-    def abort(self, abort_comment: str | None) -> PaymentPlan:
+    def abort(self, abort_comment: str | None, user_id: str | None = None) -> PaymentPlan:
         allowed_statuses = [
             PaymentPlan.Status.LOCKED,
             PaymentPlan.Status.LOCKED_FSP,
@@ -1582,10 +1611,10 @@ class PaymentPlanService:
 
         if self.payment_plan.status not in allowed_statuses:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
-        if self.payment_plan.vision_managed:
+        notify_vision_aborted = self.payment_plan.sent_to_vision
+        if notify_vision_aborted or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
             from hope.contrib.vision.services import VisionService
 
-            # TODO(Vision decision): See the rejection path for the accepted cross-attempt callback limitation.
             VisionService.invalidate_attempt(self.payment_plan)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
@@ -1594,6 +1623,19 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(
             fields=["status", "status_date", "updated_at", "abort_comment", "internal_data"]
         )
+        if notify_vision_aborted:
+            from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
+
+            notification_owner_id = user_id or str(self.payment_plan.created_by_id)
+            payment_plan = self.payment_plan
+            transaction.on_commit(
+                lambda: notify_payment_plan_status_to_vision_async_task(
+                    payment_plan,
+                    notification_owner_id,
+                    "ABORTED",
+                ),
+                robust=True,
+            )
         return self.payment_plan
 
     def reactivate_abort(self) -> PaymentPlan:

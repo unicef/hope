@@ -244,6 +244,7 @@ def test_vision_api_error_is_raised(vision_api_payment_plan_factory) -> None:
             pp = vision_api_payment_plan_factory()
             with pytest.raises(VisionAPIError):
                 api.send_payment_plan(pp)
+            pp.refresh_from_db(fields=["internal_data"])
             assert "vision" in pp.internal_data
             entry = pp.internal_data["vision"]["log"][0]
             assert entry["type"] == VisionLogEntryType.API_CALL.value
@@ -262,6 +263,7 @@ def test_send_payment_plan_logs_4xx_error(vision_api_payment_plan_factory) -> No
             pp = vision_api_payment_plan_factory()
             with pytest.raises(VisionAPIError):
                 api.send_payment_plan(pp)
+            pp.refresh_from_db(fields=["internal_data"])
             assert "vision" in pp.internal_data
             assert len(pp.internal_data["vision"]["log"]) == 1
             entry = pp.internal_data["vision"]["log"][0]
@@ -283,6 +285,7 @@ def test_send_payment_plan_persists_missing_credentials_failure(
     with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
         api.send_payment_plan(payment_plan)
 
+    payment_plan.refresh_from_db(fields=["internal_data"])
     assert payment_plan.vision_status == VisionStatus.SEND_FAILED.value
     assert payment_plan.vision_data["log"][0]["response"] == {"error": "Vision API credentials are not configured"}
 
@@ -298,6 +301,7 @@ def test_send_payment_plan_logs_payload_and_response(
     api = VisionAPI()
     pp = vision_api_payment_plan_factory(unicef_id="PP042")
     result = api.send_payment_plan(pp)
+    pp.refresh_from_db(fields=["internal_data"])
     assert result == {"status": "ok", "messageId": "msg-42"}
     assert "vision" in pp.internal_data
     assert pp.internal_data["vision"]["sent"] is True
@@ -309,6 +313,74 @@ def test_send_payment_plan_logs_payload_and_response(
     assert datetime.fromisoformat(entry["timestamp"])
     assert entry["payload"]["payplanSno"] == "PP042"
     assert entry["response"]["messageId"] == "msg-42"
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_status_uses_payment_plan_endpoint_without_changing_workflow_state(
+    mock_post,
+    mock_acquire_token,
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-STATUS")
+    payment_plan.internal_data = {
+        "vision": {
+            "status": VisionStatus.NOT_SENT.value,
+            "log": [],
+        }
+    }
+    payment_plan.save(update_fields=["internal_data"])
+
+    with django_assert_num_queries(4):
+        response = VisionAPI().notify_payment_plan_status(payment_plan, "REJECTED")
+
+    payment_plan.refresh_from_db(fields=["internal_data"])
+    assert response == {"status": "ok"}
+    payload = mock_post.call_args.args[1]
+    assert mock_post.call_args.args[0] == "https://test.example.com/ps/ezcash/PaymentPlan"
+    assert payload["payplanSno"] == "PP-STATUS"
+    assert payload["status"] == "REJECTED"
+    assert payment_plan.vision_status == VisionStatus.NOT_SENT.value
+    assert payment_plan.vision_data["log"][0]["type"] == VisionLogEntryType.STATUS_NOTIFICATION.value
+
+
+def test_notify_payment_plan_status_logs_missing_credentials_without_changing_workflow_state(
+    settings,
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    settings.VISION_CLIENT_ID = ""
+    payment_plan = vision_api_payment_plan_factory()
+
+    with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
+        VisionAPI().notify_payment_plan_status(payment_plan, "ABORTED")
+
+    payment_plan.refresh_from_db(fields=["internal_data"])
+    assert payment_plan.vision_status == VisionStatus.NOT_SENT.value
+    entry = payment_plan.vision_data["log"][0]
+    assert entry["type"] == VisionLogEntryType.STATUS_NOTIFICATION.value
+    assert entry["response"] == {"error": "Vision API credentials are not configured"}
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_notify_payment_plan_status_logs_api_error(
+    mock_post,
+    mock_acquire_token,
+    vision_api_payment_plan_factory,
+    django_assert_num_queries,
+) -> None:
+    mock_post.side_effect = BaseAPI.APIError("status update failed")
+    payment_plan = vision_api_payment_plan_factory()
+
+    with django_assert_num_queries(4), pytest.raises(VisionAPIError, match="status update failed"):
+        VisionAPI().notify_payment_plan_status(payment_plan, "REJECTED")
+
+    payment_plan.refresh_from_db(fields=["internal_data"])
+    assert payment_plan.vision_status == VisionStatus.NOT_SENT.value
+    assert payment_plan.vision_data["log"][0]["response"] == {"error": "status update failed"}
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")

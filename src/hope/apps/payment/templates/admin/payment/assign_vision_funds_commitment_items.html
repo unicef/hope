@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <p class="messagelist warning">
+    Assigning these FC items will automatically release the Payment Plan and immediately send it to Payment Gateway
+    (if applicable). All selected items must belong to the same FC group.
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Assign FC Items and Continue" class="default">
+    <a href="{% url 'admin:payment_paymentplan_change' payment_plan.id %}">Cancel</a>
+  </form>
+{% endblock content %}

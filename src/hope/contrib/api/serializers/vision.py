@@ -36,6 +36,7 @@ class FundsCommitmentItemSerializer(serializers.ModelSerializer):
 
 
 class FundsCommitmentSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     funds_commitment_number = serializers.CharField()
     funds_commitment_items = FundsCommitmentItemSerializer(many=True)
 

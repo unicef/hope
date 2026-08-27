@@ -128,8 +128,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
         if flag_state("VISION_INTEGRATION_ACTIVE"):
-            # TODO(Vision decision): Confirm whether disabling either flag should return existing Vision workflows to
-            # manual group PG sending.
             active_vision_statuses = [status.value for status in VisionStatus if status != VisionStatus.NOT_SENT]
             payment_plans = payment_plans.exclude(
                 business_area__vision_integration_active=True,

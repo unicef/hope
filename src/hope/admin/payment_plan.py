@@ -18,12 +18,13 @@ from django.utils.html import format_html
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
-from hope.apps.payment.forms import BatchReexportForm
+from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentItemAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
     AsyncJob,
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
+class FundsCommitmentItemInline(admin.TabularInline):
     model = FundsCommitmentItem
     extra = 0
     can_delete = False
@@ -119,6 +120,10 @@ class PaymentInstructionInline(admin.TabularInline):
 
 def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
     return payment_plan.can_send_to_vision
+
+
+def can_recover_vision_funds_commitment(payment_plan: PaymentPlan) -> bool:
+    return VisionService.can_recover_with_funds_commitment_items(payment_plan)
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
@@ -373,7 +378,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
     @button(
         visible=lambda btn: can_send_to_vision(btn.original),
-        permission="payment.pm_send_payment_plan",
+        permission="payment.pm_manage_vision_workflow",
     )
     def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
@@ -387,6 +392,50 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             action=self.send_to_vision,
             message="Do you confirm to send this payment plan to Vision?",
         )
+
+    @button(
+        visible=lambda btn: can_recover_vision_funds_commitment(btn.original),
+        permission="payment.pm_manage_vision_workflow",
+        label="Assign Vision FC Items",
+    )
+    def assign_vision_funds_commitment_items(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        payment_plan = PaymentPlan.objects.select_related("business_area", "created_by").get(pk=pk)
+        form = VisionFundsCommitmentItemAssignmentForm(
+            data=request.POST or None,
+            payment_plan=payment_plan,
+        )
+        if request.method == "POST" and form.is_valid():
+            try:
+                with transaction.atomic():
+                    locked_payment_plan = (
+                        PaymentPlan.objects.select_for_update().select_related("business_area", "created_by").get(pk=pk)
+                    )
+                    VisionService.recover_with_funds_commitment_items(
+                        locked_payment_plan,
+                        form.cleaned_data["funds_commitment_items"],
+                    )
+            except FundsCommitmentAssignmentError:
+                form.add_error(
+                    "funds_commitment_items",
+                    "Select one or more available Funds Commitment Items from the same group.",
+                )
+            else:
+                self.message_user(
+                    request,
+                    "Funds Commitment Items assigned and the Vision flow continued.",
+                    level=messages.SUCCESS,
+                )
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "original": payment_plan,
+            "payment_plan": payment_plan,
+            "form": form,
+            "title": "Assign Vision Funds Commitment Items",
+        }
+        return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
 
     @button(
         visible=lambda btn: can_retry_payment_gateway_send(btn.original),

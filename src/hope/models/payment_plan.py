@@ -662,7 +662,7 @@ class PaymentPlan(
             ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
             ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
-            ("pm_send_payment_plan", "Can send payment plan to Vision"),
+            ("pm_manage_vision_workflow", "Can manage Payment Plan Vision workflow"),
             ("download_payment_instruction", "Can download payment instruction from payment gateway"),
         )
         constraints = [
@@ -1226,8 +1226,7 @@ class PaymentPlan(
 
     @property
     def vision_integration_enabled(self) -> bool:
-        # TODO(Vision decision): Instruction-managed Follow-Up plans currently use instruction-level FSP delivery,
-        # which cannot invoke the automatic per-plan PG flow. Keep them outside Vision until that flow is defined.
+        # Instruction-managed Follow-Up plans use instruction-level delivery and do not require Vision.
         if self.is_instruction_managed:
             return False
         return bool(flag_state("VISION_INTEGRATION_ACTIVE")) and self.business_area.vision_integration_active

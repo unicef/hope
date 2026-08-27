@@ -75,10 +75,12 @@ def test_funds_commitment_serializer() -> None:
         commitment_amount_usd=1000.00,
     )
     data: dict[str, Any] = {
+        "id": fcg.pk,
         "funds_commitment_number": "FC-001",
         "funds_commitment_items": [fci],
     }
     serializer = FundsCommitmentSerializer(data)
+    assert serializer.data["id"] == fcg.pk
     assert serializer.data["funds_commitment_number"] == "FC-001"
     items = serializer.data["funds_commitment_items"]
     assert len(items) == 1

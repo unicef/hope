@@ -4,6 +4,7 @@ from enum import StrEnum
 class VisionLogEntryType(StrEnum):
     API_CALL = "api-call"
     PUSH_NOTIFICATION = "push-notification"
+    STATUS_NOTIFICATION = "status-notification"
 
 
 class VisionStatus(StrEnum):

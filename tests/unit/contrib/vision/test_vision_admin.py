@@ -7,6 +7,8 @@ from django.urls import reverse
 from flags.models import FlagState
 import pytest
 
+from extras.test_utils.factories import ApprovalProcessFactory, FundsCommitmentGroupFactory, FundsCommitmentItemFactory
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -37,6 +39,16 @@ def admin_client(admin_user: Any) -> Client:
     client = Client()
     client.login(username="admin", password="password")
     return client
+
+
+@pytest.fixture
+def vision_admin_context(afghanistan, admin_user, program_cycle, admin_client) -> dict[str, Any]:
+    return {
+        "business_area": afghanistan,
+        "user": admin_user,
+        "program_cycle": program_cycle,
+        "client": admin_client,
+    }
 
 
 def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentPlan.Status.IN_REVIEW):
@@ -113,3 +125,90 @@ def test_send_to_vision_queues_task(mock_send, afghanistan, admin_user, program_
     response = admin_client.post(url)
     assert response.status_code == 302, response.content[:500]
     mock_send.assert_called_once_with(pp, str(admin_user.pk))
+
+
+def test_manual_fc_item_recovery_shows_warning_and_available_item(
+    afghanistan,
+    admin_user,
+    program_cycle,
+    admin_client,
+) -> None:
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+    )
+    payment_plan = _create_payment_plan(afghanistan, admin_user, program_cycle)
+    payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.FC_NOT_FOUND.value,
+        }
+    }
+    payment_plan.save(update_fields=["internal_data"])
+    funds_commitment_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    funds_commitment_item = FundsCommitmentItemFactory(
+        funds_commitment_group=funds_commitment_group,
+        office=afghanistan,
+    )
+
+    change_response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]))
+    action_response = admin_client.get(
+        reverse("admin:payment_paymentplan_assign_vision_funds_commitment_items", args=[payment_plan.pk])
+    )
+
+    assert change_response.status_code == 200
+    assert 'id="btn-assign_vision_funds_commitment_items"' in change_response.content.decode()
+    assert action_response.status_code == 200
+    content = action_response.content.decode()
+    assert "Assigning these FC items will automatically release the Payment Plan" in content
+    assert "immediately send it to Payment Gateway if it is a PG plan" in content
+    assert "FC123" in content
+    assert str(funds_commitment_item.funds_commitment_item) in content
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
+def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
+    mock_exchange_rate_task,
+    mock_notification_task,
+    vision_admin_context,
+    django_capture_on_commit_callbacks,
+) -> None:
+    payment_plan = _create_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+    )
+    payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.FC_MISSING.value,
+        }
+    }
+    payment_plan.save(update_fields=["internal_data"])
+    ApprovalProcessFactory(payment_plan=payment_plan)
+    funds_commitment_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    funds_commitment_item = FundsCommitmentItemFactory(
+        funds_commitment_group=funds_commitment_group,
+        office=vision_admin_context["business_area"],
+    )
+    action_url = reverse(
+        "admin:payment_paymentplan_assign_vision_funds_commitment_items",
+        args=[payment_plan.pk],
+    )
+
+    with django_capture_on_commit_callbacks(execute=True):
+        response = vision_admin_context["client"].post(
+            action_url,
+            {"funds_commitment_items": [funds_commitment_item.pk]},
+        )
+
+    assert response.status_code == 302
+    payment_plan.refresh_from_db()
+    funds_commitment_item.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.ACCEPTED
+    assert payment_plan.vision_status == VisionStatus.RELEASED.value
+    assert funds_commitment_item.payment_plan_id == payment_plan.pk
+    mock_exchange_rate_task.assert_called_once()
+    mock_notification_task.assert_called_once()
