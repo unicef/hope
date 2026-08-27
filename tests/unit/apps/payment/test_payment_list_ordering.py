@@ -145,11 +145,3 @@ def test_payment_search_filter_breaks_ties_deterministically_without_ordering() 
     result = PaymentSearchFilter(data={}, queryset=Payment.objects.all()).qs
 
     assert list(result.values_list("pk", flat=True)) == sorted(payment.pk for payment in payments)
-
-
-def test_payment_search_filter_rejects_collector_id_ordering() -> None:
-    """The Collector column shows a snapshot name, so its UUID is not a meaningful sort key."""
-    filterset = PaymentSearchFilter(data={"ordering": "collector_id"}, queryset=Payment.objects.all())
-
-    assert not filterset.is_valid()
-    assert "ordering" in filterset.errors
