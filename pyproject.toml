@@ -171,7 +171,7 @@ dev = [
   "wasmer>=1.1",
   "watchdog>=2.1.8",
   "webdriver-manager>=4.0.2",
-  "webob>=1.8.10",
+  "webob>=1.8.11",
 ]
 docs = [
   "cairosvg>=2.7.1",
