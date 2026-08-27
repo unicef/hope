@@ -149,6 +149,8 @@ class BiometricDedupeSimilarityPair(models.Model):
             str(key): str(pk)
             for key, pk in Individual.all_objects.filter(
                 program=program,
+                is_removed=False,
+                withdrawn=False,
                 **{f"{id_field_name}__in": unique_ids},
             ).values_list(id_field_name, "id")
         }
