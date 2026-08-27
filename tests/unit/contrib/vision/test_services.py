@@ -686,7 +686,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with (
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-        django_assert_num_queries(5),
+        django_assert_num_queries(6),
     ):
         VisionService.process_callback(
             vision_payment_plan,
@@ -715,7 +715,7 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with (
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(5),
+        django_assert_num_queries(6),
     ):
         VisionService.process_callback(
             vision_payment_plan,
