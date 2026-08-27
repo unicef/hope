@@ -34,11 +34,24 @@ def test_business_area_ingest_source_forward_transition_allowed(django_assert_nu
     ba = BusinessAreaFactory()
 
     ba.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
-    with django_assert_num_queries(6):
+    with django_assert_num_queries(4):
         ba.save()
 
     ba.refresh_from_db()
     assert ba.ingest_source == BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+
+
+def test_business_area_save_does_not_run_full_field_validation():
+    ba = BusinessAreaFactory()
+    # bypass save() — it is the code under test
+    BusinessArea.objects.filter(pk=ba.pk).update(deduplication_duplicate_score=-1.0)
+    ba.refresh_from_db()
+
+    ba.name = "Renamed BA"
+    ba.save()
+
+    ba.refresh_from_db()
+    assert ba.name == "Renamed BA"
 
 
 @pytest.mark.parametrize(

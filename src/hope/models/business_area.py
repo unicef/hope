@@ -136,7 +136,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
-        self.full_clean()
+        self.clean()
         if self.parent:
             self.parent.is_split = True
             self.parent.save()
