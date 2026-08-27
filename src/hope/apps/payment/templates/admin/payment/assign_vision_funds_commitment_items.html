@@ -2,8 +2,8 @@
 
 {% block content %}
   <p class="messagelist warning">
-    Assigning these FC items will automatically release the Payment Plan and immediately send it to Payment Gateway
-    (if applicable). All selected items must belong to the same FC group.
+    Assigning these FC items will automatically release the Payment Plan and immediately send it to Payment Gateway if
+    it is a PG plan. All selected items must belong to the same FC group.
   </p>
   <form method="post">
     {% csrf_token %}

@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
 from hope.apps.core.api.mixins import BaseAPI
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionLogEntryType, VisionStatus
+from hope.contrib.vision.services import VisionService
 from hope.models import PaymentPlan
 
 
@@ -300,6 +301,8 @@ def test_send_payment_plan_logs_payload_and_response(
     mock_post.return_value = ({"status": "ok", "messageId": "msg-42"}, 200)
     api = VisionAPI()
     pp = vision_api_payment_plan_factory(unicef_id="PP042")
+    VisionService.set_status(pp, VisionStatus.WAITING_FOR_CALLBACK)
+    pp.save(update_fields=["internal_data"])
     result = api.send_payment_plan(pp)
     pp.refresh_from_db(fields=["internal_data"])
     assert result == {"status": "ok", "messageId": "msg-42"}

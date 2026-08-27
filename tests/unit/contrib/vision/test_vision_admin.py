@@ -43,6 +43,11 @@ def admin_client(admin_user: Any) -> Client:
 
 @pytest.fixture
 def vision_admin_context(afghanistan, admin_user, program_cycle, admin_client) -> dict[str, Any]:
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+    )
     return {
         "business_area": afghanistan,
         "user": admin_user,
@@ -162,7 +167,8 @@ def test_manual_fc_item_recovery_shows_warning_and_available_item(
     assert action_response.status_code == 200
     content = action_response.content.decode()
     assert "Assigning these FC items will automatically release the Payment Plan" in content
-    assert "immediately send it to Payment Gateway if it is a PG plan" in content
+    assert "immediately send it to Payment Gateway if" in content
+    assert "it is a PG plan" in content
     assert "FC123" in content
     assert str(funds_commitment_item.funds_commitment_item) in content
 

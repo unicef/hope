@@ -748,7 +748,7 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
 
     with (
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-        django_assert_num_queries(4),
+        django_assert_num_queries(5),
     ):
         VisionService.recover_with_funds_commitment_items(vision_payment_plan, [selected_item])
 

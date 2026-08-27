@@ -111,7 +111,9 @@ class VisionAPI(BaseAPI):
             ):
                 VisionService.set_status(locked_payment_plan, cast("VisionStatus", vision_status))
 
-            locked_payment_plan.save(update_fields=["internal_data"])
+            PaymentPlan.objects.filter(pk=locked_payment_plan.pk).update(
+                internal_data=locked_payment_plan.internal_data
+            )
 
     def _post_payment_plan(
         self,

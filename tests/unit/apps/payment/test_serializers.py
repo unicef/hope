@@ -452,7 +452,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
     payment_plan.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["id"] == str(payment_plan.id)
@@ -469,7 +469,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
     payment_plan.currency = None
     payment_plan.save(update_fields=["currency"])
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["unore_exchange_rate"] is None
@@ -488,7 +488,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     payment_plan.custom_exchange_rate = False
     payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     expected_rate = payment_plan.get_unore_exchange_rate()

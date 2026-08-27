@@ -59,14 +59,11 @@ class VisionService:
         payment_plan: PaymentPlan,
         fc_num: str,
     ) -> FundsCommitmentGroup:
-        matching_groups = list(
-            FundsCommitmentGroup.objects.select_for_update()
-            .filter(
-                funds_commitment_number=fc_num,
-                funds_commitment_items__office=payment_plan.business_area,
-            )
-            .distinct()
-        )
+        matching_group_ids = FundsCommitmentItem.objects.filter(
+            funds_commitment_group__funds_commitment_number=fc_num,
+            office=payment_plan.business_area,
+        ).values("funds_commitment_group_id")
+        matching_groups = list(FundsCommitmentGroup.objects.select_for_update().filter(pk__in=matching_group_ids))
         if not matching_groups:
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
         if len(matching_groups) != 1:

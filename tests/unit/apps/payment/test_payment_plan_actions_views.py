@@ -1734,7 +1734,7 @@ def test_assign_funds_commitments_rejects_items_from_different_groups(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "must belong to the same Funds Commitment Group" in response.json()
+    assert response.json() == ["Chosen Funds Commitment Items must belong to the same Funds Commitment Group"]
 
 
 def test_fsp_xlsx_template_list(
