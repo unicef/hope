@@ -48,70 +48,108 @@ def test_payment_search_filter_orders_by_created_at_descending(
     assert list(result.values_list("pk", flat=True)) == [newest.pk, middle.pk, oldest.pk]
 
 
-def test_payment_search_filter_orders_by_admin2_name() -> None:
+@pytest.mark.parametrize(
+    ("ordering", "first_kwargs", "second_kwargs"),
+    [
+        pytest.param(
+            "household__admin2__name",
+            lambda: {"household__admin2": AreaFactory(name="A District")},
+            lambda: {"household__admin2": AreaFactory(name="B District")},
+            id="admin2_name",
+        ),
+        pytest.param(
+            "financial_service_provider__name",
+            lambda: {"financial_service_provider": FinancialServiceProviderFactory(name="A FSP")},
+            lambda: {"financial_service_provider": FinancialServiceProviderFactory(name="B FSP")},
+            id="fsp_name",
+        ),
+        pytest.param(
+            "entitlement_quantity_usd",
+            lambda: {"entitlement_quantity_usd": 10},
+            lambda: {"entitlement_quantity_usd": 100},
+            id="entitlement_quantity_usd",
+        ),
+        pytest.param(
+            "delivered_quantity",
+            lambda: {"delivered_quantity": 10},
+            lambda: {"delivered_quantity": 100},
+            id="delivered_quantity",
+        ),
+        pytest.param(
+            "fsp_auth_code",
+            lambda: {"fsp_auth_code": "A-CODE"},
+            lambda: {"fsp_auth_code": "B-CODE"},
+            id="fsp_auth_code",
+        ),
+    ],
+)
+def test_payment_search_filter_orders_by_column(ordering: str, first_kwargs, second_kwargs) -> None:
     plan = PaymentPlanFactory()
-    payment_b = PaymentFactory(parent=plan, household__admin2=AreaFactory(name="B District"))
-    payment_a = PaymentFactory(parent=plan, household__admin2=AreaFactory(name="A District"))
+    # Created in reverse so the assertion cannot pass on insertion order alone.
+    second = PaymentFactory(parent=plan, **second_kwargs())
+    first = PaymentFactory(parent=plan, **first_kwargs())
 
-    result = PaymentSearchFilter(data={"ordering": "household__admin2__name"}, queryset=Payment.objects.all()).qs
+    result = PaymentSearchFilter(data={"ordering": ordering}, queryset=Payment.objects.all()).qs
 
-    assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
+    assert list(result.values_list("pk", flat=True)) == [first.pk, second.pk]
 
 
-def test_payment_search_filter_orders_by_fsp_name() -> None:
+def test_payment_search_filter_orders_by_reconciliation_rank() -> None:
+    """Statuses outside the reconciled/failed set must sort with their peers, not in a NULL clump."""
     plan = PaymentPlanFactory()
-    payment_b = PaymentFactory(parent=plan, financial_service_provider=FinancialServiceProviderFactory(name="B FSP"))
-    payment_a = PaymentFactory(parent=plan, financial_service_provider=FinancialServiceProviderFactory(name="A FSP"))
-
-    result = PaymentSearchFilter(
-        data={"ordering": "financial_service_provider__name"}, queryset=Payment.objects.all()
-    ).qs
-
-    assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
-
-
-def test_payment_search_filter_orders_by_entitlement_quantity_usd() -> None:
-    plan = PaymentPlanFactory()
-    high = PaymentFactory(parent=plan, entitlement_quantity_usd=100)
-    low = PaymentFactory(parent=plan, entitlement_quantity_usd=10)
-
-    result = PaymentSearchFilter(data={"ordering": "entitlement_quantity_usd"}, queryset=Payment.objects.all()).qs
-
-    assert list(result.values_list("pk", flat=True)) == [low.pk, high.pk]
-
-
-def test_payment_search_filter_orders_by_delivered_quantity() -> None:
-    plan = PaymentPlanFactory()
-    high = PaymentFactory(parent=plan, delivered_quantity=100)
-    low = PaymentFactory(parent=plan, delivered_quantity=10)
-
-    result = PaymentSearchFilter(data={"ordering": "delivered_quantity"}, queryset=Payment.objects.all()).qs
-
-    assert list(result.values_list("pk", flat=True)) == [low.pk, high.pk]
-
-
-def test_payment_search_filter_orders_by_fsp_auth_code() -> None:
-    plan = PaymentPlanFactory()
-    payment_b = PaymentFactory(parent=plan, fsp_auth_code="B-CODE")
-    payment_a = PaymentFactory(parent=plan, fsp_auth_code="A-CODE")
-
-    result = PaymentSearchFilter(data={"ordering": "fsp_auth_code"}, queryset=Payment.objects.all()).qs
-
-    assert list(result.values_list("pk", flat=True)) == [payment_a.pk, payment_b.pk]
-
-
-def test_payment_search_filter_orders_by_mark() -> None:
-    plan = PaymentPlanFactory()
-    success = PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    partial = PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_PARTIAL)
+    sent_to_fsp = PaymentFactory(parent=plan, status=Payment.STATUS_SENT_TO_FSP)
     not_distributed = PaymentFactory(parent=plan, status=Payment.STATUS_NOT_DISTRIBUTED)
-    pending = PaymentFactory(parent=plan, status=Payment.STATUS_PENDING)
+    transaction_successful = PaymentFactory(parent=plan, status=Payment.STATUS_SUCCESS)
+    partially_distributed = PaymentFactory(parent=plan, status=Payment.STATUS_DISTRIBUTION_PARTIAL)
 
-    result = PaymentSearchFilter(data={"ordering": "mark"}, queryset=Payment.objects.all()).qs
+    result = PaymentSearchFilter(data={"ordering": "reconciliation_rank"}, queryset=Payment.objects.all()).qs
 
     assert list(result.values_list("pk", flat=True)) == [
-        success.pk,
-        partial.pk,
+        transaction_successful.pk,
+        partially_distributed.pk,
         not_distributed.pk,
-        pending.pk,
+        sent_to_fsp.pk,
     ]
+
+
+def test_payment_search_filter_ranks_every_payment_status() -> None:
+    """No status may fall through the Case: NULL sorts arbitrarily, and 99 is the unranked sentinel."""
+    plan = PaymentPlanFactory()
+    for status, _label in Payment.STATUS_CHOICE:
+        payment = PaymentFactory(parent=plan)
+        Payment.objects.filter(pk=payment.pk).update(status=status)
+
+    result = PaymentSearchFilter(data={"ordering": "reconciliation_rank"}, queryset=Payment.objects.all()).qs
+
+    assert result.count() == len(Payment.STATUS_CHOICE)
+    assert not result.filter(reconciliation_rank__isnull=True).exists()
+    assert not result.filter(reconciliation_rank=99).exists()
+
+
+def test_payment_search_filter_breaks_ties_deterministically() -> None:
+    """Ties need a unique tie-breaker, otherwise LIMIT/OFFSET paging can repeat or skip a row."""
+    plan = PaymentPlanFactory()
+    payments = [PaymentFactory(parent=plan, status=Payment.STATUS_PENDING) for _ in range(5)]
+
+    result = PaymentSearchFilter(data={"ordering": "reconciliation_rank"}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == sorted(payment.pk for payment in payments)
+
+
+def test_payment_search_filter_breaks_ties_deterministically_without_ordering() -> None:
+    plan = PaymentPlanFactory()
+    now = timezone.now()
+    payments = [PaymentFactory(parent=plan) for _ in range(5)]
+    Payment.objects.filter(pk__in=[payment.pk for payment in payments]).update(created_at=now)
+
+    result = PaymentSearchFilter(data={}, queryset=Payment.objects.all()).qs
+
+    assert list(result.values_list("pk", flat=True)) == sorted(payment.pk for payment in payments)
+
+
+def test_payment_search_filter_rejects_collector_id_ordering() -> None:
+    """The Collector column shows a snapshot name, so its UUID is not a meaningful sort key."""
+    filterset = PaymentSearchFilter(data={"ordering": "collector_id"}, queryset=Payment.objects.all())
+
+    assert not filterset.is_valid()
+    assert "ordering" in filterset.errors

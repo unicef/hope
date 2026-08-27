@@ -76,7 +76,7 @@ export const headCells: HeadCell<PaymentList>[] = [
   {
     disablePadding: false,
     label: 'Reconciliation',
-    id: 'mark',
+    id: 'reconciliation_rank',
     numeric: false,
   },
 ];
@@ -150,7 +150,7 @@ export const headCellsPeople: HeadCell<PaymentList>[] = [
   {
     disablePadding: false,
     label: 'Reconciliation',
-    id: 'mark',
+    id: 'reconciliation_rank',
     numeric: false,
   },
 ];

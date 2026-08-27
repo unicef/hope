@@ -271,6 +271,19 @@ class PaymentVerificationRecordFilter(FilterSet):
         return qs.filter(unicef_id__istartswith=value)
 
 
+class StableOrderingFilter(OrderingFilter):
+    """OrderingFilter that always appends a unique tie-breaker.
+
+    `order_by()` replaces the model's `Meta.ordering`, so rows tied on the requested column have
+    no defined relative order. With LIMIT/OFFSET pagination that lets a row appear on two pages
+    or on none, because each page is a separate query and Postgres may re-plan it.
+    """
+
+    def filter(self, qs: QuerySet, value: Any) -> QuerySet:
+        ordering = [self.get_ordering_value(param) for param in value] if value else ["-created_at"]
+        return qs.order_by(*ordering, "pk")
+
+
 class PaymentSearchFilter(FilterSet):
     collector_full_name = django_filters.CharFilter(
         field_name="collector__full_name",
@@ -290,7 +303,7 @@ class PaymentSearchFilter(FilterSet):
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
 
-    ordering = OrderingFilter(
+    ordering = StableOrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
             ("household__unicef_id", "household__unicef_id"),
@@ -298,12 +311,11 @@ class PaymentSearchFilter(FilterSet):
             ("collector__full_name", "collector__full_name"),
             ("created_at", "created_at"),
             ("household__admin2__name", "household__admin2__name"),
-            ("collector_id", "collector_id"),
             ("financial_service_provider__name", "financial_service_provider__name"),
             ("entitlement_quantity_usd", "entitlement_quantity_usd"),
             ("delivered_quantity", "delivered_quantity"),
             ("fsp_auth_code", "fsp_auth_code"),
-            ("mark", "mark"),
+            ("reconciliation_rank", "reconciliation_rank"),
         )
     )
 
@@ -312,15 +324,19 @@ class PaymentSearchFilter(FilterSet):
         fields = []
 
     def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
+        # Every status must map to a value: an uncovered status would fall through to NULL,
+        # which Postgres sorts arbitrarily among itself and lumps at one end of the page.
         queryset = queryset.annotate(
-            mark=Case(
-                When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
+            reconciliation_rank=Case(
+                # PARTIAL is also in DELIVERED_STATUSES, so it has to be matched first.
                 When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
+                When(status__in=Payment.DELIVERED_STATUSES, then=Value(1)),
                 When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
                 When(status=Payment.STATUS_ERROR, then=Value(4)),
                 When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
                 When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
-                When(status=Payment.STATUS_PENDING, then=Value(7)),
+                When(status__in=Payment.PENDING_STATUSES, then=Value(7)),
+                default=Value(99),
                 output_field=IntegerField(),
             )
         )
