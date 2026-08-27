@@ -764,6 +764,17 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
     )
 
 
+def test_manual_fc_item_recovery_rejects_ineligible_plan(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(0), pytest.raises(FundsCommitmentAssignmentError) as error:
+        VisionService.recover_with_funds_commitment_items(vision_payment_plan, [])
+
+    assert error.value.status == VisionStatus.CALLBACK_FAILED
+    assert error.value.error_code == VisionErrorCode.FC_CONFLICT
+
+
 def test_assign_selected_funds_commitment_items_rejects_empty_selection(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
