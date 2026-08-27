@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     DocumentTypeFactory,
     FinancialInstitutionFactory,
     FlexibleAttributeFactory,
+    IndividualFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     RoleAssignmentFactory,
@@ -651,7 +652,7 @@ def test_retry_with_updated_data_reflects_changes(lax_api_client, lax_push_url):
     assert ind.given_name == "Jonathan"
 
 
-def test_retry_without_originating_id_creates_duplicates(lax_api_client, lax_push_url):
+def test_retry_without_originating_id_is_rejected(lax_api_client, lax_push_url):
     payload = [
         {
             "country_workspace_id": "IND_NO_OID",
@@ -668,8 +669,185 @@ def test_retry_without_originating_id_creates_duplicates(lax_api_client, lax_pus
     assert PendingIndividual.objects.count() == 1
 
     resp2 = lax_api_client.post(lax_push_url, payload, format="json")
-    assert resp2.status_code == status.HTTP_201_CREATED
-    assert PendingIndividual.objects.count() == 2
+
+    assert resp2.status_code == status.HTTP_201_CREATED, str(resp2.json())
+    assert resp2.data["accepted"] == 0
+    assert resp2.data["errors"] == 1
+    assert "country_workspace_id" in resp2.data["results"][0]
+    assert PendingIndividual.objects.count() == 1
+
+
+def test_existing_country_workspace_id_rejected_and_siblings_still_imported(
+    lax_api_client, lax_push_url, lax_business_area, lax_program
+):
+    IndividualFactory(
+        business_area=lax_business_area,
+        program=lax_program,
+        country_workspace_id="IND_TAKEN",
+    )
+    payload = [
+        {
+            "country_workspace_id": "IND_TAKEN",
+            "full_name": "Already Here",
+            "given_name": "Already",
+            "family_name": "Here",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+        {
+            "country_workspace_id": "IND_FRESH",
+            "full_name": "Brand New",
+            "given_name": "Brand",
+            "family_name": "New",
+            "birth_date": "1991-02-02",
+            "sex": "FEMALE",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 2
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {
+        "country_workspace_id": [
+            "Individual with country_workspace_id 'IND_TAKEN' already exists in this business area."
+        ]
+    }
+    assert list(response.data["individual_id_mapping"]) == ["IND_FRESH"]
+    assert PendingIndividual.objects.filter(country_workspace_id="IND_TAKEN").count() == 0
+
+
+def test_existing_withdrawn_country_workspace_id_allowed(lax_api_client, lax_push_url, lax_business_area, lax_program):
+    IndividualFactory(
+        business_area=lax_business_area,
+        program=lax_program,
+        country_workspace_id="IND_WITHDRAWN",
+        withdrawn=True,
+    )
+    payload = [
+        {
+            "country_workspace_id": "IND_WITHDRAWN",
+            "full_name": "Replacement Row",
+            "given_name": "Replacement",
+            "family_name": "Row",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+    assert PendingIndividual.objects.filter(country_workspace_id="IND_WITHDRAWN").count() == 1
+
+
+def test_existing_removed_country_workspace_id_allowed(lax_api_client, lax_push_url, lax_business_area, lax_program):
+    IndividualFactory(
+        business_area=lax_business_area,
+        program=lax_program,
+        country_workspace_id="IND_REMOVED",
+        is_removed=True,
+    )
+    payload = [
+        {
+            "country_workspace_id": "IND_REMOVED",
+            "full_name": "Replacement Row",
+            "given_name": "Replacement",
+            "family_name": "Row",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+    assert PendingIndividual.objects.filter(country_workspace_id="IND_REMOVED", is_removed=False).count() == 1
+
+
+def test_existing_country_workspace_id_in_other_business_area_allowed(lax_api_client, lax_push_url):
+    other_business_area = BusinessAreaFactory(name="Ukraine", slug="ukraine")
+    IndividualFactory(business_area=other_business_area, country_workspace_id="IND_OTHER_BA")
+    payload = [
+        {
+            "country_workspace_id": "IND_OTHER_BA",
+            "full_name": "Other Area",
+            "given_name": "Other",
+            "family_name": "Area",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    assert response.data["errors"] == 0
+    assert "IND_OTHER_BA" in response.data["individual_id_mapping"]
+
+
+def test_retry_with_same_originating_id_allowed_despite_existing_country_workspace_id(lax_api_client, lax_push_url):
+    payload = [
+        {
+            "country_workspace_id": "IND_REPUSH",
+            "full_name": "First Version",
+            "given_name": "First",
+            "family_name": "Version",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+            "originating_id": "AUR#300#1",
+        },
+    ]
+
+    resp1 = lax_api_client.post(lax_push_url, payload, format="json")
+    assert resp1.status_code == status.HTTP_201_CREATED, str(resp1.json())
+    assert resp1.data["accepted"] == 1
+
+    resp2 = lax_api_client.post(lax_push_url, payload, format="json")
+
+    assert resp2.status_code == status.HTTP_201_CREATED, str(resp2.json())
+    assert resp2.data["accepted"] == 1
+    assert resp2.data["errors"] == 0
+    assert PendingIndividual.objects.filter(country_workspace_id="IND_REPUSH").count() == 1
+
+
+def test_duplicate_country_workspace_id_within_payload_rejected(lax_api_client, lax_push_url):
+    payload = [
+        {
+            "country_workspace_id": "IND_TWICE",
+            "full_name": "First Twin",
+            "given_name": "First",
+            "family_name": "Twin",
+            "birth_date": "1990-01-01",
+            "sex": "MALE",
+        },
+        {
+            "country_workspace_id": "IND_TWICE",
+            "full_name": "Second Twin",
+            "given_name": "Second",
+            "family_name": "Twin",
+            "birth_date": "1991-02-02",
+            "sex": "FEMALE",
+        },
+    ]
+
+    response = lax_api_client.post(lax_push_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["processed"] == 2
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 2
+    assert response.data["results"][0] == {
+        "country_workspace_id": ["country_workspace_id 'IND_TWICE' is duplicated within this payload."]
+    }
+    assert PendingIndividual.objects.filter(country_workspace_id="IND_TWICE").count() == 0
 
 
 def test_phone_number_validation_flags(lax_api_client, lax_push_url):

@@ -162,6 +162,9 @@ class IndividualSerializer(serializers.ModelSerializer):
             "vector_column",
             "unicef_id",
             "program",
+            # Owned by the Country Workspace flow and only settable through its endpoints,
+            # which guard it against duplicates. This endpoint has no such guard.
+            "country_workspace_id",
         ]
 
     def validate_role(self, value: str | None) -> str | None:
