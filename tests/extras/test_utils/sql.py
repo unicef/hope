@@ -74,3 +74,13 @@ def main_list_statement(
         f"captured queries. Check that the request was made inside the capture block and that "
         f"the endpoint orders by '{order_by}' {direction}."
     )
+
+
+def statements_from(captured: CaptureQueriesContext, table: str) -> list[str]:
+    """SQL text of every captured statement whose FROM clause is `table`.
+
+    For an endpoint that runs several aggregates over one base queryset - this returns all of them,
+    so a shape assertion can be applied to each
+    and a caller can check it got as many as it expected rather than asserting over an empty list.
+    """
+    return [query["sql"] for query in captured.captured_queries if f'FROM "{table}"' in query["sql"]]
