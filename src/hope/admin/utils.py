@@ -150,6 +150,22 @@ class AutocompleteForeignKeyMixin:
         return list(result)
 
 
+class AutocompleteExcludeFieldsMixin:
+    """Exclude fields from autocomplete to respect queryset restrictions.
+
+    When ``formfield_for_foreignkey`` or ``get_form`` restricts a queryset,
+    the autocomplete widget bypasses that restriction by querying the full
+    related model. Set ``autocomplete_exclude_fields`` to the field names
+    that must stay as plain ``<select>`` widgets.
+    """
+
+    autocomplete_exclude_fields: tuple[str, ...] = ()
+
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        excluded = set(self.autocomplete_exclude_fields)
+        return [field for field in super().get_autocomplete_fields(request) if field not in excluded]
+
+
 class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 

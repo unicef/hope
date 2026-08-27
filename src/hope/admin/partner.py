@@ -10,7 +10,7 @@ from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.user_role import RoleAssignmentInline
-from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
+from hope.admin.utils import AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, HopeModelAdminMixin
 from hope.models import Area, BusinessArea, Partner, Program
 
 
@@ -21,7 +21,7 @@ class ProgramAreaForm(forms.Form):
 
 
 @admin.register(Partner)
-class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.ModelAdmin):
+class PartnerAdmin(AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)
@@ -33,6 +33,9 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
     )
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
+    # parent is restricted to root-level partners (level=0) via get_form;
+    # the autocomplete widget bypasses that queryset, so it must be excluded.
+    autocomplete_exclude_fields = ("parent",)
 
     def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
