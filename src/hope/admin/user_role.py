@@ -23,6 +23,14 @@ class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
 
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        # business_area is intentionally excluded: its choices are restricted to the
+        # partner's allowed_business_areas, and the autocomplete widget would bypass
+        # that restriction by listing every business area.
+        # role is excluded because for regular partners the choices are restricted to
+        # roles with is_available_for_partner=True, which autocomplete would bypass.
+        return [field for field in super().get_autocomplete_fields(request) if field not in ("business_area", "role")]
+
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         partner_id = request.resolver_match.kwargs.get("object_id")
 
@@ -53,6 +61,11 @@ class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
     form = RoleAssignmentAdminForm
+
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        # business_area is excluded because formfield_for_foreignkey restricts it to
+        # is_split=False, and the autocomplete widget would bypass that restriction.
+        return [field for field in super().get_autocomplete_fields(request) if field != "business_area"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -118,6 +131,12 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
         ("program", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
     )
+
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        # role is excluded because formfield_for_foreignkey restricts it to
+        # is_available_for_partner=True for regular partners, and the autocomplete
+        # widget would bypass that restriction.
+        return [field for field in super().get_autocomplete_fields(request) if field != "role"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)

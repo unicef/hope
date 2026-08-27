@@ -1,5 +1,6 @@
 import logging
 from typing import TYPE_CHECKING, Any, Sequence
+from uuid import UUID
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q, QuerySet
@@ -125,24 +126,30 @@ def _has_other_open_needs_adjudication_ticket(ticket_details: TicketNeedsAdjudic
     )
 
 
-def find_open_unique_identifiers_ticket_for_individual(
+def find_open_unique_identifiers_ticket_id_for_individual(
     individual: Individual,
-) -> TicketNeedsAdjudicationDetails | None:
-    """Find the open Unique Identifiers Similarity ticket (if any) this individual is a party to.
+) -> UUID | None:
+    """Find the ID of the earliest open Unique Identifiers Similarity ticket for an individual.
 
     Used to link a Data Change ticket that just corrected an individual's document to the
     Needs Adjudication ticket it may resolve, so the operator can be offered a close-as-unique
     prompt right after closing the Data Change ticket.
     """
-    return (
-        TicketNeedsAdjudicationDetails.objects.filter(
-            Q(golden_records_individual=individual) | Q(possible_duplicates=individual),
-            ticket__issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
-        )
-        .exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+    open_ticket_details = TicketNeedsAdjudicationDetails.objects.filter(
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY
+    ).exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+    golden_record_ticket = (
+        open_ticket_details.filter(golden_records_individual_id=individual.id)
         .order_by("created_at")
-        .first()
+        .values_list("ticket_id", "created_at")[:1]
     )
+    possible_duplicate_ticket = (
+        open_ticket_details.filter(possible_duplicates__id=individual.id)
+        .order_by("created_at")
+        .values_list("ticket_id", "created_at")[:1]
+    )
+    earliest_ticket = golden_record_ticket.union(possible_duplicate_ticket, all=True).order_by("created_at").first()
+    return earliest_ticket[0] if earliest_ticket else None
 
 
 def can_close_as_unique(ticket_details: TicketNeedsAdjudicationDetails) -> bool:
