@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import cast
 
 from django.conf import settings
 from django.db import transaction
@@ -108,7 +109,7 @@ class VisionAPI(BaseAPI):
                 # Preserve a newer callback status such as FC_NOT_FOUND, FC_MISSING, or CALLBACK_FAILED.
                 and current_status_can_be_changed_by_send_result
             ):
-                VisionService.set_status(locked_payment_plan, vision_status)
+                VisionService.set_status(locked_payment_plan, cast("VisionStatus", vision_status))
 
             locked_payment_plan.save(update_fields=["internal_data"])
 
