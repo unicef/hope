@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -63,6 +64,15 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
 class PushPeopleListSerializer(serializers.ListSerializer):
     def validate(self, attrs: list[dict]) -> list[dict]:
         cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
+        duplicated_cw_ids = sorted(cw_id for cw_id, count in Counter(cw_ids).items() if count > 1)
+        if duplicated_cw_ids:
+            raise serializers.ValidationError(
+                {
+                    "country_workspace_id": [
+                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicated_cw_ids[:100])}."
+                    ]
+                }
+            )
         existing_cw_ids = sorted(
             Individual.all_objects.filter(
                 is_removed=False,

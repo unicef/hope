@@ -239,3 +239,45 @@ def test_cw_individual_push_roundtrip_distinct_ids_persist_per_individual(
     mary = PendingIndividual.objects.get(registration_data_import=rdi, full_name="Mary Doe")
     assert john.country_workspace_id == "cw-ind-aaa"
     assert mary.country_workspace_id == "cw-ind-bbb"
+
+
+def test_cw_individual_push_duplicate_country_workspace_id_in_same_payload_returns_400(
+    token_api_client,
+    push_people_url: str,
+    rdi: RegistrationDataImport,
+    afghanistan_country,
+    base_person_data: dict,
+) -> None:
+    payload = [
+        {**base_person_data, "full_name": "John Doe", "country_workspace_id": "cw-ind-dup"},
+        {**base_person_data, "full_name": "Mary Doe", "country_workspace_id": "cw-ind-dup"},
+    ]
+
+    response = token_api_client.post(push_people_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+    assert response.json() == {
+        "country_workspace_id": ["Duplicate country_workspace_id values in payload: cw-ind-dup."]
+    }
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
+
+
+def test_cw_individual_push_multiple_duplicate_groups_lists_all_sorted(
+    token_api_client,
+    push_people_url: str,
+    rdi: RegistrationDataImport,
+    afghanistan_country,
+    base_person_data: dict,
+) -> None:
+    cw_ids = ["cw-ind-bbb", "cw-ind-bbb", "cw-ind-aaa", "cw-ind-aaa", "cw-ind-ccc"]
+    payload = [
+        {**base_person_data, "full_name": f"P{i}", "country_workspace_id": cw_id} for i, cw_id in enumerate(cw_ids)
+    ]
+
+    response = token_api_client.post(push_people_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
+    assert response.json() == {
+        "country_workspace_id": ["Duplicate country_workspace_id values in payload: cw-ind-aaa, cw-ind-bbb."]
+    }
+    assert PendingIndividual.objects.filter(registration_data_import=rdi).count() == 0
