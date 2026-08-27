@@ -59,6 +59,7 @@ from hope.models import (
 from hope.models.currency import Currency
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from uuid import UUID
 
     from rest_framework.request import Request
@@ -467,13 +468,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         if account_instances:
             PendingAccount.objects.bulk_create(account_instances, batch_size=batch_size)
 
-    def _collect_country_workspace_ids(self, request_data: Any) -> list[str]:
-        """Pull country_workspace_id out of the raw, still unvalidated payload.
-
-        Anything that is not a non-empty string is dropped here rather than handed to an
-        ``__in`` lookup. Such rows still reach the serializer, which rejects them on the
-        field's own validation.
-        """
+    def _collect_country_workspace_ids(self, request_data: Iterable[object]) -> list[str]:
         return [
             row["country_workspace_id"]
             for row in request_data
@@ -482,13 +477,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             and row["country_workspace_id"]
         ]
 
-    def _find_existing_country_workspace_ids(self, request_data: Any) -> set[str]:
-        """Business-area-wide already-exists check, mirroring PushPeopleListSerializer.
-
-        Rows that the originating_id purge in _bulk_create_individuals_and_get_unicef_ids is
-        about to hard-delete are exempt: those are an intentional re-push, not a duplicate.
-        That purge is unscoped, so this exemption is unscoped too.
-        """
+    def _find_existing_country_workspace_ids(self, request_data: Iterable[object]) -> set[str]:
         cw_ids = self._collect_country_workspace_ids(request_data)
         if not cw_ids:
             return set()
@@ -503,21 +492,16 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             country_workspace_id__in=cw_ids,
         )
         if replaced_originating_ids:
+            # re-push: these rows get hard-deleted below
             queryset = queryset.exclude(originating_id__in=replaced_originating_ids)
         return set(queryset.values_list("country_workspace_id", flat=True))
 
-    def _find_duplicated_country_workspace_ids(self, request_data: Any) -> set[str]:
-        """country_workspace_ids claimed by more than one row of the same payload.
-
-        individual_id_mapping is keyed by country_workspace_id, so two rows sharing one would
-        otherwise collapse into a single mapping entry.
-        """
+    def _find_duplicated_country_workspace_ids(self, request_data: Iterable[object]) -> set[str]:
         counts = Counter(self._collect_country_workspace_ids(request_data))
         return {cw_id for cw_id, count in counts.items() if count > 1}
 
     @staticmethod
-    def _country_workspace_id_error(cw_id: Any, existing: set[str], duplicated: set[str]) -> dict | None:
-        """Build an error in serializer.errors shape, keeping results[] uniform for the client."""
+    def _country_workspace_id_error(cw_id: object, existing: set[str], duplicated: set[str]) -> dict | None:
         if cw_id in existing:
             return {
                 "country_workspace_id": [

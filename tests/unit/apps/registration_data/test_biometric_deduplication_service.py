@@ -162,12 +162,6 @@ def test_bulk_add_pairs_country_workspace_id_binds_live_row_not_dead_twin(
 def test_bulk_add_pairs_country_workspace_id_collapses_two_live_twins(
     biometric_deduplication_context: dict[str, object],
 ) -> None:
-    """Two live rows sharing a cw_id collapse to one arbitrary winner in the findings mapping.
-
-    _resolve_id_to_hope_pk builds a plain {cw_id: pk} dict, so the second twin is silently
-    invisible to the pair mapping and never gets an adjudication ticket. This is the corruption
-    the push-time guards in CreateLaxIndividuals and PushPeopleListSerializer exist to prevent.
-    """
     program = biometric_deduplication_context["program"]
     twin_a = IndividualFactory(
         id=uuid.UUID("00000000-0000-4000-8000-000000000001"),
