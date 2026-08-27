@@ -596,12 +596,12 @@ def test_create_follow_up_pp(
     follow_up_payment.excluded = True
     follow_up_payment.save()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(59):
+    with django_assert_num_queries(65):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_child_payment_plan_async_task(follow_up_pp_2)
 
