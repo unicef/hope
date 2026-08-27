@@ -324,8 +324,6 @@ class PaymentSearchFilter(FilterSet):
         fields = []
 
     def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
-        # Every status must map to a value: an uncovered status would fall through to NULL,
-        # which Postgres sorts arbitrarily among itself and lumps at one end of the page.
         queryset = queryset.annotate(
             reconciliation_rank=Case(
                 # PARTIAL is also in DELIVERED_STATUSES, so it has to be matched first.
