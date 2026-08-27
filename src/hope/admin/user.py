@@ -34,7 +34,7 @@ from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
-from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
+from hope.admin.utils import AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
 from hope.apps.utils.security import is_root
@@ -228,7 +228,13 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(
+    AutocompleteExcludeFieldsMixin,
+    AutocompleteForeignKeyMixin,
+    HopeModelAdminMixin,
+    UserAdminPlus,
+    ADUSerMixin,
+):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -247,6 +253,9 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
+    # partner is restricted to non-parent partners via formfield_for_foreignkey;
+    # the autocomplete widget bypasses that queryset, so it must be excluded.
+    autocomplete_exclude_fields = ("partner",)
     fieldsets = (
         (None, {"fields": (("username", "azure_id"))}),
         (
@@ -280,12 +289,6 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
             },
         ),
     )
-
-    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
-        # partner is intentionally excluded: its choices are restricted to non-parent
-        # partners, and the autocomplete widget would bypass that restriction by
-        # listing every partner.
-        return [field for field in super().get_autocomplete_fields(request) if field != "partner"]
 
     def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []

@@ -7,13 +7,13 @@ from django.contrib import admin
 from django.http import HttpRequest
 from smart_admin.decorators import smart_register
 
-from hope.admin.utils import AutocompleteForeignKeyMixin
+from hope.admin.utils import AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin
 from hope.contrib.aurora import models
 from hope.models import Program
 
 
 @smart_register(models.Project)
-class ProjectAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
+class ProjectAdmin(AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("name", "organization", "programme")
     list_filter = (
         ("organization", AutoCompleteFilter),
@@ -21,6 +21,10 @@ class ProjectAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAd
     )
     readonly_fields = ("name", "organization")
     search_fields = ("name",)
+    # programme is restricted by business_area, ACTIVE status, and non-deprecated
+    # data_collecting_type via get_form; the autocomplete widget bypasses that
+    # queryset, so it must be excluded.
+    autocomplete_exclude_fields = ("programme",)
 
     def get_form(
         self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any
