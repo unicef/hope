@@ -25,12 +25,19 @@ def program() -> Program:
     return ProgramFactory(business_area=business_area, biometric_deduplication_enabled=True)
 
 
-def _rdi(program: Program, status: str, arrived_hours_ago: int) -> RegistrationDataImport:
+def _rdi(
+    program: Program,
+    status: str,
+    arrived_hours_ago: int,
+    *,
+    legacy: bool = False,
+) -> RegistrationDataImport:
+    """``legacy=True`` builds a pre-CW XLSX/Kobo RDI: no country_workspace_id, so it can never merge."""
     rdi = RegistrationDataImportFactory(
         program=program,
         business_area=program.business_area,
         status=status,
-        country_workspace_id=str(uuid.uuid4()),
+        country_workspace_id=None if legacy else str(uuid.uuid4()),
     )
     RegistrationDataImport.objects.filter(pk=rdi.pk).update(
         import_date=timezone.now() - datetime.timedelta(hours=arrived_hours_ago)
@@ -119,6 +126,33 @@ def test_dispatcher_is_scoped_to_its_program(mock_fetch: Mock, program: Program)
 @patch(DISPATCH_TARGET)
 def test_dispatcher_skips_delete_scheduled_head_and_takes_next_scheduled(mock_fetch: Mock, program: Program) -> None:
     _rdi(program, RegistrationDataImport.DELETE_SCHEDULED, arrived_hours_ago=3)
+    scheduled = _rdi(program, RegistrationDataImport.MERGE_SCHEDULED, arrived_hours_ago=1)
+
+    RdiMergeDispatcher().execute(str(program.id))
+
+    mock_fetch.assert_called_once()
+    assert mock_fetch.call_args.args[0].pk == scheduled.pk
+
+
+@pytest.mark.parametrize(
+    "legacy_status",
+    [
+        RegistrationDataImport.IMPORT_ERROR,
+        RegistrationDataImport.MERGE_ERROR,
+        RegistrationDataImport.MERGE_SCHEDULED,
+        RegistrationDataImport.MERGING,
+    ],
+)
+@patch(DISPATCH_TARGET)
+def test_dispatcher_skips_legacy_head_without_country_workspace_id(
+    mock_fetch: Mock, program: Program, legacy_status: str
+) -> None:
+    """A business area may be switched to CW-only after it already ran XLSX/Kobo imports.
+
+    Those legacy RDIs keep a NULL country_workspace_id forever and fetch_findings_and_merge_rdi
+    refuses them, so if one is allowed to be the head it blocks the queue permanently.
+    """
+    _rdi(program, legacy_status, arrived_hours_ago=48, legacy=True)
     scheduled = _rdi(program, RegistrationDataImport.MERGE_SCHEDULED, arrived_hours_ago=1)
 
     RdiMergeDispatcher().execute(str(program.id))

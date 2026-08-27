@@ -186,6 +186,7 @@ def is_cw_merge_queue_retry_enabled(btn: StandardButton) -> bool:
         and RegistrationDataImport.objects.filter(
             program=program,
             status__in=(RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR),
+            country_workspace_id__isnull=False,
         ).exists()
     )
 
@@ -276,6 +277,7 @@ class ProgramAdmin(
                 .filter(
                     program=program,
                     status__in=(RegistrationDataImport.MERGE_ERROR, RegistrationDataImport.IMPORT_ERROR),
+                    country_workspace_id__isnull=False,
                 )
                 .order_by("import_date", "id")
                 .first()

@@ -4,6 +4,7 @@ from datetime import timedelta
 from io import BytesIO
 from typing import Any
 from unittest.mock import MagicMock, patch
+import uuid
 import zipfile
 
 from concurrency.forms import get_signer
@@ -422,19 +423,27 @@ def admin_client(user: User) -> Client:
 
 
 @pytest.mark.parametrize(
-    ("ingest_source", "status", "expected"),
+    ("ingest_source", "status", "has_cw_id", "expected"),
     [
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_ERROR, True),
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.IMPORT_ERROR, True),
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_SCHEDULED, False),
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGED, False),
-        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_ERROR, False),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_ERROR, True, True),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.IMPORT_ERROR, True, True),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_SCHEDULED, True, False),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGED, True, False),
+        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_ERROR, True, False),
+        # Legacy XLSX/Kobo leftovers cannot be retried, so the button must stay disabled for them.
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGE_ERROR, False, False),
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.IMPORT_ERROR, False, False),
     ],
 )
-def test_is_cw_merge_queue_retry_enabled(ingest_source: str, status: str, expected: bool) -> None:
+def test_is_cw_merge_queue_retry_enabled(ingest_source: str, status: str, has_cw_id: bool, expected: bool) -> None:
     business_area = BusinessAreaFactory(ingest_source=ingest_source)
     program = ProgramFactory(business_area=business_area)
-    RegistrationDataImportFactory(business_area=business_area, program=program, status=status)
+    RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        status=status,
+        country_workspace_id=str(uuid.uuid4()) if has_cw_id else None,
+    )
     button = type("Button", (), {"original": program})()
 
     assert is_cw_merge_queue_retry_enabled(button) is expected
@@ -461,6 +470,7 @@ def test_retry_cw_merge_queue_reschedules_failed_head(
         business_area=cw_business_area,
         program=cw_program,
         status=status,
+        country_workspace_id=str(uuid.uuid4()),
         error_message="boom",
         sentry_id="abc123",
     )
@@ -485,10 +495,16 @@ def test_retry_cw_merge_queue_reschedules_oldest_failed(
     django_capture_on_commit_callbacks: Any,
 ) -> None:
     older = RegistrationDataImportFactory(
-        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+        business_area=cw_business_area,
+        program=cw_program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
     )
     newer = RegistrationDataImportFactory(
-        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+        business_area=cw_business_area,
+        program=cw_program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
     )
     # import_date is auto_now_add; force a deterministic arrival order.
     RegistrationDataImport.objects.filter(pk=older.pk).update(import_date=timezone.now() - timedelta(hours=1))
@@ -513,10 +529,16 @@ def test_retry_cw_merge_queue_ignores_other_programme(
 ) -> None:
     other_program = ProgramFactory(name="Other CW Program", business_area=cw_business_area)
     target_rdi = RegistrationDataImportFactory(
-        business_area=cw_business_area, program=cw_program, status=RegistrationDataImport.MERGE_ERROR
+        business_area=cw_business_area,
+        program=cw_program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
     )
     other_rdi = RegistrationDataImportFactory(
-        business_area=cw_business_area, program=other_program, status=RegistrationDataImport.MERGE_ERROR
+        business_area=cw_business_area,
+        program=other_program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
     )
 
     url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
@@ -529,6 +551,46 @@ def test_retry_cw_merge_queue_ignores_other_programme(
     other_rdi.refresh_from_db()
     assert target_rdi.status == RegistrationDataImport.MERGE_SCHEDULED
     assert other_rdi.status == RegistrationDataImport.MERGE_ERROR
+    mock_dispatcher.assert_called_once_with(cw_program)
+
+
+def test_retry_cw_merge_queue_skips_legacy_rdi_without_country_workspace_id(
+    admin_client: Client,
+    cw_business_area: BusinessArea,
+    cw_program: Program,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    """Retry must not resurrect a pre-CW XLSX/Kobo RDI.
+
+    Rescheduling one to MERGE_SCHEDULED makes it the queue head, and
+    fetch_findings_and_merge_rdi refuses anything with a NULL country_workspace_id,
+    so the queue would stall behind it instead of being retried.
+    """
+    legacy = RegistrationDataImportFactory(
+        business_area=cw_business_area,
+        program=cw_program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        country_workspace_id=None,
+    )
+    cw_rdi = RegistrationDataImportFactory(
+        business_area=cw_business_area,
+        program=cw_program,
+        status=RegistrationDataImport.MERGE_ERROR,
+        country_workspace_id=str(uuid.uuid4()),
+    )
+    # import_date is auto_now_add; the legacy import has to be the older one to be the head.
+    RegistrationDataImport.objects.filter(pk=legacy.pk).update(import_date=timezone.now() - timedelta(hours=1))
+
+    url = reverse("admin:program_program_retry_cw_merge_queue", args=[cw_program.pk])
+    with patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task") as mock_dispatcher:
+        with django_capture_on_commit_callbacks(execute=True):
+            response = admin_client.get(url)
+
+    assert response.status_code == status.HTTP_302_FOUND
+    legacy.refresh_from_db()
+    cw_rdi.refresh_from_db()
+    assert legacy.status == RegistrationDataImport.IMPORT_ERROR
+    assert cw_rdi.status == RegistrationDataImport.MERGE_SCHEDULED
     mock_dispatcher.assert_called_once_with(cw_program)
 
 

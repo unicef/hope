@@ -29,7 +29,11 @@ class RdiMergeDispatcher:
         from hope.apps.registration_data.celery_tasks import fetch_findings_and_merge_rdi
 
         head = (
-            RegistrationDataImport.objects.filter(program_id=program_id, status__in=self._QUEUE_STATUSES)
+            RegistrationDataImport.objects.filter(
+                program_id=program_id,
+                status__in=self._QUEUE_STATUSES,
+                country_workspace_id__isnull=False,
+            )
             # "id" is a stable tiebreak so same-instant import_dates don't let the head flap
             # between dispatcher runs (import_date is auto_now_add, ties are possible).
             .order_by("import_date", "id")
