@@ -152,6 +152,7 @@ class Command(BaseCommand):
 
         token = self._create_api_token(created_bas)
         result["api_token"] = token.key
+        result["api_token_id"] = token.pk
 
         self.stdout.write("=== DEDUP SETUP DONE ===")
         self.stdout.write(json.dumps(result, indent=2))
@@ -252,7 +253,7 @@ class Command(BaseCommand):
             user=root,
             grants=[grant.value for grant in Grant],
             valid_from=now.date(),
-            valid_to=(now + relativedelta(years=1)).date(),
+            valid_to=(now + relativedelta(days=30)).date(),
         )
         token.valid_for.set(business_areas)
         return token

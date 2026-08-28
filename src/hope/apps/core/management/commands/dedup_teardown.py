@@ -35,6 +35,7 @@ from django.core.management import BaseCommand
 
 from hope.apps.household.services.index_management import delete_program_indexes
 from hope.models import (
+    APIToken,
     BusinessArea,
     Household,
     HouseholdCollection,
@@ -93,6 +94,12 @@ class Command(BaseCommand):
                 name__in=[f"UNICEF Partner for {slug}" for slug in bas.values_list("slug", flat=True)]
             ).values_list("id", flat=True)
         )
+        token_ids = list(
+            APIToken.objects.filter(valid_for__id__in=ba_ids)
+            .exclude(valid_for__id__in=BusinessArea.objects.exclude(id__in=ba_ids).values("id"))
+            .values_list("id", flat=True)
+            .distinct()
+        )
 
         for program_id in program_ids:
             delete_program_indexes(str(program_id))
@@ -114,9 +121,10 @@ class Command(BaseCommand):
         # BA delete didn't cascade them, then the now-unreferenced partners).
         RoleAssignment.objects.filter(partner_id__in=subpartner_ids).delete()
         Partner.objects.filter(id__in=subpartner_ids).delete()
+        APIToken.objects.filter(id__in=token_ids).delete()
 
         self.stdout.write(
             f"=== DEDUP TEARDOWN DONE === removed {len(ba_ids)} BA(s), {len(program_ids)} program(s), "
             f"{len(hh_coll_ids)} hh-collection(s), {len(ind_coll_ids)} ind-collection(s), "
-            f"{len(subpartner_ids)} sub-partner(s)"
+            f"{len(subpartner_ids)} sub-partner(s), {len(token_ids)} API token(s)"
         )
