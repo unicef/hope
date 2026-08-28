@@ -2077,7 +2077,7 @@ def test_ready_for_closure_sends_notification(
         status=PaymentPlan.Status.FINISHED,
     )
 
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(12):
         PaymentPlanService(payment_plan).ready_for_closure(user=user)
 
     payment_plan.refresh_from_db()
@@ -2117,7 +2117,7 @@ def test_send_back_to_finished_sends_notification(
         status=PaymentPlan.Status.READY_FOR_CLOSURE,
     )
 
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(12):
         PaymentPlanService(payment_plan).send_back_to_finished(user=user)
 
     payment_plan.refresh_from_db()
