@@ -966,27 +966,33 @@ class PaymentPlanService:
 
         return self.payment_plan
 
+    def _has_newer_sibling_plan(self) -> bool:
+        return (
+            PaymentPlan.objects.filter(
+                source_payment_plan=self.payment_plan.source_payment_plan,
+                plan_type=self.payment_plan.plan_type,
+                created_at__gt=self.payment_plan.created_at,
+            )
+            .exclude(pk=self.payment_plan.pk)
+            .exists()
+        )
+
+    def _is_top_up_with_amendment(self) -> bool:
+        return (
+            self.payment_plan.plan_type == PaymentPlan.PlanType.TOP_UP
+            and PaymentPlan.objects.filter(
+                source_payment_plan=self.payment_plan, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT
+            ).exists()
+        )
+
     def _delete_child_plan(self) -> PaymentPlan:
         """Soft-delete the most recent child plan (Top-Up / Follow-Up / Amendment) together with its payments."""
         payment_plan = self.payment_plan
-        if (
-            PaymentPlan.objects.filter(
-                source_payment_plan=payment_plan.source_payment_plan,
-                plan_type=payment_plan.plan_type,
-                created_at__gt=payment_plan.created_at,
-            )
-            .exclude(pk=payment_plan.pk)
-            .exists()
-        ):
+        if self._has_newer_sibling_plan():
             raise ValidationError(
                 f"Only the most recent {payment_plan.get_plan_type_display()} of this Payment Plan can be deleted"
             )
-        if (
-            payment_plan.plan_type == PaymentPlan.PlanType.TOP_UP
-            and PaymentPlan.objects.filter(
-                source_payment_plan=payment_plan, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT
-            ).exists()
-        ):
+        if self._is_top_up_with_amendment():
             raise ValidationError("Cannot delete a Top Up that has a Top Up Amendment; delete the Amendment first")
 
         payment_plan.payment_items.all().delete()
