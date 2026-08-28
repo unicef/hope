@@ -183,11 +183,11 @@ class UserViewSet(
         individual_id = request.query_params.get("individual")
 
         if program_code:
-            program = Program.objects.get(business_area=business_area, code=program_code)
+            program = get_object_or_404(Program, business_area=business_area, code=program_code)
         elif household_id:
-            program = Household.objects.get(id=household_id).program
+            program = get_object_or_404(Household, id=household_id, business_area=business_area).program
         elif individual_id:
-            program = Individual.objects.get(id=individual_id).program
+            program = get_object_or_404(Individual, id=individual_id, business_area=business_area).program
         else:
             program = None
 
