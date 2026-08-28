@@ -15,6 +15,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     User,
@@ -27,10 +28,38 @@ if TYPE_CHECKING:
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.currency import Currency
 
-# NOTE: the activity-log helpers below deliberately re-implement what
-# hope.models.log_entry.log_create() does (build a LogEntry + attach the program M2M + diff),
-# bypassing it so they can bulk-insert and skip no-op diffs without per-row queries. If log_create's
-# semantics change (action detection, how programs/business_area are resolved), mirror it here too.
+
+def _log_update(
+    instance: Any,
+    changes: dict,
+    *,
+    business_area: Any,
+    program_pk: Any,
+    user_id: str | None,
+) -> None:
+    """Write an UPDATE LogEntry for a change applied outside a logging view.
+
+    Callers diff their own model against its ``ACTIVITY_LOG_MAPPING`` and pass the result in. Does
+    by hand what log_entry.log_create() does - build the LogEntry, attach the program M2M - so the
+    diff runs once instead of twice and an unchanged object writes no row at all, the same guard
+    the admin save_model uses. Keep in step with log_create if it changes how it detects actions or
+    resolves programs.
+
+    The mappings include FK fields, which the diff dereferences to get a readable label, so each
+    call costs a few extra SELECTs - fine for writes that happen once per plan or group, never per
+    payment. ``user_id`` is None when a system task made the change.
+    """
+    if not changes:
+        return
+    log = LogEntry.objects.create(
+        action=LogEntry.UPDATE,
+        content_object=instance,
+        user=User.objects.filter(pk=user_id).first() if user_id else None,
+        business_area=business_area,
+        object_repr=str(instance),
+        changes=changes,
+    )
+    log.programs.add(program_pk)
 
 
 def log_payment_plan_change(
@@ -38,36 +67,40 @@ def log_payment_plan_change(
     old_payment_plan: PaymentPlan,
     user_id: str | None,
 ) -> None:
-    """Create an activity log entry for a PaymentPlan change applied outside a logging view.
+    """Log a PaymentPlan change made outside a logging view.
 
-    Async tasks and gateway/file sync flows mutate a PaymentPlan after (or without) the
-    dispatching view's ``log_create()`` snapshot, so the actual changes (status, steficon rule,
-    totals, ...) would otherwise go unlogged. ``user_id`` is None for system-initiated runs
-    (periodic gateway sync, rebuild).
-
-    The diff is computed once and the entry is inserted directly (instead of via ``log_create``,
-    which re-diffs): this both skips no-op rows when only unmapped fields changed -- matching the
-    admin ``save_model`` guard -- and avoids a second (FK-heavy) diff pass over the PaymentPlan.
-
-    Note: PaymentPlan.ACTIVITY_LOG_MAPPING includes FK fields (financial_service_provider,
-    delivery_mechanism, ...) whose values are dereferenced here for a human-readable label, so the
-    diff issues a few extra SELECTs. This is once per plan (not per payment / not an N+1 over rows);
-    the readable FK labels are worth the cost on these comparatively rare plan-level log writes.
+    Async tasks and the gateway/file sync flows touch the plan after the dispatching view took its
+    ``log_create()`` snapshot, or without any view at all, so the status, steficon rule and totals
+    they change would otherwise go unlogged.
     """
-    changes = create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING)
-    if not changes:
-        return
-    user = User.objects.filter(pk=user_id).first() if user_id else None
-    log = LogEntry.objects.create(
-        action=LogEntry.UPDATE,
-        content_object=payment_plan,
-        user=user,
+    _log_update(
+        payment_plan,
+        create_diff(old_payment_plan, payment_plan, PaymentPlan.ACTIVITY_LOG_MAPPING),
         business_area=payment_plan.business_area,
-        object_repr=str(payment_plan),
-        changes=changes,
+        program_pk=payment_plan.program.pk,
+        user_id=user_id,
     )
-    # program_cycle is a non-null FK and ProgramCycle.program is non-null, so program is always set.
-    log.programs.add(payment_plan.program.pk)
+
+
+def log_payment_plan_group_change(
+    payment_plan_group: PaymentPlanGroup,
+    old_payment_plan_group: PaymentPlanGroup,
+    user_id: str | None,
+) -> None:
+    """Log a PaymentPlanGroup change made outside a logging view.
+
+    The export and import tasks flip ``background_action_status`` after the dispatching view took
+    its ``log_create()`` snapshot, so how the run ended - finished or error - would otherwise go
+    unlogged.
+    """
+    program = payment_plan_group.cycle.program
+    _log_update(
+        payment_plan_group,
+        create_diff(old_payment_plan_group, payment_plan_group, PaymentPlanGroup.ACTIVITY_LOG_MAPPING),
+        business_area=program.business_area,
+        program_pk=program.pk,
+        user_id=user_id,
+    )
 
 
 def _log_payment_plan_event(

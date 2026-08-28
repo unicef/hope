@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.request import Request
@@ -24,11 +24,13 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import Household, Individual, IndividualRoleInHousehold, User
+from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, Program, User
 
 
-def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> dict[str, str]:
-    """Map household unicef id -> individual unicef id, for one page of tickets.
+def get_fallback_individual_unicef_ids(
+    tickets: Iterable[GrievanceTicket], business_area: BusinessArea
+) -> dict[str, str]:
+    """Map household unicef id -> individual unicef id, for one page of tickets. Scoped to the business area.
 
     Only social worker programme tickets need it, so the rest of the page is skipped.
     """
@@ -42,7 +44,7 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
         return {}
 
     return dict(
-        Individual.objects.filter(household__unicef_id__in=household_unicef_ids)
+        Individual.objects.filter(business_area=business_area, household__unicef_id__in=household_unicef_ids)
         # Lowest id per household, the same individual the old per-ticket subquery picked.
         .order_by("household__unicef_id", "id")
         .distinct("household__unicef_id")
@@ -50,8 +52,8 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
     )
 
 
-def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str, int]:
-    """Map household unicef id -> number of *other* tickets for that household, for one page."""
+def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket], business_area: BusinessArea) -> dict[str, int]:
+    """Map household unicef id -> number of *other* tickets in this business area, for one page."""
     household_unicef_ids = {ticket.household_unicef_id for ticket in tickets if ticket.household_unicef_id}
 
     if not household_unicef_ids:
@@ -59,7 +61,9 @@ def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str,
 
     return {
         row["household_unicef_id"]: row["ticket_count"] - 1
-        for row in GrievanceTicket.objects.filter(household_unicef_id__in=household_unicef_ids)
+        for row in GrievanceTicket.objects.filter(
+            business_area=business_area, household_unicef_id__in=household_unicef_ids
+        )
         .values("household_unicef_id")
         .annotate(ticket_count=Count("pk"))
     }
@@ -90,8 +94,8 @@ class GrievanceListBatchMixin:
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         if page is None:  # pagination disabled - nothing to batch per page
             return super().list(request, *args, **kwargs)
-        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
-        self.existing_tickets_counts = get_existing_tickets_counts(page)
+        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page, self.business_area)
+        self.existing_tickets_counts = get_existing_tickets_counts(page, self.business_area)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
 
@@ -266,6 +270,28 @@ class GrievancePermissionsMixin:
         if can_view_sensitive_owner:
             filters |= Q(**assigned_to_filter) & Q(**sensitive_category_filter)  # type: ignore[arg-type]
         return filters
+
+
+class GrievanceDashboardMixin:
+    """Common dashboard logic for grievance tickets."""
+
+    def get_dashboard_base_queryset(self, program: Program | None = None) -> QuerySet:
+        """Get base queryset for dashboard data with optional program filtering."""
+        through = GrievanceTicket.programs.through
+        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area=self.business_area)
+
+        if program:
+            return base_queryset.filter(id__in=through.objects.filter(program=program).values("grievanceticket_id"))
+
+        # evaluated on purpose: passing a subquery here brings the `program_program` join back.
+        active_program_ids = list(
+            Program.objects.filter(business_area=self.business_area, status=Program.ACTIVE).values_list("id", flat=True)
+        )
+        has_active_program = Exists(
+            through.objects.filter(grievanceticket_id=OuterRef("pk"), program_id__in=active_program_ids)
+        )
+        has_no_program = ~Exists(through.objects.filter(grievanceticket_id=OuterRef("pk")))
+        return base_queryset.filter(has_active_program | has_no_program)
 
 
 class GrievanceMutationMixin:
