@@ -966,17 +966,10 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def _has_newer_sibling_plan(self) -> bool:
-        return PaymentPlan.objects.filter(
-            source_payment_plan=self.payment_plan.source_payment_plan,
-            plan_type=self.payment_plan.plan_type,
-            created_at__gt=self.payment_plan.created_at,
-        ).exists()
-
     def _delete_child_plan(self) -> PaymentPlan:
         """Soft-delete the most recent child plan (Top-Up / Follow-Up / Amendment) together with its payments."""
         payment_plan = self.payment_plan
-        if self._has_newer_sibling_plan():
+        if payment_plan.has_newer_sibling_plan:
             raise ValidationError(
                 f"Only the most recent {payment_plan.get_plan_type_display()} of this Payment Plan can be deleted"
             )

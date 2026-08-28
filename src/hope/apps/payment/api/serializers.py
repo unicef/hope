@@ -895,6 +895,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_send_to_payment_gateway = serializers.BooleanField()
     can_send_to_vision = serializers.BooleanField()
     can_split = serializers.SerializerMethodField()
+    can_delete = serializers.BooleanField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
@@ -945,6 +946,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "can_send_to_payment_gateway",
             "can_send_to_vision",
             "can_split",
+            "can_delete",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",

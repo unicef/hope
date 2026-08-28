@@ -120,6 +120,16 @@ def amendment_payment(amendment: PaymentPlan, top_up_payment: Payment) -> Paymen
 
 
 @pytest.fixture
+def open_regular_plan(user: User, business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.OPEN,
+    )
+
+
+@pytest.fixture
 def newer_top_up(top_up: PaymentPlan, source_plan: PaymentPlan) -> PaymentPlan:
     return PaymentPlanFactory(
         program_cycle=source_plan.program_cycle,
@@ -232,6 +242,23 @@ def test_delete_child_plan_wrong_status_raises(top_up: PaymentPlan) -> None:
         PaymentPlanService(payment_plan=top_up).delete()
 
     assert error.value.detail[0] == "Deletion is only allowed when the status is 'Open'"
+
+
+def test_can_delete_true_for_newest_top_up(top_up: PaymentPlan) -> None:
+    assert top_up.can_delete is True
+
+
+def test_can_delete_false_for_top_up_with_newer_sibling(top_up: PaymentPlan, newer_top_up: PaymentPlan) -> None:
+    assert top_up.can_delete is False
+    assert newer_top_up.can_delete is True
+
+
+def test_can_delete_true_for_open_regular_plan(open_regular_plan: PaymentPlan) -> None:
+    assert open_regular_plan.can_delete is True
+
+
+def test_can_delete_false_for_non_open_status(source_plan: PaymentPlan) -> None:
+    assert source_plan.can_delete is False
 
 
 def test_delete_top_up_query_count(
