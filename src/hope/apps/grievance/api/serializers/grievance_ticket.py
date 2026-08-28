@@ -315,7 +315,7 @@ class GrievanceChoicesSerializer(serializers.Serializer):
         return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
 
     def get_grievance_ticket_filter_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        """All non system-generated categories"""
+        """All non system-generated categories."""
         return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
 
     def get_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
