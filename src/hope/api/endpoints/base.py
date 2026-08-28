@@ -29,6 +29,9 @@ class SelectedBusinessAreaMixin:
         except ObjectDoesNotExist:
             raise Http404
 
+    def get_serializer_context(self) -> dict[str, Any]:
+        return {**super().get_serializer_context(), "business_area": self.selected_business_area}
+
 
 class HOPEAPIView(APIView):
     permission_classes = [HOPEPermission]
