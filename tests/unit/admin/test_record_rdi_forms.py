@@ -50,6 +50,13 @@ def all_except_cw_registration() -> Registration:
 
 
 @pytest.fixture
+def registration_without_business_area() -> Registration:
+    organization = OrganizationFactory(business_area=None, slug="slug-with-no-business-area")
+    project = ProjectFactory(organization=organization)
+    return RegistrationFactory(project=project)
+
+
+@pytest.fixture
 def cw_only_loading_rdi() -> RegistrationDataImport:
     return _loading_rdi_for_ingest_source(BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
 
@@ -83,6 +90,25 @@ def test_create_rdi_form_accepts_all_except_cw_business_area(
     form = CreateRDIForm(
         data={
             "registration": all_except_cw_registration.pk,
+            "status": BaseRDIForm.STATUS_TO_IMPORT,
+            "filters": "",
+            "name": "",
+            "is_open": False,
+        },
+        request=None,
+    )
+
+    assert form.is_valid()
+
+
+def test_create_rdi_form_accepts_registration_whose_organization_slug_has_no_business_area(
+    registration_without_business_area: Registration,
+) -> None:
+    assert not BusinessArea.objects.filter(slug="slug-with-no-business-area").exists()
+
+    form = CreateRDIForm(
+        data={
+            "registration": registration_without_business_area.pk,
             "status": BaseRDIForm.STATUS_TO_IMPORT,
             "filters": "",
             "name": "",

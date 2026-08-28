@@ -44,15 +44,6 @@ from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 logger = logging.getLogger(__name__)
 
 
-def is_country_workspace_rdi_rerun_enabled(btn: StandardButton) -> bool:
-    rdi = btn.original
-    return rdi.business_area.is_rdi_ingest_source_country_workspace_only and rdi.status in (
-        RegistrationDataImport.IMPORT_ERROR,
-        RegistrationDataImport.MERGE_ERROR,
-        RegistrationDataImport.MERGE_SCHEDULED,
-    )
-
-
 def is_non_country_workspace_rdi_merge_retry_enabled(btn: StandardButton) -> bool:
     rdi = btn.original
     return (
@@ -174,30 +165,6 @@ class RegistrationDataImportAdmin(ViewOnUiMixin, AdminAutoCompleteSearchMixin, H
             self.message_user(
                 request,
                 "An error occurred while processing RDI Merge task",
-                messages.ERROR,
-            )
-        return None
-
-    @button(
-        label="Re-run CW RDI Processing",
-        permission="registration_data.rerun_rdi",
-        enabled=is_country_workspace_rdi_rerun_enabled,
-    )
-    def rerun_cw_rdi(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        try:
-            rdi = self.get_object(request, pk)
-            if rdi is None:
-                self.message_user(request, "Registration Data Import not found", messages.ERROR)
-                return None
-            from hope.apps.registration_data.celery_tasks import fetch_findings_and_merge_rdi
-
-            fetch_findings_and_merge_rdi(rdi)
-            self.message_user(request, "CW RDI reprocessing task has started")
-        except OperationalError as e:
-            logger.warning(e)
-            self.message_user(
-                request,
-                "An error occurred while processing CW RDI task",
                 messages.ERROR,
             )
         return None

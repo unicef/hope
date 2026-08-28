@@ -2,7 +2,6 @@
 
 from typing import Any
 from unittest.mock import Mock, patch
-import uuid
 
 from constance.test import override_config
 from django.contrib.auth import get_user_model
@@ -26,7 +25,6 @@ from extras.test_utils.factories import (
 )
 from hope.admin.registration_data import (
     RegistrationDataImportAdmin,
-    is_country_workspace_rdi_rerun_enabled,
     is_non_country_workspace_rdi_merge_retry_enabled,
 )
 from hope.apps.grievance.models import (
@@ -225,113 +223,6 @@ def test_rerun_merge_rdi_schedules_async_job(
 
     assert response.status_code == 302
     mock_merge_registration_data_import_task.assert_called_once_with(rdi)
-
-
-@patch("hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi")
-@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
-def test_rerun_cw_rdi_merge_error_routes_to_worker(
-    mock_merge: Mock,
-    mock_worker: Mock,
-    admin_client: Client,
-    afghanistan: BusinessArea,
-    program: Program,
-) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=afghanistan,
-        program=program,
-        status=RegistrationDataImport.MERGE_ERROR,
-        country_workspace_id=str(uuid.uuid4()),
-    )
-
-    url = reverse("admin:registration_data_registrationdataimport_rerun_cw_rdi", args=[rdi.pk])
-    response = admin_client.post(url)
-
-    assert response.status_code == 302
-    mock_worker.assert_called_once_with(rdi)
-    mock_merge.assert_not_called()
-
-
-@patch("hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi")
-@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
-def test_rerun_cw_rdi_import_error_routes_to_worker(
-    mock_merge: Mock,
-    mock_worker: Mock,
-    admin_client: Client,
-    afghanistan: BusinessArea,
-    program: Program,
-) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=afghanistan,
-        program=program,
-        status=RegistrationDataImport.IMPORT_ERROR,
-        country_workspace_id=str(uuid.uuid4()),
-    )
-
-    url = reverse("admin:registration_data_registrationdataimport_rerun_cw_rdi", args=[rdi.pk])
-    response = admin_client.post(url)
-
-    assert response.status_code == 302
-    mock_worker.assert_called_once_with(rdi)
-    mock_merge.assert_not_called()
-
-
-@patch("hope.apps.registration_data.celery_tasks.fetch_findings_and_merge_rdi")
-@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
-def test_rerun_cw_rdi_merge_scheduled_routes_to_worker(
-    mock_merge: Mock,
-    mock_worker: Mock,
-    admin_client: Client,
-    afghanistan: BusinessArea,
-    program: Program,
-) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=afghanistan,
-        program=program,
-        status=RegistrationDataImport.MERGE_SCHEDULED,
-        country_workspace_id=str(uuid.uuid4()),
-    )
-
-    url = reverse("admin:registration_data_registrationdataimport_rerun_cw_rdi", args=[rdi.pk])
-    response = admin_client.post(url)
-
-    assert response.status_code == 302
-    mock_worker.assert_called_once_with(rdi)
-    mock_merge.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    "status",
-    [
-        RegistrationDataImport.IMPORT_ERROR,
-        RegistrationDataImport.MERGE_ERROR,
-        RegistrationDataImport.MERGE_SCHEDULED,
-    ],
-)
-def test_is_cw_rerunnable_true_for_cw_ingest_invalid_states(status: str) -> None:
-    business_area = BusinessArea(ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
-    rdi = RegistrationDataImport(business_area=business_area, status=status)
-    button = type("Button", (), {"original": rdi})()
-
-    assert is_country_workspace_rdi_rerun_enabled(button) is True
-
-
-@pytest.mark.parametrize(
-    ("ingest_source", "status"),
-    [
-        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.IMPORT_ERROR),
-        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_ERROR),
-        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, RegistrationDataImport.MERGE_SCHEDULED),
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.IN_REVIEW),
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGED),
-        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, RegistrationDataImport.MERGING),
-    ],
-)
-def test_is_cw_rerunnable_false_for_non_cw_ingest_or_terminal(ingest_source: str, status: str) -> None:
-    business_area = BusinessArea(ingest_source=ingest_source)
-    rdi = RegistrationDataImport(business_area=business_area, status=status)
-    button = type("Button", (), {"original": rdi})()
-
-    assert is_country_workspace_rdi_rerun_enabled(button) is False
 
 
 @pytest.mark.parametrize(

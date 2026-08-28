@@ -103,8 +103,8 @@ class BaseRDIForm(forms.Form):
         super().clean()
         registration = self.cleaned_data.get("registration")
         if registration:
-            business_area = BusinessArea.objects.get(slug=registration.project.organization.slug)
-            if business_area.is_rdi_ingest_source_country_workspace_only:
+            business_area = BusinessArea.objects.filter(slug=registration.project.organization.slug).first()
+            if business_area and business_area.is_rdi_ingest_source_country_workspace_only:
                 raise forms.ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
         filters, excludes = self.cleaned_data["filters"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
