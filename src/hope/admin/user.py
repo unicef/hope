@@ -276,6 +276,12 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         ),
     )
 
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        # partner is intentionally excluded: its choices are restricted to non-parent
+        # partners, and the autocomplete widget would bypass that restriction by
+        # listing every partner.
+        return [field for field in super().get_autocomplete_fields(request) if field != "partner"]
+
     def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
 

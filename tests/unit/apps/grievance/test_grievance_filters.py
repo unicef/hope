@@ -6,7 +6,9 @@ from typing import Any, Callable
 from django.utils import timezone
 import pytest
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.reverse import reverse
+from rest_framework.test import APIRequestFactory
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -1633,10 +1635,12 @@ def test_order_by_linked_tickets_descending_reverses_order(two_plain_tickets: li
     assert result == list(reversed(two_plain_tickets))
 
 
-def test_search_filter_with_comma_separated_unicef_ids(two_plain_tickets: list) -> None:
+def test_search_filter_with_comma_separated_unicef_ids(afghanistan: BusinessArea, two_plain_tickets: list) -> None:
     ticket1, ticket2 = two_plain_tickets
     queryset = GrievanceTicket.objects.all()
-    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+    request = Request(APIRequestFactory().get("/"))
+    request.parser_context["kwargs"] = {"business_area_slug": afghanistan.slug}
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset, request=request)
 
     result = filterset.search_filter(queryset, "search", f"{ticket1.unicef_id}, {ticket2.unicef_id}")
 
