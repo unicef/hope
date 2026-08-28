@@ -7,10 +7,9 @@ from django.shortcuts import get_object_or_404
 from hope.models import Area, BusinessArea, Feedback, Household, Individual, Program, User
 
 _SIMPLE_FIELDS = ("comments", "area", "language", "consent")
-_FK_FIELDS = {
+_SCOPED_FK_FIELDS = {
     "household_lookup": Household,
     "individual_lookup": Individual,
-    "admin2": Area,
 }
 
 
@@ -20,13 +19,16 @@ class FeedbackCrudServices:
         return key in input_data and input_data[key] is not None and input_data[key] != ""
 
     @classmethod
-    def _apply_fields(cls, obj: Feedback, input_data: dict) -> None:
+    def _apply_fields(cls, obj: Feedback, input_data: dict, business_area: BusinessArea) -> None:
         for field in _SIMPLE_FIELDS:
             if cls._has_value(input_data, field):
                 setattr(obj, field, input_data[field])
-        for field, model in _FK_FIELDS.items():
+        for field, model in _SCOPED_FK_FIELDS.items():
             if cls._has_value(input_data, field):
-                setattr(obj, field, get_object_or_404(model, id=input_data[field]))
+                setattr(obj, field, get_object_or_404(model, id=input_data[field], business_area=business_area))
+        if cls._has_value(input_data, "admin2"):
+            # admin areas are shared reference data, not owned by a business area
+            obj.admin2 = get_object_or_404(Area, id=input_data["admin2"])
 
     @classmethod
     def validate_lookup(cls, feedback: Feedback) -> None:
@@ -49,7 +51,7 @@ class FeedbackCrudServices:
             issue_type=input_data["issue_type"],
             description=input_data["description"],
         )
-        cls._apply_fields(obj, input_data)
+        cls._apply_fields(obj, input_data, business_area)
 
         if obj.household_lookup:
             obj.program = obj.household_lookup.program or obj.household_lookup.programs.first()
@@ -66,7 +68,7 @@ class FeedbackCrudServices:
         for field in ("issue_type", "description"):
             if cls._has_value(input_data, field):
                 setattr(feedback, field, input_data[field])
-        cls._apply_fields(feedback, input_data)
+        cls._apply_fields(feedback, input_data, feedback.business_area)
         if cls._has_value(input_data, "program"):
             feedback.program = get_object_or_404(Program, id=input_data["program"])
         cls.validate_lookup(feedback)
