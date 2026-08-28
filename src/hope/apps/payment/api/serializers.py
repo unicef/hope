@@ -1493,7 +1493,8 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
     def get_payment_plan_purposes(self, obj: Payment) -> list[str]:
-        return [purpose.name for purpose in obj.parent.payment_plan_purposes.all()]
+        # Sorted in Python so the parent__payment_plan_purposes prefetch is not discarded.
+        return sorted(purpose.name for purpose in obj.parent.payment_plan_purposes.all())
 
 
 class PaymentDetailParentSerializer(serializers.ModelSerializer):
