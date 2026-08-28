@@ -54,7 +54,6 @@ from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     Approval,
     ApprovalProcess,
-    BusinessArea,
     Currency,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -698,10 +697,9 @@ class PaymentPlanService:
         from_input_to_targeting_criteria(targeting_criteria_input, program, self.payment_plan)
 
     @staticmethod
-    def create(input_data: dict, user: "User", business_area_slug: str) -> PaymentPlan:
-        business_area = BusinessArea.objects.get(slug=business_area_slug)
-        program_cycle = get_object_or_404(ProgramCycle, pk=input_data["program_cycle_id"])
-        program = program_cycle.program
+    def create(input_data: dict, user: "User", program: Program) -> PaymentPlan:
+        business_area = program.business_area
+        program_cycle = get_object_or_404(ProgramCycle, pk=input_data["program_cycle_id"], program=program)
         if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Impossible to create Target Population for Programme Cycle within Finished status")
 
@@ -742,7 +740,7 @@ class PaymentPlanService:
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
             if fsp_id and delivery_mechanism_code:
-                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id, allowed_business_areas=business_area)
                 PaymentPlanService._check_group_fsp_consistency(payment_plan_group, fsp)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
                 payment_plan.financial_service_provider = fsp
@@ -793,7 +791,11 @@ class PaymentPlanService:
             self.payment_plan.delivery_mechanism = None
             return True
         if fsp_id and delivery_mechanism_code:
-            fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
+            fsp = get_object_or_404(
+                FinancialServiceProvider,
+                pk=fsp_id,
+                allowed_business_areas=self.payment_plan.business_area,
+            )
             delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
             if current_fsp != fsp or current_dm != delivery_mechanism:
                 self.payment_plan.financial_service_provider = fsp
@@ -895,7 +897,9 @@ class PaymentPlanService:
 
     def _set_program_cycle(self, input_data: dict) -> None:
         if program_cycle_id := input_data.get("program_cycle_id"):
-            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            program_cycle = get_object_or_404(
+                ProgramCycle, pk=program_cycle_id, program=self.payment_plan.program_cycle.program
+            )
             if program_cycle == self.payment_plan.program_cycle:
                 return
             self._validate_pp_cycle(program_cycle)
