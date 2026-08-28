@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { batchPlanTypeLabel, isGroupBackgroundActionBusy } from './utils';
 
 const initialFilter = {
@@ -175,6 +176,9 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           paymentPlanGroupId={groupId}
         />
       </TableWrapper>
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={group?.id} />
+      )}
     </>
   );
 };

@@ -28,7 +28,7 @@ from rest_framework.response import Response
 
 from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
@@ -2837,18 +2837,57 @@ class PaymentPlanGroupViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
+    @transaction.atomic
+    def perform_create(self, serializer: Any) -> None:
+        payment_plan_group = serializer.save()
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=self.request.user,
+            programs=payment_plan_group.cycle.program.pk,
+            old_object=None,
+            new_object=payment_plan_group,
+        )
+
+    @transaction.atomic
+    def perform_update(self, serializer: Any) -> None:
+        old_payment_plan_group = copy_model_object(serializer.instance)
+        payment_plan_group = serializer.save()
+        if not create_diff(old_payment_plan_group, payment_plan_group, PaymentPlanGroup.ACTIVITY_LOG_MAPPING):
+            return
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=self.request.user,
+            programs=payment_plan_group.cycle.program.pk,
+            old_object=old_payment_plan_group,
+            new_object=payment_plan_group,
+        )
+
+    @transaction.atomic
     def perform_destroy(self, instance: PaymentPlanGroup) -> None:
         if instance.payment_plans.exists():
             raise ValidationError("Cannot delete a group that has payment plans.")
         if instance.cycle.payment_plan_groups.count() == 1:
             raise ValidationError("Cannot delete the last group in a cycle.")
+        deleted_payment_plan_group = copy_model_object(instance)
+        program_id = instance.cycle.program.pk
         instance.delete()
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=self.request.user,
+            programs=program_id,
+            old_object=deleted_payment_plan_group,
+            new_object=None,
+        )
 
     @extend_schema(
         request=PaymentPlanGroupDeliveryExportSerializer,
         responses={200: PaymentPlanGroupDetailSerializer},
     )
     @action(detail=True, methods=["post"], url_path="delivery-export-xlsx")
+    @transaction.atomic
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
         if not payment_plan_group.can_start_background_action:
@@ -2895,8 +2934,17 @@ class PaymentPlanGroupViewSet(
             if not exportable_ids:
                 raise ValidationError(EmptyDeliveryExportError.MESSAGE)
 
+        old_payment_plan_group = copy_model_object(payment_plan_group)
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
         payment_plan_group.save(update_fields=["background_action_status"])
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=request.user,
+            programs=payment_plan_group.cycle.program.pk,
+            old_object=old_payment_plan_group,
+            new_object=payment_plan_group,
+        )
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
                 payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag, plan_type
@@ -2975,11 +3023,20 @@ class PaymentPlanGroupViewSet(
             created_by=request.user,
             file=file,
         )
+        old_payment_plan_group = copy_model_object(payment_plan_group)
         payment_plan_group.delivery_import_file = file_temp
         payment_plan_group.background_action_status = (
             PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
         )
         payment_plan_group.save(update_fields=["delivery_import_file", "background_action_status"])
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=request.user,
+            programs=payment_plan_group.cycle.program.pk,
+            old_object=old_payment_plan_group,
+            new_object=payment_plan_group,
+        )
         user_id = str(request.user.pk)
         transaction.on_commit(
             lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group, user_id)
@@ -3003,14 +3060,30 @@ class PaymentPlanGroupViewSet(
         with transaction.atomic():
             PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
 
-            plans = list(group.sendable_to_payment_gateway_plans())
+            # Take only the pks: the queryset annotates has_unsent_splits, and copy_model_object()
+            # below raises TypeError on an annotated instance.
+            plans = list(
+                PaymentPlan.objects.filter(
+                    pk__in=group.sendable_to_payment_gateway_plans().values("pk")
+                ).select_related("program_cycle")
+            )
             if not plans:
                 raise ValidationError("No payment plans can be sent to payment gateway.")
 
             for plan in plans:
-                PaymentPlanService(plan).execute_update_status_action(
+                old_plan = copy_model_object(plan)
+                program_id = plan.program_cycle.program_id
+                updated_plan = PaymentPlanService(plan).execute_update_status_action(
                     input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
                     user=request.user,
+                )
+                log_create(
+                    mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                    business_area_field="business_area",
+                    user=request.user,
+                    programs=program_id,
+                    old_object=old_plan,
+                    new_object=updated_plan,
                 )
 
         return Response(
