@@ -1178,9 +1178,9 @@ class PaymentPlan(
 
         return self.business_area.acceptance_process_thresholds.filter(
             payments_range_usd__contains=NumericRange(
-                total_entitled_quantity_usd,
-                total_entitled_quantity_usd,
-                bounds="[]",  # type: ignore[arg-type]
+                total_entitled_quantity_usd,  # type: ignore[arg-type]
+                total_entitled_quantity_usd,  # type: ignore[arg-type]
+                bounds="[]",
             )
         ).first()
 
