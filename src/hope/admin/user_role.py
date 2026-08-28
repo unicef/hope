@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ActionLocation
+    from django.db.models import QuerySet
+    from django.http import HttpRequest
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
-from django.db.models import QuerySet
-from django.http import HttpRequest
 
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
@@ -87,7 +92,7 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
             kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_actions(self, request: HttpRequest) -> dict:
+    def get_actions(self, request: HttpRequest, action_location: ActionLocation | None = None) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride
 
     def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
