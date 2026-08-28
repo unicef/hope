@@ -16,6 +16,7 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
+from hope.apps.core.api.fields import ScopedSlugRelatedField
 from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
 from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
@@ -24,9 +25,7 @@ if TYPE_CHECKING:
 
 
 class RDISerializer(serializers.ModelSerializer):
-    program = serializers.SlugRelatedField(
-        slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
-    )
+    program = ScopedSlugRelatedField(slug_field="id", required=True, queryset=Program.objects.all(), write_only=True)
     imported_by_email = serializers.EmailField(required=True, write_only=True)
     country_workspace_id = serializers.CharField(
         required=False,
