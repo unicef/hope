@@ -33,6 +33,7 @@ from hope.admin.utils import (
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    UnicefIdSearchMixin,
     ViewOnUiMixin,
 )
 from hope.apps.household.celery_tasks import (
@@ -310,6 +311,7 @@ class RepresentativesInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 @admin.register(Household)
 class HouseholdAdmin(
+    UnicefIdSearchMixin,
     ViewOnUiMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
@@ -463,8 +465,10 @@ class HouseholdAdmin(
         "mass_enroll_to_another_program",
     ]
     cursor_ordering_field = "unicef_id"
+    unicef_id_search_map = {"HH": "unicef_id"}
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
     show_full_result_count = False
+    show_query_result_count = False
 
     def geopoint(self, obj: Household) -> str | None:
         return obj.geopoint
