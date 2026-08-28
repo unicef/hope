@@ -2,10 +2,10 @@ import logging
 from typing import Any
 
 from constance import config
-from django.conf import settings
 from django.db.models import QuerySet
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.utils.external_urls import frontend_url
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
 from hope.models import PaymentPlan, User
@@ -110,13 +110,12 @@ class PaymentNotification:
                 logger.exception("Failed to send payment plan notification")
 
     def _prepare_body_variables(self) -> dict[str, Any]:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         return {
             "first_name": "Payment Plan",
             "last_name": self.recipient_title,
             "action_name": self.action_name,
-            "payment_plan_url": (
-                f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
+            "payment_plan_url": frontend_url(
+                f"{self.payment_plan.business_area.slug}/programs/"
                 f"{self.payment_plan.program.code}/payment-module/payment-plans/"
                 f"{self.payment_plan.id}"
             ),

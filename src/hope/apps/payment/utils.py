@@ -5,12 +5,12 @@ import json
 from math import ceil
 from typing import TYPE_CHECKING, Any, no_type_check
 
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.exchange_rates import ExchangeRates
+from hope.apps.utils.external_urls import frontend_url
 from hope.models import (
     LogEntry,
     Payment,
@@ -319,5 +319,4 @@ def generate_cache_key(data: dict[str, Any]) -> str:
 
 
 def get_link(api_url: str) -> str:
-    protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-    return f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
+    return frontend_url(api_url)

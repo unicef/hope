@@ -40,28 +40,22 @@ def fetch_payload():
     }
 
 
+@pytest.mark.parametrize(
+    "host",
+    [
+        pytest.param("https://aurora.example.org", id="host_without_trailing_slash"),
+        pytest.param("https://aurora.example.org/", id="host_with_trailing_slash"),
+    ],
+)
 @patch("hope.admin.record.requests.get")
-def test_fetch_builds_url_from_host_without_trailing_slash(
-    mock_get: MagicMock, admin_client, fetch_payload: dict
+def test_fetch_builds_url_with_exactly_one_slash_between_host_and_path(
+    mock_get: MagicMock, admin_client, fetch_payload: dict, host: str
 ) -> None:
     mock_get.return_value.__enter__.return_value = MagicMock(status_code=200, json=lambda: {"data": []})
 
     admin_client.post(
         reverse("admin:aurora_record_fetch"),
-        {"host": "https://aurora.example.org", **fetch_payload},
-    )
-
-    mock_get.assert_called_once()
-    assert mock_get.call_args[0][0] == "https://aurora.example.org/api/data/2/10/20/"
-
-
-@patch("hope.admin.record.requests.get")
-def test_fetch_builds_url_from_host_with_trailing_slash(mock_get: MagicMock, admin_client, fetch_payload: dict) -> None:
-    mock_get.return_value.__enter__.return_value = MagicMock(status_code=200, json=lambda: {"data": []})
-
-    admin_client.post(
-        reverse("admin:aurora_record_fetch"),
-        {"host": "https://aurora.example.org/", **fetch_payload},
+        {"host": host, **fetch_payload},
     )
 
     mock_get.assert_called_once()

@@ -2,10 +2,10 @@ import logging
 from typing import Any
 
 from constance import config
-from django.conf import settings
 from django.db.models import QuerySet
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.utils.external_urls import frontend_url
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
 from hope.models import PDUOnlineEdit, User
@@ -99,14 +99,12 @@ class PDUOnlineEditNotification:
                 logger.exception("Failed to send PDU Online Edit notification")
 
     def _prepare_body_variables(self) -> dict[str, Any]:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-
         return {
             "first_name": "PDU Online Edit",
             "last_name": self.recipient_title,
             "action_name": self.action_name,
-            "pdu_online_edit_url": (
-                f"{protocol}://{settings.FRONTEND_HOST}/{self.pdu_online_edit.business_area.slug}/programs/"
+            "pdu_online_edit_url": frontend_url(
+                f"{self.pdu_online_edit.business_area.slug}/programs/"
                 f"{self.pdu_online_edit.program.code}/population/individuals/online-templates/{self.pdu_online_edit.id}"
             ),
             "pdu_online_edit_id": self.pdu_online_edit.id,

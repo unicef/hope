@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
@@ -8,6 +7,7 @@ from django.urls import reverse
 import openpyxl
 from openpyxl.utils import get_column_letter
 
+from hope.apps.utils.external_urls import frontend_url
 from hope.models import Household, Survey
 
 logger = logging.getLogger(__name__)
@@ -40,10 +40,9 @@ class ExportSurveySampleService:
             self.survey.store_sample_file(filename, File(tmp))
 
     def get_email_context(self) -> dict:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         survey_id = str(self.survey.id)
         api = reverse("download-survey-sample", args=[survey_id])
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
+        link = frontend_url(api)
 
         msg = "Survey sample xlsx file was generated and below You have the link to download this file."
         return {
