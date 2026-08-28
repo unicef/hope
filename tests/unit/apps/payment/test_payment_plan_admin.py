@@ -35,6 +35,7 @@ from hope.models import (
     AsyncJobModel,
     AsyncRetryJob,
     FinancialServiceProvider,
+    LogEntry,
     PaymentPlan,
     PaymentPlanGroup,
     RoleAssignment,
@@ -525,6 +526,27 @@ def test_reexport_batch_post_sets_exporting_status_queues_task_and_redirects(
     assert called_template_id is None
     messages_list = list(get_messages(response.wsgi_request))
     assert any("Re-export started" in str(m) for m in messages_list)
+
+
+@pytest.mark.enable_activity_log
+@patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")
+def test_reexport_batch_post_logs_activity_entry(
+    mock_task, admin_client, admin_user, group_with_exported_batch
+) -> None:
+    group = group_with_exported_batch
+    url = reverse("admin:payment_paymentplangroup_reexport_batch", args=[group.pk])
+
+    response = admin_client.post(url, {"export_tag": "1"})
+
+    assert response.status_code == 302
+    log = LogEntry.objects.filter(object_id=group.pk).latest("timestamp")
+    assert log.action == LogEntry.UPDATE
+    assert log.user == admin_user
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [group.cycle.program.pk]
 
 
 @patch("hope.apps.payment.celery_tasks.export_payment_plan_group_delivery_xlsx_async_task")

@@ -1224,7 +1224,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
-    action = serializers.ChoiceField(PaymentPlan.Action.choices)
+    action = serializers.ChoiceField(
+        choices=[
+            (PaymentPlan.Action.APPROVE.value, PaymentPlan.Action.APPROVE.label),
+            (PaymentPlan.Action.AUTHORIZE.value, PaymentPlan.Action.AUTHORIZE.label),
+            (PaymentPlan.Action.REVIEW.value, PaymentPlan.Action.REVIEW.label),
+        ]
+    )
     comment = serializers.CharField(required=False, allow_blank=True)
 
 

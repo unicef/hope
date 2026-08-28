@@ -6,6 +6,7 @@ from django.db.models import Exists, OuterRef, Q
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 
+from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
 from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
 
@@ -16,6 +17,15 @@ if TYPE_CHECKING:
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "name",
+            "cycle",
+            "background_action_status",
+            "delivery_import_file",
+        ],
+    )
+
     class BackgroundActionStatus(models.TextChoices):
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
