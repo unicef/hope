@@ -12,7 +12,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 import multiselectfield.db.fields
-from psycopg.types.range import NumericRange
+from psycopg.types.range import Range
 
 import hope.apps.payment.fields
 import hope.apps.payment.validators
@@ -2196,7 +2196,7 @@ class Migration(migrations.Migration):
                 (
                     "payments_range_usd",
                     django.contrib.postgres.fields.ranges.IntegerRangeField(
-                        default=NumericRange(0, None, "[)"),
+                        default=Range(0, None, "[)"),
                         validators=[django.contrib.postgres.validators.RangeMinValueValidator(0)],
                     ),
                 ),

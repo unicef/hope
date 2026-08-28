@@ -121,12 +121,12 @@ class Record(models.Model):
 
     def get_data(self) -> dict:
         if self.storage:
-            return json.loads(self.storage.tobytes().decode())
+            return json.loads(bytes(self.storage).decode())
 
         fields_copy = copy.deepcopy(self.fields) if self.fields is not None else {}
 
         if not self.files:
             return fields_copy
 
-        files = json.loads(self.files.tobytes().decode())
+        files = json.loads(bytes(self.files).decode())
         return combine_collections(files, fields_copy)
