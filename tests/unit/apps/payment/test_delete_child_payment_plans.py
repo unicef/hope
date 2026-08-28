@@ -217,22 +217,6 @@ def test_delete_newest_top_up_when_older_already_removed(top_up: PaymentPlan, ne
     assert deleted.is_removed is True
 
 
-def test_delete_top_up_with_active_amendment_raises(top_up: PaymentPlan, amendment: PaymentPlan) -> None:
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=top_up).delete()
-
-    assert "delete the Amendment first" in str(error.value)
-    assert PaymentPlan.objects.filter(pk=top_up.pk).exists()
-
-
-def test_delete_top_up_after_amendment_deleted(top_up: PaymentPlan, amendment: PaymentPlan) -> None:
-    PaymentPlanService(payment_plan=amendment).delete()
-
-    deleted = PaymentPlanService(payment_plan=top_up).delete()
-
-    assert deleted.is_removed is True
-
-
 def test_delete_follow_up_not_blocked_by_newer_top_up(follow_up: PaymentPlan, newer_top_up: PaymentPlan) -> None:
     deleted = PaymentPlanService(payment_plan=follow_up).delete()
 
@@ -253,7 +237,7 @@ def test_delete_child_plan_wrong_status_raises(top_up: PaymentPlan) -> None:
 def test_delete_top_up_query_count(
     top_up: PaymentPlan, top_up_payment: Payment, django_assert_num_queries: Callable
 ) -> None:
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(9):
         PaymentPlanService(payment_plan=top_up).delete()
 
 

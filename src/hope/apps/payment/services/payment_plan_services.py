@@ -967,23 +967,11 @@ class PaymentPlanService:
         return self.payment_plan
 
     def _has_newer_sibling_plan(self) -> bool:
-        return (
-            PaymentPlan.objects.filter(
-                source_payment_plan=self.payment_plan.source_payment_plan,
-                plan_type=self.payment_plan.plan_type,
-                created_at__gt=self.payment_plan.created_at,
-            )
-            .exclude(pk=self.payment_plan.pk)
-            .exists()
-        )
-
-    def _is_top_up_with_amendment(self) -> bool:
-        return (
-            self.payment_plan.plan_type == PaymentPlan.PlanType.TOP_UP
-            and PaymentPlan.objects.filter(
-                source_payment_plan=self.payment_plan, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT
-            ).exists()
-        )
+        return PaymentPlan.objects.filter(
+            source_payment_plan=self.payment_plan.source_payment_plan,
+            plan_type=self.payment_plan.plan_type,
+            created_at__gt=self.payment_plan.created_at,
+        ).exists()
 
     def _delete_child_plan(self) -> PaymentPlan:
         """Soft-delete the most recent child plan (Top-Up / Follow-Up / Amendment) together with its payments."""
@@ -992,11 +980,14 @@ class PaymentPlanService:
             raise ValidationError(
                 f"Only the most recent {payment_plan.get_plan_type_display()} of this Payment Plan can be deleted"
             )
-        if self._is_top_up_with_amendment():
-            raise ValidationError("Cannot delete a Top Up that has a Top Up Amendment; delete the Amendment first")
 
-        payment_plan.payment_items.all().delete()
-        payment_plan.delete()
+        with transaction.atomic():
+            # Take the same source-plan lock as prepare_child_payment_plan_async_task_action,
+            # so the delete cannot interleave with the async payment copy onto this plan.
+            if payment_plan.source_payment_plan_id:
+                PaymentPlan.objects.select_for_update().get(pk=payment_plan.source_payment_plan_id)
+            payment_plan.payment_items.all().delete()
+            payment_plan.delete()
         return payment_plan
 
     def export_xlsx(self, user_id: str) -> PaymentPlan:
