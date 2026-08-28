@@ -5,7 +5,7 @@ from celery import Task
 from django.conf import settings
 from django.core.cache import cache
 from django.db import OperationalError, ProgrammingError
-import psycopg2
+from psycopg.errors import InvalidCursorName
 
 from hope.apps.core.celery import app
 from hope.apps.dashboard.services import (
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(
-    autoretry_for=(OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName),
+    autoretry_for=(OperationalError, ProgrammingError, InvalidCursorName),
     retry_kwargs={"max_retries": 3, "countdown": 60},
 )
 @log_start_and_end
@@ -51,7 +51,7 @@ def update_dashboard_figures() -> None:
 
 
 @app.task(
-    autoretry_for=(OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName),
+    autoretry_for=(OperationalError, ProgrammingError, InvalidCursorName),
     retry_kwargs={"max_retries": 3, "countdown": 300},
 )
 @log_start_and_end
@@ -112,7 +112,7 @@ def generate_dash_report_task(self: Task, business_area_slug: str) -> None:
                 return
             set_sentry_business_area_tag(business_area.slug)
             DashboardDataCache.refresh_data(business_area.slug)
-    except (OperationalError, ProgrammingError, psycopg2.errors.InvalidCursorName) as exc:
+    except (OperationalError, ProgrammingError, InvalidCursorName) as exc:
         if self.request.retries < 3:
             is_retrying = True
             raise self.retry(exc=exc, countdown=60)

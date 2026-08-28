@@ -3,7 +3,7 @@ import logging
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.db import models
-from psycopg2._range import NumericRange
+from psycopg.types.range import NumericRange
 
 from hope.models.utils import TimeStampedUUIDModel
 
@@ -17,7 +17,7 @@ class AcceptanceProcessThreshold(TimeStampedUUIDModel):
         related_name="acceptance_process_thresholds",
     )
     payments_range_usd = IntegerRangeField(
-        default=NumericRange(0, None),
+        default=NumericRange(0, None),  # type: ignore[arg-type]
         validators=[
             RangeMinValueValidator(0),
         ],

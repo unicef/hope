@@ -23,7 +23,7 @@ from django.db.models import (
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
-from psycopg2._psycopg import IntegrityError
+from psycopg.errors import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions

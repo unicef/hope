@@ -22,7 +22,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
-from psycopg2._range import NumericRange
+from psycopg.types.range import NumericRange
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
@@ -1178,7 +1178,9 @@ class PaymentPlan(
 
         return self.business_area.acceptance_process_thresholds.filter(
             payments_range_usd__contains=NumericRange(
-                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
+                total_entitled_quantity_usd,
+                total_entitled_quantity_usd,
+                bounds="[]",  # type: ignore[arg-type]
             )
         ).first()
 

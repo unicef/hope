@@ -8,7 +8,7 @@ from constance import config
 from django.db import transaction
 from django.db.models import Case, CharField, F, Prefetch, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
-from psycopg2._psycopg import IntegrityError
+from psycopg.errors import IntegrityError
 
 from hope.apps.core.utils import to_dict
 from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE

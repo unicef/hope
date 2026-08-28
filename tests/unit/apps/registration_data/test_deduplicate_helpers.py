@@ -4,7 +4,7 @@ from collections import defaultdict
 from unittest.mock import MagicMock, patch
 import uuid
 
-from psycopg2._psycopg import IntegrityError
+from psycopg.errors import IntegrityError
 import pytest
 
 from extras.test_utils.factories import (
