@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Mapping
 
 from django.conf import settings
 from django.db.models import Exists, ManyToManyField, Model, OuterRef, Q, QuerySet
+from django.utils.functional import SimpleLazyObject
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter
@@ -138,6 +139,12 @@ class BusinessAreaMixin:
 
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
+    def get_serializer_context(self) -> dict:
+        context = super().get_serializer_context()
+        # lazy: only the scoped fields pay for the lookup, plain views keep their query count
+        context["business_area"] = SimpleLazyObject(lambda: self.business_area)
+        return context
+
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().filter(**{f"{self.business_area_model_field}": self.business_area})
 
@@ -204,7 +211,7 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
 
         program_ids = self.request.user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
-            self.PERMISSIONS,
+            self.get_permissions_for_action(),
         )
 
         if self.program_model_field_is_many:
