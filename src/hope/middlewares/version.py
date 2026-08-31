@@ -11,5 +11,5 @@ class VersionMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
         response = self.get_response(request)
-        response["X-Hope-Backend-Version"] = settings.VERSION
+        response["X-Hope-Backend-Version"] = settings.VERSION or ""
         return response
