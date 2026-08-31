@@ -1,5 +1,7 @@
 from typing import Any
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 import pytest
 from rest_framework import status
@@ -245,14 +247,26 @@ def test_details(
         payment_context["business_area"],
         payment_context["program_active"],
     )
-    response = payment_context["client"].get(payment_context["url_details"])
+    with CaptureQueriesContext(connection) as captured_queries:
+        response = payment_context["client"].get(payment_context["url_details"])
 
     assert response.status_code == expected_status
+    assert "available_count" not in " ".join(query["sql"] for query in captured_queries.captured_queries)
     if expected_status == status.HTTP_200_OK:
         resp_data = response.json()
         assert "id" in resp_data
         assert resp_data["delivered_quantity"] == "999.00"
         assert resp_data["status"] == "Transaction Successful"
+        assert set(resp_data["parent"]) == {
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "plan_type",
+            "is_payment_gateway",
+            "delivery_mechanism",
+            "payment_verification_plans",
+        }
 
 
 @pytest.mark.parametrize(

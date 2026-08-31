@@ -1,8 +1,9 @@
+import re
 from typing import Any, TypeVar
 from uuid import UUID
 
 from admin_extra_buttons.buttons import StandardButton
-from admin_extra_buttons.decorators import button
+from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.mixin import AdminFiltersMixin
@@ -21,7 +22,7 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.payment.utils import generate_cache_key
+from hope.apps.payment.utils import generate_cache_key, get_link
 from hope.apps.utils.security import is_root
 from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
@@ -165,6 +166,32 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
     def count_queryset(self, request: HttpRequest, queryset: QuerySet) -> None:
         count = queryset.count()
         self.message_user(request, f"Selection contains {count} records")
+
+
+class ViewOnUiMixin:
+    """Add a "View on UI" button that links to the object page on the frontend.
+
+    Subclasses must implement :meth:`frontend_url` returning the frontend path
+    (without protocol/host) for the given object, or ``None`` when not available.
+    """
+
+    @link(
+        label="View on UI",
+        html_attrs={"target": "_blank", "class": "aeb-green"},
+        change_list=False,
+    )
+    def view_on_ui(self, button: Any) -> None:
+        button.href = None
+        obj = button.original
+        if self is None or obj is None:
+            return
+        path = self.frontend_url(obj)
+        if not path:
+            return
+        button.href = get_link(path)
+
+    def frontend_url(self, obj: Any) -> str | None:
+        raise NotImplementedError
 
 
 class HUBBusinessAreaFilter(SimpleListFilter):
@@ -508,3 +535,27 @@ class LinkedObjectsManagerMixin:
 
     def admin_urlbasename(self, value: Any, arg: str) -> str:
         return "%s_%s_%s" % (value.app_label, value.model_name, arg)
+
+
+class UnicefIdSearchMixin(admin.ModelAdmin):
+    """Prefix-match a pasted unicef_id instead of OR-ing `icontains` over every search field.
+
+    Django turns `search_fields` into `UPPER(col) LIKE UPPER('%term%')` OR-ed together, which no
+    index can serve; on `household_individual` that means walking 20M rows. unicef_ids are generated
+    uppercase by the `create_*_unicef_id` triggers, so upper-casing the term lets a plain
+    `startswith` hit the existing `..._like` (varchar_pattern_ops) index.
+    """
+
+    # unicef_id prefix a user may paste -> field to prefix-match on
+    unicef_id_search_map: dict[str, str] = {}
+
+    # the trigger format PREFIX-yy-0000.0000, or any truncation of it (still a valid startswith)
+    unicef_id_re = re.compile(r"([A-Z]+)-(\d{1,2}|\d{2}-\d{0,4}|\d{2}-\d{4}\.\d{0,4})")
+
+    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> tuple[QuerySet, bool]:
+        term = search_term.strip().upper()
+        match = self.unicef_id_re.fullmatch(term)
+        field = self.unicef_id_search_map.get(match[1]) if match else None
+        if field:
+            return queryset.filter(**{f"{field}__startswith": term}), False
+        return super().get_search_results(request, queryset, search_term)

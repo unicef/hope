@@ -1192,7 +1192,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
-    action = serializers.ChoiceField(PaymentPlan.Action.choices)
+    action = serializers.ChoiceField(
+        choices=[
+            (PaymentPlan.Action.APPROVE.value, PaymentPlan.Action.APPROVE.label),
+            (PaymentPlan.Action.AUTHORIZE.value, PaymentPlan.Action.AUTHORIZE.label),
+            (PaymentPlan.Action.REVIEW.value, PaymentPlan.Action.REVIEW.label),
+        ]
+    )
     comment = serializers.CharField(required=False, allow_blank=True)
 
 
@@ -1504,8 +1510,27 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
 
 
+class PaymentDetailParentSerializer(serializers.ModelSerializer):
+    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    is_payment_gateway = serializers.BooleanField(read_only=True)
+    payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "plan_type",
+            "is_payment_gateway",
+            "delivery_mechanism",
+            "payment_verification_plans",
+        )
+
+
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
-    parent = PaymentPlanDetailSerializer()
+    parent = PaymentDetailParentSerializer()
     source_payment = PaymentListSerializer()
     household = HouseholdDetailSerializer()
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
