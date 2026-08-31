@@ -102,16 +102,12 @@ def test_business_area_timezone_is_used_for_user_without_preference(
 
 
 def test_user_timezone_rejects_invalid_iana_identifier(user_without_timezone: User) -> None:
-    user_without_timezone.timezone = "Mars/Olympus"
-
     with pytest.raises(ValidationError, match="Invalid timezone"):
-        user_without_timezone.full_clean()
+        user_without_timezone.timezone = "Mars/Olympus"
 
 
 def test_business_area_timezone_rejects_invalid_iana_identifier(
     poland_business_area: BusinessArea,
 ) -> None:
-    poland_business_area.timezone = "Mars/Olympus"
-
     with pytest.raises(ValidationError, match="Invalid timezone"):
-        poland_business_area.full_clean()
+        poland_business_area.timezone = "Mars/Olympus"
