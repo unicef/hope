@@ -1,4 +1,3 @@
-from collections import Counter
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -16,6 +15,7 @@ from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
 )
+from hope.api.endpoints.rdi.cw_ids import duplicated_cw_ids, existing_cw_ids
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
     AccountSerializerUpload,
@@ -39,7 +39,6 @@ from hope.models import (
     Area,
     Country,
     Grant,
-    Individual,
     PendingHousehold,
     PendingIndividual,
     RegistrationDataImport,
@@ -64,31 +63,24 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
 class PushPeopleListSerializer(serializers.ListSerializer):
     def validate(self, attrs: list[dict]) -> list[dict]:
         cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
-        duplicated_cw_ids = sorted(cw_id for cw_id, count in Counter(cw_ids).items() if count > 1)
-        if duplicated_cw_ids:
+        duplicated = sorted(duplicated_cw_ids(cw_ids))
+        if duplicated:
             raise serializers.ValidationError(
                 {
                     "country_workspace_id": [
-                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicated_cw_ids[:100])}."
+                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicated[:100])}."
                     ]
                 }
             )
-        existing_cw_ids = sorted(
-            Individual.all_objects.filter(
-                is_removed=False,
-                withdrawn=False,
-                business_area=self.context["business_area"],
-                country_workspace_id__in=cw_ids,
-            )
-            .values_list("country_workspace_id", flat=True)
-            .distinct()
-        )
-        if existing_cw_ids:
+        existing = sorted(existing_cw_ids(self.context["business_area"], cw_ids))
+        if existing:
             raise serializers.ValidationError(
                 {
                     "country_workspace_id": [
-                        "Individuals with these country_workspace_id values already exist: "
-                        f"{', '.join(existing_cw_ids[:100])}."
+                        (
+                            "Individuals with these country_workspace_id values already exist: "
+                            f"{', '.join(existing[:100])}."
+                        )
                     ]
                 }
             )

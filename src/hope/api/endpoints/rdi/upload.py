@@ -13,6 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
+from hope.api.endpoints.rdi.cw_ids import cw_id_error
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.utils import humanize_errors
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -243,6 +244,31 @@ class HouseholdSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         return attrs
+
+
+class CountryWorkspaceIndividualSerializer(IndividualSerializer):
+    """Members pushed by the Country Workspace, which owns and guarantees ``country_workspace_id``.
+
+    The base serializer excludes the field so partners uploading through ``rdi/upload/`` - always a
+    non-CW business area - cannot squat ids the CW flow depends on for findings binding.
+    """
+
+    country_workspace_id = serializers.CharField(required=True, max_length=150)
+
+    class Meta(IndividualSerializer.Meta):
+        exclude = [field for field in IndividualSerializer.Meta.exclude if field != "country_workspace_id"]
+
+
+class CountryWorkspaceHouseholdSerializer(HouseholdSerializer):
+    members = CountryWorkspaceIndividualSerializer(many=True, required=True)
+
+    def validate_members(self, value: list[dict]) -> list[dict]:
+        existing = self.context.get("existing_cw_ids", set())
+        duplicated = self.context.get("duplicated_cw_ids", set())
+        errors = [cw_id_error(member.get("country_workspace_id"), existing, duplicated) for member in value]
+        if any(errors):
+            raise ValidationError(errors)
+        return value
 
 
 class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):

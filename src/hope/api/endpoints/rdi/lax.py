@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 import contextlib
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -23,6 +22,13 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
+)
+from hope.api.endpoints.rdi.cw_ids import (
+    collect_cw_ids,
+    collect_originating_ids,
+    cw_id_error,
+    duplicated_cw_ids,
+    existing_cw_ids,
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
@@ -48,7 +54,6 @@ from hope.models import (
     FinancialInstitution,
     FlexibleAttribute,
     Grant,
-    Individual,
     IndividualRoleInHousehold,
     PendingAccount,
     PendingDocument,
@@ -59,7 +64,6 @@ from hope.models import (
 from hope.models.currency import Currency
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
     from uuid import UUID
 
     from rest_framework.request import Request
@@ -468,50 +472,6 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         if account_instances:
             PendingAccount.objects.bulk_create(account_instances, batch_size=batch_size)
 
-    def _collect_country_workspace_ids(self, request_data: Iterable[object]) -> list[str]:
-        return [
-            row["country_workspace_id"]
-            for row in request_data
-            if isinstance(row, dict)
-            and isinstance(row.get("country_workspace_id"), str)
-            and row["country_workspace_id"]
-        ]
-
-    def _find_existing_country_workspace_ids(self, request_data: Iterable[object]) -> set[str]:
-        cw_ids = self._collect_country_workspace_ids(request_data)
-        if not cw_ids:
-            return set()
-
-        replaced_originating_ids = {
-            row["originating_id"] for row in request_data if isinstance(row, dict) and row.get("originating_id")
-        }
-        queryset = Individual.all_objects.filter(
-            business_area=self.selected_business_area,
-            is_removed=False,
-            withdrawn=False,
-            country_workspace_id__in=cw_ids,
-        )
-        if replaced_originating_ids:
-            # re-push: these rows get hard-deleted below
-            queryset = queryset.exclude(originating_id__in=replaced_originating_ids)
-        return set(queryset.values_list("country_workspace_id", flat=True))
-
-    def _find_duplicated_country_workspace_ids(self, request_data: Iterable[object]) -> set[str]:
-        counts = Counter(self._collect_country_workspace_ids(request_data))
-        return {cw_id for cw_id, count in counts.items() if count > 1}
-
-    @staticmethod
-    def _country_workspace_id_error(cw_id: object, existing: set[str], duplicated: set[str]) -> dict | None:
-        if cw_id in existing:
-            return {
-                "country_workspace_id": [
-                    f"Individual with country_workspace_id '{cw_id}' already exists in this business area."
-                ]
-            }
-        if cw_id in duplicated:
-            return {"country_workspace_id": [f"country_workspace_id '{cw_id}' is duplicated within this payload."]}
-        return None
-
     @extend_schema(request=IndividualSerializer(many=True))
     @atomic
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
@@ -521,19 +481,22 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         results = []
 
         self.staging = IndividualsBulkStaging()
-        existing_cw_ids = self._find_existing_country_workspace_ids(request.data)
-        duplicated_cw_ids = self._find_duplicated_country_workspace_ids(request.data)
+        raw_cw_ids = collect_cw_ids(request.data)
+        # re-push: the rows holding these originating ids are hard-deleted before the new ones are created
+        replaced_originating_ids = collect_originating_ids(request.data)
+        existing = existing_cw_ids(self.selected_business_area, raw_cw_ids, replaced_originating_ids)
+        duplicated = duplicated_cw_ids(raw_cw_ids)
 
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
-                cw_id_error = self._country_workspace_id_error(
+                error = cw_id_error(
                     individual_raw_data.get("country_workspace_id") if isinstance(individual_raw_data, dict) else None,
-                    existing_cw_ids,
-                    duplicated_cw_ids,
+                    existing,
+                    duplicated,
                 )
-                if cw_id_error:
-                    results.append(cw_id_error)
+                if error:
+                    results.append(error)
                     total_errors += 1
                     continue
 

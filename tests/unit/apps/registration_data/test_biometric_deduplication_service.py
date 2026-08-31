@@ -159,37 +159,6 @@ def test_bulk_add_pairs_country_workspace_id_binds_live_row_not_dead_twin(
     assert {str(pair.individual1_id), str(pair.individual2_id)} == {str(live.id), str(other.id)}
 
 
-def test_bulk_add_pairs_country_workspace_id_collapses_two_live_twins(
-    biometric_deduplication_context: dict[str, object],
-) -> None:
-    program = biometric_deduplication_context["program"]
-    twin_a = IndividualFactory(
-        id=uuid.UUID("00000000-0000-4000-8000-000000000001"),
-        program=program,
-        business_area=program.business_area,
-        country_workspace_id="CW-001",
-    )
-    twin_b = IndividualFactory(
-        id=uuid.UUID("ffffffff-ffff-4fff-8fff-ffffffffffff"),
-        program=program,
-        business_area=program.business_area,
-        country_workspace_id="CW-001",
-    )
-    other = IndividualFactory(program=program, business_area=program.business_area, country_workspace_id="CW-002")
-    similarity_pairs = [
-        SimilarityPair(score=0.7, first="CW-001", second="CW-002", status_code="200"),
-    ]
-
-    BiometricDedupeSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_field_name="country_workspace_id")
-
-    assert program.deduplication_engine_similarity_pairs.count() == 1
-    pair = program.deduplication_engine_similarity_pairs.get()
-    bound_ids = {str(pair.individual1_id), str(pair.individual2_id)}
-    assert str(other.id) in bound_ids
-    bound_twins = bound_ids & {str(twin_a.id), str(twin_b.id)}
-    assert len(bound_twins) == 1, "exactly one twin wins; the other is silently orphaned"
-
-
 def test_bulk_add_pairs_country_workspace_id_skips_unknown_cw_id(
     biometric_deduplication_context: dict[str, object],
 ) -> None:

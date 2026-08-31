@@ -481,8 +481,10 @@ def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
     two_pending_individuals: tuple[Individual, Individual],
 ) -> None:
     in_program_a, in_program_b = two_pending_individuals
+    # A different business area: ``country_workspace_id_ind_unique_constraint`` makes the same
+    # cw id impossible inside one business area, so the collision has to come from another one.
     other_program = ProgramFactory(
-        business_area=cw_program.business_area,
+        business_area=BusinessAreaFactory(name="Other CW Area", slug="other-cw-area"),
         biometric_deduplication_enabled=True,
     )
     other_program_collision = PendingIndividualFactory(

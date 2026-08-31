@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories import RoleFactory, UserFactory
 from extras.test_utils.factories.api import APITokenFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
+from extras.test_utils.factories.household import IndividualFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -20,6 +21,7 @@ from hope.models import (
     FinancialInstitution,
     PendingAccount,
     PendingHousehold,
+    PendingIndividual,
     Program,
     RegistrationDataImport,
     User,
@@ -161,6 +163,7 @@ def test_push_creates_household_and_individuals(
                     "sex": "MALE",
                     "photo": base64_image,
                     "role": "",
+                    "country_workspace_id": "CW-PUSH-HEAD",
                     "documents": [
                         {
                             "document_number": 10,
@@ -189,6 +192,7 @@ def test_push_creates_household_and_individuals(
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
+                    "country_workspace_id": "CW-PUSH-PRIMARY",
                 },
             ],
             "size": 1,
@@ -250,6 +254,7 @@ def test_push_creates_household_with_currency(
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
+                    "country_workspace_id": "CW-CURRENCY-HEAD",
                 },
                 {
                     "relationship": NON_BENEFICIARY,
@@ -257,6 +262,7 @@ def test_push_creates_household_with_currency(
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
+                    "country_workspace_id": "CW-CURRENCY-PRIMARY",
                 },
             ],
             "size": 1,
@@ -295,6 +301,7 @@ def test_push_creates_household_without_currency_is_null(
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
+                    "country_workspace_id": "CW-NO-CURRENCY-HEAD",
                 },
                 {
                     "relationship": NON_BENEFICIARY,
@@ -302,6 +309,7 @@ def test_push_creates_household_without_currency_is_null(
                     "birth_date": "2000-01-01",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
+                    "country_workspace_id": "CW-NO-CURRENCY-PRIMARY",
                 },
             ],
             "size": 1,
@@ -409,3 +417,186 @@ def test_push_returns_404_when_rdi_not_loading(
     response = token_api_client.post(url, [], format="json")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.fixture
+def cw_member() -> dict:
+    return {
+        "relationship": HEAD,
+        "full_name": "James Head #1",
+        "birth_date": "2000-01-01",
+        "sex": "MALE",
+        "role": ROLE_PRIMARY,
+        "country_workspace_id": "CW-IND-1",
+    }
+
+
+def test_push_persists_member_country_workspace_id(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    cw_member: dict,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {
+            "residence_status": "",
+            "village": "village-cw",
+            "country": "AF",
+            "size": 1,
+            "members": [cw_member],
+        }
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    household = PendingHousehold.objects.get(registration_data_import=rdi_loading, village="village-cw")
+    assert household.head_of_household.country_workspace_id == "CW-IND-1"
+
+
+def test_push_rejects_member_country_workspace_id_duplicated_in_payload(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    cw_member: dict,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {"residence_status": "", "village": "v1", "country": "AF", "size": 1, "members": [dict(cw_member)]},
+        {"residence_status": "", "village": "v2", "country": "AF", "size": 1, "members": [dict(cw_member)]},
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "CW-IND-1" in str(response.json())
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi_loading).exists()
+
+
+def test_push_rejects_member_country_workspace_id_already_used_in_business_area(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    cw_member: dict,
+) -> None:
+    IndividualFactory(
+        business_area=user_business_area,
+        program=program,
+        country_workspace_id="CW-IND-1",
+    )
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {"residence_status": "", "village": "v1", "country": "AF", "size": 1, "members": [cw_member]},
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "CW-IND-1" in str(response.json())
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi_loading).exists()
+
+
+def test_push_rejects_member_without_country_workspace_id(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    cw_member: dict,
+) -> None:
+    member_without_cw_id = {key: value for key, value in cw_member.items() if key != "country_workspace_id"}
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {"residence_status": "", "village": "v1", "country": "AF", "size": 1, "members": [member_without_cw_id]},
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "country_workspace_id" in str(response.json())
+
+
+def test_push_lax_persists_member_country_workspace_id(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    cw_member: dict,
+) -> None:
+    url = reverse("api:rdi-push-lax", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {
+            "residence_status": "",
+            "village": "village-lax-cw",
+            "country": "AF",
+            "size": 1,
+            "members": [cw_member],
+        }
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    household = PendingHousehold.objects.get(registration_data_import=rdi_loading, village="village-lax-cw")
+    assert household.head_of_household.country_workspace_id == "CW-IND-1"
+
+
+def test_push_lax_reports_error_for_member_country_workspace_id_already_used(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    program: Program,
+    rdi_loading: RegistrationDataImport,
+    afghanistan_country,
+    cw_member: dict,
+) -> None:
+    IndividualFactory(
+        business_area=user_business_area,
+        program=program,
+        country_workspace_id="CW-IND-1",
+    )
+    url = reverse("api:rdi-push-lax", args=[user_business_area.slug, str(rdi_loading.id)])
+    input_data = [
+        {"residence_status": "", "village": "v1", "country": "AF", "size": 1, "members": [cw_member]},
+    ]
+
+    response = token_api_client.post(url, input_data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    body = response.json()
+    assert body["accepted"] == 0
+    assert body["errors"] == 1
+    assert "CW-IND-1" in str(body)
+    assert not PendingHousehold.objects.filter(registration_data_import=rdi_loading).exists()
+
+
+def test_upload_ignores_member_country_workspace_id_for_non_cw_business_area(
+    non_cw_token_api_client: APIClient,
+    non_cw_business_area: BusinessArea,
+    afghanistan_country,
+    mock_elasticsearch,
+    valid_upload_household: dict,
+) -> None:
+    program = ProgramFactory(status=Program.DRAFT, business_area=non_cw_business_area)
+    household = dict(valid_upload_household)
+    household["members"] = [
+        {**member, "country_workspace_id": "CW-SHOULD-BE-IGNORED"} for member in valid_upload_household["members"]
+    ]
+    url = reverse("api:rdi-upload", args=[non_cw_business_area.slug])
+    payload = {
+        "name": "upload-with-cw-id",
+        "program": str(program.id),
+        "households": [household],
+    }
+
+    response = non_cw_token_api_client.post(url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert not PendingIndividual.objects.filter(country_workspace_id="CW-SHOULD-BE-IGNORED").exists()

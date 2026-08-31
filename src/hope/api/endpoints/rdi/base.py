@@ -17,8 +17,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HOPEAPIView
+from hope.api.endpoints.rdi.cw_ids import collect_member_cw_ids, duplicated_cw_ids, existing_cw_ids
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hope.api.endpoints.rdi.upload import HouseholdSerializer
+from hope.api.endpoints.rdi.upload import CountryWorkspaceHouseholdSerializer
 from hope.api.utils import humanize_errors
 from hope.apps.registration_data.celery_tasks import (
     rdi_dispatcher_task,
@@ -103,7 +104,23 @@ class CreateRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Crea
         )
 
 
-class PushToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
+class CountryWorkspaceIdContextMixin:
+    """Resolves, once per request, which member country workspace ids are taken or duplicated."""
+
+    def _cw_id_context(self, cw_ids: list[str]) -> dict[str, set[str]]:
+        return {
+            "existing_cw_ids": existing_cw_ids(self.selected_business_area, cw_ids),
+            "duplicated_cw_ids": duplicated_cw_ids(cw_ids),
+        }
+
+
+class PushToRDIView(
+    BusinessAreaIngestCWOnlyMixin,
+    HOPEAPIBusinessAreaView,
+    HouseholdUploadMixin,
+    CountryWorkspaceIdContextMixin,
+    HOPEAPIView,
+):
     """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
@@ -126,7 +143,11 @@ class PushToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Hous
         business_area: "BusinessArea",
         rdi: RegistrationDataImport,
     ) -> Response:
-        serializer = HouseholdSerializer(data=request.data, many=True)
+        serializer = CountryWorkspaceHouseholdSerializer(
+            data=request.data,
+            many=True,
+            context=self._cw_id_context(collect_member_cw_ids(request.data)),
+        )
 
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data)
@@ -134,10 +155,17 @@ class PushToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Hous
                 {"id": self.selected_rdi.id, **asdict(totals)},
                 status=status.HTTP_201_CREATED,
             )
-        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
+        # ``serializer.errors`` is a per-household list here; humanize_errors expects it keyed.
+        return Response(humanize_errors({"households": serializer.errors}), status=status.HTTP_400_BAD_REQUEST)
 
 
-class PushLaxToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
+class PushLaxToRDIView(
+    BusinessAreaIngestCWOnlyMixin,
+    HOPEAPIBusinessAreaView,
+    HouseholdUploadMixin,
+    CountryWorkspaceIdContextMixin,
+    HOPEAPIView,
+):
     """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
@@ -166,10 +194,11 @@ class PushLaxToRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, H
         errs = []
 
         program_id = self.selected_rdi.program.id
+        cw_id_context = self._cw_id_context(collect_member_cw_ids(request.data))
 
         for household_data in request.data:
             total_households += 1
-            serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
+            serializer = CountryWorkspaceHouseholdSerializer(data=household_data, context=cw_id_context)
             if serializer.is_valid():
                 members: list[dict] = serializer.validated_data.pop("members", [])
 
