@@ -207,14 +207,14 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     renderInput={(params) => (
                       <TextField {...params} label={t('Funds Commitment')} />
                     )}
-                    renderOption={(props, option) => (
-                      <MenuItem
-                        {...props}
-                        value={option?.fundsCommitmentNumber}
-                      >
-                        {option?.fundsCommitmentNumber}
-                      </MenuItem>
-                    )}
+                    renderOption={(props, option) => {
+                      const { key, ...optionProps } = props;
+                      return (
+                        <li key={key} {...optionProps}>
+                          {option.fundsCommitmentNumber}
+                        </li>
+                      );
+                    }}
                     isOptionEqualToValue={(option, value) =>
                       option.fundsCommitmentNumber ===
                       value?.fundsCommitmentNumber
@@ -338,9 +338,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   }}
                 >
                   {t('Funds Commitment Number')}:{' '}
-                  {formatFigure(
-                    paymentPlan.fundsCommitments.fundsCommitmentNumber,
-                  ) ?? '-'}{' '}
+                  {paymentPlan.fundsCommitments.fundsCommitmentNumber}
                 </Typography>
               )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(

@@ -23,6 +23,7 @@ from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
@@ -442,7 +443,10 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             "opts": self.model._meta,
             "original": payment_plan,
             "payment_plan": payment_plan,
+            "vision_send_failed": payment_plan.vision_status == VisionStatus.SEND_FAILED.value,
             "form": form,
+            "funds_commitment_options": form.funds_commitment_options,
+            "selected_funds_commitment_item_ids": request.POST.getlist("funds_commitment_items"),
             "title": "Assign Vision Funds Commitment Items",
         }
         return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
@@ -453,10 +457,20 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
     )
     def retry_payment_gateway_send(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            payment_plan = PaymentPlan.objects.get(pk=pk)
-            PaymentPlanService(payment_plan).execute_update_status_action(
+            payment_plan = PaymentPlan.objects.select_related("program_cycle").get(pk=pk)
+            program_id = payment_plan.program_cycle.program_id
+            old_payment_plan = copy_model_object(payment_plan)
+            payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
                 input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
                 user=request.user,
+            )
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=program_id,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
             )
             self.message_user(request, "Payment Gateway send retry started", level="success")
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))

@@ -54,7 +54,7 @@ Each request and response is recorded in `payment_plan.internal_data["vision"]["
 
 - A successful request sets `WAITING_FOR_CALLBACK` and records that the plan was sent.
 - A failed request sets `SEND_FAILED` and stores a sanitized error.
-- A failed request can be retried from Django admin.
+- A failed request can be retried from Django admin or recovered by assigning FC items manually in Django admin.
 - The React UI does not provide a Vision send or retry action.
 - A request cannot be resent while the plan is in `WAITING_FOR_CALLBACK`.
 
@@ -116,8 +116,10 @@ validates that all selected items belong to the same group.
 
 ## Admin FC Recovery
 
-Django admin provides recovery when a sent plan waits indefinitely or automatic FC assignment fails. An administrator
-can select one or more available FC items from a single group while both Vision flags remain enabled.
+Django admin provides recovery when sending fails, a sent plan waits indefinitely, or automatic FC assignment fails.
+While both Vision flags remain enabled, an administrator can select an available FC group on the recovery page and
+select one or more of its available items. The group and item selection happen on the same page. For `SEND_FAILED`,
+the page warns that Vision may not have received the Payment Plan.
 
 The recovery action rejects:
 
@@ -159,7 +161,9 @@ reset, allowing a later authorization to start a new attempt. A callback receive
 ### Payment Gateway Plans
 
 Successful FC assignment and release start the standard Payment Gateway send flow automatically. The integration
-reuses Payment Gateway validation, background processing, and error states.
+reuses Payment Gateway validation, background processing, error states, and Payment Plan activity logging. Automatic
+sending is recorded with the Payment Plan creator as the actor. An admin retry is recorded with the administrator as
+the actor.
 
 If Payment Gateway sending fails:
 

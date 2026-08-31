@@ -165,6 +165,12 @@ def vision_disabled_payment_plan_with_fc_failure(
     return vision_disabled_payment_plan
 
 
+@pytest.fixture
+def vision_send_failed_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
+    VisionService.set_status(vision_payment_plan, VisionStatus.SEND_FAILED)
+    return vision_payment_plan
+
+
 def test_vision_data_replaces_malformed_state(
     malformed_vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
@@ -621,6 +627,16 @@ def test_manual_fc_recovery_is_disabled_when_vision_flag_is_disabled(
     assert can_recover is False
 
 
+def test_manual_fc_recovery_is_available_when_vision_send_failed(
+    vision_send_failed_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(1):
+        can_recover = VisionService.can_recover_with_funds_commitment_items(vision_send_failed_payment_plan)
+
+    assert can_recover is True
+
+
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.log_create")
@@ -685,6 +701,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
 ) -> None:
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with (
+        patch("hope.contrib.vision.services.log_create") as mock_activity_log,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
         django_assert_num_queries(6),
     ):
@@ -700,6 +717,8 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
         input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
         user=vision_payment_plan.created_by,
     )
+    assert mock_activity_log.call_args.kwargs["user"] == vision_payment_plan.created_by
+    assert mock_activity_log.call_args.kwargs["programs"] == vision_payment_plan.program.pk
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
 
 
@@ -747,6 +766,7 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
     }
 
     with (
+        patch("hope.contrib.vision.services.log_create") as mock_activity_log,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
         django_assert_num_queries(5),
     ):
@@ -762,6 +782,7 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
         input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
         user=vision_payment_plan.created_by,
     )
+    mock_activity_log.assert_called_once()
 
 
 def test_manual_fc_item_recovery_rejects_ineligible_plan(

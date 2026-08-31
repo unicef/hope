@@ -184,7 +184,10 @@ def test_retry_payment_gateway_send_uses_existing_send_action(
 ) -> None:
     url = reverse("admin:payment_paymentplan_retry_payment_gateway_send", args=[retryable_payment_gateway_plan.pk])
 
-    with django_capture_on_commit_callbacks(execute=True):
+    with (
+        patch("hope.admin.payment_plan.log_create") as mock_activity_log,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
         response = admin_client.post(url)
 
     assert response.status_code == 302
@@ -196,6 +199,8 @@ def test_retry_payment_gateway_send_uses_existing_send_action(
     assert mock_send.call_count == 1
     assert mock_send.call_args.args[0].pk == retryable_payment_gateway_plan.pk
     assert mock_send.call_args.args[1] == str(response.wsgi_request.user.pk)
+    assert mock_activity_log.call_args.kwargs["user"] == response.wsgi_request.user
+    assert mock_activity_log.call_args.kwargs["programs"] == retryable_payment_gateway_plan.program.pk
 
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_payment_plan")

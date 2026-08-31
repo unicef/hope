@@ -1,9 +1,10 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.contrib.vision.choices import VisionErrorCode, VisionStatus
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
-from hope.models import PaymentPlan
+from hope.models import PaymentPlan, log_create
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class FundsCommitmentAssignmentError(Exception):
 class VisionService:
     MANUAL_RECOVERY_STATUSES = frozenset(
         {
+            VisionStatus.SEND_FAILED.value,
             VisionStatus.WAITING_FOR_CALLBACK.value,
             VisionStatus.CALLBACK_FAILED.value,
             VisionStatus.FC_MISSING.value,
@@ -208,9 +210,20 @@ class VisionService:
         PaymentPlan.objects.filter(pk=payment_plan.pk).update(internal_data=payment_plan.internal_data)
 
         if payment_plan.can_send_to_payment_gateway:
-            PaymentPlanService(payment_plan).execute_update_status_action(
+            automatic_actor = payment_plan.created_by
+            program_id = payment_plan.program.pk
+            old_payment_plan = copy_model_object(payment_plan)
+            payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
                 input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
-                user=payment_plan.created_by,
+                user=automatic_actor,
+            )
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=automatic_actor,
+                programs=program_id,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
             )
 
     @classmethod
@@ -229,9 +242,11 @@ class VisionService:
 
     @classmethod
     def can_recover_with_funds_commitment_items(cls, payment_plan: PaymentPlan) -> bool:
+        vision_status = payment_plan.vision_status
+        vision_was_sent_or_send_failed = payment_plan.sent_to_vision or vision_status == VisionStatus.SEND_FAILED.value
         return (
             payment_plan.status == PaymentPlan.Status.IN_REVIEW
-            and payment_plan.sent_to_vision
-            and payment_plan.vision_status in cls.MANUAL_RECOVERY_STATUSES
+            and vision_was_sent_or_send_failed
+            and vision_status in cls.MANUAL_RECOVERY_STATUSES
             and payment_plan.vision_integration_enabled
         )

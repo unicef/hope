@@ -69,6 +69,18 @@ def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentP
     )
 
 
+@pytest.fixture
+def send_failed_payment_plan(vision_admin_context) -> PaymentPlan:
+    payment_plan = _create_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+    )
+    payment_plan.internal_data = {"vision": {"status": VisionStatus.SEND_FAILED.value}}
+    payment_plan.save(update_fields=["internal_data"])
+    return payment_plan
+
+
 def test_send_to_vision_button_visible_when_in_review(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
@@ -169,8 +181,25 @@ def test_manual_fc_item_recovery_shows_warning_and_available_item(
     assert "Assigning these FC items will automatically release the Payment Plan" in content
     assert "immediately send it to Payment Gateway if" in content
     assert "it is a PG plan" in content
+    assert 'id="id_funds_commitment_group"' in content
+    assert 'id="vision-fc-options"' in content
     assert "FC123" in content
     assert str(funds_commitment_item.funds_commitment_item) in content
+
+
+def test_manual_fc_item_recovery_is_available_after_vision_send_failed(
+    send_failed_payment_plan,
+    admin_client,
+) -> None:
+    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[send_failed_payment_plan.pk]))
+    action_response = admin_client.get(
+        reverse("admin:payment_paymentplan_assign_vision_funds_commitment_items", args=[send_failed_payment_plan.pk])
+    )
+
+    assert response.status_code == 200
+    assert 'id="btn-assign_vision_funds_commitment_items"' in response.content.decode()
+    assert action_response.status_code == 200
+    assert "Vision may not have received this Payment Plan because its send failed" in action_response.content.decode()
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
@@ -207,7 +236,10 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
     with django_capture_on_commit_callbacks(execute=True):
         response = vision_admin_context["client"].post(
             action_url,
-            {"funds_commitment_items": [funds_commitment_item.pk]},
+            {
+                "funds_commitment_group": funds_commitment_group.pk,
+                "funds_commitment_items": [funds_commitment_item.pk],
+            },
         )
 
     assert response.status_code == 302
