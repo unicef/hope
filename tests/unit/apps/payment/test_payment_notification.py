@@ -13,7 +13,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import format_human_datetime
 from hope.apps.payment.notifications import PaymentNotification
-from hope.models import PaymentPlan, Role, RoleAssignment
+from hope.models import PaymentPlan, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
@@ -517,6 +517,17 @@ def notification_setup(
     }
 
 
+@pytest.fixture
+def distinct_timezone_notification_data(notification_setup: dict) -> tuple[PaymentPlan, User]:
+    action_user = notification_setup["user_action_user"]
+    action_user.timezone = "America/New_York"
+    action_user.save(update_fields=("timezone",))
+    recipient = notification_setup["users"]["user_with_action_permissions"]
+    recipient.timezone = "Europe/Warsaw"
+    recipient.save(update_fields=("timezone",))
+    return notification_setup["payment_plan"], action_user
+
+
 def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
@@ -674,7 +685,7 @@ def test_prepare_notification_from_refetched_payment_plan_stays_within_query_bud
             payment_plan,
             PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
             notification_setup["user_action_user"],
-            f"{timezone.now():%-d %B %Y}",
+            ACTION_DATETIME,
         )
 
 
@@ -809,7 +820,7 @@ def test_send_email_notification_without_catch_all_email(notification_setup: dic
         ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert sorted(payment_notification.email.recipients) == [
+    assert sorted(payment_notification.emails[0].recipients) == [
         "user_with_action_permissions@example.com",
         "user_with_approval_permission_in_ba_partner_empty@example.com",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
@@ -853,7 +864,7 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
         ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert sorted(payment_notification.email.recipients) == [
+    assert sorted(payment_notification.emails[0].recipients) == [
         "user_with_action_permissions@example.com",
         "user_with_approval_permission_in_ba_partner_empty@example.com",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
@@ -896,7 +907,7 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
         ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert sorted(payment_notification.email.recipients) == [
+    assert sorted(payment_notification.emails[0].recipients) == [
         "user_with_action_permissions@example.com",
         "user_with_approval_permission_in_ba_partner_empty@example.com",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
@@ -959,4 +970,25 @@ def test_notification_formats_action_datetime_in_requested_timezone(notification
     assert body_variables["action_date"] == format_human_datetime(
         ACTION_DATETIME,
         timezone_name="Europe/Warsaw",
+    )
+
+
+def test_notification_groups_recipients_and_action_user_by_timezone(
+    distinct_timezone_notification_data: tuple[PaymentPlan, User],
+) -> None:
+    payment_plan, action_user = distinct_timezone_notification_data
+
+    payment_notification = PaymentNotification(
+        payment_plan,
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        action_user,
+        ACTION_DATETIME,
+    )
+
+    assert len(payment_notification.emails) == 3
+    assert payment_notification.emails[0].ccs == []
+    assert payment_notification.emails[-1].recipients == [action_user.email]
+    assert payment_notification.emails[-1].variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        timezone_name="America/New_York",
     )

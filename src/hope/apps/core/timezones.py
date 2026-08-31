@@ -71,7 +71,7 @@ def format_human_datetime(
 ) -> str:
     timezone_name = timezone_name or resolve_timezone_name(user=user, business_area=business_area)
     localized_value = localize_datetime(value, timezone_name=timezone_name)
-    hour = localized_value.strftime("%I").lstrip("0") or "0"
+    hour = localized_value.strftime("%I").lstrip("0")
     return f"{localized_value.day} {localized_value:%B %Y} {hour}:{localized_value:%M %p} ({timezone_name})"
 
 

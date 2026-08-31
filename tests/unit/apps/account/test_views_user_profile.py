@@ -1,6 +1,7 @@
 """Tests for user profile API views."""
 
 import datetime
+from types import SimpleNamespace
 from typing import Any
 
 from django.utils import timezone
@@ -18,6 +19,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from extras.test_utils.fixtures.api_client import ReauthenticateAPIClient
+from hope.apps.account.api.serializers import ProfileSerializer
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Partner, Program, Role, User
 
@@ -282,6 +284,15 @@ def timezone_choices_url(afghanistan: BusinessArea) -> str:
         "api:accounts:users-timezone-choices",
         kwargs={"business_area_slug": afghanistan.slug},
     )
+
+
+@pytest.fixture
+def profile_serializer_without_business_area_context(afghanistan: BusinessArea) -> ProfileSerializer:
+    request = SimpleNamespace(
+        parser_context={"kwargs": {"business_area_slug": afghanistan.slug}},
+        query_params={},
+    )
+    return ProfileSerializer(context={"request": request})
 
 
 @pytest.fixture
@@ -577,6 +588,13 @@ def test_cross_area_filter_available_in_scope_business_area(
     assert response.status_code == status.HTTP_200_OK
     profile_data = response.data
     assert profile_data["cross_area_filter_available"] == filter_available
+
+
+def test_cross_area_filter_falls_back_to_business_area_lookup(
+    profile_serializer_without_business_area_context: ProfileSerializer,
+    user: User,
+) -> None:
+    assert profile_serializer_without_business_area_context.get_cross_area_filter_available(user) is False
 
 
 @pytest.mark.parametrize(

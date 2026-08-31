@@ -247,6 +247,20 @@ def pdu_with_authorized_users(pdu_online_edit: PDUOnlineEdit, authorized_users: 
     return pdu_online_edit
 
 
+@pytest.fixture
+def distinct_timezone_notification_data(
+    pdu_with_authorized_users: PDUOnlineEdit,
+    authorized_users: dict,
+    user_action_user: User,
+) -> tuple[PDUOnlineEdit, User]:
+    user_action_user.timezone = "America/New_York"
+    user_action_user.save(update_fields=("timezone",))
+    recipient = authorized_users["approval_authorized"]
+    recipient.timezone = "Europe/Warsaw"
+    recipient.save(update_fields=("timezone",))
+    return pdu_with_authorized_users, user_action_user
+
+
 def test_send_for_approval_action_notification_recipients(
     pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
 ) -> None:
@@ -657,4 +671,25 @@ def test_notification_formats_action_datetime_in_requested_timezone(
     assert body_variables["action_date"] == format_human_datetime(
         ACTION_DATETIME,
         timezone_name="Europe/Warsaw",
+    )
+
+
+def test_notification_groups_recipients_and_action_user_by_timezone(
+    distinct_timezone_notification_data: tuple[PDUOnlineEdit, User],
+) -> None:
+    pdu_online_edit, action_user = distinct_timezone_notification_data
+
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_online_edit,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        action_user,
+        ACTION_DATETIME,
+    )
+
+    assert len(pdu_notification.emails) == 3
+    assert pdu_notification.emails[0].ccs == []
+    assert pdu_notification.emails[-1].recipients == [action_user.email]
+    assert pdu_notification.emails[-1].variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        timezone_name="America/New_York",
     )
