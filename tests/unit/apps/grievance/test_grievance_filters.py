@@ -151,6 +151,7 @@ def households_and_individuals(
         household=None,
         preferred_language="pl",
         full_name="Tom Smith",
+        full_name_latin="Tomas Kovalsky",
         relationship=HEAD,
     )
     household1 = HouseholdFactory(
@@ -1594,6 +1595,7 @@ def test_filter_by_cross_area(
         ("HH-0001", 4, 4),
         ("IND-0002", 2, 5),
         ("Tom", 4, 4),
+        ("Kovalsky", 4, 4),
         ("GRV-9918515", 0, 0),
         ("", 6, 9),
     ],

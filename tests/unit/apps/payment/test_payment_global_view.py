@@ -595,6 +595,30 @@ def test_search_by_individual_name(
     assert response.data["results"][0]["id"] == str(office_search_setup["payment3"].id)
 
 
+def test_search_by_individual_latin_name(
+    create_user_role_with_permissions: Any,
+    office_search_setup: dict,
+) -> None:
+    create_user_role_with_permissions(
+        user=office_search_setup["user"],
+        permissions=[Permissions.PM_VIEW_DETAILS],
+        business_area=office_search_setup["business_area"],
+        program=office_search_setup["program"],
+    )
+
+    office_search_setup["individuals3"][0].full_name = "Анна Ковальська"
+    office_search_setup["individuals3"][0].full_name_latin = "Anna Kovalska"
+    office_search_setup["individuals3"][0].save()
+
+    response = office_search_setup["client"].get(
+        office_search_setup["global_url"],
+        {"office_search": "Anna Kovalska"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] == str(office_search_setup["payment3"].id)
+
+
 def test_search_with_active_programs_filter(
     create_user_role_with_permissions: Any,
     office_search_setup: dict,

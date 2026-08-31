@@ -287,6 +287,18 @@ def test_handle_add_identity(add_individual_context: dict[str, Any], program: Pr
     assert identity_obj.country == poland
 
 
+def test_close_sets_latin_names_on_created_individual(add_individual_context: dict[str, Any], user: User) -> None:
+    ticket = add_individual_context["ticket"]
+
+    service = AddIndividualService(ticket, {})
+    service.close(user)
+
+    individual = Individual.objects.get(household=add_individual_context["household"], full_name="Test Example")
+    assert individual.full_name_latin == "Test Example"
+    assert individual.given_name_latin == "Test"
+    assert individual.family_name_latin == "Example"
+
+
 def test_close_without_approval_creates_no_individual(
     unapproved_add_individual_context: dict[str, Any], user: User
 ) -> None:

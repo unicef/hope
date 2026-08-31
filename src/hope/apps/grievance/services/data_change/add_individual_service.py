@@ -117,6 +117,7 @@ class AddIndividualService(DataChangeService):
             **individual_data,  # type: ignore[arg-type]
         )
         individual.refresh_from_db()
+        individual.set_names_latin()
         documents_to_create = [handle_add_document(document, individual) for document in documents]
         identities_to_create = [handle_add_identity(identity, individual) for identity in identities]
         relationship_to_head_of_household = individual_data.get("relationship")

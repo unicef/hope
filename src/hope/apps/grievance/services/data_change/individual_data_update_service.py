@@ -276,6 +276,29 @@ class IndividualDataUpdateService(DataChangeService):
         Account.validate_uniqueness(accounts_to_update)  # type: ignore
         Account.validate_uniqueness(accounts_to_create)
 
+    def _refresh_latin_names(self, individual: Individual, only_approved_data: dict) -> None:
+        # an approved name change without an explicitly approved latin twin invalidates the
+        # stored transliteration - recompute it so the latin fields don't go stale
+        name_to_latin = {
+            "given_name": "given_name_latin",
+            "middle_name": "middle_name_latin",
+            "family_name": "family_name_latin",
+            "full_name": "full_name_latin",
+        }
+        changed = [field for field in name_to_latin if field in only_approved_data]
+        if not changed:
+            return
+        for field in changed:
+            setattr(individual, field, only_approved_data[field])
+            latin_field = name_to_latin[field]
+            if latin_field not in only_approved_data:
+                setattr(individual, latin_field, None)
+        individual.set_names_latin()
+        for field in changed:
+            latin_field = name_to_latin[field]
+            if latin_field not in only_approved_data:
+                only_approved_data[latin_field] = getattr(individual, latin_field)
+
     def _update_household_fields(self, household: Household, only_approved_data: dict) -> None:
         hh_fields = [
             "consent",
@@ -354,6 +377,7 @@ class IndividualDataUpdateService(DataChangeService):
 
         self._validate_phone_numbers(only_approved_data)
         self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]
+        self._refresh_latin_names(new_individual, only_approved_data)
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(

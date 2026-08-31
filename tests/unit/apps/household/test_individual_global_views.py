@@ -480,6 +480,27 @@ def test_search_by_individual_unicef_id(
     assert response.data["results"][0]["id"] == str(ctx["individuals1"][0].id)
 
 
+def test_search_by_individual_latin_name(
+    office_search_context: dict, create_user_role_with_permissions: Callable
+) -> None:
+    ctx = office_search_context
+    create_user_role_with_permissions(
+        user=ctx["user"],
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=ctx["afghanistan"],
+        program=ctx["program"],
+    )
+    individual = ctx["individuals1"][0]
+    individual.full_name = "Анна Ковальська"
+    individual.full_name_latin = "Anna Kovalska"
+    individual.save(update_fields=["full_name", "full_name_latin"])
+
+    response = ctx["client"].get(_global_url(ctx["afghanistan"]), {"office_search": "Anna Kovalska"})
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] == str(individual.id)
+
+
 def test_search_by_household_unicef_id(
     office_search_context: dict, create_user_role_with_permissions: Callable
 ) -> None:
