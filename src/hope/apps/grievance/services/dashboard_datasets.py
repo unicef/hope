@@ -14,28 +14,34 @@ from django.utils.encoding import force_str
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Area
 
-TICKET_ORDERING_KEYS = [
-    "Data Change",
-    "Grievance Complaint",
-    "Needs Adjudication",
-    "Negative Feedback",
-    "Payment Verification",
-    "Positive Feedback",
-    "Referral",
-    "Sensitive Grievance",
-    "System Flagging",
-]
 
-TICKET_ORDERING = {
-    "Data Change": 0,
-    "Grievance Complaint": 1,
-    "Needs Adjudication": 2,
-    "Negative Feedback": 3,
-    "Payment Verification": 4,
-    "Positive Feedback": 5,
-    "Referral": 6,
-    "Sensitive Grievance": 7,
-    "System Flagging": 8,
+def choice_labels(choices: tuple) -> dict[Any, str]:
+    return {value: force_str(label) for value, label in choices}
+
+
+TICKET_ORDERING_CODES = (
+    GrievanceTicket.CATEGORY_DATA_CHANGE,
+    GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+    GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+    GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+    GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+    GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+    GrievanceTicket.CATEGORY_REFERRAL,
+    GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+    GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+    GrievanceTicket.CATEGORY_BENEFICIARY,
+)
+
+
+class Series(TypedDict):
+    index: int
+    label: str
+
+
+_CATEGORY_LABELS = choice_labels(GrievanceTicket.CATEGORY_CHOICES)
+
+TICKET_SERIES: dict[int, Series] = {
+    code: Series(index=index, label=_CATEGORY_LABELS[code]) for index, code in enumerate(TICKET_ORDERING_CODES)
 }
 
 
@@ -58,10 +64,6 @@ def transform_to_chart_dataset(rows: Iterable[tuple[Any, Any]]) -> dict[str, Any
         data.append(value)
 
     return {"labels": labels, "datasets": [{"data": data}]}
-
-
-def choice_labels(choices: tuple) -> dict[Any, str]:
-    return {value: force_str(label) for value, label in choices}
 
 
 def is_user_generated(category: int, issue_type: int | None) -> bool:
@@ -164,29 +166,33 @@ class TicketsByChoice(DashboardDataset):
 class TicketsByLocationAndCategory(DashboardDataset):
     """Per-admin2 category breakdown, one row per area name and one series per category."""
 
-    per_area: dict[Any, list[int]] = field(default_factory=lambda: defaultdict(lambda: [0] * len(TICKET_ORDERING_KEYS)))
-    labels: dict[Any, str] = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.labels = choice_labels(GrievanceTicket.CATEGORY_CHOICES)
+    per_area: dict[Any, list[int]] = field(default_factory=lambda: defaultdict(lambda: [0] * len(TICKET_SERIES)))
 
     def add(self, group: TicketGroup) -> None:
-        if group["admin2"] is None:
+        admin2, category = group["admin2"], group["category"]
+
+        if admin2 is None:
             return
-        self.per_area[group["admin2"]][TICKET_ORDERING[self.labels[group["category"]]]] += group["ticket_count"]
+
+        category_index = TICKET_SERIES[category]["index"]
+        self.per_area[admin2][category_index] += group["ticket_count"]
 
     def result(self) -> dict[str, Any]:
         rows: dict[str, list[int]] = {}
         for name, area_id in Area.objects.filter(id__in=list(self.per_area)).order_by("name").values_list("name", "id"):
-            row = rows.setdefault(name, [0] * len(TICKET_ORDERING_KEYS))
+            row = rows.setdefault(name, [0] * len(TICKET_SERIES))
             for index, count in enumerate(self.per_area[area_id]):
                 row[index] += count
 
-        columns = list(zip(*rows.values(), strict=True)) if rows else []
+        if not rows:
+            return {"labels": [], "datasets": []}
+
+        columns = zip(*rows.values(), strict=True)
         return {
             "labels": list(rows),
             "datasets": [
-                {"label": TICKET_ORDERING_KEYS[index], "data": list(column)} for index, column in enumerate(columns)
+                {"label": series["label"], "data": list(column)}
+                for series, column in zip(TICKET_SERIES.values(), columns, strict=True)
             ],
         }
 
