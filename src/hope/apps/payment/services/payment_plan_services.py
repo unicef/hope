@@ -977,8 +977,7 @@ class PaymentPlanService:
         with transaction.atomic():
             # Take the same source-plan lock as prepare_child_payment_plan_async_task_action,
             # so the delete cannot interleave with the async payment copy onto this plan.
-            if payment_plan.source_payment_plan_id:
-                PaymentPlan.objects.select_for_update().get(pk=payment_plan.source_payment_plan_id)
+            PaymentPlan.objects.select_for_update().get(pk=payment_plan.source_payment_plan_id)
             payment_plan.payment_items.all().delete()
             payment_plan.delete()
         return payment_plan
