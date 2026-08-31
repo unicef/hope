@@ -9107,8 +9107,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -9117,7 +9115,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -9348,8 +9346,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -9358,7 +9354,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -9750,8 +9746,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -9760,7 +9754,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -18100,8 +18094,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -18110,7 +18102,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -20702,8 +20694,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -20712,7 +20702,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -20954,8 +20944,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -20964,7 +20952,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -21206,8 +21194,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -21216,7 +21202,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -22641,8 +22627,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -22651,7 +22635,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         {
                             "in": "query",
@@ -26073,8 +26057,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -26083,7 +26065,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed\n* `ASSIGNED` - Assigned"
+                            "description": "* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed\n* `ASSIGNED` - Assigned"
                         },
                         {
                             "in": "query",
@@ -26981,8 +26963,6 @@
                                     "LOCKED",
                                     "LOCKED_FSP",
                                     "OPEN",
-                                    "PREPARING",
-                                    "PROCESSING",
                                     "STEFICON_COMPLETED",
                                     "STEFICON_ERROR",
                                     "STEFICON_RUN",
@@ -26991,7 +26971,7 @@
                                     "TP_OPEN"
                                 ]
                             },
-                            "description": "* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed\n* `ASSIGNED` - Assigned"
+                            "description": "* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed\n* `ASSIGNED` - Assigned"
                         },
                         {
                             "in": "query",
@@ -39875,7 +39855,7 @@
                                     "$ref": "#/components/schemas/PaymentPlanStatusEnum"
                                 }
                             ],
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         "status_display": {
                             "type": "string"
@@ -40122,7 +40102,7 @@
                                     "$ref": "#/components/schemas/PaymentPlanStatusEnum"
                                 }
                             ],
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         "total_households_count": {
                             "type": "integer",
@@ -40786,7 +40766,7 @@
                                     "$ref": "#/components/schemas/PaymentPlanStatusEnum"
                                 }
                             ],
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         "total_households_count": {
                             "type": "integer",
@@ -40903,13 +40883,11 @@
                     "enum": [
                         "TP_OPEN",
                         "TP_LOCKED",
-                        "PROCESSING",
                         "STEFICON_WAIT",
                         "STEFICON_RUN",
                         "STEFICON_COMPLETED",
                         "STEFICON_ERROR",
                         "DRAFT",
-                        "PREPARING",
                         "OPEN",
                         "LOCKED",
                         "LOCKED_FSP",
@@ -40922,7 +40900,7 @@
                         "CLOSED"
                     ],
                     "type": "string",
-                    "description": "* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                    "description": "* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                 },
                 "PaymentPlanSupportingDocument": {
                     "type": "object",
@@ -44692,7 +44670,7 @@
                                     "$ref": "#/components/schemas/PaymentPlanStatusEnum"
                                 }
                             ],
-                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `PROCESSING` - Processing\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `PREPARING` - Preparing\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
+                            "description": "Status [sys]\n\n* `TP_OPEN` - Open\n* `TP_LOCKED` - Locked\n* `STEFICON_WAIT` - Steficon Wait\n* `STEFICON_RUN` - Steficon Run\n* `STEFICON_COMPLETED` - Steficon Completed\n* `STEFICON_ERROR` - Steficon Error\n* `DRAFT` - Draft\n* `OPEN` - Open\n* `LOCKED` - Locked\n* `LOCKED_FSP` - Locked FSP\n* `IN_APPROVAL` - In Approval\n* `IN_AUTHORIZATION` - In Authorization\n* `IN_REVIEW` - In Review\n* `ACCEPTED` - Accepted\n* `ABORTED` - Aborted\n* `FINISHED` - Finished\n* `CLOSED` - Closed"
                         },
                         "total_households_count": {
                             "type": "integer",

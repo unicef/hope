@@ -56,7 +56,6 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "individual_data",
-            "role_reassign_data",
             "linked_needs_adjudication_ticket_id",
         )
 

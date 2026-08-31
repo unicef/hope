@@ -97,8 +97,6 @@ export function LookUpReassignRole({
       case GRIEVANCE_CATEGORIES.DATA_CHANGE:
         if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
           roleReassignData = ticket?.ticketDetails?.roleReassignData;
-        } else if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-          roleReassignData = ticket?.ticketDetails?.roleReassignData;
         }
         break;
       case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:

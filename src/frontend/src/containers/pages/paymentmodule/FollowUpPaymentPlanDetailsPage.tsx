@@ -45,9 +45,8 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
-        data?.status === PaymentPlanStatusEnum.PREPARING ||
-        (data?.backgroundActionStatus !== null &&
-          !errorStatuses.includes(data?.backgroundActionStatus))
+        data?.backgroundActionStatus !== null &&
+        !errorStatuses.includes(data?.backgroundActionStatus)
       ) {
         return 3000;
       }

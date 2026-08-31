@@ -40,8 +40,9 @@ class FlexFieldArrayField(ArrayField):
         **kwargs: Any,
     ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
-        # TODO exclude PDU here
-        flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
+        flexible_attributes = (
+            FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).values_list("name", flat=True).distinct()
+        )
         flexible_choices = ((x, x) for x in flexible_attributes)
         kwargs.setdefault("widget", widget)
         kwargs.setdefault("choices", flexible_choices)
@@ -167,14 +168,17 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if main_key in {"primary_collector", "alternate_collector"}:
             return ctx.household_data.get(main_key, {}).get("id")
 
-        if main_key == "documents":
-            doc_type, doc_lookup = (
+        discriminators = {"documents": "type", "identities": "partner"}
+        if main_key in discriminators:
+            item_key, item_lookup = (
                 snapshot_field_path_split[1],
                 snapshot_field_path_split[2],
             )
-            documents_list = ctx.collector_data.get("documents", [])
-            documents_dict = {doc.get("type"): doc for doc in documents_list}
-            return documents_dict.get(doc_type, {}).get(doc_lookup)
+            discriminator = discriminators[main_key]
+            items = ctx.collector_data.get(main_key, [])
+            # DocumentType.key is lowercase, Partner.name uses a case-insensitive collation
+            items_dict = {(item.get(discriminator) or "").upper(): item for item in items}
+            return items_dict.get(item_key.upper(), {}).get(item_lookup)
 
         return None
 

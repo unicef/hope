@@ -329,8 +329,6 @@ export const EditVerificationPlan = ({
       await updateVerificationPlanMutation.mutateAsync(requestData);
       setOpen(false);
       showMessage(t('Verification plan edited.'));
-
-      // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
       showApiErrorMessages(error, showMessage);
     }

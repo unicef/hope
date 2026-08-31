@@ -939,7 +939,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_unhcr_id_number_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
         "lookup_function": get_unhcr_id_no,
-        # "snapshot_field":  # TODO: this one is not added in snapshot
+        "snapshot_field": "identities__UNHCR__number",
     },
     {
         "id": "801bdd67-d27d-4afa-9d23-823e1c8d1313",
@@ -956,7 +956,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_unhcr_id_issuer_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
         "lookup_function": get_unhcr_id_issuer,
-        # "snapshot_field":  # TODO: this one is not added in snapshot
+        "snapshot_field": "identities__UNHCR__country",
     },
     {
         "id": "2f9ca147-afde-4311-9d61-e906a8ef2334",
@@ -970,7 +970,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "unhcr_id_photo_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "4e836832-2cf2-4073-80eb-21316eaf7277",
@@ -1080,7 +1079,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_scope_id_number_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
         "lookup_function": get_scope_id_no,
-        # "snapshot_field":  # TODO: this one is not added in snapshot
+        "snapshot_field": "identities__WFP__number",
     },
     {
         "id": "638a6383-6e87-4c4f-842c-6c5433599267",
@@ -1097,7 +1096,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_scope_id_issuer_query,
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
         "lookup_function": get_scope_id_issuer,
-        # "snapshot_field":  # TODO: this one is not added in snapshot
+        "snapshot_field": "identities__WFP__country",
     },
     {
         "id": "4aa3d595-131a-48df-8752-ec171eabe3be",
@@ -1111,7 +1110,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "scope_id_photo_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "3bf6105f-87d0-479b-bf92-7f90af4d8462",
@@ -1125,7 +1123,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_type_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.XLSX_PEOPLE],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "556e14af-9901-47f3-bf2c-20b4c721e8f7",
@@ -1990,7 +1987,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_phone_number",
         "scope": [Scope.TARGETING],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "7c2b9a14-9f3d-4b6e-8a21-3d5f0c1e7b93",
@@ -2019,7 +2015,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_tax_ID_number",
         "scope": [Scope.TARGETING],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "6b97e9a3-38bb-49a3-9637-65f05d5b8ea4",
@@ -2034,7 +2029,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_the_bank_account_number",
         "scope": [Scope.TARGETING],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "0bf5fad3-8f4f-4528-85f7-57e8a84a2a43",
@@ -2149,7 +2143,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "end",
         "scope": [Scope.KOBO_IMPORT],
-        # "snapshot_field":  # TODO: this one is not added in snapshot
     },
     {
         "id": "16e68909-54f4-47cb-ab06-066d13e85134",

@@ -561,9 +561,8 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     def clean(self) -> None:
         issue_types: "dict[int, _StrPromise] | None" = self.ISSUE_TYPES_CHOICES.get(self.category)
-        should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
-        has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
+        has_invalid_issue_type = self.issue_type not in issue_types if issue_types else False
+        has_issue_type_for_category_without_issue_types = bool(not issue_types and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.warning(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
@@ -809,8 +808,6 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     individual_data = JSONField(null=True, blank=True)
-    # TODO: deprecated will be removed in next release as update Roles moved into TicketHouseholdDataUpdateDetails
-    role_reassign_data = JSONField(default=dict, blank=True)
 
     @property
     def household(self) -> "Household | None":
@@ -1113,7 +1110,6 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional["Payment"]:
-        # TODO: need to double check this property sometimes return null ???
         return getattr(self.payment_verification, "payment", None)
 
     class Meta:

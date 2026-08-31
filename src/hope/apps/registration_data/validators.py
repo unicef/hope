@@ -332,7 +332,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if not self.is_social_worker_program
             else FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
         )
-        # TODO: update flex field for People
         flex_fields = serialize_flex_attributes()
         if self.is_social_worker_program:
             return {

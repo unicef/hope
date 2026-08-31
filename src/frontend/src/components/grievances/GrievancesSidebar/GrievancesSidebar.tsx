@@ -1,5 +1,4 @@
 import { Box, Grid } from '@mui/material';
-import { isEmpty } from 'lodash';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -36,10 +35,6 @@ export function GrievancesSidebar({
         issueType: GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
       },
       {
-        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
-        issueType: GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
-      },
-      {
         category: GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
         issueType: undefined,
         approveStatus: ticket?.ticketDetails?.approveStatus,
@@ -65,22 +60,7 @@ export function GrievancesSidebar({
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign = rolesInHouseholds.some((el) => el.role !== null);
 
-    let isProperDataChange = true;
-    if (
-      category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
-    ) {
-      const { role, relationship } = ticket.ticketDetails.individualData;
-      if (isEmpty(role) && isEmpty(relationship)) {
-        isProperDataChange = false;
-      }
-    }
-
-    return (
-      (isHeadOfHousehold || hasRolesToReassign) &&
-      isProperDataChange &&
-      !isSocialDctType
-    );
+    return (isHeadOfHousehold || hasRolesToReassign) && !isSocialDctType;
   };
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>

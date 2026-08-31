@@ -160,14 +160,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         default=None,
     )
     business_area = models.ForeignKey(BusinessArea, null=True, blank=True, on_delete=models.CASCADE)
-    # TODO: set to not nullable Program and on_delete=models.PROTECT
     program = models.ForeignKey(
         "program.Program",
-        null=True,
-        blank=True,
         db_index=True,
         related_name="registration_imports",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
     import_date = models.DateTimeField(auto_now_add=True, db_index=True)
     imported_by = models.ForeignKey(

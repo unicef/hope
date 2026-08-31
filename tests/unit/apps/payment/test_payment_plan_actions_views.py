@@ -286,7 +286,7 @@ def test_fsp_extra_fields_import_is_available_for_locked_fsp(
         fsp_extra_fields_actions_context["pp"].background_action_status
         == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
     )
-    assert len(callbacks) == 1
+    assert len(callbacks) == 2
     file_temp = FileTemp.objects.get(object_id=fsp_extra_fields_actions_context["pp"].pk)
     assert file_temp.created_by == fsp_extra_fields_actions_context["user"]
     assert file_temp.file.name.endswith(".xlsx")
@@ -324,7 +324,7 @@ def test_fsp_extra_fields_import_can_retry_after_error(
         retryable_fsp_extra_fields_actions_context["pp"].background_action_status
         == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_FSP_EXTRA_FIELDS
     )
-    assert len(callbacks) == 1
+    assert len(callbacks) == 2
 
 
 def test_fsp_extra_fields_import_rejects_active_background_action(

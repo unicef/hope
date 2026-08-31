@@ -218,6 +218,32 @@ def feedback_feb_2023(program_2, user_creator):
 
 
 @pytest.fixture
+def feedback_4(program_active, user):
+    fb = FeedbackFactory(
+        program=program_active,
+        issue_type="NEGATIVE_FEEDBACK",
+        created_by=user,
+        business_area=program_active.business_area,
+    )
+    fb.unicef_id = "FEE-24-0000.0001"
+    fb.save(update_fields=["unicef_id"])
+    return fb
+
+
+@pytest.fixture
+def feedback_5(program_active, user):
+    fb = FeedbackFactory(
+        program=program_active,
+        issue_type="POSITIVE_FEEDBACK",
+        created_by=user,
+        business_area=program_active.business_area,
+    )
+    fb.unicef_id = "FEE-24-0000.0002"
+    fb.save(update_fields=["unicef_id"])
+    return fb
+
+
+@pytest.fixture
 def url_list(business_area):
     return reverse(
         "api:accountability:feedbacks-list",
@@ -1588,3 +1614,221 @@ def test_filter_by_is_active_program(
     results = response_false.json()["results"]
     assert len(results) == 1
     assert results[0]["id"] == str(feedback_with_finished_program.id)
+
+
+def test_filter_by_search_full_unicef_id(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_4,
+    feedback_5,
+    url_list,
+    url_count,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"search": "FEE-24-0000.0001"})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["unicef_id"] == "FEE-24-0000.0001"
+
+    response_count = authenticated_client.get(url_count, {"search": "FEE-24-0000.0001"})
+    assert response_count.status_code == status.HTTP_200_OK
+    assert response_count.json()["count"] == 1
+
+
+def test_filter_by_search_partial_unicef_id(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_4,
+    feedback_5,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"search": "0000.0002"})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["unicef_id"] == "FEE-24-0000.0002"
+
+
+def test_filter_by_search_id(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_4,
+    feedback_5,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"search": str(feedback_4.id)})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["unicef_id"] == "FEE-24-0000.0001"
+
+
+def test_filter_by_search_without_match_returns_empty_list(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_4,
+    feedback_5,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"search": "FEE-24-0000.9999"})
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == []
+
+
+def test_feedback_per_program_list_excludes_feedback_of_other_program(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_1,
+    feedback_3,
+    url_list_per_program,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list_per_program)
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == str(feedback_1.id)
+
+
+def test_feedback_per_program_count_excludes_feedback_of_other_program(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_1,
+    feedback_3,
+    url_count_per_program,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_count_per_program)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 1
+
+
+def test_filter_by_program(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    feedback_1,
+    feedback_3,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"program": str(program_active.id)})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == str(feedback_1.id)
+
+
+def test_filter_by_program_count(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    feedback_1,
+    feedback_3,
+    url_count,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_count, {"program": str(program_active.id)})
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 1
+
+
+def test_filter_by_program_excludes_feedback_without_program(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    program_active,
+    feedback_1,
+    feedback_2,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"program": str(program_active.id)})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == str(feedback_1.id)
+
+
+def test_filter_by_program_with_invalid_uuid_returns_400(
+    create_user_role_with_permissions: Any,
+    authenticated_client,
+    user,
+    business_area,
+    feedback_1,
+    url_list,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+        business_area,
+        whole_business_area_access=True,
+    )
+    response = authenticated_client.get(url_list, {"program": "not-a-uuid"})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

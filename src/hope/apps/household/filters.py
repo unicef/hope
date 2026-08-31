@@ -40,13 +40,12 @@ from hope.models.utils import MergeStatusModel
 logger = logging.getLogger(__name__)
 
 
-def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
+def _prepare_kobo_asset_id_value(code: str) -> str:
     """Prepare value for filter by kobo_asset_id.
 
     value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
     return asset_id number like 111222
     """
-    # TODO: test needed
     if len(code) < 6:
         return code
 
@@ -56,7 +55,6 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
         code = code[7:]
 
     if code.startswith("20224"):
-        # TODO: not sure if this one is correct?
         # code[5] is the day of month (or the first digit of it)
         # month 4 id is 12068..157380
         if len(code) == 12 and code[5] in ["1", "2", "3"]:

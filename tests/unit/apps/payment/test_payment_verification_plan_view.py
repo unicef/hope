@@ -1,12 +1,15 @@
 from datetime import timedelta
 from io import BytesIO
+import json
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import connection
 from django.http import Http404
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
@@ -32,6 +35,7 @@ from hope.models import (
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
+    PaymentVerificationSummary,
     Program,
     build_summary,
 )
@@ -1256,3 +1260,90 @@ def test_verifications_list_without_pagination_returns_flat_response(
     body = response.json()
     assert isinstance(body, list)
     assert len(body) == 2
+
+
+def test_list_is_cached(
+    verification_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+
+    with CaptureQueriesContext(connection) as miss_ctx:
+        first = verification_context["client"].get(verification_context["url_list"])
+    assert first.status_code == status.HTTP_200_OK
+    etag = first.headers["etag"]
+    assert json.loads(cache.get(etag)[0].decode("utf8")) == first.json()
+    assert len(miss_ctx.captured_queries) == 15
+
+    with CaptureQueriesContext(connection) as hit_ctx:
+        second = verification_context["client"].get(verification_context["url_list"])
+    assert second.status_code == status.HTTP_200_OK
+    assert second.headers["etag"] == etag
+    assert len(hit_ctx.captured_queries) == 4
+
+
+def test_list_cache_invalidated_on_verification_summary_change(
+    verification_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+
+    with CaptureQueriesContext(connection) as miss_ctx:
+        first = verification_context["client"].get(verification_context["url_list"])
+    assert first.status_code == status.HTTP_200_OK
+    assert first.json()["results"][0]["verification_status"] == "PENDING"
+    etag = first.headers["etag"]
+    assert len(miss_ctx.captured_queries) == 15
+
+    summary = verification_context["payment_plan"].payment_verification_summary
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        summary.status = PaymentVerificationSummary.STATUS_ACTIVE
+        summary.save()
+
+    with CaptureQueriesContext(connection) as invalidated_ctx:
+        second = verification_context["client"].get(verification_context["url_list"])
+    assert second.status_code == status.HTTP_200_OK
+    assert second.headers["etag"] != etag
+    assert second.json()["results"][0]["verification_status"] == "ACTIVE"
+    assert len(invalidated_ctx.captured_queries) == 9
+
+
+def test_list_cache_invalidated_on_program_cycle_change(
+    verification_context: dict[str, Any],
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+
+    with CaptureQueriesContext(connection) as miss_ctx:
+        first = verification_context["client"].get(verification_context["url_list"])
+    assert first.status_code == status.HTTP_200_OK
+    assert first.json()["results"][0]["program_cycle_title"] == "Cycle Verification"
+    etag = first.headers["etag"]
+    assert len(miss_ctx.captured_queries) == 15
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        cycle.title = "Renamed Cycle"
+        cycle.save()
+
+    with CaptureQueriesContext(connection) as invalidated_ctx:
+        second = verification_context["client"].get(verification_context["url_list"])
+    assert second.status_code == status.HTTP_200_OK
+    assert second.headers["etag"] != etag
+    assert second.json()["results"][0]["program_cycle_title"] == "Renamed Cycle"
+    assert len(invalidated_ctx.captured_queries) == 9

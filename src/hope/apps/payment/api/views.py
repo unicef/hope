@@ -43,6 +43,7 @@ from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
     PaymentPlanPurposeListKeyConstructor,
+    PaymentVerificationListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
@@ -260,10 +261,8 @@ class PaymentVerificationViewSet(
     def get_verification_plan_object(self) -> PaymentVerificationPlan:
         return get_object_or_404(PaymentVerificationPlan, id=self.kwargs.get("verification_plan_id"))
 
-    # @etag_decorator(PaymentVerificationListKeyConstructor)
-    # @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
-    # TODO: Enable cache on verification list, it is not working due to the fact that when summary is invalidated
-    # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
+    @etag_decorator(PaymentVerificationListKeyConstructor)
+    @cached_response(key_func=PaymentVerificationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -2402,7 +2401,6 @@ class PaymentPlanManagerialViewSet(
             .select_related("program_cycle__program")
         )
 
-    # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
     @cached_response(key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:

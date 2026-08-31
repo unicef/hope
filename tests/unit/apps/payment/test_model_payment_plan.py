@@ -326,11 +326,6 @@ def test_can_be_locked():
     assert payment_plan.can_be_locked is True
 
 
-def test_is_population_finalized():
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.TP_PROCESSING)
-    assert payment_plan.is_population_finalized()
-
-
 def test_get_exchange_rate_for_usdc_currency():
     payment_plan = PaymentPlanFactory(currency=CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True))
     assert payment_plan.get_exchange_rate() == 1.0

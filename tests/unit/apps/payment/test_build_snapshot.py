@@ -11,7 +11,10 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
 )
-from hope.apps.household.const import ROLE_PRIMARY
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.factories.household import IndividualIdentityFactory
+from hope.apps.household.const import ROLE_PRIMARY, UNHCR, WFP
 from hope.apps.payment.services import payment_household_snapshot_service
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import MergeStatusModel
@@ -61,6 +64,24 @@ def account(account_type, household_one):
         },
         rdi_merge_status=MergeStatusModel.MERGED,
     )
+
+
+@pytest.fixture
+def collector_identities(household_one):
+    return [
+        IndividualIdentityFactory(
+            individual=household_one.head_of_household,
+            partner=PartnerFactory(name=UNHCR),
+            number="UNHCR-77",
+            country=CountryFactory(iso_code3="UGA"),
+        ),
+        IndividualIdentityFactory(
+            individual=household_one.head_of_household,
+            partner=PartnerFactory(name=WFP),
+            number="WFP-88",
+            country=CountryFactory(iso_code3="KEN"),
+        ),
+    ]
 
 
 @pytest.fixture
@@ -187,6 +208,18 @@ def test_build_snapshot(payment_plan, payments, household_one, household_two) ->
         "financial_institution_name": "",
         "financial_institution_pk": "",
     }
+
+
+def test_build_snapshot_stores_collector_identities(payment_plan, payments, collector_identities) -> None:
+    create_payment_plan_snapshot_data(payment_plan)
+
+    payment_one = payments[0]
+    payment_one.refresh_from_db()
+
+    assert payment_one.household_snapshot.snapshot_data["primary_collector"]["identities"] == [
+        {"partner": "UNHCR", "number": "UNHCR-77", "country": "UGA"},
+        {"partner": "WFP", "number": "WFP-88", "country": "KEN"},
+    ]
 
 
 def test_batching(batch_payment_plan, batch_payments, monkeypatch) -> None:

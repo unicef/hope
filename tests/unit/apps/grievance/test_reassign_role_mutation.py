@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     PartnerFactory,
     ProgramFactory,
     TicketDeleteIndividualDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
     UserFactory,
 )
@@ -148,6 +149,42 @@ def needs_adjudication_context(common_context: dict[str, Any]) -> dict[str, Any]
     }
 
 
+@pytest.fixture
+def individual_data_update_context(common_context: dict[str, Any]) -> dict[str, Any]:
+    program = common_context["program"]
+    business_area = common_context["business_area"]
+    household = HouseholdFactory(
+        program=program,
+        business_area=business_area,
+        create_role=False,
+    )
+    individual = household.head_of_household
+    IndividualRoleInHouseholdFactory(
+        household=household,
+        individual=individual,
+        role=ROLE_PRIMARY,
+    )
+    grievance_ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        admin2=common_context["admin_area"],
+        business_area=business_area,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+    )
+    grievance_ticket.programs.set([program])
+    TicketIndividualDataUpdateDetailsFactory(
+        ticket=grievance_ticket,
+        individual=individual,
+        individual_data={"relationship": {"value": "WIFE_HUSBAND", "approve_status": True}},
+    )
+    return {
+        **common_context,
+        "household": household,
+        "individual": individual,
+        "grievance_ticket": grievance_ticket,
+    }
+
+
 def test_role_reassignment(
     create_user_role_with_permissions: Any,
     delete_individual_context: dict[str, Any],
@@ -232,3 +269,33 @@ def test_role_reassignment_new_ticket(
         }
     }
     assert ticket_details.role_reassign_data == expected_data
+
+
+def test_role_reassignment_rejected_for_individual_data_update_ticket(
+    create_user_role_with_permissions: Any,
+    individual_data_update_context: dict[str, Any],
+) -> None:
+    create_user_role_with_permissions(
+        individual_data_update_context["user"],
+        [Permissions.GRIEVANCES_UPDATE],
+        individual_data_update_context["business_area"],
+        individual_data_update_context["program"],
+    )
+    response = individual_data_update_context["client"].post(
+        reverse(
+            "api:grievance-tickets:grievance-tickets-global-reassign-role",
+            kwargs={
+                "business_area_slug": individual_data_update_context["business_area"].slug,
+                "pk": str(individual_data_update_context["grievance_ticket"].id),
+            },
+        ),
+        {
+            "household_id": str(individual_data_update_context["household"].id),
+            "individual_id": str(individual_data_update_context["individual"].id),
+            "role": ROLE_PRIMARY,
+            "version": individual_data_update_context["grievance_ticket"].version,
+        },
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == ["Role reassignment is not available for Individual Data Update tickets"]
