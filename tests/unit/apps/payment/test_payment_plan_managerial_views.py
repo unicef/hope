@@ -286,6 +286,31 @@ def test_bulk_action(
     assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_AUTHORIZATION
 
 
+def test_bulk_action_rejects_unsupported_action(
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={
+            "ids": [managerial_context["payment_plan1"].id],
+            "action": PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+            "comment": "Test comment",
+        },
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "action" in response.json()
+    managerial_context["payment_plan1"].refresh_from_db()
+    assert managerial_context["payment_plan1"].status == PaymentPlan.Status.IN_APPROVAL
+
+
 def test_bulk_action_raises_for_instruction_managed(
     managerial_context: dict[str, Any],
     create_user_role_with_permissions: Any,

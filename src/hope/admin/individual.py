@@ -27,6 +27,7 @@ from hope.admin.utils import (
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    UnicefIdSearchMixin,
     ViewOnUiMixin,
 )
 from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
@@ -65,6 +66,7 @@ class IndividualAccountInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 @admin.register(Individual)
 class IndividualAdmin(
+    UnicefIdSearchMixin,
     ViewOnUiMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
@@ -77,6 +79,7 @@ class IndividualAdmin(
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
     cursor_ordering_field = "unicef_id"
+    unicef_id_search_map = {"IND": "unicef_id", "HH": "household__unicef_id"}
 
     list_display = (
         "unicef_id",
@@ -185,6 +188,7 @@ class IndividualAdmin(
     ]
     inlines = [IndividualAccountInline]
     show_full_result_count = False
+    show_query_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (

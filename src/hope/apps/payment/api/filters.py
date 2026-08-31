@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Q, QuerySet
+from django.db.models import Case, IntegerField, Q, QuerySet, Value, When
 import django_filters
 from django_filters import FilterSet, OrderingFilter
 
@@ -271,6 +271,19 @@ class PaymentVerificationRecordFilter(FilterSet):
         return qs.filter(unicef_id__istartswith=value)
 
 
+class StableOrderingFilter(OrderingFilter):
+    """OrderingFilter that always appends a unique tie-breaker.
+
+    `order_by()` replaces the model's `Meta.ordering`, so rows tied on the requested column have
+    no defined relative order. With LIMIT/OFFSET pagination that lets a row appear on two pages
+    or on none, because each page is a separate query and Postgres may re-plan it.
+    """
+
+    def filter(self, qs: QuerySet, value: Any) -> QuerySet:
+        ordering = [self.get_ordering_value(param) for param in value] if value else ["-created_at"]
+        return qs.order_by(*ordering, "pk")
+
+
 class PaymentSearchFilter(FilterSet):
     collector_full_name = django_filters.CharFilter(
         field_name="collector__full_name",
@@ -290,16 +303,39 @@ class PaymentSearchFilter(FilterSet):
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
 
-    ordering = OrderingFilter(
+    ordering = StableOrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
             ("household__unicef_id", "household__unicef_id"),
             ("household__size", "household__size"),
             ("collector__full_name", "collector__full_name"),
             ("created_at", "created_at"),
+            ("household__admin2__name", "household__admin2__name"),
+            ("financial_service_provider__name", "financial_service_provider__name"),
+            ("entitlement_quantity_usd", "entitlement_quantity_usd"),
+            ("delivered_quantity", "delivered_quantity"),
+            ("fsp_auth_code", "fsp_auth_code"),
+            ("reconciliation_rank", "reconciliation_rank"),
         )
     )
 
     class Meta:
         model = Payment
         fields = []
+
+    def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
+        queryset = queryset.annotate(
+            reconciliation_rank=Case(
+                # PARTIAL is also in DELIVERED_STATUSES, so it has to be matched first.
+                When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
+                When(status__in=Payment.DELIVERED_STATUSES, then=Value(1)),
+                When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
+                When(status=Payment.STATUS_ERROR, then=Value(4)),
+                When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
+                When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
+                When(status__in=Payment.PENDING_STATUSES, then=Value(7)),
+                default=Value(99),
+                output_field=IntegerField(),
+            )
+        )
+        return super().filter_queryset(queryset)
