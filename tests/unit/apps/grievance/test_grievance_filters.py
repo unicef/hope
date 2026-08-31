@@ -289,6 +289,8 @@ def tickets(
         priority=PRIORITY_MEDIUM,
         urgency=URGENCY_URGENT,
     )
+    ticket1.unicef_id = "GRV-0001"
+    ticket1.save()
     ticket1.programs.add(program_afghanistan1)
 
     # Ticket 2: Payment Verification ticket, program1
@@ -1590,6 +1592,8 @@ def test_filter_by_cross_area(
 @pytest.mark.parametrize(
     ("filter_value", "expected_count_for_program", "expected_count_for_global"),
     [
+        ("GRV-0001", 1, 1),
+        ("GRV-000", 0, 0),
         ("GRV-SEARCH-TARGET", 1, 1),
         ("HH-0001", 4, 4),
         ("IND-0002", 2, 5),
