@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable, cast
 
 from django.core.cache import cache
 from rest_framework_extensions.key_constructor import bits
@@ -21,7 +21,7 @@ class ProfileVersioner:
         return f"profile:user:{_NS}:{user_id}"
 
     def _get_or_init(self, key: str, default: int = 1) -> int:
-        return cache.get_or_set(key, default, timeout=None)
+        return cast("int", cache.get_or_set(key, default, timeout=None))
 
     def get_versions(self, user_id: UUID) -> tuple[int, int]:
         g = self._get_or_init(self._global_key())
