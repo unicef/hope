@@ -6,6 +6,7 @@ import pytest
 from hope.apps.core.timezones import (
     format_human_datetime,
     get_country_timezone_name,
+    latest_local_schedule_time,
     local_date,
     localize_datetime,
     resolve_timezone,
@@ -13,6 +14,51 @@ from hope.apps.core.timezones import (
     to_utc_midnight,
     utc_date,
 )
+
+
+@pytest.mark.parametrize(
+    ("timezone_name", "at", "hour", "expected_date", "expected_schedule_time"),
+    [
+        (
+            "Asia/Kolkata",
+            datetime(2026, 8, 10, 0, 30, tzinfo=UTC),
+            6,
+            date(2026, 8, 10),
+            datetime(2026, 8, 10, 0, 30, tzinfo=UTC),
+        ),
+        (
+            "America/New_York",
+            datetime(2026, 8, 10, 9, tzinfo=UTC),
+            6,
+            date(2026, 8, 9),
+            datetime(2026, 8, 9, 10, tzinfo=UTC),
+        ),
+        (
+            "UTC",
+            datetime(2026, 8, 10, 7, 30, tzinfo=UTC),
+            8,
+            date(2026, 8, 9),
+            datetime(2026, 8, 9, 8, tzinfo=UTC),
+        ),
+    ],
+)
+def test_latest_local_schedule_time(
+    timezone_name: str,
+    at: datetime,
+    hour: int,
+    expected_date: date,
+    expected_schedule_time: datetime,
+) -> None:
+    schedule_date, schedule_time = latest_local_schedule_time(timezone_name, at, hour)
+
+    assert schedule_date == expected_date
+    assert schedule_time == expected_schedule_time
+
+
+@pytest.mark.parametrize("hour", [-1, 24])
+def test_latest_local_schedule_time_rejects_invalid_hour(hour: int) -> None:
+    with pytest.raises(ValueError, match="hour must be between 0 and 23"):
+        latest_local_schedule_time("UTC", datetime(2026, 8, 10, tzinfo=UTC), hour)
 
 
 @pytest.mark.parametrize(

@@ -8,20 +8,23 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
 import logging
 from typing import TYPE_CHECKING, Any, cast
+from zoneinfo import ZoneInfo
 
 from constance import config
 from django.db.models import F, Q
 from django.template.loader import render_to_string
 
+from hope.apps.core.timezones import resolve_timezone_name
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.utils import grievance_ticket_url
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import is_mailable
+from hope.models import User
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hope.models import BusinessArea, User
+    from hope.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -48,24 +51,62 @@ class DailyDigestService:
     # limit number of tickets that can be send in one email, and how many are ever held in memory
     ROW_LIMIT = 50
 
-    def __init__(self, business_area: "BusinessArea", digest_date: date) -> None:
+    @staticmethod
+    def recipient_timezone_names(business_area: "BusinessArea") -> set[str]:
+        user_timezones = (
+            User.objects.filter(
+                Q(assigned_tickets__business_area=business_area) | Q(created_tickets__business_area=business_area)
+            )
+            .filter(is_active=True)
+            .exclude(email="")
+            .exclude(timezone__isnull=True)
+            .order_by()
+            .values_list("timezone", flat=True)
+            .distinct()
+        )
+        return {
+            resolve_timezone_name(business_area=business_area),
+            *(str(timezone_name) for timezone_name in user_timezones),
+        }
+
+    def __init__(
+        self,
+        business_area: "BusinessArea",
+        digest_date: date,
+        timezone_name: str | None = None,
+    ) -> None:
         self.business_area = business_area
         self.digest_date = digest_date
-        self.start = datetime.combine(digest_date, time.min, tzinfo=UTC)
-        self.end = self.start + timedelta(days=1)
+        self.timezone_name = timezone_name or resolve_timezone_name(business_area=business_area)
+        recipient_timezone = ZoneInfo(self.timezone_name)
+        self.start = datetime.combine(digest_date, time.min, tzinfo=recipient_timezone).astimezone(UTC)
+        self.end = datetime.combine(
+            digest_date + timedelta(days=1),
+            time.min,
+            tzinfo=recipient_timezone,
+        ).astimezone(UTC)
 
-    def send(self) -> tuple[int, int]:
-        """Send one digest per recipient. Returns number of (sent, failed)."""
-        sent = 0
+    def send(
+        self,
+        *,
+        skip_user_ids: set[str] | None = None,
+    ) -> tuple[set[str], int]:
+        """Send one digest per recipient and return successful user IDs and the failure count."""
+        successful_user_ids: set[str] = set()
         failed = 0
+        if skip_user_ids is None:
+            skip_user_ids = set()
 
         if not config.SEND_GRIEVANCES_NOTIFICATION:
-            return sent, failed
+            return successful_user_ids, failed
 
         for digest in self.build_digests():
+            user_id = str(digest.user.pk)
+            if user_id in skip_user_ids:
+                continue
             try:
                 self._build_email(digest).send_email()
-                sent += 1
+                successful_user_ids.add(user_id)
             except Exception:
                 logger.exception(
                     f"Failed to send the {self.digest_date.isoformat()} grievance digest to user {digest.user.pk}"
@@ -73,9 +114,9 @@ class DailyDigestService:
                 failed += 1
         logger.info(
             f"Grievance digest for {self.business_area.slug} on {self.digest_date.isoformat()}: "
-            f"{sent} sent, {failed} failed"
+            f"{len(successful_user_ids)} sent, {failed} failed"
         )
-        return sent, failed
+        return successful_user_ids, failed
 
     def build_digests(self) -> list[RecipientDigest]:
         def digest_for(user: "User") -> RecipientDigest:
@@ -87,14 +128,20 @@ class DailyDigestService:
 
         for ticket in self._assigned_tickets().iterator():
             # the queryset only yields tickets with an active assignee that has an email
-            digest = digest_for(cast("User", ticket.assigned_to))
+            assigned_to = cast("User", ticket.assigned_to)
+            digest = digest_for(assigned_to)
             digest.assigned_total += 1
             if digest.assigned_total <= self.ROW_LIMIT:
                 digest.assigned.append(ticket)
             assigned_pairs.add((ticket.assigned_to_id, ticket.pk))
 
         for ticket in self._edited_tickets().iterator():
-            candidates = {c.pk: c for c in (ticket.created_by, ticket.assigned_to) if is_mailable(c)}
+            candidates = {
+                candidate.pk: candidate
+                for candidate in (ticket.created_by, ticket.assigned_to)
+                if is_mailable(candidate)
+                and resolve_timezone_name(user=candidate, business_area=self.business_area) == self.timezone_name
+            }
             for pk, candidate in candidates.items():
                 if pk == ticket.user_modified_by_id or (pk, ticket.pk) in assigned_pairs:
                     continue
@@ -108,6 +155,7 @@ class DailyDigestService:
     def _assigned_tickets(self) -> "QuerySet[GrievanceTicket]":
         return (
             GrievanceTicket.objects.filter(
+                self._recipient_timezone_filter("assigned_to"),
                 Q(assigned_by__isnull=True) | ~Q(assigned_by=F("assigned_to")),
                 Q(assigned_to__is_active=True, assigned_to__email__gt=""),
                 business_area=self.business_area,
@@ -123,6 +171,7 @@ class DailyDigestService:
     def _edited_tickets(self) -> "QuerySet[GrievanceTicket]":
         return (
             GrievanceTicket.objects.filter(
+                self._recipient_timezone_filter("assigned_to") | self._recipient_timezone_filter("created_by"),
                 Q(assigned_to__is_active=True, assigned_to__email__gt="")
                 | Q(created_by__is_active=True, created_by__email__gt=""),
                 business_area=self.business_area,
@@ -135,6 +184,12 @@ class DailyDigestService:
             .select_related("business_area", "assigned_to", "created_by", "user_modified_by")
             .order_by("unicef_id")
         )
+
+    def _recipient_timezone_filter(self, field_name: str) -> Q:
+        timezone_filter = Q(**{f"{field_name}__timezone": self.timezone_name})
+        if self.timezone_name == resolve_timezone_name(business_area=self.business_area):
+            timezone_filter |= Q(**{f"{field_name}__timezone__isnull": True})
+        return timezone_filter
 
     @staticmethod
     def _rows(tickets: list[GrievanceTicket], total: int) -> tuple[list[dict[str, Any]], int]:

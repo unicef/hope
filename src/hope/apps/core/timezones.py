@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, date, datetime, time
+from datetime import UTC, date, datetime, time, timedelta
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -82,3 +82,21 @@ def local_date(
     at: datetime | None = None,
 ) -> date:
     return timezone.localdate(at or timezone.now(), timezone=resolve_timezone(user=user, business_area=business_area))
+
+
+def latest_local_schedule_time(
+    timezone_name: str,
+    at: datetime,
+    hour: int,
+) -> tuple[date, datetime]:
+    """Return the most recent local schedule date and its corresponding UTC datetime."""
+    if not 0 <= hour <= 23:
+        raise ValueError("hour must be between 0 and 23")
+
+    target_timezone = ZoneInfo(timezone_name)
+    local_at = at.astimezone(target_timezone)
+    schedule_date = local_at.date()
+    if local_at.hour < hour:
+        schedule_date -= timedelta(days=1)
+    local_schedule_time = datetime.combine(schedule_date, time(hour=hour), tzinfo=target_timezone)
+    return schedule_date, local_schedule_time.astimezone(UTC)

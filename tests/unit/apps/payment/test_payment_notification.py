@@ -528,6 +528,12 @@ def distinct_timezone_notification_data(notification_setup: dict) -> tuple[Payme
     return notification_setup["payment_plan"], action_user
 
 
+@pytest.fixture
+def notification_data_without_recipients(notification_setup: dict) -> tuple[PaymentPlan, User]:
+    RoleAssignment.objects.all().delete()
+    return notification_setup["payment_plan"], notification_setup["user_action_user"]
+
+
 def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
@@ -992,3 +998,20 @@ def test_notification_groups_recipients_and_action_user_by_timezone(
         ACTION_DATETIME,
         timezone_name="America/New_York",
     )
+
+
+def test_notification_without_recipients_creates_cc_only_email(
+    notification_data_without_recipients: tuple[PaymentPlan, User],
+) -> None:
+    payment_plan, action_user = notification_data_without_recipients
+
+    payment_notification = PaymentNotification(
+        payment_plan,
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        action_user,
+        ACTION_DATETIME,
+    )
+
+    assert len(payment_notification.emails) == 1
+    assert payment_notification.emails[0].recipients == []
+    assert payment_notification.emails[0].ccs == [action_user.email]

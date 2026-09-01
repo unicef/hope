@@ -51,7 +51,9 @@ The effective timezone is the timezone that applies to a particular human-facing
 | User-requested single-Business-Area output | Requesting User, current Business Area, UTC |
 | Unattended Business-Area-specific human output | Business Area, UTC |
 | Global or multi-Business-Area output | UTC |
-| Celery trigger or scheduled-task window | UTC |
+| Celery trigger | UTC |
+| Grievance digest and reminder delivery window | Recipient User, related Business Area, UTC |
+| Other scheduled-task windows | UTC unless explicitly documented otherwise |
 
 For example, if a User has no personal preference and the current Business Area uses `Africa/Nairobi`, both
 `timezone: null` and `effective_timezone: "Africa/Nairobi"` are returned for that scoped profile. If the User then
@@ -203,6 +205,29 @@ Payment Plan and Periodic Data Update email notifications resolve each recipient
 with the same effective timezone are grouped so that one correctly localized message can be rendered for the group.
 The creation and action timestamps in those emails are converted to that timezone and include its IANA identifier.
 
+### Scheduled grievance notifications
+
+The grievance daily digest and overdue/sensitive reminders target the local hour configured by the
+`GRIEVANCE_NOTIFICATION_HOUR` Constance setting. Its default is `6`, meaning 06:00. Enter an integer from `0` through
+`23` in 24-hour format; task execution rejects values outside that range. Both notification mechanisms use the same
+setting.
+
+Their Celery beat entries run once per UTC hour and determine which recipient timezone has reached its configured
+delivery window. This avoids creating a separate beat schedule for every timezone. With the default setting,
+timezones with a non-whole-hour offset are processed during the first hourly run after 06:00, for example at 06:30 or
+06:45 local time.
+
+The dispatcher catches up the most recent missed local delivery window after a scheduler outage. Daily digest jobs
+use a Business Area, effective timezone, and local digest date as their delivery key. The digest contains changes
+from the previous local calendar day; its local midnight boundaries are converted separately to UTC so 23-hour and
+25-hour daylight-saving transition days are handled correctly. After the send loop finishes, successful recipient IDs
+are stored before a partial failure is raised, so a retry does not resend messages to those recipients.
+
+Sensitive reminders remain eligible after one elapsed day, and other overdue reminders after 30 elapsed days. Once
+eligible, they are delivered in the assignee's next configured local delivery window. The actual send time and
+`last_notification_sent` remain UTC datetimes. An unassigned ticket has no recipient timezone and is not marked as
+notified.
+
 For a human-facing report or document concerning one Business Area, use the requesting User's preference, then the
 Business Area timezone, then UTC. Global or multi-Business-Area outputs remain UTC and must state that timezone
 explicitly.
@@ -217,15 +242,15 @@ The timezone settings affect human-facing presentation. They do not change these
 
 - REST and OpenAPI datetime values.
 - Datetime storage and audit/event storage.
-- Celery schedules, triggers, and internal scheduled-task date windows.
+- Celery triggers and scheduled-task windows, except for the documented scheduled grievance notification windows.
 - FSP and payment-gateway interchange files.
 - Partner-facing machine imports and exports.
 - Round-trip files containing timestamps that are parsed again on import.
 - Global processing and multi-Business-Area output.
 
-Changing a Business Area timezone does not automatically change business-rule deadlines, date filters, or the day
-boundaries used by scheduled processing. Code that intentionally implements a Business-Area-local calendar rule must
-receive that Business Area explicitly and calculate its local date from an aware instant.
+Changing a Business Area timezone does not automatically change business-rule deadlines, date filters, or other task
+day boundaries. Code that intentionally implements a local calendar rule must receive the Business Area explicitly
+and calculate its local date from an aware datetime value.
 
 Timezone conversion requires aware datetime values. Callers must attach the correct UTC or source offset before
 conversion; naive datetime values are rejected instead of being assigned an assumed timezone.

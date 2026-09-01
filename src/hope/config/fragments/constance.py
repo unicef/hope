@@ -136,6 +136,11 @@ CONSTANCE_CONFIG = {
         "Should send grievances notification",
         bool,
     ),
+    "GRIEVANCE_NOTIFICATION_HOUR": (
+        6,
+        "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",
+        int,
+    ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,
         "Should send payment plans notification",
