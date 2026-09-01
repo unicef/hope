@@ -427,7 +427,6 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
 
 
 def _validate_latin_names_provided(attrs: dict) -> None:
-    """Require the *_latin twin of every changed name unless the user opted into transliteration."""
     if attrs.get("transliterate_latin_names"):
         return
     missing = [latin for name, latin in NAME_TO_LATIN_FIELDS.items() if attrs.get(name) and not attrs.get(latin)]

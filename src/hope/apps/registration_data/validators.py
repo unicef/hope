@@ -39,6 +39,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
 from hope.apps.registration_data.utils import (
     calculate_hash_for_kobo_submission,
     collectors_str_ids_to_list,
@@ -327,18 +328,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.facility_admin_area_header = (
             "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
         )
-        self.full_name_header_latin = (
-            "pp_full_name_latin_i_c" if self.is_social_worker_program else "full_name_latin_i_c"
-        )
-        self.given_name_header_latin = (
-            "pp_given_name_latin_i_c" if self.is_social_worker_program else "given_name_latin_i_c"
-        )
-        self.middle_name_header_latin = (
-            "pp_middle_name_latin_i_c" if self.is_social_worker_program else "middle_name_latin_i_c"
-        )
-        self.family_name_header_latin = (
-            "pp_family_name_latin_i_c" if self.is_social_worker_program else "family_name_latin_i_c"
-        )
+        prefix = "pp_" if self.is_social_worker_program else ""
+        self.latin_name_headers = [f"{prefix}{latin}_i_c" for latin in NAME_TO_LATIN_FIELDS.values()]
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -619,18 +610,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._process_document_number(header_value_doc, value, self._documents_numbers, self._identities_numbers)
         return errors
 
-    def _validate_ascii_name(self, value: str, field_name: str, row_number: int, invalid_rows: list) -> None:
-        try:
-            ascii_name_validator(value)
-        except ValidationError as e:
-            invalid_rows.append(
-                {
-                    "row_number": row_number,
-                    "header": field_name,
-                    "message": f"{str(e.code)}, {str(e.message)}, Value provided: {value}",
-                }
-            )
-
     def get_cell_value(self, first_row: Any, row: Any, field_name: str) -> Any:
         headers = [cell.value for cell in first_row]
         if field_name in headers:
@@ -705,18 +684,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"when '{self.facility_name_header}' is provided.",
                         }
                     )
-                # validate name fields AB#301335
                 if self.sheet_title in ("Individuals", "People"):
-                    for field_name in [
-                        self.full_name_header_latin,
-                        self.given_name_header_latin,
-                        self.middle_name_header_latin,
-                        self.family_name_header_latin,
-                    ]:
+                    for field_name in self.latin_name_headers:
                         value = self.get_cell_value(first_row, row, field_name)
-                        # skip empty values
-                        if value:
-                            self._validate_ascii_name(value, field_name, row_number, invalid_rows)
+                        if not value:
+                            continue
+                        try:
+                            ascii_name_validator(value)
+                        except ValidationError as e:
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": field_name,
+                                    "message": f"{e.code}, {e.message}, Value provided: {value}",
+                                }
+                            )
 
             if self.sheet_title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
@@ -1907,7 +1889,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             errors.append(
                 {
                     "header": field,
-                    "message": f"{str(e.code)}, {str(e.message)}, Value provided: {value}",
+                    "message": f"{e.code}, {e.message}, Value provided: {value}",
                 }
             )
 
@@ -1965,12 +1947,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         if error:
                             errors.append(error)
 
-                        if i_field in [
-                            "full_name_latin_i_c",
-                            "given_name_latin_i_c",
-                            "middle_name_latin_i_c",
-                            "family_name_latin_i_c",
-                        ]:
+                        if i_field.removesuffix("_i_c") in NAME_TO_LATIN_FIELDS.values():
                             self._validate_latin_fields(i_field, i_value, errors)
 
                     docs_and_identities_to_validate.append(current_individual_docs_and_identities)

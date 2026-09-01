@@ -188,9 +188,7 @@ class HouseholdFilter(UpdatedAtFilter):
             {"match_phrase_prefix": {"detail_id": {"query": search}}},
             {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
         ]
-        # full_name_latin only exists in indexes rebuilt after the mapping change; on the others
-        # the clause silently matches nothing, so it stays off until the fleet reindex is done
-        if config.ES_USE_LATIN_NAMES:
+        if config.ES_USE_LATIN_NAMES:  # flag off until the fleet reindex adds the field
             should.append({"match_phrase_prefix": {"head_of_household.full_name_latin": {"query": search}}})
         query: dict[str, Any] = {
             "size": "100",

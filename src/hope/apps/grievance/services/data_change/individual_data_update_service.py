@@ -278,8 +278,7 @@ class IndividualDataUpdateService(DataChangeService):
         Account.validate_uniqueness(accounts_to_create)
 
     def _refresh_latin_names(self, individual: Individual, only_approved_data: dict) -> None:
-        # an approved name change without an explicitly approved latin twin invalidates the
-        # stored transliteration - recompute it so the latin fields don't go stale
+        # recompute stale latin twins of changed names; explicitly approved latin wins
         changed = [field for field in NAME_TO_LATIN_FIELDS if field in only_approved_data]
         if not changed:
             return
@@ -361,8 +360,7 @@ class IndividualDataUpdateService(DataChangeService):
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
             for field, value_and_approve_status in individual_data.items()
             if is_approved(value_and_approve_status)
-            # previous_documents is bookkeeping; transliterate_latin_names is a UX flag, not a
-            # model field - the latin recompute below is the backend check either way
+            # not model fields: bookkeeping + the UX transliteration flag
             and field not in ("previous_documents", "transliterate_latin_names")
         }
         old_individual = copy_model_object(individual)

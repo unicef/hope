@@ -17,14 +17,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
-export function displayNameWithLatin<T extends Record<string, any>>(
-  obj: T | null | undefined,
-  key: string & keyof T,
+export function displayNameWithLatin(
+  obj: Record<string, any> | null | undefined,
+  key: string,
 ): string | ReactElement | null {
   if (!obj) return null;
-  const name = obj[key] as string | null | undefined;
+  const name = obj[key];
   if (!name) return null;
-  const latinName = obj[`${key}Latin`] as string | null | undefined;
+  const latinName = obj[`${key}Latin`];
   if (!latinName) return name;
   return (
     <Box

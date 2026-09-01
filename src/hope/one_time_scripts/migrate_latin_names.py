@@ -1,16 +1,15 @@
 import json
-import logging
 import time
+from typing import TextIO
 
 from django.db import transaction
 from django.db.models import Q
 
+from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
 from hope.models import Individual, Program
 
-logger = logging.getLogger(__name__)
-
-LATIN_FIELDS = ["full_name_latin", "given_name_latin", "middle_name_latin", "family_name_latin"]
-NAME_FIELDS = ["full_name", "given_name", "middle_name", "family_name"]
+LATIN_FIELDS = list(NAME_TO_LATIN_FIELDS.values())
+NAME_FIELDS = list(NAME_TO_LATIN_FIELDS)
 MISSING_LATIN = (
     Q(full_name_latin__isnull=True)
     | Q(given_name_latin__isnull=True)
@@ -19,7 +18,7 @@ MISSING_LATIN = (
 )
 
 
-def _report_failure(failures_file, individual: Individual, program: Program, reason: Exception) -> None:
+def _report_failure(failures_file: TextIO, individual: Individual, program: Program, reason: Exception) -> None:
     failures_file.write(
         json.dumps(
             {
@@ -38,14 +37,8 @@ def _report_failure(failures_file, individual: Individual, program: Program, rea
     print(f"    FAILED {individual.unicef_id or individual.pk}: {reason}")
 
 
-def _migrate_program(program: Program, batch_size: int, failures_file) -> tuple[int, int]:
-    """Keyset-paginated pass over one program's individuals missing any latin name.
-
-    Each batch is one short SELECT + one short transaction - no long-running
-    cursor and no long transaction. set_names_latin() fills only empty latin
-    fields, so already-populated rows are never overwritten and a re-run
-    resumes on whatever is still missing.
-    """
+def _migrate_program(program: Program, batch_size: int, failures_file: TextIO) -> tuple[int, int]:
+    """Keyset-paginated backfill of one program - short queries, fills only missing latin fields."""
     updated = failed = batch_no = 0
     last_pk = None
     while True:
@@ -79,12 +72,7 @@ def _migrate_program(program: Program, batch_size: int, failures_file) -> tuple[
 
 
 def migrate_to_latin_names(batch_size: int = 1000, failures_path: str = "latin_migration_failures.jsonl") -> None:
-    """Backfill latin name fields for all individuals, program by program, grouped by business area.
-
-    Idempotent and resumable: only rows still missing a latin field are
-    selected, and existing latin values are never overwritten. Rows that fail
-    transliteration are skipped and appended to `failures_path` as JSONL.
-    """
+    """Resumable latin-names backfill, program by program grouped by business area; failures go to JSONL."""
     started_at = time.time()
     total_updated = total_failed = 0
 
