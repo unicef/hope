@@ -12,7 +12,7 @@ from hope.apps.periodic_data_update.service.periodic_data_update_base_service im
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
-from hope.models import FlexibleAttribute, Individual, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData
+from hope.models import FlexibleAttribute, Individual, PDUXlsxTemplate, PDUXlsxUpload, PeriodicFieldData, Program
 
 
 class PDUBaseForm(forms.Form):
@@ -133,7 +133,7 @@ class PDUXlsxImportService(PDURoundValueMixin):
         self.flexible_attributes_dict: dict[str, FlexibleAttribute] | None = None
 
     @classmethod
-    def read_periodic_data_update_template_object(cls, file: File) -> PDUXlsxTemplate:
+    def read_periodic_data_update_template_object(cls, file: File, program: Program) -> PDUXlsxTemplate:
         wb = openpyxl.load_workbook(file)
         ws_meta = wb[PDUXlsxExportTemplateService.META_SHEET]
         try:
@@ -155,7 +155,9 @@ class PDUXlsxImportService(PDURoundValueMixin):
         if type(periodic_data_update_template_id) is not int:
             raise ValidationError("Periodic Data Update Template ID must be an integer")
 
-        periodic_data_update_template = PDUXlsxTemplate.objects.filter(id=periodic_data_update_template_id).first()
+        periodic_data_update_template = PDUXlsxTemplate.objects.filter(
+            id=periodic_data_update_template_id, program=program
+        ).first()
         if not periodic_data_update_template:
             raise ValidationError(f"Periodic Data Update Template with ID {periodic_data_update_template_id} not found")
         return periodic_data_update_template
@@ -228,7 +230,9 @@ class PDUXlsxImportService(PDURoundValueMixin):
     def _import_cleaned_data(self, cleaned_data: dict) -> Individual | None:
         individual_uuid = cleaned_data["individual__uuid"]
         individual_unicef_id = cleaned_data["individual_unicef_id"]
-        individual = Individual.objects.filter(id=individual_uuid).first()
+        individual = Individual.objects.filter(
+            id=individual_uuid, program=self.periodic_data_update_template.program
+        ).first()
 
         individual_errors = []
 
