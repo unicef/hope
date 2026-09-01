@@ -891,7 +891,7 @@ class PaymentPlanViewSet(
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
-        payment_plan = get_object_or_404(PaymentPlan, id=request.data["target_population_id"])
+        payment_plan = get_object_or_404(PaymentPlan, id=request.data.get("target_population_id"))
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
@@ -1624,7 +1624,9 @@ class PaymentPlanViewSet(
             raise ValidationError("Payment plan must be accepted to make a split")
 
         payments_no = request.data.get("payments_no")
-        split_type = request.data["split_type"]
+        split_type = request.data.get("split_type")
+        if not split_type:
+            raise ValidationError("split_type is required")
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             if not payments_no:
                 raise ValidationError("Payment Number is required for split by records")
@@ -2265,7 +2267,7 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        request.data["target_population_id"] = kwargs.get("pk")
+        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
 
         serializer = self.get_serializer(
             data=request.data,
