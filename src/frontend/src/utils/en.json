@@ -955,5 +955,7 @@
   "Sex": "Sex",
   "Phone": "Phone",
   "Withdraw": "Withdraw",
-  "Not Duplicates": "Not Duplicates"
+  "Not Duplicates": "Not Duplicates",
+  "Transliterate Latin names automatically": "Transliterate Latin names automatically",
+  "Latin names will be transliterated automatically": "Latin names will be transliterated automatically"
 }
