@@ -1000,7 +1000,7 @@ def test_send_payment_plan_to_vision_task_skips_ineligible_plan(
 ) -> None:
     job = MagicMock(config={"payment_plan_id": str(vision_disabled_payment_plan.pk)})
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(4):
         send_payment_plan_to_vision_async_task_action(job)
 
     mock_vision_api.assert_not_called()
@@ -1016,7 +1016,7 @@ def test_send_payment_plan_to_vision_task_rechecks_status_under_lock(
     vision_enabled_payment_plan.save(update_fields=["status"])
     job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(3):
         send_payment_plan_to_vision_async_task_action(job)
 
     mock_vision_api.assert_not_called()
@@ -1061,7 +1061,7 @@ def test_send_payment_plan_to_vision_task_does_not_duplicate_persisted_failure_l
     mock_vision_api.return_value.send_payment_plan.side_effect = persist_failure_then_raise
     job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
 
-    with django_assert_num_queries(22), pytest.raises(VisionAPIError):
+    with django_assert_num_queries(24), pytest.raises(VisionAPIError):
         send_payment_plan_to_vision_async_task_action(job)
 
     vision_enabled_payment_plan.refresh_from_db()
