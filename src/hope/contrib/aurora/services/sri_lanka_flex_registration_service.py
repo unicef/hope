@@ -189,20 +189,24 @@ class SriLankaRegistrationService(BaseRegistrationService):
             "business_area": registration_data_import.business_area,
         }
 
-        head_of_household = PendingIndividual.objects.create(
+        head_of_household = PendingIndividual(
             **base_individual_data_dict,
             **self._prepare_individual_data(head_of_household_dict, registration_data_import),
             relationship=HEAD,
         )
+        head_of_household.set_names_latin()
+        head_of_household.save()
         self._prepare_national_id(head_of_household_dict, head_of_household)
 
         if should_use_hoh_as_collector:
             primary_collector = head_of_household
         else:
-            primary_collector = PendingIndividual.objects.create(
+            primary_collector = PendingIndividual(
                 **base_individual_data_dict,
                 **self._prepare_individual_data(collector_dict, registration_data_import),
             )
+            primary_collector.set_names_latin()
+            primary_collector.save()
             self._prepare_national_id(collector_dict, primary_collector)
         self._prepare_bank_statement_document(collector_dict, primary_collector)
 
@@ -225,6 +229,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             )
         for individual in individuals_to_create:
             calculate_phone_numbers_validity(individual)
+            individual.set_names_latin()
         PendingIndividual.objects.bulk_create(individuals_to_create)
         for individual_data_dict, imported_individual in zip(individuals_list, individuals_to_create, strict=True):
             self._prepare_birth_certificate(individual_data_dict, imported_individual)

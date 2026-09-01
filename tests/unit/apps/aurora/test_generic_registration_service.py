@@ -413,6 +413,34 @@ def test_import_data_to_datahub_household_individual(
     assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
 
 
+def test_import_fills_latin_names_when_not_provided(
+    ukraine_admin_areas: dict,
+    document_types: dict,
+    registration: object,
+    user: object,
+    record_defaults: dict,
+    base_household: list[dict],
+    individual_with_bank_account_and_tax: dict,
+) -> None:
+    assert ukraine_admin_areas
+    assert document_types
+    record = RecordFactory(
+        **record_defaults,
+        source_id=20,
+        fields={"household": base_household, "individuals": [individual_with_bank_account_and_tax]},
+        files=json.dumps({}).encode(),
+    )
+    service = GenericRegistrationService(registration)
+    rdi = service.create_rdi(user, f"generic rdi latin {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id])
+
+    individual = PendingIndividual.objects.get(given_name="Wiktor")
+    assert individual.given_name_latin == "Wiktor"
+    assert individual.middle_name_latin == "Stefan"
+    assert individual.family_name_latin == "Lamiacy"
+    assert individual.full_name_latin == "Wiktor Stefan Lamiacy"
+
+
 def test_phone_number_validation_flags(
     ukraine_admin_areas: dict,
     document_types: dict,

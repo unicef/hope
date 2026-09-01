@@ -221,6 +221,27 @@ def test_import_data_to_datahub(
     assert PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration == 43
 
 
+@freeze_time("2023-12-12")
+def test_import_fills_latin_names(
+    registration: Any,
+    user: Any,
+    program: Program,
+    sri_lanka_country: Any,
+    national_id_document_type: Any,
+    sri_lanka_records: list[Record],
+) -> None:
+    service = SriLankaRegistrationService(registration)
+    rdi = service.create_rdi(user, f"sri_lanka rdi latin {datetime.datetime.now()}")
+    service.process_records(rdi.id, [record.id for record in sri_lanka_records])
+
+    head = PendingIndividual.objects.filter(relationship="HEAD").first()
+    assert head.full_name_latin == "Alexis"
+    collector = PendingIndividual.objects.get(full_name="Dome")
+    assert collector.full_name_latin == "Dome"
+    child = PendingIndividual.objects.get(relationship="SON_DAUGHTER")
+    assert child.full_name_latin == "Alexis"
+
+
 def test_import_record_twice(
     registration: Any,
     user: Any,
