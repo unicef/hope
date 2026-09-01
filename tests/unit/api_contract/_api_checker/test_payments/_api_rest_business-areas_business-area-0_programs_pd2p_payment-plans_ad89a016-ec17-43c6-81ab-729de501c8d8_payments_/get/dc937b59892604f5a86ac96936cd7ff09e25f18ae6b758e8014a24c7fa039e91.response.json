@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1629"
+        "Content-Length": "1651"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/pd2p/payment-plans/ad89a016-ec17-43c6-81ab-729de501c8d8/payments/?limit=50&offset=50",
@@ -62,7 +62,12 @@
                 "people_individual": null,
                 "program_name": "Program 0",
                 "program_code": "pd2p",
-                "collector_type_display": "Primary collector"
+                "collector_type_display": "Primary collector",
+                "payment_plan_cycle": "Programme Cycle 0",
+                "payment_plan_group": "Default Group",
+                "payment_plan_purposes": [
+                    "Purpose 0"
+                ]
             }
         ]
     },

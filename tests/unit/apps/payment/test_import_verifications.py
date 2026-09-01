@@ -183,8 +183,10 @@ def test_validation_invalid_received_changed(verification_setup):
     assert [error.sheet, error.coordinates, error.message] == [
         "Payment Verifications",
         f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-        "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
-        "(None, 'YES', 'NO')",
+        (
+            "The received of this payment verification is not correct: NOT_CORRECT_RECEIVED should be one of: "
+            "(None, 'YES', 'NO')"
+        ),
     ]
 
 

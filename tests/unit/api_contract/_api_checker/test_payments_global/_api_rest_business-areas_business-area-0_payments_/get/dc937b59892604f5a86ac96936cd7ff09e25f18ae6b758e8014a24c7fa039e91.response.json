@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1564"
+        "Content-Length": "1575"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/payments/?limit=50&offset=50",
@@ -62,7 +62,10 @@
                 "people_individual": null,
                 "program_name": "Program 0",
                 "program_code": "2839",
-                "collector_type_display": "Primary collector"
+                "collector_type_display": "Primary collector",
+                "payment_plan_cycle": "Programme Cycle 0",
+                "payment_plan_group": "Default Group",
+                "payment_plan_purposes": []
             }
         ]
     },

@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "13075"
+        "Content-Length": "9748"
     },
     "data": {
         "id": "f6730d02-ba17-4532-8d32-a3d456eb2768",
@@ -62,6 +62,11 @@
         "program_name": "Program 0",
         "program_code": "1cpl",
         "collector_type_display": "Primary collector",
+        "payment_plan_cycle": "Programme Cycle 0",
+        "payment_plan_group": "Default Group",
+        "payment_plan_purposes": [
+            "Purpose 0"
+        ],
         "parent": {
             "id": "cb35a199-c561-4206-a989-065b41e8f319",
             "unicef_id": "PP-BA0000-25-00000001",

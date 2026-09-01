@@ -8,7 +8,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import Q, QuerySet
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -55,6 +55,7 @@ from hope.apps.payment.api.filters import (
     PendingPaymentFilter,
     TargetPopulationFilter,
 )
+from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyCustomExchangeRateSerializer,
@@ -171,8 +172,6 @@ from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
-    Individual,
-    IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
@@ -617,39 +616,6 @@ class PaymentVerificationViewSet(
         )
 
 
-def _with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
-    role_prefetch = Prefetch(
-        "households_and_roles",
-        queryset=IndividualRoleInHousehold.all_objects.only("id", "role", "individual_id", "household_id"),
-        to_attr="prefetched_roles",
-    )
-    individual_prefetch = Prefetch(
-        "household__individuals",
-        queryset=Individual.objects.only("id", "household_id", "full_name").prefetch_related(role_prefetch),
-        to_attr="prefetched_individuals",
-    )
-    return (
-        queryset.select_related(
-            "currency",
-            "head_of_household",
-            "collector",
-            "household_snapshot",
-            "financial_service_provider",
-            "business_area",
-            "program__business_area",
-            "parent__program_cycle__program__data_collecting_type",
-            "parent__delivery_mechanism",
-            "parent__financial_service_provider",
-        )
-        .prefetch_related(
-            individual_prefetch,
-            "parent__payment_verification_plans",
-            "payment_verifications",
-        )
-        .all()
-    )
-
-
 class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, SerializerActionMixin, BaseViewSet):
     queryset = Payment.objects.all()
     program_model_field = "program_cycle__program"
@@ -675,9 +641,9 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
 
     def get_queryset(self) -> QuerySet:
         payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
-        return payment_plan.eligible_payments.exclude(
-            payment_verifications__payment_verification_plan__isnull=True
-        ).select_related("currency")
+        return with_payment_related_data(
+            payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
+        )
 
     @extend_schema(
         responses={
@@ -697,7 +663,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment = get_object_or_404(
-            _with_payment_related_data(Payment.objects.all()),
+            with_payment_related_data(Payment.objects.all()),
             id=self.kwargs.get("pk"),
         )
         serializer = self.get_serializer(payment)
@@ -891,7 +857,7 @@ class PaymentPlanViewSet(
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
-        payment_plan = get_object_or_404(PaymentPlan, id=request.data["target_population_id"])
+        payment_plan = get_object_or_404(PaymentPlan, id=request.data.get("target_population_id"))
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
@@ -1624,7 +1590,9 @@ class PaymentPlanViewSet(
             raise ValidationError("Payment plan must be accepted to make a split")
 
         payments_no = request.data.get("payments_no")
-        split_type = request.data["split_type"]
+        split_type = request.data.get("split_type")
+        if not split_type:
+            raise ValidationError("split_type is required")
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             if not payments_no:
                 raise ValidationError("Payment Number is required for split by records")
@@ -2265,7 +2233,7 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        request.data["target_population_id"] = kwargs.get("pk")
+        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
 
         serializer = self.get_serializer(
             data=request.data,
@@ -2569,7 +2537,7 @@ class PaymentViewSet(
 
     def get_object(self) -> Payment:
         payment_id = self.kwargs["payment_id"]
-        return get_object_or_404(_with_payment_related_data(Payment.objects.all()), id=payment_id)
+        return get_object_or_404(with_payment_related_data(Payment.objects.all()), id=payment_id)
 
     def get_queryset(self) -> QuerySet:
         parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
@@ -2577,7 +2545,7 @@ class PaymentViewSet(
             queryset = parent.eligible_payments_with_conflicts
         else:
             queryset = parent.eligible_payments
-        return _with_payment_related_data(queryset)
+        return with_payment_related_data(queryset)
 
     @action(
         detail=True,
@@ -2632,22 +2600,7 @@ class PaymentGlobalViewSet(
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        return (
-            super()
-            .get_queryset()
-            .select_related(
-                "household",
-                "household__admin1",
-                "household__admin2",
-                "head_of_household",
-                "collector",
-                "parent",
-                "financial_service_provider",
-                "program",
-                "currency",
-            )
-            .order_by("-created_at")
-        )
+        return with_payment_related_data(super().get_queryset()).order_by("-created_at")
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:

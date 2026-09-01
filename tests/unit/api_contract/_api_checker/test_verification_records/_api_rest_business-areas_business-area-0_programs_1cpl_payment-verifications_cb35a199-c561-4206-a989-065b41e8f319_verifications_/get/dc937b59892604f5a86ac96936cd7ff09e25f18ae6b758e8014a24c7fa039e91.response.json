@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1759"
+        "Content-Length": "1781"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/1cpl/payment-verifications/cb35a199-c561-4206-a989-065b41e8f319/verifications/?limit=50&offset=50",
@@ -65,7 +65,12 @@
                 "people_individual": null,
                 "program_name": "Program 0",
                 "program_code": "1cpl",
-                "collector_type_display": "Primary collector"
+                "collector_type_display": "Primary collector",
+                "payment_plan_cycle": "Programme Cycle 0",
+                "payment_plan_group": "Default Group",
+                "payment_plan_purposes": [
+                    "Purpose 0"
+                ]
             }
         ]
     },
