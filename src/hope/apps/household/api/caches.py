@@ -56,14 +56,14 @@ def invalidate_household_and_individual_list_cache(program_id: UUID) -> None:
 
 
 class HouseholdListKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
         return str(get_household_list_program_key(view_instance.program.id))
 
 
 class IndividualListKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
         return str(get_individual_list_program_key(view_instance.program.id))

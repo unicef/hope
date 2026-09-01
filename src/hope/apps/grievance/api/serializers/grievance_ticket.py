@@ -292,6 +292,7 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_status_choices = serializers.SerializerMethodField()
     grievance_ticket_category_choices = serializers.SerializerMethodField()
     grievance_ticket_manual_category_choices = serializers.SerializerMethodField()
+    grievance_ticket_filter_category_choices = serializers.SerializerMethodField()
     grievance_ticket_system_category_choices = serializers.SerializerMethodField()
     grievance_ticket_priority_choices = serializers.SerializerMethodField()
     grievance_ticket_urgency_choices = serializers.SerializerMethodField()
@@ -310,7 +311,12 @@ class GrievanceChoicesSerializer(serializers.Serializer):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
     def get_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        """Categories a user is allowed to create a ticket in."""
         return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
+
+    def get_grievance_ticket_filter_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        """All non system-generated categories."""
+        return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
 
     def get_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
