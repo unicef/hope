@@ -323,6 +323,7 @@ const CreateGrievancePage = (): ReactElement => {
     linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
+    transliterateLatinNames: true,
     roles: [],
   };
 

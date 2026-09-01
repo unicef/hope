@@ -6,6 +6,7 @@ import {
 } from '@utils/constants';
 import camelCase from 'lodash/camelCase';
 import { removeIdPropertyFromObjects } from './helpers';
+import { removeLatinNameFields, removeLatinNameRows } from './latinNames';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   if (!_beneficiaryGroup || !text) {
@@ -210,14 +211,19 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
         values.individualData?.identities,
       );
 
+      const addIndividualData = values.transliterateLatinNames
+        ? removeLatinNameFields(values.individualData || {})
+        : values.individualData;
+
       extras.issueType = {
         addIndividualIssueTypeExtras: {
           household: values.selectedHousehold?.id,
           individualData: {
-            ...values.individualData,
+            ...addIndividualData,
             documents: newlyAddedDocumentsWithoutIds,
             identities: newlyAddedIdentitiesWithoutIds,
             flexFields,
+            transliterateLatinNames: Boolean(values.transliterateLatinNames),
           },
         },
       };
@@ -240,7 +246,11 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     } else if (
       issueType === parseInt(GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL, 10)
     ) {
-      const individualData = values.individualDataUpdateFields
+      const updateFields = values.transliterateLatinNames
+        ? removeLatinNameRows(values.individualDataUpdateFields)
+        : values.individualDataUpdateFields;
+
+      const individualData = updateFields
         .filter((item) => item.fieldName && !item.isFlexField)
         .reduce((prev, current) => {
           prev[camelCase(current.fieldName)] = current.fieldValue;
@@ -285,6 +295,7 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
             accounts_to_edit: prepareExistingAccountValues(
               values.individualDataUpdateAccountsToEdit,
             ),
+            transliterateLatinNames: Boolean(values.transliterateLatinNames),
           },
         },
       };

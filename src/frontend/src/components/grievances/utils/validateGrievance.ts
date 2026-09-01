@@ -4,8 +4,64 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
+import {
+  LATIN_NAME_FIELDS,
+  LATIN_NAME_FORMAT_ERROR,
+  LATIN_NAME_REGEX,
+  NAME_TO_LATIN_FIELDS,
+  latinNameMissingError,
+} from './latinNames';
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
+}
+
+// Mirrors the backend rule in AddIndividualDataSerializer / IndividualUpdateDataSerializer:
+// every changed name needs its *_latin twin unless transliteration is enabled. Checked
+// client-side so the form fails fast instead of surfacing a nested DRF 400.
+function validateLatinNameRows(values): string | undefined {
+  if (values.transliterateLatinNames) {
+    return undefined;
+  }
+  const rows = values.individualDataUpdateFields || [];
+  const valueOf = (fieldName: string) =>
+    rows.find((row) => row?.fieldName === fieldName)?.fieldValue;
+
+  for (const latinField of LATIN_NAME_FIELDS) {
+    const latinValue = valueOf(latinField);
+    if (!isEmpty(latinValue) && !LATIN_NAME_REGEX.test(String(latinValue))) {
+      return LATIN_NAME_FORMAT_ERROR;
+    }
+  }
+  for (const [nameField, latinField] of Object.entries(NAME_TO_LATIN_FIELDS)) {
+    if (!isEmpty(valueOf(nameField)) && isEmpty(valueOf(latinField))) {
+      return latinNameMissingError(latinField);
+    }
+  }
+  return undefined;
+}
+
+function validateLatinNameData(values): { [key: string]: string } {
+  const latinErrors: { [key: string]: string } = {};
+  if (values.transliterateLatinNames) {
+    return latinErrors;
+  }
+  const individualData = values.individualData || {};
+
+  for (const latinField of LATIN_NAME_FIELDS) {
+    const latinValue = individualData[camelCase(latinField)];
+    if (!isEmpty(latinValue) && !LATIN_NAME_REGEX.test(String(latinValue))) {
+      latinErrors[camelCase(latinField)] = LATIN_NAME_FORMAT_ERROR;
+    }
+  }
+  for (const [nameField, latinField] of Object.entries(NAME_TO_LATIN_FIELDS)) {
+    if (
+      !isEmpty(individualData[camelCase(nameField)]) &&
+      isEmpty(individualData[camelCase(latinField)])
+    ) {
+      latinErrors[camelCase(latinField)] = latinNameMissingError(latinField);
+    }
+  }
+  return latinErrors;
 }
 
 export function validate(
@@ -113,6 +169,10 @@ export function validate(
           }
         });
       }
+      const latinNameError = validateLatinNameRows(values);
+      if (latinNameError) {
+        errors.individualDataUpdateFields = latinNameError;
+      }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments
@@ -177,7 +237,7 @@ export function validate(
     category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
   ) {
-    const individualDataErrors = {};
+    const individualDataErrors = validateLatinNameData(values);
     const individualData = values.individualData || {};
     if (addIndividualFieldsData) {
       for (const field of addIndividualFieldsData) {
@@ -189,10 +249,10 @@ export function validate(
         ) {
           individualDataErrors[fieldName] = 'Field Required';
         }
-        if (Object.keys(individualDataErrors).length > 0) {
-          errors.individualData = individualDataErrors;
-        }
       }
+    }
+    if (Object.keys(individualDataErrors).length > 0) {
+      errors.individualData = individualDataErrors;
     }
   }
 
@@ -317,6 +377,10 @@ export function validateUsingSteps(
           }
         });
       }
+      const latinNameError = validateLatinNameRows(values);
+      if (latinNameError) {
+        errors.individualDataUpdateFields = latinNameError;
+      }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
@@ -417,7 +481,7 @@ export function validateUsingSteps(
     issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
     activeStep === GrievanceSteps.Description
   ) {
-    const individualDataErrors = {};
+    const individualDataErrors = validateLatinNameData(values);
     const individualData = values.individualData || {};
 
     if (addIndividualFieldsData) {
@@ -430,10 +494,10 @@ export function validateUsingSteps(
         ) {
           individualDataErrors[fieldName] = 'Field Required';
         }
-        if (Object.keys(individualDataErrors).length > 0) {
-          errors.individualData = individualDataErrors;
-        }
       }
+    }
+    if (Object.keys(individualDataErrors).length > 0) {
+      errors.individualData = individualDataErrors;
     }
 
     if (individualData?.documents?.length) {

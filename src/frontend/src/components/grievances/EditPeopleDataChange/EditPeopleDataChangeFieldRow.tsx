@@ -8,6 +8,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { EditPeopleDataChangeField } from './EditPeopleDataChangeField';
 import { CurrentValue } from './CurrentValue';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { LATIN_NAME_FIELDS } from '../utils/latinNames';
 
 export interface EditPeopleDataChangeFieldRowProps {
   fields: any[];
@@ -58,8 +59,12 @@ export const EditPeopleDataChangeFieldRow = ({
           choices={fields
             .filter(
               (item) =>
-                !notAvailableFields.includes(item.name) ||
-                item.name === itemValue?.fieldName,
+                item.name === itemValue?.fieldName ||
+                (!notAvailableFields.includes(item.name) &&
+                  !(
+                    values.transliterateLatinNames &&
+                    LATIN_NAME_FIELDS.includes(item.name)
+                  )),
             )
             .map((item) => ({
               value: item.name,
