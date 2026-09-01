@@ -50,6 +50,9 @@ class Command(BaseCommand):
         for action in ChoicesViewSet.get_extra_actions():
             if action.detail or "get" not in action.mapping:
                 continue
+            if not action.kwargs.get("enum_source", True):
+                # Bundle action - object-shaped, not a flat choice list.
+                continue
             response = getattr(viewset, action.__name__)(viewset.request)
             result[action.url_path] = response.data
             self.stdout.write(f"  + {action.url_path} ({len(response.data)} choices)")

@@ -5,6 +5,7 @@ from django.core.management import call_command
 import pytest
 
 from extras.test_utils.factories import CurrencyFactory
+from hope.apps.core.api.views import ChoicesViewSet
 
 pytestmark = pytest.mark.xdist_group(name="generate_openapi")
 
@@ -38,7 +39,7 @@ def test_writes_openapi_schema_and_choices_files(generated: SimpleNamespace) -> 
     assert generated.choices_path.exists()
 
 
-def test_choices_cover_all_viewset_actions(generated: SimpleNamespace) -> None:
+def test_choices_cover_all_enum_source_actions(generated: SimpleNamespace) -> None:
     assert set(generated.choices) == {
         "countries",
         "currencies",
@@ -56,6 +57,15 @@ def test_choices_cover_all_viewset_actions(generated: SimpleNamespace) -> None:
         "permissions",
         "sex",
     }
+
+
+def test_bundle_actions_are_excluded_from_choices(generated: SimpleNamespace) -> None:
+    bundle_url_paths = {
+        action.url_path for action in ChoicesViewSet.get_extra_actions() if not action.kwargs.get("enum_source", True)
+    }
+
+    assert bundle_url_paths
+    assert bundle_url_paths.isdisjoint(generated.choices)
 
 
 def test_every_choice_has_value_and_name(generated: SimpleNamespace) -> None:
