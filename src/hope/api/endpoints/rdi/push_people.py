@@ -211,7 +211,17 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             **individual_data,
         )
         ind.validate_phone_numbers()
-        ind.save(update_fields=("phone_no_valid", "phone_no_alternative_valid"))
+        ind.set_names_latin()
+        ind.save(
+            update_fields=(
+                "phone_no_valid",
+                "phone_no_alternative_valid",
+                "full_name_latin",
+                "given_name_latin",
+                "middle_name_latin",
+                "family_name_latin",
+            )
+        )
 
         if person_type is not NON_BENEFICIARY:
             hh.head_of_household = ind
