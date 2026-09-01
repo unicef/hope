@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class BusinessAreaSelectWidget(Select):
     """Custom select widget that adds slug as data attribute."""
 
-    def create_option(  # noqa: PLR0913
+    def create_option(  # noqa: PLR0913, PLR0917
         self,
         name: str,
         value: int | str,
@@ -46,7 +46,7 @@ class BusinessAreaSelectWidget(Select):
 class ProgramSelectWidget(Select):
     """Custom select widget that adds code as data attribute."""
 
-    def create_option(  # noqa: PLR0913
+    def create_option(  # noqa: PLR0913, PLR0917
         self,
         name: str,
         value: int | str,
