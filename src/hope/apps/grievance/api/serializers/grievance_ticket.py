@@ -21,6 +21,7 @@ from hope.apps.household.api.serializers.individual import (
     IndividualSimpleSerializer,
 )
 from hope.apps.household.const import ROLE_CHOICE
+from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
 from hope.apps.payment.api.serializers import PaymentSmallSerializer
 from hope.apps.program.api.serializers import ProgramSmallSerializer
 from hope.models import (
@@ -419,6 +420,15 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
         return value
 
 
+def _validate_latin_names_provided(attrs: dict) -> None:
+    """Require the *_latin twin of every changed name unless the user opted into transliteration."""
+    if attrs.get("transliterate_latin_names"):
+        return
+    missing = [latin for name, latin in NAME_TO_LATIN_FIELDS.items() if attrs.get(name) and not attrs.get(latin)]
+    if missing:
+        raise serializers.ValidationError(f"Provide {', '.join(missing)} or set transliterate_latin_names to true.")
+
+
 class AddIndividualDataSerializer(serializers.Serializer):
     full_name = serializers.CharField()
     given_name = serializers.CharField(required=False)
@@ -457,6 +467,15 @@ class AddIndividualDataSerializer(serializers.Serializer):
     flex_fields = serializers.JSONField(required=False)
     payment_delivery_phone_no = serializers.CharField(required=False)
     photo = serializers.ImageField(required=False, allow_null=True)
+    transliterate_latin_names = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Fill missing *_latin name fields automatically by transliteration",
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        _validate_latin_names_provided(attrs)
+        return attrs
 
 
 class IndividualUpdateDataSerializer(serializers.Serializer):
@@ -522,6 +541,15 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     org_name_enumerator = serializers.CharField(required=False, help_text="People update")
     registration_method = serializers.CharField(required=False, help_text="People update")
     admin_area_title = serializers.CharField(required=False, help_text="People update")
+    transliterate_latin_names = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Fill missing *_latin name fields automatically by transliteration",
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        _validate_latin_names_provided(attrs)
+        return attrs
 
 
 class PositiveFeedbackTicketExtras(serializers.Serializer):

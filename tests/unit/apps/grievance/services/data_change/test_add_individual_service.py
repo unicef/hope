@@ -289,6 +289,9 @@ def test_handle_add_identity(add_individual_context: dict[str, Any], program: Pr
 
 def test_close_sets_latin_names_on_created_individual(add_individual_context: dict[str, Any], user: User) -> None:
     ticket = add_individual_context["ticket"]
+    ticket_details = add_individual_context["ticket_details"]
+    ticket_details.individual_data["transliterate_latin_names"] = True
+    ticket_details.save()
 
     service = AddIndividualService(ticket, {})
     service.close(user)

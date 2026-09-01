@@ -49,6 +49,7 @@ from hope.apps.household.api.caches import (
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.household.services.locking import lock_household_then_individual
+from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.currency import Currency
@@ -279,23 +280,17 @@ class IndividualDataUpdateService(DataChangeService):
     def _refresh_latin_names(self, individual: Individual, only_approved_data: dict) -> None:
         # an approved name change without an explicitly approved latin twin invalidates the
         # stored transliteration - recompute it so the latin fields don't go stale
-        name_to_latin = {
-            "given_name": "given_name_latin",
-            "middle_name": "middle_name_latin",
-            "family_name": "family_name_latin",
-            "full_name": "full_name_latin",
-        }
-        changed = [field for field in name_to_latin if field in only_approved_data]
+        changed = [field for field in NAME_TO_LATIN_FIELDS if field in only_approved_data]
         if not changed:
             return
         for field in changed:
             setattr(individual, field, only_approved_data[field])
-            latin_field = name_to_latin[field]
+            latin_field = NAME_TO_LATIN_FIELDS[field]
             if latin_field not in only_approved_data:
                 setattr(individual, latin_field, None)
         individual.set_names_latin()
         for field in changed:
-            latin_field = name_to_latin[field]
+            latin_field = NAME_TO_LATIN_FIELDS[field]
             if latin_field not in only_approved_data:
                 only_approved_data[latin_field] = getattr(individual, latin_field)
 
@@ -365,7 +360,10 @@ class IndividualDataUpdateService(DataChangeService):
         only_approved_data = {
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
             for field, value_and_approve_status in individual_data.items()
-            if is_approved(value_and_approve_status) and field != "previous_documents"
+            if is_approved(value_and_approve_status)
+            # previous_documents is bookkeeping; transliterate_latin_names is a UX flag, not a
+            # model field - the latin recompute below is the backend check either way
+            and field not in ("previous_documents", "transliterate_latin_names")
         }
         old_individual = copy_model_object(individual)
         merged_flex_fields = {}

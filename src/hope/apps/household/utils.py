@@ -6,6 +6,13 @@ from unidecode import unidecode
 
 from hope.models.individual import ascii_name_validator
 
+NAME_TO_LATIN_FIELDS = {
+    "given_name": "given_name_latin",
+    "middle_name": "middle_name_latin",
+    "family_name": "family_name_latin",
+    "full_name": "full_name_latin",
+}
+
 
 def to_latin(text: str | None) -> str | None:
     """Transliterate name into Latin while preserving valid punctuation."""
