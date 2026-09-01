@@ -579,8 +579,9 @@ class GrievanceMutationMixin:
         if admin := input_data.pop("admin", None):
             ticket.admin2 = admin
 
-        linked_tickets = input_data.pop("linked_tickets", [])
-        ticket.linked_tickets.set(linked_tickets)
+        # Partial update: an absent key - do not update, an explicit [] - clear them.
+        if (linked_tickets := input_data.pop("linked_tickets", None)) is not None:
+            ticket.linked_tickets.set(linked_tickets)
         ticket.user_modified = timezone.now()
         ticket.user_modified_by = editor
 
@@ -590,9 +591,15 @@ class GrievanceMutationMixin:
                 setattr(ticket, field, value)
 
     def _handle_assignment_change(
-        self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
+        self,
+        approver: User,
+        ticket: GrievanceTicket,
+        assigned_to: User | None,
+        messages: list,
+        *,
+        assignment_provided: bool,
     ) -> None:
-        if assigned_to != ticket.assigned_to:
+        if assignment_provided and assigned_to != ticket.assigned_to:
             self._set_status_based_on_assigned_to(approver, ticket, messages)
             ticket.assigned_to = assigned_to
             ticket.assigned_at = timezone.now()
@@ -611,9 +618,14 @@ class GrievanceMutationMixin:
     def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
         messages = []
         self._handle_document_operations(approver, grievance_ticket, input_data)
+        # Partial update: `None` is a legitimate value here (explicit unassign), so the assignment
+        # may only be touched when the request actually carries the key.
+        assignment_provided = "assigned_to" in input_data
         assigned_to = input_data.pop("assigned_to", None)
         self._apply_ticket_field_updates(grievance_ticket, input_data, editor=approver)
-        self._handle_assignment_change(approver, grievance_ticket, assigned_to, messages)
+        self._handle_assignment_change(
+            approver, grievance_ticket, assigned_to, messages, assignment_provided=assignment_provided
+        )
 
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
