@@ -15,13 +15,13 @@ from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hope.admin.utils import AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, HOPEModelAdminBase
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
 from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, RoleAssignment, UserRoleAssignment
 
 logger = logging.getLogger(__name__)
 
 
-class RoleAssignmentInline(AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, admin.TabularInline):
+class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = RoleAssignment
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
@@ -60,7 +60,7 @@ class RoleAssignmentInline(AutocompleteExcludeFieldsMixin, AutocompleteForeignKe
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class BaseRoleAssignmentAdmin(AutocompleteExcludeFieldsMixin, HOPEModelAdminBase):
+class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
     form = RoleAssignmentAdminForm
     # business_area is restricted to is_split=False via formfield_for_foreignkey;
     # the autocomplete widget bypasses that queryset, so it must be excluded.

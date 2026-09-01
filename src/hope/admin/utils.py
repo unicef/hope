@@ -117,7 +117,13 @@ class AutocompleteForeignKeyMixin:
     - Related model admin exists but has no ``search_fields`` → raw id widget.
     - Fields already handled by ``filter_horizontal`` / ``filter_vertical`` are
       left untouched so they keep their multi-select widget.
+
+    Set ``autocomplete_exclude_fields`` to field names that must stay as plain
+    ``<select>`` widgets — useful when ``formfield_for_foreignkey`` or ``get_form``
+    restricts a queryset that the autocomplete widget would bypass.
     """
+
+    autocomplete_exclude_fields: tuple[str, ...] = ()
 
     def _related_admin_fields(self, request: HttpRequest) -> tuple[set[str], set[str]]:
         """Return (autocomplete_fields, raw_id_fields) computed from FK/M2M relations."""
@@ -148,29 +154,13 @@ class AutocompleteForeignKeyMixin:
         result = set(super().get_autocomplete_fields(request))
         autocomplete, _ = self._related_admin_fields(request)
         result.update(autocomplete)
-        return list(result)
+        return list(result - set(self.autocomplete_exclude_fields))
 
     def get_raw_id_fields(self, request: HttpRequest) -> list[str]:
         result = set(getattr(self, "raw_id_fields", ()) or ())
         _, raw_id = self._related_admin_fields(request)
         result.update(raw_id)
         return list(result)
-
-
-class AutocompleteExcludeFieldsMixin:
-    """Exclude fields from autocomplete to respect queryset restrictions.
-
-    When ``formfield_for_foreignkey`` or ``get_form`` restricts a queryset,
-    the autocomplete widget bypasses that restriction by querying the full
-    related model. Set ``autocomplete_exclude_fields`` to the field names
-    that must stay as plain ``<select>`` widgets.
-    """
-
-    autocomplete_exclude_fields: tuple[str, ...] = ()
-
-    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
-        excluded = set(self.autocomplete_exclude_fields)
-        return [field for field in super().get_autocomplete_fields(request) if field not in excluded]
 
 
 class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):

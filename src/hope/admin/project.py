@@ -7,13 +7,13 @@ from django.contrib import admin
 from django.http import HttpRequest
 from smart_admin.decorators import smart_register
 
-from hope.admin.utils import AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin
 from hope.contrib.aurora import models
 from hope.models import Program
 
 
 @smart_register(models.Project)
-class ProjectAdmin(AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
+class ProjectAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("name", "organization", "programme")
     list_filter = (
         ("organization", AutoCompleteFilter),

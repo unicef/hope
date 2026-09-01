@@ -34,7 +34,7 @@ from hope.admin.account_filters import BusinessAreaFilter
 from hope.admin.account_forms import AddRoleForm, HopeUserCreationForm, ImportCSVForm
 from hope.admin.steficon import AutocompleteWidget
 from hope.admin.user_role import RoleAssignmentInline
-from hope.admin.utils import AutocompleteExcludeFieldsMixin, AutocompleteForeignKeyMixin, HopeModelAdminMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
 from hope.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hope.apps.core.utils import build_arg_dict_from_dict
 from hope.apps.utils.security import is_root
@@ -229,7 +229,6 @@ class ADUSerMixin:
 
 @admin.register(User)
 class UserAdmin(
-    AutocompleteExcludeFieldsMixin,
     AutocompleteForeignKeyMixin,
     HopeModelAdminMixin,
     UserAdminPlus,
