@@ -74,7 +74,8 @@ export const PaymentPlanDetailsHeader = ({
     });
   }
 
-  const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
+  const canRemove =
+    hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
