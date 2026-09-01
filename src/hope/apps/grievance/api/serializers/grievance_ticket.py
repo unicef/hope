@@ -168,9 +168,11 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
         return ProgramSmallSerializer(obj.programs, many=True).data
 
     def get_related_tickets_count(self, obj: GrievanceTicket) -> int:
-        existing_count = getattr(obj, "existing_tickets_count", None)
-        if existing_count is None:
+        # batched per page by GrievanceListBatchMixin, absent outside the list endpoints
+        existing_tickets_counts = self.context.get("existing_tickets_counts")
+        if existing_tickets_counts is None:
             return obj._related_tickets.count()
+        existing_count = existing_tickets_counts.get(obj.household_unicef_id, 0)
         linked_tickets = list(obj.linked_tickets.all())
         if obj.household_unicef_id:
             overlap = sum(1 for t in linked_tickets if t.household_unicef_id == obj.household_unicef_id)
@@ -186,9 +188,9 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             ticket_details = obj.ticket_details
             if ticket_details and getattr(ticket_details, "individual", None):
                 return ticket_details.individual.unicef_id if ticket_details.individual else ""
-            if fallback_individual_unicef_id := getattr(obj, "fallback_individual_unicef_id_annotated", None):
-                return fallback_individual_unicef_id
-            return ""
+            # batched per page by GrievanceListBatchMixin, absent outside the list endpoints
+            fallback_individual_unicef_ids = self.context.get("fallback_individual_unicef_ids") or {}
+            return fallback_individual_unicef_ids.get(obj.household_unicef_id, "")
 
         return obj.household_unicef_id or ""
 
@@ -290,6 +292,7 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_status_choices = serializers.SerializerMethodField()
     grievance_ticket_category_choices = serializers.SerializerMethodField()
     grievance_ticket_manual_category_choices = serializers.SerializerMethodField()
+    grievance_ticket_filter_category_choices = serializers.SerializerMethodField()
     grievance_ticket_system_category_choices = serializers.SerializerMethodField()
     grievance_ticket_priority_choices = serializers.SerializerMethodField()
     grievance_ticket_urgency_choices = serializers.SerializerMethodField()
@@ -308,7 +311,12 @@ class GrievanceChoicesSerializer(serializers.Serializer):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
     def get_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        """Categories a user is allowed to create a ticket in."""
         return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
+
+    def get_grievance_ticket_filter_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        """All non system-generated categories."""
+        return to_choice_object(GrievanceTicket.MANUAL_CATEGORIES)
 
     def get_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)

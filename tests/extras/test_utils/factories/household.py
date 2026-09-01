@@ -40,8 +40,11 @@ class IndividualFactory(DjangoModelFactory):
     first_registration_date = factory.LazyFunction(date.today)
     last_registration_date = factory.LazyFunction(date.today)
     rdi_merge_status = MergeStatusModel.MERGED
-    business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+    household = None
+    business_area = factory.LazyAttribute(lambda o: o.household.business_area if o.household else BusinessAreaFactory())
+    program = factory.LazyAttribute(
+        lambda o: o.household.program if o.household else ProgramFactory(business_area=o.business_area)
+    )
     registration_data_import = factory.SubFactory(
         RegistrationDataImportFactory,
         business_area=factory.SelfAttribute("..business_area"),

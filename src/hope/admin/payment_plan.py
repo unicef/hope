@@ -15,7 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
+from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm
@@ -140,7 +140,7 @@ def has_payment_instruction_download_permission(request: Any) -> bool:
 
 
 @admin.register(PaymentPlan)
-class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
+class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     list_display = (
         "unicef_id",
         "name",
@@ -234,6 +234,16 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def frontend_url(self, obj: PaymentPlan) -> str | None:
+        base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
+        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+            return f"{base}/target-population/{obj.id}"
+        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return f"{base}/payment-module/followup-payment-plans/{obj.id}"
+        if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
+            return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
+        return f"{base}/payment-module/payment-plans/{obj.id}"
 
     def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
         request._payment_plan_obj = obj
@@ -394,7 +404,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
 
 
 @admin.register(PaymentPlanGroup)
-class PaymentPlanGroupAdmin(HOPEModelAdminBase):
+class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "name", "cycle")
     search_fields = ("name", "unicef_id")
     list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
@@ -407,6 +417,10 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
         "cycle",
         "name",
     )
+
+    def frontend_url(self, obj: PaymentPlanGroup) -> str | None:
+        program = obj.cycle.program
+        return f"/{program.business_area.slug}/programs/{program.code}/payment-module/groups/{obj.id}"
 
     @button(permission="payment.view_paymentplan")
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -432,8 +446,17 @@ class PaymentPlanGroupAdmin(HOPEModelAdminBase):
                     return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
+                old_group = copy_model_object(group)
                 group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
                 group.save(update_fields=["background_action_status"])
+                log_create(
+                    mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+                    business_area_field="cycle.program.business_area",
+                    user=request.user,
+                    programs=group.cycle.program.pk,
+                    old_object=old_group,
+                    new_object=group,
+                )
                 export_payment_plan_group_delivery_xlsx_async_task(
                     group, str(request.user.pk), fsp_xlsx_template_id, export_tag
                 )
@@ -552,7 +575,7 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
 
 
 @admin.register(Payment)
-class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
     list_display = (
         "unicef_id",
@@ -668,6 +691,12 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
+
+    def frontend_url(self, obj: Payment) -> str | None:
+        program = obj.program
+        if program is None:
+            return None
+        return f"/{obj.business_area.slug}/programs/{program.code}/payment-module/payments/{obj.id}"
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
