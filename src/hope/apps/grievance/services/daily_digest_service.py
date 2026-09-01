@@ -59,7 +59,7 @@ class DailyDigestService:
             )
             .filter(is_active=True)
             .exclude(email="")
-            .exclude(timezone__isnull=True)
+            .exclude(Q(timezone__isnull=True) | Q(timezone=""))
             .order_by()
             .values_list("timezone", flat=True)
             .distinct()
@@ -188,7 +188,7 @@ class DailyDigestService:
     def _recipient_timezone_filter(self, field_name: str) -> Q:
         timezone_filter = Q(**{f"{field_name}__timezone": self.timezone_name})
         if self.timezone_name == resolve_timezone_name(business_area=self.business_area):
-            timezone_filter |= Q(**{f"{field_name}__timezone__isnull": True})
+            timezone_filter |= Q(**{f"{field_name}__timezone__isnull": True}) | Q(**{f"{field_name}__timezone": ""})
         return timezone_filter
 
     @staticmethod

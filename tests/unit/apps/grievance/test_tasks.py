@@ -421,34 +421,34 @@ def test_sensitive_ticket_waits_for_the_next_local_morning(
 
 
 @override_config(GRIEVANCE_NOTIFICATION_HOUR=8)
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
+@patch.object(GrievanceNotification, "send_email_notification", autospec=True)
 def test_sensitive_ticket_uses_the_configured_local_notification_hour(
-    mock_notification_cls: Mock,
+    mock_send_email_notification: Mock,
     new_york_sensitive_ticket: GrievanceTicket,
     grievance_notification_job: AsyncJob,
 ) -> None:
     with freeze_time("2026-08-10 13:00:00+00:00"):
         periodic_grievances_notifications_async_task_action(grievance_notification_job)
 
-    mock_notification_cls.assert_called_once_with(
-        new_york_sensitive_ticket,
-        GrievanceNotification.ACTION_SENSITIVE_REMINDER,
-    )
+    mock_send_email_notification.assert_called_once()
+    notification = mock_send_email_notification.call_args.args[0]
+    assert notification.grievance_ticket == new_york_sensitive_ticket
+    assert notification.action == GrievanceNotification.ACTION_SENSITIVE_REMINDER
 
 
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
+@patch.object(GrievanceNotification, "send_email_notification", autospec=True)
 def test_sensitive_ticket_is_sent_at_the_next_local_morning(
-    mock_notification_cls: Mock,
+    mock_send_email_notification: Mock,
     new_york_sensitive_ticket: GrievanceTicket,
     grievance_notification_job: AsyncJob,
 ) -> None:
     with freeze_time("2026-08-11 10:00:00+00:00"):
         periodic_grievances_notifications_async_task_action(grievance_notification_job)
 
-    mock_notification_cls.assert_called_once_with(
-        new_york_sensitive_ticket,
-        GrievanceNotification.ACTION_SENSITIVE_REMINDER,
-    )
+    mock_send_email_notification.assert_called_once()
+    notification = mock_send_email_notification.call_args.args[0]
+    assert notification.grievance_ticket == new_york_sensitive_ticket
+    assert notification.action == GrievanceNotification.ACTION_SENSITIVE_REMINDER
 
 
 @patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
