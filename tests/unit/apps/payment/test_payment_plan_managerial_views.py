@@ -7,6 +7,7 @@ from django.db import connection
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+from flags.models import FlagState
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -92,6 +93,21 @@ def managerial_context(
         "url": url,
         "bulk_url": bulk_url,
     }
+
+
+@pytest.fixture
+def vision_managerial_context(managerial_context: dict[str, Any]) -> dict[str, Any]:
+    payment_plan = managerial_context["payment_plan1"]
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    payment_plan.save(update_fields=["status"])
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+    )
+    return managerial_context
 
 
 @pytest.mark.parametrize(
@@ -288,6 +304,29 @@ def test_bulk_action(
     managerial_context["payment_plan2"].refresh_from_db()
     assert managerial_context["payment_plan1"].status == PaymentPlan.Status.IN_AUTHORIZATION
     assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_AUTHORIZATION
+
+
+def test_bulk_finance_release_skips_vision_managed_plan(
+    vision_managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    payment_plan = vision_managerial_context["payment_plan1"]
+    assert payment_plan.vision_managed is True
+    create_user_role_with_permissions(
+        vision_managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        vision_managerial_context["business_area"],
+        vision_managerial_context["program1"],
+    )
+
+    response = vision_managerial_context["client"].post(
+        vision_managerial_context["bulk_url"],
+        data={"ids": [payment_plan.id], "action": PaymentPlan.Action.REVIEW.value},
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
 
 
 def test_bulk_action_rejects_unsupported_action(

@@ -1226,8 +1226,8 @@ class PaymentPlan(
 
     @property
     def vision_integration_enabled(self) -> bool:
-        # Instruction-managed Follow-Up plans use instruction-level delivery and do not require Vision.
-        if self.is_instruction_managed:
+        # Follow-Up plans reuse funds reserved for the source plan and do not require a new Vision commitment.
+        if self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             return False
         return bool(flag_state("VISION_INTEGRATION_ACTIVE")) and self.business_area.vision_integration_active
 

@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -8,19 +10,29 @@ from hope.models import AsyncJob, PaymentPlan
 
 
 def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
-    payment_plan = PaymentPlan.objects.select_related("business_area").get(pk=job.config["payment_plan_id"])
-    if not payment_plan.can_send_to_vision:
-        return
+    with transaction.atomic():
+        payment_plan = cast(
+            "PaymentPlan",
+            PaymentPlan.objects.select_for_update()
+            .select_related("business_area")
+            .get(pk=job.config["payment_plan_id"]),
+        )
+        if not payment_plan.can_send_to_vision:
+            return
 
-    # Persist the in-flight state before the network call so a fast callback can be correlated with this send.
-    # Abort/reject invalidates it, and the locked status checks below prevent a late response from restoring it.
-    VisionService.set_status(payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-    payment_plan.save(update_fields=["internal_data"])
+        # Lock and recheck immediately before marking the request in flight. This prevents an older task instance
+        # from restoring the Vision attempt after an abort or rejection has reset it.
+        VisionService.set_status(payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+        payment_plan.save(update_fields=["internal_data"])
+
     try:
         VisionAPI().send_payment_plan(payment_plan)
     except (VisionAPIError, VisionAPIMissingCredentialsError) as error:
         with transaction.atomic():
-            locked_payment_plan = PaymentPlan.objects.select_for_update().get(pk=payment_plan.pk)
+            locked_payment_plan = cast(
+                "PaymentPlan",
+                PaymentPlan.objects.select_for_update().get(pk=payment_plan.pk),
+            )
             if (
                 locked_payment_plan.status == PaymentPlan.Status.IN_REVIEW
                 and locked_payment_plan.vision_status in VISION_SEND_MUTABLE_STATUSES

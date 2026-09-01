@@ -14,7 +14,7 @@ class FundsCommitmentAssignmentError(Exception):
 
 
 class VisionService:
-    MANUAL_RECOVERY_STATUSES = frozenset(
+    RECOVERABLE_STATUSES = frozenset(
         {
             VisionStatus.SEND_FAILED.value,
             VisionStatus.WAITING_FOR_CALLBACK.value,
@@ -141,19 +141,6 @@ class VisionService:
         FundsCommitmentItem.objects.filter(pk__in=item_ids, payment_plan__isnull=True).update(payment_plan=payment_plan)
 
     @classmethod
-    def has_fc_assignment_failure(cls, payment_plan: PaymentPlan) -> bool:
-        vision_data = cls.vision_data(payment_plan)
-        if payment_plan.vision_status in {
-            VisionStatus.FC_MISSING.value,
-            VisionStatus.FC_NOT_FOUND.value,
-        }:
-            return True
-        return payment_plan.vision_status == VisionStatus.CALLBACK_FAILED.value and vision_data.get("error_code") in {
-            VisionErrorCode.FC_AMBIGUOUS.value,
-            VisionErrorCode.FC_CONFLICT.value,
-        }
-
-    @classmethod
     def process_callback(
         cls,
         payment_plan: PaymentPlan,
@@ -165,20 +152,26 @@ class VisionService:
         """Return whether the callback must be rejected because its FC could not be assigned."""
         vision_data = cls.vision_data(payment_plan)
         released = vision_data.get("status") == VisionStatus.RELEASED.value
+        # Callbacks for completed, disabled, aborted, or rejected workflows are logged by the view but must not
+        # change FC assignments or Payment Plan status.
         if (
             released
             or not payment_plan.vision_integration_enabled
             or payment_plan.status != PaymentPlan.Status.IN_REVIEW
         ):
-            # Disabled flags and abort/reject both return the plan to the manual flow. The callback is logged by the
-            # view but must not assign FC data or release the plan.
             return False
-        if payment_plan.vision_status != VisionStatus.WAITING_FOR_CALLBACK.value:
-            return cls.has_fc_assignment_failure(payment_plan)
+
+        # Failed attempts remain recoverable through a later corrected callback. NOT_SENT is excluded so an
+        # unsolicited callback cannot start a Vision workflow.
+        if payment_plan.vision_status not in cls.RECOVERABLE_STATUSES:
+            return False
 
         vision_data["vision_id"] = vision_payment_plan_id
         if fc_num:
             vision_data["fc_num"] = fc_num
+        else:
+            # Do not display an FC number from an earlier callback when the latest callback did not provide one.
+            vision_data.pop("fc_num", None)
         if vision_result != "SUCCESS":
             cls.set_status(
                 payment_plan,
@@ -197,6 +190,7 @@ class VisionService:
             cls.set_status(payment_plan, error.status, error_code=error.error_code)
             return True
 
+        # Successful assignment completes finance release, sends PG plans, and enables XLSX delivery for other plans.
         cls.complete_funds_commitment_assignment(payment_plan)
         return False
 
@@ -243,10 +237,8 @@ class VisionService:
     @classmethod
     def can_recover_with_funds_commitment_items(cls, payment_plan: PaymentPlan) -> bool:
         vision_status = payment_plan.vision_status
-        vision_was_sent_or_send_failed = payment_plan.sent_to_vision or vision_status == VisionStatus.SEND_FAILED.value
         return (
             payment_plan.status == PaymentPlan.Status.IN_REVIEW
-            and vision_was_sent_or_send_failed
-            and vision_status in cls.MANUAL_RECOVERY_STATUSES
+            and vision_status in cls.RECOVERABLE_STATUSES
             and payment_plan.vision_integration_enabled
         )

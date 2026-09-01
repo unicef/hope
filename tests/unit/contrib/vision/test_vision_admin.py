@@ -81,6 +81,18 @@ def send_failed_payment_plan(vision_admin_context) -> PaymentPlan:
     return payment_plan
 
 
+@pytest.fixture
+def waiting_without_send_confirmation_payment_plan(vision_admin_context) -> PaymentPlan:
+    payment_plan = _create_payment_plan(
+        vision_admin_context["business_area"],
+        vision_admin_context["user"],
+        vision_admin_context["program_cycle"],
+    )
+    payment_plan.internal_data = {"vision": {"status": VisionStatus.WAITING_FOR_CALLBACK.value}}
+    payment_plan.save(update_fields=["internal_data"])
+    return payment_plan
+
+
 def test_send_to_vision_button_visible_when_in_review(afghanistan, admin_user, program_cycle, admin_client) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
@@ -199,7 +211,33 @@ def test_manual_fc_item_recovery_is_available_after_vision_send_failed(
     assert response.status_code == 200
     assert 'id="btn-assign_vision_funds_commitment_items"' in response.content.decode()
     assert action_response.status_code == 200
-    assert "Vision may not have received this Payment Plan because its send failed" in action_response.content.decode()
+    content = action_response.content.decode()
+    assert "HOPE could not confirm that this Payment Plan was successfully sent to Vision" in content
+    assert "The request may have failed, or" in content
+    assert "processing may have stopped before confirmation was recorded" in content
+
+
+def test_manual_fc_item_recovery_is_available_while_waiting_without_send_confirmation(
+    waiting_without_send_confirmation_payment_plan,
+    admin_client,
+) -> None:
+    response = admin_client.get(
+        reverse("admin:payment_paymentplan_change", args=[waiting_without_send_confirmation_payment_plan.pk])
+    )
+    action_response = admin_client.get(
+        reverse(
+            "admin:payment_paymentplan_assign_vision_funds_commitment_items",
+            args=[waiting_without_send_confirmation_payment_plan.pk],
+        )
+    )
+
+    assert response.status_code == 200
+    assert 'id="btn-assign_vision_funds_commitment_items"' in response.content.decode()
+    assert action_response.status_code == 200
+    content = action_response.content.decode()
+    assert "HOPE could not confirm that this Payment Plan was successfully sent to Vision" in content
+    assert "The request may have failed, or" in content
+    assert "processing may have stopped before confirmation was recorded" in content
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")

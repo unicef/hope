@@ -2414,6 +2414,7 @@ class PaymentPlanManagerialViewSet(
         payment_plans: QuerySet[PaymentPlan] = PaymentPlan.objects.filter(
             id__in=serializer.validated_data["ids"]
         ).select_related(
+            "business_area",
             "program_cycle__program",
             "imported_file",
             "export_file_entitlement",
@@ -2438,6 +2439,8 @@ class PaymentPlanManagerialViewSet(
         business_area: BusinessArea,
         request: Request,
     ) -> None:
+        if input_data["action"] == PaymentPlan.Action.REVIEW.value and payment_plan.vision_managed:
+            return
         if payment_plan.is_instruction_managed:
             raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         perm = self._get_action_permission(input_data["action"])

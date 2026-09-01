@@ -46,9 +46,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
-      const visionProcessing =
-        data?.visionManaged &&
-        ['NOT_SENT', 'WAITING_FOR_CALLBACK'].includes(data.vision.status);
       const errorStatuses = [
         PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
@@ -56,7 +53,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
       if (
-        visionProcessing ||
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           !errorStatuses.includes(data?.backgroundActionStatus))

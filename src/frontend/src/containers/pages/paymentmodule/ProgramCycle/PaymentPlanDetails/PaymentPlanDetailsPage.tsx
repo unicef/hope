@@ -64,8 +64,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
         PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
+      if (visionProcessing) {
+        return 60000;
+      }
       if (
-        visionProcessing ||
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           !errorStatuses.includes(data?.backgroundActionStatus))

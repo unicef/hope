@@ -23,7 +23,6 @@ from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
-from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
@@ -443,7 +442,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             "opts": self.model._meta,
             "original": payment_plan,
             "payment_plan": payment_plan,
-            "vision_send_failed": payment_plan.vision_status == VisionStatus.SEND_FAILED.value,
+            "vision_receipt_unconfirmed": not payment_plan.sent_to_vision,
             "form": form,
             "funds_commitment_options": form.funds_commitment_options,
             "selected_funds_commitment_item_ids": request.POST.getlist("funds_commitment_items"),

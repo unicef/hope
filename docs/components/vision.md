@@ -20,9 +20,8 @@ VISION_INTEGRATION_ACTIVE and payment_plan.business_area.vision_integration_acti
 `VISION_INTEGRATION_ACTIVE` enables the integration for the HOPE installation.
 `BusinessArea.vision_integration_active` enables it for an individual Business Area.
 
-The standard Vision workflow applies to regular Payment Plans, Top-Ups, and Top-Up Amendments. Instruction-managed
-Follow-Up Payment Plans do not use Vision because their funds have already been reserved and their delivery is managed
-through Payment Plan Instructions.
+The standard Vision workflow applies to regular Payment Plans, Top-Ups, and Top-Up Amendments. Follow-Up Payment Plans
+do not use Vision because their funds were reserved for the source Payment Plan.
 
 When either flag is disabled:
 
@@ -47,6 +46,10 @@ When either flag is disabled:
 
 While a Vision-managed plan is in `IN_REVIEW`, the regular UI and API block manual FC assignment, manual release, and
 manual Payment Gateway sending. XLSX export is unavailable because the plan has not reached `ACCEPTED`.
+
+Enabling Vision for a Business Area does not automatically send Payment Plans that were already in `IN_REVIEW`.
+Administrators must send each eligible `NOT_SENT` plan from the Payment Plan's Django admin page. This avoids sending
+an existing backlog to Vision as a side effect of enabling a feature flag.
 
 ## Sending and Retry
 
@@ -74,7 +77,7 @@ processed only when:
 
 - both Vision flags are enabled,
 - the Payment Plan is in `IN_REVIEW`, and
-- its Vision state is `WAITING_FOR_CALLBACK`.
+- its Vision state represents an active request or a previous send, callback, or FC-assignment failure.
 
 Every callback is logged. Callbacks received after a completed release, abort, rejection, or while Vision is disabled
 do not change FC assignments or Payment Plan status. Duplicate callbacks do not repeat release or delivery side
@@ -85,7 +88,7 @@ effects.
 | Callback result | Vision state | Payment Plan result |
 | --- | --- | --- |
 | Invalid payload or missing Vision identifier | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
-| Plan is not waiting for Vision | Unchanged | Callback is logged; no workflow changes |
+| Plan has no active Vision request | Unchanged | Callback is logged; no workflow changes |
 | Vision reports failure | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
 | Success without `fc_num` | `FC_MISSING` | Remains `IN_REVIEW`; no FC changes |
 | No matching HOPE FC group | `FC_NOT_FOUND` | Remains `IN_REVIEW`; no FC changes |
@@ -93,8 +96,10 @@ effects.
 | The FC conflicts with another assignment | `CALLBACK_FAILED` with `FC_CONFLICT` | Remains `IN_REVIEW`; no FC changes |
 | FC assignment succeeds | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
 
-An FC assignment failure returns HTTP `400`, status `KO`, and message `FC not found`. Repeated callbacks for the same
-unresolved failure return the same response while Vision remains enabled.
+An FC assignment failure returns HTTP `400`, status `KO`, and message `FC not found`. A later callback retries
+processing from `SEND_FAILED`, `CALLBACK_FAILED`, `FC_MISSING`, or `FC_NOT_FOUND`. A successful callback with a valid
+FC can therefore recover the workflow without admin intervention. Callbacks that still cannot assign an FC return the
+same `KO` response.
 
 ## Funds Commitment Assignment
 
@@ -118,8 +123,9 @@ validates that all selected items belong to the same group.
 
 Django admin provides recovery when sending fails, a sent plan waits indefinitely, or automatic FC assignment fails.
 While both Vision flags remain enabled, an administrator can select an available FC group on the recovery page and
-select one or more of its available items. The group and item selection happen on the same page. For `SEND_FAILED`,
-the page warns that Vision may not have received the Payment Plan.
+select one or more of its available items. The group and item selection happen on the same page. For `SEND_FAILED` or
+`WAITING_FOR_CALLBACK` without a successful-send marker, the page warns that HOPE cannot confirm that Vision
+received the Payment Plan.
 
 The recovery action rejects:
 

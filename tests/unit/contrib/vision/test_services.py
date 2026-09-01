@@ -72,8 +72,15 @@ def instruction_managed_payment_plan(vision_enabled_payment_plan: PaymentPlan) -
         program=vision_enabled_payment_plan.program,
         created_by=vision_enabled_payment_plan.created_by,
     )
+    vision_enabled_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
     vision_enabled_payment_plan.follow_up_instruction = instruction
-    vision_enabled_payment_plan.save(update_fields=["follow_up_instruction"])
+    vision_enabled_payment_plan.save(update_fields=["plan_type", "follow_up_instruction"])
+    return vision_enabled_payment_plan
+
+
+@pytest.fixture
+def follow_up_vision_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
+    vision_enabled_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
     return vision_enabled_payment_plan
 
 
@@ -348,13 +355,13 @@ def test_process_callback_failure_stores_returned_fc_number(
     }
 
 
-def test_process_callback_repeats_existing_fc_assignment_failure(
+def test_process_callback_reprocesses_existing_fc_assignment_failure(
     payment_plan_with_fc_assignment_failure: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
     payment_plan = payment_plan_with_fc_assignment_failure
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         fc_assignment_failed = VisionService.process_callback(
             payment_plan,
             vision_payment_plan_id="VISION-RETRY",
@@ -363,6 +370,56 @@ def test_process_callback_repeats_existing_fc_assignment_failure(
         )
 
     assert fc_assignment_failed is True
+    assert payment_plan.vision_data == {
+        "vision_id": "VISION-RETRY",
+        "fc_num": "FC123",
+        "status": VisionStatus.FC_NOT_FOUND.value,
+    }
+
+
+@pytest.mark.parametrize(
+    ("vision_status", "error_code"),
+    [
+        (VisionStatus.SEND_FAILED, None),
+        (VisionStatus.CALLBACK_FAILED, VisionErrorCode.VISION_STATUS_FAILED),
+        (VisionStatus.FC_MISSING, None),
+        (VisionStatus.FC_NOT_FOUND, None),
+    ],
+)
+def test_process_callback_recovers_failed_state_with_valid_fc(
+    vision_payment_plan: PaymentPlan,
+    matching_fc_items: list,
+    vision_status: VisionStatus,
+    error_code: VisionErrorCode | None,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, vision_status, error_code=error_code)
+
+    with (
+        patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision"
+        ) as mock_release,
+        patch(
+            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
+        ) as mock_send_to_pg,
+        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
+        django_assert_num_queries(6),
+    ):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-RETRY",
+            vision_result="SUCCESS",
+            fc_num="FC123",
+        )
+
+    assert fc_assignment_failed is False
+    assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
+    assert FundsCommitmentItem.objects.filter(
+        pk__in=[item.pk for item in matching_fc_items],
+        payment_plan=vision_payment_plan,
+    ).count() == len(matching_fc_items)
+    mock_release.assert_called_once_with()
+    mock_send_to_pg.assert_not_called()
 
 
 def test_process_callback_ignores_plan_that_is_not_waiting_for_vision(
@@ -517,6 +574,12 @@ def test_instruction_managed_plan_is_excluded_from_vision(
     assert instruction_managed_payment_plan.vision_managed is False
 
 
+def test_follow_up_plan_is_excluded_from_vision(follow_up_vision_payment_plan: PaymentPlan) -> None:
+    assert follow_up_vision_payment_plan.vision_integration_enabled is False
+    assert follow_up_vision_payment_plan.can_send_to_vision is False
+    assert follow_up_vision_payment_plan.vision_managed is False
+
+
 @pytest.mark.parametrize(
     "plan_type",
     [PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT],
@@ -634,6 +697,19 @@ def test_manual_fc_recovery_is_available_when_vision_send_failed(
     with django_assert_num_queries(1):
         can_recover = VisionService.can_recover_with_funds_commitment_items(vision_send_failed_payment_plan)
 
+    assert can_recover is True
+
+
+def test_manual_fc_recovery_is_available_when_waiting_without_send_confirmation(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+
+    with django_assert_num_queries(1):
+        can_recover = VisionService.can_recover_with_funds_commitment_items(vision_payment_plan)
+
+    assert vision_payment_plan.sent_to_vision is False
     assert can_recover is True
 
 
@@ -928,6 +1004,24 @@ def test_send_payment_plan_to_vision_task_skips_ineligible_plan(
         send_payment_plan_to_vision_async_task_action(job)
 
     mock_vision_api.assert_not_called()
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_send_payment_plan_to_vision_task_rechecks_status_under_lock(
+    mock_vision_api,
+    vision_enabled_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    vision_enabled_payment_plan.status = PaymentPlan.Status.ABORTED
+    vision_enabled_payment_plan.save(update_fields=["status"])
+    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
+
+    with django_assert_num_queries(1):
+        send_payment_plan_to_vision_async_task_action(job)
+
+    mock_vision_api.assert_not_called()
+    vision_enabled_payment_plan.refresh_from_db()
+    assert vision_enabled_payment_plan.vision_status == VisionStatus.NOT_SENT.value
 
 
 @patch("hope.contrib.vision.tasks.VisionAPI")
