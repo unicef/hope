@@ -1471,6 +1471,14 @@ def test_split(
         assert response_3.status_code == status.HTTP_400_BAD_REQUEST
         assert "Payment Number is required for split by records" in response_3.data
 
+        response_missing_split_type = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_pp_split"],
+            {"payments_no": 1},
+            format="json",
+        )
+        assert response_missing_split_type.status_code == status.HTTP_400_BAD_REQUEST
+        assert "split_type is required" in response_missing_split_type.data
+
         fsp_api = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             payment_gateway_id="123",
