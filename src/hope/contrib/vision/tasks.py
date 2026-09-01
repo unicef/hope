@@ -1,5 +1,3 @@
-from typing import cast
-
 from django.db import transaction
 from django.utils import timezone
 
@@ -11,11 +9,10 @@ from hope.models import AsyncJob, PaymentPlan
 
 def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
     with transaction.atomic():
-        payment_plan = cast(
-            "PaymentPlan",
+        payment_plan = (
             PaymentPlan.objects.select_for_update()
             .select_related("business_area")
-            .get(pk=job.config["payment_plan_id"]),
+            .get(pk=job.config["payment_plan_id"])
         )
         if not payment_plan.can_send_to_vision:
             return
@@ -29,10 +26,7 @@ def send_payment_plan_to_vision_async_task_action(job: AsyncJob) -> None:
         VisionAPI().send_payment_plan(payment_plan)
     except (VisionAPIError, VisionAPIMissingCredentialsError) as error:
         with transaction.atomic():
-            locked_payment_plan = cast(
-                "PaymentPlan",
-                PaymentPlan.objects.select_for_update().get(pk=payment_plan.pk),
-            )
+            locked_payment_plan = PaymentPlan.objects.select_for_update().get(pk=payment_plan.pk)
             if (
                 locked_payment_plan.status == PaymentPlan.Status.IN_REVIEW
                 and locked_payment_plan.vision_status in VISION_SEND_MUTABLE_STATUSES
