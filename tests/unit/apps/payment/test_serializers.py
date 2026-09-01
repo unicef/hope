@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RoleAssignmentFactory,
@@ -80,6 +81,10 @@ def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(created_by=user, program_cycle=ProgramCycleFactory(program=program))
     program = payment_plan.program_cycle.program
+    school_supplies = PaymentPlanPurposeFactory(name="School Supplies")
+    emergency_cash = PaymentPlanPurposeFactory(name="Emergency Cash")
+    program.payment_plan_purposes.add(school_supplies, emergency_cash)
+    payment_plan.payment_plan_purposes.set([school_supplies, emergency_cash])
     admin2 = AreaFactory(name="New admin22")
     hoh = IndividualFactory(household=None, business_area=business_area, program=program)
     household = HouseholdFactory(
@@ -270,6 +275,9 @@ def test_payment_list_serializer_all_data(payment_list_context: dict[str, Any]) 
     assert data["status"] == payment.get_status_display()
     assert data["fsp_name"] == "FSP 1"
     assert data["fsp_auth_code"] == ""
+    assert data["payment_plan_cycle"] == payment.parent.program_cycle.title
+    assert data["payment_plan_group"] == payment.parent.payment_plan_group.name
+    assert data["payment_plan_purposes"] == ["Emergency Cash", "School Supplies"]
 
 
 def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, Any]) -> None:

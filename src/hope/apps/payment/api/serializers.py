@@ -1381,6 +1381,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
     people_individual = IndividualListSerializer(read_only=True)
     program_name = serializers.CharField(source="parent.program.name")
     program_code = serializers.CharField(source="parent.program.code")
+    payment_plan_cycle = serializers.CharField(source="parent.program_cycle.title", read_only=True)
+    payment_plan_group = serializers.CharField(source="parent.payment_plan_group.name", read_only=True, allow_null=True)
+    payment_plan_purposes = serializers.SerializerMethodField()
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1434,6 +1437,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "program_name",
             "program_code",
             "collector_type_display",
+            "payment_plan_cycle",
+            "payment_plan_group",
+            "payment_plan_purposes",
         )
 
     @classmethod
@@ -1540,6 +1546,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     def get_collector_phone_no_alt(self, obj: Payment) -> str:
         return str(self._safe_get(obj, "collector.phone_no_alternative"))
+
+    def get_payment_plan_purposes(self, obj: Payment) -> list[str]:
+        # Sorted in Python so the parent__payment_plan_purposes prefetch is not discarded.
+        return sorted(purpose.name for purpose in obj.parent.payment_plan_purposes.all())
 
 
 class PaymentDetailParentSerializer(serializers.ModelSerializer):
