@@ -404,6 +404,7 @@ class IndividualFilter(UpdatedAtFilter):
         See docs/guide-dev/elasticsearch.md ("The deploy -> reindex gap and feature flags").
 
         Delete this branch together with the flag once the fleet is on the new mapping.
+        Ticket: https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/338861
         """
         if not config.ES_USE_EXACT_ID_AND_ADDRESS_SEARCH:
             return [
