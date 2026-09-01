@@ -9,6 +9,8 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { LATIN_NAME_FIELDS } from './utils/latinNames';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { AgencyField } from './AgencyField';
@@ -188,7 +190,14 @@ function AddIndividualDataChange({
   const flexFields =
     combinedData.results.filter((item) => item.isFlexField) || [];
   const coreFields =
-    combinedData.results.filter((item) => !item.isFlexField) || [];
+    combinedData.results.filter(
+      (item) =>
+        !item.isFlexField &&
+        !(
+          values.transliterateLatinNames &&
+          LATIN_NAME_FIELDS.includes(item.name)
+        ),
+    ) || [];
   return (
     !isEditTicket && (
       <>
@@ -203,6 +212,14 @@ function AddIndividualDataChange({
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
+          <Grid size={12}>
+            <Field
+              name="transliterateLatinNames"
+              label={t('Transliterate Latin names automatically')}
+              color="primary"
+              component={FormikCheckboxField}
+            />
+          </Grid>
           {flexFields.length > 0 && <Grid size={12}>{t('Flex Fields')}</Grid>}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField

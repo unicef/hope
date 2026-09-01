@@ -8,11 +8,12 @@ import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { FieldArray } from 'formik';
+import { Field, FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
@@ -193,6 +194,14 @@ function EditPeopleDataChange({
                   >
                     {t('Add new field')}
                   </Button>
+                </Grid>
+                <Grid size={12}>
+                  <Field
+                    name="transliterateLatinNames"
+                    label={t('Transliterate Latin names automatically')}
+                    color="primary"
+                    component={FormikCheckboxField}
+                  />
                 </Grid>
               </>
             )}

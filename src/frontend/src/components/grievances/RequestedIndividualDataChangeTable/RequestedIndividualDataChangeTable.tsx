@@ -1,4 +1,6 @@
 import { ReactElement } from 'react';
+import { Box, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
@@ -29,6 +31,7 @@ export function RequestedIndividualDataChangeTable({
   values,
   isEdit,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
+  const { t } = useTranslation();
   const { businessAreaSlug } = useBaseUrl();
 
   const { data: addIndividualFieldsData, isLoading: loading } = useQuery({
@@ -94,6 +97,7 @@ export function RequestedIndividualDataChangeTable({
     accounts,
     accountsToEdit,
     flexFields,
+    transliterateLatinNames,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
@@ -133,6 +137,13 @@ export function RequestedIndividualDataChangeTable({
 
   return (
     <div>
+      {transliterateLatinNames?.value ? (
+        <Box data-cy="transliterate-latin-names-info" sx={{ p: 2 }}>
+          <Typography variant="body2">
+            {t('Latin names will be transliterated automatically')}
+          </Typography>
+        </Box>
+      ) : null}
       {entries?.length || entriesFlexFields?.length ? (
         <EntriesTable
           values={values}
