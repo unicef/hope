@@ -1,0 +1,56 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "582"
+    },
+    "data": {
+        "document_type_choices": [
+            {
+                "name": "Passport",
+                "value": "passport"
+            }
+        ],
+        "residence_status_choices": [
+            {
+                "name": "Displaced  |   Refugee Returnee",
+                "value": "RETURNEE"
+            },
+            {
+                "name": "Displaced  |  Internally Displaced People",
+                "value": "IDP"
+            },
+            {
+                "name": "Displaced  |  Internally Displaced People Returnee",
+                "value": "IDP_RETURNEE"
+            },
+            {
+                "name": "Displaced  |  Others of Concern",
+                "value": "OTHERS_OF_CONCERN"
+            },
+            {
+                "name": "Displaced  |  Refugee / Asylum Seeker",
+                "value": "REFUGEE"
+            },
+            {
+                "name": "Non-displaced  |   Host",
+                "value": "HOST"
+            },
+            {
+                "name": "Non-displaced  |   Non-host",
+                "value": "NON_HOST"
+            },
+            {
+                "name": "None",
+                "value": ""
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

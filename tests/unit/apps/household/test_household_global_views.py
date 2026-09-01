@@ -5,6 +5,7 @@ from django.utils import timezone
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -879,38 +880,21 @@ def test_search_with_active_programs_filter(
 
 
 @pytest.fixture
-def household_choices_context(api_client: Any) -> dict[str, Any]:
-    choices_url = "api:households:households-global-choices"
-    afghanistan = BusinessAreaFactory(slug="afghanistan", name="Afghanistan")
-    partner = PartnerFactory(name="TestPartner")
-    user = UserFactory(partner=partner)
-    client = api_client(user)
-
-    DocumentTypeFactory(key="passport", label="Passport")
-    DocumentTypeFactory(key="id_card", label="ID Card")
-    DocumentTypeFactory(key="birth_certificate", label="Birth Certificate")
-
-    return {
-        "choices_url": choices_url,
-        "afghanistan": afghanistan,
-        "partner": partner,
-        "user": user,
-        "api_client": client,
-    }
+def household_choices_document_types() -> list[DocumentType]:
+    return [
+        DocumentTypeFactory(key="passport", label="Passport"),
+        DocumentTypeFactory(key="id_card", label="ID Card"),
+        DocumentTypeFactory(key="birth_certificate", label="Birth Certificate"),
+    ]
 
 
-def test_get_choices(create_user_role_with_permissions: Any, household_choices_context: dict[str, Any]) -> None:
-    create_user_role_with_permissions(
-        user=household_choices_context["user"],
-        permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
-        business_area=household_choices_context["afghanistan"],
-    )
-    response = household_choices_context["api_client"].get(
-        reverse(
-            household_choices_context["choices_url"],
-            kwargs={"business_area_slug": household_choices_context["afghanistan"].slug},
-        )
-    )
+def test_get_choices_returns_choices_for_user_without_any_role(
+    api_client: Any, household_choices_document_types: list[DocumentType]
+) -> None:
+    client = api_client(UserFactory(partner=PartnerFactory(name="TestPartner")))
+
+    response = client.get(reverse("api:choices-households"))
+
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
         "document_type_choices": [
@@ -922,3 +906,9 @@ def test_get_choices(create_user_role_with_permissions: Any, household_choices_c
             key=lambda choice: choice["name"],
         ),
     }
+
+
+def test_get_choices_denies_anonymous_access(household_choices_document_types: list[DocumentType]) -> None:
+    response = APIClient().get(reverse("api:choices-households"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN

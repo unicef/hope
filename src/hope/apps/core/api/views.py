@@ -33,6 +33,7 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
+from hope.apps.household.api.serializers.household import HouseholdChoicesSerializer
 from hope.apps.household.const import SEX_CHOICE
 from hope.models import (
     AccountType,
@@ -138,10 +139,15 @@ class BusinessAreaViewSet(
 
 
 class ChoicesViewSet(ViewSet):
-    """Return choices used in the system like statuses, currencies.
+    """Return business-area-independent choices used in the system."""
 
-    Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
-    """
+    # Two kinds of actions live here:
+    # * flat - a single list, [{"name": ..., "value": ...}].
+    # * bundles - an object grouping several related lists.
+
+    enum_source = True
+
+    # --- flat choices -------------------------------------------------------
 
     @extend_schema(responses={200: CurrencyChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
@@ -239,3 +245,11 @@ class ChoicesViewSet(ViewSet):
     def permissions(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(Permissions.choices()), many=True).data
         return Response(resp)
+
+    # --- bundles ------------------------------------------------------------
+
+    @extend_schema(responses={200: HouseholdChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="households", enum_source=False)
+    def households(self, request: Request) -> Response:
+        """Return the choice lists used by the household screens."""
+        return Response(HouseholdChoicesSerializer(instance={}, context={"request": request}).data)
