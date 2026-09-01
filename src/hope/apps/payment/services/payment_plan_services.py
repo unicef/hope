@@ -944,6 +944,9 @@ class PaymentPlanService:
         ]:
             raise ValidationError("Deletion is only allowed when the status is 'Open'")
 
+        if self.payment_plan.plan_type != PaymentPlan.PlanType.REGULAR:
+            return self._delete_child_plan()
+
         if self.payment_plan.status == PaymentPlan.Status.OPEN:
             if self.payment_plan.program_cycle.payment_plans.count() == 1:
                 # if it's the last Payment Plan in this Cycle need to update Cycle status
@@ -961,6 +964,22 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         return self.payment_plan
+
+    def _delete_child_plan(self) -> PaymentPlan:
+        """Soft-delete the most recent child plan (Top-Up / Follow-Up / Amendment) together with its payments."""
+        payment_plan = self.payment_plan
+        if payment_plan.has_newer_sibling_plan:
+            raise ValidationError(
+                f"Only the most recent {payment_plan.get_plan_type_display()} of this Payment Plan can be deleted"
+            )
+
+        with transaction.atomic():
+            # Take the same source-plan lock as prepare_child_payment_plan_async_task_action,
+            # so the delete cannot interleave with the async payment copy onto this plan.
+            PaymentPlan.objects.select_for_update().get(pk=payment_plan.source_payment_plan_id)
+            payment_plan.payment_items.all().delete()
+            payment_plan.delete()
+        return payment_plan
 
     def export_xlsx(self, user_id: str) -> PaymentPlan:
         flow = PaymentPlanFlow(self.payment_plan)
