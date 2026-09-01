@@ -601,7 +601,7 @@ def test_read_periodic_data_update_template_object(
     service.generate_workbook()
     service.save_xlsx_file()
     periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(
-        periodic_data_update_template.file.file
+        periodic_data_update_template.file.file, program
     )
     assert periodic_data_update_template_from_xlsx.pk == periodic_data_update_template.pk
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
@@ -609,7 +609,9 @@ def test_read_periodic_data_update_template_object(
     tmp_file = BytesIO()
     wb.save(tmp_file)
     tmp_file.seek(0)
-    periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
+    periodic_data_update_template_from_xlsx = PDUXlsxImportService.read_periodic_data_update_template_object(
+        tmp_file, program
+    )
     assert periodic_data_update_template_from_xlsx.pk == periodic_data_update_template.pk
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
@@ -619,7 +621,7 @@ def test_read_periodic_data_update_template_object(
     wb.save(tmp_file)
     tmp_file.seek(0)
     with pytest.raises(ValidationError, match="Periodic Data Update Template ID is missing in the file"):
-        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
+        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file, program)
 
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
@@ -629,7 +631,7 @@ def test_read_periodic_data_update_template_object(
     wb.save(tmp_file)
     tmp_file.seek(0)
     with pytest.raises(ValidationError, match="Periodic Data Update Template ID must be a number"):
-        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
+        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file, program)
 
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
@@ -639,7 +641,7 @@ def test_read_periodic_data_update_template_object(
     wb.save(tmp_file)
     tmp_file.seek(0)
     with pytest.raises(ValidationError, match="Periodic Data Update Template ID must be an integer"):
-        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
+        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file, program)
 
     wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
     del wb.custom_doc_props[PDUXlsxExportTemplateService.PROPERTY_ID_NAME]
@@ -649,7 +651,7 @@ def test_read_periodic_data_update_template_object(
     wb.save(tmp_file)
     tmp_file.seek(0)
     with pytest.raises(ValidationError, match="Periodic Data Update Template with ID -1 not found"):
-        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file)
+        PDUXlsxImportService.read_periodic_data_update_template_object(tmp_file, program)
 
 
 def test_read_flexible_attributes(

@@ -901,6 +901,23 @@ class PaymentPlan(
             and self.eligible_payments_for_top_up_amendment().exists()
         )
 
+    @property
+    def has_newer_sibling_plan(self) -> bool:
+        return PaymentPlan.objects.filter(
+            source_payment_plan=self.source_payment_plan,
+            plan_type=self.plan_type,
+            created_at__gt=self.created_at,
+        ).exists()
+
+    @property
+    def can_delete(self) -> bool:
+        """Mirror of PaymentPlanService.delete() validations, so the UI can hide the delete button."""
+        if self.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN):
+            return False
+        if self.plan_type == PaymentPlan.PlanType.REGULAR:
+            return True
+        return not self.has_newer_sibling_plan
+
     def eligible_payments_for_child_plan(self) -> "QuerySet":
         """Payments eligible for the child plan this plan can spawn.
 
