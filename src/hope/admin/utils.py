@@ -1,7 +1,15 @@
-from typing import Any, TypeVar
-from uuid import UUID
+from __future__ import annotations
 
-from admin_extra_buttons.buttons import StandardButton
+import re
+from typing import TYPE_CHECKING, Any, TypeVar
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from admin_extra_buttons.buttons import StandardButton
+    from django.contrib.admin.options import ActionLocation
+    from django.http import HttpRequest, HttpResponse
+
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
@@ -13,7 +21,6 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, OneToOneRel, QuerySet
-from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -156,8 +163,10 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
         return super().get_fields(request, obj)
 
-    def get_actions(self, request: HttpRequest) -> dict:
-        actions = super().get_actions(request)
+    def get_actions(self, request: HttpRequest, action_location: ActionLocation | None = None) -> dict:
+        actions = super().get_actions(
+            request, **({"action_location": action_location} if action_location is not None else {})
+        )
         if "delete_selected" in actions and not is_root(request):
             del actions["delete_selected"]
         return actions
@@ -534,3 +543,27 @@ class LinkedObjectsManagerMixin:
 
     def admin_urlbasename(self, value: Any, arg: str) -> str:
         return "%s_%s_%s" % (value.app_label, value.model_name, arg)
+
+
+class UnicefIdSearchMixin(admin.ModelAdmin):
+    """Prefix-match a pasted unicef_id instead of OR-ing `icontains` over every search field.
+
+    Django turns `search_fields` into `UPPER(col) LIKE UPPER('%term%')` OR-ed together, which no
+    index can serve; on `household_individual` that means walking 20M rows. unicef_ids are generated
+    uppercase by the `create_*_unicef_id` triggers, so upper-casing the term lets a plain
+    `startswith` hit the existing `..._like` (varchar_pattern_ops) index.
+    """
+
+    # unicef_id prefix a user may paste -> field to prefix-match on
+    unicef_id_search_map: dict[str, str] = {}
+
+    # the trigger format PREFIX-yy-0000.0000, or any truncation of it (still a valid startswith)
+    unicef_id_re = re.compile(r"([A-Z]+)-(\d{1,2}|\d{2}-\d{0,4}|\d{2}-\d{4}\.\d{0,4})")
+
+    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> tuple[QuerySet, bool]:
+        term = search_term.strip().upper()
+        match = self.unicef_id_re.fullmatch(term)
+        field = self.unicef_id_search_map.get(match[1]) if match else None
+        if field:
+            return queryset.filter(**{f"{field}__startswith": term}), False
+        return super().get_search_results(request, queryset, search_term)
