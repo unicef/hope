@@ -296,6 +296,21 @@ def profile_serializer_without_business_area_context(afghanistan: BusinessArea) 
 
 
 @pytest.fixture
+def profile_serializer_with_undefined_business_area() -> ProfileSerializer:
+    request = SimpleNamespace(
+        parser_context={"kwargs": {"business_area_slug": "undefined"}},
+        query_params={},
+    )
+    return ProfileSerializer(context={"request": request})
+
+
+@pytest.fixture
+def profile_superuser(user: User) -> User:
+    user.is_superuser = True
+    return user
+
+
+@pytest.fixture
 def authenticated_client(api_client: Any, user: User):
     return api_client(user)
 
@@ -595,6 +610,15 @@ def test_cross_area_filter_falls_back_to_business_area_lookup(
     user: User,
 ) -> None:
     assert profile_serializer_without_business_area_context.get_cross_area_filter_available(user) is False
+
+
+def test_cross_area_filter_uses_global_scope_when_business_area_is_undefined(
+    profile_serializer_with_undefined_business_area: ProfileSerializer,
+    profile_superuser: User,
+    django_assert_num_queries: Any,
+) -> None:
+    with django_assert_num_queries(0):
+        assert profile_serializer_with_undefined_business_area.get_cross_area_filter_available(profile_superuser)
 
 
 @pytest.mark.parametrize(
