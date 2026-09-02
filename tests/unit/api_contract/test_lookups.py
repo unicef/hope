@@ -257,3 +257,8 @@ def test_choices_payments(superuser):
 def test_choices_activity_log_actions(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/activity-log-actions/")
+
+
+def test_choices_registration_data_import_statuses(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/registration-data-import-statuses/")

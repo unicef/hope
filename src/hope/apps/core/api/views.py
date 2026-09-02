@@ -53,6 +53,7 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    RegistrationDataImport,
     RoleAssignment,
 )
 
@@ -259,6 +260,13 @@ class ChoicesViewSet(ViewSet):
     def activity_log_actions(self, request: Request) -> Response:
         """Return the actions an activity log entry can record."""
         resp = ChoiceSerializer(to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="registration-data-import-statuses")
+    def registration_data_import_statuses(self, request: Request) -> Response:
+        """Return the statuses a registration data import can be in."""
+        resp = ChoiceSerializer(to_choice_object(RegistrationDataImport.STATUS_CHOICE), many=True).data
         return Response(resp)
 
     # --- bundles ------------------------------------------------------------
