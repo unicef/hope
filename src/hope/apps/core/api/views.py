@@ -41,6 +41,7 @@ from hope.apps.household.api.serializers.household import (
     IndividualChoicesSerializer,
 )
 from hope.apps.household.const import SEX_CHOICE
+from hope.apps.payment.api.serializers import PaymentChoicesSerializer
 from hope.models import (
     AccountType,
     BusinessArea,
@@ -271,3 +272,9 @@ class ChoicesViewSet(ViewSet):
     def grievance_tickets(self, request: Request) -> Response:
         """Return the choice lists used by the grievance ticket screens."""
         return Response(GrievanceChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: PaymentChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="payments", enum_source=False)
+    def payments(self, request: Request) -> Response:
+        """Return the choice lists used by the payment screens."""
+        return Response(PaymentChoicesSerializer(instance={}, context={"request": request}).data)

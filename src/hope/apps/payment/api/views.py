@@ -70,7 +70,6 @@ from hope.apps.payment.api.serializers import (
     FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
-    PaymentChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
@@ -2596,7 +2595,6 @@ class PaymentGlobalViewSet(
     queryset = Payment.objects.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).all()
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
-        "choices": PaymentChoicesSerializer,
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
     filter_backends = (DjangoFilterBackend, OrderingFilter)
@@ -2605,10 +2603,6 @@ class PaymentGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return with_payment_related_data(super().get_queryset()).order_by("-created_at")
-
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})

@@ -247,3 +247,8 @@ def test_choices_individuals(superuser, document_type):
 def test_choices_grievance_tickets(superuser, document_type):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/grievance-tickets/")
+
+
+def test_choices_payments(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/payments/")
