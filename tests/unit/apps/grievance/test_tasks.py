@@ -389,6 +389,15 @@ def grievance_notification_job() -> AsyncJob:
     )
 
 
+@pytest.fixture
+def email_disabled_overdue_ticket() -> GrievanceTicket:
+    return _make_ticket(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        created_days_ago=31,
+        enable_email=False,
+    )
+
+
 @patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
 def test_sensitive_ticket_notified_when_never_notified(mock_notification_cls: Mock) -> None:
     ticket = _make_ticket(
@@ -528,6 +537,19 @@ def test_other_ticket_notified_when_overdue(mock_notification_cls: Mock) -> None
     mock_notification_cls.return_value.send_email_notification.assert_called_once()
     ticket.refresh_from_db()
     assert ticket.last_notification_sent is not None
+
+
+@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
+def test_other_ticket_skipped_when_email_disabled(
+    mock_notification_cls: Mock,
+    email_disabled_overdue_ticket: GrievanceTicket,
+    grievance_notification_job: AsyncJob,
+) -> None:
+    periodic_grievances_notifications_async_task_action(grievance_notification_job)
+
+    mock_notification_cls.assert_not_called()
+    email_disabled_overdue_ticket.refresh_from_db()
+    assert email_disabled_overdue_ticket.last_notification_sent is None
 
 
 @patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
