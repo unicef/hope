@@ -33,6 +33,9 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
+from hope.apps.grievance.api.serializers.grievance_ticket import (
+    GrievanceChoicesSerializer,
+)
 from hope.apps.household.api.serializers.household import (
     HouseholdChoicesSerializer,
     IndividualChoicesSerializer,
@@ -262,3 +265,9 @@ class ChoicesViewSet(ViewSet):
     def individuals(self, request: Request) -> Response:
         """Return the choice lists used by the individual screens."""
         return Response(IndividualChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: GrievanceChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="grievance-tickets", enum_source=False)
+    def grievance_tickets(self, request: Request) -> Response:
+        """Return the choice lists used by the grievance ticket screens."""
+        return Response(GrievanceChoicesSerializer(instance={}, context={"request": request}).data)

@@ -1,0 +1,281 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "3317"
+    },
+    "data": {
+        "grievance_ticket_status_choices": [
+            {
+                "name": "Assigned",
+                "value": 2
+            },
+            {
+                "name": "Closed",
+                "value": 6
+            },
+            {
+                "name": "For Approval",
+                "value": 5
+            },
+            {
+                "name": "In Progress",
+                "value": 3
+            },
+            {
+                "name": "New",
+                "value": 1
+            },
+            {
+                "name": "On Hold",
+                "value": 4
+            }
+        ],
+        "grievance_ticket_category_choices": [
+            {
+                "name": "Beneficiary",
+                "value": 10
+            },
+            {
+                "name": "Data Change",
+                "value": 2
+            },
+            {
+                "name": "Grievance Complaint",
+                "value": 4
+            },
+            {
+                "name": "Needs Adjudication",
+                "value": 8
+            },
+            {
+                "name": "Negative Feedback",
+                "value": 5
+            },
+            {
+                "name": "Payment Verification",
+                "value": 1
+            },
+            {
+                "name": "Positive Feedback",
+                "value": 7
+            },
+            {
+                "name": "Referral",
+                "value": 6
+            },
+            {
+                "name": "Sensitive Grievance",
+                "value": 3
+            },
+            {
+                "name": "System Flagging",
+                "value": 9
+            }
+        ],
+        "grievance_ticket_manual_category_choices": [
+            {
+                "name": "Data Change",
+                "value": 2
+            },
+            {
+                "name": "Grievance Complaint",
+                "value": 4
+            },
+            {
+                "name": "Referral",
+                "value": 6
+            },
+            {
+                "name": "Sensitive Grievance",
+                "value": 3
+            }
+        ],
+        "grievance_ticket_filter_category_choices": [
+            {
+                "name": "Beneficiary",
+                "value": 10
+            },
+            {
+                "name": "Data Change",
+                "value": 2
+            },
+            {
+                "name": "Grievance Complaint",
+                "value": 4
+            },
+            {
+                "name": "Negative Feedback",
+                "value": 5
+            },
+            {
+                "name": "Positive Feedback",
+                "value": 7
+            },
+            {
+                "name": "Referral",
+                "value": 6
+            },
+            {
+                "name": "Sensitive Grievance",
+                "value": 3
+            }
+        ],
+        "grievance_ticket_system_category_choices": [
+            {
+                "name": "Needs Adjudication",
+                "value": 8
+            },
+            {
+                "name": "Payment Verification",
+                "value": 1
+            },
+            {
+                "name": "System Flagging",
+                "value": 9
+            }
+        ],
+        "grievance_ticket_priority_choices": [
+            {
+                "name": "High",
+                "value": 1
+            },
+            {
+                "name": "Low",
+                "value": 3
+            },
+            {
+                "name": "Medium",
+                "value": 2
+            },
+            {
+                "name": "Not set",
+                "value": 0
+            }
+        ],
+        "grievance_ticket_urgency_choices": [
+            {
+                "name": "Not set",
+                "value": 0
+            },
+            {
+                "name": "Not urgent",
+                "value": 3
+            },
+            {
+                "name": "Urgent",
+                "value": 2
+            },
+            {
+                "name": "Very urgent",
+                "value": 1
+            }
+        ],
+        "grievance_ticket_submission_channel_choices": [
+            {
+                "name": "Call Center",
+                "value": 1
+            },
+            {
+                "name": "Community Outreach",
+                "value": 3
+            },
+            {
+                "name": "Grievances Redressal Desk at Distribution Site",
+                "value": 2
+            },
+            {
+                "name": "HOPE Generated",
+                "value": 5
+            },
+            {
+                "name": "Suggestion Boxes",
+                "value": 4
+            }
+        ],
+        "grievance_ticket_manual_submission_channel_choices": [
+            {
+                "name": "Call Center",
+                "value": 1
+            },
+            {
+                "name": "Community Outreach",
+                "value": 3
+            },
+            {
+                "name": "Grievances Redressal Desk at Distribution Site",
+                "value": 2
+            },
+            {
+                "name": "Suggestion Boxes",
+                "value": 4
+            }
+        ],
+        "grievance_ticket_issue_type_choices": [
+            {
+                "category": 2,
+                "label": "Data Change",
+                "sub_categories": {
+                    "16": "Add Individual",
+                    "13": "Household Data Update",
+                    "14": "Individual Data Update",
+                    "15": "Withdraw Individual",
+                    "17": "Withdraw Household",
+                    "26": "Update Delegate",
+                    "27": "Biometric Photo Error"
+                }
+            },
+            {
+                "category": 3,
+                "label": "Sensitive Grievance",
+                "sub_categories": {
+                    "2": "Bribery, corruption or kickback",
+                    "1": "Data breach",
+                    "8": "Conflict of interest",
+                    "3": "Fraud and forgery",
+                    "4": "Fraud involving misuse of programme funds by third party",
+                    "9": "Gross mismanagement",
+                    "5": "Harassment and abuse of authority",
+                    "6": "Inappropriate staff conduct",
+                    "12": "Miscellaneous",
+                    "10": "Personal disputes",
+                    "11": "Sexual harassment and sexual exploitation",
+                    "7": "Unauthorized use, misuse or waste of UNICEF property or funds"
+                }
+            },
+            {
+                "category": 4,
+                "label": "Grievance Complaint",
+                "sub_categories": {
+                    "18": "Payment Related Complaint",
+                    "19": "FSP Related Complaint",
+                    "20": "Registration Related Complaint",
+                    "21": "Other Complaint",
+                    "22": "Partner Related Complaint"
+                }
+            },
+            {
+                "category": 8,
+                "label": "Needs Adjudication",
+                "sub_categories": {
+                    "23": "Unique Identifiers Similarity",
+                    "24": "Biographical Data Similarity",
+                    "25": "Biometrics Similarity"
+                }
+            }
+        ],
+        "document_type_choices": [
+            {
+                "name": "Passport",
+                "value": "passport"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
