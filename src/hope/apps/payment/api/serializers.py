@@ -49,6 +49,7 @@ from hope.models import (
     ApprovalProcess,
     Currency,
     DeliveryMechanism,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
@@ -1881,6 +1882,14 @@ class FspChoiceSerializer(serializers.ModelSerializer):
 class FspChoicesSerializer(serializers.Serializer):
     delivery_mechanism = DeliveryMechanismSerializer()
     fsps = FspChoiceSerializer(many=True)
+
+
+class FinancialInstitutionChoiceSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+
+    class Meta:
+        model = FinancialInstitution
+        fields = ("name", "value")
 
 
 class FSPXlsxTemplateSerializer(serializers.ModelSerializer):

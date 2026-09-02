@@ -31,8 +31,10 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
+    PermissionActionMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -62,6 +64,7 @@ from hope.apps.payment.api.serializers import (
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
+    FinancialInstitutionChoiceSerializer,
     FollowUpInstructionCreateSerializer,
     FollowUpInstructionDetailSerializer,
     FollowUpInstructionListSerializer,
@@ -169,6 +172,7 @@ from hope.models import (
     BusinessArea,
     DeliveryMechanism,
     FileTemp,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
@@ -2949,6 +2953,28 @@ class PaymentPlanGroupViewSet(
             data=PaymentPlanGroupDetailSerializer(group, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+
+class FinancialInstitutionViewSet(BusinessAreaMixin, SerializerActionMixin, PermissionActionMixin, BaseViewSet):
+    queryset = FinancialInstitution.objects.all()
+    permission_classes_by_action = {
+        "choices": [IsAuthenticated],
+    }
+    serializer_classes_by_action = {
+        "choices": FinancialInstitutionChoiceSerializer,
+    }
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            FinancialInstitution.objects.filter(Q(country__business_areas=self.business_area) | Q(country__isnull=True))
+            .distinct()
+            .order_by("id")
+        )
+
+    @extend_schema(responses={200: FinancialInstitutionChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices")
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(self.get_serializer(self.get_queryset(), many=True).data)
 
 
 class PaymentPlanPurposeViewSet(
