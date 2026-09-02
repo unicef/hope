@@ -176,6 +176,36 @@ def test_update_dashboard_figures_continues_on_global_failure(
 
 
 @patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_dashboard_figures_reraises_ba_db_error(mock_ba_refresh: Mock, afghanistan: BusinessArea) -> None:
+    """update_dashboard_figures re-raises DB errors from the BA loop so celery can autoretry."""
+    mocked_error_message = "Mocked DB error"
+    mock_ba_refresh.side_effect = OperationalError(mocked_error_message)
+    BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
+
+    with pytest.raises(Exception, match=mocked_error_message):
+        update_dashboard_figures.apply(throw=True)
+
+    mock_ba_refresh.assert_any_call(afghanistan.slug)
+
+
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+@patch("hope.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+def test_update_dashboard_figures_reraises_global_db_error(
+    mock_global_refresh: Mock, mock_ba_refresh: Mock, afghanistan: BusinessArea
+) -> None:
+    """update_dashboard_figures re-raises DB errors from the global refresh so celery can autoretry."""
+    mocked_error_message = "Mocked global DB error"
+    mock_global_refresh.side_effect = OperationalError(mocked_error_message)
+    BusinessArea.objects.exclude(slug=afghanistan.slug).update(active=False)
+
+    with pytest.raises(Exception, match=mocked_error_message):
+        update_dashboard_figures.apply(throw=True)
+
+    mock_ba_refresh.assert_any_call(afghanistan.slug)
+    mock_global_refresh.assert_called()
+
+
+@patch("hope.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_dashboard_figures_does_not_steal_existing_lock(
     mock_ba_refresh: Mock, afghanistan: BusinessArea
 ) -> None:
