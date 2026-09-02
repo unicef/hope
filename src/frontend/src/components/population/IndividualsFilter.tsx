@@ -9,7 +9,10 @@ import {
   generateTableOrderOptionsMember,
   PROGRAM_STATE_FILTER,
 } from '@utils/constants';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import {
+  createHandleApplyFilterChange,
+  isPhoneSearchTooShort,
+} from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
@@ -64,12 +67,9 @@ export function IndividualsFilter({
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const handleApplyFilter = (): void => {
-    if (filter.phone) {
-      const digitCount = filter.phone.replace(/\D/g, '').length;
-      if (digitCount < 4) {
-        setPhoneError(t('Phone search requires at least 4 digits'));
-        return;
-      }
+    if (isPhoneSearchTooShort(filter.phone)) {
+      setPhoneError(t('Phone search requires at least 4 digits'));
+      return;
     }
     setPhoneError(null);
     applyFilterChanges();

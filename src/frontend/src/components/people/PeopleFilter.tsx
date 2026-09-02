@@ -12,7 +12,10 @@ import {
   generateTableOrderOptionsMember,
   PROGRAM_STATE_CHOICES,
 } from '@utils/constants';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import {
+  createHandleApplyFilterChange,
+  isPhoneSearchTooShort,
+} from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -63,12 +66,9 @@ export function PeopleFilter({
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const handleApplyFilter = (): void => {
-    if (filter.phone) {
-      const digitCount = filter.phone.replace(/\D/g, '').length;
-      if (digitCount < 4) {
-        setPhoneError(t('Phone search requires at least 4 digits'));
-        return;
-      }
+    if (isPhoneSearchTooShort(filter.phone)) {
+      setPhoneError(t('Phone search requires at least 4 digits'));
+      return;
     }
     setPhoneError(null);
     applyFilterChanges();
