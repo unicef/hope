@@ -267,3 +267,8 @@ def test_choices_registration_data_import_statuses(superuser):
 def test_choices_survey_categories(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/survey-categories/")
+
+
+def test_choices_programs(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/programs/")

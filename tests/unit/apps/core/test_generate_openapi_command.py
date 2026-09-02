@@ -41,6 +41,7 @@ def test_writes_openapi_schema_and_choices_files(generated: SimpleNamespace) -> 
 
 def test_choices_cover_all_enum_source_actions(generated: SimpleNamespace) -> None:
     assert set(generated.choices) == {
+        "activity-log-actions",
         "countries",
         "currencies",
         "feedback-issue-type",
@@ -55,7 +56,9 @@ def test_choices_cover_all_enum_source_actions(generated: SimpleNamespace) -> No
         "payment-verification-status",
         "payment-verification-summary-status",
         "permissions",
+        "registration-data-import-statuses",
         "sex",
+        "survey-categories",
     }
 
 

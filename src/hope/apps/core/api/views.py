@@ -16,12 +16,20 @@ from hope.api.caches import cached_response, etag_decorator
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
-from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
+from hope.apps.core.api.mixins import (
+    BaseViewSet,
+    BusinessAreaMixin,
+    CountActionMixin,
+    PermissionActionMixin,
+    PermissionsMixin,
+    SerializerActionMixin,
+)
 from hope.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
     CollectorAttributeSerializer,
     CurrencyChoiceSerializer,
+    DataCollectingTypeChoiceSerializer,
     FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
@@ -42,10 +50,12 @@ from hope.apps.household.api.serializers.household import (
 )
 from hope.apps.household.const import SEX_CHOICE
 from hope.apps.payment.api.serializers import PaymentChoicesSerializer
+from hope.apps.program.api.serializers import ProgramChoicesSerializer
 from hope.models import (
     AccountType,
     BusinessArea,
     Country,
+    DataCollectingType,
     DeliveryMechanism,
     Feedback,
     LogEntry,
@@ -146,6 +156,36 @@ class BusinessAreaViewSet(
             only_deployed=request.data.get("only_deployed", False),
         )
         return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
+
+
+class DataCollectingTypeViewSet(BusinessAreaMixin, SerializerActionMixin, PermissionActionMixin, BaseViewSet):
+    """Serve the data collecting types available in a business area."""
+
+    queryset = DataCollectingType.objects.all()
+    permission_classes_by_action = {
+        "choices": [IsAuthenticated],
+    }
+    serializer_classes_by_action = {
+        "choices": DataCollectingTypeChoiceSerializer,
+    }
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            DataCollectingType.objects.filter(
+                Q(limit_to=self.business_area) | Q(limit_to__isnull=True),
+                active=True,
+                deprecated=False,
+            )
+            .exclude(code__iexact="unknown")
+            .distinct()
+            .order_by("label")
+        )
+
+    @extend_schema(responses={200: DataCollectingTypeChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices", pagination_class=None)
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Return the data collecting types a program in this business area can use."""
+        return Response(self.get_serializer(self.get_queryset(), many=True).data)
 
 
 class ChoicesViewSet(ViewSet):
@@ -302,3 +342,9 @@ class ChoicesViewSet(ViewSet):
     def payments(self, request: Request) -> Response:
         """Return the choice lists used by the payment screens."""
         return Response(PaymentChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: ProgramChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="programs", enum_source=False)
+    def programs(self, request: Request) -> Response:
+        """Return the choice lists used by the program screens."""
+        return Response(ProgramChoicesSerializer(instance={}, context={"request": request}).data)
