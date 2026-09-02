@@ -2,7 +2,9 @@ from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef, Q, TextField, Value
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 
@@ -138,9 +140,26 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
         if flag_state("VISION_INTEGRATION_ACTIVE"):
-            active_vision_statuses = [status.value for status in VisionStatus if status != VisionStatus.NOT_SENT]
-            payment_plans = payment_plans.exclude(
-                business_area__vision_integration_active=True,
-                internal_data__vision__status__in=active_vision_statuses,
+            payment_plans = payment_plans.annotate(
+                # PaymentPlan.vision_status treats missing Vision data as NOT_SENT. Apply the same fallback in SQL;
+                # otherwise PostgreSQL evaluates the negated exclusion against NULL and drops legacy/manual plans.
+                vision_workflow_status=Coalesce(
+                    KeyTextTransform("status", KeyTextTransform("vision", "internal_data")),
+                    Value(VisionStatus.NOT_SENT.value),
+                    output_field=TextField(),
+                )
+            ).exclude(
+                # Group PG sending rules for ACCEPTED plans:
+                # - Released through Vision: exclude it because automatic PG sending was already attempted; failures
+                #   are retried in Django admin.
+                # - Accepted before Vision was enabled, or manually released while Vision was disabled: include it
+                #   because its Vision state is missing or NOT_SENT and no automatic PG send was scheduled.
+                # - Follow-Up plan: include it because the FC was reserved for the source plan and Follow-Ups do not
+                #   use Vision, even if historical Vision data is present.
+                Q(business_area__vision_integration_active=True)
+                & ~Q(vision_workflow_status=VisionStatus.NOT_SENT.value)
+                # Follow-Ups reuse funds reserved for their source plan and never use Vision. They stay on the normal
+                # group PG path even if historical Vision data remains in internal_data.
+                & ~Q(plan_type=PaymentPlan.PlanType.FOLLOW_UP)
             )
         return payment_plans

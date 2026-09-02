@@ -96,6 +96,35 @@ def not_sent_to_vision_sendable_payment_plan(cycle, payment_plan_group):
     return payment_plan
 
 
+@pytest.fixture(params=[PaymentPlan.PlanType.REGULAR, PaymentPlan.PlanType.FOLLOW_UP])
+def vision_enabled_sendable_payment_plan_without_vision_state(request, cycle, payment_plan_group):
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=payment_plan_group,
+        status=PaymentPlan.Status.ACCEPTED,
+        plan_type=request.param,
+        financial_service_provider=FinancialServiceProviderFactory(),
+        use_payment_gateway=True,
+        internal_data={},
+    )
+    PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+    FlagState.objects.update_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        defaults={"value": "True"},
+    )
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    return payment_plan
+
+
+@pytest.fixture
+def vision_enabled_sendable_follow_up_with_historical_vision_state(vision_enabled_sendable_payment_plan):
+    vision_enabled_sendable_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
+    vision_enabled_sendable_payment_plan.save(update_fields=["plan_type"])
+    return vision_enabled_sendable_payment_plan
+
+
 def test_group_send_excludes_vision_managed_plan(
     payment_plan_group, vision_enabled_sendable_payment_plan, django_assert_num_queries
 ) -> None:
@@ -130,6 +159,28 @@ def test_group_send_includes_plan_with_not_sent_vision_status(
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert not_sent_to_vision_sendable_payment_plan.pk in sendable_plan_ids
+
+
+def test_group_send_includes_plan_without_vision_state(
+    payment_plan_group,
+    vision_enabled_sendable_payment_plan_without_vision_state,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(2):
+        sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
+
+    assert vision_enabled_sendable_payment_plan_without_vision_state.pk in sendable_plan_ids
+
+
+def test_group_send_includes_follow_up_with_historical_vision_state(
+    payment_plan_group,
+    vision_enabled_sendable_follow_up_with_historical_vision_state,
+    django_assert_num_queries,
+) -> None:
+    with django_assert_num_queries(2):
+        sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
+
+    assert vision_enabled_sendable_follow_up_with_historical_vision_state.pk in sendable_plan_ids
 
 
 def test_default_group_created_on_cycle_creation(cycle):
