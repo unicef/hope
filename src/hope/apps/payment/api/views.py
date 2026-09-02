@@ -2972,7 +2972,7 @@ class FinancialInstitutionViewSet(BusinessAreaMixin, SerializerActionMixin, Perm
         )
 
     @extend_schema(responses={200: FinancialInstitutionChoiceSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="choices", url_name="choices")
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices", pagination_class=None)
     def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return Response(self.get_serializer(self.get_queryset(), many=True).data)
 
