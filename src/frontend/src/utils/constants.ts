@@ -313,3 +313,10 @@ export const generateTableOrderOptionsMember = (
     { name: 'Registration Date: descending', value: '-last_registration_date' },
   ];
 };
+
+export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: string[] = [
+  'EXCLUDE_BENEFICIARIES_ERROR',
+  'XLSX_EXPORT_ERROR',
+  'XLSX_IMPORT_ERROR',
+  'APPLYING_CUSTOM_EXCHANGE_RATE_ERROR',
+];

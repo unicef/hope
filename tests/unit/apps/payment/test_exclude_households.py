@@ -10,7 +10,7 @@ from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFacto
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries_async_task
-from hope.models import AsyncRetryJob, DataCollectingType, PaymentPlan
+from hope.models import AsyncRetryJob, DataCollectingType, PaymentPlan, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -257,4 +257,108 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
     assert money_mock.called is False
     assert payment_plan.exclusion_reason == "reason exception"
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
-    assert payment_plan.exclude_household_error is None
+    assert payment_plan.exclude_household_error == "['Exclusion failed due to an unexpected error.']"
+
+
+@pytest.fixture
+def active_cycle_without_end_date(program):
+    return ProgramCycleFactory(
+        program=program,
+        start_date=date.today(),
+        end_date=None,
+        status=ProgramCycle.ACTIVE,
+    )
+
+
+@pytest.fixture
+def open_payment_plan_in_active_cycle(active_cycle_without_end_date):
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.OPEN,
+        program_cycle=active_cycle_without_end_date,
+    )
+
+
+@pytest.fixture
+def two_excluded_payments(open_payment_plan_in_active_cycle, program):
+    households = [HouseholdFactory(program=program), HouseholdFactory(program=program)]
+    payments = [
+        PaymentFactory(
+            parent=open_payment_plan_in_active_cycle,
+            household=households[0],
+            collector=households[0].head_of_household,
+            excluded=True,
+        ),
+        PaymentFactory(
+            parent=open_payment_plan_in_active_cycle,
+            household=households[1],
+            collector=households[1].head_of_household,
+            excluded=True,
+        ),
+    ]
+    return {"households": households, "payments": payments}
+
+
+def test_undo_exclude_when_program_cycle_has_no_end_date(
+    open_payment_plan_in_active_cycle,
+    two_excluded_payments,
+):
+    open_payment_plan_in_active_cycle.background_action_status = (
+        PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+    )
+    open_payment_plan_in_active_cycle.save(update_fields=["background_action_status"])
+
+    still_excluded_id = two_excluded_payments["households"][0].unicef_id
+
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries_async_task,
+        payment_plan=open_payment_plan_in_active_cycle,
+        excluding_hh_or_ind_ids=[still_excluded_id],
+        exclusion_reason="removed one household from the exclusion list",
+    )
+
+    open_payment_plan_in_active_cycle.refresh_from_db()
+    two_excluded_payments["payments"][0].refresh_from_db()
+    two_excluded_payments["payments"][1].refresh_from_db()
+
+    assert open_payment_plan_in_active_cycle.background_action_status is None
+    assert two_excluded_payments["payments"][0].excluded is True
+    assert two_excluded_payments["payments"][1].excluded is False
+
+
+def test_undo_exclude_detects_hard_conflict_when_cycle_has_no_end_date(
+    open_payment_plan_in_active_cycle,
+    two_excluded_payments,
+    active_cycle_without_end_date,
+):
+    household_1 = two_excluded_payments["households"][0]
+
+    finished_payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.FINISHED,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        program_cycle=active_cycle_without_end_date,
+    )
+    PaymentFactory(parent=finished_payment_plan, household=household_1, excluded=False)
+
+    open_payment_plan_in_active_cycle.background_action_status = (
+        PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+    )
+    open_payment_plan_in_active_cycle.save(update_fields=["background_action_status"])
+
+    queue_and_run_retry_task(
+        payment_plan_exclude_beneficiaries_async_task,
+        payment_plan=open_payment_plan_in_active_cycle,
+        excluding_hh_or_ind_ids=[two_excluded_payments["households"][1].unicef_id],
+        exclusion_reason="undo household_1",
+    )
+
+    open_payment_plan_in_active_cycle.refresh_from_db()
+
+    error_msg = (
+        f"['It is not possible to undo exclude Beneficiary with ID {household_1.unicef_id} "
+        "because of hard conflict(s) with other Payment Plan(s).']"
+    )
+    assert (
+        open_payment_plan_in_active_cycle.background_action_status
+        == PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
+    )
+    assert open_payment_plan_in_active_cycle.exclude_household_error == error_msg
