@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
 from django.forms.models import inlineformset_factory
+from django.http import HttpRequest
 from django.test import RequestFactory
 from django.urls import reverse
 import pytest
@@ -1022,3 +1023,13 @@ def test_role_assignment_inline_formset_post_allowed_business_area(
     formset = form_set(data=data, instance=partner)
 
     assert formset.is_valid()
+
+
+def test_user_role_assignment_admin_get_actions(admin_site: Any) -> None:
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+    request = HttpRequest()
+    request.user = MagicMock()
+    request.user.is_staff = True
+
+    actions = admin.get_actions(request)
+    assert isinstance(actions, dict)

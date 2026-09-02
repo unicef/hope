@@ -812,6 +812,28 @@ def test_group_details_xlsx_buttons_disabled_while_background_action_busy(
         browser.wait_for_element_visible('[data-cy="button-delivery-import-xlsx-group"]:disabled')
 
 
+def test_group_details_shows_background_action_status_while_busy(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    busy_group: PaymentPlanGroup,
+) -> None:
+    group_url = f"/{business_area.slug}/programs/{busy_group.cycle.program.code}/payment-module/groups/{busy_group.id}"
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(group_url)
+
+        browser.wait_for_element_visible('[data-cy="group-background-action-status"]')
+        browser.assert_text("XLSX EXPORTING", '[data-cy="group-background-action-status"]')
+
+
 def test_group_details_overview_shows_totals_and_links_to_cycle(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,

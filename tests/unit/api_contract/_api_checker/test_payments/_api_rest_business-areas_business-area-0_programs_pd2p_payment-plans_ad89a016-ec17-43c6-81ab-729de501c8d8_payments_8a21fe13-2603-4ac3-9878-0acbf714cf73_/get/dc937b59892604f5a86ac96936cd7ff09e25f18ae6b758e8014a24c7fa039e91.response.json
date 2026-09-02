@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "11941"
+        "Content-Length": "8892"
     },
     "data": {
         "id": "8a21fe13-2603-4ac3-9878-0acbf714cf73",
@@ -57,6 +57,11 @@
         "program_name": "Program 0",
         "program_code": "pd2p",
         "collector_type_display": "Primary collector",
+        "payment_plan_cycle": "Programme Cycle 0",
+        "payment_plan_group": "Default Group",
+        "payment_plan_purposes": [
+            "Purpose 0"
+        ],
         "parent": {
             "id": "ad89a016-ec17-43c6-81ab-729de501c8d8",
             "unicef_id": "PP-BA0000-25-00000001",

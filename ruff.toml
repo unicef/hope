@@ -75,7 +75,7 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [lint.per-file-ignores]
-"tests/**.py" = ["S101", "PLR2004", "S", "SIM117", "D", "UP", "PLR0913", "PLR0915", "ANN", "N999"]
+"tests/**.py" = ["S101", "PLR2004", "S", "SIM117", "D", "UP", "PLR0913", "PLR0915", "PLR0917", "ANN", "N999"]
 "src/**/versioning/**.py" = ["N999", ]
 "src/**/migrations/**.py" = ["E501", ]
 "src/**/one_time_scripts/**.py" = ["T201", ]
