@@ -237,3 +237,8 @@ def test_choices_permissions(superuser):
 def test_choices_households(superuser, document_type):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/households/")
+
+
+def test_choices_individuals(superuser, document_type):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/individuals/")

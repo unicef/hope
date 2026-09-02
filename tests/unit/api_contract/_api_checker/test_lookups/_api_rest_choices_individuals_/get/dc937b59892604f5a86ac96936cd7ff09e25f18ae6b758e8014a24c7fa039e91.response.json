@@ -1,0 +1,295 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "3574"
+    },
+    "data": {
+        "document_type_choices": [
+            {
+                "name": "Passport",
+                "value": "passport"
+            }
+        ],
+        "flag_choices": [
+            {
+                "name": "Duplicate",
+                "value": "DUPLICATE"
+            },
+            {
+                "name": "Needs adjudication",
+                "value": "NEEDS_ADJUDICATION"
+            },
+            {
+                "name": "Sanction list match",
+                "value": "SANCTION_LIST_CONFIRMED_MATCH"
+            },
+            {
+                "name": "Sanction list possible match",
+                "value": "SANCTION_LIST_POSSIBLE_MATCH"
+            }
+        ],
+        "status_choices": [
+            {
+                "name": "Active",
+                "value": "ACTIVE"
+            },
+            {
+                "name": "Duplicate",
+                "value": "DUPLICATE"
+            },
+            {
+                "name": "Withdrawn",
+                "value": "WITHDRAWN"
+            }
+        ],
+        "deduplication_batch_status_choices": [
+            {
+                "name": "Duplicate in RDI",
+                "value": "DUPLICATE_IN_BATCH"
+            },
+            {
+                "name": "Not Processed",
+                "value": "NOT_PROCESSED"
+            },
+            {
+                "name": "Similar in RDI",
+                "value": "SIMILAR_IN_BATCH"
+            },
+            {
+                "name": "Unique in RDI",
+                "value": "UNIQUE_IN_BATCH"
+            }
+        ],
+        "deduplication_golden_record_status_choices": [
+            {
+                "name": "Duplicate",
+                "value": "DUPLICATE"
+            },
+            {
+                "name": "Needs Adjudication",
+                "value": "NEEDS_ADJUDICATION"
+            },
+            {
+                "name": "Not Processed",
+                "value": "NOT_PROCESSED"
+            },
+            {
+                "name": "Postpone",
+                "value": "POSTPONE"
+            },
+            {
+                "name": "Unique",
+                "value": "UNIQUE"
+            }
+        ],
+        "relationship_choices": [
+            {
+                "name": "Aunt / Uncle",
+                "value": "AUNT_UNCLE"
+            },
+            {
+                "name": "Brother / Sister",
+                "value": "BROTHER_SISTER"
+            },
+            {
+                "name": "Cousin",
+                "value": "COUSIN"
+            },
+            {
+                "name": "Daughter-in-law / Son-in-law",
+                "value": "DAUGHTERINLAW_SONINLAW"
+            },
+            {
+                "name": "Foster child",
+                "value": "FOSTER_CHILD"
+            },
+            {
+                "name": "Free union",
+                "value": "FREE_UNION"
+            },
+            {
+                "name": "Granddaughter / Grandson",
+                "value": "GRANDDAUGHER_GRANDSON"
+            },
+            {
+                "name": "Grandmother / Grandfather",
+                "value": "GRANDMOTHER_GRANDFATHER"
+            },
+            {
+                "name": "Head of household (self)",
+                "value": "HEAD"
+            },
+            {
+                "name": "Mother / Father",
+                "value": "MOTHER_FATHER"
+            },
+            {
+                "name": "Mother-in-law / Father-in-law",
+                "value": "MOTHERINLAW_FATHERINLAW"
+            },
+            {
+                "name": "Nephew / Niece",
+                "value": "NEPHEW_NIECE"
+            },
+            {
+                "name": "Not a Family Member. Can only act as a recipient.",
+                "value": "NON_BENEFICIARY"
+            },
+            {
+                "name": "Other",
+                "value": "OTHER"
+            },
+            {
+                "name": "Removed by collision",
+                "value": "REMOVED_BY_COLLISION"
+            },
+            {
+                "name": "Sister-in-law / Brother-in-law",
+                "value": "SISTERINLAW_BROTHERINLAW"
+            },
+            {
+                "name": "Son / Daughter",
+                "value": "SON_DAUGHTER"
+            },
+            {
+                "name": "Unknown",
+                "value": "UNKNOWN"
+            },
+            {
+                "name": "Wife / Husband",
+                "value": "WIFE_HUSBAND"
+            }
+        ],
+        "role_choices": [
+            {
+                "name": "Alternate collector",
+                "value": "ALTERNATE"
+            },
+            {
+                "name": "Primary collector",
+                "value": "PRIMARY"
+            }
+        ],
+        "role_choices_for_grievance": [
+            {
+                "name": "Alternate collector",
+                "value": "ALTERNATE"
+            },
+            {
+                "name": "Primary collector",
+                "value": "PRIMARY"
+            },
+            {
+                "name": "No role",
+                "value": "NO_ROLE"
+            }
+        ],
+        "marital_status_choices": [
+            {
+                "name": "Divorced",
+                "value": "DIVORCED"
+            },
+            {
+                "name": "Married",
+                "value": "MARRIED"
+            },
+            {
+                "name": "None",
+                "value": ""
+            },
+            {
+                "name": "Separated",
+                "value": "SEPARATED"
+            },
+            {
+                "name": "Single",
+                "value": "SINGLE"
+            },
+            {
+                "name": "Widowed",
+                "value": "WIDOWED"
+            }
+        ],
+        "identity_type_choices": [
+            {
+                "name": "UNHCR",
+                "value": "UNHCR"
+            },
+            {
+                "name": "WFP",
+                "value": "WFP"
+            }
+        ],
+        "observed_disability_choices": [
+            {
+                "name": "Difficulty communicating (e.g understanding or being understood)",
+                "value": "COMMUNICATING"
+            },
+            {
+                "name": "Difficulty hearing (even if using a hearing aid)",
+                "value": "HEARING"
+            },
+            {
+                "name": "Difficulty remembering or concentrating",
+                "value": "MEMORY"
+            },
+            {
+                "name": "Difficulty seeing (even if wearing glasses)",
+                "value": "SEEING"
+            },
+            {
+                "name": "Difficulty walking or climbing steps",
+                "value": "WALKING"
+            },
+            {
+                "name": "Difficulty with self care (washing, dressing)",
+                "value": "SELF_CARE"
+            },
+            {
+                "name": "None",
+                "value": "NONE"
+            }
+        ],
+        "severity_of_disability_choices": [
+            {
+                "name": "A lot of difficulty",
+                "value": "LOT_DIFFICULTY"
+            },
+            {
+                "name": "Cannot do at all",
+                "value": "CANNOT_DO"
+            },
+            {
+                "name": "None",
+                "value": ""
+            },
+            {
+                "name": "Some difficulty",
+                "value": "SOME_DIFFICULTY"
+            }
+        ],
+        "work_status_choices": [
+            {
+                "name": "No",
+                "value": "0"
+            },
+            {
+                "name": "Not provided",
+                "value": "NOT_PROVIDED"
+            },
+            {
+                "name": "Yes",
+                "value": "1"
+            }
+        ],
+        "account_type_choices": []
+    },
+    "content_type": "application/json"
+}

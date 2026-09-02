@@ -33,7 +33,10 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
-from hope.apps.household.api.serializers.household import HouseholdChoicesSerializer
+from hope.apps.household.api.serializers.household import (
+    HouseholdChoicesSerializer,
+    IndividualChoicesSerializer,
+)
 from hope.apps.household.const import SEX_CHOICE
 from hope.models import (
     AccountType,
@@ -253,3 +256,9 @@ class ChoicesViewSet(ViewSet):
     def households(self, request: Request) -> Response:
         """Return the choice lists used by the household screens."""
         return Response(HouseholdChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: IndividualChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="individuals", enum_source=False)
+    def individuals(self, request: Request) -> Response:
+        """Return the choice lists used by the individual screens."""
+        return Response(IndividualChoicesSerializer(instance={}, context={"request": request}).data)
