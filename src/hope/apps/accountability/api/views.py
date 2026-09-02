@@ -27,7 +27,6 @@ from hope.apps.accountability.api.serializers import (
     MessageListSerializer,
     MessageSampleSizeSerializer,
     SampleSizeSerializer,
-    SurveyCategoryChoiceSerializer,
     SurveyRapidProFlowSerializer,
     SurveySampleSizeSerializer,
     SurveySerializer,
@@ -56,7 +55,6 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
-from hope.apps.core.utils import to_choice_object
 from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, User, log_create
 
 logger = logging.getLogger(__name__)
@@ -437,11 +435,6 @@ class SurveyViewSet(
         export_survey_sample_async_task(survey, cast("User", request.user))
         serializer = self.get_serializer(survey)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-
-    @extend_schema(responses=SurveyCategoryChoiceSerializer(many=True))
-    @action(detail=False, methods=["get"], url_path="category-choices")
-    def category_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return Response(to_choice_object(Survey.CATEGORY_CHOICES))
 
     @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="available-flows", pagination_class=None)

@@ -55,6 +55,7 @@ from hope.models import (
     PaymentVerificationSummary,
     RegistrationDataImport,
     RoleAssignment,
+    Survey,
 )
 
 
@@ -267,6 +268,13 @@ class ChoicesViewSet(ViewSet):
     def registration_data_import_statuses(self, request: Request) -> Response:
         """Return the statuses a registration data import can be in."""
         resp = ChoiceSerializer(to_choice_object(RegistrationDataImport.STATUS_CHOICE), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="survey-categories")
+    def survey_categories(self, request: Request) -> Response:
+        """Return the categories a survey can belong to."""
+        resp = ChoiceSerializer(to_choice_object(Survey.CATEGORY_CHOICES), many=True).data
         return Response(resp)
 
     # --- bundles ------------------------------------------------------------
