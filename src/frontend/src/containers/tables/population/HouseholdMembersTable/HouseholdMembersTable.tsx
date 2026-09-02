@@ -152,6 +152,7 @@ export const HouseholdMembersTable = ({
             onClick={() => handleClick(row)}
             role="checkbox"
             key={row.id}
+            data-cy="household-members-row"
           >
             <TableCell align="left">
               {renderTableCellContent(
