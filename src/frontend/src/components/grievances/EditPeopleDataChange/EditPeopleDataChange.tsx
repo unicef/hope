@@ -83,15 +83,20 @@ function EditPeopleDataChange({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const { data: financialInstitutionChoices } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList,
+      { businessAreaSlug: businessArea },
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: restQueryKey(RestService.restChoicesCountriesList),
@@ -241,11 +246,17 @@ function EditPeopleDataChange({
             setFieldValue={setFieldValue}
             individual={fullIndividual}
             individualChoicesData={individualChoicesData}
+            accountFinancialInstitutionChoices={
+              financialInstitutionChoices || []
+            }
           />
           {!isEditTicket && (
             <NewAccountFieldArray
               values={values}
               individualChoicesData={individualChoicesData}
+              accountFinancialInstitutionChoices={
+                financialInstitutionChoices || []
+              }
             />
           )}
         </Box>

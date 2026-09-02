@@ -21,20 +21,14 @@ const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData } = useQuery<IndividualChoices>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasIndividualsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasIndividualsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+    queryFn: () => RestService.restChoicesIndividualsRetrieve(),
   });
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,

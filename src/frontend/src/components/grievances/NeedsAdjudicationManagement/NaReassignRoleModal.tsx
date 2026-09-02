@@ -2,7 +2,6 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@core/LoadingComponent';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Box,
   Button,
@@ -54,18 +53,11 @@ export const NaReassignRoleModal = ({
 }: NaReassignRoleModalProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { businessArea } = useBaseUrl();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
   const initialFilterIND = {
@@ -132,8 +124,7 @@ export const NaReassignRoleModal = ({
           {open && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle>
-              {t('Reassign Role')}: {t(roleLabel(role))} —{' '}
-              {household.unicefId}
+              {t('Reassign Role')}: {t(roleLabel(role))} — {household.unicefId}
             </DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
@@ -175,7 +166,9 @@ export const NaReassignRoleModal = ({
                   type="submit"
                   color="primary"
                   variant="contained"
-                  disabled={!values.identityVerified || !values.selectedIndividual}
+                  disabled={
+                    !values.identityVerified || !values.selectedIndividual
+                  }
                   onClick={submitForm}
                   data-cy="button-na-reassign-save"
                 >

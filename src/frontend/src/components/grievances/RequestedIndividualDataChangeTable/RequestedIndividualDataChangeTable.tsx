@@ -46,19 +46,27 @@ export function RequestedIndividualDataChangeTable({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
+  });
+
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList,
+      { businessAreaSlug },
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList({
+        businessAreaSlug,
+      }),
   });
 
   const individualParams = {
@@ -112,7 +120,7 @@ export function RequestedIndividualDataChangeTable({
     'name',
   );
   const accountFinancialInstitutionsDict = useArrayToDict(
-    individualChoicesData?.accountFinancialInstitutionChoices,
+    financialInstitutionChoices,
     'value',
     'name',
   );
@@ -121,6 +129,7 @@ export function RequestedIndividualDataChangeTable({
     loading ||
     individualChoicesLoading ||
     countriesLoading ||
+    financialInstitutionChoicesLoading ||
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||

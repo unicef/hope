@@ -21,6 +21,7 @@ import { ReactElement } from 'react';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
+import { useSexChoices } from '@hooks/useSexChoices';
 
 interface IndividualsFilterProps {
   filter;
@@ -49,6 +50,7 @@ export function IndividualsFilter({
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { data: sexChoices } = useSexChoices();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -156,7 +158,7 @@ export function IndividualsFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            {choicesData?.sexChoices?.map((each) => (
+            {sexChoices?.map((each) => (
               <MenuItem key={each.value} value={each.value}>
                 {each.name}
               </MenuItem>

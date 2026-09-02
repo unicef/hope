@@ -20,6 +20,7 @@ import { useProgramContext } from '../../programContext';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
+import { useSexChoices } from '@hooks/useSexChoices';
 
 interface PeopleFilterProps {
   filter;
@@ -48,6 +49,7 @@ export function PeopleFilter({
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
+  const { data: sexChoices } = useSexChoices();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -194,7 +196,7 @@ export function PeopleFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            {choicesData?.sexChoices?.map(({ name, value }) => (
+            {sexChoices?.map(({ name, value }) => (
               <MenuItem key={value} value={value}>
                 {name}
               </MenuItem>
