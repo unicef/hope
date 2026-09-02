@@ -1064,6 +1064,7 @@ def prepare_child_payment_plan_async_task(
 def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> None:  # noqa: PLR0915
     from django.db.models import Q
 
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
     from hope.models import Payment, PaymentPlan
 
     payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=job.config["payment_plan_id"])
@@ -1163,7 +1164,7 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
         if error_msg:
             payment_plan.exclude_household_error = str([*error_msg, *info_msg])
         else:
-            payment_plan.exclude_household_error = str(["Exclusion failed due to an unexpected error."])
+            payment_plan.exclude_household_error = str([*info_msg, "Exclusion failed due to an unexpected error."])
         payment_plan.save(
             update_fields=[
                 "exclusion_reason",
@@ -1173,7 +1174,7 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
         )
         if error_msg:
             return
-        raise
+        raise NonRetriableTaskError(str(exc)) from exc
 
 
 def payment_plan_exclude_beneficiaries_async_task(

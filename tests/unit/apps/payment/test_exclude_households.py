@@ -8,7 +8,7 @@ from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollec
 from extras.test_utils.factories.household import HouseholdFactory
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
-from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries_async_task
 from hope.models import AsyncRetryJob, DataCollectingType, PaymentPlan, ProgramCycle
 
@@ -239,11 +239,11 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
     hh_unicef_id_1 = payment_plan_data["households"][0].unicef_id
 
     with (
-        mock.patch("hope.apps.core.celery_tasks.async_retry_job_task.retry", side_effect=Retry("retry")),
+        mock.patch("hope.apps.core.celery_tasks.async_retry_job_task.retry", side_effect=Retry("retry")) as retry_mock,
         mock.patch.object(PaymentPlan, "update_population_count_fields", side_effect=Exception("boom")) as pop_mock,
         mock.patch.object(PaymentPlan, "update_money_fields") as money_mock,
     ):
-        with pytest.raises(Retry):
+        with pytest.raises(NonRetriableTaskError):
             queue_and_run_retry_task(
                 payment_plan_exclude_beneficiaries_async_task,
                 payment_plan=payment_plan,
@@ -255,6 +255,7 @@ def test_exclude_handles_exception_during_updates(payment_plan, payment_plan_dat
 
     assert pop_mock.called is True
     assert money_mock.called is False
+    assert retry_mock.called is False
     assert payment_plan.exclusion_reason == "reason exception"
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
     assert payment_plan.exclude_household_error == "['Exclusion failed due to an unexpected error.']"
