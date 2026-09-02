@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -110,9 +111,13 @@ function ExcludeSection({
       return t('Permission denied');
     }
     if (!canRunExclusion) {
-      return t(
-        'Another background action is currently running on this Payment Plan',
-      );
+      return PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+        backgroundActionStatus,
+      )
+        ? t(
+            'Another background action on this Payment Plan failed and must be resolved first',
+          )
+        : t('Another background action is currently running on this Payment Plan');
     }
     return '';
   };

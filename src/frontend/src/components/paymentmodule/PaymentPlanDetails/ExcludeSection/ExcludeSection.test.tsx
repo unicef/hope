@@ -141,6 +141,34 @@ describe('ExcludeSection', () => {
     expect(apply.disabled).toBe(true);
   });
 
+  it('says the action is running when one is still in progress', async () => {
+    renderComponent({ backgroundActionStatus: 'EXCLUDE_BENEFICIARIES' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const save = screen.getByRole('button', { name: 'Save' });
+    fireEvent.mouseOver(save.parentElement as HTMLElement);
+
+    expect(
+      await screen.findByText(
+        'Another background action is currently running on this Payment Plan',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('says the action failed when it is at a terminal error status', async () => {
+    renderComponent({ backgroundActionStatus: 'XLSX_EXPORT_ERROR' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const save = screen.getByRole('button', { name: 'Save' });
+    fireEvent.mouseOver(save.parentElement as HTMLElement);
+
+    expect(
+      await screen.findByText(
+        'Another background action on this Payment Plan failed and must be resolved first',
+      ),
+    ).toBeTruthy();
+  });
+
   it('shows the stored exclusion error when no exclusion reason is set', () => {
     renderComponent({
       exclusionReason: '',

@@ -1,4 +1,5 @@
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
@@ -314,9 +315,12 @@ export const generateTableOrderOptionsMember = (
   ];
 };
 
-export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: string[] = [
-  'EXCLUDE_BENEFICIARIES_ERROR',
-  'XLSX_EXPORT_ERROR',
-  'XLSX_IMPORT_ERROR',
-  'APPLYING_CUSTOM_EXCHANGE_RATE_ERROR',
-];
+export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: PaymentPlanDetailBackgroundActionStatusEnum[] =
+  [
+    PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
+    PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+    PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+    PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+    PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
+    PaymentPlanDetailBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
+  ];
