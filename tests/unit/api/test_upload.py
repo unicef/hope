@@ -425,7 +425,7 @@ def test_upload_error_too_many_heads_of_household(
     }
     response = token_api_client.post(upload_url, payload, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"households": [{"Household #1": [{"head_of_household": ["Only one HoH allowed"]}]}]}
+    assert response.json() == {"households": {"Household #0": [{"head_of_household": ["Only one HoH allowed"]}]}}
 
 
 def test_upload_error_missing_primary_collector(
@@ -509,7 +509,7 @@ def test_upload_error_missing_primary_collector(
     }
     response = token_api_client.post(upload_url, payload, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"households": [{"Household #2": [{"primary_collector": ["Missing Primary Collector"]}]}]}
+    assert response.json() == {"households": {"Household #1": [{"primary_collector": ["Missing Primary Collector"]}]}}
 
 
 def test_upload_multiple_validation_errors(
@@ -592,25 +592,21 @@ def test_upload_multiple_validation_errors(
     response = token_api_client.post(upload_url, payload, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
-        "households": [
-            {
-                "Household #1": [
-                    {
-                        "alternate_collector": ["Only one Alternate Collector allowed"],
-                        "head_of_household": ["Missing Head Of Household"],
-                        "primary_collector": ["Missing Primary Collector"],
-                    }
-                ]
-            },
-            {
-                "Household #2": [
-                    {
-                        "head_of_household": ["Only one HoH allowed"],
-                        "primary_collector": ["Missing Primary Collector"],
-                    }
-                ]
-            },
-        ],
+        "households": {
+            "Household #0": [
+                {
+                    "alternate_collector": ["Only one Alternate Collector allowed"],
+                    "head_of_household": ["Missing Head Of Household"],
+                    "primary_collector": ["Missing Primary Collector"],
+                }
+            ],
+            "Household #1": [
+                {
+                    "head_of_household": ["Only one HoH allowed"],
+                    "primary_collector": ["Missing Primary Collector"],
+                }
+            ],
+        },
         "program": ["This field is required."],
     }
 
@@ -636,7 +632,7 @@ def test_upload_error_empty_members(
     }
     response = token_api_client.post(upload_url, payload, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"households": [{"Household #1": [{"members": ["This field is required"]}]}]}
+    assert response.json() == {"households": {"Household #0": [{"members": ["This field is required"]}]}}
 
 
 def test_upload_error_multiple_primary_collectors(
@@ -676,7 +672,7 @@ def test_upload_error_multiple_primary_collectors(
     response = token_api_client.post(upload_url, payload, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
-        "households": [{"Household #1": [{"primary_collector": ["Only one Primary Collector allowed"]}]}]
+        "households": {"Household #0": [{"primary_collector": ["Only one Primary Collector allowed"]}]}
     }
 
 
