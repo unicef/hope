@@ -48,6 +48,7 @@ from hope.models import (
     Country,
     DeliveryMechanism,
     Feedback,
+    LogEntry,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -251,6 +252,13 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="permissions")
     def permissions(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(Permissions.choices()), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="activity-log-actions")
+    def activity_log_actions(self, request: Request) -> Response:
+        """Return the actions an activity log entry can record."""
+        resp = ChoiceSerializer(to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES), many=True).data
         return Response(resp)
 
     # --- bundles ------------------------------------------------------------

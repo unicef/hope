@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -180,14 +181,6 @@ def url_list(business_area: Any) -> str:
 def url_count(business_area: Any) -> str:
     return reverse(
         "api:activity-logs:activity-logs-count",
-        kwargs={"business_area_slug": business_area.slug},
-    )
-
-
-@pytest.fixture
-def url_choices(business_area: Any) -> str:
-    return reverse(
-        "api:activity-logs:activity-logs-log-entry-action-choices",
         kwargs={"business_area_slug": business_area.slug},
     )
 
@@ -695,24 +688,21 @@ def test_activity_logs_filters_by_program_id(
     assert log["is_user_generated"] is True
 
 
-def test_activity_logs_choices_returns_action_choices(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    url_choices: str,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
+def test_activity_log_action_choices_returns_choices_for_user_without_any_role(api_client: Any, user: Any) -> None:
     client = api_client(user)
-    response = client.get(url_choices)
+    response = client.get(reverse("api:choices-activity-log-actions"))
 
     assert response.status_code == status.HTTP_200_OK
-    resp_data = response.json()
-    assert len(resp_data) == 4
-    choice = resp_data[0]
-    assert "name" in choice
-    assert "value" in choice
+    assert response.json() == sorted(
+        ({"name": str(label), "value": value} for value, label in LogEntry.LOG_ENTRY_ACTION_CHOICES),
+        key=lambda choice: choice["name"],
+    )
+
+
+def test_activity_log_action_choices_denies_anonymous_access() -> None:
+    response = APIClient().get(reverse("api:choices-activity-log-actions"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.enable_activity_log
