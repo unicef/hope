@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { hasNameFieldRow } from '@components/grievances/utils/latinNames';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
@@ -195,14 +196,16 @@ function EditPeopleDataChange({
                     {t('Add new field')}
                   </Button>
                 </Grid>
-                <Grid size={12}>
-                  <Field
-                    name="transliterateLatinNames"
-                    label={t('Transliterate Latin names automatically')}
-                    color="primary"
-                    component={FormikCheckboxField}
-                  />
-                </Grid>
+                {hasNameFieldRow(values.individualDataUpdateFields) && (
+                  <Grid size={12}>
+                    <Field
+                      name="transliterateLatinNames"
+                      label={t('Transliterate Latin names automatically')}
+                      color="primary"
+                      component={FormikCheckboxField}
+                    />
+                  </Grid>
+                )}
               </>
             )}
           />

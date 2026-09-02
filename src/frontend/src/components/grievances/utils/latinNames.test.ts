@@ -66,6 +66,22 @@ describe('prepareRestVariables - transliterateLatinNames', () => {
     expect(individualDataOf(variables).givenNameLatin).toBeUndefined();
   });
 
+  it('keeps a latin-only correction and turns the flag off when no name changes', () => {
+    // The checkbox is hidden (and defaults to on) while no name row is present, so
+    // without this a bare latin fix would be stripped and the ticket would carry
+    // nothing to apply.
+    const variables = prepareRestVariables({
+      ...editIndividualBase,
+      transliterateLatinNames: true,
+      individualDataUpdateFields: [
+        { fieldName: 'given_name_latin', fieldValue: 'Ivan' },
+      ],
+    });
+
+    expect(individualDataOf(variables).givenNameLatin).toBe('Ivan');
+    expect(individualDataOf(variables).transliterateLatinNames).toBe(false);
+  });
+
   it('keeps latin names when transliteration is off', () => {
     const variables = prepareRestVariables({
       ...editIndividualBase,
@@ -153,6 +169,19 @@ describe('validate - latin name rules', () => {
     );
   });
 
+  it('rejects a malformed latin-only correction even with transliteration on', () => {
+    const errors = runEditValidation({
+      transliterateLatinNames: true,
+      individualDataUpdateFields: [
+        { fieldName: 'given_name_latin', fieldValue: 'Иван' },
+      ],
+    });
+
+    expect(errors.individualDataUpdateFields).toBe(
+      'Only ASCII letters, spaces, hyphens and apostrophes are allowed',
+    );
+  });
+
   it('requires each name to have its own latin twin', () => {
     const errors = runEditValidation({
       transliterateLatinNames: false,
@@ -227,7 +256,8 @@ describe('validateUsingSteps - latin name rules for add individual', () => {
     });
 
     expect(errors.individualData).toEqual({
-      fullNameLatin: 'Provide full_name_latin or enable automatic transliteration',
+      fullNameLatin:
+        'Provide full_name_latin or enable automatic transliteration',
     });
   });
 

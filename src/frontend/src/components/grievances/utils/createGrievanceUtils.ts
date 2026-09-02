@@ -6,7 +6,11 @@ import {
 } from '@utils/constants';
 import camelCase from 'lodash/camelCase';
 import { removeIdPropertyFromObjects } from './helpers';
-import { removeLatinNameFields, removeLatinNameRows } from './latinNames';
+import {
+  removeLatinNameFields,
+  removeLatinNameRows,
+  transliterateUpdateRows,
+} from './latinNames';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   if (!_beneficiaryGroup || !text) {
@@ -29,7 +33,9 @@ export function isShowIssueType(category: string | number): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
-export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR];
+export const SYSTEM_GENERATED_ISSUE_TYPES = [
+  GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR,
+];
 
 export function isSystemGenerated(category: any, issueType?: number): boolean {
   const cat = category?.toString();
@@ -97,7 +103,8 @@ export const roleDisplayMap = {
 };
 
 export function prepareExistingAccountValues(
-  individualDataUpdateAccountsToEdit: Record<string, unknown>[] | null | undefined,
+  individualDataUpdateAccountsToEdit:
+    Record<string, unknown>[] | null | undefined,
 ) {
   if (!individualDataUpdateAccountsToEdit) {
     return [];
@@ -246,7 +253,8 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
     } else if (
       issueType === parseInt(GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL, 10)
     ) {
-      const updateFields = values.transliterateLatinNames
+      const transliterateLatinNames = transliterateUpdateRows(values);
+      const updateFields = transliterateLatinNames
         ? removeLatinNameRows(values.individualDataUpdateFields)
         : values.individualDataUpdateFields;
 
@@ -295,7 +303,7 @@ export function prepareRestVariables(values: any): CreateGrievanceTicket {
             accounts_to_edit: prepareExistingAccountValues(
               values.individualDataUpdateAccountsToEdit,
             ),
-            transliterateLatinNames: Boolean(values.transliterateLatinNames),
+            transliterateLatinNames,
           },
         },
       };

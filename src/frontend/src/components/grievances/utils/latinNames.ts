@@ -10,6 +10,7 @@ export const NAME_TO_LATIN_FIELDS = {
 };
 
 export const LATIN_NAME_FIELDS: string[] = Object.values(NAME_TO_LATIN_FIELDS);
+export const NAME_FIELDS: string[] = Object.keys(NAME_TO_LATIN_FIELDS);
 
 // Mirrors ascii_name_validator in src/hope/models/individual.py
 export const LATIN_NAME_REGEX = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
@@ -36,5 +37,20 @@ export function removeLatinNameFields<T extends Record<string, any>>(
 export function removeLatinNameRows(individualDataUpdateFields) {
   return (individualDataUpdateFields || []).filter(
     (item) => !LATIN_NAME_FIELDS.includes(item?.fieldName),
+  );
+}
+
+export function hasNameFieldRow(individualDataUpdateFields): boolean {
+  return (individualDataUpdateFields || []).some((item) =>
+    NAME_FIELDS.includes(item?.fieldName),
+  );
+}
+
+// Transliteration only applies when a name is actually being changed; otherwise a
+// latin-only correction would be stripped from the payload and silently lost.
+export function transliterateUpdateRows(values): boolean {
+  return (
+    Boolean(values.transliterateLatinNames) &&
+    hasNameFieldRow(values.individualDataUpdateFields)
   );
 }

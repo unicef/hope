@@ -12,6 +12,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { hasNameFieldRow } from '@components/grievances/utils/latinNames';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
@@ -211,14 +212,16 @@ function EditIndividualDataChange({
                       {t('Add new field')}
                     </Button>
                   </Grid>
-                  <Grid size={12}>
-                    <Field
-                      name="transliterateLatinNames"
-                      label={t('Transliterate Latin names automatically')}
-                      color="primary"
-                      component={FormikCheckboxField}
-                    />
-                  </Grid>
+                  {hasNameFieldRow(values.individualDataUpdateFields) && (
+                    <Grid size={12}>
+                      <Field
+                        name="transliterateLatinNames"
+                        label={t('Transliterate Latin names automatically')}
+                        color="primary"
+                        component={FormikCheckboxField}
+                      />
+                    </Grid>
+                  )}
                 </>
               )}
             />

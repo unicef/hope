@@ -10,6 +10,7 @@ import {
   LATIN_NAME_REGEX,
   NAME_TO_LATIN_FIELDS,
   latinNameMissingError,
+  transliterateUpdateRows,
 } from './latinNames';
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
@@ -19,7 +20,7 @@ export function isEmpty(value): boolean {
 // every changed name needs its *_latin twin unless transliteration is enabled. Checked
 // client-side so the form fails fast instead of surfacing a nested DRF 400.
 function validateLatinNameRows(values): string | undefined {
-  if (values.transliterateLatinNames) {
+  if (transliterateUpdateRows(values)) {
     return undefined;
   }
   const rows = values.individualDataUpdateFields || [];

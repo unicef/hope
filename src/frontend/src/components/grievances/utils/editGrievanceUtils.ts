@@ -10,7 +10,11 @@ import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDat
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
-import { removeLatinNameFields, removeLatinNameRows } from './latinNames';
+import {
+  removeLatinNameFields,
+  removeLatinNameRows,
+  transliterateUpdateRows,
+} from './latinNames';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -320,7 +324,8 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 }
 
 function prepareEditIndividualVariables(requiredVariables, values) {
-  const updateFields = values.transliterateLatinNames
+  const transliterateLatinNames = transliterateUpdateRows(values);
+  const updateFields = transliterateLatinNames
     ? removeLatinNameRows(values.individualDataUpdateFields)
     : values.individualDataUpdateFields;
 
@@ -373,7 +378,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
             values.individualDataUpdateIdentitiesToEdit,
           ),
           accountsToEdit: values.individualDataUpdateAccountsToEdit,
-          transliterateLatinNames: Boolean(values.transliterateLatinNames),
+          transliterateLatinNames,
         },
       },
     },
