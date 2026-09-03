@@ -9,7 +9,10 @@ import {
   generateTableOrderOptionsMember,
   PROGRAM_STATE_FILTER,
 } from '@utils/constants';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import {
+  createHandleApplyFilterChange,
+  isPhoneSearchTooShort,
+} from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
@@ -17,7 +20,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 import { DocumentSearchField } from '@core/DocumentSearchField';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
@@ -60,11 +63,20 @@ export function IndividualsFilter({
       appliedFilter,
       setAppliedFilter,
     );
+
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
   const handleApplyFilter = (): void => {
+    if (isPhoneSearchTooShort(filter.phone)) {
+      setPhoneError(t('Phone search requires at least 4 digits'));
+      return;
+    }
+    setPhoneError(null);
     applyFilterChanges();
   };
 
   const handleClearFilter = (): void => {
+    setPhoneError(null);
     clearFilter();
   };
 
@@ -94,6 +106,19 @@ export function IndividualsFilter({
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="ind-filters-search"
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <SearchTextField
+            label={t('Phone number')}
+            value={filter.phone}
+            onChange={(e) => {
+              handleFilterChange('phone', e.target.value);
+              if (phoneError) setPhoneError(null);
+            }}
+            data-cy="ind-filters-phone"
+            error={!!phoneError}
+            helperText={phoneError ?? ''}
           />
         </Grid>
         <DocumentSearchField
@@ -188,6 +213,14 @@ export function IndividualsFilter({
               handleFilterChange('ageMax', e.target.value);
             }}
             icon={<CakeIcon />}
+          />
+        </Grid>
+        <Grid size={{ xs: 2 }}>
+          <DatePickerFilter
+            topLabel={t('Date of Birth')}
+            onChange={(date) => handleFilterChange('birthDate', date)}
+            value={filter.birthDate}
+            dataCy="ind-filters-birth-date"
           />
         </Grid>
         <Grid size={{ xs: 3 }}>

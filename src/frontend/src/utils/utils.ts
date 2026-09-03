@@ -928,6 +928,11 @@ interface HandleFilterChangeFunctions {
   clearFilter: HandleClearFilter;
 }
 
+export const MIN_PHONE_SEARCH_DIGITS = 4;
+
+export const isPhoneSearchTooShort = (phone?: string | null): boolean =>
+  !!phone && phone.replace(/\D/g, '').length < MIN_PHONE_SEARCH_DIGITS;
+
 export const createHandleApplyFilterChange = (
   initialFilter: Filter,
   navigate: ReturnType<typeof useNavigate>,
