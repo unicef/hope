@@ -33,6 +33,8 @@ from hope.admin.utils import (
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    UnicefIdSearchMixin,
+    ViewOnUiMixin,
 )
 from hope.apps.household.celery_tasks import (
     enroll_households_to_program_async_task,
@@ -309,6 +311,8 @@ class RepresentativesInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 @admin.register(Household)
 class HouseholdAdmin(
+    UnicefIdSearchMixin,
+    ViewOnUiMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
@@ -461,8 +465,10 @@ class HouseholdAdmin(
         "mass_enroll_to_another_program",
     ]
     cursor_ordering_field = "unicef_id"
+    unicef_id_search_map = {"HH": "unicef_id"}
     inlines = [HouseholdRepresentationInline, RepresentativesInline]
     show_full_result_count = False
+    show_query_result_count = False
 
     def geopoint(self, obj: Household) -> str | None:
         return obj.geopoint
@@ -487,6 +493,9 @@ class HouseholdAdmin(
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+
+    def frontend_url(self, obj: Household) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/population/household/{obj.id}"
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "head_of_household":

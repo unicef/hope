@@ -86,7 +86,7 @@ export const GrievancesFilters = ({
 
   const categoryChoices = useMemo(() => {
     if (isUserGeneratedTab)
-      return choicesData.grievanceTicketManualCategoryChoices;
+      return choicesData.grievanceTicketFilterCategoryChoices;
     // Data Change is a manual category, but it also owns a system-generated issue type
     // (Biometric Photo Error), so it has to be selectable on the system tab too.
     const dataChangeCategory = choicesData.grievanceTicketCategoryChoices?.find(

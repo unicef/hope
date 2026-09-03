@@ -6,12 +6,12 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.models import Message
 
 
 @admin.register(Message)
-class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class MessageAdmin(ViewOnUiMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     exclude = (
         "number_of_recipients",
         "unicef_id",
@@ -48,6 +48,11 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     def recipient_households(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?message_id={pk}")
+
+    def frontend_url(self, obj: Message) -> str | None:
+        if not obj.program:
+            return None
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/accountability/communication/{obj.id}"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return self.model.objects.get_queryset()
