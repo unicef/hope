@@ -617,6 +617,29 @@ def test_exclude_beneficiaries(
         assert resp_data["background_action_status"] == "EXCLUDE_BENEFICIARIES"
 
 
+def test_exclude_beneficiaries_accepts_blank_exclusion_reason(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
+    payment_plan_actions_context["pp"].save()
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_exclude_hh"],
+        {"excluded_households_ids": ["HH-1"], "exclusion_reason": ""},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["background_action_status"] == "EXCLUDE_BENEFICIARIES"
+
+
 def test_exclude_beneficiaries_validation_errors(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,

@@ -12,12 +12,12 @@ import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPla
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
@@ -38,16 +38,12 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
-      const errorStatuses = [
-        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-      ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
-          !errorStatuses.includes(data?.backgroundActionStatus))
+          !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+            data?.backgroundActionStatus,
+          ))
       ) {
         return 3000;
       }

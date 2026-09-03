@@ -603,7 +603,7 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
 
 class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
     excluded_households_ids = serializers.ListField(child=serializers.CharField())
-    exclusion_reason = serializers.CharField(required=False)
+    exclusion_reason = serializers.CharField(required=False, allow_blank=True)
 
     def validate_excluded_households_ids(self, value: list[str]) -> list[str]:
         if len(value) != len(set(value)):
