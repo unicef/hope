@@ -12,6 +12,7 @@ from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry
 
 from hope.apps.utils.exceptions import log_and_raise
+from hope.apps.utils.external_urls import build_url, normalize_base_url
 from hope.models import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class KoboAPI:
         token: str | None = None,
         project_views_id: str | None = None,
     ) -> None:
-        self._kpi_url = kpi_url or settings.KOBO_URL
+        self._kpi_url = normalize_base_url(kpi_url or settings.KOBO_URL)
         self._token = token or settings.KOBO_MASTER_API_TOKEN
         self._project_views_id = project_views_id or settings.KOBO_PROJECT_VIEWS_ID
 
@@ -104,7 +105,7 @@ class KoboAPI:
             }
             endpoint = "api/v2/assets"
             query_params = f"format={self.FORMAT}"
-            url = f"{self._kpi_url}/{endpoint}?{query_params}"
+            url = build_url(self._kpi_url, f"{endpoint}?{query_params}")
             asset_response = self._post_request(url=url, data=data)
             try:
                 asset_response.raise_for_status()
@@ -118,10 +119,10 @@ class KoboAPI:
 
         file_import_data = {
             "assetUid": asset_uid,
-            "destination": f"{self._kpi_url}/assets/{asset_uid}?format={self.FORMAT}",
+            "destination": build_url(self._kpi_url, f"assets/{asset_uid}?format={self.FORMAT}"),
         }
         file_import_response = self._post_request(
-            url=f"{self._kpi_url}/imports?format={self.FORMAT}",
+            url=build_url(self._kpi_url, f"imports?format={self.FORMAT}"),
             data=file_import_data,
             files={"file": bytes_io_file},  # type: ignore # FIXME
         )
@@ -150,13 +151,13 @@ class KoboAPI:
         endpoint = f"api/v2/project-views/{self._project_views_id}/assets/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
         query_params += f"&q=settings__country_codes__icontains:{country_code.upper()}"
-        url = f"{self._kpi_url}/{endpoint}?{query_params}"
+        url = build_url(self._kpi_url, f"{endpoint}?{query_params}")
         return self._get_paginated_request(url)
 
     def get_single_project_data(self, uid: str) -> dict:
         endpoint = f"api/v2/assets/{uid}/"
         query_params = f"format={self.FORMAT}&limit={self.LIMIT}"
-        url = f"{self._kpi_url}/{endpoint}?{query_params}"
+        url = build_url(self._kpi_url, f"{endpoint}?{query_params}")
         response = self._get_request(url)
         return response.json()
 
@@ -166,7 +167,7 @@ class KoboAPI:
         if only_active_submissions:
             additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'
             query_params += f"&{additional_query_params}"
-        url = f"{self._kpi_url}/{endpoint}?{query_params}"
+        url = build_url(self._kpi_url, f"{endpoint}?{query_params}")
         return self._get_paginated_request(url)
 
     def get_attached_file(self, url: str) -> BytesIO:  # pragma: no cover

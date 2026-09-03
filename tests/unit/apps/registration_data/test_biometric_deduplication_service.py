@@ -82,6 +82,22 @@ def test_create_deduplication_set(
     )
 
 
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.create_deduplication_set")
+def test_create_deduplication_set_notification_url_omits_double_slash(
+    mock_create_deduplication_set: mock.Mock, biometric_deduplication_context: dict[str, object], settings
+) -> None:
+    settings.DOMAIN_NAME = "hope.example.org/"
+    program = biometric_deduplication_context["program"]
+    service = BiometricDeduplicationService()
+
+    service.create_deduplication_set(program)
+
+    assert mock_create_deduplication_set.call_args[0][0].notification_url == (
+        "https://hope.example.org/api/rest/business-areas/afghanistan/programs/"
+        f"{program.code}/registration-data-imports/webhookdeduplication/"
+    )
+
+
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
 def test_get_deduplication_set_results(
     mock_get_duplicates: mock.Mock, biometric_deduplication_context: dict[str, object]

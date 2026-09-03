@@ -24,6 +24,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.utils.external_urls import build_url
 from hope.apps.utils.security import is_root
 from hope.contrib.aurora.celery_tasks import fresh_extract_records_async_task
 from hope.contrib.aurora.models import Record, Registration
@@ -348,7 +349,10 @@ class RecordAdmin(HOPEModelAdminBase):
                     cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
 
                 auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
-                url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
+                url = build_url(
+                    form.cleaned_data["host"],
+                    "api/data/{registration}/{start}/{end}/".format(**form.cleaned_data),
+                )
                 with requests.get(url, stream=True, auth=auth, timeout=60) as res:
                     if res.status_code != 200:
                         raise Exception(str(res))

@@ -22,6 +22,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.accountability.api.serializers import SurveySerializer
 from hope.apps.core.services.rapid_pro.api import TokenNotProvidedError
 from hope.models import PaymentPlan, Program, Survey
 
@@ -1205,3 +1206,9 @@ def test_survey_creation_fails_with_all_invalid_phones(
     response = authenticated_client.post(url_list, data=data, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "recipients were excluded because they do not have valid phone numbers" in str(response.json())
+
+
+def test_rapid_pro_url_omits_double_slash_when_the_setting_has_a_trailing_slash(settings: Any, srv: Survey) -> None:
+    settings.RAPID_PRO_URL = "https://rapidpro.io/"
+
+    assert SurveySerializer(srv).data["rapid_pro_url"] == "https://rapidpro.io/flow/results/id123/"

@@ -17,6 +17,7 @@ from urllib3 import Retry
 
 from hope.api.auth import HOPEAuthentication, HOPEPermission
 from hope.apps.account.api.permissions import BaseRestPermission
+from hope.apps.utils.external_urls import build_url, normalize_base_url
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea, Partner, Program
@@ -57,7 +58,7 @@ class BaseAPI:
             )
 
     def __init__(self, api_url: str | None = None, api_key: str | None = None) -> None:
-        self.api_url = api_url if api_url is not None else self.get_api_url()
+        self.api_url = normalize_base_url(api_url if api_url is not None else self.get_api_url())
         self.api_key = api_key if api_key is not None else self.get_api_key()
 
         if not self.api_url or (self.API_KEY_SETTING_NAME and not self.api_key):
@@ -76,7 +77,7 @@ class BaseAPI:
             self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
     def get_url(self, endpoint: str) -> str:
-        return f"{self.api_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        return build_url(self.api_url, endpoint)
 
     def validate_response(self, response: Response) -> Response:
         if not response.ok:
