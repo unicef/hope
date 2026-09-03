@@ -16,6 +16,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.bulk_action_service import (
+    _ACTIVITY_LOG_PREFETCH_RELATED,
     _ACTIVITY_LOG_SELECT_RELATED,
     BulkActionService,
 )
@@ -311,13 +312,13 @@ def test_bulk_close_select_related_covers_activity_log_diff(
     django_assert_num_queries: Any,
 ) -> None:
     # bulk_close logs every closed ticket, and create_diff reads every relation in
-    # ACTIVITY_LOG_MAPPING. This guards that _ACTIVITY_LOG_SELECT_RELATED covers them all so the
+    # ACTIVITY_LOG_MAPPING. This guards that the two tuples together cover them all so the
     # diff stays query-free (no per-ticket N+1); it fails if a relation is added to the mapping
-    # but not to the select_related tuple.
+    # but to neither tuple.
     ticket = (
         GrievanceTicket.objects.filter(pk=complaint_for_approval.pk)
         .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
-        .prefetch_related("programs")
+        .prefetch_related(*_ACTIVITY_LOG_PREFETCH_RELATED)
         .get()
     )
 
@@ -336,8 +337,9 @@ def test_bulk_close_query_count_scales_per_ticket(
 ) -> None:
     # the per-ticket permission check adds a constant cost (the permission set is cached per
     # user/business-area/program scope, and both tickets share the same scope), so it does not
-    # scale per ticket.
-    with django_assert_max_num_queries(22):
+    # scale per ticket. The activity-log detail relations are prefetched rather than joined, which
+    # is one extra query per relation but also constant per call, not per ticket.
+    with django_assert_max_num_queries(30):
         BulkActionService().bulk_close(
             user,
             [complaint_for_approval.id, another_complaint_for_approval.id],
