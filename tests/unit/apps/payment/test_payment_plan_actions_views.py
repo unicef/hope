@@ -1253,6 +1253,11 @@ def test_send_for_approval(
             PaymentPlan.Status.IN_REVIEW,
         ),
         ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.IN_APPROVAL),
+        (
+            [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PM_VIEW_LIST],
+            status.HTTP_400_BAD_REQUEST,
+            PaymentPlan.Status.LOCKED,
+        ),
     ],
 )
 def test_approval_process_reject(
