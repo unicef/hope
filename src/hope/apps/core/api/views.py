@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.apps.account.api.serializers import UserChoicesSerializer
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
@@ -348,3 +349,9 @@ class ChoicesViewSet(ViewSet):
     def programs(self, request: Request) -> Response:
         """Return the choice lists used by the program screens."""
         return Response(ProgramChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: UserChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="users", enum_source=False)
+    def users(self, request: Request) -> Response:
+        """Return the choice lists used by the user screens."""
+        return Response(UserChoicesSerializer(instance={}, context={"request": request}).data)

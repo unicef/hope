@@ -272,3 +272,8 @@ def test_choices_survey_categories(superuser):
 def test_choices_programs(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/programs/")
+
+
+def test_choices_users(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/users/")
