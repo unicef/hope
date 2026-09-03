@@ -175,6 +175,24 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
 
 
 @pytest.fixture
+def vision_payment_plan_detail_context(payment_plan_detail_context: dict[str, Any]) -> dict[str, Any]:
+    from flags.models import FlagState
+
+    FlagState.objects.get_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        value="True",
+        required=False,
+    )
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.save(update_fields=["status"])
+    return payment_plan_detail_context
+
+
+@pytest.fixture
 def approval_process_context(business_area: Any, user: Any) -> dict[str, Any]:
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
@@ -374,14 +392,6 @@ def test_payment_plan_list_serializer_created_by(payment_plan_list_context: dict
 
 
 def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: dict[str, Any]) -> None:
-    from flags.models import FlagState
-
-    FlagState.objects.get_or_create(
-        name="VISION_INTEGRATION_ACTIVE",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
@@ -399,20 +409,25 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["can_split"] is True
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
-    assert data["can_send_to_vision"] is True
     assert data["status_date"] is not None
 
 
-def test_payment_plan_detail_serializer_can_send_to_vision_false(
-    payment_plan_detail_context: dict[str, Any],
+def test_payment_plan_detail_serializer_vision_state(
+    vision_payment_plan_detail_context: dict[str, Any],
 ) -> None:
-    payment_plan = payment_plan_detail_context["payment_plan"]
-    user = payment_plan_detail_context["user"]
-    payment_plan.status = PaymentPlan.Status.DRAFT
-    payment_plan.save(update_fields=["status"])
+    payment_plan = vision_payment_plan_detail_context["payment_plan"]
+    user = vision_payment_plan_detail_context["user"]
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
-    assert data["can_send_to_vision"] is False
+
+    assert data["vision_integration_enabled"] is True
+    assert data["vision_managed"] is True
+    assert data["vision"] == {
+        "status": "NOT_SENT",
+        "vision_id": None,
+        "fc_num": None,
+        "error_code": None,
+    }
 
 
 def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
@@ -445,7 +460,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
     payment_plan.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
-    with django_assert_num_queries(20):
+    with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["id"] == str(payment_plan.id)
@@ -462,7 +477,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
     payment_plan.currency = None
     payment_plan.save(update_fields=["currency"])
 
-    with django_assert_num_queries(20):
+    with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["unore_exchange_rate"] is None
@@ -481,7 +496,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     payment_plan.custom_exchange_rate = False
     payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
 
-    with django_assert_num_queries(20):
+    with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     expected_rate = payment_plan.get_unore_exchange_rate()

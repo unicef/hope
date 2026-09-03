@@ -27,6 +27,7 @@ import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlemen
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
 import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
@@ -38,7 +39,14 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaymentPlanDetail>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -47,12 +55,18 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
+      const visionProcessing =
+        data?.visionManaged &&
+        ['NOT_SENT', 'WAITING_FOR_CALLBACK'].includes(data.vision.status);
       const errorStatuses = [
         PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
         PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
         PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
         PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
       ];
+      if (visionProcessing) {
+        return 60000;
+      }
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
@@ -105,6 +119,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
+      <VisionStatusSection paymentPlan={paymentPlan} />
       {status !== PaymentPlanStatusEnum.PREPARING && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
