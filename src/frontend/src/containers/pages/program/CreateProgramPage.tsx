@@ -18,7 +18,7 @@ import { Box, Fade } from '@mui/material';
 import { AreaTree } from '@restgenerated/models/AreaTree';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
-import { UserChoices } from '@restgenerated/models/UserChoices';
+import { PartnerChoices } from '@restgenerated/models/PartnerChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -60,15 +60,15 @@ export const CreateProgramPage = (): ReactElement => {
   });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
-    useQuery<UserChoices>({
+    useQuery<PartnerChoices>({
       queryKey: restQueryKey(
-        RestService.restBusinessAreasUsersChoicesRetrieve,
+        RestService.restBusinessAreasPartnersChoicesRetrieve,
         {
           businessAreaSlug: businessArea,
         },
       ),
       queryFn: () =>
-        RestService.restBusinessAreasUsersChoicesRetrieve({
+        RestService.restBusinessAreasPartnersChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
