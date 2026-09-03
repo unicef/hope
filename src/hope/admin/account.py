@@ -1,10 +1,41 @@
+from typing import Any
+
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from django.urls import reverse
+from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase
-from hope.models import Account, AccountType, BusinessArea, DeliveryMechanism, DeliveryMechanismConfig, Program
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
+from hope.models import (
+    Account,
+    AccountAttachment,
+    AccountType,
+    BusinessArea,
+    DeliveryMechanism,
+    DeliveryMechanismConfig,
+    Program,
+)
+
+
+class AccountAttachmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
+    model = AccountAttachment
+    extra = 0
+    fields = ("title", "file", "uploaded_at", "created_by", "view_link")
+
+    readonly_fields = ("uploaded_at", "created_by", "view_link")
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return AccountAttachment.objects.select_related("created_by")
+
+    def view_link(self, obj: Any) -> str:
+        if obj.pk:
+            url = reverse("admin:payment_accountattachment_change", args=[obj.pk])
+            return format_html('<a href="{}" target="_blank">View</a>', url)
+        return ""
+
+    view_link.short_description = "View"
 
 
 @admin.register(Account)
@@ -46,6 +77,7 @@ class AccountAdmin(HOPEModelAdminBase):
         "rdi_merge_status",
     )
     show_full_result_count = False
+    inlines = (AccountAttachmentInline,)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (

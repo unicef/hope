@@ -1,6 +1,7 @@
 import { DividerLine } from '@components/core/DividerLine';
 import React, { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
 import { Grid, Paper, Theme, Typography } from '@mui/material';
@@ -13,6 +14,31 @@ import styled from 'styled-components';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import type { Account } from '@restgenerated/models/Account';
+import type { AccountAttachment } from '@restgenerated/models/AccountAttachment';
+
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
+
+const isImage = (file: string): boolean =>
+  IMAGE_EXTENSIONS.includes(file.split('.').pop()?.toLowerCase() ?? '');
+
+const AttachmentField: FC<{ attachment: AccountAttachment }> = ({
+  attachment,
+}) => {
+  const label = attachment.title || t('Attachment');
+  return (
+    <Grid size={3}>
+      <LabelizedField label={label}>
+        {isImage(attachment.file) ? (
+          <PhotoModal src={attachment.file} title={label} />
+        ) : (
+          <a href={attachment.file} target="_blank" rel="noopener noreferrer">
+            {t('Download')}
+          </a>
+        )}
+      </LabelizedField>
+    </Grid>
+  );
+};
 
 interface IndividualAccountsProps {
   individual: IndividualDetail;
@@ -68,6 +94,9 @@ const AccountItem: FC<AccountItemProps> = ({
             </Grid>
           );
         })}
+        {account.attachments?.map((attachment) => (
+          <AttachmentField key={attachment.id} attachment={attachment} />
+        ))}
       </Grid>
       {!lastItem && <DividerLine />}
     </Grid>
