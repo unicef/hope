@@ -8,7 +8,6 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -20,6 +19,7 @@ import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/Paymen
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
@@ -47,16 +47,12 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
-      const errorStatuses = [
-        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-      ];
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
-          !errorStatuses.includes(data?.backgroundActionStatus))
+          !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+            data?.backgroundActionStatus,
+          ))
       ) {
         return 3000;
       }
