@@ -1292,6 +1292,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
         )
 
 
+# Served from /api/rest/choices/payments/ - keys must not depend on the business area.
 class PaymentChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
 

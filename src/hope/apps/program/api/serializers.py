@@ -861,6 +861,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         return data
 
 
+# Served from /api/rest/choices/programs/ - keys must not depend on the business area.
 class ProgramChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
     frequency_of_payments_choices = serializers.SerializerMethodField()

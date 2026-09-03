@@ -422,6 +422,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
         return obj.active_individuals.count()
 
 
+# Served from /api/rest/choices/households/ - keys must not depend on the business area.
 class HouseholdChoicesSerializer(serializers.Serializer):
     document_type_choices = serializers.SerializerMethodField()
     residence_status_choices = serializers.SerializerMethodField()
@@ -433,6 +434,7 @@ class HouseholdChoicesSerializer(serializers.Serializer):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
 
 
+# Served from /api/rest/choices/individuals/ - keys must not depend on the business area.
 class IndividualChoicesSerializer(serializers.Serializer):
     document_type_choices = serializers.SerializerMethodField()
     flag_choices = serializers.SerializerMethodField()

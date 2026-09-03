@@ -288,6 +288,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         return ProgramSmallSerializer(obj.programs, many=True).data
 
 
+# Served from /api/rest/choices/grievance-tickets/ - keys must not depend on the business area.
 class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_status_choices = serializers.SerializerMethodField()
     grievance_ticket_category_choices = serializers.SerializerMethodField()
