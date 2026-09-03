@@ -22,6 +22,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 export interface AddIndividualDataChangeFieldProps {
   field: any;
@@ -141,10 +142,8 @@ function AddIndividualDataChange({
       ),
   });
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
-    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
-  });
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
@@ -159,7 +158,7 @@ function AddIndividualDataChange({
 
   if (
     loading ||
-    choicesLoading ||
+    documentTypeChoicesLoading ||
     individualChoicesLoading ||
     countriesLoading
   ) {
@@ -169,7 +168,7 @@ function AddIndividualDataChange({
   const combinedData = {
     results: data || [],
     countriesChoices: countriesData || [],
-    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    documentTypeChoices: documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };
 

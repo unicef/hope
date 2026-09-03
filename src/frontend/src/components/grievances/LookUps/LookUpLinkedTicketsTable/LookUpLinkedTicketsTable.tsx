@@ -10,6 +10,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import { MouseEvent, ReactElement, useState, useEffect, useMemo } from 'react';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 
@@ -34,12 +35,14 @@ export function LookUpLinkedTicketsTable({
       queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
     });
 
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
+
   const initialQueryVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
       programCode: programId,
       search: filter.search?.trim() || '',
-      documentType: choicesData?.documentTypeChoices?.[0]?.value,
+      documentType: documentTypeChoices?.[0]?.value,
       documentNumber: filter.documentNumber?.trim() || '',
       status: filter.status ? [filter.status] : undefined,
       fsp: filter.fsp || undefined,
@@ -57,7 +60,7 @@ export function LookUpLinkedTicketsTable({
     filter.createdAtRangeMin,
     filter.createdAtRangeMax,
     filter?.admin2?.id,
-    choicesData?.documentTypeChoices,
+    documentTypeChoices,
   ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);

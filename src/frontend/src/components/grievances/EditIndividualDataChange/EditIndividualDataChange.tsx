@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
@@ -80,11 +81,8 @@ function EditIndividualDataChange({
     enabled: Boolean(businessArea),
   });
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
-    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
-    enabled: Boolean(businessArea),
-  });
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
@@ -149,7 +147,7 @@ function EditIndividualDataChange({
   if (
     addIndividualFieldsLoading ||
     fullIndividualLoading ||
-    choicesLoading ||
+    documentTypeChoicesLoading ||
     individualChoicesLoading ||
     countriesLoading ||
     !fullIndividual ||
@@ -165,7 +163,7 @@ function EditIndividualDataChange({
   const combinedData = {
     allAddIndividualsFieldsAttributes: addIndividualFieldsData || [],
     countriesChoices: countriesData || [],
-    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    documentTypeChoices: documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };
   const notAvailableItems = (values.individualDataUpdateFields || []).map(

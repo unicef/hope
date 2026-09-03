@@ -20,6 +20,7 @@ import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -38,9 +39,11 @@ export const HouseholdMembersPage = (): ReactElement => {
       queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
+
   const initialFilter = {
     search: '',
-    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',

@@ -1,6 +1,7 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
@@ -70,10 +71,8 @@ function EditPeopleDataChange({
         ),
     });
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
-    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
-  });
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
@@ -132,7 +131,7 @@ function EditPeopleDataChange({
   if (
     editPeopleFieldsLoading ||
     fullIndividualLoading ||
-    choicesLoading ||
+    documentTypeChoicesLoading ||
     individualChoicesLoading ||
     countriesLoading ||
     !fullIndividual ||
@@ -148,7 +147,7 @@ function EditPeopleDataChange({
   const combinedData = {
     results: editPeopleFieldsData || [],
     countriesChoices: countriesData || [],
-    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    documentTypeChoices: documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };
   const notAvailableItems = (values.individualDataUpdateFields || []).map(

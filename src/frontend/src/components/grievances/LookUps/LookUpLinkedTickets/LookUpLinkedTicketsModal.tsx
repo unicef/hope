@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -35,9 +36,11 @@ export const LookUpLinkedTicketsModal = ({
     queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
     queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
   const initialFilter = {
     search: '',
-    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     status: '',
     fsp: '',
@@ -58,8 +61,8 @@ export const LookUpLinkedTicketsModal = ({
     setShouldScroll(false),
   );
 
-  if (!choicesData) return null;
-  if (choicesLoading) {
+  if (!choicesData || !documentTypeChoices) return null;
+  if (choicesLoading || documentTypeChoicesLoading) {
     return <LoadingComponent />;
   }
   const handleSubmit = (values: FormikValues): void => {

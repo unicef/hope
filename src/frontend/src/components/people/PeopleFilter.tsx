@@ -21,6 +21,7 @@ import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { useSexChoices } from '@hooks/useSexChoices';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface PeopleFilterProps {
   filter;
@@ -50,6 +51,7 @@ export function PeopleFilter({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
   const { data: sexChoices } = useSexChoices();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -109,7 +111,7 @@ export function PeopleFilter({
               fullWidth
               disableClearable
             >
-              {choicesData?.documentTypeChoices?.map(({ name, value }) => (
+              {documentTypeChoices?.map(({ name, value }) => (
                 <MenuItem key={value} value={value}>
                   {name}
                 </MenuItem>

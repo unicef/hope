@@ -18,6 +18,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface NaTicketsFiltersProps {
   filter;
@@ -38,6 +39,7 @@ export const NaTicketsFilters = ({
 }: NaTicketsFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -119,7 +121,7 @@ export const NaTicketsFilters = ({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>

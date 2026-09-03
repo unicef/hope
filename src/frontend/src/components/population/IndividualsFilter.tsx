@@ -22,6 +22,7 @@ import { ProgramList } from '@restgenerated/models/ProgramList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { useSexChoices } from '@hooks/useSexChoices';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface IndividualsFilterProps {
   filter;
@@ -51,6 +52,7 @@ export function IndividualsFilter({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: sexChoices } = useSexChoices();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -102,7 +104,7 @@ export function IndividualsFilter({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>
