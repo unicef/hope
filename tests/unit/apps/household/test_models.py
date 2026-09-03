@@ -304,7 +304,7 @@ def test_mark_as_distinct_raise_errors(program) -> None:
 
     with pytest.raises(
         ValidationError,
-        match="Individual IND-333 cannot be marked as distinct: document 123456ABC is already valid",
+        match="Individual IND-333 cannot be marked as distinct: document 123456ABC conflicts",
     ):
         ind.mark_as_distinct()
 

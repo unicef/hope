@@ -513,7 +513,7 @@ class Individual(
             except IntegrityError:
                 raise ValidationError(
                     f"Individual {self.unicef_id} cannot be marked as distinct: document "
-                    f"{doc.document_number} is already valid for another individual."
+                    f"{doc.document_number} conflicts with an existing valid document."
                 )
         self.accounts.update(active=True)
         self.duplicate = False
