@@ -2233,7 +2233,7 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
+        request.data["target_population_id"] = kwargs.get("pk")  # type: ignore[index]
 
         serializer = self.get_serializer(
             data=request.data,

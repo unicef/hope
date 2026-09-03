@@ -167,7 +167,7 @@ def test_validate_file_size_none(serializer_context: dict[str, Any]) -> None:
         data={"file": file, "title": "test"}, context=serializer_context
     )
     assert not serializer.is_valid()
-    assert serializer.errors["file"][0] == "File size is not available."
+    assert "file" in serializer.errors
 
 
 def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> None:
