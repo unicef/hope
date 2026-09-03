@@ -1,7 +1,7 @@
 {% extends 'base_notification_email.txt' %}
 
 {% block content %}
-    A note has been left by {{ created_by }} in Grievance & Feedback ticket {{ ticket_url }}.
+    A note has been left by {{ created_by }} in Grievance & Feedback ticket {% if ticket_url %}{{ ticket_url }}{% else %}{{ ticket_id }}{% endif %}.
 
     {{ ticket_note.description }}
 {% endblock content %}

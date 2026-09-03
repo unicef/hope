@@ -66,19 +66,54 @@ def test_es_panel_post_test_connection_pings(superuser_client: Client, mocker: A
 def test_es_panel_post_rebuild_search_index_invokes_helper(superuser_client: Client, mocker: Any) -> None:
     rebuild = mocker.patch("hope.apps.administration.panels.es.rebuild_search_index")
 
-    response = superuser_client.post(reverse("admin:console-es"), {"action": "rebuild_search_index"})
+    response = superuser_client.post(
+        reverse("admin:console-es"), {"action": "rebuild_search_index", "confirm_live_index_write": "on"}
+    )
 
     assert response.status_code == 200
     rebuild.assert_called_once()
 
 
+def test_es_panel_post_rebuild_search_index_without_confirm_is_rejected(superuser_client: Client, mocker: Any) -> None:
+    rebuild = mocker.patch("hope.apps.administration.panels.es.rebuild_search_index")
+
+    response = superuser_client.post(reverse("admin:console-es"), {"action": "rebuild_search_index"})
+
+    assert response.status_code == 200
+    rebuild.assert_not_called()
+    assert "confirm_live_index_write" in response.context["form"].errors
+
+
 def test_es_panel_post_populate_all_indexes_invokes_helper(superuser_client: Client, mocker: Any) -> None:
+    populate = mocker.patch("hope.apps.administration.panels.es.populate_all_indexes")
+
+    response = superuser_client.post(
+        reverse("admin:console-es"), {"action": "populate_all_indexes", "confirm_live_index_write": "on"}
+    )
+
+    assert response.status_code == 200
+    populate.assert_called_once()
+
+
+def test_es_panel_post_populate_all_indexes_without_confirm_is_rejected(superuser_client: Client, mocker: Any) -> None:
     populate = mocker.patch("hope.apps.administration.panels.es.populate_all_indexes")
 
     response = superuser_client.post(reverse("admin:console-es"), {"action": "populate_all_indexes"})
 
     assert response.status_code == 200
-    populate.assert_called_once()
+    populate.assert_not_called()
+    assert "confirm_live_index_write" in response.context["form"].errors
+
+
+def test_es_panel_post_info_without_confirm_is_allowed(superuser_client: Client, mocker: Any) -> None:
+    conn = mocker.Mock()
+    conn.info.return_value = mocker.Mock(body={})
+    mocker.patch("hope.apps.administration.panels.es.create_connection", return_value=conn)
+
+    response = superuser_client.post(reverse("admin:console-es"), {"action": "info"})
+
+    assert response.status_code == 200
+    assert not response.context["form"].errors
 
 
 def test_es_panel_post_connection_error_adds_error_message(superuser_client: Client, mocker: Any) -> None:
