@@ -31,6 +31,7 @@ from hope.apps.program.utils import (
     _create_enrollment_rdi,
     _format_integrity_error,
     _prepare_and_save_household_copy,
+    copy_program_object,
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
@@ -681,3 +682,17 @@ def test_enroll_households_to_program_clears_country_workspace_id_and_originatin
     assert copied_individual.country_workspace_id is None
     assert copied_individual.originating_id is None
     assert copied_household.originating_id is None
+
+
+def test_copy_program_object_disables_biometric_deduplication(afghanistan: BusinessArea, user: User) -> None:
+    program = ProgramFactory(
+        name="Program with biometric deduplication",
+        business_area=afghanistan,
+        biometric_deduplication_enabled=True,
+    )
+
+    copied_program = copy_program_object(str(program.id), {"name": "Program copy", "code": "CPY1"}, user)
+
+    assert copied_program.biometric_deduplication_enabled is False
+    program.refresh_from_db()
+    assert program.biometric_deduplication_enabled is True

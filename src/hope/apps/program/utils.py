@@ -39,6 +39,9 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
     admin_areas = program.admin_areas.all()
     program.pk = None
     program.status = Program.DRAFT
+    # The copied population has no country_workspace_id, so the Deduplication Engine can never
+    # return findings for it and the biometric results would render as a scan that never ran.
+    program.biometric_deduplication_enabled = False
 
     data_collecting_type = program_data.pop("data_collecting_type", None) or program.data_collecting_type
 
