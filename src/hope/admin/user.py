@@ -228,7 +228,12 @@ class ADUSerMixin:
 
 
 @admin.register(User)
-class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus, ADUSerMixin):
+class UserAdmin(
+    AutocompleteForeignKeyMixin,
+    HopeModelAdminMixin,
+    UserAdminPlus,
+    ADUSerMixin,
+):
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -247,6 +252,9 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
+    # partner is restricted to non-parent partners via formfield_for_foreignkey;
+    # the autocomplete widget bypasses that queryset, so it must be excluded.
+    autocomplete_exclude_fields = ("partner",)
     fieldsets = (
         (None, {"fields": (("username", "azure_id"))}),
         (
@@ -280,12 +288,6 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
             },
         ),
     )
-
-    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
-        # partner is intentionally excluded: its choices are restricted to non-parent
-        # partners, and the autocomplete widget would bypass that restriction by
-        # listing every partner.
-        return [field for field in super().get_autocomplete_fields(request) if field != "partner"]
 
     def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
