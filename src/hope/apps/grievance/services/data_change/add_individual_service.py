@@ -100,7 +100,6 @@ class AddIndividualService(DataChangeService):
         details = self.grievance_ticket.add_individual_ticket_details
         household = Household.objects.select_for_update().get(id=details.household.id)
         individual_data = details.individual_data
-        individual_data.pop("transliterate_latin_names", None)  # UX flag, not a model field
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
         individual_data["flex_fields"] = populate_pdu_with_null_values(  # type: ignore[index]
@@ -118,7 +117,6 @@ class AddIndividualService(DataChangeService):
             **individual_data,  # type: ignore[arg-type]
         )
         individual.refresh_from_db()
-        individual.set_names_latin()
         documents_to_create = [handle_add_document(document, individual) for document in documents]
         identities_to_create = [handle_add_identity(identity, individual) for identity in identities]
         relationship_to_head_of_household = individual_data.get("relationship")

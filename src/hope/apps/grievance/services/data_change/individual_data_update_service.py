@@ -49,7 +49,6 @@ from hope.apps.household.api.caches import (
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.household.services.locking import lock_household_then_individual
-from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.currency import Currency
@@ -277,22 +276,6 @@ class IndividualDataUpdateService(DataChangeService):
         Account.validate_uniqueness(accounts_to_update)  # type: ignore
         Account.validate_uniqueness(accounts_to_create)
 
-    def _refresh_latin_names(self, individual: Individual, only_approved_data: dict) -> None:
-        # recompute stale latin twins of changed names; explicitly approved latin wins
-        changed = [field for field in NAME_TO_LATIN_FIELDS if field in only_approved_data]
-        if not changed:
-            return
-        for field in changed:
-            setattr(individual, field, only_approved_data[field])
-            latin_field = NAME_TO_LATIN_FIELDS[field]
-            if latin_field not in only_approved_data:
-                setattr(individual, latin_field, None)
-        individual.set_names_latin()
-        for field in changed:
-            latin_field = NAME_TO_LATIN_FIELDS[field]
-            if latin_field not in only_approved_data:
-                only_approved_data[latin_field] = getattr(individual, latin_field)
-
     def _update_household_fields(self, household: Household, only_approved_data: dict) -> None:
         hh_fields = [
             "consent",
@@ -359,9 +342,7 @@ class IndividualDataUpdateService(DataChangeService):
         only_approved_data = {
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
             for field, value_and_approve_status in individual_data.items()
-            if is_approved(value_and_approve_status)
-            # not model fields: bookkeeping + the UX transliteration flag
-            and field not in ("previous_documents", "transliterate_latin_names")
+            if is_approved(value_and_approve_status) and field != "previous_documents"
         }
         old_individual = copy_model_object(individual)
         merged_flex_fields = {}
@@ -373,7 +354,6 @@ class IndividualDataUpdateService(DataChangeService):
 
         self._validate_phone_numbers(only_approved_data)
         self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]
-        self._refresh_latin_names(new_individual, only_approved_data)
 
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(

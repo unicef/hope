@@ -141,7 +141,6 @@ def test_usdc_import_detail_pages_render_and_rdi_merges(
         browser.open(f"/{business_area.slug}/programs/{program.code}/population/individuals/{individual.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
         browser.assert_text(individual.full_name, 'div[data-cy="label-Full Name"]')
-        browser.assert_text(individual.full_name_latin, 'div[data-cy="label-Full Name"]')
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/population/household/{household.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')

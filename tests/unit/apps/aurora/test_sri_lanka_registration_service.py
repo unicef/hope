@@ -222,7 +222,7 @@ def test_import_data_to_datahub(
 
 
 @freeze_time("2023-12-12")
-def test_import_fills_latin_names(
+def test_import_leaves_latin_names_empty_when_not_provided(
     registration: Any,
     user: Any,
     program: Program,
@@ -235,11 +235,11 @@ def test_import_fills_latin_names(
     service.process_records(rdi.id, [record.id for record in sri_lanka_records])
 
     head = PendingIndividual.objects.filter(relationship="HEAD").first()
-    assert head.full_name_latin == "Alexis"
+    assert head.full_name_latin is None
     collector = PendingIndividual.objects.get(full_name="Dome")
-    assert collector.full_name_latin == "Dome"
+    assert collector.full_name_latin is None
     child = PendingIndividual.objects.get(relationship="SON_DAUGHTER")
-    assert child.full_name_latin == "Alexis"
+    assert child.full_name_latin is None
 
 
 def test_import_record_twice(

@@ -71,9 +71,6 @@ export function RequestedIndividualDataChange({
   delete individualData.accounts;
   delete individualData.accounts_to_edit;
 
-  // UX flag, not an approvable field change
-  delete individualData.transliterateLatinNames;
-
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approveStatus).length;

@@ -1,7 +1,7 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-import { Field, FieldArray } from 'formik';
+import { FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -11,8 +11,6 @@ import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { hasNameFieldRow } from '@components/grievances/utils/latinNames';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
@@ -212,16 +210,6 @@ function EditIndividualDataChange({
                       {t('Add new field')}
                     </Button>
                   </Grid>
-                  {hasNameFieldRow(values.individualDataUpdateFields) && (
-                    <Grid size={12}>
-                      <Field
-                        name="transliterateLatinNames"
-                        label={t('Transliterate Latin names automatically')}
-                        color="primary"
-                        component={FormikCheckboxField}
-                      />
-                    </Grid>
-                  )}
                 </>
               )}
             />

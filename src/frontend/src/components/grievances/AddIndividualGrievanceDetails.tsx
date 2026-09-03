@@ -103,9 +103,6 @@ function AddIndividualGrievanceDetails({
   delete individualData.identities;
   const flexFields = individualData?.flexFields;
   delete individualData?.flexFields;
-  // UX flag, not a field of the individual being added
-  const transliterateLatinNames = individualData?.transliterateLatinNames;
-  delete individualData?.transliterateLatinNames;
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
@@ -234,13 +231,6 @@ function AddIndividualGrievanceDetails({
           )}
         </Box>
       </Title>
-      {transliterateLatinNames ? (
-        <Box data-cy="transliterate-latin-names-info" sx={{ mb: 2 }}>
-          <Typography variant="body2">
-            {t('Latin names will be transliterated automatically')}
-          </Typography>
-        </Box>
-      ) : null}
       <Grid container spacing={6}>
         {allLabels}
       </Grid>

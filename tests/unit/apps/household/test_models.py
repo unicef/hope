@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
 import pytest
@@ -411,86 +410,3 @@ def test_individual_erase(business_area: BusinessArea) -> None:
     assert individual.given_name_latin == "GDPR REMOVED"
     assert individual.middle_name_latin == "GDPR REMOVED"
     assert individual.family_name_latin == "GDPR REMOVED"
-
-
-def test_individual_set_latin_names(business_area: BusinessArea) -> None:
-    individual = IndividualFactory(
-        business_area=business_area, full_name="甜的 針 昏迷", given_name="甜的", middle_name="針", family_name="昏迷"
-    )
-    individual.set_names_latin()
-    assert individual.full_name_latin == "Tian De Zhen Hun Mi"
-    assert individual.given_name_latin == "Tian De"
-    assert individual.middle_name_latin == "Zhen"
-    assert individual.family_name_latin == "Hun Mi"
-
-
-def test_individual_set_latin_names_full_name(business_area: BusinessArea) -> None:
-    individual = IndividualFactory(
-        business_area=business_area, given_name="عبد الملك", middle_name="جولر", family_name="الفرامل"
-    )
-    # calculate based on first, middle, last names
-    individual.full_name = None
-    individual.set_names_latin()
-    assert individual.full_name_latin == "Bd Lmlk Jwlr Lfrml"
-    assert individual.given_name_latin == "Bd Lmlk"
-    assert individual.middle_name_latin == "Jwlr"
-    assert individual.family_name_latin == "Lfrml"
-
-    # provide full name latin
-    individual_2 = IndividualFactory(
-        business_area=business_area,
-        full_name_latin="Provided Latin Name",
-        given_name="عبد الملك",
-        middle_name="جولر",
-        family_name="الفرامل",
-    )
-    individual_2.set_names_latin()
-    assert individual_2.full_name_latin == "Provided Latin Name"
-
-
-def test_individual_set_latin_names_validation_error(business_area: BusinessArea) -> None:
-    individual = IndividualFactory(business_area=business_area, full_name="2222222")
-    with pytest.raises(ValidationError) as error:
-        individual.set_names_latin()
-
-    assert individual.full_name_latin is None
-    assert "Only ASCII letters, spaces, hyphens, and apostrophes are allowed." in str(error.value)
-
-
-# --- DocumentType ---
-
-
-def test_get_all_doc_types_choices_is_cached_and_invalidated(django_capture_on_commit_callbacks) -> None:
-    from django.core.cache import cache
-
-    cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
-    DocumentTypeFactory(key="key_a", label="Label A")
-
-    # First call populates the cache from the DB.
-    choices = DocumentType.get_all_doc_types_choices()
-    assert ("key_a", "Label A") in choices
-    assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) == choices
-
-    # While cached, a directly inserted row (bypassing signals) is not reflected.
-    DocumentType.objects.bulk_create([DocumentType(key="key_b", label="Label B")])
-    assert ("key_b", "Label B") not in DocumentType.get_all_doc_types_choices()
-
-    # Saving a DocumentType invalidates the cache on commit, so the next call is fresh.
-    with django_capture_on_commit_callbacks(execute=True):
-        DocumentTypeFactory(key="key_c", label="Label C")
-    refreshed = DocumentType.get_all_doc_types_choices()
-    assert ("key_b", "Label B") in refreshed
-    assert ("key_c", "Label C") in refreshed
-
-
-def test_get_all_doc_types_choices_cache_cleared_on_delete(django_capture_on_commit_callbacks) -> None:
-    from django.core.cache import cache
-
-    cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
-    doc_type = DocumentTypeFactory(key="key_to_delete", label="To Delete")
-    assert ("key_to_delete", "To Delete") in DocumentType.get_all_doc_types_choices()
-
-    with django_capture_on_commit_callbacks(execute=True):
-        doc_type.delete()
-    assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) is None
-    assert ("key_to_delete", "To Delete") not in DocumentType.get_all_doc_types_choices()

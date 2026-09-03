@@ -39,7 +39,7 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
+from hope.apps.household.utils import LATIN_NAME_FIELDS
 from hope.apps.registration_data.utils import (
     calculate_hash_for_kobo_submission,
     collectors_str_ids_to_list,
@@ -329,7 +329,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
         )
         prefix = "pp_" if self.is_social_worker_program else ""
-        self.latin_name_headers = [f"{prefix}{latin}_i_c" for latin in NAME_TO_LATIN_FIELDS.values()]
+        self.latin_name_headers = [f"{prefix}{latin}_i_c" for latin in LATIN_NAME_FIELDS]
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -1947,7 +1947,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         if error:
                             errors.append(error)
 
-                        if i_field.removesuffix("_i_c") in NAME_TO_LATIN_FIELDS.values():
+                        if i_field.removesuffix("_i_c") in LATIN_NAME_FIELDS:
                             self._validate_latin_fields(i_field, i_value, errors)
 
                     docs_and_identities_to_validate.append(current_individual_docs_and_identities)

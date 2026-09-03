@@ -214,13 +214,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         form = ModelClassForm(data=data, files=files)  # type: ignore
         if not form.is_valid():
             raise ValidationError(form.errors)
-        instance = form.save(commit=False)
-        if isinstance(instance, PendingIndividual):
-            # fills only empty latin fields, so explicitly provided *_latin values win
-            instance.set_names_latin()
-        instance.save()
-        form.save_m2m()
-        return instance
+        return form.save()
 
     def _prepare_picture_from_base64(self, certificate_picture: Any, document_number: str) -> ContentFile | Any:
         if certificate_picture:

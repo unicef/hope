@@ -397,7 +397,6 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             self.staging.saved_file_fields.append(ind.disability_certificate_picture)
 
         calculate_phone_numbers_validity(ind)
-        ind.set_names_latin()
 
         self.staging.valid_individuals.append(ind)
         self.staging.individual_external_ids_by_pk[str(ind.id)] = external_individual_id

@@ -640,43 +640,6 @@ def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     assert update_context["individual"].phone_no_alternative == "+485544334455"
 
 
-def test_close_recomputes_latin_name_on_name_change(update_context: dict[str, Any]) -> None:
-    individual = update_context["individual"]
-    individual.full_name_latin = "Stale Latin"
-    individual.save(update_fields=["full_name_latin"])
-    update_context["ticket"].individual_data_update_ticket_details.individual_data = {
-        "full_name": {"approve_status": True, "previous_value": individual.full_name, "value": "John Smith"},
-    }
-    update_context["ticket"].individual_data_update_ticket_details.save()
-    service = IndividualDataUpdateService(
-        update_context["ticket"], update_context["ticket"].individual_data_update_ticket_details
-    )
-
-    service.close(update_context["user"])
-
-    individual.refresh_from_db()
-    assert individual.full_name == "John Smith"
-    assert individual.full_name_latin == "John Smith"
-
-
-def test_close_ignores_transliterate_flag_entry(update_context: dict[str, Any]) -> None:
-    individual = update_context["individual"]
-    update_context["ticket"].individual_data_update_ticket_details.individual_data = {
-        "full_name": {"approve_status": True, "previous_value": individual.full_name, "value": "John Smith"},
-        "transliterate_latin_names": {"approve_status": True, "previous_value": None, "value": True},
-    }
-    update_context["ticket"].individual_data_update_ticket_details.save()
-    service = IndividualDataUpdateService(
-        update_context["ticket"], update_context["ticket"].individual_data_update_ticket_details
-    )
-
-    service.close(update_context["user"])
-
-    individual.refresh_from_db()
-    assert individual.full_name == "John Smith"
-    assert individual.full_name_latin == "John Smith"
-
-
 def test_close_keeps_explicitly_approved_latin_name(update_context: dict[str, Any]) -> None:
     individual = update_context["individual"]
     update_context["ticket"].individual_data_update_ticket_details.individual_data = {

@@ -15,7 +15,10 @@ def household_with_cyrillic_head(program: Program, business_area: BusinessArea) 
     head.middle_name = "Іванович"
     head.family_name = "Шевченко"
     head.full_name = "Олександр Іванович Шевченко"
-    head.set_names_latin()
+    head.given_name_latin = "Oleksandr"
+    head.middle_name_latin = "Ivanovych"
+    head.family_name_latin = "Shevchenko"
+    head.full_name_latin = "Oleksandr Ivanovych Shevchenko"
     head.save()
     return household
 

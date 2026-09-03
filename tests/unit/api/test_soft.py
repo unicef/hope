@@ -327,6 +327,6 @@ def test_push_lax_creates_households_and_reports_errors(
     hh = PendingHousehold.objects.get(pk=pk2)
     assert hh.program_id == program.id
     assert hh.head_of_household.full_name == "James Head #1"
-    assert hh.primary_collector.full_name_latin == "James Head"
+    assert hh.primary_collector.full_name_latin is None
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id

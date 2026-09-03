@@ -191,7 +191,6 @@ def test_create_grievance_ticket_add_individual(
                         "given_name": "Test",
                         "full_name": "Test Test",
                         "family_name": "Romaniak",
-                        "transliterate_latin_names": True,
                         "sex": "MALE",
                         "birth_date": date(year=1980, month=2, day=1).isoformat(),
                         "marital_status": SINGLE,
@@ -310,7 +309,6 @@ def test_create_grievance_ticket_update_individual(
                     "individual": str(household_with_individuals["individuals"][0].pk),
                     "individual_data": {
                         "full_name": "New full_name",
-                        "transliterate_latin_names": True,
                         "accounts_to_edit": [
                             {
                                 "id": str(account_data["account"].pk),
@@ -364,7 +362,6 @@ def test_create_grievance_ticket_update_individual_with_document(
             household_with_individuals["individuals"][0].pk
         ),
         "extras.issue_type.individual_data_update_issue_type_extras.individual_data.full_name": "New full_name",
-        "extras.issue_type.individual_data_update_issue_type_extras.individual_data.transliterate_latin_names": True,
         "documentation[0].file": fake_file,
         "documentation[0].name": fake_file.name,
     }
@@ -791,7 +788,6 @@ def test_create_grievance_ticket_add_individual_with_photo(
         "extras.issue_type.add_individual_issue_type_extras.individual_data.given_name": "PhotoTest",
         "extras.issue_type.add_individual_issue_type_extras.individual_data.full_name": "PhotoTest Test",
         "extras.issue_type.add_individual_issue_type_extras.individual_data.family_name": "Test",
-        "extras.issue_type.add_individual_issue_type_extras.individual_data.transliterate_latin_names": True,
         "extras.issue_type.add_individual_issue_type_extras.individual_data.sex": "MALE",
         "extras.issue_type.add_individual_issue_type_extras.individual_data.birth_date": date(
             year=1980, month=2, day=1

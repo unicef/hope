@@ -124,7 +124,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             raise ValueError("RDI program must not be None")
         member_data["flex_fields"] = populate_pdu_with_null_values(program, member_data.get("flex_fields"))
         role = member_data.pop("role", None)
-        ind = PendingIndividual(
+        ind = PendingIndividual.objects.create(
             household=member_of,
             program=rdi.program,
             registration_data_import=rdi,
@@ -132,8 +132,6 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             photo=photo,
             **member_data,
         )
-        ind.set_names_latin()
-        ind.save()
         for doc in documents:
             doc["photo"] = self.get_photo(doc.pop("image", None))
             self.save_document(ind, doc)

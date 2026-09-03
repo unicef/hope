@@ -33,7 +33,6 @@ from hope.apps.household.const import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
 )
-from hope.apps.household.utils import NAME_TO_LATIN_FIELDS
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
     Area,
@@ -212,8 +211,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             **individual_data,
         )
         ind.validate_phone_numbers()
-        ind.set_names_latin()
-        ind.save(update_fields=("phone_no_valid", "phone_no_alternative_valid", *NAME_TO_LATIN_FIELDS.values()))
+        ind.save(update_fields=("phone_no_valid", "phone_no_alternative_valid"))
 
         if person_type is not NON_BENEFICIARY:
             hh.head_of_household = ind

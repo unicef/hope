@@ -579,23 +579,6 @@ class Individual(
         self.relationship_confirmed = confirmed
         self.save(update_fields=["relationship_confirmed"])
 
-    def set_names_latin(self) -> None:
-        from hope.apps.household.utils import NAME_TO_LATIN_FIELDS, to_latin
-
-        for local_name, latin_name in NAME_TO_LATIN_FIELDS.items():
-            if local_name == "full_name":
-                continue
-            value = getattr(self, local_name)
-            if value and not getattr(self, latin_name):
-                setattr(self, latin_name, to_latin(value))
-
-        if not self.full_name_latin:
-            self.full_name_latin = (
-                to_latin(self.full_name)
-                if self.full_name
-                else " ".join(filter(None, [self.given_name_latin, self.middle_name_latin, self.family_name_latin]))
-            )
-
     def __str__(self) -> str:
         return self.unicef_id or ""
 

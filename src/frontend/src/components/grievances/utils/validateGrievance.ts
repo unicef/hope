@@ -8,58 +8,32 @@ import {
   LATIN_NAME_FIELDS,
   LATIN_NAME_FORMAT_ERROR,
   LATIN_NAME_REGEX,
-  NAME_TO_LATIN_FIELDS,
-  latinNameMissingError,
-  transliterateUpdateRows,
 } from './latinNames';
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
-// Mirrors the backend rule in AddIndividualDataSerializer / IndividualUpdateDataSerializer:
-// every changed name needs its *_latin twin unless transliteration is enabled. Checked
-// client-side so the form fails fast instead of surfacing a nested DRF 400.
-function validateLatinNameRows(values): string | undefined {
-  if (transliterateUpdateRows(values)) {
-    return undefined;
-  }
-  const rows = values.individualDataUpdateFields || [];
-  const valueOf = (fieldName: string) =>
-    rows.find((row) => row?.fieldName === fieldName)?.fieldValue;
+const isInvalidLatin = (value): boolean =>
+  !isEmpty(value) && !LATIN_NAME_REGEX.test(String(value).trim());
 
-  for (const latinField of LATIN_NAME_FIELDS) {
-    const latinValue = valueOf(latinField);
-    if (!isEmpty(latinValue) && !LATIN_NAME_REGEX.test(String(latinValue))) {
-      return LATIN_NAME_FORMAT_ERROR;
-    }
-  }
-  for (const [nameField, latinField] of Object.entries(NAME_TO_LATIN_FIELDS)) {
-    if (!isEmpty(valueOf(nameField)) && isEmpty(valueOf(latinField))) {
-      return latinNameMissingError(latinField);
-    }
-  }
-  return undefined;
+// Mirrors ascii_name_validator on the backend so the form fails fast
+function validateLatinNameRows(values): string | undefined {
+  const rows = values.individualDataUpdateFields || [];
+  const invalid = rows.some(
+    (row) =>
+      LATIN_NAME_FIELDS.includes(row?.fieldName) &&
+      isInvalidLatin(row?.fieldValue),
+  );
+  return invalid ? LATIN_NAME_FORMAT_ERROR : undefined;
 }
 
 function validateLatinNameData(values): { [key: string]: string } {
-  const latinErrors: { [key: string]: string } = {};
-  if (values.transliterateLatinNames) {
-    return latinErrors;
-  }
   const individualData = values.individualData || {};
-
+  const latinErrors: { [key: string]: string } = {};
   for (const latinField of LATIN_NAME_FIELDS) {
-    const latinValue = individualData[camelCase(latinField)];
-    if (!isEmpty(latinValue) && !LATIN_NAME_REGEX.test(String(latinValue))) {
-      latinErrors[camelCase(latinField)] = LATIN_NAME_FORMAT_ERROR;
-    }
-  }
-  for (const [nameField, latinField] of Object.entries(NAME_TO_LATIN_FIELDS)) {
-    if (
-      !isEmpty(individualData[camelCase(nameField)]) &&
-      isEmpty(individualData[camelCase(latinField)])
-    ) {
-      latinErrors[camelCase(latinField)] = latinNameMissingError(latinField);
+    const key = camelCase(latinField);
+    if (isInvalidLatin(individualData[key])) {
+      latinErrors[key] = LATIN_NAME_FORMAT_ERROR;
     }
   }
   return latinErrors;

@@ -10,11 +10,6 @@ import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDat
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
-import {
-  removeLatinNameFields,
-  removeLatinNameRows,
-  transliterateUpdateRows,
-} from './latinNames';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -37,8 +32,6 @@ interface EditValuesTypes {
   paymentRecord?: string;
   selectedLinkedTickets: string[];
   individualData?;
-  individualDataUpdateFields?;
-  transliterateLatinNames?: boolean;
   householdDataUpdateFields?;
   partner?;
   comments?;
@@ -59,10 +52,6 @@ function prepareInitialValueAddIndividual(
   };
   const flexFields = individualData.flexFields;
   delete individualData.flexFields;
-  // Not a real field - it is a top level Formik value driving the checkbox
-  initialValues.transliterateLatinNames =
-    individualData.transliterateLatinNames ?? true;
-  delete individualData.transliterateLatinNames;
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
@@ -104,7 +93,6 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     identitiesToEdit,
     accounts,
     accountsToEdit,
-    transliterateLatinNames,
     ...rest
   } = ticketDetails.individualData;
 
@@ -115,7 +103,6 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
   return {
     ...initialValues,
     selectedIndividual: individual,
-    transliterateLatinNames: transliterateLatinNames?.value ?? true,
     individualDataUpdateFields: [...individualDataArray, ...flexFieldsArray],
     individualDataUpdateFieldsDocuments: camelizeArrayObjects(documents),
     individualDataUpdateDocumentsToRemove:
@@ -297,20 +284,12 @@ function prepareAddIndividualVariables(requiredVariables, values) {
       }
     }
   }
-  const individualData = values.transliterateLatinNames
-    ? removeLatinNameFields(values.individualData || {})
-    : values.individualData;
-
   return {
     ...requiredVariables,
     linkedTickets: values.selectedLinkedTickets,
     extras: {
       addIndividualIssueTypeExtras: {
-        individualData: {
-          ...individualData,
-          flexFields,
-          transliterateLatinNames: Boolean(values.transliterateLatinNames),
-        },
+        individualData: { ...values.individualData, flexFields },
       },
     },
   };
@@ -324,12 +303,7 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 }
 
 function prepareEditIndividualVariables(requiredVariables, values) {
-  const transliterateLatinNames = transliterateUpdateRows(values);
-  const updateFields = transliterateLatinNames
-    ? removeLatinNameRows(values.individualDataUpdateFields)
-    : values.individualDataUpdateFields;
-
-  const individualData = updateFields
+  const individualData = values.individualDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
       prev[camelCase(current.fieldName)] = current.fieldValue;
@@ -378,7 +352,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
             values.individualDataUpdateIdentitiesToEdit,
           ),
           accountsToEdit: values.individualDataUpdateAccountsToEdit,
-          transliterateLatinNames,
         },
       },
     },

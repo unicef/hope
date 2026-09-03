@@ -413,7 +413,7 @@ def test_import_data_to_datahub_household_individual(
     assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
 
 
-def test_import_fills_latin_names_when_not_provided(
+def test_import_leaves_latin_names_empty_when_not_provided(
     ukraine_admin_areas: dict,
     document_types: dict,
     registration: object,
@@ -435,10 +435,10 @@ def test_import_fills_latin_names_when_not_provided(
     service.process_records(rdi.id, [record.id])
 
     individual = PendingIndividual.objects.get(given_name="Wiktor")
-    assert individual.given_name_latin == "Wiktor"
-    assert individual.middle_name_latin == "Stefan"
-    assert individual.family_name_latin == "Lamiacy"
-    assert individual.full_name_latin == "Wiktor Stefan Lamiacy"
+    assert individual.given_name_latin is None
+    assert individual.middle_name_latin is None
+    assert individual.family_name_latin is None
+    assert individual.full_name_latin is None
 
 
 def test_phone_number_validation_flags(
