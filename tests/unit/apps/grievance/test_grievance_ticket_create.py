@@ -180,6 +180,7 @@ def test_create_grievance_ticket_add_individual(
         "category": 2,
         "consent": True,
         "language": "PL",
+        "submission_channel": 1,
         "program": str(program.pk),
         "documentation": [],
         "extras": {
@@ -236,6 +237,7 @@ def test_create_grievance_ticket_add_individual(
     if expected_status == status.HTTP_201_CREATED:
         assert len(resp_data) == 1
         assert GrievanceTicket.objects.all().count() == 1
+        assert GrievanceTicket.objects.first().submission_channel == 1
         assert TicketAddIndividualDetails.objects.all().count() == 1
 
 

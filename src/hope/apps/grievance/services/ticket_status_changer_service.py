@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, cast
 
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change_services import (
@@ -48,6 +49,8 @@ class TicketStatusChangerService:
     def _change_status_assigned(self) -> None:
         if not self.ticket.assigned_to:
             self.ticket.assigned_to = cast("User", self.user)
+            self.ticket.assigned_at = timezone.now()
+            self.ticket.assigned_by = cast("User", self.user)
         self.ticket.status = GrievanceTicket.STATUS_ASSIGNED
 
     def _change_status_in_progress(self) -> None:
@@ -57,7 +60,18 @@ class TicketStatusChangerService:
         self.ticket.status = GrievanceTicket.STATUS_ON_HOLD
 
     def _change_status_for_approval(self) -> None:
+        self._validate_biometrics_photo_assigned()
         self.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+
+    def _validate_biometrics_photo_assigned(self) -> None:
+        # A rerouted biometric photo-fix ticket is created with an empty photo value; the
+        # operator must upload a valid photo before the ticket can proceed to approval.
+        if self.ticket.issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO:
+            return
+        details = self.ticket.individual_data_update_ticket_details
+        photo = (details.individual_data or {}).get("photo", {})
+        if not photo.get("value"):
+            log_and_raise("A valid photo must be uploaded before this ticket can be sent for approval")
 
     def _change_status_closed(self) -> None:
         self.ticket.status = GrievanceTicket.STATUS_CLOSED
