@@ -1118,6 +1118,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
     import_from_program = ProgramFactory(
         name="Source Social Worker Program",
         status=Program.ACTIVE,
+        business_area=business_area,
         biometric_deduplication_enabled=True,
         beneficiary_group=beneficiary_group,
         data_collecting_type=social_dct,
@@ -1201,6 +1202,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
     import_from_program = ProgramFactory(
         name="Source Social Worker Program",
         status=Program.ACTIVE,
+        business_area=business_area,
         biometric_deduplication_enabled=True,
         beneficiary_group=beneficiary_group,
         data_collecting_type=social_dct,

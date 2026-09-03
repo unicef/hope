@@ -261,7 +261,7 @@ def test_create_or_update_dash_report_internal_server_error(
     response = client.post(generate_report_url)
 
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert response.data["detail"] == "Unexpected error"
+    assert response.data["detail"] == "An unexpected error occurred while generating the dash report."
     mock_task_delay.assert_called_once_with(afghanistan.slug)
 
 
