@@ -13,6 +13,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
@@ -510,8 +511,10 @@ class Individual(
                 doc.save()
             # AB#244721
             except IntegrityError:
-                error_message = f"{self.unicef_id}: Valid Document already exists: {doc.document_number}."
-                raise Exception(error_message)
+                raise ValidationError(
+                    f"Individual {self.unicef_id} cannot be marked as distinct: document "
+                    f"{doc.document_number} is already valid for another individual."
+                )
         self.accounts.update(active=True)
         self.duplicate = False
         self.duplicate_date = timezone.now()
