@@ -112,6 +112,8 @@ class CopyProgramPopulation:
         individual.flex_fields = populate_pdu_with_null_values(self.program, copied_flex_fields)
         individual.program = self.program
         individual.copied_from_id = copied_from_pk
+        individual.country_workspace_id = None
+        individual.originating_id = None
         individual.registration_data_import = self.rdi
         individual.first_registration_date = timezone.now()
         individual.last_registration_date = timezone.now()
@@ -144,6 +146,7 @@ class CopyProgramPopulation:
         household.first_registration_date = timezone.now()
         household.last_registration_date = timezone.now()
         household.copied_from_id = copy_from_household_id
+        household.originating_id = None
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
         household.head_of_household = Individual.all_merge_status_objects.filter(
@@ -401,6 +404,7 @@ def _prepare_and_save_household_copy(
     original_head_of_household_unicef_id = household.head_of_household.unicef_id
     household.copied_from_id = original_household_id
     household.pk = None
+    household.originating_id = None
     household.program = program
     household.registration_data_import = rdi
     household.total_cash_received = None
@@ -504,6 +508,8 @@ def copy_individual(individual: Individual, program: Program, rdi: RegistrationD
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
+    individual.country_workspace_id = None
+    individual.originating_id = None
     individual.flex_fields = get_flex_fields_without_pdu_values(individual)
     populate_pdu_with_null_values(program, individual.flex_fields)
     individual.program = program
