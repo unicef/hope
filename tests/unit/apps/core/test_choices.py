@@ -3,6 +3,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories import CountryFactory, CurrencyFactory, PartnerFactory, UserFactory
+from extras.test_utils.factories.household import DocumentTypeFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.languages import LANGUAGES, Languages
 
@@ -30,6 +31,15 @@ def countries():
     return [
         CountryFactory(name="Afghanistan", short_name="Afghanistan", iso_code2="AF", iso_code3="AFG", iso_num="0004"),
         CountryFactory(name="Poland", short_name="Poland", iso_code2="PL", iso_code3="POL", iso_num="0616"),
+    ]
+
+
+@pytest.fixture
+def document_types():
+    return [
+        DocumentTypeFactory(key="passport", label="Passport"),
+        DocumentTypeFactory(key="id_card", label="ID Card"),
+        DocumentTypeFactory(key="birth_certificate", label="Birth Certificate"),
     ]
 
 
@@ -174,3 +184,22 @@ def test_choices_currencies_returns_value_name_format(authenticated_client, curr
         assert "name" in item
         assert "vision_code" in item
         assert "active" in item
+
+
+@pytest.mark.django_db
+def test_choices_document_types_returns_document_types_ordered_by_key(authenticated_client, document_types):
+    response = authenticated_client.get(reverse("api:choices-document-types"))
+
+    assert response.status_code == 200
+    assert response.data == [
+        {"name": "Birth Certificate", "value": "birth_certificate"},
+        {"name": "ID Card", "value": "id_card"},
+        {"name": "Passport", "value": "passport"},
+    ]
+
+
+@pytest.mark.django_db
+def test_choices_document_types_denies_unauthenticated_access(anonymous_client, document_types):
+    response = anonymous_client.get(reverse("api:choices-document-types"))
+
+    assert response.status_code == 403

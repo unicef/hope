@@ -8,7 +8,6 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories import PartnerFactory, UserFactory
-from extras.test_utils.factories.household import DocumentTypeFactory
 from hope.apps.core.utils import to_choice_object
 from hope.apps.grievance.constants import (
     PRIORITY_CHOICES,
@@ -17,19 +16,11 @@ from hope.apps.grievance.constants import (
     URGENCY_CHOICES,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import DocumentType
 
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
-def document_types() -> None:
-    DocumentTypeFactory(key="passport", label="Passport")
-    DocumentTypeFactory(key="id_card", label="ID Card")
-    DocumentTypeFactory(key="birth_certificate", label="Birth Certificate")
-
-
-def test_get_choices_returns_choices_for_user_without_any_role(api_client: Any, document_types: None) -> None:
+def test_get_choices_returns_choices_for_user_without_any_role(api_client: Any) -> None:
     client = api_client(UserFactory(partner=PartnerFactory(name="TestPartner")))
 
     response = client.get(reverse("api:choices-grievance-tickets"))
@@ -50,14 +41,10 @@ def test_get_choices_returns_choices_for_user_without_any_role(api_client: Any, 
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
         ],
-        "document_type_choices": [
-            {"name": str(document_type.label), "value": document_type.key}
-            for document_type in DocumentType.objects.order_by("key")
-        ],
     }
 
 
-def test_get_choices_denies_anonymous_access(document_types: None) -> None:
+def test_get_choices_denies_anonymous_access() -> None:
     response = APIClient().get(reverse("api:choices-grievance-tickets"))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN

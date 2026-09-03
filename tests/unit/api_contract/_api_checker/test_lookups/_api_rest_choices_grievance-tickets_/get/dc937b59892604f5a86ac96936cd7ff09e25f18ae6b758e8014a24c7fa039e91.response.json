@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "3317"
+        "Content-Length": "3252"
     },
     "data": {
         "grievance_ticket_status_choices": [
@@ -268,12 +268,6 @@
                     "24": "Biographical Data Similarity",
                     "25": "Biometrics Similarity"
                 }
-            }
-        ],
-        "document_type_choices": [
-            {
-                "name": "Passport",
-                "value": "passport"
             }
         ]
     },

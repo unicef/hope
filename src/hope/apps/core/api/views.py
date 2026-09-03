@@ -318,6 +318,15 @@ class ChoicesViewSet(ViewSet):
         resp = ChoiceSerializer(to_choice_object(Survey.CATEGORY_CHOICES), many=True).data
         return Response(resp)
 
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="document-types", enum_source=False)
+    def document_types(self, request: Request) -> Response:
+        """Return the document types a person can hold."""
+        from hope.models import DocumentType
+
+        choices = [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
+        return Response(ChoiceSerializer(choices, many=True).data)
+
     # --- bundles ------------------------------------------------------------
 
     @extend_schema(responses={200: HouseholdChoicesSerializer})

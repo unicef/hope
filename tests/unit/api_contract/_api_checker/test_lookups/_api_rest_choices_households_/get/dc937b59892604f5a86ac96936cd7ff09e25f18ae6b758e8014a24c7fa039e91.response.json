@@ -8,15 +8,9 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "582"
+        "Content-Length": "517"
     },
     "data": {
-        "document_type_choices": [
-            {
-                "name": "Passport",
-                "value": "passport"
-            }
-        ],
         "residence_status_choices": [
             {
                 "name": "Displaced  |   Refugee Returnee",

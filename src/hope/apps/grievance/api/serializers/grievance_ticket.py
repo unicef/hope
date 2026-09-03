@@ -26,7 +26,6 @@ from hope.apps.program.api.serializers import ProgramSmallSerializer
 from hope.models import (
     Area,
     Document,
-    DocumentType,
     Feedback,
     Household,
     Individual,
@@ -300,10 +299,6 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_submission_channel_choices = serializers.SerializerMethodField()
     grievance_ticket_manual_submission_channel_choices = serializers.SerializerMethodField()
     grievance_ticket_issue_type_choices = serializers.SerializerMethodField()
-    document_type_choices = serializers.SerializerMethodField()
-
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
     def get_grievance_ticket_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

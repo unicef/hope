@@ -30,7 +30,6 @@ from hope.apps.household.services.household_programs_with_delivered_quantity imp
 )
 from hope.models import (
     AccountType,
-    DocumentType,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -424,11 +423,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
 
 # Served from /api/rest/choices/households/ - keys must not depend on the business area.
 class HouseholdChoicesSerializer(serializers.Serializer):
-    document_type_choices = serializers.SerializerMethodField()
     residence_status_choices = serializers.SerializerMethodField()
-
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
     def get_residence_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
@@ -436,7 +431,6 @@ class HouseholdChoicesSerializer(serializers.Serializer):
 
 # Served from /api/rest/choices/individuals/ - keys must not depend on the business area.
 class IndividualChoicesSerializer(serializers.Serializer):
-    document_type_choices = serializers.SerializerMethodField()
     flag_choices = serializers.SerializerMethodField()
     status_choices = serializers.SerializerMethodField()
     deduplication_batch_status_choices = serializers.SerializerMethodField()
@@ -451,9 +445,6 @@ class IndividualChoicesSerializer(serializers.Serializer):
     severity_of_disability_choices = serializers.SerializerMethodField()
     work_status_choices = serializers.SerializerMethodField()
     account_type_choices = serializers.SerializerMethodField()
-
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
     def get_flag_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)

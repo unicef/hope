@@ -12,7 +12,6 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
-    DocumentTypeFactory,
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -36,7 +35,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import RESIDENCE_STATUS_CHOICE, ROLE_PRIMARY
-from hope.models import DocumentType, Household, Program
+from hope.models import Household, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -879,28 +878,13 @@ def test_search_with_active_programs_filter(
     assert response.data["results"][0]["id"] == str(household_office_search_context["household1"].id)
 
 
-@pytest.fixture
-def household_choices_document_types() -> list[DocumentType]:
-    return [
-        DocumentTypeFactory(key="passport", label="Passport"),
-        DocumentTypeFactory(key="id_card", label="ID Card"),
-        DocumentTypeFactory(key="birth_certificate", label="Birth Certificate"),
-    ]
-
-
-def test_get_choices_returns_choices_for_user_without_any_role(
-    api_client: Any, household_choices_document_types: list[DocumentType]
-) -> None:
+def test_get_choices_returns_choices_for_user_without_any_role(api_client: Any) -> None:
     client = api_client(UserFactory(partner=PartnerFactory(name="TestPartner")))
 
     response = client.get(reverse("api:choices-households"))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
-        "document_type_choices": [
-            {"name": str(document_type.label), "value": document_type.key}
-            for document_type in DocumentType.objects.order_by("key")
-        ],
         "residence_status_choices": sorted(
             [{"name": name, "value": value} for value, name in RESIDENCE_STATUS_CHOICE],
             key=lambda choice: choice["name"],
@@ -908,7 +892,7 @@ def test_get_choices_returns_choices_for_user_without_any_role(
     }
 
 
-def test_get_choices_denies_anonymous_access(household_choices_document_types: list[DocumentType]) -> None:
+def test_get_choices_denies_anonymous_access() -> None:
     response = APIClient().get(reverse("api:choices-households"))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN

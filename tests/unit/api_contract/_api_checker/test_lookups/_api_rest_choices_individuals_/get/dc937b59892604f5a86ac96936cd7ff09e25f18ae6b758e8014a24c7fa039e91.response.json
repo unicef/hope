@@ -8,15 +8,9 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "3574"
+        "Content-Length": "3509"
     },
     "data": {
-        "document_type_choices": [
-            {
-                "name": "Passport",
-                "value": "passport"
-            }
-        ],
         "flag_choices": [
             {
                 "name": "Duplicate",

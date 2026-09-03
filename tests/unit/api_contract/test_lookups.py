@@ -2,7 +2,7 @@ from pathlib import Path
 
 from drf_api_checker.pytest import frozenfixture
 import pytest
-from unit.api_contract._helpers import HopeRecorder
+from unit.api_contract._helpers import HopeRecorder, UserChoicesRecorder
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
@@ -234,17 +234,22 @@ def test_choices_permissions(superuser):
     recorder.assertGET("/api/rest/choices/permissions/")
 
 
-def test_choices_households(superuser, document_type):
+def test_choices_households(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/households/")
 
 
-def test_choices_individuals(superuser, document_type):
+def test_choices_document_types(superuser, document_type):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/document-types/")
+
+
+def test_choices_individuals(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/individuals/")
 
 
-def test_choices_grievance_tickets(superuser, document_type):
+def test_choices_grievance_tickets(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/grievance-tickets/")
 
@@ -275,5 +280,5 @@ def test_choices_programs(superuser):
 
 
 def test_choices_users(superuser):
-    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder = UserChoicesRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/users/")

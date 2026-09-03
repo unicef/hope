@@ -10,7 +10,6 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
-    DocumentTypeFactory,
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -45,7 +44,7 @@ from hope.apps.household.const import (
     SEVERITY_OF_DISABILITY_CHOICES,
     WORK_STATUS_CHOICE,
 )
-from hope.models import AccountType, BusinessArea, DocumentType, Individual, Program
+from hope.models import AccountType, BusinessArea, Individual, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -87,21 +86,11 @@ def client(api_client: Callable, user: Any) -> Any:
     return api_client(user)
 
 
-@pytest.fixture
-def documents() -> None:
-    DocumentTypeFactory(key="passport", label="Passport")
-    DocumentTypeFactory(key="id_card", label="ID Card")
-    DocumentTypeFactory(key="birth_certificate", label="Birth Certificate")
-
-
-def test_get_choices_returns_choices_for_user_without_any_role(documents: None, client: Any) -> None:
+def test_get_choices_returns_choices_for_user_without_any_role(client: Any) -> None:
     response = client.get(reverse("api:choices-individuals"))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
-        "document_type_choices": [
-            {"name": str(dt.label), "value": dt.key} for dt in DocumentType.objects.order_by("key")
-        ],
         "flag_choices": to_choice_object(INDIVIDUAL_FLAGS_CHOICES),
         "status_choices": to_choice_object(INDIVIDUAL_STATUS_CHOICES),
         "deduplication_batch_status_choices": to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE),
@@ -122,7 +111,7 @@ def test_get_choices_returns_choices_for_user_without_any_role(documents: None, 
     }
 
 
-def test_get_choices_denies_anonymous_access(documents: None) -> None:
+def test_get_choices_denies_anonymous_access() -> None:
     response = APIClient().get(reverse("api:choices-individuals"))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
