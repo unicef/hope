@@ -6,7 +6,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
@@ -54,17 +53,12 @@ const RegistrationPeopleFilters = ({
   };
 
   const { t } = useTranslation();
-  const { businessAreaSlug, programCode } = useBaseUrl();
-
   const { data: registrationChoicesData } = useQuery({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList,
-      { businessAreaSlug, programCode },
+      RestService.restChoicesRegistrationDataImportStatusesList,
     ),
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
-        { businessAreaSlug, programCode },
-      );
+      return RestService.restChoicesRegistrationDataImportStatusesList();
     },
   });
 

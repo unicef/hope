@@ -32,14 +32,8 @@ export const LookUpLinkedTicketsModal = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
   const initialFilter = {
     search: '',

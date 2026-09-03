@@ -54,9 +54,12 @@ const EditProgramPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -77,22 +80,20 @@ const EditProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+      queryFn: () => RestService.restChoicesProgramsRetrieve(),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
     });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,

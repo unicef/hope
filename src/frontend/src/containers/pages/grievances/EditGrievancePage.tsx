@@ -131,14 +131,8 @@ const EditGrievancePage = (): ReactElement => {
   );
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
   const { mutateAsync: updateGrievanceTicket, isPending: loading } =

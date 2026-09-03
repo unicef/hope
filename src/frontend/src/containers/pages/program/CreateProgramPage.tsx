@@ -47,9 +47,12 @@ export const CreateProgramPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -58,9 +61,12 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -69,13 +75,8 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+      queryFn: () => RestService.restChoicesProgramsRetrieve(),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
     });
@@ -98,9 +99,7 @@ export const CreateProgramPage = (): ReactElement => {
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       await queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsChoicesRetrieve,
-        ),
+        queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
       });
     },
   });

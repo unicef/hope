@@ -181,7 +181,9 @@ export const GrievancesTable = ({
       allGrievanceTicketsParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList(allGrievanceTicketsParams),
+      RestService.restBusinessAreasGrievanceTicketsList(
+        allGrievanceTicketsParams,
+      ),
     enabled: isAllPrograms,
     placeholderData: keepPreviousData,
   });
@@ -271,14 +273,8 @@ export const GrievancesTable = ({
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
   const currentUserParams = {

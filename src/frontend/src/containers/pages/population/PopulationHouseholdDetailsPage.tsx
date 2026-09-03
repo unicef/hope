@@ -106,14 +106,8 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+      queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
     });
 
   if (

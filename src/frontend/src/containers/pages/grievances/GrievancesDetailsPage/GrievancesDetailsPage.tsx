@@ -68,20 +68,16 @@ const GrievancesDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-        { businessAreaSlug },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+      queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
     });
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error))
-    return <PermissionDenied permission={GRIEVANCES_VIEW_DETAILS_PERMISSIONS} />;
+    return (
+      <PermissionDenied permission={GRIEVANCES_VIEW_DETAILS_PERMISSIONS} />
+    );
 
   if (
     !grievanceTicket ||
