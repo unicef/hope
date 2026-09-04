@@ -93,7 +93,8 @@ export const GrievancesTable = ({
       urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
       submissionChannel: filter.submissionChannel,
       preferredLanguage: filter.preferredLanguage,
-      programCode: isAllPrograms ? filter.program : programCode,
+      program: isAllPrograms ? filter.program : undefined,
+      programCode: isAllPrograms ? undefined : programCode,
       isActiveProgram: isAllPrograms ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
@@ -164,10 +165,7 @@ export const GrievancesTable = ({
 
   //ALL PROGRAMS
   const allGrievanceTicketsParams = createApiParams(
-    {
-      businessAreaSlug: businessArea,
-      program: programId === 'all' ? undefined : programId,
-    },
+    { businessAreaSlug: businessArea },
     queryVariables,
     { withPagination: true },
   );

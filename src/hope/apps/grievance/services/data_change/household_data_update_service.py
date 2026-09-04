@@ -100,8 +100,11 @@ class HouseholdDataUpdateService(DataChangeService):
         return [self.grievance_ticket]
 
     def update(self) -> GrievanceTicket:
-        ticket_details = self.grievance_ticket.household_data_update_ticket_details
         household_data_update_new_extras = self.extras.get("household_data_update_issue_type_extras")
+        if not household_data_update_new_extras:
+            # No data-change payload in the request: keep the stored request as it is.
+            return self.grievance_ticket
+        ticket_details = self.grievance_ticket.household_data_update_ticket_details
         household = ticket_details.household
         new_household_data = household_data_update_new_extras.get("household_data", {})
         to_date_string(new_household_data, "start")

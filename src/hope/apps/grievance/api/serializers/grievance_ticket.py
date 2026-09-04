@@ -3,6 +3,7 @@ from typing import Any
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerSerializer, UserSerializer
+from hope.apps.core.api.fields import ScopedRelatedField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaListSerializer
@@ -12,6 +13,7 @@ from hope.apps.grievance.api.serializers.ticket_detail import (
 from hope.apps.grievance.constants import (
     PRIORITY_CHOICES,
     SUBMISSION_CHANNEL_CHOICES,
+    SUBMISSION_CHANNEL_HOPE,
     SUBMISSION_CHANNEL_MANUAL_CHOICES,
     URGENCY_CHOICES,
 )
@@ -116,7 +118,7 @@ class TicketNoteSerializer(serializers.ModelSerializer):
 
 
 class HouseholdUpdateRolesSerializer(serializers.Serializer):
-    individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
+    individual = ScopedRelatedField(queryset=Individual.objects.all(), required=True)
     new_role = serializers.ChoiceField(choices=ROLE_CHOICE + (("NO_ROLE", "No role"),), required=False)
 
     def validate_new_role(self, value: Any) -> Any:
@@ -350,7 +352,7 @@ class IndividualDocumentSerializer(serializers.Serializer):
 
 
 class EditIndividualDocumentSerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Document.objects.all())
+    id = ScopedRelatedField(queryset=Document.objects.all(), scope_path="individual__business_area")
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
@@ -365,7 +367,7 @@ class IndividualIdentityGTSerializer(serializers.Serializer):
 
 
 class EditIndividualIdentitySerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=IndividualIdentity.objects.all())
+    id = ScopedRelatedField(queryset=IndividualIdentity.objects.all(), scope_path="individual__business_area")
     country = serializers.CharField()
     partner = serializers.CharField()
     number = serializers.CharField()
@@ -523,21 +525,21 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
 
 
 class PositiveFeedbackTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    household = ScopedRelatedField(required=False, queryset=Household.objects.all())
+    individual = ScopedRelatedField(required=False, queryset=Individual.objects.all())
 
 
 class NegativeFeedbackTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    household = ScopedRelatedField(required=False, queryset=Household.objects.all())
+    individual = ScopedRelatedField(required=False, queryset=Individual.objects.all())
 
 
 class GrievanceComplaintTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all(), allow_null=True)
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all(), allow_null=True)
+    household = ScopedRelatedField(required=False, queryset=Household.objects.all(), allow_null=True)
+    individual = ScopedRelatedField(required=False, queryset=Individual.objects.all(), allow_null=True)
     payment_record = serializers.ListField(
         required=False,
-        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()),
+        child=ScopedRelatedField(queryset=Payment.objects.all()),
     )
 
 
@@ -546,21 +548,21 @@ class PaymentVerificationTicketExtras(serializers.Serializer):
 
 
 class ReferralTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    household = ScopedRelatedField(required=False, queryset=Household.objects.all())
+    individual = ScopedRelatedField(required=False, queryset=Individual.objects.all())
 
 
 class SensitiveGrievanceTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    household = ScopedRelatedField(required=False, queryset=Household.objects.all())
+    individual = ScopedRelatedField(required=False, queryset=Individual.objects.all())
     payment_record = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()),
+        child=ScopedRelatedField(queryset=Payment.objects.all()),
         required=False,
     )
 
 
 class AddIndividualIssueTypeExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(queryset=Household.objects.all())
+    household = ScopedRelatedField(queryset=Household.objects.all())
     individual_data = AddIndividualDataSerializer()
 
 
@@ -569,15 +571,15 @@ class UpdateAddIndividualIssueTypeExtras(serializers.Serializer):
 
 
 class HouseholdDeleteIssueTypeExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(queryset=Household.objects.all())
+    household = ScopedRelatedField(queryset=Household.objects.all())
 
 
 class IndividualDeleteIssueTypeExtras(serializers.Serializer):
-    individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all())
+    individual = ScopedRelatedField(queryset=Individual.objects.all())
 
 
 class HouseholdDataUpdateIssueTypeExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(queryset=Household.objects.all())
+    household = ScopedRelatedField(queryset=Household.objects.all())
     household_data = HouseholdUpdateDataSerializer()
 
 
@@ -586,7 +588,7 @@ class UpdateHouseholdDataUpdateIssueTypeExtras(serializers.Serializer):
 
 
 class IndividualDataUpdateIssueTypeExtras(serializers.Serializer):
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    individual = ScopedRelatedField(required=False, queryset=Individual.objects.all())
     individual_data = IndividualUpdateDataSerializer()
 
 
@@ -638,7 +640,7 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
     language = serializers.CharField(required=False, allow_blank=True)
     consent = serializers.BooleanField()
     linked_tickets = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=GrievanceTicket.objects.all()),
+        child=ScopedRelatedField(queryset=GrievanceTicket.objects.all()),
         required=False,
         allow_empty=True,
     )
@@ -646,11 +648,9 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
     priority = serializers.IntegerField(required=False)
     urgency = serializers.IntegerField(required=False)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
-    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
+    program = ScopedRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
     comments = serializers.CharField(required=False, allow_null=True)
-    linked_feedback_id = serializers.PrimaryKeyRelatedField(
-        queryset=Feedback.objects.all(), required=False, allow_null=True
-    )
+    linked_feedback_id = ScopedRelatedField(queryset=Feedback.objects.all(), required=False, allow_null=True)
     documentation = GrievanceDocumentCreateSerializer(many=True, required=False, allow_null=True)
 
 
@@ -686,21 +686,21 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     area = serializers.CharField(required=False, allow_blank=True)
     language = serializers.CharField(allow_blank=True)
     linked_tickets = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=GrievanceTicket.objects.all()),
+        child=ScopedRelatedField(queryset=GrievanceTicket.objects.all()),
         required=False,
         allow_empty=True,
     )
-    household = serializers.PrimaryKeyRelatedField(queryset=Household.objects.all(), required=False)
-    individual = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=False)
-    payment_record = serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all(), required=False)
+    household = ScopedRelatedField(queryset=Household.objects.all(), required=False)
+    individual = ScopedRelatedField(queryset=Individual.objects.all(), required=False)
+    payment_record = ScopedRelatedField(queryset=Payment.objects.all(), required=False)
     extras = UpdateGrievanceTicketExtrasSerializer(required=False)
     priority = serializers.IntegerField()
     urgency = serializers.IntegerField()
-    # All choices (incl. HOPE) accepted on update: the FE echoes a system ticket's existing
-    # HOPE value back. Users still can't *pick* HOPE — the edit dropdown uses manual choices.
+    # All choices (incl. HOPE) accepted here because the FE echoes a system ticket's existing HOPE
+    # value back; validate_submission_channel rejects HOPE on anything that is not system-generated.
     submission_channel = serializers.ChoiceField(choices=SUBMISSION_CHANNEL_CHOICES, required=False, allow_null=True)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
-    program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
+    program = ScopedRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
     comments = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     documentation = CreateGrievanceDocumentSerializer(many=True, required=False, allow_null=True)
     documentation_to_update = UpdateGrievanceDocumentSerializer(many=True, required=False, allow_null=True)
@@ -709,6 +709,11 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
         required=False,
         allow_empty=True,
     )
+
+    def validate_submission_channel(self, value: int | None) -> int | None:
+        if value == SUBMISSION_CHANNEL_HOPE and not self.instance.is_system_generated:
+            raise serializers.ValidationError("HOPE Generated is set by the system and cannot be selected.")
+        return value
 
 
 class GrievanceStatusChangeSerializer(serializers.Serializer):
@@ -757,34 +762,32 @@ class GrievanceDeleteHouseholdApproveStatusSerializer(serializers.Serializer):
 
 
 class GrievanceNeedsAdjudicationApproveSerializer(serializers.Serializer):
-    selected_individual_id = serializers.PrimaryKeyRelatedField(
-        queryset=Individual.objects.all(), required=False, allow_null=True
-    )
+    selected_individual_id = ScopedRelatedField(queryset=Individual.objects.all(), required=False, allow_null=True)
     duplicate_individual_ids = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()),
+        child=ScopedRelatedField(queryset=Individual.objects.all()),
         required=False,
     )
     distinct_individual_ids = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()),
+        child=ScopedRelatedField(queryset=Individual.objects.all()),
         required=False,
     )
     clear_individual_ids = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()),
+        child=ScopedRelatedField(queryset=Individual.objects.all()),
         required=False,
     )
     version = serializers.IntegerField(required=False)
 
 
 class GrievanceReassignRoleSerializer(serializers.Serializer):
-    household_id = serializers.PrimaryKeyRelatedField(
+    household_id = ScopedRelatedField(
         queryset=Household.objects.all(),
     )
     household_version = serializers.IntegerField(required=False)
-    individual_id = serializers.PrimaryKeyRelatedField(
+    individual_id = ScopedRelatedField(
         queryset=Individual.objects.all(),
     )
     individual_version = serializers.IntegerField(required=False)
-    new_individual_id = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=False)
+    new_individual_id = ScopedRelatedField(queryset=Individual.objects.all(), required=False)
     role = serializers.CharField()
     version = serializers.IntegerField(required=False)
 

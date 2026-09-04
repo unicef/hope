@@ -140,6 +140,15 @@ def kab_add_individual_context() -> dict[str, Any]:
     return {"household": household, "ticket": ticket}
 
 
+def test_update_without_extras_keeps_requested_data(kab_add_individual_context: dict[str, Any]) -> None:
+    ticket = kab_add_individual_context["ticket"]
+    requested_data = ticket.add_individual_ticket_details.individual_data
+
+    updated_ticket = AddIndividualService(ticket, {}).update()
+
+    assert updated_ticket.add_individual_ticket_details.individual_data == requested_data
+
+
 def test_add_individual_populates_kab_for_non_recalculating_dct(
     kab_add_individual_context: dict[str, Any],
 ) -> None:

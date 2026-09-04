@@ -31,15 +31,16 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@api/*": ["src/api/*"],
-      "@components/*": ["src/components/*"],
-      "@core/*": ["src/components/core/*"],
-      "@containers/*": ["src/containers/*"],
-      "@shared/*": ["src/shared/*"],
-      "@utils/*": ["src/utils/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@generated/*": ["src/__generated__/*"],
-      "@restgenerated/*": ["src/restgenerated/*"]
+      "@api/*": ["./src/api/*"],
+      "@components/*": ["./src/components/*"],
+      "@core/*": ["./src/components/core/*"],
+      "@containers/*": ["./src/containers/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@generated/*": ["./src/__generated__/*"],
+      "@restgenerated/*": ["./src/restgenerated/*"],
+      "src/*": ["./src/*"]
     }
   },
   "include": [

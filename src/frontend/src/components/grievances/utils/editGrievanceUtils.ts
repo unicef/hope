@@ -279,23 +279,9 @@ function prepareSensitiveVariables(requiredVariables, values) {
 }
 
 function prepareAddIndividualVariables(requiredVariables, values) {
-  let { flexFields } = values.individualData;
-  if (flexFields) {
-    flexFields = { ...flexFields };
-    for (const [key, value] of Object.entries(flexFields)) {
-      if (value === '') {
-        delete flexFields[key];
-      }
-    }
-  }
   return {
     ...requiredVariables,
     linkedTickets: values.selectedLinkedTickets,
-    extras: {
-      addIndividualIssueTypeExtras: {
-        individualData: { ...values.individualData, flexFields },
-      },
-    },
   };
 }
 
@@ -307,81 +293,13 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 }
 
 function prepareEditIndividualVariables(requiredVariables, values) {
-  const individualData = values.individualDataUpdateFields
-    .filter((item) => item.fieldName && !item.isFlexField)
-    .reduce((prev, current) => {
-      prev[camelCase(current.fieldName)] = current.fieldValue;
-      return prev;
-    }, {});
-  const flexFields = values.individualDataUpdateFields
-    .filter((item) => item.fieldName && item.isFlexField)
-    .reduce((prev, current) => {
-      prev[camelCase(current.fieldName)] = current.fieldValue;
-      return prev;
-    }, {});
-  individualData.flexFields = flexFields;
-
-  // Transform documents and identities to extract value from nested structure
-  const transformNestedData = (items) => {
-    if (!items || !Array.isArray(items)) return items;
-    return items.map((item) => {
-      // Handle nested structure {approveStatus, value: {country, key, number}}
-      if (item.value && typeof item.value === 'object') {
-        return item.value;
-      }
-      // Handle direct structure {country, key, number} for backward compatibility
-      return item;
-    });
-  };
-
   return {
     ...requiredVariables,
     linkedTickets: values.selectedLinkedTickets,
-    extras: {
-      individualDataUpdateIssueTypeExtras: {
-        individualData: {
-          ...individualData,
-          documents: transformNestedData(
-            values.individualDataUpdateFieldsDocuments,
-          ),
-          documentsToRemove: values.individualDataUpdateDocumentsToRemove,
-          documentsToEdit: transformNestedData(
-            values.individualDataUpdateDocumentsToEdit,
-          ),
-          identities: transformNestedData(
-            values.individualDataUpdateFieldsIdentities,
-          ),
-          identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
-          identitiesToEdit: transformNestedData(
-            values.individualDataUpdateIdentitiesToEdit,
-          ),
-          accountsToEdit: values.individualDataUpdateAccountsToEdit,
-        },
-      },
-    },
   };
 }
 
-function prepareEditHouseholdVariables(requiredVariables, values) {
-  const householdData = values.householdDataUpdateFields
-    .filter((item) => item.fieldName && !item.isFlexField)
-    .reduce((prev, current) => {
-      prev[camelCase(current.fieldName)] = current.fieldValue;
-      return prev;
-    }, {});
-  const flexFields = values.householdDataUpdateFields
-    .filter((item) => item.fieldName && item.isFlexField)
-    .reduce((prev, current) => {
-      prev[current.fieldName] = current.fieldValue;
-      return prev;
-    }, {});
-  householdData.flexFields = flexFields;
-  // Add roles if present and valid
-  if (Array.isArray(values.roles) && values.roles.length > 0) {
-    householdData.roles = values.roles;
-  } else if (householdData.roles) {
-    delete householdData.roles;
-  }
+function prepareEditHouseholdVariables(requiredVariables) {
   return {
     ...requiredVariables,
   };
