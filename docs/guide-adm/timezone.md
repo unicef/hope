@@ -210,8 +210,8 @@ The creation and action timestamps in those emails are converted to that timezon
 
 The grievance daily digest and overdue/sensitive reminders target the local hour configured by the
 `GRIEVANCE_NOTIFICATION_HOUR` Constance setting. Its default is `6`, meaning 06:00. Enter an integer from `0` through
-`23` in 24-hour format; task execution rejects values outside that range. Both notification mechanisms use the same
-setting.
+`23` in 24-hour format. The Constance administration form rejects values outside that range before saving the
+configuration. Both notification mechanisms use the same setting.
 
 Their Celery beat entries run once per UTC hour and determine which recipient timezone has reached its configured
 delivery window. This avoids creating a separate beat schedule for every timezone. With the default setting,
