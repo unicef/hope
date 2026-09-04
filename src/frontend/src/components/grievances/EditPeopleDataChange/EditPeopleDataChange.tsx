@@ -80,7 +80,10 @@ function EditPeopleDataChange({
       queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
-  const { data: financialInstitutionChoices } = useQuery({
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasFinancialInstitutionsChoicesList,
       { businessAreaSlug: businessArea },
@@ -133,6 +136,7 @@ function EditPeopleDataChange({
     fullIndividualLoading ||
     documentTypeChoicesLoading ||
     individualChoicesLoading ||
+    financialInstitutionChoicesLoading ||
     countriesLoading ||
     !fullIndividual ||
     !editPeopleFieldsData

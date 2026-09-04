@@ -1,4 +1,5 @@
 import { DividerLine } from '@components/core/DividerLine';
+import { LoadingComponent } from '@core/LoadingComponent';
 import React, { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@core/Title';
@@ -87,7 +88,10 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   const { selectedProgram } = useProgramContext();
   const { businessAreaSlug } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { data: financialInstitutionChoices } = useQuery({
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasFinancialInstitutionsChoicesList,
       { businessAreaSlug },
@@ -105,6 +109,10 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
 
   if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
     return null;
+  }
+
+  if (financialInstitutionChoicesLoading) {
+    return <LoadingComponent />;
   }
 
   return (

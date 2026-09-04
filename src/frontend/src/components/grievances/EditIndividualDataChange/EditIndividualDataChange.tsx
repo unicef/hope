@@ -91,7 +91,10 @@ function EditIndividualDataChange({
       enabled: Boolean(businessArea),
     });
 
-  const { data: financialInstitutionChoices } = useQuery({
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasFinancialInstitutionsChoicesList,
       { businessAreaSlug: businessArea },
@@ -149,6 +152,7 @@ function EditIndividualDataChange({
     fullIndividualLoading ||
     documentTypeChoicesLoading ||
     individualChoicesLoading ||
+    financialInstitutionChoicesLoading ||
     countriesLoading ||
     !fullIndividual ||
     !addIndividualFieldsData
