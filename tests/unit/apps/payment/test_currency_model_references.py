@@ -5,6 +5,7 @@ from django.conf import settings
 import pytest
 
 from extras.test_utils.factories import (
+    CurrencyFactory,
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -68,6 +69,29 @@ def test_get_unore_exchange_rate_calls_client_with_currency_code(
         mock_client.get_exchange_rate_for_currency_code.assert_called_once_with(
             "PLN", payment_plan_pln.currency_exchange_date
         )
+
+
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian Pound", vision_code="SYP01")
+
+
+@pytest.fixture
+def payment_plan_syp(current_syp: Currency) -> PaymentPlan:
+    return PaymentPlanFactory(currency=current_syp)
+
+
+def test_get_unore_exchange_rate_uses_vision_code_when_different_from_code(payment_plan_syp: PaymentPlan) -> None:
+    payment_plan = payment_plan_syp
+    mock_client = mock.Mock()
+    mock_client.get_exchange_rate_for_currency_code.return_value = 0.01
+
+    result = payment_plan.get_unore_exchange_rate(exchange_rates_client=mock_client)
+
+    assert result == 0.01
+    mock_client.get_exchange_rate_for_currency_code.assert_called_once_with(
+        "SYP01", payment_plan.currency_exchange_date
+    )
 
 
 def test_get_unore_exchange_rate_raises_for_null_currency(

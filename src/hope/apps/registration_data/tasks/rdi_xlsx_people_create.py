@@ -260,7 +260,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             setattr(
                 obj_to_create,
                 current_field["name"],
-                Currency.objects.get(code=value),
+                Currency.objects.resolve_code(value),
             )
         else:
             setattr(

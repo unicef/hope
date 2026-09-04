@@ -25,6 +25,7 @@ from hope.api.endpoints.rdi.common import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
+from hope.api.utils import CurrencySlugRelatedField
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -557,11 +558,10 @@ class HouseholdSerializer(serializers.ModelSerializer):
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     consent_sign = serializers.CharField(allow_blank=True, required=False)
-    currency = serializers.SlugRelatedField(
-        slug_field="code",
+    currency = CurrencySlugRelatedField(
         required=False,
         allow_null=True,
-        queryset=Currency.objects.all(),
+        queryset=Currency.objects.active(),
     )
     head_of_household_id = serializers.SlugRelatedField(
         source="head_of_household",

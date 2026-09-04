@@ -183,9 +183,9 @@ class HouseholdDataUpdateService(DataChangeService):
             ).first()
         currency = household_data.get("currency", {})
         if currency.get("value") is not None:
-            household_data["currency"]["value"] = Currency.objects.filter(  # type: ignore[index]
-                code=currency.get("value")
-            ).first()
+            household_data["currency"]["value"] = Currency.objects.resolve_code_or_none(  # type: ignore[index]
+                currency.get("value")
+            )
         only_approved_data = {
             field: value_and_approve_status.get("value")
             for field, value_and_approve_status in household_data.items()

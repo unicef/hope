@@ -297,7 +297,7 @@ def get_quantity_in_usd(
     if amount == 0:
         return Decimal(0)
 
-    currency_code = currency.code if currency else None
+    currency_code = currency.vision_code if currency else None
 
     if not exchange_rate:
         if not exchange_rates_client:

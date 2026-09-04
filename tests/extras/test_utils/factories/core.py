@@ -57,10 +57,11 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
 class CurrencyFactory(DjangoModelFactory):
     class Meta:
         model = Currency
-        django_get_or_create = ("code",)
+        django_get_or_create = ("code", "vision_code")
 
     code = "PLN"
     name = "Polish Zloty"
+    vision_code = factory.LazyAttribute(lambda o: o.code)
 
 
 class CountryCodeMapFactory(DjangoModelFactory):
