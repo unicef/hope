@@ -34,7 +34,6 @@ from hope.apps.core.api.mixins import (
     BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
-    PermissionActionMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -2949,10 +2948,14 @@ class PaymentPlanGroupViewSet(
         )
 
 
-class FinancialInstitutionViewSet(BusinessAreaMixin, SerializerActionMixin, PermissionActionMixin, BaseViewSet):
+class FinancialInstitutionViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
     queryset = FinancialInstitution.objects.all()
-    permission_classes_by_action = {
-        "choices": [IsAuthenticated],
+    permissions_by_action = {
+        "choices": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+        ],
     }
     serializer_classes_by_action = {
         "choices": FinancialInstitutionChoiceSerializer,

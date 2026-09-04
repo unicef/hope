@@ -11,6 +11,7 @@ from extras.test_utils.factories import (
     FinancialInstitutionFactory,
     UserFactory,
 )
+from hope.apps.account.permissions import Permissions
 
 pytestmark = pytest.mark.django_db
 
@@ -48,9 +49,17 @@ def _choices_url(business_area_slug: str) -> str:
 
 def test_choices_returns_only_institutions_of_the_business_area(
     client: Any,
+    user: Any,
     afghanistan: Any,
     ukraine: Any,
+    create_user_role_with_permissions: Callable,
 ) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
     afghan_institution = FinancialInstitutionFactory(name="Afghan Bank", country=afghanistan.countries.first())
     FinancialInstitutionFactory(name="Ukrainian Bank", country=ukraine.countries.first())
     countryless_institution = FinancialInstitutionFactory(name="Generic Bank", country=None)
@@ -66,9 +75,17 @@ def test_choices_returns_only_institutions_of_the_business_area(
 
 def test_choices_returns_countryless_institutions_in_every_business_area(
     client: Any,
+    user: Any,
     afghanistan: Any,
     ukraine: Any,
+    create_user_role_with_permissions: Callable,
 ) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=ukraine,
+        whole_business_area_access=True,
+    )
     FinancialInstitutionFactory(name="Afghan Bank", country=afghanistan.countries.first())
     countryless_institution = FinancialInstitutionFactory(name="Generic Bank", country=None)
 
@@ -78,13 +95,52 @@ def test_choices_returns_countryless_institutions_in_every_business_area(
     assert response.json() == [{"name": "Generic Bank", "value": countryless_institution.id}]
 
 
-def test_choices_allows_authenticated_user_without_any_role(client: Any, afghanistan: Any) -> None:
+def test_choices_allows_a_user_holding_the_rdi_permission(
+    client: Any,
+    user: Any,
+    afghanistan: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.RDI_VIEW_DETAILS],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
     institution = FinancialInstitutionFactory(name="Generic Bank", country=None)
 
     response = client.get(_choices_url(afghanistan.slug))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [{"name": "Generic Bank", "value": institution.id}]
+
+
+def test_choices_denies_a_user_without_the_permission_in_the_business_area(
+    client: Any,
+    user: Any,
+    afghanistan: Any,
+    ukraine: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=ukraine,
+        whole_business_area_access=True,
+    )
+    FinancialInstitutionFactory(name="Generic Bank", country=None)
+
+    response = client.get(_choices_url(afghanistan.slug))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_choices_denies_a_user_without_any_role(client: Any, afghanistan: Any) -> None:
+    FinancialInstitutionFactory(name="Generic Bank", country=None)
+
+    response = client.get(_choices_url(afghanistan.slug))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_choices_denies_anonymous_access(afghanistan: Any) -> None:

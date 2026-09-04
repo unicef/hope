@@ -21,7 +21,6 @@ from hope.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
     CountActionMixin,
-    PermissionActionMixin,
     PermissionsMixin,
     SerializerActionMixin,
 )
@@ -159,12 +158,12 @@ class BusinessAreaViewSet(
         return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
 
 
-class DataCollectingTypeViewSet(BusinessAreaMixin, SerializerActionMixin, PermissionActionMixin, BaseViewSet):
+class DataCollectingTypeViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
     """Serve the data collecting types available in a business area."""
 
     queryset = DataCollectingType.objects.all()
-    permission_classes_by_action = {
-        "choices": [IsAuthenticated],
+    permissions_by_action = {
+        "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
     }
     serializer_classes_by_action = {
         "choices": DataCollectingTypeChoiceSerializer,

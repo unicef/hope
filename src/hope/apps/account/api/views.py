@@ -187,12 +187,15 @@ class UserViewSet(
         return Response(to_choice_object(choices_data))
 
 
-class PartnerViewSet(BusinessAreaMixin, SerializerActionMixin, PermissionActionMixin, BaseViewSet):
+class PartnerViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
     """Serve the partner choices scoped to a business area."""
 
     queryset = Partner.objects.all()
-    permission_classes_by_action = {
-        "choices": [IsAuthenticated],
+    permissions_by_action = {
+        "choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
     }
     serializer_classes_by_action = {
         "choices": PartnerChoicesSerializer,

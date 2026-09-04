@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories import BusinessAreaFactory, UserFactory
+from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, DataCollectingType, User
 
 pytestmark = pytest.mark.django_db
@@ -119,7 +120,9 @@ def _choices_url(business_area_slug: str) -> str:
 
 def test_choices_returns_unlimited_and_business_area_types_only(
     authenticated_client: Any,
+    user: User,
     afghanistan: BusinessArea,
+    create_user_role_with_permissions: Callable,
     unlimited_dct: DataCollectingType,
     afghanistan_dct: DataCollectingType,
     ukraine_dct: DataCollectingType,
@@ -127,6 +130,13 @@ def test_choices_returns_unlimited_and_business_area_types_only(
     deprecated_dct: DataCollectingType,
     unknown_dct: DataCollectingType,
 ) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
     response = authenticated_client.get(_choices_url(afghanistan.slug))
 
     assert response.status_code == status.HTTP_200_OK
@@ -148,26 +158,54 @@ def test_choices_returns_unlimited_and_business_area_types_only(
 
 def test_choices_returns_a_different_list_per_business_area(
     authenticated_client: Any,
+    user: User,
     ukraine: BusinessArea,
+    create_user_role_with_permissions: Callable,
     unlimited_dct: DataCollectingType,
     afghanistan_dct: DataCollectingType,
     ukraine_dct: DataCollectingType,
 ) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        business_area=ukraine,
+        whole_business_area_access=True,
+    )
+
     response = authenticated_client.get(_choices_url(ukraine.slug))
 
     assert response.status_code == status.HTTP_200_OK
     assert [row["value"] for row in response.json()] == [unlimited_dct.code, ukraine_dct.code]
 
 
-def test_choices_allows_authenticated_user_without_any_role(
+def test_choices_denies_a_user_without_the_permission_in_the_business_area(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    ukraine: BusinessArea,
+    create_user_role_with_permissions: Callable,
+    unlimited_dct: DataCollectingType,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        business_area=ukraine,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(_choices_url(afghanistan.slug))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_choices_denies_a_user_without_any_role(
     authenticated_client: Any,
     afghanistan: BusinessArea,
     unlimited_dct: DataCollectingType,
 ) -> None:
     response = authenticated_client.get(_choices_url(afghanistan.slug))
 
-    assert response.status_code == status.HTTP_200_OK
-    assert [row["value"] for row in response.json()] == [unlimited_dct.code]
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_choices_denies_anonymous_access(afghanistan: BusinessArea, unlimited_dct: DataCollectingType) -> None:
