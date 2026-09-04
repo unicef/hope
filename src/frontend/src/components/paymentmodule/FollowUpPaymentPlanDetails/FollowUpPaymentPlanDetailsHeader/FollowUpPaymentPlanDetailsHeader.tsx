@@ -37,6 +37,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   permissions,
   paymentPlan,
 }: FollowUpPaymentPlanDetailsHeaderProps): ReactElement {
+  const visionManaged = paymentPlan.visionManaged;
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -45,7 +46,8 @@ export function FollowUpPaymentPlanDetailsHeader({
     },
   ];
 
-  const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
+  const canRemove =
+    hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
@@ -61,10 +63,11 @@ export function FollowUpPaymentPlanDetailsHeader({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
     permissions,
   );
-  const canMarkAsReleased = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
-  );
+  const canMarkAsReleased =
+    hasPermissions(
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+      permissions,
+    ) && !visionManaged;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canMarkReadyForClosure = hasPermissions(
@@ -74,7 +77,8 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
+    paymentPlan.canSendToPaymentGateway &&
+    !visionManaged;
 
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;

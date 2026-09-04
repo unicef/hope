@@ -335,7 +335,7 @@ class RegistrationDataImportViewSet(
         serializer.is_valid(raise_exception=True)
         registration_data_import = serializer.get_object(serializer.validated_data)
         import_from_program_id = serializer.validated_data["import_from_program_id"]
-        import_from_program = Program.objects.get(id=import_from_program_id)
+        import_from_program = serializer.import_from_program  # already scoped to the business area of the url path
         if self.program.status == Program.FINISHED:
             raise ValidationError("In order to perform this action, program status must not be finished.")
 
@@ -399,7 +399,7 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        import_data = ImportData.objects.filter(id=import_data_id).first()
+        import_data = ImportData.objects.filter(id=import_data_id, business_area_slug=self.business_area.slug).first()
         if not import_data:
             raise ValidationError("Import data not found")
         if import_data.status != ImportData.STATUS_FINISHED:
@@ -408,8 +408,8 @@ class RegistrationDataImportViewSet(
         # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
-        import_data_id = validated_data.pop("import_data_id")
-        import_data_obj = ImportData.objects.get(id=import_data_id)
+        validated_data.pop("import_data_id")
+        import_data_obj = import_data
         business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
 
         registration_data_import = RegistrationDataImport(
@@ -480,7 +480,9 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        import_data = KoboImportData.objects.filter(id=import_data_id).first()
+        import_data = KoboImportData.objects.filter(
+            id=import_data_id, business_area_slug=self.business_area.slug
+        ).first()
         if not import_data:
             raise ValidationError("Kobo import data not found")
         if import_data.status != ImportData.STATUS_FINISHED:
@@ -489,8 +491,8 @@ class RegistrationDataImportViewSet(
         # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
-        import_data_id = validated_data.pop("import_data_id")
-        import_data_obj = KoboImportData.objects.get(id=import_data_id)
+        validated_data.pop("import_data_id")
+        import_data_obj = import_data
         business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
 
         registration_data_import = RegistrationDataImport(

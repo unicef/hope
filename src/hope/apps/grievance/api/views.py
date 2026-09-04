@@ -553,9 +553,6 @@ class GrievanceTicketGlobalViewSet(
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             raise ValidationError("Grievance Ticket in status Closed is not editable")
 
-        if grievance_ticket.issue_type:
-            self.verify_required_arguments(input_data, "issue_type", self.UPDATE_EXTRAS_OPTIONS)
-
         extras = input_data.pop("extras", {})
         grievance_ticket = self.update_basic_data(user, input_data, grievance_ticket)  # type: ignore
 

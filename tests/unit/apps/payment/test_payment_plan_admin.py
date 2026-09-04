@@ -25,11 +25,11 @@ from extras.test_utils.factories import (
 from hope.admin.payment_plan import (
     PaymentInstructionInline,
     PaymentPlanAdmin,
+    can_retry_payment_gateway_send,
     can_send_to_vision,
     can_sync_with_payment_gateway,
 )
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
-from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
 from hope.models import (
     AsyncJob,
     AsyncJobModel,
@@ -146,6 +146,61 @@ def payment_gateway_fsp(delivery_mechanism):
         payment_gateway_id="pg-1",
         delivery_mechanisms=[delivery_mechanism],
     )
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(False, id="non-vision"),
+        pytest.param(True, id="vision"),
+    ]
+)
+def retryable_payment_gateway_plan(request, payment_gateway_fsp):
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.ACCEPTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        financial_service_provider=payment_gateway_fsp,
+        delivery_mechanism=payment_gateway_fsp.delivery_mechanisms.first(),
+    )
+    if request.param:
+        payment_plan.internal_data = {"vision": {"status": "RELEASED"}}
+        payment_plan.save(update_fields=["internal_data"])
+    PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+    return payment_plan
+
+
+def test_can_retry_payment_gateway_send_for_vision_and_non_vision_plans(
+    retryable_payment_gateway_plan, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        assert can_retry_payment_gateway_send(retryable_payment_gateway_plan) is True
+
+
+@patch("hope.apps.payment.services.payment_plan_services.send_to_payment_gateway_async_task")
+def test_retry_payment_gateway_send_uses_existing_send_action(
+    mock_send,
+    admin_client,
+    retryable_payment_gateway_plan,
+    django_capture_on_commit_callbacks,
+) -> None:
+    url = reverse("admin:payment_paymentplan_retry_payment_gateway_send", args=[retryable_payment_gateway_plan.pk])
+
+    with (
+        patch("hope.admin.payment_plan.log_create") as mock_activity_log,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        response = admin_client.post(url)
+
+    assert response.status_code == 302
+    retryable_payment_gateway_plan.refresh_from_db(fields=["background_action_status"])
+    assert (
+        retryable_payment_gateway_plan.background_action_status
+        == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY
+    )
+    assert mock_send.call_count == 1
+    assert mock_send.call_args.args[0].pk == retryable_payment_gateway_plan.pk
+    assert mock_send.call_args.args[1] == str(response.wsgi_request.user.pk)
+    assert mock_activity_log.call_args.kwargs["user"] == response.wsgi_request.user
+    assert mock_activity_log.call_args.kwargs["programs"] == retryable_payment_gateway_plan.program.pk
 
 
 @patch("hope.apps.payment.services.payment_gateway.PaymentGatewayService.sync_payment_plan")
@@ -359,9 +414,9 @@ def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gate
 @pytest.mark.parametrize(
     ("status", "flag_enabled", "sent_to_vision", "expected"),
     [
-        (PaymentPlan.Status.ACCEPTED, True, False, True),
-        (PaymentPlan.Status.ACCEPTED, True, True, False),
-        (PaymentPlan.Status.ACCEPTED, False, False, False),
+        (PaymentPlan.Status.IN_REVIEW, True, False, True),
+        (PaymentPlan.Status.IN_REVIEW, True, True, False),
+        (PaymentPlan.Status.IN_REVIEW, False, False, False),
         (PaymentPlan.Status.OPEN, True, False, False),
         (PaymentPlan.Status.OPEN, False, False, False),
     ],
@@ -373,61 +428,31 @@ def test_can_send_to_vision(payment_plan, status, flag_enabled, sent_to_vision, 
         value=str(flag_enabled),
     )
     payment_plan.status = status
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
     payment_plan.internal_data = {"vision": {"sent": sent_to_vision}}
     payment_plan.save(update_fields=["status", "internal_data"])
     assert can_send_to_vision(payment_plan) is expected
 
 
-@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
-def test_send_to_vision_post_success(mock_send, admin_client, payment_plan, settings) -> None:
+@patch("hope.admin.payment_plan.send_payment_plan_to_vision_async_task")
+def test_send_to_vision_post_queues_async_task(mock_send, admin_client, payment_plan) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
-    mock_send.return_value = {"messageId": "test-msg-id"}
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    payment_plan.save(update_fields=["status"])
     url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
-    settings.VISION_API_URL = "http://fake.vision.test/"
     response = admin_client.post(url)
     assert response.status_code == 302
-    mock_send.assert_called_once_with(payment_plan)
+    mock_send.assert_called_once_with(payment_plan, str(response.wsgi_request.user.pk))
     messages = list(get_messages(response.wsgi_request))
     assert len(messages) == 1
-    assert "Payment plan sent to Vision successfully" in str(messages[0])
-
-
-@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
-def test_send_to_vision_handles_api_error(mock_send, admin_client, payment_plan, settings) -> None:
-    FlagState.objects.get_or_create(
-        name="VISION_INTEGRATION_ACTIVE",
-        condition="boolean",
-        value="True",
-    )
-    mock_send.side_effect = VisionAPIError("boom")
-    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
-    settings.VISION_API_URL = "http://fake.vision.test/"
-    response = admin_client.post(url)
-    assert response.status_code == 302
-    mock_send.assert_called_once_with(payment_plan)
-    messages = list(get_messages(response.wsgi_request))
-    assert any("Failed to send to Vision" in str(m) for m in messages)
-
-
-@patch("hope.contrib.vision.api.VisionAPI.send_payment_plan")
-def test_send_to_vision_handles_missing_creds(mock_send, admin_client, payment_plan, settings) -> None:
-    FlagState.objects.get_or_create(
-        name="VISION_INTEGRATION_ACTIVE",
-        condition="boolean",
-        value="True",
-    )
-    mock_send.side_effect = VisionAPIMissingCredentialsError("no creds")
-    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
-    settings.VISION_API_URL = "http://fake.vision.test/"
-    response = admin_client.post(url)
-    assert response.status_code == 302
-    mock_send.assert_called_once_with(payment_plan)
-    messages = list(get_messages(response.wsgi_request))
-    assert any("Vision API not configured" in str(m) for m in messages)
+    assert "Sending Payment Plan to Vision started" in str(messages[0])
 
 
 def test_send_to_vision_get_confirmation(admin_client, payment_plan) -> None:
@@ -436,6 +461,10 @@ def test_send_to_vision_get_confirmation(admin_client, payment_plan) -> None:
         condition="boolean",
         value="True",
     )
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
+    payment_plan.save(update_fields=["status"])
     url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
     response = admin_client.get(url)
     assert response.status_code == 200

@@ -30,6 +30,7 @@ from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.contrib.vision.choices import VisionStatus
 from hope.models.approval import Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
@@ -661,7 +662,7 @@ class PaymentPlan(
             ("restart_exporting_payment_plan_list", "Can restart Exporting Payment Plans"),
             ("restart_importing_reconciliation_xlsx_file", "Can restart Importing Reconciliation XLSX File"),
             ("pm_sync_payment_plan_with_pg", "Can sync payment plan with payment gateway"),
-            ("pm_send_payment_plan", "Can send payment plan to Vision"),
+            ("pm_manage_vision_workflow", "Can manage Payment Plan Vision workflow"),
             ("download_payment_instruction", "Can download payment instruction from payment gateway"),
         )
         constraints = [
@@ -899,6 +900,23 @@ class PaymentPlan(
             and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
             and self.eligible_payments_for_top_up_amendment().exists()
         )
+
+    @property
+    def has_newer_sibling_plan(self) -> bool:
+        return PaymentPlan.objects.filter(
+            source_payment_plan=self.source_payment_plan,
+            plan_type=self.plan_type,
+            created_at__gt=self.created_at,
+        ).exists()
+
+    @property
+    def can_delete(self) -> bool:
+        """Mirror of PaymentPlanService.delete() validations, so the UI can hide the delete button."""
+        if self.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN):
+            return False
+        if self.plan_type == PaymentPlan.PlanType.REGULAR:
+            return True
+        return not self.has_newer_sibling_plan
 
     def eligible_payments_for_child_plan(self) -> "QuerySet":
         """Payments eligible for the child plan this plan can spawn.
@@ -1224,10 +1242,40 @@ class PaymentPlan(
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
 
     @property
+    def vision_integration_enabled(self) -> bool:
+        # Follow-Up plans reuse funds reserved for the source plan and do not require a new Vision commitment.
+        if self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return False
+        return bool(flag_state("VISION_INTEGRATION_ACTIVE")) and self.business_area.vision_integration_active
+
+    @property
+    def vision_status(self) -> str:
+        vision_data = (self.internal_data or {}).get("vision", {})
+        if not isinstance(vision_data, dict):
+            return VisionStatus.NOT_SENT.value
+        return str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
+
+    @property
+    def vision_data(self) -> dict[str, Any]:
+        vision_data = (self.internal_data or {}).get("vision", {})
+        return vision_data if isinstance(vision_data, dict) else {}
+
+    @property
+    def vision_managed(self) -> bool:
+        return self.vision_integration_enabled and (
+            self.status == PaymentPlan.Status.IN_REVIEW or self.vision_status != VisionStatus.NOT_SENT.value
+        )
+
+    @property
+    def can_manually_send_to_payment_gateway(self) -> bool:
+        return self.can_send_to_payment_gateway and not self.vision_managed
+
+    @property
     def can_send_to_vision(self) -> bool:
         return (
-            self.status == PaymentPlan.Status.ACCEPTED
-            and bool(flag_state("VISION_INTEGRATION_ACTIVE"))
+            self.status == PaymentPlan.Status.IN_REVIEW
+            and self.vision_integration_enabled
+            and self.vision_status in {VisionStatus.NOT_SENT.value, VisionStatus.SEND_FAILED.value}
             and not self.sent_to_vision
         )
 

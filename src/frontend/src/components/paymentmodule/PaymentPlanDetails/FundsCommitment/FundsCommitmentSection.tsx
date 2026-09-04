@@ -21,6 +21,8 @@ import {
   Typography,
   Grid,
 } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
+import { Close } from '@mui/icons-material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -28,16 +30,14 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { WarningTooltip } from '@core/WarningTooltip';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const EndInputAdornment = styled(InputAdornment)`
   margin-right: 10px;
 `;
 
-import { Close } from '@mui/icons-material';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { formatFigure, showApiErrorMessages } from '@utils/utils';
 const XIcon = styled(Close)`
   color: #707070;
 `;
@@ -49,10 +49,11 @@ interface FundsCommitmentSectionProps {
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
+  const visionManaged = paymentPlan.visionManaged;
   const initialFundsCommitment = paymentPlan?.fundsCommitments || null;
   const initialFundsCommitmentItems =
     paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
-      (el) => el.recSerialNumber,
+      (item) => item.recSerialNumber,
     ) || [];
 
   const queryClient = useQueryClient();
@@ -100,50 +101,42 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     () => paymentPlan?.availableFundsCommitments || [],
     [paymentPlan],
   );
-  const selectedCommitment = useMemo(() => {
+  const selectedAvailableCommitment = useMemo(() => {
     if (!selectedFundsCommitment) return undefined;
     return availableFundsCommitments.find(
-      (commitment) =>
-        commitment?.fundsCommitmentNumber ===
-        selectedFundsCommitment?.fundsCommitmentNumber,
+      (commitment) => commitment.id === selectedFundsCommitment.id,
     );
   }, [availableFundsCommitments, selectedFundsCommitment]);
 
-  const handleFundsCommitmentChange = (newValue: any) => {
+  const handleFundsCommitmentChange = (
+    newValue: PaymentPlanDetail['fundsCommitments'],
+  ) => {
     setSelectedFundsCommitment(newValue);
     setSelectedItems([]);
   };
 
-  const handleItemsChange = (event: any) => {
-    const value = event.target.value as string[];
-    if (!selectedCommitment) return;
-    if (value.includes('select-all')) {
-      const allItems =
-        selectedCommitment.fundsCommitmentItems?.map(
-          (item) => item.recSerialNumber,
-        ) || [];
-      if (selectedItems.length === allItems.length) {
-        setSelectedItems([]); // Deselect all
-      } else {
-        setSelectedItems(allItems); // Select all
-      }
-    } else {
-      const clickedItem = Number(value[value.length - 1]); // Get the last clicked item
-      if (selectedItems.includes(clickedItem)) {
-        setSelectedItems(selectedItems.filter((item) => item !== clickedItem));
-      } else {
-        setSelectedItems([...selectedItems, clickedItem]);
-      }
+  const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
+    if (!selectedAvailableCommitment) return;
+
+    const value = event.target.value;
+    const selectedValues = typeof value === 'string' ? value.split(',') : value;
+    if (selectedValues.includes('select-all')) {
+      const allItems = selectedAvailableCommitment.fundsCommitmentItems.map(
+        (item) => item.recSerialNumber,
+      );
+      setSelectedItems(
+        selectedItems.length === allItems.length ? [] : allItems,
+      );
+      return;
     }
+    setSelectedItems(selectedValues.map(Number));
   };
 
   const handleSubmit = async () => {
-    if (paymentPlan) {
+    if (paymentPlan && selectedFundsCommitment && selectedItems.length > 0) {
       try {
         await assignFundsCommitment({
-          fundCommitmentItemsIds: selectedItems.map((number) =>
-            number.toString(),
-          ),
+          fundCommitmentItemsIds: selectedItems.map(String),
         });
         showMessage(t('Funds commitment items assigned successfully'));
         await queryClient.invalidateQueries({
@@ -157,12 +150,6 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     }
   };
 
-  const isSameSelection = (a_set: number[], b_set: number[]) => {
-    if (a_set.length !== b_set.length) return false;
-    const setA = new Set(a_set);
-    return b_set.every((item) => setA.has(item));
-  };
-
   const assignedFundsCommitmentItems = useMemo(
     () =>
       paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
@@ -172,7 +159,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   );
 
   const isAlreadyAssigned = useMemo(() => {
-    return isSameSelection(selectedItems, assignedFundsCommitmentItems);
+    if (selectedItems.length !== assignedFundsCommitmentItems.length) {
+      return false;
+    }
+    const assignedItems = new Set(assignedFundsCommitmentItems);
+    return selectedItems.every((item) => assignedItems.has(item));
   }, [selectedItems, assignedFundsCommitmentItems]);
 
   const clearItems = () => {
@@ -195,140 +186,142 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
             <Typography variant="h6">{t('Funds Commitment')}</Typography>
           </Title>
         </Box>
-        {paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW && (
-          <React.Fragment>
-            <Box
-              sx={{
-                mt: 2,
-              }}
-            >
-              <FormControl fullWidth size="small">
-                <Autocomplete
-                  value={selectedFundsCommitment}
-                  onChange={(_event, newValue) =>
-                    handleFundsCommitmentChange(newValue)
-                  }
-                  options={availableFundsCommitments}
-                  getOptionLabel={(option) =>
-                    option?.fundsCommitmentNumber || ''
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label={t('Funds Commitment')} />
-                  )}
-                  renderOption={(props, option) => (
-                    <MenuItem {...props} value={option?.fundsCommitmentNumber}>
-                      {option?.fundsCommitmentNumber}
-                    </MenuItem>
-                  )}
-                  isOptionEqualToValue={(option, value) =>
-                    option.fundsCommitmentNumber ===
-                    value?.fundsCommitmentNumber
-                  }
-                  noOptionsText={t('No options')}
-                  clearOnEscape
-                />
-              </FormControl>
-            </Box>
-            {selectedCommitment && (
+        {paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW &&
+          !visionManaged && (
+            <React.Fragment>
               <Box
                 sx={{
                   mt: 2,
                 }}
               >
                 <FormControl fullWidth size="small">
-                  <InputLabel>{t('Funds Commitment Items')}</InputLabel>
-                  <Select
-                    multiple
-                    label={t('Funds Commitment Items')}
-                    // @ts-ignore
-                    value={selectedItems.map(String)}
-                    onChange={handleItemsChange}
-                    renderValue={(selected) =>
-                      Array.isArray(selected) ? selected.join(', ') : selected
+                  <Autocomplete
+                    value={selectedFundsCommitment}
+                    onChange={(_event, newValue) =>
+                      handleFundsCommitmentChange(newValue)
                     }
-                    endAdornment={
-                      <EndInputAdornment position="end">
-                        <IconButton
-                          size="medium"
-                          onMouseDown={(event) => {
-                            event.preventDefault();
-                            clearItems();
-                          }}
-                        >
-                          <XIcon fontSize="small" />
-                        </IconButton>
-                      </EndInputAdornment>
+                    options={availableFundsCommitments}
+                    getOptionLabel={(option) =>
+                      option?.fundsCommitmentNumber || ''
                     }
-                  >
-                    <MenuItem value="select-all">
-                      <Checkbox
-                        checked={
-                          selectedCommitment?.fundsCommitmentItems.length > 0 &&
-                          selectedCommitment?.fundsCommitmentItems.every(
-                            (item) =>
-                              selectedItems.includes(item.recSerialNumber),
-                          )
-                        }
-                        indeterminate={
-                          selectedCommitment?.fundsCommitmentItems.some(
-                            (item) =>
-                              selectedItems.includes(item.recSerialNumber),
-                          ) &&
-                          !selectedCommitment.fundsCommitmentItems.every(
-                            (item) =>
-                              selectedItems.includes(item.recSerialNumber),
-                          )
-                        }
-                      />
-                      <ListItemText primary={t('Select All')} />
-                    </MenuItem>
-                    {selectedCommitment.fundsCommitmentItems.map((item) => (
-                      <MenuItem
-                        key={item.recSerialNumber}
-                        value={item.recSerialNumber}
-                      >
-                        <Checkbox
-                          checked={selectedItems.includes(item.recSerialNumber)}
-                        />
-                        <ListItemText
-                          primary={`${item.fundsCommitmentItem} - ${item.recSerialNumber}`}
-                        />
-                      </MenuItem>
-                    ))}
-                  </Select>
+                    renderInput={(params) => (
+                      <TextField {...params} label={t('Funds Commitment')} />
+                    )}
+                    renderOption={(props, option) => {
+                      const { key, ...optionProps } = props;
+                      return (
+                        <li key={key} {...optionProps}>
+                          {option.fundsCommitmentNumber}
+                        </li>
+                      );
+                    }}
+                    isOptionEqualToValue={(option, value) =>
+                      option.fundsCommitmentNumber ===
+                      value?.fundsCommitmentNumber
+                    }
+                    noOptionsText={t('No options')}
+                    clearOnEscape
+                  />
                 </FormControl>
               </Box>
-            )}
-            <Box
-              sx={{
-                mt: 3,
-              }}
-            >
-              <Tooltip
-                title={!canAssignFunds ? t('Permission Denied') : ''}
-                arrow
+              {selectedAvailableCommitment && (
+                <Box sx={{ mt: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>{t('Funds Commitment Items')}</InputLabel>
+                    <Select<string[]>
+                      multiple
+                      label={t('Funds Commitment Items')}
+                      value={selectedItems.map(String)}
+                      onChange={handleItemsChange}
+                      renderValue={(selected) => selected.join(', ')}
+                      endAdornment={
+                        <EndInputAdornment position="end">
+                          <IconButton
+                            size="medium"
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              clearItems();
+                            }}
+                          >
+                            <XIcon fontSize="small" />
+                          </IconButton>
+                        </EndInputAdornment>
+                      }
+                    >
+                      <MenuItem value="select-all">
+                        <Checkbox
+                          checked={
+                            selectedAvailableCommitment.fundsCommitmentItems
+                              .length > 0 &&
+                            selectedAvailableCommitment.fundsCommitmentItems.every(
+                              (item) =>
+                                selectedItems.includes(item.recSerialNumber),
+                            )
+                          }
+                          indeterminate={
+                            selectedAvailableCommitment.fundsCommitmentItems.some(
+                              (item) =>
+                                selectedItems.includes(item.recSerialNumber),
+                            ) &&
+                            !selectedAvailableCommitment.fundsCommitmentItems.every(
+                              (item) =>
+                                selectedItems.includes(item.recSerialNumber),
+                            )
+                          }
+                        />
+                        <ListItemText primary={t('Select All')} />
+                      </MenuItem>
+                      {selectedAvailableCommitment.fundsCommitmentItems.map(
+                        (item) => (
+                          <MenuItem
+                            key={item.recSerialNumber}
+                            value={String(item.recSerialNumber)}
+                          >
+                            <Checkbox
+                              checked={selectedItems.includes(
+                                item.recSerialNumber,
+                              )}
+                            />
+                            <ListItemText
+                              primary={`${item.fundsCommitmentItem} - ${item.recSerialNumber}`}
+                            />
+                          </MenuItem>
+                        ),
+                      )}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+              <Box
+                sx={{
+                  mt: 3,
+                }}
               >
-                <span>
-                  <LoadingButton
-                    variant="contained"
-                    loading={loadingAssign}
-                    color="primary"
-                    onClick={handleSubmit}
-                    disabled={
-                      loadingAssign ||
-                      !canAssignFunds ||
-                      !selectedFundsCommitment ||
-                      selectedItems.length === 0 ||
-                      isAlreadyAssigned
-                    }
-                  >
-                    {t('Assign Funds Commitments')}
-                  </LoadingButton>
-                </span>
-              </Tooltip>
-            </Box>
-          </React.Fragment>
-        )}
+                <Tooltip
+                  title={!canAssignFunds ? t('Permission Denied') : ''}
+                  arrow
+                >
+                  <span>
+                    <LoadingButton
+                      variant="contained"
+                      loading={loadingAssign}
+                      color="primary"
+                      onClick={handleSubmit}
+                      disabled={
+                        loadingAssign ||
+                        !canAssignFunds ||
+                        !selectedFundsCommitment ||
+                        selectedItems.length === 0 ||
+                        isAlreadyAssigned
+                      }
+                    >
+                      {t('Assign Funds Commitments')}
+                    </LoadingButton>
+                  </span>
+                </Tooltip>
+              </Box>
+            </React.Fragment>
+          )}
         {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.length > 0 && (
           <React.Fragment>
             <Box
@@ -345,13 +338,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   }}
                 >
                   {t('Funds Commitment Number')}:{' '}
-                  {formatFigure(selectedCommitment?.fundsCommitmentNumber) ??
-                    '-'}{' '}
-                  {paymentPlan.fundsCommitments.insufficientAmount && (
-                    <WarningTooltip
-                      message={t('Insufficient Commitment Amount')}
-                    />
-                  )}
+                  {paymentPlan.fundsCommitments.fundsCommitmentNumber}
                 </Typography>
               )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(

@@ -12,6 +12,7 @@ from hope.apps.grievance.api.serializers.ticket_detail import (
 from hope.apps.grievance.constants import (
     PRIORITY_CHOICES,
     SUBMISSION_CHANNEL_CHOICES,
+    SUBMISSION_CHANNEL_HOPE,
     SUBMISSION_CHANNEL_MANUAL_CHOICES,
     URGENCY_CHOICES,
 )
@@ -692,8 +693,8 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     extras = UpdateGrievanceTicketExtrasSerializer(required=False)
     priority = serializers.IntegerField()
     urgency = serializers.IntegerField()
-    # All choices (incl. HOPE) accepted on update: the FE echoes a system ticket's existing
-    # HOPE value back. Users still can't *pick* HOPE — the edit dropdown uses manual choices.
+    # All choices (incl. HOPE) accepted here because the FE echoes a system ticket's existing HOPE
+    # value back; validate_submission_channel rejects HOPE on anything that is not system-generated.
     submission_channel = serializers.ChoiceField(choices=SUBMISSION_CHANNEL_CHOICES, required=False, allow_null=True)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
     program = serializers.PrimaryKeyRelatedField(queryset=Program.objects.all(), required=False, allow_null=True)
@@ -705,6 +706,11 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
         required=False,
         allow_empty=True,
     )
+
+    def validate_submission_channel(self, value: int | None) -> int | None:
+        if value == SUBMISSION_CHANNEL_HOPE and not self.instance.is_system_generated:
+            raise serializers.ValidationError("HOPE Generated is set by the system and cannot be selected.")
+        return value
 
 
 class GrievanceStatusChangeSerializer(serializers.Serializer):

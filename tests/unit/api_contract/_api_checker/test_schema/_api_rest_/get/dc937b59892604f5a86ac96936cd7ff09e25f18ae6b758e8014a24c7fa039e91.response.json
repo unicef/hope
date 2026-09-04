@@ -30274,7 +30274,10 @@
                                 "type": "string"
                             }
                         }
-                    }
+                    },
+                    "required": [
+                        "fund_commitment_items_ids"
+                    ]
                 },
                 "AuthorizedUser": {
                     "type": "object",
@@ -32744,6 +32747,95 @@
                     },
                     "required": [
                         "excluded_admin_areas"
+                    ]
+                },
+                "FundsCommitment": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "funds_commitment_number": {
+                            "type": "string"
+                        },
+                        "funds_commitment_items": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FundsCommitmentItem"
+                            }
+                        }
+                    },
+                    "required": [
+                        "funds_commitment_items",
+                        "funds_commitment_number",
+                        "id"
+                    ]
+                },
+                "FundsCommitmentItem": {
+                    "type": "object",
+                    "properties": {
+                        "wbs_element": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 24
+                        },
+                        "grant_number": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 20
+                        },
+                        "currency_code": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 5
+                        },
+                        "commitment_amount_local": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "commitment_amount_usd": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "total_open_amount_local": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "total_open_amount_usd": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "rec_serial_number": {
+                            "type": "integer",
+                            "maximum": 2147483647,
+                            "minimum": -2147483648
+                        },
+                        "funds_commitment_item": {
+                            "type": "string",
+                            "maxLength": 3
+                        },
+                        "sponsor": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 10
+                        },
+                        "sponsor_name": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 100
+                        }
+                    },
+                    "required": [
+                        "funds_commitment_item",
+                        "rec_serial_number"
                     ]
                 },
                 "GenericImportResponse": {
@@ -40492,16 +40584,18 @@
                             "readOnly": true
                         },
                         "funds_commitments": {
-                            "type": "object",
-                            "additionalProperties": {},
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/FundsCommitment"
+                                }
+                            ],
                             "nullable": true,
                             "readOnly": true
                         },
                         "available_funds_commitments": {
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "additionalProperties": {}
+                                "$ref": "#/components/schemas/FundsCommitment"
                             },
                             "readOnly": true
                         },
