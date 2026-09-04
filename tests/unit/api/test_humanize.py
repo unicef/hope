@@ -100,3 +100,55 @@ def test_empty_members_list(household_error: dict) -> None:
 
     hh = result["households"][0]["Household #1"][0]
     assert "members" not in hh
+
+
+def test_households_dict_single_error(household_error: dict) -> None:
+    errors = {"households": {"0": household_error}}
+    result = humanize_errors(errors)
+
+    assert result == {"households": {"Household #0": [{"country": ["This field is required."]}]}}
+
+
+def test_households_dict_keyed_by_index(household_error: dict) -> None:
+    errors = {"households": {"1": household_error}}
+    result = humanize_errors(errors)
+
+    assert result == {"households": {"Household #1": [{"country": ["This field is required."]}]}}
+
+
+def test_households_dict_only_failing_indices_included(household_error: dict) -> None:
+    errors = {"households": {"0": {}, "2": household_error}}
+    result = humanize_errors(errors)
+
+    assert result == {"households": {"Household #2": [{"country": ["This field is required."]}]}}
+
+
+def test_households_dict_string_error() -> None:
+    errors = {"households": "This field is required."}
+    result = humanize_errors(errors)
+
+    assert result == {"households": ["This field is required."]}
+
+
+def test_households_dict_members_dict(household_error: dict, member_error: dict) -> None:
+    errors = {"households": {"0": {**household_error, "members": {"1": member_error}}}}
+    result = humanize_errors(errors)
+
+    hh = result["households"]["Household #0"][0]
+    assert hh["members"] == {"Member #1": [{"full_name": ["This field is required."]}]}
+
+
+def test_households_dict_members_only_failing_indices_included(household_error: dict, member_error: dict) -> None:
+    errors = {"households": {"0": {**household_error, "members": {"0": {}, "2": member_error}}}}
+    result = humanize_errors(errors)
+
+    hh = result["households"]["Household #0"][0]
+    assert hh["members"] == {"Member #2": [{"full_name": ["This field is required."]}]}
+
+
+def test_members_raw_string_error(household_error: dict) -> None:
+    errors = {"households": [{**household_error, "members": "This field is required."}]}
+    result = humanize_errors(errors)
+
+    hh = result["households"][0]["Household #1"][0]
+    assert hh["members"] == ["This field is required."]
