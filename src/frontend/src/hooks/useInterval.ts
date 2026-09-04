@@ -18,5 +18,6 @@ export function useInterval(
       const id = setInterval(tick, delay);
       return () => clearInterval(id);
     }
+    return undefined;
   }, [delay]);
 }

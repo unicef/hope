@@ -162,15 +162,13 @@ export const CollectorsTable = ({
               </BlackLink>
             );
           }
-          if (household?.id === row?.household?.id) {
-            return (
-              <span>
-                {renderTableCellContent(
-                  relationshipChoicesDict[row.relationship ?? ''],
-                )}
-              </span>
-            );
-          }
+          return (
+            <span>
+              {renderTableCellContent(
+                relationshipChoicesDict[row.relationship ?? ''],
+              )}
+            </span>
+          );
         };
 
         return (

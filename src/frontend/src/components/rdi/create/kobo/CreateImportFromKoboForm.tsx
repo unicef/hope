@@ -94,7 +94,7 @@ export function CreateImportFromKoboForm({
     validationSchema,
     onSubmit,
   });
-  const saveKoboInputData = (): Promise<void> => {
+  const saveKoboInputData = (): void => {
     if (!formik.values.koboAssetId) {
       return;
     }

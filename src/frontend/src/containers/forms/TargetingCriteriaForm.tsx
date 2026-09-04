@@ -161,7 +161,7 @@ class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps, any> {
     return arrayHelpers;
   }
 
-  render(): ReactNode {
+  override render(): ReactNode {
     const { children } = this.props;
     return children;
   }

@@ -22,9 +22,12 @@
     "strictFunctionTypes": true,
     "alwaysStrict": true,
     "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
