@@ -42,7 +42,8 @@ export function VerificationPlanDetailsChart({
                 verificationPlan.receivedCount,
                 verificationPlan.receivedWithProblemsCount,
                 verificationPlan.notReceivedCount,
-                verificationPlan.sampleSize - verificationPlan.respondedCount,
+                (verificationPlan.sampleSize ?? 0) -
+                  (verificationPlan.respondedCount ?? 0),
               ],
               backgroundColor: ['#31D237', '#F57F1A', '#FF0100', '#DCDCDC'],
               hoverBackgroundColor: [

@@ -217,8 +217,8 @@ export const EditVerificationPlan = ({
 
   const initialValues = {
     confidenceInterval:
-      paymentVerificationPlanNode.confidenceInterval * 100 || 95,
-    marginOfError: paymentVerificationPlanNode.marginOfError * 100 || 5,
+      (paymentVerificationPlanNode.confidenceInterval ?? 0) * 100 || 95,
+    marginOfError: (paymentVerificationPlanNode.marginOfError ?? 0) * 100 || 5,
     filterAgeMin: paymentVerificationPlanNode.ageFilterMin || '',
     filterAgeMax: paymentVerificationPlanNode.ageFilterMax || '',
     filterSex: paymentVerificationPlanNode.sexFilter || '',

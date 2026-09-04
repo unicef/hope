@@ -34,16 +34,16 @@ export function CurrentValue({
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value)?.labelEn || '-';
+        field.choices?.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'SELECT_MANY':
       displayValue =
-        field.choices.find((item) => item.value === value)?.labelEn || '-';
+        field.choices?.find((item) => item.value === value)?.labelEn || '-';
       if (value instanceof Array) {
         displayValue = value
           .map(
             (choice) =>
-              field.choices.find((item) => item.value === choice)?.labelEn ||
+              field.choices?.find((item) => item.value === choice)?.labelEn ||
               '-',
           )
           .join(', ');

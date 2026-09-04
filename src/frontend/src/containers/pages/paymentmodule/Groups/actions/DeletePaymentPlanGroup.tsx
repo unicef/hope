@@ -43,7 +43,7 @@ export function DeletePaymentPlanGroup({
       RestService.restBusinessAreasProgramsPaymentPlanGroupsDestroy({
         businessAreaSlug: businessArea,
         programCode: programId,
-        id: group.id,
+        id: group?.id ?? '',
       }),
   });
 

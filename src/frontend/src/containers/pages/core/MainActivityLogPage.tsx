@@ -144,7 +144,7 @@ export function ActivityLogPage(): ReactElement {
   if (!logsData && logsLoading) return <LoadingComponent />;
 
   // Use REST API LogEntry data directly
-  const logEntries = logsData.results;
+  const logEntries = logsData?.results ?? [];
 
   // Get total count for pagination
   const totalCount = countData?.count ?? 0;

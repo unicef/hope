@@ -83,7 +83,7 @@ export function FinishVerificationPlan({
       const receivedWithProblemsTicketsCount =
         verificationPlan?.receivedWithProblemsCount;
 
-      return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
+      return (notReceivedTicketsCount ?? 0) + (receivedWithProblemsTicketsCount ?? 0);
     }
     return null;
   };

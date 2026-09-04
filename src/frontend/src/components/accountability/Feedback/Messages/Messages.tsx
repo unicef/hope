@@ -91,7 +91,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     }
   };
 
-  if (meLoading) {
+  if (meLoading || !meData) {
     return null;
   }
 

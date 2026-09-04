@@ -45,7 +45,7 @@ export function RequestedIndividualDataChange({
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
   const individualData = {
-    ...ticket.ticketDetails.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   let allApprovedCount = 0;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
@@ -220,11 +220,14 @@ export function RequestedIndividualDataChange({
     ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
       .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    ticket.ticketDetails.roleReassignData as Record<string, RoleReassignData>,
+    (ticket.ticketDetails?.roleReassignData ?? {}) as Record<
+      string,
+      RoleReassignData
+    >,
   )?.filter((el) => el.role === 'PRIMARY' || el.role === 'HEAD').length;
 
   let approveEnabled = false;
-  if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
+  if (ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
     approveEnabled =
       isForApproval &&
       primaryCollectorRolesCount === primaryColletorRolesReassignedCount;

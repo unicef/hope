@@ -437,7 +437,7 @@ export const TargetingCriteriaForm = ({
                           data={
                             isSocialDctType
                               ? data
-                              : householdData.allFieldsAttributes
+                              : householdData?.allFieldsAttributes
                           }
                           choicesDict={allDataChoicesDict}
                           each={each}
@@ -469,7 +469,7 @@ export const TargetingCriteriaForm = ({
                       <Button
                         onClick={() =>
                           householdsFiltersBlocksWrapperRef.current
-                            .getArrayHelpers()
+                            ?.getArrayHelpers()
                             .push({ fieldName: '' })
                         }
                         color="primary"
@@ -552,7 +552,7 @@ export const TargetingCriteriaForm = ({
                           data-cy="button-individual-rule"
                           onClick={() =>
                             individualsFiltersBlocksWrapperRef.current
-                              .getArrayHelpers()
+                              ?.getArrayHelpers()
                               .push({
                                 individualBlockFilters: [{ fieldName: '' }],
                               })

@@ -37,7 +37,7 @@ export function GrievanceDocumentPhotoModalEditable({
             type="file"
             accept="image/*"
             onChange={(event) => {
-              setFieldValue(fieldName, event.currentTarget.files[0]);
+              setFieldValue(fieldName, event.currentTarget.files?.[0]);
             }}
           />
         </Box>

@@ -48,7 +48,7 @@ function prepareInitialValueAddIndividual(
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
-    ...ticket.ticketDetails.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   const flexFields = individualData.flexFields;
   delete individualData.flexFields;

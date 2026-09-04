@@ -37,7 +37,7 @@ const IndividualQuestionnaire = ({
       }),
   });
   const relationshipChoicesDict = choicesToDict(
-    choicesData.relationshipChoices,
+    choicesData?.relationshipChoices,
   );
 
   return (

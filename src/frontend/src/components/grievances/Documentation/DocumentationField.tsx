@@ -49,7 +49,7 @@ export function DocumentationField({
             onChange={(event) => {
               setFieldValue(
                 `${baseName}[${index}].file`,
-                event.currentTarget.files[0],
+                event.currentTarget.files?.[0],
               );
             }}
           />

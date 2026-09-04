@@ -138,7 +138,7 @@ export function LookUpHouseholdFiltersCommunication({
             value={filter.orderBy}
             data-cy="hh-filters-order-by"
           >
-            {householdTableOrderOptions.map((order) => (
+            {householdTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

@@ -41,14 +41,14 @@ export function ReassignMultipleRoleBox({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const reassignData = ticket.ticketDetails.roleReassignData;
+  const reassignData = ticket.ticketDetails?.roleReassignData ?? {};
   const reassignDataDictByIndividualId = {};
   for (const key of Object.keys(reassignData)) {
     reassignDataDictByIndividualId[reassignData[key].individual] =
       reassignData[key];
   }
   const selectedIndividualsToReassign =
-    ticket.ticketDetails.selectedDuplicates?.filter(
+    ticket.ticketDetails?.selectedDuplicates?.filter(
       (el) =>
         el.role === 'PRIMARY' || el.id === el.household?.headOfHousehold?.id,
     );

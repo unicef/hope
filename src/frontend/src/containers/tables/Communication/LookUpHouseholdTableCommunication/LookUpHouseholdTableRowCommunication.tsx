@@ -35,7 +35,7 @@ export function LookUpHouseholdTableRowCommunication({
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableRowCommunicationProps): ReactElement {
   const businessArea = useBusinessArea();
-  const isSelected = (id: string): boolean => selected.includes(id);
+  const isSelected = (id: string): boolean => selected?.includes(id) ?? false;
   const isItemSelected = isSelected(household.id);
 
   const handleClick = (event): void => {

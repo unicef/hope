@@ -91,7 +91,7 @@ export function ApprovePaymentPlan({
       latestApprovalProcess?.approvalNumberRequired;
     const approvalsCount = latestApprovalProcess?.actions?.approval?.length;
 
-    return approvalNumberRequired - 1 === approvalsCount;
+    return (approvalNumberRequired ?? 0) - 1 === approvalsCount;
   };
 
   return (

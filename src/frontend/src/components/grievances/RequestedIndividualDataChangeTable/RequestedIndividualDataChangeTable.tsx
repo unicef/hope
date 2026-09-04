@@ -63,8 +63,8 @@ export function RequestedIndividualDataChangeTable({
 
   const individualParams = {
     businessAreaSlug,
-    programCode: ticket.individual.programCode,
-    id: ticket.individual.id,
+    programCode: ticket.individual?.programCode,
+    id: ticket.individual?.id,
   };
   const { data: individual, isLoading: individualLoading } = useQuery({
     queryKey: restQueryKey(
@@ -80,7 +80,7 @@ export function RequestedIndividualDataChangeTable({
   });
 
   const individualData = {
-    ...ticket.ticketDetails.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   const {
     documents,

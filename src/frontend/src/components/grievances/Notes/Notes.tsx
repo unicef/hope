@@ -89,7 +89,7 @@ export function Notes({
     },
   });
 
-  if (meLoading) {
+  if (meLoading || !meData) {
     return null;
   }
 

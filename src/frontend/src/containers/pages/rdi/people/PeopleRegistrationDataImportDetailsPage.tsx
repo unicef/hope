@@ -123,6 +123,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
     return null;
   }
 
+  const rdi = data;
   const canMerge = hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions);
 
   function RegistrationContainer({
@@ -164,7 +165,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
                   rdi={data}
                   isMerged={isMerged}
                   businessArea={businessArea}
-                  key={`${data.status}-individual`}
+                  key={`${rdi.status}-individual`}
                   choicesData={choicesData}
                 />
               </TabPanel>

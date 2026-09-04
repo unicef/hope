@@ -55,7 +55,7 @@ export function CreatePaymentPlanHeader({
       to: '../../..',
     },
     {
-      title: `${programCycleData.title}`,
+      title: `${programCycleData?.title}`,
       to: '../..',
     },
   ];

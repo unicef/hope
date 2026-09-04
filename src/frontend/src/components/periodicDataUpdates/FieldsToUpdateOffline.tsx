@@ -97,7 +97,7 @@ export const FieldsToUpdateOffline: FC<FieldsToUpdateOfflineProps> = ({
                   <TableCell>
                     <Checkbox
                       data-cy={`checkbox-${field.field}`}
-                      checked={checkedFields[field.field] || false}
+                      checked={checkedFields?.[field.field] || false}
                       onChange={(event) => handleCheckboxChange(event, field)}
                     />
                   </TableCell>

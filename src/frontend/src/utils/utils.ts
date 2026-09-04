@@ -815,7 +815,7 @@ export function thingForSpecificGrievanceType(
   ) {
     return categoryThing;
   }
-  if (!(issueType in categoryThing)) {
+  if (!issueType || !(issueType in categoryThing)) {
     return defaultThing;
   }
   return categoryThing[issueType ?? ''];

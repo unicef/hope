@@ -56,6 +56,7 @@ function PaymentDetailsPage(): ReactElement {
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
+  if (!payment) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

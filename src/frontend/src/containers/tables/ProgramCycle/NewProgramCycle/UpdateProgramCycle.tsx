@@ -69,10 +69,10 @@ const UpdateProgramCycle = ({
   const initialValues: {
     [key: string]: string | boolean | number | null;
   } = {
-    id: programCycle.id,
-    title: programCycle.title,
-    startDate: programCycle.startDate,
-    endDate: programCycle.endDate,
+    id: programCycle?.id ?? null,
+    title: programCycle?.title ?? null,
+    startDate: programCycle?.startDate ?? null,
+    endDate: programCycle?.endDate ?? null,
   };
 
   const { mutateAsync, isPending } = useMutation({
@@ -102,7 +102,7 @@ const UpdateProgramCycle = ({
     try {
       await mutateAsync({
         businessAreaSlug: businessArea,
-        id: programCycle.id,
+        id: programCycle?.id ?? '',
         programCode: program.code ?? program.id,
         requestBody: {
           title: values.title,

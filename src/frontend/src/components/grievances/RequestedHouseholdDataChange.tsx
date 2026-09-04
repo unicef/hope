@@ -79,9 +79,9 @@ export function RequestedHouseholdDataChange({
   });
   const householdData = React.useMemo(
     () => ({
-      ...ticket.ticketDetails.householdData,
+      ...ticket.ticketDetails?.householdData,
     }),
-    [ticket.ticketDetails.householdData],
+    [ticket.ticketDetails?.householdData],
   );
   const rolesArr = React.useMemo(
     () => householdData.roles || [],

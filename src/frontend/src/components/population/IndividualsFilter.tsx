@@ -219,7 +219,7 @@ export function IndividualsFilter({
             data-cy="ind-filters-order-by"
             disableClearable
           >
-            {individualTableOrderOptions.map((order) => (
+            {individualTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

@@ -148,7 +148,7 @@ export function LookUpLinkedTicketsTable({
     enabled: !choicesLoading && !!choicesData && page === 0,
   });
 
-  if (choicesLoading) {
+  if (choicesLoading || !choicesData) {
     return null;
   }
 

@@ -43,7 +43,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
+  const { dedupEngineSimilarityPair } = ticket.ticketDetails?.extraData ?? {};
 
   const { mutateAsync: approve, isPending: isApproving } = useMutation({
     mutationFn: async (formData: Record<string, any>) => {

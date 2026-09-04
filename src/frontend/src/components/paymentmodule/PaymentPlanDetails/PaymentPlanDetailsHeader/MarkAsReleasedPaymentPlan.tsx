@@ -84,7 +84,7 @@ export function MarkAsReleasedPaymentPlan({
     const financeReleasesCount =
       latestApprovalProcess?.actions?.financeRelease?.length;
 
-    return financeReleaseNumberRequired - 1 === financeReleasesCount;
+    return (financeReleaseNumberRequired ?? 0) - 1 === financeReleasesCount;
   };
 
   const initialValues = {

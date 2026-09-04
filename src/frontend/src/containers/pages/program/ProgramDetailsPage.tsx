@@ -161,7 +161,7 @@ function ProgramDetailsPage(): ReactElement {
           </TableWrapper>
         )}
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={program.id} />
+          <UniversalActivityLogTable objectId={program?.id} />
         )}
       </Container>
     </>

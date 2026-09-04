@@ -58,7 +58,7 @@ export const NeedsAdjudicationDetailsNew = ({
     );
   };
 
-  const isApproved = !!details.selectedIndividual;
+  const isApproved = !!details?.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
 
   const isTicketForApproval =

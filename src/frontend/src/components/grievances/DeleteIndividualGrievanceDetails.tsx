@@ -48,7 +48,10 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
       .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    ticket.ticketDetails.roleReassignData as Record<string, RoleReassignData>,
+    (ticket.ticketDetails?.roleReassignData ?? {}) as Record<
+      string,
+      RoleReassignData
+    >,
   )?.filter((el) => el.role === 'PRIMARY' || el.role === 'HEAD').length;
 
   const approveEnabled = (): boolean => {
@@ -195,7 +198,7 @@ export function DeleteIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
-  if (!ticket.ticketDetails.approveStatus) {
+  if (!ticket.ticketDetails?.approveStatus) {
     dialogText = t(
       `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
@@ -226,10 +229,10 @@ export function DeleteIndividualGrievanceDetails({
                       grievanceTicketId: ticket.id,
                       approveStatus: !ticket.ticketDetails?.approveStatus,
                     });
-                    if (ticket.ticketDetails.approveStatus) {
+                    if (ticket.ticketDetails?.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.ticketDetails.approveStatus) {
+                    if (!ticket.ticketDetails?.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
                   } catch (error) {

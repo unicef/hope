@@ -91,7 +91,7 @@ export function AuthorizePaymentPlan({
     const authorizationsCount =
       latestApprovalProcess?.actions?.authorization?.length;
 
-    return authorizationNumberRequired - 1 === authorizationsCount;
+    return (authorizationNumberRequired ?? 0) - 1 === authorizationsCount;
   };
 
   return (

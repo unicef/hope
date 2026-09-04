@@ -46,8 +46,12 @@ export function EditGroupName({
       RestService.restBusinessAreasProgramsPaymentPlanGroupsUpdate({
         businessAreaSlug: businessArea,
         programCode: programId,
-        id: group.id,
-        requestBody: { id: group.id, unicefId: group.unicefId ?? null, name },
+        id: group?.id ?? '',
+        requestBody: {
+          id: group?.id ?? '',
+          unicefId: group?.unicefId ?? null,
+          name,
+        },
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
