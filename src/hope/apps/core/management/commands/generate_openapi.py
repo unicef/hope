@@ -51,8 +51,8 @@ class Command(BaseCommand):
             if action.detail or "get" not in action.mapping:
                 continue
             if not action.kwargs.get("enum_source", True):
-                # Either a bundle (object-shaped, not a flat choice list) or a
-                # database-backed list that must not be frozen into the generated code.
+                # Skip: the action returns something other than a flat list of
+                # choices, so there is no enum to generate from it.
                 continue
             response = getattr(viewset, action.__name__)(viewset.request)
             result[action.url_path] = response.data

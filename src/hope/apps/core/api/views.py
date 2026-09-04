@@ -57,6 +57,7 @@ from hope.models import (
     Country,
     DataCollectingType,
     DeliveryMechanism,
+    DocumentType,
     Feedback,
     LogEntry,
     PaymentPlan,
@@ -321,8 +322,6 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="document-types", enum_source=False)
     def document_types(self, request: Request) -> Response:
         """Return the document types a person can hold."""
-        from hope.models import DocumentType
-
         choices = [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
         return Response(ChoiceSerializer(choices, many=True).data)
 

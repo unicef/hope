@@ -28,6 +28,14 @@ def partner(db: Any) -> Partner:
 
 
 @pytest.fixture
+def unicef_partners(db: Any) -> list[Partner]:
+    return [
+        PartnerFactory(name="UNICEF HQ"),
+        PartnerFactory(name="UNICEF Partner for afghanistan"),
+    ]
+
+
+@pytest.fixture
 def user(partner: Partner) -> User:
     return UserFactory(partner=partner)
 
@@ -46,6 +54,7 @@ def test_get_choices_returns_the_partners_of_the_business_area(
     user: User,
     afghanistan: BusinessArea,
     partner: Partner,
+    unicef_partners: list[Partner],
     create_user_role_with_permissions: Any,
 ) -> None:
     partner.allowed_business_areas.add(afghanistan)
@@ -55,20 +64,14 @@ def test_get_choices_returns_the_partners_of_the_business_area(
         business_area=afghanistan,
         whole_business_area_access=True,
     )
-    unicef_hq = PartnerFactory(name="UNICEF HQ")
-    unicef_in_afghanistan = PartnerFactory(name="UNICEF Partner for afghanistan")
 
     response = authenticated_client.get(_choices_url(afghanistan.slug))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
-        "partner_choices": [
-            {"name": choice.name, "value": choice.id} for choice in [partner, unicef_hq, unicef_in_afghanistan]
-        ],
+        "partner_choices": [{"name": choice.name, "value": choice.id} for choice in [partner, *unicef_partners]],
         # TODO: below assert can be removed after temporary solution is removed for partners
-        "partner_choices_temp": [
-            {"name": choice.name, "value": choice.id} for choice in [unicef_hq, unicef_in_afghanistan]
-        ],
+        "partner_choices_temp": [{"name": choice.name, "value": choice.id} for choice in unicef_partners],
     }
 
 

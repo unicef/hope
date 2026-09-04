@@ -20,10 +20,18 @@ from hope.apps.grievance.models import GrievanceTicket
 pytestmark = pytest.mark.django_db
 
 
-def test_get_choices_returns_choices_for_user_without_any_role(api_client: Any) -> None:
-    client = api_client(UserFactory(partner=PartnerFactory(name="TestPartner")))
+@pytest.fixture
+def user(db: Any) -> Any:
+    return UserFactory(partner=PartnerFactory(name="TestPartner"))
 
-    response = client.get(reverse("api:choices-grievance-tickets"))
+
+@pytest.fixture
+def authenticated_client(api_client: Any, user: Any) -> Any:
+    return api_client(user)
+
+
+def test_get_choices_returns_choices_for_user_without_any_role(authenticated_client: Any) -> None:
+    response = authenticated_client.get(reverse("api:choices-grievance-tickets"))
 
     categories = dict(GrievanceTicket.CATEGORY_CHOICES)
     assert response.status_code == status.HTTP_200_OK
