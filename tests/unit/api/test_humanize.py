@@ -144,3 +144,11 @@ def test_households_dict_members_only_failing_indices_included(household_error: 
 
     hh = result["households"]["Household #0"][0]
     assert hh["members"] == {"Member #2": [{"full_name": ["This field is required."]}]}
+
+
+def test_members_raw_string_error(household_error: dict) -> None:
+    errors = {"households": [{**household_error, "members": "This field is required."}]}
+    result = humanize_errors(errors)
+
+    hh = result["households"][0]["Household #1"][0]
+    assert hh["members"] == ["This field is required."]
