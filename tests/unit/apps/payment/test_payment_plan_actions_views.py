@@ -813,6 +813,7 @@ def test_apply_engine_formula_pp(
         payment_plan_actions_context["program_active"],
     )
     rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True, version=11).rule
+    rule_for_pp.allowed_business_areas.add(payment_plan_actions_context["business_area"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
     payment_plan_actions_context["pp"].save()
     payment_plan_actions_context["pp"].refresh_from_db()
@@ -846,6 +847,7 @@ def test_apply_engine_formula_pp_validation_errors(
         payment_plan_actions_context["program_active"],
     )
     rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=False, version=22).rule
+    rule_for_pp.allowed_business_areas.add(payment_plan_actions_context["business_area"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
     payment_plan_actions_context["pp"].save()
 
@@ -1045,6 +1047,7 @@ def test_entitlement_actions_are_blocked_for_follow_up_payment_plans(
 
     if url_key == "url_apply_steficon":
         rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True, version=99).rule
+        rule_for_pp.allowed_business_areas.add(payment_plan_actions_context["business_area"])
         payload = {
             "engine_formula_rule_id": str(rule_for_pp.pk),
             "version": payment_plan_actions_context["pp"].version,
@@ -2112,6 +2115,7 @@ def test_apply_engine_formula_without_version_skips_concurrency_check(
         payment_plan_actions_context["program_active"],
     )
     rule = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True, version=12).rule
+    rule.allowed_business_areas.add(payment_plan_actions_context["business_area"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
     payment_plan_actions_context["pp"].save()
 
@@ -2134,6 +2138,7 @@ def test_apply_engine_formula_rejects_when_rule_engine_already_running(
         payment_plan_actions_context["program_active"],
     )
     rule = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=True, version=13).rule
+    rule.allowed_business_areas.add(payment_plan_actions_context["business_area"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
     payment_plan_actions_context["pp"].background_action_status = PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN
     payment_plan_actions_context["pp"].save()
