@@ -625,21 +625,34 @@ def test_copy_program_population_clears_country_workspace_id_and_originating_id(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
+@pytest.mark.parametrize(
+    ("individual_country_workspace_id", "individual_originating_id", "household_originating_id"),
+    [
+        pytest.param("CW-IND-2", None, None, id="country_workspace_id"),
+        pytest.param(None, "API#IND-2", "API#HH-2", id="originating_id"),
+    ],
+)
 def test_copy_program_population_twice_does_not_violate_unique_constraints(
-    afghanistan: BusinessArea, program1: Program, program2: Program, program3: Program
+    individual_country_workspace_id: str | None,
+    individual_originating_id: str | None,
+    household_originating_id: str | None,
+    afghanistan: BusinessArea,
+    program1: Program,
+    program2: Program,
+    program3: Program,
 ) -> None:
     source_individual = IndividualFactory(
         household=None,
         business_area=afghanistan,
         program=program1,
-        country_workspace_id="CW-IND-2",
-        originating_id="API#IND-2",
+        country_workspace_id=individual_country_workspace_id,
+        originating_id=individual_originating_id,
     )
     source_household = HouseholdFactory(
         business_area=afghanistan,
         program=program1,
         head_of_household=source_individual,
-        originating_id="API#HH-2",
+        originating_id=household_originating_id,
     )
 
     CopyProgramPopulation(
