@@ -1224,12 +1224,8 @@ def test_grievance_detail_delete_household(
             },
             "admin3": None,
             "admin4": None,
-            "first_registration_date": ticket_details.reason_household.first_registration_date.strftime(
-                "%Y-%m-%d"
-            ),
-            "last_registration_date": ticket_details.reason_household.last_registration_date.strftime(
-                "%Y-%m-%d"
-            ),
+            "first_registration_date": ticket_details.reason_household.first_registration_date.strftime("%Y-%m-%d"),
+            "last_registration_date": ticket_details.reason_household.last_registration_date.strftime("%Y-%m-%d"),
             "total_cash_received": None,
             "total_cash_received_usd": None,
             "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
@@ -1368,12 +1364,8 @@ def test_grievance_detail_system_flagging(
             "address": golden_records_individual.household.address,
             "village": golden_records_individual.household.village,
             "geopoint": golden_records_individual.household.geopoint,
-            "first_registration_date": (
-                f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"
-            ),
-            "last_registration_date": (
-                f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"
-            ),
+            "first_registration_date": (f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"),
+            "last_registration_date": (f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"),
             "total_cash_received": golden_records_individual.household.total_cash_received,
             "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
             "delivered_quantities": [
@@ -1727,12 +1719,8 @@ def test_grievance_detail_needs_adjudication(
             "address": golden_records_individual.household.address,
             "village": golden_records_individual.household.village,
             "geopoint": golden_records_individual.household.geopoint,
-            "first_registration_date": (
-                f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"
-            ),
-            "last_registration_date": (
-                f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"
-            ),
+            "first_registration_date": (f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"),
+            "last_registration_date": (f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"),
             "total_cash_received": golden_records_individual.household.total_cash_received,
             "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
             "delivered_quantities": [

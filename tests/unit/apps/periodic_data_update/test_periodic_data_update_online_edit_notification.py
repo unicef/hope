@@ -338,14 +338,13 @@ def test_send_back_action_notification_recipients(
         assert expected_recipient in actual_recipients
 
 
-def test_no_authorized_users_no_recipients(
+def test_no_authorized_users_notifies_only_action_user(
     afghanistan: BusinessArea,
     program: Any,
     user_pdu_creator: User,
     user_action_user: User,
     setup_roles_and_permissions: None,
 ) -> None:
-    # When no authorized users are set, no notifications are sent.
     pdu_edit_no_auth = PDUOnlineEdit.objects.create(
         name="Test PDU Edit No Auth",
         business_area=afghanistan,
@@ -365,6 +364,9 @@ def test_no_authorized_users_no_recipients(
 
     actual_recipients = list(pdu_notification.user_recipients.all())
     assert actual_recipients == []
+    assert len(pdu_notification.emails) == 1
+    assert pdu_notification.emails[0].recipients == [user_action_user.email]
+    assert pdu_notification.emails[0].ccs == []
 
 
 @override_config(

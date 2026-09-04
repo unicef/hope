@@ -1000,7 +1000,7 @@ def test_notification_groups_recipients_and_action_user_by_timezone(
     )
 
 
-def test_notification_without_recipients_creates_cc_only_email(
+def test_notification_without_permission_recipients_notifies_action_user(
     notification_data_without_recipients: tuple[PaymentPlan, User],
 ) -> None:
     payment_plan, action_user = notification_data_without_recipients
@@ -1013,5 +1013,5 @@ def test_notification_without_recipients_creates_cc_only_email(
     )
 
     assert len(payment_notification.emails) == 1
-    assert payment_notification.emails[0].recipients == []
-    assert payment_notification.emails[0].ccs == [action_user.email]
+    assert payment_notification.emails[0].recipients == [action_user.email]
+    assert payment_notification.emails[0].ccs == []

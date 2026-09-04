@@ -122,8 +122,7 @@ class PDUOnlineEditNotification:
             MailjetClient(
                 mailjet_template_id=config.MAILJET_TEMPLATE_PDU_ONLINE_EDIT_NOTIFICATION,
                 subject=self.email_subject,
-                recipients=[],
-                ccs=[self.action_user.email],
+                recipients=[self.action_user.email],
                 variables=self._prepare_body_variables(action_user_timezone),
             )
         ]
