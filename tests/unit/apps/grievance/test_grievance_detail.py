@@ -448,8 +448,8 @@ def assert_base_grievance_data(
                 "program_code": individual.program.code,
                 "admin3": None,
                 "admin4": None,
-                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%d}",
+                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
                 "delivered_quantities": delivered_quantities
@@ -488,8 +488,8 @@ def assert_base_grievance_data(
                         "address": role.household.address,
                         "village": role.household.village,
                         "geopoint": role.household.geopoint,
-                        "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                        "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                        "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%d}",
+                        "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%d}",
                         "total_cash_received": role.household.total_cash_received,
                         "total_cash_received_usd": role.household.total_cash_received_usd,
                         "delivered_quantities": delivered_quantities
@@ -1225,10 +1225,10 @@ def test_grievance_detail_delete_household(
             "admin3": None,
             "admin4": None,
             "first_registration_date": ticket_details.reason_household.first_registration_date.strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
+                "%Y-%m-%d"
             ),
             "last_registration_date": ticket_details.reason_household.last_registration_date.strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
+                "%Y-%m-%d"
             ),
             "total_cash_received": None,
             "total_cash_received_usd": None,
@@ -1369,10 +1369,10 @@ def test_grievance_detail_system_flagging(
             "village": golden_records_individual.household.village,
             "geopoint": golden_records_individual.household.geopoint,
             "first_registration_date": (
-                f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"
             ),
             "last_registration_date": (
-                f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"
             ),
             "total_cash_received": golden_records_individual.household.total_cash_received,
             "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
@@ -1728,10 +1728,10 @@ def test_grievance_detail_needs_adjudication(
             "village": golden_records_individual.household.village,
             "geopoint": golden_records_individual.household.geopoint,
             "first_registration_date": (
-                f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"
             ),
             "last_registration_date": (
-                f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"
             ),
             "total_cash_received": golden_records_individual.household.total_cash_received,
             "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
@@ -1839,8 +1839,8 @@ def test_grievance_detail_needs_adjudication(
             "address": individuals2[0].household.address,
             "village": individuals2[0].household.village,
             "geopoint": individuals2[0].household.geopoint,
-            "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
-            "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
+            "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%d}"),
+            "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%d}"),
             "total_cash_received": individuals2[0].household.total_cash_received,
             "total_cash_received_usd": individuals2[0].household.total_cash_received_usd,
             "delivered_quantities": [
@@ -1919,8 +1919,8 @@ def test_grievance_detail_needs_adjudication(
                 "address": individuals2[0].household.address,
                 "village": individuals2[0].household.village,
                 "geopoint": individuals2[0].household.geopoint,
-                "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
-                "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
+                "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%d}"),
+                "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%d}"),
                 "total_cash_received": individuals2[0].household.total_cash_received,
                 "total_cash_received_usd": individuals2[0].household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -2011,8 +2011,8 @@ def test_grievance_detail_needs_adjudication(
         "address": duplicate.household.address,
         "village": duplicate.household.village,
         "geopoint": duplicate.household.geopoint,
-        "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-        "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%d}",
+        "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%d}",
         "total_cash_received": duplicate.household.total_cash_received,
         "total_cash_received_usd": duplicate.household.total_cash_received_usd,
         "delivered_quantities": [

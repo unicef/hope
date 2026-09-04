@@ -34349,13 +34349,13 @@
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "unhcr_id": {
                             "type": "string",
@@ -34787,13 +34787,13 @@
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "currency": {
                             "type": "string",
@@ -34937,13 +34937,13 @@
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "total_cash_received": {
                             "type": "string",
@@ -43603,8 +43603,8 @@
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         }
                     },
                     "required": [

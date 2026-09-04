@@ -195,7 +195,7 @@ def test_household_global_list_with_permissions(
         assert household_result_first["total_cash_received"] == household.total_cash_received
         assert household_result_first["total_cash_received_usd"] == household.total_cash_received_usd
         assert (
-            household_result_first["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+            household_result_first["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%d}"
         )
 
 
