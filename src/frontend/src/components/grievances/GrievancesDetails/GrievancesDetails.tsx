@@ -173,7 +173,7 @@ function GrievancesDetails({
                 label: t('Status'),
                 value: (
                   <StatusBox
-                    status={statusChoices[ticket.status]}
+                    status={statusChoices[ticket.status ?? '']}
                     statusToColor={grievanceTicketStatusToColor}
                   />
                 ),
@@ -220,7 +220,7 @@ function GrievancesDetails({
                 label: t('Submission Channel'),
                 value: (
                   <span>
-                    {submissionChannelChoices[ticket.submissionChannel] || '-'}
+                    {submissionChannelChoices[ticket.submissionChannel ?? ''] || '-'}
                   </span>
                 ),
                 size: 3,

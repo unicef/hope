@@ -818,7 +818,7 @@ export function thingForSpecificGrievanceType(
   if (!(issueType in categoryThing)) {
     return defaultThing;
   }
-  return categoryThing[issueType];
+  return categoryThing[issueType ?? ''];
 }
 
 export const isInvalid = (fieldname: string, errors, touched): boolean =>

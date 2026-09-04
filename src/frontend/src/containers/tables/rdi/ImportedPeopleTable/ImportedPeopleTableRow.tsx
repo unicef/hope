@@ -82,9 +82,9 @@ export function ImportedPeopleTableRow({
         <BlackLink to={peopleDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
-      <TableCell align="left">{roleChoicesDict[individual.role]}</TableCell>
+      <TableCell align="left">{roleChoicesDict[individual.role ?? '']}</TableCell>
       <TableCell align="left">
-        {relationshipChoicesDict[individual.relationship]}
+        {relationshipChoicesDict[individual.relationship ?? '']}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{individual.birthDate}</UniversalMoment>

@@ -264,7 +264,7 @@ function EditHouseholdDataChange({
                 </Grid>
                 <Grid size={4}>
                   {currentRoleObj
-                    ? roleDisplayMap[currentRoleObj.role] || currentRoleObj.role
+                    ? roleDisplayMap[currentRoleObj.role ?? ''] || currentRoleObj.role
                     : 'No role'}
                 </Grid>
                 <Grid size={3}>

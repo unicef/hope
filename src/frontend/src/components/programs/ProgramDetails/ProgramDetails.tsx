@@ -168,7 +168,7 @@ export const ProgramDetails = ({
           <Grid size={4}>
             <LabelizedField
               label={t('Partner Access')}
-              value={PartnerAccess[program.partnerAccess]}
+              value={PartnerAccess[program.partnerAccess ?? '']}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>

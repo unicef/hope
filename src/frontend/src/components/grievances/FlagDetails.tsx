@@ -72,6 +72,7 @@ export const FlagDetails = ({
   );
   const removalText = t('Are you sure you want to remove the flag ?');
   const details = ticket.ticketDetails;
+  if (!details) return null;
   const isFlagConfirmed = details.approveStatus;
   return (
     <ApproveBox>

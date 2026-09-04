@@ -313,7 +313,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           const f = field as PduField;
           const backendKey = f.fieldName;
 
-          acc[backendKey] = {
+          acc[backendKey ?? ''] = {
             round_number: f.roundNumber,
             value: f.value,
             subtype: f.subtype,

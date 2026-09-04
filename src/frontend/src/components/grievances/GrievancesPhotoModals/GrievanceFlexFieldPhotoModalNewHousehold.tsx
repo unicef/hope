@@ -44,7 +44,7 @@ export function GrievanceFlexFieldPhotoModalNewHousehold({
     return null;
   }
 
-  const picUrl: string = data.flexFields?.[flexField.name];
+  const picUrl: string = data.flexFields?.[flexField.name ?? ''];
 
   return (
     <Box

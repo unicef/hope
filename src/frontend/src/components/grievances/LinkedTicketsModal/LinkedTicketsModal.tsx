@@ -121,7 +121,7 @@ function LinkedTicketsModal({
         <TableCell align="left">{issueType || '-'}</TableCell>
         <TableCell align="left">
           <StatusBox
-            status={statusChoices[row.status]}
+            status={statusChoices[row.status ?? '']}
             statusToColor={grievanceTicketStatusToColor}
           />
         </TableCell>

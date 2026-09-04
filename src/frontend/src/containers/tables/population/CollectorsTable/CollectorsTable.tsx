@@ -166,7 +166,7 @@ export const CollectorsTable = ({
             return (
               <span>
                 {renderTableCellContent(
-                  relationshipChoicesDict[row.relationship],
+                  relationshipChoicesDict[row.relationship ?? ''],
                 )}
               </span>
             );
@@ -180,7 +180,7 @@ export const CollectorsTable = ({
             role="checkbox"
             key={row.id}
           >
-            <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
+            <TableCell align="left">{roleChoicesDict[row.role ?? '']}</TableCell>
             <TableCell align="left">{row.fullName}</TableCell>
             <TableCell align="left">{renderRelationship()}</TableCell>
           </ClickableTableRow>

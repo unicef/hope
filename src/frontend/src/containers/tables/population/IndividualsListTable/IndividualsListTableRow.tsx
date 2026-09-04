@@ -52,7 +52,7 @@ export function IndividualsListTableRow({
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>
       <TableCell align="left">
-        {relationshipChoicesDict[individual.relationship]}
+        {relationshipChoicesDict[individual.relationship ?? '']}
       </TableCell>
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>

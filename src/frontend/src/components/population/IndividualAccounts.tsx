@@ -50,7 +50,7 @@ const AccountItem: FC<AccountItemProps> = ({
         <Grid size={3}>
           <LabelizedField label={t('Financial Institution')}>
             {renderSomethingOrDash(
-              accountFinancialInstitutionsDict[account.financialInstitution],
+              accountFinancialInstitutionsDict[account.financialInstitution ?? ''],
             )}
           </LabelizedField>
         </Grid>

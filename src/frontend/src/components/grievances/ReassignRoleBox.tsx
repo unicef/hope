@@ -52,28 +52,34 @@ export const ReassignRoleBox = ({
   const ticketCategory = ticket.category.toString();
   const ticketIssueType = ticket.issueType?.toString();
 
+  const details = ticket.ticketDetails;
   let individual = ticket.individual;
   let household = ticket.household;
   let reassignData;
   let uniqueIndividual;
 
   // Handle category-specific data extraction
-  if (ticketCategory === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-    individual = ticket.ticketDetails.selectedIndividual;
-    household = ticket.ticketDetails.selectedIndividual?.household;
-    reassignData = ticket.ticketDetails.roleReassignData;
+  if (ticketCategory === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION && details) {
+    individual = details.selectedIndividual;
+    household = details.selectedIndividual?.household;
+    reassignData = details.roleReassignData;
 
-    // Determine which individual is the unique one (not the duplicate)
-    const isDuplicate =
-      ticket.ticketDetails.possibleDuplicate.id === individual.id;
+    // Determine which individual is the unique one (not the duplicate).
+    // Both ids must be present for the comparison to mean anything; two
+    // missing ids must not read as a match.
+    const duplicateId = details.possibleDuplicate?.id;
+    const isDuplicate = Boolean(duplicateId) && duplicateId === individual?.id;
     uniqueIndividual = isDuplicate
-      ? ticket.ticketDetails.goldenRecordsIndividual
-      : ticket.ticketDetails.possibleDuplicate;
-  } else if (ticketCategory === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
-    reassignData = ticket.ticketDetails.roleReassignData;
-  } else if (!reassignData && ticket.ticketDetails?.roleReassignData) {
+      ? details.goldenRecordsIndividual
+      : details.possibleDuplicate;
+  } else if (
+    ticketCategory === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+    details
+  ) {
+    reassignData = details.roleReassignData;
+  } else if (!reassignData && details?.roleReassignData) {
     // Fallback for other categories that might have reassign data
-    reassignData = ticket.ticketDetails.roleReassignData;
+    reassignData = details.roleReassignData;
   }
 
   // Initialize role and household data
@@ -86,12 +92,12 @@ export const ReassignRoleBox = ({
     ticketIssueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL;
 
   if (isEditIndividualDataChange) {
-    const individualData = ticket.ticketDetails.individualData;
+    const individualData = details?.individualData;
 
-    if (isEmpty(individualData.role)) {
+    if (isEmpty(individualData?.role)) {
       householdsAndRoles = [];
     }
-    if (isEmpty(individualData.relationship)) {
+    if (isEmpty(individualData?.relationship)) {
       shouldShowReassignHoH = false;
     }
   }
@@ -122,7 +128,7 @@ export const ReassignRoleBox = ({
     .map((el) => {
       // Find matching key by normalizing UUID (remove hyphens and check case-insensitive)
       const normalizedId = el.id.replace(/-/g, '');
-      const roleData = ticket.ticketDetails.roleReassignData;
+      const roleData = details?.roleReassignData;
       let matchingKey = null;
       let selectedIndividualId = null;
 
@@ -181,7 +187,7 @@ export const ReassignRoleBox = ({
           {shouldDisplayButton &&
           ticket.category.toString() ===
             GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-          ticket.ticketDetails.roleReassignData?.[matchingKey]?.individual !==
+          details?.roleReassignData?.[matchingKey ?? '']?.individual !==
             uniqueIndividual.id ? (
             <ReassignRoleUnique
               individualRole={{ role: el.role, id: el.id }}
@@ -195,7 +201,7 @@ export const ReassignRoleBox = ({
 
   const showMessage = (): ReactElement => {
     if (
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
       (ticket.individual?.role === 'PRIMARY' ||
         ticket.individual?.relationship === 'HEAD')
     ) {
@@ -245,9 +251,9 @@ export const ReassignRoleBox = ({
               </LabelizedField>
               <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
                 <ContentLink
-                  href={`/${baseUrl}/population/household/${ticket?.household.id}`}
+                  href={`/${baseUrl}/population/household/${ticket?.household?.id}`}
                 >
-                  {household.unicefId}
+                  {household?.unicefId}
                 </ContentLink>
               </LabelizedField>
             </Box>
@@ -260,9 +266,8 @@ export const ReassignRoleBox = ({
                 individualToReassign={individual}
                 initialSelectedIndividualId={(() => {
                   const headIndividual =
-                    ticket.ticketDetails.roleReassignData?.['head']
-                      ?.individual ||
-                    ticket.ticketDetails.roleReassignData?.['HEAD']?.individual;
+                    details?.roleReassignData?.['head']?.individual ||
+                    details?.roleReassignData?.['HEAD']?.individual;
                   return headIndividual;
                 })()}
               />

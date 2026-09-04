@@ -104,10 +104,10 @@ export const useSortAndFilter = ({
   // into every consuming section for no real safety gain.
   const sortRows = (rows: any[]) => {
     return [...rows].sort((a, b) => {
-      if (a[sortField] < b[sortField]) {
+      if (a[sortField ?? ''] < b[sortField ?? '']) {
         return sortDirection === 'asc' ? -1 : 1;
       }
-      if (a[sortField] > b[sortField]) {
+      if (a[sortField ?? ''] > b[sortField ?? '']) {
         return sortDirection === 'asc' ? 1 : -1;
       }
       return 0;

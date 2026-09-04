@@ -145,7 +145,7 @@ export function LinkedGrievancesModal({
               <ContentLink href={grievanceDetailsPath}>
                 {`${el.unicefId} - ${
                   categoryChoices[el.category]
-                } - ${statusChoices[el.status]}`}
+                } - ${statusChoices[el.status ?? '']}`}
               </ContentLink>{' '}
               <br />
             </span>

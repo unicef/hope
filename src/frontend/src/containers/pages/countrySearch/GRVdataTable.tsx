@@ -58,13 +58,13 @@ const GRVDataTable: React.FC<GRVDataTableProps> = ({ grvData }) => {
                     <BlackLink to={grvDetailsPath}>{grv.unicefId}</BlackLink>
                   </TableCell>
                   <TableCell>
-                    {GRIEVANCE_TICKET_STATES_NAMES[grv.status]}
+                    {GRIEVANCE_TICKET_STATES_NAMES[grv.status ?? '']}
                   </TableCell>
                   <TableCell>
                     {GRIEVANCE_CATEGORIES_NAMES[grv.category]}
                   </TableCell>
                   <TableCell>
-                    {GRIEVANCE_ISSUE_TYPES_NAMES[grv.issueType]}
+                    {GRIEVANCE_ISSUE_TYPES_NAMES[grv.issueType ?? '']}
                   </TableCell>
                   <TableCell>
                     <BlackLink to={programDetailsPath}>

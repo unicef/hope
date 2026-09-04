@@ -172,7 +172,7 @@ export const HouseholdMembersTable = ({
             <TableCell align="left">
               {renderTableCellContent(
                 household?.id === row?.household?.id
-                  ? relationshipChoicesDict[row.relationship]
+                  ? relationshipChoicesDict[row.relationship ?? '']
                   : relationshipChoicesDict.NON_BENEFICIARY,
               )}
             </TableCell>

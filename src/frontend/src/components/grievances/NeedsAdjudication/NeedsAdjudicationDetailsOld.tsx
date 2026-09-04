@@ -76,6 +76,9 @@ export const NeedsAdjudicationDetailsOld = ({
     details?.selectedIndividual?.id,
   );
   const [isEditMode, setIsEditMode] = useState(false);
+  // ticketDetails is nullable and everything below reads through it. Placed
+  // after the hooks so the hook order stays stable.
+  if (!details) return null;
   const confirmationText = t(
     'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
   );

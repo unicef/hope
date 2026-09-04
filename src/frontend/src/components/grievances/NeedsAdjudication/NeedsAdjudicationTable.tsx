@@ -48,6 +48,9 @@ export const NeedsAdjudicationTable = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const details = ticket?.ticketDetails;
+  // ticketDetails is nullable and every read below goes through it. All hooks
+  // are above this point, so the hook order stays stable.
+  if (!details) return null;
 
   const handleSelect = (id: string) => {
     setSelectedIndividualIds((prevSelected: string[]) => {

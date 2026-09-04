@@ -49,7 +49,9 @@ export function DeleteHouseholdGrievanceDetails({
     });
 
   if (choicesLoading) return <LoadingComponent />;
-  if (!choicesData) return null;
+  // ticketDetails and household are nullable on the ticket and every read
+  // below dereferences them directly.
+  if (!choicesData || !ticket.ticketDetails || !ticket.household) return null;
 
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,

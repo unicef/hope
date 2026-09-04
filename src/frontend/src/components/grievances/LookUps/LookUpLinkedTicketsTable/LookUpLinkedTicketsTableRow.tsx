@@ -56,7 +56,7 @@ export function LookUpLinkedTicketsTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={statusChoices[ticket.status]}
+          status={statusChoices[ticket.status ?? '']}
           statusToColor={grievanceTicketStatusToColor}
         />
       </TableCell>
