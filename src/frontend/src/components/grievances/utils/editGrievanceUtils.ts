@@ -52,15 +52,19 @@ function prepareInitialValueAddIndividual(
   };
   const flexFields = individualData.flexFields;
   delete individualData.flexFields;
-  initialValues.individualData = Object.entries(individualData).reduce(
-    (previousValue, currentValue: [string, { value: string }]) => {
+  initialValues.individualData = Object.entries(
+    individualData as Record<string, { value: string }>,
+  ).reduce(
+    (previousValue, currentValue) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
     {} as EditValuesTypes['individualData'],
   );
-  initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
-    (previousValue, currentValue: [string, { value: string }]) => {
+  initialValues.individualData.flexFields = Object.entries(
+    flexFields as Record<string, { value: string }>,
+  ).reduce(
+    (previousValue, currentValue) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -129,14 +133,18 @@ function prepareInitialValueEditHousehold(
   };
   const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;
-  const householdDataArray = Object.entries(householdData || {}).map(
-    (entry: [string, { value: string }]) => ({
+  const householdDataArray = Object.entries(
+    (householdData || {}) as Record<string, { value: string }>,
+  ).map(
+    (entry) => ({
       fieldName: entry[0],
       fieldValue: entry[1]?.value,
     }),
   );
-  const flexFieldsArray = Object.entries(flexFields || {}).map(
-    (entry: [string, { value: string }]) => ({
+  const flexFieldsArray = Object.entries(
+    (flexFields || {}) as Record<string, { value: string }>,
+  ).map(
+    (entry) => ({
       fieldName: entry[0],
       fieldValue: entry[1]?.value,
     }),

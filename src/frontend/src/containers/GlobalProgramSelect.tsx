@@ -24,7 +24,7 @@ import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { programStatusToColor } from '@utils/utils';
 import {
-  ChangeEvent,
+  SyntheticEvent,
   KeyboardEvent,
   MouseEvent,
   useEffect,
@@ -390,7 +390,7 @@ export const GlobalProgramSelect = () => {
         <ClickAwayListener onClickAway={handleClose}>
           <Autocomplete
             open
-            onClose={(_event: ChangeEvent, reason: AutocompleteCloseReason) => {
+            onClose={(_event: SyntheticEvent, reason: AutocompleteCloseReason) => {
               if (reason === 'escape') {
                 handleClose();
               }

@@ -48,10 +48,8 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
       .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    ticket.ticketDetails.roleReassignData,
-  )?.filter(
-    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
-  ).length;
+    ticket.ticketDetails.roleReassignData as Record<string, RoleReassignData>,
+  )?.filter((el) => el.role === 'PRIMARY' || el.role === 'HEAD').length;
 
   const approveEnabled = (): boolean => {
     if (isOneIndividual && isForApproval) {

@@ -143,8 +143,10 @@ function AddIndividualGrievanceDetails({
     }) || [];
 
   const flexFieldLabels =
-    Object.entries(flexFields || {}).map(
-      ([key, value]: [string, string | string[]]) => (
+    Object.entries(
+      (flexFields || {}) as Record<string, string | string[]>,
+    ).map(
+      ([key, value]) => (
         <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}

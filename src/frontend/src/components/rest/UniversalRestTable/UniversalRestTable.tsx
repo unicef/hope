@@ -171,7 +171,9 @@ export const UniversalRestTable = <T, K>({
       handleRequestSort={(_event, property) => {
         const direction: Order =
           orderBy === property && orderDirection === 'asc' ? 'desc' : 'asc';
-        setOrderBy(property);
+        // `property` widens to `keyof T` for typed head cells; the ordering key
+        // goes out as a query-string param, so store it as a string.
+        setOrderBy(String(property));
         setOrderDirection(direction);
         setPage(0);
       }}

@@ -92,14 +92,17 @@ export const CreatedByAutocompleteRestFilter = ({
     name: `${user.firstName} ${user.lastName}`.trim() || user.email,
   }));
 
+  // Both sides arrive as `AutocompleteOption | string`: MUI hands back the raw
+  // input text before an option is picked. Comparing without narrowing
+  // `option` reads `.id` off a string and silently never matches.
   const handleOptionSelected = (
-    option: AutocompleteOption,
+    option: AutocompleteOption | string,
     selectedValue: AutocompleteOption | string,
   ) => {
-    if (typeof selectedValue === 'string') {
-      return option?.id === selectedValue;
-    }
-    return option?.id === selectedValue?.id;
+    const optionKey = typeof option === 'string' ? option : option?.id;
+    const valueKey =
+      typeof selectedValue === 'string' ? selectedValue : selectedValue?.id;
+    return optionKey === valueKey;
   };
 
   const handleOptionLabel = (option: AutocompleteOption | string) => {

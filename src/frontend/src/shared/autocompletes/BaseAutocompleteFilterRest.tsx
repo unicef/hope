@@ -81,7 +81,9 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
       data-cy={dataCy}
       open={open}
       options={options}
-      onChange={handleChange}
+      onChange={(event, newValue) =>
+        handleChange(event, newValue as TOption | null)
+      }
       onOpen={handleOpen}
       onClose={handleClose}
       isOptionEqualToValue={(option, selectedValue) =>
@@ -90,7 +92,7 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
           selectedValue as TOption | string,
         )
       }
-      getOptionLabel={handleOptionLabel}
+      getOptionLabel={(option) => handleOptionLabel(option as TOption | string)}
       disabled={disabled}
       loading={loading}
       renderInput={(params) => (

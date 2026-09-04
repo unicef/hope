@@ -172,7 +172,7 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       filterOptions={(options1) => options1}
       onChange={handleChange}
       value={newValue}
-      getOptionLabel={(option: AdminAreaOption) => option?.name || ''}
+      getOptionLabel={(option) => (option as AdminAreaOption)?.name || ''}
       open={open}
       onOpen={handleOpen}
       onClose={handleClose}
@@ -180,10 +180,12 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       options={options}
       loading={isLoading}
       noOptionsText="No options available"
-      isOptionEqualToValue={(option: AdminAreaOption, value1: AdminAreaOption) =>
-        option?.value === value1?.value
+      isOptionEqualToValue={(option, value1) =>
+        (option as AdminAreaOption)?.value === (value1 as AdminAreaOption)?.value
       }
-      renderOption={(props, option: AdminAreaOption, { selected }) => (
+      renderOption={(props, rawOption, { selected }) => {
+        const option = rawOption as AdminAreaOption;
+        return (
         <li {...props} key={option.value}>
           <Checkbox
             icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
@@ -193,7 +195,8 @@ export function AdminAreaAutocompleteMultipleRestFilter({
           />
           {option.name}
         </li>
-      )}
+        );
+      }}
       renderInput={(params) => {
         return (
           <StyledTextField

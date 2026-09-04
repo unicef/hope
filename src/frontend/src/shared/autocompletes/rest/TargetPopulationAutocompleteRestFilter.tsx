@@ -149,12 +149,13 @@ export const TargetPopulationAutocompleteRestFilter = ({
         setInputValue('');
       }}
       handleOptionSelected={(
-        option: TargetPopulationOption,
+        option: TargetPopulationOption | string,
         selectedValue: TargetPopulationOption | string,
       ) =>
-        typeof selectedValue === 'string'
-          ? option?.value === selectedValue
-          : option?.value === selectedValue?.value
+        (typeof option === 'string' ? option : option?.value) ===
+        (typeof selectedValue === 'string'
+          ? selectedValue
+          : selectedValue?.value)
       }
       handleOptionLabel={(option: TargetPopulationOption | string) => {
         if (typeof option === 'string') {

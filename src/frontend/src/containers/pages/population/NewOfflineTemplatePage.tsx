@@ -108,6 +108,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
 
   const initialValues = {
     roundsData: mappedRoundsData,
+    name: '',
   };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

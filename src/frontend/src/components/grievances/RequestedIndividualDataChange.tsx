@@ -82,12 +82,12 @@ export function RequestedIndividualDataChange({
   ).length;
   allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]) => (value as { approve_status?: boolean })?.approve_status,
   ).length;
   allApprovedCount += accounts.filter((el) => el.approve_status).length;
   allApprovedCount += accountsToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entriesFlexFields.filter(
-    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
+    ([, value]) => (value as { approveStatus?: boolean })?.approveStatus,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -218,10 +218,8 @@ export function RequestedIndividualDataChange({
     ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
       .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    ticket.ticketDetails.roleReassignData,
-  )?.filter(
-    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
-  ).length;
+    ticket.ticketDetails.roleReassignData as Record<string, RoleReassignData>,
+  )?.filter((el) => el.role === 'PRIMARY' || el.role === 'HEAD').length;
 
   let approveEnabled = false;
   if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
@@ -291,8 +289,11 @@ export function RequestedIndividualDataChange({
     <Formik
       initialValues={{
         selected: entries
-          .filter((row: [string, Record<string, unknown>]) => {
-            const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
+          .filter((row) => {
+            const valueDetails = mapKeys(
+              row[1] as Record<string, unknown>,
+              (_v, k) => camelCase(k),
+            ) as {
               value: string;
               approveStatus: boolean;
             };
@@ -300,8 +301,11 @@ export function RequestedIndividualDataChange({
           })
           .map((row) => camelCase(row[0])),
         selectedFlexFields: entriesFlexFields
-          .filter((row: [string, Record<string, unknown>]) => {
-            const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
+          .filter((row) => {
+            const valueDetails = mapKeys(
+              row[1] as Record<string, unknown>,
+              (_v, k) => camelCase(k),
+            ) as {
               value: string;
               approveStatus: boolean;
             };

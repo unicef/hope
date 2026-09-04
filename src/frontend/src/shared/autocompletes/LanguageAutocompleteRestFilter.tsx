@@ -76,14 +76,17 @@ export function LanguageAutocompleteRestFilter({
     name: lang.name,
   }));
 
+  // Both sides arrive as `LanguageOption | string`: MUI hands back the raw
+  // input text before an option is picked. Comparing without narrowing
+  // `option` reads `.code` off a string and silently never matches.
   const handleOptionSelected = (
-    option: LanguageOption,
+    option: LanguageOption | string,
     selectedValue: LanguageOption | string,
   ) => {
-    if (typeof selectedValue === 'string') {
-      return option?.code === selectedValue;
-    }
-    return option?.code === selectedValue?.code;
+    const optionKey = typeof option === 'string' ? option : option?.code;
+    const valueKey =
+      typeof selectedValue === 'string' ? selectedValue : selectedValue?.code;
+    return optionKey === valueKey;
   };
 
   const handleOptionLabel = (option: LanguageOption | string) => {

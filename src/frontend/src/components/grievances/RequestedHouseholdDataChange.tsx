@@ -92,11 +92,11 @@ export function RequestedHouseholdDataChange({
   const entries = Object.entries(householdData);
   // Count approved top-level fields
   allApprovedCount += entries.filter(
-    ([, val]: [string, { approve_status: boolean }]) => val.approve_status,
+    ([, val]) => (val as { approve_status?: boolean })?.approve_status,
   ).length;
   // Count approved flex fields
   allApprovedCount += flexFieldsEntries.filter(
-    ([, val]: [string, { approve_status: boolean }]) => val.approve_status,
+    ([, val]) => (val as { approve_status?: boolean })?.approve_status,
   ).length;
   // Count approved roles
   allApprovedCount += rolesArr.filter(

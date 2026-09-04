@@ -99,7 +99,10 @@ interface TableComponentProps<T> {
   itemsCount: number;
   handleChangePage: (event: unknown, newPage: number) => void;
   handleChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
-  handleRequestSort: (event: MouseEvent<unknown>, property: string) => void;
+  handleRequestSort: (
+    event: MouseEvent<unknown>,
+    property: keyof T | string,
+  ) => void;
   orderBy: string;
   order: Order;
   title?: string;
