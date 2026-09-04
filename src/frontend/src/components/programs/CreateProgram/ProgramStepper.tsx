@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Stepper, Step, StepButton } from '@mui/material';
 
 interface StepData {

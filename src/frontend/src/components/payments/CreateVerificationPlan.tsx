@@ -395,7 +395,7 @@ export const CreateVerificationPlan = ({
                       data-cy="tabs"
                       value={selectedTab}
                       onChange={(
-                        event: ChangeEvent<unknown>,
+                        _event: ChangeEvent<unknown>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);

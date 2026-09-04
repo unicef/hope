@@ -31,7 +31,7 @@ export const individualDataRow = (
   const fieldName = camelCase(row[0]);
   const isItemSelected = isSelected(row[0]);
   const labelId = `enhanced-table-checkbox-${index}`;
-  const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+  const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
     value: string;
     previousValue: string;
     approveStatus: boolean;

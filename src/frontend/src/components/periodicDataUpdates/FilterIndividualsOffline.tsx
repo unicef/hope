@@ -13,7 +13,7 @@ import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/re
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { t } from 'i18next';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 interface FilterIndividualsOfflineProps {
   filter;

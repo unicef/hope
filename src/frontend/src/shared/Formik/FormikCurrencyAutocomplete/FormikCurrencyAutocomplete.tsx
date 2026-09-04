@@ -27,7 +27,7 @@ export const FormikCurrencyAutocomplete = ({
     queryFn: () => RestService.restChoicesCurrenciesList(),
   });
 
-  const handleChange = (e, option: CurrencyChoice | null): void => {
+  const handleChange = (_e, option: CurrencyChoice | null): void => {
     if (!option) {
       form.setFieldValue(field.name, null);
     } else {

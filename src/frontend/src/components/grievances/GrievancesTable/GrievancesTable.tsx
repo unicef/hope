@@ -371,7 +371,7 @@ export const GrievancesTable = ({
     setSelectedTickets(newSelectedTickets);
   };
 
-  const handleSelectAllCheckboxesClick = (event, rows): void => {
+  const handleSelectAllCheckboxesClick = (_event, rows): void => {
     if (!currentSelectedTickets?.length) {
       const newSelected = rows
         .filter((row) => row.status !== GRIEVANCE_TICKET_STATES.CLOSED)

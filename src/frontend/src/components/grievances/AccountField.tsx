@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
-import React, { Fragment, ReactElement } from 'react';
+import { Fragment, ReactElement } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Account } from '@restgenerated/models/Account';
 

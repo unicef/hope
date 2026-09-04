@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@mui/material';
 import { FieldArray } from 'formik';
-import React, { ChangeEvent, FC, useEffect, useRef } from 'react';
+import { ChangeEvent, FC, useEffect, useRef } from 'react';
 
 interface Field {
   field: string;

@@ -1,5 +1,5 @@
 import { DividerLine } from '@components/core/DividerLine';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';

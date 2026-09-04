@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useRef } from 'react';
+import { ReactElement, useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';

@@ -20,7 +20,7 @@ export function FlexFieldsTable({
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
 
-  const handleRequestSort = (event, property): void => {
+  const handleRequestSort = (_event, property): void => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);

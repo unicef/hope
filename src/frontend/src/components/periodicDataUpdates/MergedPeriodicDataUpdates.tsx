@@ -1,4 +1,4 @@
-import React, { useState, ReactElement } from 'react';
+import { useState, ReactElement } from 'react';
 import { TableCell } from '@mui/material';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';

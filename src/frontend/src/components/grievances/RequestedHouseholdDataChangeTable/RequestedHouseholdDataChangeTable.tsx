@@ -1,6 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';

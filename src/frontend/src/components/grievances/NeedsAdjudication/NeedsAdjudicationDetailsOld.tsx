@@ -315,7 +315,7 @@ export const NeedsAdjudicationDetailsOld = ({
                   !isActiveProgram
                 }
                 checked={selectedDuplicate === details.possibleDuplicate?.id}
-                onChange={(event, checked) =>
+                onChange={(_event, checked) =>
                   setSelectedDuplicate(
                     checked ? details.possibleDuplicate?.id : null,
                   )

@@ -2,7 +2,7 @@ import { Box, Button, Grid, IconButton } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
-import React, { Fragment, ReactElement, useState } from 'react';
+import { Fragment, ReactElement, useState } from 'react';
 import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';

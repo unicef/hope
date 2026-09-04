@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Box, Button } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useConfirmation } from '@components/core/ConfirmationDialog';

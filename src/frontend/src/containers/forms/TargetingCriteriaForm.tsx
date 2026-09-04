@@ -447,7 +447,7 @@ export const TargetingCriteriaForm = ({
                           }
                           choicesDict={allDataChoicesDict}
                           each={each}
-                          onChange={(e, object) => {
+                          onChange={(_e, object) => {
                             if (object) {
                               return chooseFieldType(
                                 object,
