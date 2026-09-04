@@ -31,6 +31,7 @@ from hope.apps.program.utils import (
     _create_enrollment_rdi,
     _format_integrity_error,
     _prepare_and_save_household_copy,
+    copy_program_object,
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
@@ -214,6 +215,88 @@ def enrollment_test_data(
         "individual_external": individual_external,
         "individual_hoh_e": individual_hoh_e,
     }
+
+
+@pytest.fixture
+def source_individual(afghanistan: BusinessArea, program1: Program) -> Individual:
+    return IndividualFactory(
+        household=None,
+        business_area=afghanistan,
+        program=program1,
+        country_workspace_id="CW-IND-1",
+        originating_id="API#IND-1",
+    )
+
+
+@pytest.fixture
+def source_household(afghanistan: BusinessArea, program1: Program, source_individual: Individual) -> Household:
+    return HouseholdFactory(
+        business_area=afghanistan,
+        program=program1,
+        head_of_household=source_individual,
+        originating_id="API#HH-1",
+    )
+
+
+@pytest.fixture
+def source_household_with_linked_head(
+    afghanistan: BusinessArea, program1: Program, source_individual: Individual
+) -> Household:
+    household = HouseholdFactory(
+        business_area=afghanistan,
+        program=program1,
+        head_of_household=source_individual,
+        originating_id="API#HH-1",
+    )
+    source_individual.household = household
+    source_individual.save()
+    return household
+
+
+@pytest.fixture
+def country_workspace_id_only_individual(afghanistan: BusinessArea, program1: Program) -> Individual:
+    return IndividualFactory(
+        household=None,
+        business_area=afghanistan,
+        program=program1,
+        country_workspace_id="CW-IND-2",
+        originating_id=None,
+    )
+
+
+@pytest.fixture
+def country_workspace_id_only_household(
+    afghanistan: BusinessArea, program1: Program, country_workspace_id_only_individual: Individual
+) -> Household:
+    return HouseholdFactory(
+        business_area=afghanistan,
+        program=program1,
+        head_of_household=country_workspace_id_only_individual,
+        originating_id=None,
+    )
+
+
+@pytest.fixture
+def originating_id_only_individual(afghanistan: BusinessArea, program1: Program) -> Individual:
+    return IndividualFactory(
+        household=None,
+        business_area=afghanistan,
+        program=program1,
+        country_workspace_id=None,
+        originating_id="API#IND-3",
+    )
+
+
+@pytest.fixture
+def originating_id_only_household(
+    afghanistan: BusinessArea, program1: Program, originating_id_only_individual: Individual
+) -> Household:
+    return HouseholdFactory(
+        business_area=afghanistan,
+        program=program1,
+        head_of_household=originating_id_only_individual,
+        originating_id="API#HH-3",
+    )
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
@@ -577,3 +660,101 @@ def test_enroll_households_raises_on_integrity_error(enrollment_test_data: dict)
                 enrollment_test_data["program2"],
                 str(enrollment_test_data["user"].pk),
             )
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_copy_program_population_clears_country_workspace_id_and_originating_id(
+    afghanistan: BusinessArea, program2: Program, source_individual: Individual, source_household: Household
+) -> None:
+    rdi = RegistrationDataImportFactory(business_area=afghanistan, program=program2)
+
+    CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=source_individual.pk),
+        copy_from_households=Household.objects.filter(pk=source_household.pk),
+        program=program2,
+        rdi=rdi,
+        create_collection=False,
+    ).copy_program_population()
+
+    copied_individual = Individual.objects.get(program=program2, copied_from=source_individual)
+    copied_household = Household.objects.get(program=program2, copied_from=source_household)
+    source_individual.refresh_from_db()
+    source_household.refresh_from_db()
+    assert copied_individual.country_workspace_id is None
+    assert copied_individual.originating_id is None
+    assert copied_household.originating_id is None
+    assert source_individual.country_workspace_id == "CW-IND-1"
+    assert source_individual.originating_id == "API#IND-1"
+    assert source_household.originating_id == "API#HH-1"
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_copy_program_population_does_not_violate_country_workspace_id_constraint(
+    afghanistan: BusinessArea,
+    program2: Program,
+    country_workspace_id_only_individual: Individual,
+    country_workspace_id_only_household: Household,
+) -> None:
+    CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=country_workspace_id_only_individual.pk),
+        copy_from_households=Household.objects.filter(pk=country_workspace_id_only_household.pk),
+        program=program2,
+        rdi=RegistrationDataImportFactory(business_area=afghanistan, program=program2),
+        create_collection=False,
+    ).copy_program_population()
+
+    assert Individual.objects.filter(copied_from=country_workspace_id_only_individual).count() == 1
+    assert Household.objects.filter(copied_from=country_workspace_id_only_household).count() == 1
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_copy_program_population_does_not_violate_originating_id_constraint(
+    afghanistan: BusinessArea,
+    program2: Program,
+    originating_id_only_individual: Individual,
+    originating_id_only_household: Household,
+) -> None:
+    CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=originating_id_only_individual.pk),
+        copy_from_households=Household.objects.filter(pk=originating_id_only_household.pk),
+        program=program2,
+        rdi=RegistrationDataImportFactory(business_area=afghanistan, program=program2),
+        create_collection=False,
+    ).copy_program_population()
+
+    assert Individual.objects.filter(copied_from=originating_id_only_individual).count() == 1
+    assert Household.objects.filter(copied_from=originating_id_only_household).count() == 1
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_enroll_households_to_program_clears_country_workspace_id_and_originating_id(
+    program2: Program,
+    user: User,
+    source_individual: Individual,
+    source_household_with_linked_head: Household,
+) -> None:
+    enroll_households_to_program(
+        Household.objects.filter(pk=source_household_with_linked_head.pk),
+        program2,
+        str(user.pk),
+    )
+
+    copied_individual = Individual.objects.get(program=program2, copied_from=source_individual)
+    copied_household = Household.objects.get(program=program2, copied_from=source_household_with_linked_head)
+    assert copied_individual.country_workspace_id is None
+    assert copied_individual.originating_id is None
+    assert copied_household.originating_id is None
+
+
+def test_copy_program_object_disables_biometric_deduplication(afghanistan: BusinessArea, user: User) -> None:
+    program = ProgramFactory(
+        name="Program with biometric deduplication",
+        business_area=afghanistan,
+        biometric_deduplication_enabled=True,
+    )
+
+    copied_program = copy_program_object(str(program.id), {"name": "Program copy", "code": "CPY1"}, user)
+
+    assert copied_program.biometric_deduplication_enabled is False
+    program.refresh_from_db()
+    assert program.biometric_deduplication_enabled is True
