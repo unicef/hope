@@ -2,7 +2,9 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from unittest.mock import Mock, patch
 
+from constance.forms import ConstanceForm
 from constance.test import override_config
+from django.core.exceptions import ValidationError
 from django.db import Error
 from django.utils import timezone
 from freezegun import freeze_time
@@ -23,7 +25,6 @@ from hope.apps.grievance.celery_tasks import (
 )
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.notifications import GrievanceNotification
-from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
@@ -32,10 +33,12 @@ from hope.models import AsyncJob, PeriodicAsyncJob
 pytestmark = pytest.mark.django_db
 
 
-@override_config(GRIEVANCE_NOTIFICATION_HOUR=24)
-def test_grievance_notification_hour_rejects_out_of_range_value() -> None:
-    with pytest.raises(ValueError, match="GRIEVANCE_NOTIFICATION_HOUR must be between 0 and 23"):
-        get_grievance_notification_hour()
+@pytest.mark.parametrize("invalid_hour", [-1, 24])
+def test_grievance_notification_hour_field_rejects_out_of_range_value(invalid_hour: int) -> None:
+    notification_hour_field = ConstanceForm(initial={}).fields["GRIEVANCE_NOTIFICATION_HOUR"]
+
+    with pytest.raises(ValidationError):
+        notification_hour_field.clean(invalid_hour)
 
 
 @pytest.fixture

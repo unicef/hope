@@ -7,10 +7,7 @@ from hope.apps.grievance.models import GrievanceTicket
 
 
 def get_grievance_notification_hour() -> int:
-    notification_hour = int(config.GRIEVANCE_NOTIFICATION_HOUR)
-    if not 0 <= notification_hour <= 23:
-        raise ValueError("GRIEVANCE_NOTIFICATION_HOUR must be between 0 and 23")
-    return notification_hour
+    return int(config.GRIEVANCE_NOTIFICATION_HOUR)
 
 
 def is_grievance_reminder_due(
