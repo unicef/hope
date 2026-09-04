@@ -23,6 +23,13 @@ from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
 )
+from hope.api.endpoints.rdi.cw_ids import (
+    collect_cw_ids,
+    collect_originating_ids,
+    cw_id_error,
+    duplicated_cw_ids,
+    existing_cw_ids,
+)
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.household.const import (
@@ -70,7 +77,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class IndividualsBulkStaging:
     valid_individuals: list[PendingIndividual] = field(default_factory=list)
-    individual_external_ids_by_pk: dict[str, str] = field(default_factory=dict)
+    individual_country_workspace_ids_by_pk: dict[str, str] = field(default_factory=dict)
     prepared_documents: list[dict] = field(default_factory=list)
     prepared_accounts: list[dict] = field(default_factory=list)
     doc_country_codes: set[str] = field(default_factory=set)
@@ -153,10 +160,9 @@ class IndividualSerializer(serializers.ModelSerializer):
     accounts = AccountLaxSerializer(many=True, required=False)
     photo = serializers.CharField(allow_blank=True, required=False)
     disability_certificate_picture = serializers.CharField(allow_null=True, allow_blank=True, required=False)
-    individual_id = serializers.CharField(required=True)
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     sex = serializers.ChoiceField(SEX_CHOICE, allow_blank=False, default=NOT_COLLECTED)
-    country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
+    country_workspace_id = serializers.CharField(required=True, max_length=150)
 
     class Meta:
         model = PendingIndividual
@@ -358,7 +364,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
     ) -> UUID:
         documents_data = serializer.validated_data.pop("documents", [])
         accounts_data = serializer.validated_data.pop("accounts", [])
-        external_individual_id = serializer.validated_data.pop("individual_id")
+        country_workspace_id = serializer.validated_data.get("country_workspace_id")
 
         photo_file = self.get_photo(serializer.validated_data.pop("photo", None), self._programme_code)
         disability_certificate_picture_file = self.get_photo(
@@ -399,7 +405,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         calculate_phone_numbers_validity(ind)
 
         self.staging.valid_individuals.append(ind)
-        self.staging.individual_external_ids_by_pk[str(ind.id)] = external_individual_id
+        self.staging.individual_country_workspace_ids_by_pk[str(ind.id)] = country_workspace_id
 
         self._prepare_documents(documents_data, ind)
         self._prepare_accounts(accounts_data, ind)
@@ -475,16 +481,30 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
         results = []
 
         self.staging = IndividualsBulkStaging()
+        raw_cw_ids = collect_cw_ids(request.data)
+        # re-push: the rows holding these originating ids are hard-deleted before the new ones are created
+        replaced_originating_ids = collect_originating_ids(request.data)
+        existing = existing_cw_ids(self.selected_business_area, raw_cw_ids, replaced_originating_ids)
+        duplicated = duplicated_cw_ids(raw_cw_ids)
 
         try:
             for individual_raw_data in request.data:
                 total_individuals += 1
+                error = cw_id_error(
+                    individual_raw_data.get("country_workspace_id") if isinstance(individual_raw_data, dict) else None,
+                    existing,
+                    duplicated,
+                )
+                if error:
+                    results.append(error)
+                    total_errors += 1
+                    continue
+
                 self.handle_individual_flex_fields(
                     cast("dict[Any, Any]", individual_raw_data), reserved_fields={"documents", "accounts"}
                 )
                 serializer = IndividualSerializer(
                     data=individual_raw_data,
-                    context={"is_coming_from_cw": self.selected_rdi.is_coming_from_cw},
                 )
 
                 if serializer.is_valid():
@@ -516,8 +536,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             self._bulk_create_accounts(BATCH_SIZE)
 
             for ind in self.staging.valid_individuals:
-                if external := self.staging.individual_external_ids_by_pk.get(str(ind.id)):
-                    individual_id_mapping[external] = id_to_unicef.get(str(ind.id))
+                country_workspace_id = self.staging.individual_country_workspace_ids_by_pk[str(ind.id)]
+                individual_id_mapping[country_workspace_id] = id_to_unicef.get(str(ind.id))
 
             accepted_count = len(self.staging.valid_individuals)
             response_payload = {

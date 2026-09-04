@@ -10,6 +10,7 @@ class Grant(Enum):
     API_READ_ONLY = auto()
     API_RDI_UPLOAD = auto()
     API_RDI_CREATE = auto()
+    API_RDI_DELETE = auto()
 
     API_PROGRAM_CREATE = auto()
     API_BENEFICIARY_TICKET_CREATE = auto()

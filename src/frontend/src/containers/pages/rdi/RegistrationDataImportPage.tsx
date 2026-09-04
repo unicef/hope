@@ -1,18 +1,15 @@
-import { runDeduplicationDataImports } from '@api/rdiApi';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import RegistrationFilters from '@components/rdi/RegistrationFilters';
-import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -35,19 +32,7 @@ function RegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
-  const { showMessage } = useSnackbar();
-  const { data: deduplicationFlags, isLoading: loading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve,
-      { businessAreaSlug: businessArea, code: programId },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
-        businessAreaSlug: businessArea,
-        code: programId,
-      }),
-  });
+  const { businessArea } = useBaseUrl();
   const { data: businessAreaData } = useQuery<BusinessArea>({
     queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
       slug: businessArea,
@@ -57,6 +42,7 @@ function RegistrationDataImportPage(): ReactElement {
         slug: businessArea,
       }),
   });
+  const isManualIngest = businessAreaData?.isManualIngest;
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -70,30 +56,7 @@ function RegistrationDataImportPage(): ReactElement {
     setShouldScroll(false),
   );
 
-  const queryClient = useQueryClient();
-
-  const { mutateAsync } = useMutation({
-    mutationFn: async () =>
-      runDeduplicationDataImports(businessArea, programId),
-    onSuccess: () => {
-      showMessage('Deduplication process started');
-      queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsRegistrationDataImportsList,
-        ),
-      });
-    },
-  });
-
-  const runDeduplication = async () => {
-    try {
-      await mutateAsync();
-    } catch (error) {
-      showApiErrorMessages(error, showMessage);
-    }
-  };
-
-  if (permissions === null || loading) return null;
+  if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
     return <PermissionDenied permission={PERMISSIONS.RDI_VIEW_LIST} />;
@@ -106,30 +69,14 @@ function RegistrationDataImportPage(): ReactElement {
           alignItems: 'center',
         }}
       >
-        {deduplicationFlags?.canRunDeduplication && (
-          <Box
-            sx={{
-              mr: 3,
-            }}
-          >
-            <ButtonTooltip
-              variant="contained"
-              color="primary"
-              onClick={runDeduplication}
-              disabled={deduplicationFlags?.isDeduplicationDisabled}
-              title={t('Deduplication engine already in progress')}
-            >
-              {t('START DEDUPLICATION ENGINE')}
-            </ButtonTooltip>
-          </Box>
-        )}
-        {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
-          <Box>
-            <RegistrationDataImportCreateDialog
-              rdiImportXlsxDisabled={businessAreaData?.rdiImportXlsxDisabled}
-            />
-          </Box>
-        )}
+        {isManualIngest &&
+          hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
+            <Box>
+              <RegistrationDataImportCreateDialog
+                rdiImportXlsxDisabled={businessAreaData?.rdiImportXlsxDisabled}
+              />
+            </Box>
+          )}
       </Box>
     </PageHeader>
   );

@@ -1,7 +1,7 @@
 import pytest
 
-from extras.test_utils.factories import PartnerFactory, RoleFactory
-from hope.models import BusinessArea, Partner
+from extras.test_utils.factories import BusinessAreaFactory, PartnerFactory, RoleFactory
+from hope.models import Partner
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def test_create_business_area_signal_creates_partner_and_assigns_roles(
 ):
     partner_count = Partner.objects.count()
 
-    new_ba = BusinessArea.objects.create(name="Test Business Area", code="TBA", active=True)
+    new_ba = BusinessAreaFactory(name="Test Business Area", code="TBA", active=True)
 
     assert Partner.objects.count() == partner_count + 1
 

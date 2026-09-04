@@ -15,6 +15,7 @@ from hope.api.endpoints.rdi.common import (
     DisabilityChoiceField,
     NullableChoiceField,
 )
+from hope.api.endpoints.rdi.cw_ids import duplicated_cw_ids, existing_cw_ids
 from hope.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import (
     AccountSerializerUpload,
@@ -59,6 +60,33 @@ class DynamicAreaChoiceField(serializers.ChoiceField):
     pass
 
 
+class PushPeopleListSerializer(serializers.ListSerializer):
+    def validate(self, attrs: list[dict]) -> list[dict]:
+        cw_ids = [item["country_workspace_id"] for item in attrs if item.get("country_workspace_id")]
+        duplicated = sorted(duplicated_cw_ids(cw_ids))
+        if duplicated:
+            raise serializers.ValidationError(
+                {
+                    "country_workspace_id": [
+                        f"Duplicate country_workspace_id values in payload: {', '.join(duplicated[:100])}."
+                    ]
+                }
+            )
+        existing = sorted(existing_cw_ids(self.context["business_area"], cw_ids))
+        if existing:
+            raise serializers.ValidationError(
+                {
+                    "country_workspace_id": [
+                        (
+                            "Individuals with these country_workspace_id values already exist: "
+                            f"{', '.join(existing[:100])}."
+                        )
+                    ]
+                }
+            )
+        return attrs
+
+
 class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -96,7 +124,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin4 = DynamicAreaChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     disability = DisabilityChoiceField(choices=DISABILITY_CHOICES, required=False, allow_blank=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
-    country_workspace_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=150)
+    country_workspace_id = serializers.CharField(required=True, max_length=150)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -112,6 +140,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PendingIndividual
+        list_serializer_class = PushPeopleListSerializer
         exclude = [
             "id",
             "registration_data_import",
@@ -248,7 +277,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         serializer = PushPeopleSerializer(
             data=request.data,
             many=True,
-            context={"is_coming_from_cw": self.selected_rdi.is_coming_from_cw},
+            context={"business_area": self.selected_business_area},
         )
         if serializer.is_valid():
             people_ids = self.save_people(self.selected_rdi, serializer.validated_data)

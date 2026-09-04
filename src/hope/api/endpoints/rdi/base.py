@@ -1,26 +1,44 @@
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Any
+import logging
+from typing import TYPE_CHECKING, Any, cast
+from urllib.parse import urlsplit
 
+from django.core.validators import URLValidator
 from django.db.models import QuerySet
-from django.db.transaction import atomic, on_commit
+from django.db.transaction import atomic
 from django.http import HttpRequest
 from django.http.response import Http404, HttpResponseBase
 from django.utils.functional import cached_property
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
+from hope.api.endpoints.base import BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, HOPEAPIView
+from hope.api.endpoints.rdi.cw_ids import collect_member_cw_ids, duplicated_cw_ids, existing_cw_ids
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
-from hope.api.endpoints.rdi.upload import HouseholdSerializer
+from hope.api.endpoints.rdi.upload import CountryWorkspaceHouseholdSerializer
 from hope.api.utils import humanize_errors
-from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
-from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
+from hope.apps.registration_data.celery_tasks import (
+    rdi_dispatcher_task,
+    remove_rdi_population_async_task,
+)
+from hope.models import (
+    Country,
+    Grant,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+    User,
+)
 
 if TYPE_CHECKING:
     from hope.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 class RDISerializer(serializers.ModelSerializer):
@@ -29,8 +47,7 @@ class RDISerializer(serializers.ModelSerializer):
     )
     imported_by_email = serializers.EmailField(required=True, write_only=True)
     country_workspace_id = serializers.CharField(
-        required=False,
-        allow_blank=False,
+        required=True,
         max_length=255,
     )
 
@@ -40,12 +57,10 @@ class RDISerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: dict) -> None:
         validated_data.pop("imported_by_email", None)
-        if validated_data.get("program").biometric_deduplication_enabled:
-            validated_data["deduplication_engine_status"] = RegistrationDataImport.DEDUP_ENGINE_PENDING
         return super().create(validated_data)
 
 
-class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
+class CreateRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, CreateAPIView):
     """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
@@ -89,7 +104,23 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         )
 
 
-class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
+class CountryWorkspaceIdContextMixin:
+    """Resolves, once per request, which member country workspace ids are taken or duplicated."""
+
+    def _cw_id_context(self, cw_ids: list[str]) -> dict[str, set[str]]:
+        return {
+            "existing_cw_ids": existing_cw_ids(self.selected_business_area, cw_ids),
+            "duplicated_cw_ids": duplicated_cw_ids(cw_ids),
+        }
+
+
+class PushToRDIView(
+    BusinessAreaIngestCWOnlyMixin,
+    HOPEAPIBusinessAreaView,
+    HouseholdUploadMixin,
+    CountryWorkspaceIdContextMixin,
+    HOPEAPIView,
+):
     """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
@@ -112,7 +143,11 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
         business_area: "BusinessArea",
         rdi: RegistrationDataImport,
     ) -> Response:
-        serializer = HouseholdSerializer(data=request.data, many=True)
+        serializer = CountryWorkspaceHouseholdSerializer(
+            data=request.data,
+            many=True,
+            context=self._cw_id_context(collect_member_cw_ids(request.data)),
+        )
 
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data)
@@ -120,10 +155,17 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
                 {"id": self.selected_rdi.id, **asdict(totals)},
                 status=status.HTTP_201_CREATED,
             )
-        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
+        # ``serializer.errors`` is a per-household list here; humanize_errors expects it keyed.
+        return Response(humanize_errors({"households": serializer.errors}), status=status.HTTP_400_BAD_REQUEST)
 
 
-class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
+class PushLaxToRDIView(
+    BusinessAreaIngestCWOnlyMixin,
+    HOPEAPIBusinessAreaView,
+    HouseholdUploadMixin,
+    CountryWorkspaceIdContextMixin,
+    HOPEAPIView,
+):
     """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
@@ -152,10 +194,11 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         errs = []
 
         program_id = self.selected_rdi.program.id
+        cw_id_context = self._cw_id_context(collect_member_cw_ids(request.data))
 
         for household_data in request.data:
             total_households += 1
-            serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
+            serializer = CountryWorkspaceHouseholdSerializer(data=household_data, context=cw_id_context)
             if serializer.is_valid():
                 members: list[dict] = serializer.validated_data.pop("members", [])
 
@@ -192,7 +235,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         )
 
 
-class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
+class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, UpdateAPIView):
     """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
@@ -220,15 +263,77 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
         self.selected_rdi.number_of_individuals = PendingIndividual.objects.filter(
             registration_data_import=self.selected_rdi
         ).count()
-        if self.selected_rdi.is_coming_from_cw:
-            self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
-            on_commit(lambda: classify_findings_and_schedule_merge_async_task(self.selected_rdi))
-        else:
-            self.selected_rdi.status = RegistrationDataImport.IN_REVIEW
+        self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
         self.selected_rdi.save()
+        rdi_dispatcher_task(cast("Program", self.selected_rdi.program))
 
         return Response(
             [
                 {"id": self.selected_rdi.pk, "status": self.selected_rdi.status},
             ]
         )
+
+
+class RDIResetSerializer(serializers.Serializer):
+    callback_url = serializers.URLField(
+        required=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+    )
+    signed_token = serializers.CharField(required=True)
+
+    def validate_callback_url(self, value: str) -> str:
+        if "//" in urlsplit(value).path:
+            raise serializers.ValidationError("callback_url path must not contain '//'")
+        return value
+
+
+class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
+    """Async reset (hard-delete) of a CW-managed RDI.
+
+    RDI is resettable in every status except ``MERGED`` (terminal -> 409). An in-flight
+    merge holding the row lock is not waited on -> 409 ``rdi_merge_in_progress`` (retryable).
+    """
+
+    permission = Grant.API_RDI_DELETE
+
+    @extend_schema(request=RDIResetSerializer)
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        rdi_id = self.kwargs["rdi"]
+        serializer = RDIResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        callback_url = serializer.validated_data["callback_url"]
+        signed_token = serializer.validated_data["signed_token"]
+        logger.debug("RDI reset requested for %s (callback_url=%s)", rdi_id, callback_url)
+
+        with atomic():
+            base_qs = RegistrationDataImport.objects.filter(
+                id=rdi_id,
+                business_area=self.selected_business_area,
+                country_workspace_id__isnull=False,
+            )
+            try:
+                rdi = base_qs.select_for_update(skip_locked=True, of=("self",)).select_related("program").get()
+            except RegistrationDataImport.DoesNotExist:
+                if base_qs.exists():
+                    logger.info("RDI reset conflict for %s: row lock held by an in-flight merge", rdi_id)
+                    return Response({"error": "rdi_merge_in_progress"}, status=status.HTTP_409_CONFLICT)
+                logger.info("RDI reset 404 for %s: unknown or not CW-managed", rdi_id)
+                raise Http404
+
+            if rdi.status == RegistrationDataImport.MERGED:
+                logger.info("RDI reset conflict for %s: already MERGED (terminal)", rdi_id)
+                return Response({"error": "rdi_already_merged"}, status=status.HTTP_409_CONFLICT)
+
+            job = remove_rdi_population_async_task(rdi, callback_url=callback_url, signed_token=signed_token)
+            if job is None:
+                logger.info("RDI reset for %s is already in progress (status %s)", rdi_id, rdi.status)
+                return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)
+
+            rdi.status = RegistrationDataImport.DELETE_SCHEDULED
+            rdi.save(update_fields=["status"])
+            # The RDI just left the merge queue; we need to trigger the queue, so a newer RDI waiting
+            # behind will start being processed.
+            rdi_dispatcher_task(cast("Program", rdi.program))
+            logger.info("RDI reset scheduled for %s: delete rdi job %s queued", rdi_id, job.pk)
+
+        return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)

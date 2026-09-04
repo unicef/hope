@@ -31,6 +31,14 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
+def business_area(business_area: BusinessArea) -> BusinessArea:
+    # rdi-push-lax is restricted to BAs that maintain RDI only through Country Workspace.
+    business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    business_area.save(update_fields=["ingest_source"])
+    return business_area
+
+
+@pytest.fixture
 def rdi_in_review(business_area: BusinessArea, program: Program) -> RegistrationDataImport:
     return RegistrationDataImportFactory(
         name="test_push_error_if_not_loading",
@@ -90,6 +98,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": HEAD,
                     "full_name": "James Head #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-1",
                     "sex": "MALE",
                     "role": "",
                     "documents": [
@@ -105,6 +114,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": NON_BENEFICIARY,
                     "full_name": "Mary Primary #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-2",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
                 },
@@ -120,6 +130,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": HEAD,
                     "full_name": "James Head #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-3",
                     "sex": "MALE",
                     "role": ROLE_PRIMARY,
                     "documents": [
@@ -142,6 +153,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 {
                     "full_name": "Jhon Primary #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-4",
                     "role": "",
                     "sex": "FEMALE",
                 },
@@ -149,6 +161,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": NON_BENEFICIARY,
                     "full_name": "Mary Alternate #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-5",
                     "role": ROLE_ALTERNATE,
                     "sex": "MALE",
                 },
@@ -156,6 +169,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": HEAD,
                     "full_name": "James Head #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-6",
                     "sex": "MALE",
                     "role": "",
                     "documents": [
@@ -170,6 +184,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": SON_DAUGHTER,
                     "full_name": "Mary Son #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-7",
                     "role": "",
                     "sex": "MALE",
                 },
@@ -185,6 +200,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": HEAD,
                     "full_name": "John Head #2",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-8",
                     "sex": "MALE",
                     "role": "",
                     "documents": [
@@ -200,6 +216,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": NON_BENEFICIARY,
                     "full_name": "Mary Primary #2",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-9",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
                 },
@@ -215,6 +232,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": HEAD,
                     "full_name": "John Doe",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-10",
                     "sex": "MALE",
                     "role": "",
                     "documents": [
@@ -230,6 +248,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": NON_BENEFICIARY,
                     "full_name": "Mary Doe",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-11",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
                 },
@@ -244,6 +263,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 {
                     "full_name": "James Head #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-12",
                     "sex": "MALE",
                     "role": "",
                     "documents": [
@@ -259,6 +279,7 @@ def test_push_lax_creates_households_and_reports_errors(
                     "relationship": NON_BENEFICIARY,
                     "full_name": "Mary Primary #1",
                     "birth_date": "2000-01-01",
+                    "country_workspace_id": "CW-SOFT-13",
                     "role": ROLE_PRIMARY,
                     "sex": "FEMALE",
                 },

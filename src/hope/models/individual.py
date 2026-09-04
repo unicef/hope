@@ -597,6 +597,11 @@ class Individual(
                 condition=Q(is_removed=False) & Q(originating_id__isnull=False),
                 name="originating_id_ind_unique_constraint",
             ),
+            UniqueConstraint(
+                fields=["business_area", "country_workspace_id"],
+                condition=Q(is_removed=False) & Q(withdrawn=False) & Q(country_workspace_id__isnull=False),
+                name="country_workspace_id_ind_unique_constraint",
+            ),
         ]
         permissions = (
             ("update_individual_iban", "Can update individual IBAN"),

@@ -19,8 +19,9 @@ import { RegistrationDataImportDetail } from '@restgenerated/models/Registration
 import { useActionMutation } from '@hooks/useActionMutation';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { RefuseRdi } from '@restgenerated/models/RefuseRdi';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDataImportDetail;
@@ -48,6 +49,14 @@ const RegistrationDataImportDetailsPageHeader = ({
   const navigate = useNavigate();
   const client = useQueryClient();
   const { isActiveProgram } = useProgramContext();
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: restQueryKey(RestService.restBusinessAreasRetrieve, {
+      slug: businessAreaSlug,
+    }),
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({ slug: businessAreaSlug }),
+  });
+  const isManualIngest = businessAreaData?.isManualIngest;
   const { mutateAsync: refuseMutate, isPending: refuseLoading } = useMutation({
     mutationFn: async (data: RefuseRdi) => {
       return RestService.restBusinessAreasProgramsRegistrationDataImportsRefuseCreate(
@@ -109,19 +118,22 @@ const RegistrationDataImportDetailsPageHeader = ({
     case RegistrationDataImportStatusEnum.IN_REVIEW:
       buttons = (
         <div>
-          {!registration.countryWorkspaceId && canMerge && canRefuse && (
-            <LoadingButton
-              loading={refuseLoading}
-              onClick={() => setShowRefuseRdiForm(true)}
-              variant="contained"
-              color="primary"
-              disabled={!isActiveProgram}
-              data-cy="button-refuse-rdi"
-            >
-              {t('Refuse Import')}
-            </LoadingButton>
-          )}
-          {!registration.countryWorkspaceId && canMerge && (
+          {isManualIngest &&
+            !registration.countryWorkspaceId &&
+            canMerge &&
+            canRefuse && (
+              <LoadingButton
+                loading={refuseLoading}
+                onClick={() => setShowRefuseRdiForm(true)}
+                variant="contained"
+                color="primary"
+                disabled={!isActiveProgram}
+                data-cy="button-refuse-rdi"
+              >
+                {t('Refuse Import')}
+              </LoadingButton>
+            )}
+          {isManualIngest && !registration.countryWorkspaceId && canMerge && (
             <MergeButtonContainer>
               <MergeRegistrationDataImportDialog registration={registration} />
             </MergeButtonContainer>
@@ -133,11 +145,13 @@ const RegistrationDataImportDetailsPageHeader = ({
       buttons = (
         <div>
           {canRefuse && eraseButton}
-          {!registration.countryWorkspaceId && canRerunDedupe && (
-            <MergeButtonContainer>
-              <RerunDedupe registration={registration} />
-            </MergeButtonContainer>
-          )}
+          {isManualIngest &&
+            !registration.countryWorkspaceId &&
+            canRerunDedupe && (
+              <MergeButtonContainer>
+                <RerunDedupe registration={registration} />
+              </MergeButtonContainer>
+            )}
         </div>
       );
       break;
