@@ -6,6 +6,7 @@ import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/Acce
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
+import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
@@ -29,7 +30,14 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { data: paymentPlan, error } = useQuery<PaymentPlanDetail>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -84,6 +92,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         baseUrl={baseUrl}
         permissions={permissions}
       />
+      <VisionStatusSection paymentPlan={paymentPlan} />
       <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <AcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayFundsCommitment && (

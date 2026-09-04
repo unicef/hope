@@ -6,7 +6,7 @@ import pytest
 
 from hope.models import AsyncJob
 
-migration_module = importlib.import_module("hope.apps.core.migrations.0034_migration")
+migration_module = importlib.import_module("hope.apps.core.migrations.0035_migration")
 
 
 @pytest.fixture

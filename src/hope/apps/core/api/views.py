@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -45,6 +46,7 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    Program,
     RoleAssignment,
 )
 
@@ -119,6 +121,9 @@ class BusinessAreaViewSet(
     def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_id = request.query_params.get("program_id", None)
         business_area_slug = self.kwargs["slug"]
+        if program_id:
+            # checked for scope only, the generator below takes the id
+            get_object_or_404(Program, id=program_id, business_area__slug=business_area_slug)
         result_list = get_fields_attr_generators(business_area_slug=business_area_slug, program_id=program_id)
         return Response(FieldAttributeSerializer(result_list, many=True).data, status=200)
 

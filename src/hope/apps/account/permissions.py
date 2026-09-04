@@ -114,7 +114,6 @@ class Permissions(Enum):
     PM_ABORT = auto()
     PM_REACTIVATE_ABORT = auto()
     PM_CUSTOM_EXCHANGE_RATE = auto()
-    PM_SEND_TO_VISION = auto()
 
     # PaymentPlanSupportingDocument
     PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()

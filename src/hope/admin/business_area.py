@@ -171,6 +171,7 @@ class BusinessAreaAdmin(
         "is_split",
         "parent",
         "enable_email_notification",
+        "vision_integration_active",
         "is_accountability_applicable",
     )
     search_fields = ("name", "slug")
@@ -183,6 +184,7 @@ class BusinessAreaAdmin(
         "postpone_deduplication",
         "is_split",
         "enable_email_notification",
+        "vision_integration_active",
         "is_accountability_applicable",
     )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
