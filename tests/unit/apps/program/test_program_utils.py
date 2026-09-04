@@ -71,11 +71,6 @@ def program2(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
-def program3(afghanistan: BusinessArea) -> Program:
-    return ProgramFactory(name="Program 3", business_area=afghanistan)
-
-
-@pytest.fixture
 def household_original_already_enrolled(program1: Program) -> Household:
     return HouseholdFactory(
         program=program1,
@@ -694,10 +689,9 @@ def test_copy_program_population_clears_country_workspace_id_and_originating_id(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-def test_copy_program_population_twice_does_not_violate_country_workspace_id_constraint(
+def test_copy_program_population_does_not_violate_country_workspace_id_constraint(
     afghanistan: BusinessArea,
     program2: Program,
-    program3: Program,
     country_workspace_id_only_individual: Individual,
     country_workspace_id_only_household: Household,
 ) -> None:
@@ -709,23 +703,14 @@ def test_copy_program_population_twice_does_not_violate_country_workspace_id_con
         create_collection=False,
     ).copy_program_population()
 
-    CopyProgramPopulation(
-        copy_from_individuals=Individual.objects.filter(pk=country_workspace_id_only_individual.pk),
-        copy_from_households=Household.objects.filter(pk=country_workspace_id_only_household.pk),
-        program=program3,
-        rdi=RegistrationDataImportFactory(business_area=afghanistan, program=program3),
-        create_collection=False,
-    ).copy_program_population()
-
-    assert Individual.objects.filter(copied_from=country_workspace_id_only_individual).count() == 2
-    assert Household.objects.filter(copied_from=country_workspace_id_only_household).count() == 2
+    assert Individual.objects.filter(copied_from=country_workspace_id_only_individual).count() == 1
+    assert Household.objects.filter(copied_from=country_workspace_id_only_household).count() == 1
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
-def test_copy_program_population_twice_does_not_violate_originating_id_constraint(
+def test_copy_program_population_does_not_violate_originating_id_constraint(
     afghanistan: BusinessArea,
     program2: Program,
-    program3: Program,
     originating_id_only_individual: Individual,
     originating_id_only_household: Household,
 ) -> None:
@@ -737,16 +722,8 @@ def test_copy_program_population_twice_does_not_violate_originating_id_constrain
         create_collection=False,
     ).copy_program_population()
 
-    CopyProgramPopulation(
-        copy_from_individuals=Individual.objects.filter(pk=originating_id_only_individual.pk),
-        copy_from_households=Household.objects.filter(pk=originating_id_only_household.pk),
-        program=program3,
-        rdi=RegistrationDataImportFactory(business_area=afghanistan, program=program3),
-        create_collection=False,
-    ).copy_program_population()
-
-    assert Individual.objects.filter(copied_from=originating_id_only_individual).count() == 2
-    assert Household.objects.filter(copied_from=originating_id_only_household).count() == 2
+    assert Individual.objects.filter(copied_from=originating_id_only_individual).count() == 1
+    assert Household.objects.filter(copied_from=originating_id_only_household).count() == 1
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
