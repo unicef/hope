@@ -4,10 +4,10 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface IndividualsListTableRowProps {

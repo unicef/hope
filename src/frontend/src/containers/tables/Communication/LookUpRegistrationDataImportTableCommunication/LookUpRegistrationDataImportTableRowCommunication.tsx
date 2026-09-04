@@ -5,9 +5,9 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 import { registrationDataImportStatusToColor } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface LookUpRegistrationDataImportTableRowCommunicationProps {

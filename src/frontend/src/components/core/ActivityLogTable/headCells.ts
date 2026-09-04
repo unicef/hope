@@ -1,5 +1,5 @@
-import { HeadCell } from '../Table/EnhancedTableHead';
-import { ActivityLogEntry } from './types';
+import type { HeadCell } from '../Table/EnhancedTableHead';
+import type { ActivityLogEntry } from './types';
 
 export const headCells: HeadCell<ActivityLogEntry>[] = [
   {

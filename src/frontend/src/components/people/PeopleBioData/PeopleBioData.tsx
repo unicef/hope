@@ -3,7 +3,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Box, Grid, Typography } from '@mui/material';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
   formatAge,
@@ -11,7 +11,7 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
@@ -20,9 +20,9 @@ import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/Li
 import { BlackLink } from '@components/core/BlackLink';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { Overview } from '@components/payments/Overview';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 
 const BorderBox = styled.div`

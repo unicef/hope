@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 

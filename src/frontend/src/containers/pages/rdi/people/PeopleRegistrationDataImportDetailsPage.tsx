@@ -9,7 +9,7 @@ import RegistrationDetails from '@components/rdi/details/RegistrationDetails/Reg
 import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
 import { Tab, Tabs } from '@core/Tabs';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
-import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
+import type { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -17,13 +17,14 @@ import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, ReactNode, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const Container = styled.div`
   && {
@@ -98,9 +99,12 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,

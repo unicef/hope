@@ -1,6 +1,6 @@
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import { IconButton } from '@mui/material';
-import { Dispatch, SetStateAction, ReactElement } from 'react';
+import type { Dispatch, SetStateAction, ReactElement } from 'react';
 
 export function RotateImg({
   turnAngle,

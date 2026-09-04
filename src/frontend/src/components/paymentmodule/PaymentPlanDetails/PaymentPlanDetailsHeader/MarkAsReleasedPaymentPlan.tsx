@@ -14,14 +14,15 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
@@ -63,10 +64,14 @@ export function MarkAsReleasedPaymentPlan({
         showMessage(t('Payment Plan has been marked as released.'));
         setMarkAsReleasedDialogOpen(false);
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansList,
+          ),
         });
       },
     });

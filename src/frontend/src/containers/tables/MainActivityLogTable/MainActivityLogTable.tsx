@@ -1,4 +1,5 @@
-import { ChangeEvent, ReactElement, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import Collapse from '@mui/material/Collapse';
 import { Box, IconButton, Paper } from '@mui/material';

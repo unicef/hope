@@ -2,10 +2,10 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { formatCurrencyWithSymbol } from '@utils/utils';
 import { Grid, Typography } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface FollowUpInstructionSummaryProps {

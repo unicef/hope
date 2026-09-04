@@ -19,15 +19,16 @@ import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
 } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './HouseholdTableHeadCells';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
-import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { HouseholdList } from '@restgenerated/models/HouseholdList';
+import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface HouseholdTableRestProps {
   filter;

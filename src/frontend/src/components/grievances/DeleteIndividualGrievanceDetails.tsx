@@ -14,10 +14,10 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { Individual } from '@restgenerated/models/Individual';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { Individual } from '@restgenerated/models/Individual';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 

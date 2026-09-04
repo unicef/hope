@@ -1,14 +1,15 @@
 import { Close } from '@mui/icons-material';
+import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
   IconButton,
   InputAdornment,
   MenuItem,
   Select,
-  SelectChangeEvent,
 } from '@mui/material';
 import moment from 'moment';
-import { FC, useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 
 interface UseSortAndFilterProps {
   initialSortField: string | null;

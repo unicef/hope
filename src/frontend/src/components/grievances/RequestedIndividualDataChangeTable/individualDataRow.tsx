@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { snakeCase } from 'lodash';
 
 const GreenIcon = styled.div`

@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
@@ -10,7 +10,7 @@ import {
 } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/LinkedPaymentPlansModal';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface PaymentPlanTableRowProps {
   paymentPlan: PaymentPlanList;

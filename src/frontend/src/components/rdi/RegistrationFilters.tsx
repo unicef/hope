@@ -11,7 +11,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';

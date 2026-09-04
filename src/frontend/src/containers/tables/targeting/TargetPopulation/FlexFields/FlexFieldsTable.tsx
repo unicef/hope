@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { Table, TableBody, TableCell, TableRow } from '@mui/material';
 import { EnhancedTableHead } from '@components/core/Table/EnhancedTableHead';
@@ -40,7 +41,6 @@ export function FlexFieldsTable({
       filteredByFieldType = fields.filter((el) => el.isFlexField === false);
     }
     return filteredByFieldType.filter((each) => {
-       
       for (const key in filters) {
         if (
           each[key] === undefined ||

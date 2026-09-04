@@ -9,13 +9,13 @@ import { Notes } from '@components/grievances/Notes/Notes';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import Grid from '@mui/material/Grid';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
@@ -81,7 +81,9 @@ const GrievancesDetailsPage = (): ReactElement => {
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error))
-    return <PermissionDenied permission={GRIEVANCES_VIEW_DETAILS_PERMISSIONS} />;
+    return (
+      <PermissionDenied permission={GRIEVANCES_VIEW_DETAILS_PERMISSIONS} />
+    );
 
   if (
     !grievanceTicket ||

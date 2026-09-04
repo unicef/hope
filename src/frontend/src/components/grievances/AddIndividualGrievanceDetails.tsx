@@ -16,9 +16,9 @@ import { Title } from '@core/Title';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -143,9 +143,7 @@ function AddIndividualGrievanceDetails({
     }) || [];
 
   const flexFieldLabels =
-    Object.entries(
-      (flexFields || {}) as Record<string, string | string[]>,
-    ).map(
+    Object.entries((flexFields || {}) as Record<string, string | string[]>).map(
       ([key, value]) => (
         <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField

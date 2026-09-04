@@ -1,19 +1,20 @@
-import { ReactElement, useState, useEffect, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import styled from 'styled-components';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
 import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
 import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { ProgramList } from '@restgenerated/models/ProgramList';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
 
 const NoTableStyling = styled.div`
   .MuiPaper-elevation1 {
@@ -97,7 +98,8 @@ export function LookUpProgrammesTableSurveys({
       RestService.restBusinessAreasProgramsList,
       programsListParams,
     ),
-    queryFn: () => RestService.restBusinessAreasProgramsList(programsListParams),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsList(programsListParams),
     placeholderData: keepPreviousData,
     enabled: !!queryVariables.businessAreaSlug,
   });

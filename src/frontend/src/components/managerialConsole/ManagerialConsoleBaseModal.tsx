@@ -13,7 +13,8 @@ import {
   TextField,
 } from '@mui/material';
 import styled from 'styled-components';
-import { ReactElement, ReactNode, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 

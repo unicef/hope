@@ -21,8 +21,8 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
-import { PaymentPlanCreateTopUp } from '@restgenerated/models/PaymentPlanCreateTopUp';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanCreateTopUp } from '@restgenerated/models/PaymentPlanCreateTopUp';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -31,7 +31,8 @@ import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -146,17 +147,19 @@ export function CreateChildPaymentPlan({
       ),
     // Only "neither" is checked: picking a file clears the fixed amount, so the two
     // funding modes can never both be set.
-    fixedAmount: Yup.string().when('file', ([file], schema: Yup.StringSchema) =>
-      isTopUp && !file
-        ? schema
-            .required(t('Enter a fixed amount or upload an amount file'))
-            // Mirrors the serializer's min_value; keep the two in step.
-            .test(
-              'min-amount',
-              t('Amount has to be at least 0.01'),
-              (value) => Number(value) >= 0.01,
-            )
-        : schema,
+    fixedAmount: Yup.string().when(
+      'file',
+      ([file], schema: Yup.StringSchema) =>
+        isTopUp && !file
+          ? schema
+              .required(t('Enter a fixed amount or upload an amount file'))
+              // Mirrors the serializer's min_value; keep the two in step.
+              .test(
+                'min-amount',
+                t('Amount has to be at least 0.01'),
+                (value) => Number(value) >= 0.01,
+              )
+          : schema,
     ),
     file: Yup.mixed().nullable(),
   });
@@ -184,9 +187,7 @@ export function CreateChildPaymentPlan({
       const res = await createChildPaymentPlan({
         dispersionStartDate,
         dispersionEndDate,
-        ...(isTopUp && values.file
-          ? { file: values.file }
-          : {}),
+        ...(isTopUp && values.file ? { file: values.file } : {}),
         ...(isTopUp && !values.file && values.fixedAmount
           ? { fixedAmount: values.fixedAmount }
           : {}),
@@ -215,273 +216,281 @@ export function CreateChildPaymentPlan({
           setFundedRows(null);
         };
         return (
-        <Form>
-          <Box
-            sx={{
-              p: 2,
-            }}
-          >
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => setDialogOpen(true)}
-              data-cy={`button-create-${variant}`}
-              data-perm={PERMISSIONS.PM_CREATE}
-              disabled={
-                !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
-                !isActiveProgram
-              }
+          <Form>
+            <Box
+              sx={{
+                p: 2,
+              }}
             >
-              {labels.button}
-            </Button>
-          </Box>
-          <Dialog
-            open={dialogOpen}
-            onClose={closeDialog}
-            scroll="paper"
-            maxWidth="md"
-          >
-            <DialogTitleWrapper>
-              <DialogTitle>{labels.title}</DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              <DialogContainer>
-                <Box
-                  sx={{
-                    p: 5,
-                  }}
-                >
-                  {isFollowUp && (
-                    <>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                        }}
-                      >
-                        {paymentPlan.unsuccessfulPaymentsCount === 0 && (
-                          <Box
-                            sx={{
-                              mb: 2,
-                            }}
-                          >
-                            <FieldBorder color="#FF0200">
-                              <GreyText>
-                                {t(
-                                  'Follow-up Payment Plan might be started just for unsuccessful payments',
-                                )}
-                              </GreyText>
-                            </FieldBorder>
-                          </Box>
-                        )}
-                        {paymentPlan.totalWithdrawnHouseholdsCount > 0 && (
-                          <Box
-                            sx={{
-                              mb: 4,
-                            }}
-                          >
-                            <FieldBorder color="#FF0200">
-                              <GreyText>
-                                {t(
-                                  `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
-                                )}
-                              </GreyText>
-                            </FieldBorder>
-                          </Box>
-                        )}
-                      </Box>
-                      <Grid container spacing={3}>
-                        <Grid size={{ xs: 6 }}>
-                          <Box
-                            sx={{
-                              mt: 2,
-                            }}
-                          >
-                            <Typography>
-                              {t('Main Payment Plan Details')}
-                            </Typography>
-                          </Box>
-                        </Grid>
-                        <Grid size={{ xs: 6 }} />
-                        <Grid size={{ xs: 6 }}>
-                          <LabelizedField label={t('Unsuccessful payments')}>
-                            {paymentPlan.unsuccessfulPaymentsCount}
-                          </LabelizedField>
-                        </Grid>
-                        <Grid size={{ xs: 6 }}>
-                          <LabelizedField
-                            label={t(
-                              `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
-                            )}
-                          >
-                            {paymentPlan.totalWithdrawnHouseholdsCount}
-                          </LabelizedField>
-                        </Grid>
-                      </Grid>
-                      <Grid size={{ xs: 12 }}>
-                        <DividerLine />
-                      </Grid>
-                    </>
-                  )}
-                  {isTopUp && (
-                    <>
-                      <Box sx={{ mb: 3 }}>
-                        <Typography>
-                          {t('Configure Top-Up Amount')}
-                        </Typography>
-                      </Box>
-                      <Grid container spacing={3} sx={{ alignItems: 'center' }}>
-                        <Grid size={{ xs: 5 }}>
-                          <Typography>{t('Fixed')}:</Typography>
-                        </Grid>
-                        <Grid size={{ xs: 7 }}>
-                          <Field
-                            name="fixedAmount"
-                            type="number"
-                            component={FormikTextField}
-                            fullWidth
-                            disabled={loadingCreate || Boolean(values.file)}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 5 }}>
-                          <Typography>{t('Custom / per Beneficiary')}:</Typography>
-                        </Grid>
-                        <Grid size={{ xs: 7 }}>
-                          <Button
-                            color="primary"
-                            variant="contained"
-                            component="a"
-                            download
-                            href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlan.id}/top-up-amount-template/`}
-                            data-cy="button-download-top-up-template"
-                          >
-                            {t('Download template')}
-                          </Button>
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <DropzoneField
-                            dontShowFilename={false}
-                            loading={loadingCreate}
-                            onChange={(files) => {
-                              const file = files[0] ?? null;
-                              // Updater form, not `...values`: DropzoneField memoises its
-                              // onDrop with an empty dependency list, so this closure only
-                              // ever sees the first render's values.
-                              void setValues((previous) => ({
-                                ...previous,
-                                file,
-                                // The file wins on submit, so drop whatever was typed above.
-                                ...(file ? { fixedAmount: '' } : {}),
-                              }));
-                              selectedFile.current = file;
-                              setFundedRows(null);
-                              if (!file) return;
-                              void countTopUpAmountRows(file)
-                                .then((count) => {
-                                  // Drop a result that lost the race to a newer pick.
-                                  if (selectedFile.current === file)
-                                    setFundedRows(count);
-                                })
-                                // A failed preview must not block the upload itself.
-                                .catch(() => setFundedRows(null));
-                            }}
-                          />
-                          {fundedRows !== null && (
-                            <Box sx={{ mt: 1 }}>
-                              <Typography data-cy="top-up-funded-rows">
-                                {variant === 'amendment'
-                                  ? t('New Top-Up Amendment will be created for')
-                                  : t('New Top-Up will be created for')}{' '}
-                                {fundedRows}{' '}
-                                {fundedRows === 1
-                                  ? t('payment')
-                                  : t('payments')}
-                              </Typography>
-                            </Box>
-                          )}
-                          <GreyText>
-                            {variant === 'amendment'
-                              ? t(
-                                  'Beneficiaries left empty or at zero are not part of this Top-Up Amendment and stay available for a later one.',
-                                )
-                              : t(
-                                  'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
-                                )}
-                          </GreyText>
-                        </Grid>
-                      </Grid>
-                      <Grid size={{ xs: 12 }}>
-                        <DividerLine />
-                      </Grid>
-                    </>
-                  )}
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setDialogOpen(true)}
+                data-cy={`button-create-${variant}`}
+                data-perm={PERMISSIONS.PM_CREATE}
+                disabled={
+                  !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
+                  !isActiveProgram
+                }
+              >
+                {labels.button}
+              </Button>
+            </Box>
+            <Dialog
+              open={dialogOpen}
+              onClose={closeDialog}
+              scroll="paper"
+              maxWidth="md"
+            >
+              <DialogTitleWrapper>
+                <DialogTitle>{labels.title}</DialogTitle>
+              </DialogTitleWrapper>
+              <DialogContent>
+                <DialogContainer>
                   <Box
                     sx={{
-                      mb: 3,
+                      p: 5,
                     }}
                   >
-                    <Typography>{t('Set the Dispersion Dates')}</Typography>
+                    {isFollowUp && (
+                      <>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          {paymentPlan.unsuccessfulPaymentsCount === 0 && (
+                            <Box
+                              sx={{
+                                mb: 2,
+                              }}
+                            >
+                              <FieldBorder color="#FF0200">
+                                <GreyText>
+                                  {t(
+                                    'Follow-up Payment Plan might be started just for unsuccessful payments',
+                                  )}
+                                </GreyText>
+                              </FieldBorder>
+                            </Box>
+                          )}
+                          {paymentPlan.totalWithdrawnHouseholdsCount > 0 && (
+                            <Box
+                              sx={{
+                                mb: 4,
+                              }}
+                            >
+                              <FieldBorder color="#FF0200">
+                                <GreyText>
+                                  {t(
+                                    `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
+                                  )}
+                                </GreyText>
+                              </FieldBorder>
+                            </Box>
+                          )}
+                        </Box>
+                        <Grid container spacing={3}>
+                          <Grid size={{ xs: 6 }}>
+                            <Box
+                              sx={{
+                                mt: 2,
+                              }}
+                            >
+                              <Typography>
+                                {t('Main Payment Plan Details')}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid size={{ xs: 6 }} />
+                          <Grid size={{ xs: 6 }}>
+                            <LabelizedField label={t('Unsuccessful payments')}>
+                              {paymentPlan.unsuccessfulPaymentsCount}
+                            </LabelizedField>
+                          </Grid>
+                          <Grid size={{ xs: 6 }}>
+                            <LabelizedField
+                              label={t(
+                                `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
+                              )}
+                            >
+                              {paymentPlan.totalWithdrawnHouseholdsCount}
+                            </LabelizedField>
+                          </Grid>
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                          <DividerLine />
+                        </Grid>
+                      </>
+                    )}
+                    {isTopUp && (
+                      <>
+                        <Box sx={{ mb: 3 }}>
+                          <Typography>
+                            {t('Configure Top-Up Amount')}
+                          </Typography>
+                        </Box>
+                        <Grid
+                          container
+                          spacing={3}
+                          sx={{ alignItems: 'center' }}
+                        >
+                          <Grid size={{ xs: 5 }}>
+                            <Typography>{t('Fixed')}:</Typography>
+                          </Grid>
+                          <Grid size={{ xs: 7 }}>
+                            <Field
+                              name="fixedAmount"
+                              type="number"
+                              component={FormikTextField}
+                              fullWidth
+                              disabled={loadingCreate || Boolean(values.file)}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 5 }}>
+                            <Typography>
+                              {t('Custom / per Beneficiary')}:
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 7 }}>
+                            <Button
+                              color="primary"
+                              variant="contained"
+                              component="a"
+                              download
+                              href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlan.id}/top-up-amount-template/`}
+                              data-cy="button-download-top-up-template"
+                            >
+                              {t('Download template')}
+                            </Button>
+                          </Grid>
+                          <Grid size={{ xs: 12 }}>
+                            <DropzoneField
+                              dontShowFilename={false}
+                              loading={loadingCreate}
+                              onChange={(files) => {
+                                const file = files[0] ?? null;
+                                // Updater form, not `...values`: DropzoneField memoises its
+                                // onDrop with an empty dependency list, so this closure only
+                                // ever sees the first render's values.
+                                void setValues((previous) => ({
+                                  ...previous,
+                                  file,
+                                  // The file wins on submit, so drop whatever was typed above.
+                                  ...(file ? { fixedAmount: '' } : {}),
+                                }));
+                                selectedFile.current = file;
+                                setFundedRows(null);
+                                if (!file) return;
+                                void countTopUpAmountRows(file)
+                                  .then((count) => {
+                                    // Drop a result that lost the race to a newer pick.
+                                    if (selectedFile.current === file)
+                                      setFundedRows(count);
+                                  })
+                                  // A failed preview must not block the upload itself.
+                                  .catch(() => setFundedRows(null));
+                              }}
+                            />
+                            {fundedRows !== null && (
+                              <Box sx={{ mt: 1 }}>
+                                <Typography data-cy="top-up-funded-rows">
+                                  {variant === 'amendment'
+                                    ? t(
+                                        'New Top-Up Amendment will be created for',
+                                      )
+                                    : t('New Top-Up will be created for')}{' '}
+                                  {fundedRows}{' '}
+                                  {fundedRows === 1
+                                    ? t('payment')
+                                    : t('payments')}
+                                </Typography>
+                              </Box>
+                            )}
+                            <GreyText>
+                              {variant === 'amendment'
+                                ? t(
+                                    'Beneficiaries left empty or at zero are not part of this Top-Up Amendment and stay available for a later one.',
+                                  )
+                                : t(
+                                    'Beneficiaries left empty or at zero are not part of this Top-Up and stay available for a later one.',
+                                  )}
+                            </GreyText>
+                          </Grid>
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                          <DividerLine />
+                        </Grid>
+                      </>
+                    )}
+                    <Box
+                      sx={{
+                        mb: 3,
+                      }}
+                    >
+                      <Typography>{t('Set the Dispersion Dates')}</Typography>
+                    </Box>
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 6 }}>
+                        <Field
+                          name="dispersionStartDate"
+                          label={t('Dispersion Start Date')}
+                          component={FormikDateField}
+                          required
+                          disabled={loadingCreate}
+                          fullWidth
+                          decoratorEnd={
+                            <CalendarTodayRoundedIcon color="disabled" />
+                          }
+                          data-cy="input-dispersion-start-date"
+                          tooltip={t(
+                            'The first day from which payments could be delivered.',
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6 }}>
+                        <Field
+                          name="dispersionEndDate"
+                          label={t('Dispersion End Date')}
+                          component={FormikDateField}
+                          required
+                          minDate={tomorrow}
+                          disabled={!values.dispersionStartDate}
+                          initialFocusedDate={values.dispersionStartDate}
+                          fullWidth
+                          decoratorEnd={
+                            <CalendarTodayRoundedIcon color="disabled" />
+                          }
+                          data-cy="input-dispersion-end-date"
+                          tooltip={t(
+                            'The last day on which payments could be delivered.',
+                          )}
+                        />
+                      </Grid>
+                    </Grid>
                   </Box>
-                  <Grid container spacing={3}>
-                    <Grid size={{ xs: 6 }}>
-                      <Field
-                        name="dispersionStartDate"
-                        label={t('Dispersion Start Date')}
-                        component={FormikDateField}
-                        required
-                        disabled={loadingCreate}
-                        fullWidth
-                        decoratorEnd={
-                          <CalendarTodayRoundedIcon color="disabled" />
-                        }
-                        data-cy="input-dispersion-start-date"
-                        tooltip={t(
-                          'The first day from which payments could be delivered.',
-                        )}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Field
-                        name="dispersionEndDate"
-                        label={t('Dispersion End Date')}
-                        component={FormikDateField}
-                        required
-                        minDate={tomorrow}
-                        disabled={!values.dispersionStartDate}
-                        initialFocusedDate={values.dispersionStartDate}
-                        fullWidth
-                        decoratorEnd={
-                          <CalendarTodayRoundedIcon color="disabled" />
-                        }
-                        data-cy="input-dispersion-end-date"
-                        tooltip={t(
-                          'The last day on which payments could be delivered.',
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              </DialogContainer>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Button onClick={closeDialog} data-cy="button-cancel">
-                {t('Cancel')}
-              </Button>
-                <LoadingButton
-                  loading={loadingCreate}
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                  onClick={submitForm}
-                  data-cy="button-submit"
-                >
-                  {t('Save')}
-                </LoadingButton>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
-        </Form>
+                </DialogContainer>
+              </DialogContent>
+              <DialogFooter>
+                <DialogActions>
+                  <Button onClick={closeDialog} data-cy="button-cancel">
+                    {t('Cancel')}
+                  </Button>
+                  <LoadingButton
+                    loading={loadingCreate}
+                    type="submit"
+                    color="primary"
+                    variant="contained"
+                    onClick={submitForm}
+                    data-cy="button-submit"
+                  >
+                    {t('Save')}
+                  </LoadingButton>
+                </DialogActions>
+              </DialogFooter>
+            </Dialog>
+          </Form>
         );
       }}
     </Formik>

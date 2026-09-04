@@ -1,7 +1,8 @@
 import styled from 'styled-components';
-import { Tooltip, TooltipProps } from '@mui/material';
+import type { TooltipProps } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface StyledWarningProps {
   confirmed: boolean;

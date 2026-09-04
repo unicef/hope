@@ -3,7 +3,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
@@ -13,7 +13,8 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -71,7 +72,10 @@ export const CreateImportFromProgramPopulationForm = ({
   );
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, programsParams),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsList,
+        programsParams,
+      ),
       queryFn: () => RestService.restBusinessAreasProgramsList(programsParams),
       placeholderData: keepPreviousData,
     });

@@ -1,5 +1,5 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -15,10 +15,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { AreaTree } from '@restgenerated/models/AreaTree';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { AreaTree } from '@restgenerated/models/AreaTree';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
-import { UserChoices } from '@restgenerated/models/UserChoices';
+import type { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -30,7 +30,8 @@ import {
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -47,9 +48,12 @@ export const CreateProgramPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -58,9 +62,12 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -69,9 +76,12 @@ export const CreateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,

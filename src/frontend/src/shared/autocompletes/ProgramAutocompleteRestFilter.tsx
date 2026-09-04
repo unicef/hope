@@ -1,22 +1,23 @@
 import { InputAdornment } from '@mui/material';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '@shared/autocompletes/BaseAutocompleteFilterRest';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { AutocompleteOption } from '@shared/autocompletes/types';
+import type { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import type { AutocompleteOption } from '@shared/autocompletes/types';
 
 export function ProgramAutocompleteRestFilter({
   disabled,
@@ -61,7 +62,10 @@ export function ProgramAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, queryVariables),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsList,
+      queryVariables,
+    ),
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
   });
 

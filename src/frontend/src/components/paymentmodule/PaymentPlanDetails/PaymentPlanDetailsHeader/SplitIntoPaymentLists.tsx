@@ -13,15 +13,16 @@ import {
   DialogTitle,
   Grid,
 } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { SplitPaymentPlan } from '@restgenerated/models/SplitPaymentPlan';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { SplitPaymentPlan } from '@restgenerated/models/SplitPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from 'src/config/permissions';
 import * as Yup from 'yup';
@@ -74,10 +75,14 @@ export const SplitIntoPaymentLists = ({
       showMessage(t('Payment Plan has been split successfully.'));
       setDialogOpen(false);
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     },
   });

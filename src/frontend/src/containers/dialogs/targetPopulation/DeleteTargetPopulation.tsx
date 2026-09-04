@@ -11,7 +11,7 @@ import {
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { getErrorMessage, isEmptyJsonResponseError } from '@utils/errors';
@@ -58,7 +58,7 @@ export const DeleteTargetPopulation = ({
       });
     },
   });
-  const handleDelete = async(): Promise<void> => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await mutate({
         businessAreaSlug: businessArea,

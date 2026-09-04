@@ -1,6 +1,6 @@
 import { usePermissions } from '@hooks/usePermissions';
-import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
-import { ReactElement } from 'react';
+import type { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';

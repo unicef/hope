@@ -17,8 +17,8 @@ import {
   GRIEVANCE_TICKET_STATES_NAMES,
 } from '@utils/constants';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
-import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 interface GRVDataTableProps {
   grvData: PaginatedGrievanceTicketListList;

@@ -1,7 +1,7 @@
 import { ImportCounters } from '../ImportCounters';
 import { ErrorsKobo } from './KoboErrors';
-import { ReactElement } from 'react';
-import { KoboImportData } from '@restgenerated/models/KoboImportData';
+import type { ReactElement } from 'react';
+import type { KoboImportData } from '@restgenerated/models/KoboImportData';
 
 export interface KoboImportDataRepresentationPropTypes {
   koboImportData: KoboImportData;
@@ -16,9 +16,7 @@ export function KoboImportDataRepresentation({
   }
   return (
     <>
-      <ErrorsKobo
-        errors={koboImportData.koboValidationErrors}
-      />
+      <ErrorsKobo errors={koboImportData.koboValidationErrors} />
       <ImportCounters
         numberOfHouseholds={koboImportData.numberOfHouseholds}
         numberOfIndividuals={koboImportData.numberOfIndividuals}

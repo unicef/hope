@@ -8,7 +8,7 @@ import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface ActivityLogPageFiltersProps {
   filter;

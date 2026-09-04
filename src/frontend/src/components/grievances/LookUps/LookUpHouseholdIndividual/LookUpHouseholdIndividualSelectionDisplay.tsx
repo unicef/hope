@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Types = { household: 'household', individual: 'individual' };
 

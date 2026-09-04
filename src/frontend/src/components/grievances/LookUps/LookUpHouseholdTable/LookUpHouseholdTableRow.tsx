@@ -4,12 +4,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { MouseEvent, ReactElement } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdList } from '@restgenerated/models/HouseholdList';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpHouseholdTableRowProps {
   household: HouseholdList;

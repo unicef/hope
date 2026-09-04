@@ -13,12 +13,12 @@ import {
   PROGRAM_STATE_CHOICES,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../programContext';
-import { ProgramList } from '@restgenerated/models/ProgramList';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 
 interface PeopleFilterProps {

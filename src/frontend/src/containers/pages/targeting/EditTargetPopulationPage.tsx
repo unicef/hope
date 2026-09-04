@@ -1,10 +1,10 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { usePermissions } from '@hooks/usePermissions';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';

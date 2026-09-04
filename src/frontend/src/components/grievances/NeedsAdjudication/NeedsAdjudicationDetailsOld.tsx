@@ -8,7 +8,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -25,7 +26,7 @@ import {
   ApproveBox,
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export const NeedsAdjudicationDetailsOld = ({

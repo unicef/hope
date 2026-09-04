@@ -17,9 +17,9 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 import { DocumentSearchField } from '@core/DocumentSearchField';
-import { ReactElement } from 'react';
-import { ProgramList } from '@restgenerated/models/ProgramList';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { ReactElement } from 'react';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 
 interface IndividualsFilterProps {

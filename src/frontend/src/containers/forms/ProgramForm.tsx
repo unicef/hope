@@ -2,8 +2,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Grid, Tooltip } from '@mui/material';
-import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -14,7 +14,8 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, useFormikContext } from 'formik';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -36,9 +37,12 @@ const ProgramForm = ({
   const isEditProgram = location.pathname.indexOf('edit') !== -1;
 
   const { data } = useQuery<ProgramChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsChoicesRetrieve,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsChoicesRetrieve({
         businessAreaSlug: businessArea,

@@ -1,5 +1,6 @@
 import { Paper } from '@mui/material';
-import { ReactElement, useState, useRef, ChangeEvent } from 'react';
+import type { ReactElement, ChangeEvent } from 'react';
+import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -88,7 +89,9 @@ export function ActivityLogPage(): ReactElement {
     ),
     queryFn: () => {
       if (isAllPrograms) {
-        return RestService.restBusinessAreasActivityLogsList(activityLogsParams);
+        return RestService.restBusinessAreasActivityLogsList(
+          activityLogsParams,
+        );
       } else {
         return RestService.restBusinessAreasProgramsActivityLogsList({
           ...activityLogsParams,

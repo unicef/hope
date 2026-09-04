@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
-import { ReactElement } from 'react';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { ReactElement } from 'react';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;

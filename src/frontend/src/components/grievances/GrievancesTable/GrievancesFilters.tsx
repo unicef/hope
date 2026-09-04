@@ -13,7 +13,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AccountBalance } from '@mui/icons-material';
 import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
@@ -27,7 +27,8 @@ import {
   GrievanceTypes,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
@@ -93,7 +94,10 @@ export const GrievancesFilters = ({
       (item) => item.value?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE,
     );
     return dataChangeCategory
-      ? [...choicesData.grievanceTicketSystemCategoryChoices, dataChangeCategory]
+      ? [
+          ...choicesData.grievanceTicketSystemCategoryChoices,
+          dataChangeCategory,
+        ]
       : choicesData.grievanceTicketSystemCategoryChoices;
   }, [choicesData, isUserGeneratedTab]);
 

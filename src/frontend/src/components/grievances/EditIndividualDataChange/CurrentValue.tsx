@@ -5,7 +5,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 import { GrievanceIndividualPhotoModal } from '../GrievancesPhotoModals/GrievanceIndividualPhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: {

@@ -7,9 +7,9 @@ import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
-import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import type { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -19,7 +19,8 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
@@ -37,7 +38,7 @@ import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkCloseModal } from './bulk/BulkCloseModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface GrievancesTableProps {
@@ -181,7 +182,9 @@ export const GrievancesTable = ({
       allGrievanceTicketsParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsList(allGrievanceTicketsParams),
+      RestService.restBusinessAreasGrievanceTicketsList(
+        allGrievanceTicketsParams,
+      ),
     enabled: isAllPrograms,
     placeholderData: keepPreviousData,
   });

@@ -4,10 +4,10 @@ import { useBusinessArea } from '@hooks/useBusinessArea';
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { MouseEvent, ReactElement } from 'react';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import type { MouseEvent, ReactElement } from 'react';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface LookUpHouseholdTableRowCommunicationProps {
   household: HouseholdList;

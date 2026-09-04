@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: {

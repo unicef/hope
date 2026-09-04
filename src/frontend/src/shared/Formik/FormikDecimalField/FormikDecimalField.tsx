@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { TextField, InputAdornment } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

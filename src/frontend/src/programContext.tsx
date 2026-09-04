@@ -1,11 +1,6 @@
-import {
-  createContext,
-  ReactElement,
-  ReactNode,
-  useContext,
-  useState,
-} from 'react';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { DataCollectingTypeTypeEnum } from '@restgenerated/models/DataCollectingTypeTypeEnum';
 

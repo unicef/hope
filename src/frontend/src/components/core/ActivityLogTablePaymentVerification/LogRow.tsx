@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import moment from 'moment';
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
@@ -6,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
-import { LogEntry } from '@restgenerated/models/LogEntry';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);

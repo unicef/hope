@@ -3,7 +3,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useEffect, useState, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -17,8 +18,8 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
-import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import type { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
+import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
 interface RegistrationDataImportProps {
   filter;

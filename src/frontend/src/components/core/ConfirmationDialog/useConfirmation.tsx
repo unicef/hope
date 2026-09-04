@@ -1,11 +1,5 @@
-import {
-  createContext,
-  ReactElement,
-  ReactNode,
-  useContext,
-  useRef,
-  useState,
-} from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import { ConfirmationDialog } from './ConfirmationDialog';
 
 const ConfirmationDialogContext = createContext<

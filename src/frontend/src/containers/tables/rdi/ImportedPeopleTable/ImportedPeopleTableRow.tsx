@@ -6,10 +6,10 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface ImportedIndividualsTableRowProps {
   individual: IndividualList;

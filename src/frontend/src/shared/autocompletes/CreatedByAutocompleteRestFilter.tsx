@@ -1,19 +1,20 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
-import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import type { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 export const CreatedByAutocompleteRestFilter = ({
   disabled,
@@ -59,7 +60,10 @@ export const CreatedByAutocompleteRestFilter = ({
     isLoading,
     refetch,
   } = useQuery<PaginatedUserList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, queryVariables),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersList,
+      queryVariables,
+    ),
     queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
   });
 

@@ -15,14 +15,15 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PERMISSIONS } from 'src/config/permissions';
@@ -129,7 +130,9 @@ export function RequestedPhotoErrorDataChange({
           <ApproveBox>
             <Title>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="h6">{t('Requested Data Change')}</Typography>
+                <Typography variant="h6">
+                  {t('Requested Data Change')}
+                </Typography>
                 {shouldShowEditButton ? (
                   <Button
                     onClick={() => setEdit(true)}
@@ -185,10 +188,7 @@ export function RequestedPhotoErrorDataChange({
                         checked={isSelected}
                         disabled={!isForApproval}
                         onChange={() =>
-                          setFieldValue(
-                            'selected',
-                            isSelected ? [] : ['photo'],
-                          )
+                          setFieldValue('selected', isSelected ? [] : ['photo'])
                         }
                         data-cy="checkbox-requested-data-change"
                       />

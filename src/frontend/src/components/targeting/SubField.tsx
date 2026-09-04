@@ -1,6 +1,7 @@
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, useFormikContext } from 'formik';
-import { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';

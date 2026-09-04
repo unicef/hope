@@ -5,7 +5,7 @@ import {
   isDecisionResolved,
   keyReassignments,
 } from './naRoleUtils';
-import { NaTicketDecision } from './naTypes';
+import type { NaTicketDecision } from './naTypes';
 
 const household = (overrides = {}) => ({
   id: 'hh-1',

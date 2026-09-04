@@ -21,13 +21,14 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { GrievanceTicketRelated } from '@restgenerated/models/GrievanceTicketRelated';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { GrievanceTicketRelated } from '@restgenerated/models/GrievanceTicketRelated';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { grievanceTicketStatusToColor } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

@@ -2,7 +2,8 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
@@ -20,8 +21,8 @@ import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

@@ -23,8 +23,8 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;

@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { ChangeEvent, ReactElement, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';

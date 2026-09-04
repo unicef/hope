@@ -5,13 +5,14 @@ import styled from 'styled-components';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button } from '@mui/material';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
+import type { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 
 const ReassignRoleButton = styled(Button)`
   padding: 25px;

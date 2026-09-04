@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
@@ -10,7 +10,7 @@ import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { AccountToEditTable } from './AccountToEditTable';
 import { AccountTable } from './AccountTable';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';

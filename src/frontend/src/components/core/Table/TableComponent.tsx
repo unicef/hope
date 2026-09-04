@@ -13,10 +13,11 @@ import {
   TableRow as MuiTableRow,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
+import type { HeadCell } from './EnhancedTableHead';
+import { EnhancedTableHead } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import styled from 'styled-components';
-import { ReactElement, ChangeEvent, MouseEvent } from 'react';
+import type { ReactElement, ChangeEvent, MouseEvent } from 'react';
 
 export type Order = 'asc' | 'desc';
 

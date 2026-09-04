@@ -7,7 +7,8 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -22,7 +23,7 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { showApiErrorMessages } from '@utils/utils';
@@ -79,7 +80,9 @@ function ExcludeSection({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
     },
     onError: (error) => {

@@ -1,6 +1,6 @@
 import SubField from '@components/targeting/SubField';
 import { FieldChooser } from '@components/targeting/FieldChooser';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function TargetingCriteriaIndividualBlockFilter({
   blockIndex,

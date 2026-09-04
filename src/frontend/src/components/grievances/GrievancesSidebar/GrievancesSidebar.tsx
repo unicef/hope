@@ -9,9 +9,9 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function GrievancesSidebar({
   ticket,

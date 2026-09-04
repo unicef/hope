@@ -4,9 +4,9 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 import { sexToCapitalize } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 interface LookUpIndividualTableRowProps {

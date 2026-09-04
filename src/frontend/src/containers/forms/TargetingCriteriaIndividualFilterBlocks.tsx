@@ -1,7 +1,8 @@
 import { Box, Button } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import { Fragment, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';

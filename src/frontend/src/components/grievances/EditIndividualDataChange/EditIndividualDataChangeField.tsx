@@ -9,7 +9,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface EditIndividualDataChangeFieldProps {
   field: {

@@ -12,12 +12,12 @@ import { Title } from '@core/Title';
 import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { ReactElement } from 'react';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const Info = styled(InfoIcon)`
   color: ${({ theme }) => theme.hctPalette.gray};

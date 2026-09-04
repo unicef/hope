@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
 import HopeLogo from './something_went_wrong_hope_logo.png';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 const Container = styled.div`
   background-color: #ffffff;

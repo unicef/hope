@@ -2,8 +2,8 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { useProgramContext } from '../../programContext';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -12,10 +12,12 @@ import { Title } from '@core/Title';
 import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export function RequestedHouseholdDataChange({

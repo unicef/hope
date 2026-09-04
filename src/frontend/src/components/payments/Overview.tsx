@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Paper, Theme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Paper } from '@mui/material';
 
 export const Overview = styled(Paper)<{ theme?: Theme }>`
   margin: 20px;

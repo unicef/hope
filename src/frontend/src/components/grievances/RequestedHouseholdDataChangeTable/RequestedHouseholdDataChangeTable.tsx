@@ -1,6 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -18,7 +18,7 @@ import { householdDataRow } from './householdDataRow';
 import { snakeCase } from 'lodash';
 import { roleDisplayMap } from '../utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 
 const GreenIcon = styled.div`

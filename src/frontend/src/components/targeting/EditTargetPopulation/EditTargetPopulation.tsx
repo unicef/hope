@@ -22,7 +22,8 @@ import {
   IndIdValidation,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -32,10 +33,10 @@ import { PaperContainer } from '../PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
+import type { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';

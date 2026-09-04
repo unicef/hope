@@ -5,18 +5,19 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { renderUserName, ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { renderUserName, showApiErrorMessages } from '@utils/utils';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { GrievanceCreateNote } from '@restgenerated/models/GrievanceCreateNote';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceCreateNote } from '@restgenerated/models/GrievanceCreateNote';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 const Name = styled.span`

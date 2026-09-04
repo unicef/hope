@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -13,7 +14,7 @@ import {
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function OtherRelatedTickets({
   ticket,

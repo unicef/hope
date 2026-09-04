@@ -1,4 +1,4 @@
-import { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
 import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
@@ -11,8 +11,8 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
+import type { useLocation, useNavigate } from 'react-router-dom';
+import type { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
 const NEWLINE_RE = /[\r\n]/g;

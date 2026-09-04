@@ -1,7 +1,7 @@
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceIndividualPhotoModal } from '../GrievancesPhotoModals/GrievanceIndividualPhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface NewValueProps {
@@ -18,13 +18,20 @@ export interface NewValueProps {
   fieldName?: string;
 }
 
-export function NewValue({ field, value, fieldName }: NewValueProps): ReactElement {
+export function NewValue({
+  field,
+  value,
+  fieldName,
+}: NewValueProps): ReactElement {
   const { t } = useTranslation();
   // Handle core photo field - check both field.name and passed fieldName as fallback
-  const isPhotoField = field?.name === 'photo' || (fieldName === 'photo' && !field?.isFlexField);
+  const isPhotoField =
+    field?.name === 'photo' || (fieldName === 'photo' && !field?.isFlexField);
 
   if (isPhotoField && (field?.type === 'IMAGE' || !field)) {
-    return <>{value ? <GrievanceIndividualPhotoModal photoPath={value} /> : '-'}</>;
+    return (
+      <>{value ? <GrievanceIndividualPhotoModal photoPath={value} /> : '-'}</>
+    );
   }
 
   let displayValue;
@@ -65,7 +72,9 @@ export function NewValue({ field, value, fieldName }: NewValueProps): ReactEleme
   }
   return (
     <>
-      {displayValue === null || displayValue === undefined || displayValue === ''
+      {displayValue === null ||
+      displayValue === undefined ||
+      displayValue === ''
         ? '-'
         : displayValue}
     </>

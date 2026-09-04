@@ -2,9 +2,9 @@ import { Box, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { EditAccountRow } from './EditAccountRow';
-import { ReactElement } from 'react';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { ReactElement } from 'react';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 export interface ExistingAccountsFieldArrayProps {
   setFieldValue;

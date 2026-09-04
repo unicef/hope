@@ -1,4 +1,5 @@
-import { forwardRef, ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { Autocomplete, Paper, TextField } from '@mui/material';
@@ -18,7 +19,11 @@ interface Option {
 const CriteriaAutocompletePaper = forwardRef<HTMLDivElement>(
   function CriteriaAutocompletePaper(props, ref) {
     return (
-      <Paper {...props} ref={ref} data-cy="autocomplete-target-criteria-options" />
+      <Paper
+        {...props}
+        ref={ref}
+        data-cy="autocomplete-target-criteria-options"
+      />
     );
   },
 );

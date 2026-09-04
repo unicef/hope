@@ -1,4 +1,4 @@
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -7,14 +7,14 @@ import { RegistrationIndividualAdditionalRegistrationInformation } from '@compon
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -63,9 +63,12 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasIndividualsChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,

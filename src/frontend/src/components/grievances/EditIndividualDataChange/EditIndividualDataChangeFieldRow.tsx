@@ -3,11 +3,12 @@ import camelCase from 'lodash/camelCase';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { EditIndividualDataChangeField } from './EditIndividualDataChangeField';
 import { CurrentValue } from './CurrentValue';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 export interface EditIndividualDataChangeFieldRowProps {
   fields;

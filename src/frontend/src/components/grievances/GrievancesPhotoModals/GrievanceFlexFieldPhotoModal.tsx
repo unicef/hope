@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
 
 export interface GrievanceFlexFieldPhotoModalProps {

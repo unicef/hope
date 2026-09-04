@@ -1,11 +1,13 @@
-import { ReactElement, useState } from 'react';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { Order, TableComponent } from '@components/core/Table/TableComponent';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { Order } from '@components/core/Table/TableComponent';
+import { TableComponent } from '@components/core/Table/TableComponent';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { Individual } from '@restgenerated/models/Individual';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import type { Individual } from '@restgenerated/models/Individual';
 
 const headCells: HeadCell<Individual>[] = [
   {

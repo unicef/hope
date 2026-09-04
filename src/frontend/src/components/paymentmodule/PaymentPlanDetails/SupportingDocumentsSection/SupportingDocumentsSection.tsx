@@ -32,12 +32,13 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { getErrorMessage } from '@utils/errors';
 

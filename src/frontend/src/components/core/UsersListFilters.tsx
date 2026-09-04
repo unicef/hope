@@ -9,7 +9,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface UsersListFiltersProps {
   filter;

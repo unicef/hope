@@ -1,9 +1,5 @@
-import {
-  createContext,
-  ReactElement,
-  useContext,
-  useState,
-} from 'react';
+import type { ReactElement } from 'react';
+import { createContext, useContext, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import { useTranslation } from 'react-i18next';
 

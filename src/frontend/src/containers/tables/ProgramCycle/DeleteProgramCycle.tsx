@@ -17,12 +17,13 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
-import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { isEmptyJsonResponseError, toApiError } from '@utils/errors';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -57,7 +58,7 @@ const DeleteProgramCycle = ({
     },
   });
 
-  const handleDelete = async(): Promise<void> => {
+  const handleDelete = async (): Promise<void> => {
     try {
       await mutateAsync();
       showMessage(t('Programme Cycle Deleted'));

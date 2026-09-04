@@ -7,9 +7,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import {
@@ -24,7 +24,8 @@ import {
   showApiErrorMessages,
   formatFigure,
 } from '@utils/utils';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';

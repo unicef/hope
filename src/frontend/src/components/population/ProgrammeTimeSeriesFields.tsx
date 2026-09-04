@@ -15,9 +15,9 @@ import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
+import type { ReactElement } from 'react';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;

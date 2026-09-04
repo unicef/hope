@@ -1,11 +1,11 @@
 import { TextField, Autocomplete } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import get from 'lodash/get';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { CurrencyChoice } from '@restgenerated/models/CurrencyChoice';
+import type { CurrencyChoice } from '@restgenerated/models/CurrencyChoice';
 
 const getCurrencyLabel = (option: CurrencyChoice): string => {
   if (option.visionCode && option.visionCode !== option.value) {

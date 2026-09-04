@@ -1,7 +1,5 @@
-import {
-  EnhancedTableHead,
-  HeadCell,
-} from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { EnhancedTableHead } from '@components/core/Table/EnhancedTableHead';
 import { EnhancedTableToolbar } from '@components/core/Table/EnhancedTableToolbar';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 import {
@@ -74,7 +72,7 @@ function TablePaginationActions(props) {
     </MuiBox>
   );
 }
-import { ReactElement, ChangeEvent, MouseEvent } from 'react';
+import type { ReactElement, ChangeEvent, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

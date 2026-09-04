@@ -3,8 +3,8 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { PendingPayment } from '@restgenerated/models/PendingPayment';
+import type { ReactElement } from 'react';
+import type { PendingPayment } from '@restgenerated/models/PendingPayment';
 
 interface TargetPopulationPeopleTableRowProps {
   payment: PendingPayment;

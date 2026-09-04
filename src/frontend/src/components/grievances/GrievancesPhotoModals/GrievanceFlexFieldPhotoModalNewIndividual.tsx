@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 
@@ -34,7 +34,9 @@ export function GrievanceFlexFieldPhotoModalNewIndividual({
       individualParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve(individualParams),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(
+        individualParams,
+      ),
     enabled:
       !!businessArea &&
       !!individualId &&

@@ -13,7 +13,7 @@ import PaymentPlanGroupDetailsPage from '@containers/pages/paymentmodule/Groups/
 import BatchDetailsPage from '@containers/pages/paymentmodule/Groups/BatchDetailsPage';
 import FollowUpInstructionListPage from '@containers/pages/paymentmodule/FollowUpInstructionListPage';
 import FollowUpInstructionDetailsPage from '@containers/pages/paymentmodule/FollowUpInstructionDetailsPage';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export const PaymentModuleRoutes = (): ReactElement => {
   const children = [

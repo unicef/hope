@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildExecutePayload } from './naPayload';
-import { NaTicketDecision } from './naTypes';
+import type { NaTicketDecision } from './naTypes';
 
 describe('buildExecutePayload', () => {
   it('sends the replacement so the server can hand over the role', () => {

@@ -1,15 +1,16 @@
 import { TableWrapper } from '@core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
-import { MouseEvent, ReactElement, useState, useEffect, useMemo } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 

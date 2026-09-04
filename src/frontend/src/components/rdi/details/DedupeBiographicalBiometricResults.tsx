@@ -15,13 +15,14 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { MiśTheme } from '../../../theme';
+import type { MiśTheme } from '../../../theme';
 import BiometricsResultsRdi from './BiometricsResultsRdi';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};

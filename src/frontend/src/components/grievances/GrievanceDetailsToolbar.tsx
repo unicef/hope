@@ -1,5 +1,5 @@
 import { AdminButton } from '@core/AdminButton';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { ButtonDialog } from '@core/ButtonDialog';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
@@ -8,7 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Box, Button, Tooltip } from '@mui/material';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,17 +17,18 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgramContext } from '../../programContext';
-import { MiśTheme } from '../../theme';
+import type { MiśTheme } from '../../theme';
 import {
   getGrievanceDetailsPath,
   getGrievanceEditPath,
 } from './utils/createGrievanceUtils';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 const Separator = styled.div`

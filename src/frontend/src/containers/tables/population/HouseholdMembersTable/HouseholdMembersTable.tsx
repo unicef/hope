@@ -2,16 +2,16 @@ import { BlackLink } from '@components/core/BlackLink';
 import { Bold } from '@components/core/Bold';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { HouseholdMember } from '@restgenerated/models/HouseholdMember';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdMember } from '@restgenerated/models/HouseholdMember';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import type { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -21,7 +21,8 @@ import {
   populationStatusToColor,
   sexToCapitalize,
 } from '@utils/utils';
-import { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 

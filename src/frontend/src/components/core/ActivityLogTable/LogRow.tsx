@@ -1,10 +1,11 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import moment from 'moment';
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
-import { ActivityLogEntry } from './types';
+import type { ActivityLogEntry } from './types';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 

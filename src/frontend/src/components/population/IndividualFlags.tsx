@@ -2,9 +2,9 @@ import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { FlagTooltip } from '@core/FlagTooltip';
 import { WarningTooltip } from '@core/WarningTooltip';
-import { FC, ReactElement } from 'react';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { FC, ReactElement } from 'react';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface IndividualFlagsProps {
   individual: IndividualList | IndividualDetail;

@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { showApiErrorMessages, today } from '@utils/utils';
@@ -29,8 +30,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycleList;

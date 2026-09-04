@@ -6,7 +6,7 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { tomorrow } from '@utils/utils';
 import { Field } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 
@@ -36,7 +36,10 @@ export const PaymentPlanParameters = ({
               fullWidth
               variant="outlined"
               required
-              choices={cycles.map((c) => ({ value: c.id, name: c.title ?? c.id }))}
+              choices={cycles.map((c) => ({
+                value: c.id,
+                name: c.title ?? c.id,
+              }))}
               component={FormikSelectField}
               disableClearable
               data-cy="input-program-cycle"

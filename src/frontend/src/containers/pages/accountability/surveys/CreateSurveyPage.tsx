@@ -1,5 +1,5 @@
 import { LookUpSelectionSurveys } from '@components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { FormikEffect } from '@components/core/FormikEffect';
 import { LoadingButton } from '@components/core/LoadingButton';
@@ -27,7 +27,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { AreaList } from '@restgenerated/models/AreaList';
+import type { AreaList } from '@restgenerated/models/AreaList';
 import { SurveySampleSizeSamplingTypeEnum } from '@restgenerated/models/SurveySampleSizeSamplingTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -41,13 +41,8 @@ import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import {
-  ReactElement,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

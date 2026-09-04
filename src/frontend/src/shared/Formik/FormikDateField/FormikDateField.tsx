@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import FormControl from '@mui/material/FormControl';
 import { parseISO } from 'date-fns';
 import get from 'lodash/get';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const FullWidthFormControl = styled(FormControl)`
   width: 100%;

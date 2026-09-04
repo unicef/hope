@@ -1,8 +1,8 @@
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ReactElement } from 'react';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import type { ReactElement } from 'react';
+import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 interface VerificationPlanDetailsChartProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
@@ -20,17 +20,15 @@ export function VerificationPlanDetailsChart({
   return (
     <ChartContainer>
       <Doughnut
-        options={
-          {
-            maintainAspectRatio: false,
-            cutout: '%',
-            plugins: {
-              legend: {
-                display: false,
-              },
+        options={{
+          maintainAspectRatio: false,
+          cutout: '%',
+          plugins: {
+            legend: {
+              display: false,
             },
-          }
-        }
+          },
+        }}
         data={{
           labels: [
             t('RECEIVED'),

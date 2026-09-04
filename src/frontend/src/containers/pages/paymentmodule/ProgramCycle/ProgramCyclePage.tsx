@@ -1,4 +1,5 @@
-import { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +18,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 const initialFilter = {
   search: '',
@@ -49,9 +50,12 @@ export const ProgramCyclePage = (): ReactElement => {
   );
 
   const { data: programChoicesData } = useQuery<ProgramChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsChoicesRetrieve,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsChoicesRetrieve({
         businessAreaSlug: businessArea,

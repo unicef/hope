@@ -5,12 +5,12 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import {
   paymentPlanStatusToColor,
   targetPopulationStatusDisplayMap,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface TargetPopulationTableRowProps {

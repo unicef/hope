@@ -4,9 +4,10 @@ import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
 import { headCells } from './SanctionListIndividualsHeadCells';
-import { PaginatedSanctionListIndividualList } from '@restgenerated/models/PaginatedSanctionListIndividualList';
-import { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
-import { ReactElement, useMemo, useState, useEffect } from 'react';
+import type { PaginatedSanctionListIndividualList } from '@restgenerated/models/PaginatedSanctionListIndividualList';
+import type { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
+import type { ReactElement } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface SanctionListIndividualsTableProps {

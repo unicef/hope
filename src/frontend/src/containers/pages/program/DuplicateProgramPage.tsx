@@ -1,5 +1,5 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -15,12 +15,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { AreaTree } from '@restgenerated/models/AreaTree';
-import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
-import { ProgramCopy } from '@restgenerated/models/ProgramCopy';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { UserChoices } from '@restgenerated/models/UserChoices';
+import type { AreaTree } from '@restgenerated/models/AreaTree';
+import type { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramCopy } from '@restgenerated/models/ProgramCopy';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -32,7 +32,8 @@ import {
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -64,9 +65,12 @@ const DuplicateProgramPage = (): ReactElement => {
   });
 
   const { data: treeData, isLoading: treeLoading } = useQuery<AreaTree[]>({
-    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -86,9 +90,12 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasUsersChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasUsersChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -97,9 +104,12 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,

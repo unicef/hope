@@ -5,7 +5,7 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ResultsForPeopleProps {
   paymentPlan: PaymentPlanDetail;

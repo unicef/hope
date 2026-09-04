@@ -1,12 +1,13 @@
 import { Title } from '@core/Title';
 import { Box, Typography } from '@mui/material';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApproveBox } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { NeedsAdjudicationActions } from './NeedsAdjudicationActions';
 import { NeedsAdjudicationTable } from './NeedsAdjudicationTable';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export const NeedsAdjudicationDetailsNew = ({
   ticket,

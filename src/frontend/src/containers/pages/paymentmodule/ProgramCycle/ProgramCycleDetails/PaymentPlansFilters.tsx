@@ -7,13 +7,13 @@ import { SelectFilter } from '@core/SelectFilter';
 import { Title } from '@core/Title';
 import { Grid, MenuItem, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import type { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
 import moment from 'moment';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 

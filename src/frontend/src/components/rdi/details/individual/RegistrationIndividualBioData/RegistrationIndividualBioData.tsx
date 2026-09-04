@@ -3,9 +3,10 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Grid, Paper, Theme, Typography } from '@mui/material';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { Theme } from '@mui/material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
   formatAge,
@@ -13,7 +14,7 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';

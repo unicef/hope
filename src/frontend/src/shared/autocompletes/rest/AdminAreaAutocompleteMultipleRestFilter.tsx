@@ -1,4 +1,5 @@
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { Checkbox } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -11,7 +12,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { AreaList } from '@restgenerated/models/AreaList';
+import type { AreaList } from '@restgenerated/models/AreaList';
 
 type AdminAreaOption = { name: string; value: string };
 
@@ -181,20 +182,21 @@ export function AdminAreaAutocompleteMultipleRestFilter({
       loading={isLoading}
       noOptionsText="No options available"
       isOptionEqualToValue={(option, value1) =>
-        (option as AdminAreaOption)?.value === (value1 as AdminAreaOption)?.value
+        (option as AdminAreaOption)?.value ===
+        (value1 as AdminAreaOption)?.value
       }
       renderOption={(props, rawOption, { selected }) => {
         const option = rawOption as AdminAreaOption;
         return (
-        <li {...props} key={option.value}>
-          <Checkbox
-            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-            checkedIcon={<CheckBoxIcon fontSize="small" />}
-            style={{ marginRight: 8 }}
-            checked={selected}
-          />
-          {option.name}
-        </li>
+          <li {...props} key={option.value}>
+            <Checkbox
+              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              checkedIcon={<CheckBoxIcon fontSize="small" />}
+              style={{ marginRight: 8 }}
+              checked={selected}
+            />
+            {option.name}
+          </li>
         );
       }}
       renderInput={(params) => {

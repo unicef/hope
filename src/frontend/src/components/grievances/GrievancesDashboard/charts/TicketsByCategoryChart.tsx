@@ -1,7 +1,7 @@
 import { Bar } from 'react-chartjs-2';
 import { formatThousands } from '@utils/utils';
-import { ChartData } from '@restgenerated/models/ChartData';
-import { ReactElement } from 'react';
+import type { ChartData } from '@restgenerated/models/ChartData';
+import type { ReactElement } from 'react';
 
 interface TicketsByCategoryChartProps {
   data: ChartData;

@@ -1,15 +1,14 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import {
   columnToOrderBy,
   filterEmptyParams,
   isPermissionDeniedError,
 } from '@utils/utils';
-import {
-  Order,
-  TableRestComponent,
-} from '../TableRestComponent/TableRestComponent';
+import type { Order } from '../TableRestComponent/TableRestComponent';
+import { TableRestComponent } from '../TableRestComponent/TableRestComponent';
 import { isEqual } from 'lodash';
 
 interface UniversalRestTableProps<T = any, K = any> {

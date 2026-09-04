@@ -5,11 +5,11 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
 import { choicesToDict } from '@utils/utils';
 

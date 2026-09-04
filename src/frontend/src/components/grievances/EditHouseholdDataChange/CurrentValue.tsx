@@ -2,7 +2,7 @@ import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: {

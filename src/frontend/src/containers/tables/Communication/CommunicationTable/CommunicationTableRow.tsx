@@ -5,7 +5,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import type { MessageList } from '@restgenerated/models/MessageList';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface CommunicationTableRowProps {
   message: MessageList;

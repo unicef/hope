@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { Doughnut } from 'react-chartjs-2';
-import { ChartData } from '@restgenerated/models/ChartData';
-import { ReactElement } from 'react';
+import type { ChartData } from '@restgenerated/models/ChartData';
+import type { ReactElement } from 'react';
 
 interface TicketsByStatusChartProps {
   data: ChartData;

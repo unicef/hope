@@ -5,12 +5,12 @@ import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore
 import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';

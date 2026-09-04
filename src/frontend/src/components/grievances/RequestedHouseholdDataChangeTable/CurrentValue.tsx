@@ -1,5 +1,5 @@
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -67,7 +67,6 @@ export function CurrentValue({
         }
         break;
       case 'BOOL':
-
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':

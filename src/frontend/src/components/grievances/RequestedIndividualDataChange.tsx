@@ -2,7 +2,8 @@ import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -14,14 +15,15 @@ import {
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export type RoleReassignData = {

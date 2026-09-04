@@ -3,7 +3,7 @@ import { AddCircleOutlined } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface NewDocumentationFieldArrayProps {
   values;

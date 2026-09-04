@@ -1,5 +1,5 @@
 import { Autocomplete, Box, TextField } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function FormikAutocomplete({
   field,

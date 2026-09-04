@@ -7,8 +7,8 @@ import { renderSomethingOrDash } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
-import { ReactElement } from 'react';
-import { FeedbackList } from '@restgenerated/models/FeedbackList';
+import type { ReactElement } from 'react';
+import type { FeedbackList } from '@restgenerated/models/FeedbackList';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackList;

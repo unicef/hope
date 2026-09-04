@@ -1,13 +1,8 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import {
-  ReactElement,
-  ReactNode,
-  SyntheticEvent,
-  useEffect,
-  useRef,
-} from 'react';
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   value,
@@ -39,7 +34,10 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   handleChange: (event: SyntheticEvent, newValue: TOption | null) => void;
 
   handleClose: (event: SyntheticEvent, reason: string) => void;
-  handleOptionSelected: (option: TOption | string, value: TOption | string) => boolean;
+  handleOptionSelected: (
+    option: TOption | string,
+    value: TOption | string,
+  ) => boolean;
   handleOptionLabel: (option: TOption | string) => string;
   handleOpen: () => void;
   open: boolean;

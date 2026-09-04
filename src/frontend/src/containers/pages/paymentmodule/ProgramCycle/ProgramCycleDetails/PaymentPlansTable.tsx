@@ -4,16 +4,17 @@ import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramC
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePersistedCount } from '@hooks/usePersistedCount';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
-import React, { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentPlansTableProps {

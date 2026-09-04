@@ -1,20 +1,15 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
-import {
-  ReactElement,
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';

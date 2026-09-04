@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
-import { ReactElement } from 'react';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ReactElement } from 'react';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramDetail;

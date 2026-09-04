@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
-import { Fragment, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import { Fragment } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { Account } from '@restgenerated/models/Account';
+import type { Account } from '@restgenerated/models/Account';
 
 export interface AccountProps {
   id: string;

@@ -1,17 +1,18 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { Formik } from 'formik';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LookUpButton } from '../../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
 import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface LookUpReassignRoleProps {
   household?:

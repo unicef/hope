@@ -1,5 +1,6 @@
 import { Autocomplete, Box, TextField, CircularProgress } from '@mui/material';
-import { useState, useEffect, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';

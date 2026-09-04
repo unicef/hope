@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import TableCell from '@mui/material/TableCell';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 import {
   formatCurrencyWithSymbol,
   opacityToHex,
@@ -15,7 +15,7 @@ import {
   renderSomethingOrDash,
 } from '@utils/utils';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
-import { ReactElement, SyntheticEvent } from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';

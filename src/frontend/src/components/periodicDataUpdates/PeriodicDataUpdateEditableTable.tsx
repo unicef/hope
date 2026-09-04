@@ -20,7 +20,7 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { t } from 'i18next';
-import { PduField } from './PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
+import type { PduField } from './PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 type Individual = {

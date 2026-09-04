@@ -1,5 +1,5 @@
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 export const headCellsStandardProgram: HeadCell<PaginatedIndividualListList>[] =
   [

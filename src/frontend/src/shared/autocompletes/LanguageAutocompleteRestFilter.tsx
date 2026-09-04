@@ -1,17 +1,18 @@
-import { ReactElement, useCallback, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 type LanguageOption = AutocompleteOption & { code: string };
 

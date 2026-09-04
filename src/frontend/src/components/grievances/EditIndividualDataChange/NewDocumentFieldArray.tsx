@@ -5,7 +5,7 @@ import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '../utils/helpers';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: any;

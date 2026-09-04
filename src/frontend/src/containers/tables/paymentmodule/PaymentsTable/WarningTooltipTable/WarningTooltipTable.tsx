@@ -23,9 +23,9 @@ import { paymentPlanStatusToColor } from '@utils/utils';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 
 // Interface to replace PaymentConflictDataNode
 interface PaymentConflictData {

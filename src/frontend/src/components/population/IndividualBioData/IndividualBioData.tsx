@@ -1,4 +1,5 @@
-import { Box, Grid, Paper, Theme, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -16,11 +17,11 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement, ReactNode } from 'react';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { ReactElement, ReactNode } from 'react';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`

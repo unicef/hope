@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material';
-import { ReactNode, ReactElement } from 'react';
+import type { ReactNode, ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface DashboardCardProps {

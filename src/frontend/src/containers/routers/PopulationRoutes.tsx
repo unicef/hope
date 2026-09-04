@@ -1,6 +1,6 @@
 import { useRoutes, Navigate } from 'react-router-dom';
 import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import PeopleDetailsPage from '@containers/pages/people/PeopleDetailsPage';
 import PeoplePage from '@containers/pages/people/PeoplePage';
 import PopulationHouseholdDetailsPage from '@containers/pages/population/PopulationHouseholdDetailsPage';
