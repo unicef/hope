@@ -45,6 +45,8 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
             "type_display",
             "individual_filters_available",
             "household_filters_available",
+            "collects_individual_data",
+            "recalculate_composition",
         )
 
 

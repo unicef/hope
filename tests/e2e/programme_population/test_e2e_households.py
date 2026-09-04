@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_programs(business_area) -> None:
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD, collects_individual_data=True)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name="Test Programm",

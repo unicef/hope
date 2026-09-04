@@ -16,6 +16,7 @@ import {
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 
 const GreyTableCell = styled(TableCell)`
@@ -40,6 +41,26 @@ export function HouseholdCompositionTable({
   household,
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  // Deviation from AB#336514: KAB values can derive from individual records
+  // only when the programme collects individual data or recalculates the
+  // composition from individuals; otherwise they are a copy of the declared
+  // composition (or NULL) and the ticket's verbatim title/tooltip would be
+  // untrue - see _recalculate_kab / recalculate_data.
+  const kabFromIndividuals =
+    selectedProgram?.dataCollectingType?.collectsIndividualData ||
+    selectedProgram?.dataCollectingType?.recalculateComposition;
+  const title = kabFromIndividuals
+    ? t('Known Affected Beneficiaries')
+    : `${beneficiaryGroup?.groupLabel} Composition`;
+  const tooltip = kabFromIndividuals
+    ? t(
+        'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
+      )
+    : t(
+        'Figures represent the declared composition reported during registration. This programme does not collect individual records.',
+      );
   const rows: {
     ageGroup: string;
     female: Count;
@@ -104,19 +125,9 @@ export function HouseholdCompositionTable({
     <OverviewPaper data-cy="known-affected-beneficiaries">
       <Title>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h6">
-            {t('Known Affected Beneficiaries')}
-          </Typography>
-          <Tooltip
-            title={t(
-              'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
-            )}
-          >
-            <IconButton
-              color="primary"
-              aria-label={t('Known Affected Beneficiaries')}
-              data-cy="kab-info"
-            >
+          <Typography variant="h6">{title}</Typography>
+          <Tooltip title={tooltip}>
+            <IconButton color="primary" aria-label={title} data-cy="kab-info">
               <Info />
             </IconButton>
           </Tooltip>
