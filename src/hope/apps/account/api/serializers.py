@@ -215,11 +215,6 @@ class UserTimezoneSerializer(serializers.ModelSerializer):
         return resolve_timezone_name(user=user, business_area=self.context.get("business_area"))
 
 
-class TimezoneChoiceSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    value = serializers.CharField()
-
-
 class PartnerForProgramSerializer(serializers.ModelSerializer):
     """Serializer for Partner model.
 

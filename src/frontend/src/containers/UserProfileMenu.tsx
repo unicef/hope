@@ -68,8 +68,7 @@ export function UserProfileMenu({
   const { businessArea: businessAreaSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const [open, setOpen] = useState(false);
-  const [hasOpenedTimezonePicker, setHasOpenedTimezonePicker] =
-    useState(false);
+  const [hasOpenedTimezonePicker, setHasOpenedTimezonePicker] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
   const previousTimezoneRef = useRef<string | null>(meData?.timezone ?? null);
   const [localTimezone, setLocalTimezone] = useState<string | null>(
@@ -102,13 +101,8 @@ export function UserProfileMenu({
 
   const { data: timezoneChoicesData, isLoading: timezoneChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(RestService.restBusinessAreasUsersTimezoneChoicesList, {
-        businessAreaSlug,
-      }),
-      queryFn: () =>
-        RestService.restBusinessAreasUsersTimezoneChoicesList({
-          businessAreaSlug,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesTimezonesList),
+      queryFn: () => RestService.restChoicesTimezonesList(),
       enabled: open || hasOpenedTimezonePicker,
       staleTime: Infinity,
     });

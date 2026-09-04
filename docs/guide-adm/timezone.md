@@ -137,7 +137,7 @@ after the database transaction commits.
 Clients can load the validated, alphabetically sorted choice list from:
 
 ```http
-GET /api/rest/business-areas/{business_area_slug}/users/timezone-choices/
+GET /api/rest/choices/timezones/
 ```
 
 The response uses the standard HOPE choice shape:
@@ -155,7 +155,8 @@ The response uses the standard HOPE choice shape:
 ]
 ```
 
-Clients should load this large list only when it is needed instead of including it in every profile request.
+This static list is independent of Business Area scope and is built once when the backend process starts. Clients
+should load it only when it is needed instead of including it in every profile request.
 
 ## REST datetime values
 

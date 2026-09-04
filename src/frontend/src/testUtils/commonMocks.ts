@@ -87,9 +87,7 @@ const _restServiceMethods = vi.hoisted(() => {
     restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
     restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
     restBusinessAreasRetrieve: vi.fn(),
-    restBusinessAreasUsersTimezoneChoicesList: vi.fn(() =>
-      Promise.resolve({ results: [] }),
-    ),
+    restChoicesTimezonesList: vi.fn(() => Promise.resolve([])),
     restBusinessAreasUsersProfileTimezonePartialUpdate: vi.fn(),
   };
   // restQueryKey derives the key root from `fn.name`, and every bare spy is named 'spy'.

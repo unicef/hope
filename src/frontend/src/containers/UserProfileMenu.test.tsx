@@ -77,9 +77,9 @@ describe('UserProfileMenu timezone picker', () => {
     vi.mocked(RestService.restBusinessAreasRetrieve).mockResolvedValue(
       businessArea,
     );
-    vi.mocked(
-      RestService.restBusinessAreasUsersTimezoneChoicesList,
-    ).mockResolvedValue(timezoneChoices);
+    vi.mocked(RestService.restChoicesTimezonesList).mockResolvedValue(
+      timezoneChoices,
+    );
   });
 
   const renderMenu = (meData: Profile) => {
@@ -92,16 +92,12 @@ describe('UserProfileMenu timezone picker', () => {
 
   it('does not request timezone choices before the menu is opened', () => {
     renderMenu(buildProfile());
-    expect(
-      RestService.restBusinessAreasUsersTimezoneChoicesList,
-    ).not.toHaveBeenCalled();
+    expect(RestService.restChoicesTimezonesList).not.toHaveBeenCalled();
   });
 
   it('requests choices once when opened and shows a loading state', async () => {
     let resolveChoices: (value: unknown) => void;
-    vi.mocked(
-      RestService.restBusinessAreasUsersTimezoneChoicesList,
-    ).mockReturnValue(
+    vi.mocked(RestService.restChoicesTimezonesList).mockReturnValue(
       new Promise((resolve) => {
         resolveChoices = resolve;
       }) as any,
@@ -111,9 +107,7 @@ describe('UserProfileMenu timezone picker', () => {
     openMenu();
 
     await waitFor(() =>
-      expect(
-        RestService.restBusinessAreasUsersTimezoneChoicesList,
-      ).toHaveBeenCalledTimes(1),
+      expect(RestService.restChoicesTimezonesList).toHaveBeenCalledTimes(1),
     );
     expect(screen.getByRole('progressbar')).toBeTruthy();
 
@@ -122,9 +116,7 @@ describe('UserProfileMenu timezone picker', () => {
 
     openMenu();
     openMenu();
-    expect(
-      RestService.restBusinessAreasUsersTimezoneChoicesList,
-    ).toHaveBeenCalledTimes(1);
+    expect(RestService.restChoicesTimezonesList).toHaveBeenCalledTimes(1);
   });
 
   // Regression: the endpoint's bare array was read as `data.results`, so every fetched

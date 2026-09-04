@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING, Any
-from zoneinfo import available_timezones
 
 from django.contrib.auth.models import Group
 from django.db import models
@@ -21,7 +20,6 @@ from hope.apps.account.api.serializers import (
     GroupListSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
-    TimezoneChoiceSerializer,
     UserChoicesSerializer,
     UserSerializer,
     UserTimezoneSerializer,
@@ -54,7 +52,6 @@ class UserViewSet(
     permission_classes_by_action = {
         "profile": [IsAuthenticated],
         "profile_timezone": [IsAuthenticated],
-        "timezone_choices": [IsAuthenticated],
     }
     permissions_by_action = {
         "list": [
@@ -171,22 +168,6 @@ class UserViewSet(
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-    @extend_schema(responses=TimezoneChoiceSerializer(many=True), filters=False)
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="timezone-choices",
-        url_name="timezone-choices",
-        pagination_class=None,
-    )
-    def timezone_choices(self, request: "Request", *args: object, **kwargs: object) -> Response:
-        # "Factory" is a tzdb test entry with an unspecified -00 offset, not a user-selectable timezone.
-        choices = [
-            {"name": timezone_name, "value": timezone_name}
-            for timezone_name in sorted(available_timezones() - {"Factory"})
-        ]
-        return Response(TimezoneChoiceSerializer(choices, many=True).data)
 
     @extend_schema(
         parameters=[

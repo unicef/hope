@@ -279,14 +279,6 @@ def user_timezone_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
-def timezone_choices_url(afghanistan: BusinessArea) -> str:
-    return reverse(
-        "api:accounts:users-timezone-choices",
-        kwargs={"business_area_slug": afghanistan.slug},
-    )
-
-
-@pytest.fixture
 def profile_serializer_without_business_area_context(afghanistan: BusinessArea) -> ProfileSerializer:
     request = SimpleNamespace(
         parser_context={"kwargs": {"business_area_slug": afghanistan.slug}},
@@ -707,21 +699,6 @@ def test_user_timezone_update_rejects_invalid_identifier(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data == {"timezone": ["A valid timezone is required."]}
-
-
-def test_timezone_choices_returns_sorted_iana_identifiers(
-    authenticated_client: ReauthenticateAPIClient,
-    timezone_choices_url: str,
-) -> None:
-    response = authenticated_client.get(timezone_choices_url)
-
-    assert response.status_code == status.HTTP_200_OK
-    # The picker renders this payload directly, so it must stay an unpaginated list holding
-    # the whole tzdb — a paginated envelope or a truncated page silently empties the dropdown.
-    assert isinstance(response.data, list)
-    for timezone_name in ("Europe/Warsaw", "America/New_York", "Pacific/Auckland", "Asia/Kabul"):
-        assert {"name": timezone_name, "value": timezone_name} in response.data
-    assert response.data == sorted(response.data, key=lambda choice: choice["name"])
 
 
 def test_business_area_timezone_change_invalidates_cached_profile(

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 from zoneinfo import ZoneInfo
 
 from constance import config
-from django.db.models import F, Q
+from django.db.models import Exists, F, OuterRef, Q
 from django.template.loader import render_to_string
 
 from hope.apps.core.timezones import resolve_timezone_name
@@ -53,13 +53,19 @@ class DailyDigestService:
 
     @staticmethod
     def recipient_timezone_names(business_area: "BusinessArea") -> set[str]:
+        assigned_ticket_exists = GrievanceTicket.objects.filter(
+            assigned_to_id=OuterRef("pk"),
+            business_area_id=business_area.pk,
+        )
+        created_ticket_exists = GrievanceTicket.objects.filter(
+            created_by_id=OuterRef("pk"),
+            business_area_id=business_area.pk,
+        )
         user_timezones = (
-            User.objects.filter(
-                Q(assigned_tickets__business_area=business_area) | Q(created_tickets__business_area=business_area)
-            )
-            .filter(is_active=True)
+            User.objects.filter(is_active=True, timezone__isnull=False)
             .exclude(email="")
-            .exclude(Q(timezone__isnull=True) | Q(timezone=""))
+            .exclude(timezone="")
+            .filter(Exists(assigned_ticket_exists) | Exists(created_ticket_exists))
             .order_by()
             .values_list("timezone", flat=True)
             .distinct()

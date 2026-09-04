@@ -361,6 +361,17 @@ def test_digest_uses_only_recipients_in_the_requested_timezone(
     assert utc_digests == []
 
 
+def test_recipient_timezone_names_uses_one_query(
+    business_area: BusinessArea,
+    warsaw_assigned_ticket: GrievanceTicket,
+    django_assert_num_queries: Any,
+) -> None:
+    with django_assert_num_queries(1):
+        timezone_names = DailyDigestService.recipient_timezone_names(business_area)
+
+    assert timezone_names == {"UTC", "Europe/Warsaw"}
+
+
 def test_digest_converts_local_dst_day_boundaries_to_utc(business_area: BusinessArea) -> None:
     service = DailyDigestService(business_area, date(2026, 3, 29), "Europe/Warsaw")
 
