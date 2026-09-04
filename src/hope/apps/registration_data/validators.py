@@ -12,6 +12,7 @@ from zipfile import BadZipfile
 
 from dateutil import parser
 from django.core import validators as django_core_validators
+from django.core.exceptions import ValidationError
 import openpyxl
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
@@ -38,12 +39,14 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
+from hope.apps.household.utils import LATIN_NAME_FIELDS
 from hope.apps.registration_data.utils import (
     calculate_hash_for_kobo_submission,
     collectors_str_ids_to_list,
     find_attachment_in_kobo,
 )
 from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
+from hope.models.individual import ascii_name_validator
 
 logger = logging.getLogger(__name__)
 
@@ -325,6 +328,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.facility_admin_area_header = (
             "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
         )
+        prefix = "pp_" if self.is_social_worker_program else ""
+        self.latin_name_headers = [f"{prefix}{latin}_i_c" for latin in LATIN_NAME_FIELDS]
 
     def get_combined_fields(self) -> dict:
         core_fields = (
@@ -679,11 +684,26 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             f"when '{self.facility_name_header}' is provided.",
                         }
                     )
+                if self.sheet_title in ("Individuals", "People"):
+                    for field_name in self.latin_name_headers:
+                        value = self.get_cell_value(first_row, row, field_name)
+                        if not value:
+                            continue
+                        try:
+                            ascii_name_validator(value)
+                        except ValidationError as e:
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": field_name,
+                                    "message": f"{e.code}, {e.message}, Value provided: {value}",
+                                }
+                            )
 
-            if sheet.title == "Individuals":
+            if self.sheet_title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
 
-            if sheet.title in ("Households", "People"):
+            if self.sheet_title in ("Households", "People"):
                 admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
                 if admin_area_invalid_rows:
                     invalid_rows.extend(admin_area_invalid_rows)
@@ -1862,6 +1882,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             return {"header": "facility_admin_area_h_c", "message": f"Area with code: {area_p_code} does not exist"}
         return None
 
+    def _validate_latin_fields(self, field: str, value: str, errors: list[dict[str, str]]) -> None:
+        try:
+            ascii_name_validator(value)
+        except ValidationError as e:
+            errors.append(
+                {
+                    "header": field,
+                    "message": f"{e.code}, {e.message}, Value provided: {value}",
+                }
+            )
+
     def _validate_household(
         self,
         household: dict[str, Any],
@@ -1915,6 +1946,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         )
                         if error:
                             errors.append(error)
+
+                        if i_field.removesuffix("_i_c") in LATIN_NAME_FIELDS:
+                            self._validate_latin_fields(i_field, i_value, errors)
 
                     docs_and_identities_to_validate.append(current_individual_docs_and_identities)
 

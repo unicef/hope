@@ -43,6 +43,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         "phone_no": "phone_no_i_c",
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
+        "given_name_latin": "given_name_latin_i_c",
+        "family_name_latin": "family_name_latin_i_c",
         "relationship": "relationship_i_c",
         "preferred_language": "preferred_language_i_c",
     }

@@ -203,6 +203,7 @@ class GrievanceTicketFilter(FilterSet):
             Individual.objects.filter(business_area=self.business_area, relationship=HEAD)
             .filter(
                 Q(full_name__icontains=search)
+                | Q(full_name_latin__icontains=search)
                 | Q(detail_id__icontains=search)
                 | Q(program_registration_id__icontains=search)
                 | Q(phone_no__icontains=search)
@@ -329,6 +330,10 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
             "given_name",
             "middle_name",
             "family_name",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
         ]
 
         # Search in ticket type lookups

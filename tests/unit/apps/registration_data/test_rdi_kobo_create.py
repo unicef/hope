@@ -195,12 +195,26 @@ def test_execute(
 
     individuals_obj_data = model_to_dict(
         individual,
-        ("country", "sex", "age", "marital_status", "relationship"),
+        (
+            "country",
+            "sex",
+            "age",
+            "marital_status",
+            "relationship",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
+        ),
     )
     expected_ind = {
         "relationship": "HEAD",
         "sex": "MALE",
         "marital_status": "MARRIED",
+        "full_name_latin": None,
+        "given_name_latin": "TestLatin",
+        "middle_name_latin": None,
+        "family_name_latin": None,
     }
     assert individuals_obj_data == expected_ind
 

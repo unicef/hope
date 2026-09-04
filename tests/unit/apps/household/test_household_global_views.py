@@ -822,6 +822,32 @@ def test_search_by_member_given_name(
     assert response.data["results"][0]["id"] == str(household_office_search_context["household4"].id)
 
 
+def test_search_by_member_latin_name(
+    create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
+) -> None:
+    create_user_role_with_permissions(
+        user=household_office_search_context["user"],
+        permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+        business_area=household_office_search_context["afghanistan"],
+        program=household_office_search_context["program"],
+    )
+
+    household_office_search_context["individuals3"][0].full_name = "Анна Ковальська"
+    household_office_search_context["individuals3"][0].full_name_latin = "Anna Kovalska"
+    household_office_search_context["individuals3"][0].save(update_fields=["full_name", "full_name_latin"])
+
+    response = household_office_search_context["api_client"].get(
+        reverse(
+            household_office_search_context["global_url_name"],
+            kwargs={"business_area_slug": household_office_search_context["afghanistan"].slug},
+        ),
+        {"office_search": "Anna Kovalska"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] == str(household_office_search_context["household3"].id)
+
+
 def test_search_with_active_programs_filter(
     create_user_role_with_permissions: Any, household_office_search_context: dict[str, Any]
 ) -> None:

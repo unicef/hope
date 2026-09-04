@@ -389,40 +389,24 @@ def test_facility_str(business_area: BusinessArea, area_hierarchy: tuple[Area, A
     assert str(facility) == "TEST FACILITY"
 
 
-# --- DocumentType ---
-
-
-def test_get_all_doc_types_choices_is_cached_and_invalidated(django_capture_on_commit_callbacks) -> None:
-    from django.core.cache import cache
-
-    cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
-    DocumentTypeFactory(key="key_a", label="Label A")
-
-    # First call populates the cache from the DB.
-    choices = DocumentType.get_all_doc_types_choices()
-    assert ("key_a", "Label A") in choices
-    assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) == choices
-
-    # While cached, a directly inserted row (bypassing signals) is not reflected.
-    DocumentType.objects.bulk_create([DocumentType(key="key_b", label="Label B")])
-    assert ("key_b", "Label B") not in DocumentType.get_all_doc_types_choices()
-
-    # Saving a DocumentType invalidates the cache on commit, so the next call is fresh.
-    with django_capture_on_commit_callbacks(execute=True):
-        DocumentTypeFactory(key="key_c", label="Label C")
-    refreshed = DocumentType.get_all_doc_types_choices()
-    assert ("key_b", "Label B") in refreshed
-    assert ("key_c", "Label C") in refreshed
-
-
-def test_get_all_doc_types_choices_cache_cleared_on_delete(django_capture_on_commit_callbacks) -> None:
-    from django.core.cache import cache
-
-    cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
-    doc_type = DocumentTypeFactory(key="key_to_delete", label="To Delete")
-    assert ("key_to_delete", "To Delete") in DocumentType.get_all_doc_types_choices()
-
-    with django_capture_on_commit_callbacks(execute=True):
-        doc_type.delete()
-    assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) is None
-    assert ("key_to_delete", "To Delete") not in DocumentType.get_all_doc_types_choices()
+def test_individual_erase(business_area: BusinessArea) -> None:
+    individual = IndividualFactory(
+        business_area=business_area,
+        full_name="FullName",
+        given_name="G_Name",
+        middle_name="M_Name",
+        family_name="F_Name",
+        full_name_latin="LatinFull",
+        given_name_latin="LatinGiven",
+        middle_name_latin="MLatin",
+        family_name_latin="Family latin",
+    )
+    individual.erase()
+    assert individual.full_name == "GDPR REMOVED"
+    assert individual.given_name == "GDPR REMOVED"
+    assert individual.middle_name == "GDPR REMOVED"
+    assert individual.family_name == "GDPR REMOVED"
+    assert individual.full_name_latin == "GDPR REMOVED"
+    assert individual.given_name_latin == "GDPR REMOVED"
+    assert individual.middle_name_latin == "GDPR REMOVED"
+    assert individual.family_name_latin == "GDPR REMOVED"

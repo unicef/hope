@@ -38,6 +38,7 @@ from hope.models import (
     Program,
     User,
 )
+from hope.models.individual import ascii_name_validator
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -432,6 +433,10 @@ class AddIndividualDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
+    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
+    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
     sex = serializers.CharField()
     birth_date = serializers.DateField()
     estimated_birth_date = serializers.BooleanField()
@@ -469,6 +474,10 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
+    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
+    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
     sex = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
     estimated_birth_date = serializers.BooleanField(required=False)

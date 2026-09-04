@@ -5,6 +5,7 @@ from drf_api_checker.pytest import frozenfixture
 import pytest
 from unit.api_contract._helpers import HopeRecorder
 
+from extras.test_utils.factories import ProgramCycleFactory
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.household import HouseholdFactory, IndividualRoleInHouseholdFactory
@@ -52,6 +53,8 @@ def role_assignment(request, db, superuser, business_area, role):
 @frozenfixture()
 def payment_plan(request, db, business_area, program, superuser):
     cycle = program.cycles.first()
+    if not cycle:
+        cycle = ProgramCycleFactory(program=program)
     return PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,

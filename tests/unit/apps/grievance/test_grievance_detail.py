@@ -355,6 +355,7 @@ def assert_base_grievance_data(
             "head_of_household": {
                 "id": str(household.head_of_household.id),
                 "full_name": household.head_of_household.full_name,
+                "full_name_latin": None,
             },
             "active_individuals_count": household.active_individuals.count(),
         }
@@ -433,6 +434,7 @@ def assert_base_grievance_data(
             "id": str(individual.id),
             "unicef_id": individual.unicef_id,
             "full_name": individual.full_name,
+            "full_name_latin": None,
             "program_code": individual.program.code,
             "household": {
                 "id": str(individual.household.id),
@@ -1344,6 +1346,7 @@ def test_grievance_detail_system_flagging(
         "id": str(golden_records_individual.id),
         "unicef_id": golden_records_individual.unicef_id,
         "full_name": golden_records_individual.full_name,
+        "full_name_latin": None,
         "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
         "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
         "sex": golden_records_individual.sex,
@@ -1698,6 +1701,7 @@ def test_grievance_detail_needs_adjudication(
         "id": str(golden_records_individual.id),
         "unicef_id": golden_records_individual.unicef_id,
         "full_name": golden_records_individual.full_name,
+        "full_name_latin": None,
         "given_name": golden_records_individual.given_name,
         "family_name": golden_records_individual.family_name,
         "phone_no": str(golden_records_individual.phone_no),
@@ -1810,6 +1814,7 @@ def test_grievance_detail_needs_adjudication(
         "id": str(individuals2[0].id),
         "unicef_id": individuals2[0].unicef_id,
         "full_name": individuals2[0].full_name,
+        "full_name_latin": None,
         "given_name": individuals2[0].given_name,
         "family_name": individuals2[0].family_name,
         "phone_no": str(individuals2[0].phone_no),
@@ -1890,6 +1895,7 @@ def test_grievance_detail_needs_adjudication(
             "id": str(individuals2[0].id),
             "unicef_id": individuals2[0].unicef_id,
             "full_name": individuals2[0].full_name,
+            "full_name_latin": None,
             "given_name": individuals2[0].given_name,
             "family_name": individuals2[0].family_name,
             "phone_no": str(individuals2[0].phone_no),
@@ -1986,6 +1992,7 @@ def test_grievance_detail_needs_adjudication(
         "head_of_household": {
             "id": str(duplicate.household.head_of_household.id),
             "full_name": duplicate.household.head_of_household.full_name,
+            "full_name_latin": duplicate.household.head_of_household.full_name_latin,
         },
         "residence_status": duplicate.household.get_residence_status_display(),
         "size": duplicate.household.size,
@@ -2035,6 +2042,7 @@ def test_grievance_detail_needs_adjudication(
             "id": str(duplicate.id),
             "unicef_id": duplicate.unicef_id,
             "full_name": duplicate.full_name,
+            "full_name_latin": None,
             "birth_date": f"{duplicate.birth_date:%Y-%m-%d}",
             "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
             "sex": duplicate.sex,

@@ -476,6 +476,12 @@ def test_rows_validator(
                     "type select one of field preferred_language_i_c",
                 },
                 {
+                    "row_number": 4,
+                    "header": "full_name_latin_i_c",
+                    "message": "invalid_name, Only ASCII letters, spaces, hyphens, and apostrophes are allowed., "
+                    "Value provided: 222222",
+                },
+                {
                     "row_number": 8,
                     "header": "relationship_i_c",
                     "message": "Sheet: 'Individuals', There is no household with provided id: TEXT",

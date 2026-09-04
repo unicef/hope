@@ -958,6 +958,42 @@ def test_search_by_individual_name(
     assert response.data["results"][0]["id"] == str(complaint_ticket2.id)
 
 
+def test_search_by_individual_latin_name(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    tickets: dict,
+    households_and_individuals: dict,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        afghanistan,
+        program=program,
+    )
+
+    individuals3 = households_and_individuals["individuals3"]
+    complaint_ticket2 = tickets["complaint_ticket2"]
+
+    individuals3[0].full_name = "Анна Ковальська"
+    individuals3[0].full_name_latin = "Anna Kovalska"
+    individuals3[0].save()
+
+    client = api_client(user)
+    response = client.get(
+        reverse(
+            "api:grievance:grievance-tickets-global-list",
+            kwargs={"business_area_slug": afghanistan.slug},
+        ),
+        {"office_search": "Anna Kovalska"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] == str(complaint_ticket2.id)
+
+
 def test_search_with_active_programs_filter(
     api_client: Any,
     user: User,

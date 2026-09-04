@@ -654,6 +654,24 @@ def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     assert update_context["individual"].phone_no_alternative == "+485544334455"
 
 
+def test_close_keeps_explicitly_approved_latin_name(update_context: dict[str, Any]) -> None:
+    individual = update_context["individual"]
+    update_context["ticket"].individual_data_update_ticket_details.individual_data = {
+        "full_name": {"approve_status": True, "previous_value": individual.full_name, "value": "Анна Ковальська"},
+        "full_name_latin": {"approve_status": True, "previous_value": None, "value": "Anna Kovalska"},
+    }
+    update_context["ticket"].individual_data_update_ticket_details.save()
+    service = IndividualDataUpdateService(
+        update_context["ticket"], update_context["ticket"].individual_data_update_ticket_details
+    )
+
+    service.close(update_context["user"])
+
+    individual.refresh_from_db()
+    assert individual.full_name == "Анна Ковальська"
+    assert individual.full_name_latin == "Anna Kovalska"
+
+
 def test_close_individual_update_without_household(update_context: dict[str, Any]) -> None:
     individual_without_household = IndividualFactory(
         business_area=update_context["business_area"],

@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
   choicesToDict,
+  displayNameWithLatin,
   populationStatusToColor,
   sexToCapitalize,
 } from '@utils/utils';
@@ -151,6 +152,7 @@ export const HouseholdMembersTable = ({
             onClick={() => handleClick(row)}
             role="checkbox"
             key={row.id}
+            data-cy="household-members-row"
           >
             <TableCell align="left">
               {renderTableCellContent(
@@ -160,7 +162,7 @@ export const HouseholdMembersTable = ({
               )}
             </TableCell>
             <TableCell align="left">
-              {renderTableCellContent(row.fullName)}
+              {renderTableCellContent(displayNameWithLatin(row, 'fullName'))}
             </TableCell>
             <TableCell align="left">
               <StatusBox

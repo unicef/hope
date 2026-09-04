@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1706"
+        "Content-Length": "1745"
     },
     "data": {
         "id": "39153afe-db31-418c-bc62-5da4f46a9efc",
@@ -17,6 +17,10 @@
         "given_name": "",
         "middle_name": "",
         "family_name": "",
+        "full_name_latin": null,
+        "given_name_latin": null,
+        "middle_name_latin": null,
+        "family_name_latin": null,
         "sex": "MALE",
         "age": 35,
         "birth_date": "1990-01-01",

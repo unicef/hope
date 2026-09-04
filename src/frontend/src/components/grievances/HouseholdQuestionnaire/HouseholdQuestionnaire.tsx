@@ -11,6 +11,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { displayNameWithLatin } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
 
 interface HouseholdQuestionnaireProps {
@@ -93,7 +94,7 @@ function HouseholdQuestionnaire({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
             >
-              {selectedHouseholdData.headOfHousehold.fullName}
+              {displayNameWithLatin(selectedHouseholdData.headOfHousehold, 'fullName')}
             </ContentLink>
           ) : (
             '-'

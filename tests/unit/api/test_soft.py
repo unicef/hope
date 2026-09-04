@@ -89,6 +89,7 @@ def test_push_lax_creates_households_and_reports_errors(
                 {
                     "relationship": HEAD,
                     "full_name": "James Head #1",
+                    "full_name_latin": "James Head One",
                     "birth_date": "2000-01-01",
                     "sex": "MALE",
                     "role": "",
@@ -264,15 +265,48 @@ def test_push_lax_creates_households_and_reports_errors(
                 },
             ],
         },
+        {
+            "residence_status": "",
+            "village": "village555",
+            "country": "AF",
+            "admin1": "AF01",
+            "admin2": None,
+            "members": [
+                {
+                    "relationship": HEAD,
+                    "full_name": "New Test #555",
+                    "full_name_latin": "New Test #555",
+                    "birth_date": "2000-01-01",
+                    "sex": "MALE",
+                    "role": "",
+                    "documents": [
+                        {
+                            "document_number": 10,
+                            "image": base64_encoded_data,
+                            "country": "AF",
+                            "type": birth_cert_key,
+                        }
+                    ],
+                },
+                {
+                    "relationship": NON_BENEFICIARY,
+                    "full_name": "Mary Primary #555",
+                    "birth_date": "2000-01-01",
+                    "role": ROLE_PRIMARY,
+                    "sex": "FEMALE",
+                },
+            ],
+            "size": 1,
+        },
     ]
 
     response = token_api_client.post(url, input_data, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
     data = response.json()
-    assert len(data["households"]) == 6
-    assert data["processed"] == 6
-    assert data["errors"] == 2
+    assert len(data["households"]) == 7
+    assert data["processed"] == 7
+    assert data["errors"] == 3
     assert data["accepted"] == 4
     rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
     assert rdi is not None
@@ -285,6 +319,7 @@ def test_push_lax_creates_households_and_reports_errors(
     hh = PendingHousehold.objects.get(pk=pk1)
     assert hh.program_id == program.id
     assert hh.head_of_household.full_name == "James Head #1"
+    assert hh.head_of_household.full_name_latin == "James Head One"
     assert hh.primary_collector.full_name == "Mary Primary #1"
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id
@@ -292,6 +327,6 @@ def test_push_lax_creates_households_and_reports_errors(
     hh = PendingHousehold.objects.get(pk=pk2)
     assert hh.program_id == program.id
     assert hh.head_of_household.full_name == "James Head #1"
-    assert hh.primary_collector.full_name == "James Head #1"
+    assert hh.primary_collector.full_name_latin is None
     assert hh.head_of_household.program_id == program.id
     assert hh.primary_collector.program_id == program.id

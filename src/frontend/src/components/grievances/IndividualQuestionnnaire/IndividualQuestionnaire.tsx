@@ -11,7 +11,7 @@ import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
-import { choicesToDict } from '@utils/utils';
+import { choicesToDict, displayNameWithLatin } from '@utils/utils';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -49,7 +49,7 @@ const IndividualQuestionnaire = ({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
             >
-              {selectedIndividualData.fullName}
+              {displayNameWithLatin(selectedIndividualData, 'fullName')}
             </ContentLink>
           ),
           size: 3,
@@ -123,7 +123,7 @@ const IndividualQuestionnaire = ({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
             >
-              {selectedIndividualData.fullName}
+              {displayNameWithLatin(selectedIndividualData, 'fullName')}
             </ContentLink>
           ),
           size: 3,

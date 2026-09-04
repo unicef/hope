@@ -13,7 +13,11 @@ import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHou
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { adjustHeadCells, choicesToDict } from '@utils/utils';
+import {
+  adjustHeadCells,
+  choicesToDict,
+  displayNameWithLatin,
+} from '@utils/utils';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -177,9 +181,12 @@ export const CollectorsTable = ({
             onClick={() => handleClick(row)}
             role="checkbox"
             key={row.id}
+            data-cy="collectors-row"
           >
             <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
-            <TableCell align="left">{row.fullName}</TableCell>
+            <TableCell align="left">
+              {displayNameWithLatin(row, 'fullName')}
+            </TableCell>
             <TableCell align="left">{renderRelationship()}</TableCell>
           </ClickableTableRow>
         );

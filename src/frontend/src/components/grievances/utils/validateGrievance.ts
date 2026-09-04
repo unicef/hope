@@ -4,8 +4,39 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
+import {
+  LATIN_NAME_FIELDS,
+  LATIN_NAME_FORMAT_ERROR,
+  LATIN_NAME_REGEX,
+} from './latinNames';
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
+}
+
+const isInvalidLatin = (value): boolean =>
+  !isEmpty(value) && !LATIN_NAME_REGEX.test(String(value).trim());
+
+// Mirrors ascii_name_validator on the backend so the form fails fast
+function validateLatinNameRows(values): string | undefined {
+  const rows = values.individualDataUpdateFields || [];
+  const invalid = rows.some(
+    (row) =>
+      LATIN_NAME_FIELDS.includes(row?.fieldName) &&
+      isInvalidLatin(row?.fieldValue),
+  );
+  return invalid ? LATIN_NAME_FORMAT_ERROR : undefined;
+}
+
+function validateLatinNameData(values): { [key: string]: string } {
+  const individualData = values.individualData || {};
+  const latinErrors: { [key: string]: string } = {};
+  for (const latinField of LATIN_NAME_FIELDS) {
+    const key = camelCase(latinField);
+    if (isInvalidLatin(individualData[key])) {
+      latinErrors[key] = LATIN_NAME_FORMAT_ERROR;
+    }
+  }
+  return latinErrors;
 }
 
 export function validate(
@@ -113,6 +144,10 @@ export function validate(
           }
         });
       }
+      const latinNameError = validateLatinNameRows(values);
+      if (latinNameError) {
+        errors.individualDataUpdateFields = latinNameError;
+      }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments
@@ -177,7 +212,7 @@ export function validate(
     category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
   ) {
-    const individualDataErrors = {};
+    const individualDataErrors = validateLatinNameData(values);
     const individualData = values.individualData || {};
     if (addIndividualFieldsData) {
       for (const field of addIndividualFieldsData) {
@@ -189,10 +224,10 @@ export function validate(
         ) {
           individualDataErrors[fieldName] = 'Field Required';
         }
-        if (Object.keys(individualDataErrors).length > 0) {
-          errors.individualData = individualDataErrors;
-        }
       }
+    }
+    if (Object.keys(individualDataErrors).length > 0) {
+      errors.individualData = individualDataErrors;
     }
   }
 
@@ -317,6 +352,10 @@ export function validateUsingSteps(
           }
         });
       }
+      const latinNameError = validateLatinNameRows(values);
+      if (latinNameError) {
+        errors.individualDataUpdateFields = latinNameError;
+      }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
@@ -417,7 +456,7 @@ export function validateUsingSteps(
     issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
     activeStep === GrievanceSteps.Description
   ) {
-    const individualDataErrors = {};
+    const individualDataErrors = validateLatinNameData(values);
     const individualData = values.individualData || {};
 
     if (addIndividualFieldsData) {
@@ -430,10 +469,10 @@ export function validateUsingSteps(
         ) {
           individualDataErrors[fieldName] = 'Field Required';
         }
-        if (Object.keys(individualDataErrors).length > 0) {
-          errors.individualData = individualDataErrors;
-        }
       }
+    }
+    if (Object.keys(individualDataErrors).length > 0) {
+      errors.individualData = individualDataErrors;
     }
 
     if (individualData?.documents?.length) {

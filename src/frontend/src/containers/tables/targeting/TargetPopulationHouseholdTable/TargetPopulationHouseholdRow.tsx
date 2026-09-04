@@ -5,6 +5,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { PendingPayment } from '@restgenerated/models/PendingPayment';
+import { displayNameWithLatin } from '@utils/utils';
 
 interface TargetPopulationHouseholdTableRowProps {
   payment: PendingPayment;
@@ -41,7 +42,7 @@ export function TargetPopulationHouseholdTableRow({
           payment.householdUnicefId
         )}
       </TableCell>
-      <AnonTableCell>{payment.headOfHousehold.fullName || '-'}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(payment.headOfHousehold, 'fullName') || '-'}</AnonTableCell>
       <TableCell align="left">{payment.householdSize}</TableCell>
       <TableCell align="left">{payment.householdAdmin2 || '-'}</TableCell>
       <TableCell align="left">
