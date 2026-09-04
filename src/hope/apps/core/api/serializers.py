@@ -48,6 +48,15 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
         )
 
 
+class DataCollectingTypeChoiceSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="label")
+    value = serializers.CharField(source="code")
+
+    class Meta:
+        model = DataCollectingType
+        fields = ("name", "value", "description", "type")
+
+
 class ChoiceSerializer(serializers.Serializer):
     name = serializers.CharField()
     value = serializers.CharField()

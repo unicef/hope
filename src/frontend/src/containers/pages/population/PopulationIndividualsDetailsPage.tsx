@@ -60,14 +60,8 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
   const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
@@ -89,14 +83,8 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+      queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
     });
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
@@ -203,7 +191,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualAccounts individual={individual} choicesData={choicesData} />
+        <IndividualAccounts individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual}

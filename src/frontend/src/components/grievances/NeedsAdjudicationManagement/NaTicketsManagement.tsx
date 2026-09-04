@@ -132,9 +132,12 @@ export const NaTicketsManagement = ({
         { count: incompleteCount },
       );
     if (unresolvedCount > 0)
-      return t('{{count}} ticket(s) need a role reassignment before finalizing', {
-        count: unresolvedCount,
-      });
+      return t(
+        '{{count}} ticket(s) need a role reassignment before finalizing',
+        {
+          count: unresolvedCount,
+        },
+      );
     return '';
   };
 
@@ -162,7 +165,9 @@ export const NaTicketsManagement = ({
       );
       setDecisions({});
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsList,
+        ),
       });
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
@@ -269,7 +274,8 @@ export const NaTicketsManagement = ({
         RestService.restBusinessAreasGrievanceTicketsList,
         listParams,
       ),
-      queryFn: () => RestService.restBusinessAreasGrievanceTicketsList(listParams),
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsList(listParams),
       enabled: isAllPrograms,
     });
 
@@ -316,14 +322,8 @@ export const NaTicketsManagement = ({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-        { businessAreaSlug },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+      queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
     });
 
   const results = useMemo(() => listData?.results ?? [], [listData]);

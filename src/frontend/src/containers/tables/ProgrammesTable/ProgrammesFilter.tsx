@@ -3,6 +3,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { DataCollectingTypeChoice } from '@restgenerated/models/DataCollectingTypeChoice';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -15,6 +16,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 interface ProgrammesFilterProps {
   filter;
   choicesData: ProgramChoices;
+  dataCollectingTypeChoices: DataCollectingTypeChoice[];
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -23,6 +25,7 @@ interface ProgrammesFilterProps {
 function ProgrammesFilters({
   filter,
   choicesData,
+  dataCollectingTypeChoices,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -173,7 +176,7 @@ function ProgrammesFilters({
             value={filter.dataCollectingType}
             data-cy="filters-data-collecting-type"
           >
-            {choicesData.dataCollectingTypeChoices.map((item) => (
+            {dataCollectingTypeChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>

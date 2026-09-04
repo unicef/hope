@@ -7,6 +7,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { Account } from '@restgenerated/models/Account';
+import { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
 
 export interface EditAccountRowProps {
   values;
@@ -14,6 +15,7 @@ export interface EditAccountRowProps {
   arrayHelpers;
   id: string;
   individualChoicesData: IndividualChoices;
+  accountFinancialInstitutionChoices: FinancialInstitutionChoice[];
 }
 
 export function EditAccountRow({
@@ -22,13 +24,14 @@ export function EditAccountRow({
   arrayHelpers,
   id,
   individualChoicesData,
+  accountFinancialInstitutionChoices,
 }: EditAccountRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [isEdited, setEdit] = useState(false);
   const dataFields = account.dataFields;
   const financialInstitutionName =
-    individualChoicesData.accountFinancialInstitutionChoices.find(
+    accountFinancialInstitutionChoices.find(
       (c: any) => c.value === account.financialInstitution,
     )?.name || account.financialInstitution;
   return isEdited ? (
@@ -41,9 +44,7 @@ export function EditAccountRow({
         account={account}
         values={values}
         accountTypeChoices={individualChoicesData.accountTypeChoices}
-        accountFinancialInstitutionChoices={
-          individualChoicesData.accountFinancialInstitutionChoices
-        }
+        accountFinancialInstitutionChoices={accountFinancialInstitutionChoices}
         onDelete={() => {}}
       />
       <Box

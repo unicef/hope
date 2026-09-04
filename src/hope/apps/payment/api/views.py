@@ -30,6 +30,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
@@ -61,12 +62,12 @@ from hope.apps.payment.api.serializers import (
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
     AssignFundsCommitmentsSerializer,
+    FinancialInstitutionChoiceSerializer,
     FollowUpInstructionCreateSerializer,
     FollowUpInstructionDetailSerializer,
     FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
-    PaymentChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
@@ -167,6 +168,7 @@ from hope.models import (
     BusinessArea,
     DeliveryMechanism,
     FileTemp,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
@@ -2585,7 +2587,6 @@ class PaymentGlobalViewSet(
     queryset = Payment.objects.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).all()
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
-        "choices": PaymentChoicesSerializer,
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
     filter_backends = (DjangoFilterBackend, OrderingFilter)
@@ -2594,10 +2595,6 @@ class PaymentGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return with_payment_related_data(super().get_queryset()).order_by("-created_at")
-
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})
@@ -2942,6 +2939,32 @@ class PaymentPlanGroupViewSet(
             data=PaymentPlanGroupDetailSerializer(group, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+
+class FinancialInstitutionViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
+    queryset = FinancialInstitution.objects.all()
+    permissions_by_action = {
+        "choices": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+        ],
+    }
+    serializer_classes_by_action = {
+        "choices": FinancialInstitutionChoiceSerializer,
+    }
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            FinancialInstitution.objects.filter(Q(country__business_areas=self.business_area) | Q(country__isnull=True))
+            .distinct()
+            .order_by("id")
+        )
+
+    @extend_schema(responses={200: FinancialInstitutionChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices", pagination_class=None)
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(self.get_serializer(self.get_queryset(), many=True).data)
 
 
 class PaymentPlanPurposeViewSet(

@@ -1,6 +1,7 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
@@ -70,28 +71,28 @@ function EditPeopleDataChange({
         ),
     });
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
-  });
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList,
+      { businessAreaSlug: businessArea },
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: restQueryKey(RestService.restChoicesCountriesList),
@@ -133,8 +134,9 @@ function EditPeopleDataChange({
   if (
     editPeopleFieldsLoading ||
     fullIndividualLoading ||
-    choicesLoading ||
+    documentTypeChoicesLoading ||
     individualChoicesLoading ||
+    financialInstitutionChoicesLoading ||
     countriesLoading ||
     !fullIndividual ||
     !editPeopleFieldsData
@@ -149,7 +151,7 @@ function EditPeopleDataChange({
   const combinedData = {
     results: editPeopleFieldsData || [],
     countriesChoices: countriesData || [],
-    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    documentTypeChoices: documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
@@ -241,11 +243,17 @@ function EditPeopleDataChange({
             setFieldValue={setFieldValue}
             individual={fullIndividual}
             individualChoicesData={individualChoicesData}
+            accountFinancialInstitutionChoices={
+              financialInstitutionChoices || []
+            }
           />
           {!isEditTicket && (
             <NewAccountFieldArray
               values={values}
               individualChoicesData={individualChoicesData}
+              accountFinancialInstitutionChoices={
+                financialInstitutionChoices || []
+              }
             />
           )}
         </Box>

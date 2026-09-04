@@ -14,5 +14,8 @@ SPECTACULAR_SETTINGS = {
         "ProgramStatusEnum": "hope.models.program.Program.STATUS_CHOICE",
         "GrievanceTicketStatusEnum": "hope.apps.grievance.models.GrievanceTicket.STATUS_CHOICES",
         "PaymentVerificationStatusEnum": "hope.models.payment_verification.PaymentVerification.STATUS_CHOICES",
+        # Shared by DataCollectingType and DataCollectingTypeChoice; without the override the
+        # collision resolves to a hashed name and the generated frontend type is unstable.
+        "DataCollectingTypeTypeEnum": "hope.models.data_collecting_type.DataCollectingType.Type",
     },
 }

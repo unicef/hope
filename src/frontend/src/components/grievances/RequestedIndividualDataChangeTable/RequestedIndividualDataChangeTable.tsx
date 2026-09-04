@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -46,19 +47,29 @@ export function RequestedIndividualDataChangeTable({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: restQueryKey(RestService.restChoicesCountriesList),
     queryFn: () => RestService.restChoicesCountriesList(),
+  });
+
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList,
+      { businessAreaSlug },
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList({
+        businessAreaSlug,
+      }),
   });
 
   const individualParams = {
@@ -101,18 +112,14 @@ export function RequestedIndividualDataChangeTable({
   //@ts-ignore
   const fieldsDict = useArrayToDict(addIndividualFieldsData, 'name', '*');
   const countriesDict = useArrayToDict(countriesData, 'value', 'name');
-  const documentTypeDict = useArrayToDict(
-    individualChoicesData?.documentTypeChoices,
-    'value',
-    'name',
-  );
+  const documentTypeDict = useArrayToDict(documentTypeChoices, 'value', 'name');
   const identityTypeDict = useArrayToDict(
     individualChoicesData?.identityTypeChoices,
     'value',
     'name',
   );
   const accountFinancialInstitutionsDict = useArrayToDict(
-    individualChoicesData?.accountFinancialInstitutionChoices,
+    financialInstitutionChoices,
     'value',
     'name',
   );
@@ -121,6 +128,7 @@ export function RequestedIndividualDataChangeTable({
     loading ||
     individualChoicesLoading ||
     countriesLoading ||
+    financialInstitutionChoicesLoading ||
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||

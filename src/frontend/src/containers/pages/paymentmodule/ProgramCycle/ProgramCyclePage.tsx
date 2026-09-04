@@ -33,7 +33,7 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { isAllPrograms, businessArea } = useBaseUrl();
+  const { isAllPrograms } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [filter, setFilter] = useState(
@@ -49,13 +49,8 @@ export const ProgramCyclePage = (): ReactElement => {
   );
 
   const { data: programChoicesData } = useQuery<ProgramChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+    queryFn: () => RestService.restChoicesProgramsRetrieve(),
   });
 
   const replacements = {

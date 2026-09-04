@@ -18,9 +18,9 @@ from hope.apps.account.api.caches import UserListKeyConstructor
 from hope.apps.account.api.serializers import (
     GroupDetailSerializer,
     GroupListSerializer,
+    PartnerChoicesSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
-    UserChoicesSerializer,
     UserSerializer,
 )
 from hope.apps.account.filters import UsersFilter
@@ -28,6 +28,7 @@ from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissi
 from hope.apps.account.profile_cache import ProfileEtagKey, ProfileKeyConstructor
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     CountActionMixin,
     CustomSerializerMixin,
     PermissionActionMixin,
@@ -65,10 +66,6 @@ class UserViewSet(
             Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
             Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
         ],
-        "choices": [
-            Permissions.USER_MANAGEMENT_VIEW_LIST,
-            *ALL_GRIEVANCES_CREATE_MODIFY,
-        ],
         "partner_for_grievance_choices": [
             Permissions.USER_MANAGEMENT_VIEW_LIST,
             *ALL_GRIEVANCES_CREATE_MODIFY,
@@ -79,7 +76,6 @@ class UserViewSet(
     serializer_classes_by_action = {
         "profile": ProfileSerializer,
         "list": UserSerializer,
-        "choices": UserChoicesSerializer,
     }
     serializer_classes = {
         "program_users": ProgramUsersSerializer,
@@ -164,10 +160,6 @@ class UserViewSet(
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
-
     @action(
         detail=False,
         methods=["get"],
@@ -193,6 +185,28 @@ class UserViewSet(
 
         choices_data = Partner.get_partners_for_program_as_choices(business_area.id, program.id if program else None)
         return Response(to_choice_object(choices_data))
+
+
+class PartnerViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
+    """Serve the partner choices scoped to a business area."""
+
+    queryset = Partner.objects.all()
+    permissions_by_action = {
+        "choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
+    }
+    serializer_classes_by_action = {
+        "choices": PartnerChoicesSerializer,
+    }
+
+    @extend_schema(responses={200: PartnerChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices")
+    def choices(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
+        """Return the partner choice lists used by the user and program screens."""
+        serializer = self.get_serializer(instance={}, context={"business_area": self.business_area})
+        return Response(serializer.data)
 
 
 class GroupViewSet(

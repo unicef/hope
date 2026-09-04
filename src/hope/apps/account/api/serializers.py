@@ -220,8 +220,6 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
 class UserChoicesSerializer(serializers.Serializer):
     role_choices = serializers.SerializerMethodField()
     status_choices = serializers.SerializerMethodField()
-    partner_choices = serializers.SerializerMethodField()
-    partner_choices_temp = serializers.SerializerMethodField()
 
     def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": role.name, "value": role.id} for role in Role.objects.order_by("name")]
@@ -229,12 +227,16 @@ class UserChoicesSerializer(serializers.Serializer):
     def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
+
+class PartnerChoicesSerializer(serializers.Serializer):
+    partner_choices = serializers.SerializerMethodField()
+    partner_choices_temp = serializers.SerializerMethodField()
+
     def get_partner_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
-                .filter(allowed_business_areas__slug=business_area_slug)
+                .filter(allowed_business_areas=self.context["business_area"])
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
                 .values_list("id", "name")
             )
@@ -243,12 +245,11 @@ class UserChoicesSerializer(serializers.Serializer):
     def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         # TODO: can be removed after proper solution is applied; this is the temp solution to skip the user input in
         #  program mutations and retrieve partners already with a role in BA
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
                 .filter(
-                    role_assignments__business_area__slug=business_area_slug,
+                    role_assignments__business_area=self.context["business_area"],
                     role_assignments__program=None,
                 )
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))

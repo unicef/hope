@@ -1,0 +1,64 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "548"
+    },
+    "data": [
+        {
+            "name": "Deduplication",
+            "value": "DEDUPLICATION"
+        },
+        {
+            "name": "Deduplication Failed",
+            "value": "DEDUPLICATION_FAILED"
+        },
+        {
+            "name": "Import Error",
+            "value": "IMPORT_ERROR"
+        },
+        {
+            "name": "Import Scheduled",
+            "value": "IMPORT_SCHEDULED"
+        },
+        {
+            "name": "Importing",
+            "value": "IMPORTING"
+        },
+        {
+            "name": "In Review",
+            "value": "IN_REVIEW"
+        },
+        {
+            "name": "Loading",
+            "value": "LOADING"
+        },
+        {
+            "name": "Merge Error",
+            "value": "MERGE_ERROR"
+        },
+        {
+            "name": "Merge Scheduled",
+            "value": "MERGE_SCHEDULED"
+        },
+        {
+            "name": "Merged",
+            "value": "MERGED"
+        },
+        {
+            "name": "Merging",
+            "value": "MERGING"
+        },
+        {
+            "name": "Refused import",
+            "value": "REFUSED"
+        }
+    ],
+    "content_type": "application/json"
+}

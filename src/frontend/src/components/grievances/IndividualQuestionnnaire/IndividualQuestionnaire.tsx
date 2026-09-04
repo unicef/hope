@@ -12,6 +12,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
 import { choicesToDict } from '@utils/utils';
+import { useSexChoices } from '@hooks/useSexChoices';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -21,25 +22,20 @@ const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData } = useQuery<IndividualChoices>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasIndividualsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasIndividualsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+    queryFn: () => RestService.restChoicesIndividualsRetrieve(),
   });
+  const { data: sexChoices } = useSexChoices();
   const relationshipChoicesDict = choicesToDict(
     choicesData?.relationshipChoices,
   );
-  const genderChoicesDict = choicesToDict(choicesData?.sexChoices);
+  const genderChoicesDict = choicesToDict(sexChoices);
   const questionFields = isSocialDctType
     ? [
         {

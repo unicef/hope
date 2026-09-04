@@ -14,15 +14,23 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.apps.account.api.serializers import UserChoicesSerializer
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.caches import BusinessAreaKeyConstructor
 from hope.apps.core.api.filters import BusinessAreaFilter
-from hope.apps.core.api.mixins import BaseViewSet, CountActionMixin, PermissionsMixin
+from hope.apps.core.api.mixins import (
+    BaseViewSet,
+    BusinessAreaMixin,
+    CountActionMixin,
+    PermissionsMixin,
+    SerializerActionMixin,
+)
 from hope.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
     CollectorAttributeSerializer,
     CurrencyChoiceSerializer,
+    DataCollectingTypeChoiceSerializer,
     FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
@@ -34,19 +42,33 @@ from hope.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
+from hope.apps.grievance.api.serializers.grievance_ticket import (
+    GrievanceChoicesSerializer,
+)
+from hope.apps.household.api.serializers.household import (
+    HouseholdChoicesSerializer,
+    IndividualChoicesSerializer,
+)
 from hope.apps.household.const import SEX_CHOICE
+from hope.apps.payment.api.serializers import PaymentChoicesSerializer
+from hope.apps.program.api.serializers import ProgramChoicesSerializer
 from hope.models import (
     AccountType,
     BusinessArea,
     Country,
+    DataCollectingType,
     DeliveryMechanism,
+    DocumentType,
     Feedback,
+    LogEntry,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     Program,
+    RegistrationDataImport,
     RoleAssignment,
+    Survey,
 )
 
 
@@ -142,11 +164,46 @@ class BusinessAreaViewSet(
         return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
 
 
-class ChoicesViewSet(ViewSet):
-    """Return choices used in the system like statuses, currencies.
+class DataCollectingTypeViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
+    """Serve the data collecting types available in a business area."""
 
-    Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
-    """
+    queryset = DataCollectingType.objects.all()
+    permissions_by_action = {
+        "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+    }
+    serializer_classes_by_action = {
+        "choices": DataCollectingTypeChoiceSerializer,
+    }
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            DataCollectingType.objects.filter(
+                Q(limit_to=self.business_area) | Q(limit_to__isnull=True),
+                active=True,
+                deprecated=False,
+            )
+            .exclude(code__iexact="unknown")
+            .distinct()
+            .order_by("label")
+        )
+
+    @extend_schema(responses={200: DataCollectingTypeChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices", pagination_class=None)
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Return the data collecting types a program in this business area can use."""
+        return Response(self.get_serializer(self.get_queryset(), many=True).data)
+
+
+class ChoicesViewSet(ViewSet):
+    """Return business-area-independent choices used in the system."""
+
+    # Two kinds of actions live here:
+    # * flat - a single list, [{"name": ..., "value": ...}].
+    # * bundles - an object grouping several related lists.
+
+    enum_source = True
+
+    # --- flat choices -------------------------------------------------------
 
     @extend_schema(responses={200: CurrencyChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="currencies")
@@ -244,3 +301,69 @@ class ChoicesViewSet(ViewSet):
     def permissions(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(Permissions.choices()), many=True).data
         return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="activity-log-actions")
+    def activity_log_actions(self, request: Request) -> Response:
+        """Return the actions an activity log entry can record."""
+        resp = ChoiceSerializer(to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="registration-data-import-statuses")
+    def registration_data_import_statuses(self, request: Request) -> Response:
+        """Return the statuses a registration data import can be in."""
+        resp = ChoiceSerializer(to_choice_object(RegistrationDataImport.STATUS_CHOICE), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="survey-categories")
+    def survey_categories(self, request: Request) -> Response:
+        """Return the categories a survey can belong to."""
+        resp = ChoiceSerializer(to_choice_object(Survey.CATEGORY_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="document-types", enum_source=False)
+    def document_types(self, request: Request) -> Response:
+        """Return the document types a person can hold."""
+        choices = [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
+        return Response(ChoiceSerializer(choices, many=True).data)
+
+    # --- bundles ------------------------------------------------------------
+
+    @extend_schema(responses={200: HouseholdChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="households", enum_source=False)
+    def households(self, request: Request) -> Response:
+        """Return the choice lists used by the household screens."""
+        return Response(HouseholdChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: IndividualChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="individuals", enum_source=False)
+    def individuals(self, request: Request) -> Response:
+        """Return the choice lists used by the individual screens."""
+        return Response(IndividualChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: GrievanceChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="grievance-tickets", enum_source=False)
+    def grievance_tickets(self, request: Request) -> Response:
+        """Return the choice lists used by the grievance ticket screens."""
+        return Response(GrievanceChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: PaymentChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="payments", enum_source=False)
+    def payments(self, request: Request) -> Response:
+        """Return the choice lists used by the payment screens."""
+        return Response(PaymentChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: ProgramChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="programs", enum_source=False)
+    def programs(self, request: Request) -> Response:
+        """Return the choice lists used by the program screens."""
+        return Response(ProgramChoicesSerializer(instance={}, context={"request": request}).data)
+
+    @extend_schema(responses={200: UserChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="users", enum_source=False)
+    def users(self, request: Request) -> Response:
+        """Return the choice lists used by the user screens."""
+        return Response(UserChoicesSerializer(instance={}, context={"request": request}).data)

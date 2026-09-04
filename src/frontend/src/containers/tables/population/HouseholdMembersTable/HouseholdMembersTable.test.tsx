@@ -207,10 +207,6 @@ describe('HouseholdMembersTable', () => {
   };
 
   const mockChoicesData = {
-    documentTypeChoices: [
-      { value: 'PASSPORT', label: 'Passport' },
-      { value: 'NATIONAL_ID', label: 'National ID' },
-    ],
     sexChoices: [
       { value: SexEnum.MALE, label: 'Male' },
       { value: SexEnum.FEMALE, label: 'Female' },

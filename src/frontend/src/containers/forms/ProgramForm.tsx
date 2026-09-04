@@ -36,11 +36,19 @@ const ProgramForm = ({
   const isEditProgram = location.pathname.indexOf('edit') !== -1;
 
   const { data } = useQuery<ProgramChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+    queryFn: () => RestService.restChoicesProgramsRetrieve(),
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
+
+  const { data: dataCollectingTypeChoices } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasDataCollectingTypesChoicesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsChoicesRetrieve({
+      RestService.restBusinessAreasDataCollectingTypesChoicesList({
         businessAreaSlug: businessArea,
       }),
     staleTime: 1000 * 60 * 10,
@@ -60,9 +68,7 @@ const ProgramForm = ({
   // For copy program pages, filter DCTs based on Beneficiary Group (BG → DCT)
   // For normal create/edit, filter BGs based on DCT (DCT → BG)
   const filteredDataCollectionTypeChoicesData = useMemo(() => {
-    const allDCTs = data?.dataCollectingTypeChoices.filter(
-      (el) => el.name !== '',
-    );
+    const allDCTs = dataCollectingTypeChoices?.filter((el) => el.name !== '');
 
     if (
       !isCopyProgramPage ||
@@ -89,7 +95,7 @@ const ProgramForm = ({
       return true;
     });
   }, [
-    data?.dataCollectingTypeChoices,
+    dataCollectingTypeChoices,
     isCopyProgramPage,
     values.beneficiaryGroup,
     beneficiaryGroupsData,

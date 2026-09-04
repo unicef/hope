@@ -50,6 +50,10 @@ class Command(BaseCommand):
         for action in ChoicesViewSet.get_extra_actions():
             if action.detail or "get" not in action.mapping:
                 continue
+            if not action.kwargs.get("enum_source", True):
+                # Skip: the action returns something other than a flat list of
+                # choices, so there is no enum to generate from it.
+                continue
             response = getattr(viewset, action.__name__)(viewset.request)
             result[action.url_path] = response.data
             self.stdout.write(f"  + {action.url_path} ({len(response.data)} choices)")

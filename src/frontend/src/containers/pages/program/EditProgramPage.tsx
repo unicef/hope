@@ -24,7 +24,7 @@ import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
 import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
-import { UserChoices } from '@restgenerated/models/UserChoices';
+import { PartnerChoices } from '@restgenerated/models/PartnerChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -54,9 +54,12 @@ const EditProgramPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: treeData } = useQuery<AreaTree[]>({
-    queryKey: restQueryKey(RestService.restBusinessAreasGeoAreasAllAreasTreeList, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGeoAreasAllAreasTreeList,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGeoAreasAllAreasTreeList({
         businessAreaSlug: businessArea,
@@ -77,24 +80,22 @@ const EditProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+      queryFn: () => RestService.restChoicesProgramsRetrieve(),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
     });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
-    useQuery<UserChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+    useQuery<PartnerChoices>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasPartnersChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
-        RestService.restBusinessAreasUsersChoicesRetrieve({
+        RestService.restBusinessAreasPartnersChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });

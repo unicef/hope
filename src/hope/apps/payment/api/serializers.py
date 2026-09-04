@@ -50,6 +50,7 @@ from hope.models import (
     ApprovalProcess,
     Currency,
     DeliveryMechanism,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
@@ -1325,6 +1326,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
         )
 
 
+# Served from /api/rest/choices/payments/ - keys must not depend on the business area.
 class PaymentChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
 
@@ -1915,6 +1917,14 @@ class FspChoiceSerializer(serializers.ModelSerializer):
 class FspChoicesSerializer(serializers.Serializer):
     delivery_mechanism = DeliveryMechanismSerializer()
     fsps = FspChoiceSerializer(many=True)
+
+
+class FinancialInstitutionChoiceSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+
+    class Meta:
+        model = FinancialInstitution
+        fields = ("name", "value")
 
 
 class FSPXlsxTemplateSerializer(serializers.ModelSerializer):

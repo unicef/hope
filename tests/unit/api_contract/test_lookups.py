@@ -2,10 +2,11 @@ from pathlib import Path
 
 from drf_api_checker.pytest import frozenfixture
 import pytest
-from unit.api_contract._helpers import HopeRecorder
+from unit.api_contract._helpers import HopeRecorder, UserChoicesRecorder
 
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
+from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import DeliveryMechanismFactory, FinancialInstitutionFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.steficon import RuleFactory
@@ -71,6 +72,11 @@ def rule(request, db):
 @frozenfixture()
 def delivery_mechanism(request, db):
     return DeliveryMechanismFactory()
+
+
+@frozenfixture()
+def document_type(request, db):
+    return DocumentTypeFactory(key="passport", label="Passport")
 
 
 # ---------------------------------------------------------------------------
@@ -226,3 +232,53 @@ def test_choices_countries(superuser, country):
 def test_choices_permissions(superuser):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET("/api/rest/choices/permissions/")
+
+
+def test_choices_households(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/households/")
+
+
+def test_choices_document_types(superuser, document_type):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/document-types/")
+
+
+def test_choices_individuals(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/individuals/")
+
+
+def test_choices_grievance_tickets(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/grievance-tickets/")
+
+
+def test_choices_payments(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/payments/")
+
+
+def test_choices_activity_log_actions(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/activity-log-actions/")
+
+
+def test_choices_registration_data_import_statuses(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/registration-data-import-statuses/")
+
+
+def test_choices_survey_categories(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/survey-categories/")
+
+
+def test_choices_programs(superuser):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/programs/")
+
+
+def test_choices_users(superuser):
+    recorder = UserChoicesRecorder(DATA_DIR, as_user=superuser)
+    recorder.assertGET("/api/rest/choices/users/")

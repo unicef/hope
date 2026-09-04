@@ -1,6 +1,5 @@
 from typing import Any
 
-from django.db.models import Q
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -24,7 +23,6 @@ from hope.apps.household.const import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
@@ -32,8 +30,6 @@ from hope.apps.household.services.household_programs_with_delivered_quantity imp
 )
 from hope.models import (
     AccountType,
-    DocumentType,
-    FinancialInstitution,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -425,20 +421,16 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
         return obj.active_individuals.count()
 
 
+# Served from /api/rest/choices/households/ - keys must not depend on the business area.
 class HouseholdChoicesSerializer(serializers.Serializer):
-    document_type_choices = serializers.SerializerMethodField()
     residence_status_choices = serializers.SerializerMethodField()
-
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
     def get_residence_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
 
 
+# Served from /api/rest/choices/individuals/ - keys must not depend on the business area.
 class IndividualChoicesSerializer(serializers.Serializer):
-    document_type_choices = serializers.SerializerMethodField()
-    sex_choices = serializers.SerializerMethodField()
     flag_choices = serializers.SerializerMethodField()
     status_choices = serializers.SerializerMethodField()
     deduplication_batch_status_choices = serializers.SerializerMethodField()
@@ -453,13 +445,6 @@ class IndividualChoicesSerializer(serializers.Serializer):
     severity_of_disability_choices = serializers.SerializerMethodField()
     work_status_choices = serializers.SerializerMethodField()
     account_type_choices = serializers.SerializerMethodField()
-    account_financial_institution_choices = serializers.SerializerMethodField()
-
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
-
-    def get_sex_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return to_choice_object(SEX_CHOICE)
 
     def get_flag_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
@@ -503,14 +488,6 @@ class IndividualChoicesSerializer(serializers.Serializer):
 
     def get_account_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
-
-    def get_account_financial_institution_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        business_area = self.context.get("business_area")
-        fis = FinancialInstitution.objects.all()
-        if business_area:
-            fis = fis.filter(Q(country__business_areas=business_area) | Q(country__isnull=True)).distinct()
-
-        return [{"name": x.name, "value": x.id} for x in fis]
 
 
 class HouseholdSmallSerializer(serializers.ModelSerializer):

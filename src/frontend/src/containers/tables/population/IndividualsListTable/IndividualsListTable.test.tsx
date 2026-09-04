@@ -57,10 +57,6 @@ describe('IndividualsListTable', () => {
   };
 
   const mockChoicesData = {
-    documentTypeChoices: [
-      { value: 'NATIONAL_ID', label: 'National ID' },
-      { value: 'PASSPORT', label: 'Passport' },
-    ],
     sexChoices: [],
     flagChoices: [],
     statusChoices: [],
