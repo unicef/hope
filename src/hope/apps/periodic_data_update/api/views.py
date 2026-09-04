@@ -305,7 +305,7 @@ class PDUOnlineEditViewSet(
             instance,
             "SEND_FOR_APPROVAL",
             str(request.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
@@ -368,7 +368,7 @@ class PDUOnlineEditViewSet(
             instance,
             "SEND_BACK",
             str(request.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
@@ -396,7 +396,7 @@ class PDUOnlineEditViewSet(
                 pdu_edit,
                 "APPROVE",
                 str(request.user.pk),
-                f"{timezone.now():%-d %B %Y}",
+                timezone.now().isoformat(),
             )
 
         return Response(

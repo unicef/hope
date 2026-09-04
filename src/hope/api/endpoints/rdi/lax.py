@@ -25,6 +25,7 @@ from hope.api.endpoints.rdi.common import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
+from hope.apps.core.api.fields import UTCDateField
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -102,8 +103,8 @@ class DocumentSerializerLax(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
-    issuance_date = serializers.DateField(required=False)
-    expiry_date = serializers.DateField(required=False)
+    issuance_date = UTCDateField(required=False)
+    expiry_date = UTCDateField(required=False)
 
     class Meta:
         model = PendingDocument

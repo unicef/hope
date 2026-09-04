@@ -1,5 +1,6 @@
 """Tests for PDU online edit notifications."""
 
+from datetime import UTC, datetime
 from typing import Any
 from unittest import mock
 
@@ -16,10 +17,13 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.timezones import format_human_datetime
 from hope.apps.periodic_data_update.notifications import PDUOnlineEditNotification
 from hope.models import BusinessArea, PDUOnlineEdit, User
 
 pytestmark = pytest.mark.django_db
+
+ACTION_DATETIME = datetime(2026, 8, 21, 12, 30, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -243,6 +247,20 @@ def pdu_with_authorized_users(pdu_online_edit: PDUOnlineEdit, authorized_users: 
     return pdu_online_edit
 
 
+@pytest.fixture
+def distinct_timezone_notification_data(
+    pdu_with_authorized_users: PDUOnlineEdit,
+    authorized_users: dict,
+    user_action_user: User,
+) -> tuple[PDUOnlineEdit, User]:
+    user_action_user.timezone = "America/New_York"
+    user_action_user.save(update_fields=("timezone",))
+    recipient = authorized_users["approval_authorized"]
+    recipient.timezone = "Europe/Warsaw"
+    recipient.save(update_fields=("timezone",))
+    return pdu_with_authorized_users, user_action_user
+
+
 def test_send_for_approval_action_notification_recipients(
     pdu_with_authorized_users: PDUOnlineEdit, user_action_user: User, authorized_users: dict
 ) -> None:
@@ -251,7 +269,7 @@ def test_send_for_approval_action_notification_recipients(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
     expected_recipients = [
@@ -278,7 +296,7 @@ def test_approve_action_notification_recipients(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_APPROVE,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
     expected_recipients = [
@@ -304,7 +322,7 @@ def test_send_back_action_notification_recipients(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_BACK,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
     expected_recipients = [
@@ -320,14 +338,13 @@ def test_send_back_action_notification_recipients(
         assert expected_recipient in actual_recipients
 
 
-def test_no_authorized_users_no_recipients(
+def test_no_authorized_users_notifies_only_action_user(
     afghanistan: BusinessArea,
     program: Any,
     user_pdu_creator: User,
     user_action_user: User,
     setup_roles_and_permissions: None,
 ) -> None:
-    # When no authorized users are set, no notifications are sent.
     pdu_edit_no_auth = PDUOnlineEdit.objects.create(
         name="Test PDU Edit No Auth",
         business_area=afghanistan,
@@ -342,11 +359,14 @@ def test_no_authorized_users_no_recipients(
         pdu_edit_no_auth,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
     actual_recipients = list(pdu_notification.user_recipients.all())
     assert actual_recipients == []
+    assert len(pdu_notification.emails) == 1
+    assert pdu_notification.emails[0].recipients == [user_action_user.email]
+    assert pdu_notification.emails[0].ccs == []
 
 
 @override_config(
@@ -362,7 +382,7 @@ def test_send_email_notification(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -380,7 +400,7 @@ def test_send_email_notification_disabled_by_config(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     mock_send.assert_not_called()
@@ -398,7 +418,7 @@ def test_send_email_notification_disabled_by_business_area(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     mock_send.assert_not_called()
@@ -413,9 +433,10 @@ def test_send_email_notification_subject_send_for_approval(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
-    assert pdu_notification.email.subject == "PDU Online Edit pending for Approval"
+    assert len(pdu_notification.emails) == 1
+    assert pdu_notification.emails[0].subject == "PDU Online Edit pending for Approval"
 
 
 @mock.patch("hope.apps.utils.celery_tasks.requests.post")
@@ -432,12 +453,13 @@ def test_send_email_notification_catch_all_email(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
-    assert len(pdu_notification.email.recipients) == 2
-    assert "catchallemail@email.com" in pdu_notification.email.recipients
-    assert "catchallemail2@email.com" in pdu_notification.email.recipients
+    assert len(pdu_notification.emails) == 1
+    assert len(pdu_notification.emails[0].recipients) == 2
+    assert "catchallemail@email.com" in pdu_notification.emails[0].recipients
+    assert "catchallemail2@email.com" in pdu_notification.emails[0].recipients
     assert mock_post.call_count == 1
 
 
@@ -454,7 +476,7 @@ def test_send_email_notification_without_catch_all_email(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     expected_recipients = [
@@ -484,7 +506,7 @@ def send_email_notification_exclude_superuser(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
     actual_recipients = list(pdu_notification.user_recipients.all())
@@ -503,7 +525,7 @@ def test_send_email_notification_include_internal_users(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
     assert authorized_users["unicef_hq_authorized"] in pdu_notification.user_recipients
@@ -522,7 +544,7 @@ def test_email_body_variables_send_for_approval(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -548,7 +570,7 @@ def test_email_body_variables_approve(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_APPROVE,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -574,7 +596,7 @@ def test_email_body_variables_send_back(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_BACK,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
     pdu_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -591,10 +613,10 @@ def test_email_body_variables_content(
         pdu_with_authorized_users,
         PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
         user_action_user,
-        "1 January 2025",
+        ACTION_DATETIME,
     )
 
-    body_variables = pdu_notification._prepare_body_variables()
+    body_variables = pdu_notification._prepare_body_variables(str(pdu_with_authorized_users.business_area.timezone))
 
     expected_keys = [
         "first_name",
@@ -619,11 +641,57 @@ def test_email_body_variables_content(
     assert body_variables["pdu_online_edit_id"] == pdu_with_authorized_users.id
     assert body_variables["pdu_online_edit_name"] == "Test PDU Edit"
     assert body_variables["pdu_creator"] == user_pdu_creator.get_full_name()
-    assert body_variables["pdu_creation_date"] == f"{pdu_with_authorized_users.created_at:%-d %B %Y}"
+    assert body_variables["pdu_creation_date"] == format_human_datetime(
+        pdu_with_authorized_users.created_at,
+        business_area=pdu_with_authorized_users.business_area,
+    )
     assert body_variables["action_user"] == user_action_user.get_full_name()
-    assert body_variables["action_date"] == "1 January 2025"
+    assert body_variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        business_area=pdu_with_authorized_users.business_area,
+    )
     assert body_variables["program_name"] == program.name
     assert (
         f"/population/individuals/online-templates/{pdu_with_authorized_users.id}"
         in body_variables["pdu_online_edit_url"]
+    )
+
+
+def test_notification_formats_action_datetime_in_requested_timezone(
+    pdu_with_authorized_users: PDUOnlineEdit,
+    user_action_user: User,
+) -> None:
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_with_authorized_users,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        user_action_user,
+        ACTION_DATETIME,
+    )
+
+    body_variables = pdu_notification._prepare_body_variables("Europe/Warsaw")
+
+    assert body_variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        timezone_name="Europe/Warsaw",
+    )
+
+
+def test_notification_groups_recipients_and_action_user_by_timezone(
+    distinct_timezone_notification_data: tuple[PDUOnlineEdit, User],
+) -> None:
+    pdu_online_edit, action_user = distinct_timezone_notification_data
+
+    pdu_notification = PDUOnlineEditNotification(
+        pdu_online_edit,
+        PDUOnlineEditNotification.ACTION_SEND_FOR_APPROVAL,
+        action_user,
+        ACTION_DATETIME,
+    )
+
+    assert len(pdu_notification.emails) == 3
+    assert pdu_notification.emails[0].ccs == []
+    assert pdu_notification.emails[-1].recipients == [action_user.email]
+    assert pdu_notification.emails[-1].variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        timezone_name="America/New_York",
     )

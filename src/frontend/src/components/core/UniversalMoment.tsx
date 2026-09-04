@@ -1,6 +1,7 @@
-import { format, parseISO } from 'date-fns';
-import { DATE_FORMAT, DATE_FORMAT_LONG } from '../../config';
+import Tooltip from '@mui/material/Tooltip';
 import { ReactElement } from 'react';
+import { useTimezone } from 'src/timezoneContext';
+import { formatInstant, formatTooltip, isDateOnly, parseInstant } from '@utils/timezone';
 
 export interface Props {
   children: string;
@@ -8,20 +9,33 @@ export interface Props {
 }
 
 export function UniversalMoment({ children, withTime }: Props): ReactElement {
-  const dateFormat = withTime ? DATE_FORMAT_LONG : DATE_FORMAT;
-  const date = children
-    ? /^\d{4}-\d{2}-\d{2}$/.test(children)
-      ? parseISO(children)
-      : withTime
-        ? parseISO(children)
-        : parseISO(children.slice(0, 10))
-    : null;
-  const formattedDate = date ? format(date, dateFormat) : '-';
-  const dateTime = date ? date.getTime().toString() : '';
+  const timezone = useTimezone();
 
-  return date ? (
-    <time dateTime={dateTime}>{formattedDate}</time>
-  ) : (
-    <>{formattedDate}</>
+  if (!children) {
+    return <>-</>;
+  }
+
+  if (isDateOnly(children)) {
+    // True calendar date: parse as literal UTC midnight, never through the
+    // offset-less-datetime path (that path exists for real timestamps and warns).
+    const dateOnly = new Date(`${children}T00:00:00Z`);
+    return (
+      <time dateTime={children}>{formatInstant(dateOnly, 'UTC', 'date')}</time>
+    );
+  }
+
+  const date = parseInstant(children);
+  if (!date) {
+    return <>-</>;
+  }
+
+  const mode = withTime ? 'dateTime' : 'date';
+  const formattedDate = formatInstant(date, timezone, mode);
+  const tooltip = formatTooltip(date, timezone);
+
+  return (
+    <Tooltip title={tooltip}>
+      <time dateTime={date.toISOString()}>{formattedDate}</time>
+    </Tooltip>
   );
 }

@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.utils import humanize_errors
+from hope.apps.core.api.fields import UTCDateField
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
@@ -92,8 +93,8 @@ class DocumentSerializerUpload(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
-    issuance_date = serializers.DateField(required=False)
-    expiry_date = serializers.DateField(required=False)
+    issuance_date = UTCDateField(required=False)
+    expiry_date = UTCDateField(required=False)
 
     class Meta:
         model = PendingDocument

@@ -1,6 +1,7 @@
 from typing import Any, Callable
 
 from rest_framework import serializers
+from timezone_field.rest_framework import TimeZoneSerializerField
 
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
 from hope.models import BusinessArea, Country, DataCollectingType, FlexibleAttribute, FlexibleAttributeChoice
@@ -14,6 +15,7 @@ class CountrySmallSerializer(serializers.ModelSerializer):
 
 class BusinessAreaSerializer(serializers.ModelSerializer):
     countries = CountrySmallSerializer(many=True, read_only=True)
+    timezone = TimeZoneSerializerField(read_only=True)
 
     class Meta:
         model = BusinessArea
@@ -23,6 +25,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
             "code",
             "long_name",
             "slug",
+            "timezone",
             "parent",
             "is_split",
             "active",

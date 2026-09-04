@@ -15,6 +15,7 @@ from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.api.fields import UTCDateField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
@@ -269,7 +270,9 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True)
     payment_verification_summary = PaymentVerificationSummarySerializer()
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
-    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     program_name = serializers.CharField(source="program_cycle.program.name")
     program_id = serializers.CharField(source="program_cycle.program_id")
     available_payment_records_count = serializers.SerializerMethodField()
@@ -332,7 +335,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
 
 class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
-    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
     program_cycle_title = serializers.CharField(source="program_cycle.title")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
@@ -363,6 +366,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_code = serializers.CharField(source="program_cycle.program.code", read_only=True)
     program_cycle_id = serializers.UUIDField(read_only=True)
+    last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
@@ -878,6 +882,8 @@ class VisionStateSerializer(serializers.Serializer):
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
     is_payment_gateway = serializers.BooleanField(read_only=True)
@@ -1237,6 +1243,8 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 
 
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
@@ -1369,6 +1377,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_cycle = serializers.CharField(source="parent.program_cycle.title", read_only=True)
     payment_plan_group = serializers.CharField(source="parent.payment_plan_group.name", read_only=True, allow_null=True)
     payment_plan_purposes = serializers.SerializerMethodField()
+    delivery_date = UTCDateField(read_only=True, allow_null=True)
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu

@@ -55,6 +55,7 @@ def test_choices_cover_all_viewset_actions(generated: SimpleNamespace) -> None:
         "payment-verification-summary-status",
         "permissions",
         "sex",
+        "timezones",
     }
 
 

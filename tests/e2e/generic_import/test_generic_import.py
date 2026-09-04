@@ -52,6 +52,7 @@ def somalia_business_area(business_area: BusinessArea) -> BusinessArea:
             "has_data_sharing_agreement": True,
             "is_accountability_applicable": True,
             "active": True,
+            "timezone": "UTC",
         },
     )
 

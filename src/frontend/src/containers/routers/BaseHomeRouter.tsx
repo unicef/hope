@@ -11,6 +11,7 @@ import { FC, useState } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { TimezoneProvider } from 'src/timezoneContext';
 
 const Root = styled.div`
   display: flex;
@@ -48,9 +49,9 @@ export const BaseHomeRouter: FC = () => {
   };
 
   const {
-    data: businessAreaData,
-    isLoading: businessAreaLoading,
-    isError: businessAreaError,
+    data: profileData,
+    isLoading: profileLoading,
+    isError: profileError,
   } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasUsersProfileRetrieve,
@@ -65,16 +66,16 @@ export const BaseHomeRouter: FC = () => {
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
-  if (businessAreaError) {
+  if (profileError) {
     navigate('/404');
     return null;
   }
 
-  if (!businessAreaData || businessAreaLoading) {
+  if (!profileData || profileLoading) {
     return <LoadingComponent />;
   }
 
-  const allBusinessAreasSlugs = businessAreaData.businessAreas.map(
+  const allBusinessAreasSlugs = profileData.businessAreas.map(
     (el) => el.slug,
   );
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
@@ -85,19 +86,21 @@ export const BaseHomeRouter: FC = () => {
   }
 
   return (
-    <Root>
-      <CssBaseline />
-      <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
-      <Drawer
-        open={open}
-        handleDrawerClose={handleDrawerClose}
-        currentLocation={location.pathname}
-        dataCy="side-nav"
-      />
-      <MainContent data-cy="main-content">
-        <AppBarSpacer />
-        <Outlet />
-      </MainContent>
-    </Root>
+    <TimezoneProvider timezone={profileData.effectiveTimezone ?? 'UTC'}>
+      <Root>
+        <CssBaseline />
+        <AppBar open={open} handleDrawerOpen={handleDrawerOpen} />
+        <Drawer
+          open={open}
+          handleDrawerClose={handleDrawerClose}
+          currentLocation={location.pathname}
+          dataCy="side-nav"
+        />
+        <MainContent data-cy="main-content">
+          <AppBarSpacer />
+          <Outlet />
+        </MainContent>
+      </Root>
+    </TimezoneProvider>
   );
 };

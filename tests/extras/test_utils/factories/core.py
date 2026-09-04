@@ -40,6 +40,7 @@ class BusinessAreaFactory(DjangoModelFactory):
     region_code = "64"
     region_name = "TEST"
     active = True
+    timezone = "UTC"
 
 
 class BeneficiaryGroupFactory(DjangoModelFactory):

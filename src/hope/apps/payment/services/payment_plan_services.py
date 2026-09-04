@@ -186,7 +186,7 @@ class PaymentPlanService:
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value,
             str(self.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
         return self.payment_plan
 
@@ -537,7 +537,7 @@ class PaymentPlanService:
                     self.payment_plan,
                     notification_action.value,
                     str(self.user.id),
-                    f"{timezone.now():%-d %B %Y}",
+                    timezone.now().isoformat(),
                 )
 
             self.payment_plan.save()
@@ -1591,7 +1591,7 @@ class PaymentPlanService:
                     payment_plan,
                     PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
                     str(user.pk),
-                    f"{timezone.now():%-d %B %Y}",
+                    timezone.now().isoformat(),
                 )
 
         self.payment_plan = payment_plan
@@ -1612,7 +1612,7 @@ class PaymentPlanService:
                 payment_plan,
                 PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
                 str(user.pk),
-                f"{timezone.now():%-d %B %Y}",
+                timezone.now().isoformat(),
             )
 
         self.payment_plan = payment_plan

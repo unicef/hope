@@ -191,7 +191,7 @@ def send_pdu_online_edit_notification_emails_async_task_action(job: AsyncRetryJo
         pdu_online_edit,
         job.config["action"],
         action_user,
-        job.config["action_date_formatted"],
+        datetime.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -199,14 +199,14 @@ def send_pdu_online_edit_notification_emails_async_task(
     pdu_online_edit: PDUOnlineEdit,
     action: str,
     action_user_id: str,
-    action_date_formatted: str,
+    action_date: str,
 ) -> None:
     pdu_online_edit_id = str(pdu_online_edit.id)
     config = {
         "pdu_online_edit_id": pdu_online_edit_id,
         "action": action,
         "action_user_id": action_user_id,
-        "action_date_formatted": action_date_formatted,
+        "action_date": action_date,
     }
     AsyncRetryJob.queue_task(
         instance=pdu_online_edit,

@@ -50,6 +50,7 @@
                     "long_name": "Business Area 0 Long Name",
                     "parent": null,
                     "office_country": null,
+                    "timezone": "UTC",
                     "is_split": false,
                     "region_code": "64",
                     "region_name": "TEST",

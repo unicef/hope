@@ -231,9 +231,7 @@ def test_list_payment_plans_approval_process_data(
     response_json = response.json()["results"]
     assert len(response_json) == 1
 
-    assert response_json[0]["last_approval_process_date"] == approval_approval.created_at.strftime(
-        "%Y-%m-%dT%H:%M:%S.%fZ"
-    )
+    assert response_json[0]["last_approval_process_date"] == approval_approval.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert response_json[0]["last_approval_process_by"] == str(approval_approval.created_by)
 
     with TestCase.captureOnCommitCallbacks(execute=True):
@@ -244,7 +242,7 @@ def test_list_payment_plans_approval_process_data(
     response_json = response.json()["results"]
     assert len(response_json) == 1
     assert response_json[0]["last_approval_process_date"] == approval_authorization.created_at.strftime(
-        "%Y-%m-%dT%H:%M:%S.%fZ"
+        "%Y-%m-%dT%H:%M:%SZ"
     )
     assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
 
@@ -255,9 +253,7 @@ def test_list_payment_plans_approval_process_data(
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()["results"]
     assert len(response_json) == 1
-    assert response_json[0]["last_approval_process_date"] == approval_release.created_at.strftime(
-        "%Y-%m-%dT%H:%M:%S.%fZ"
-    )
+    assert response_json[0]["last_approval_process_date"] == approval_release.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert response_json[0]["last_approval_process_by"] == str(approval_release.created_by)
 
 

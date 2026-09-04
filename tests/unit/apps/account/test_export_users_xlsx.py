@@ -34,7 +34,7 @@ def partner(business_area: BusinessArea) -> Partner:
 
 @pytest.fixture
 def user(partner: Partner) -> User:
-    return UserFactory(partner=partner, first_name="A_FirstU", last_name="LastN")
+    return UserFactory(partner=partner, first_name="A_FirstU", last_name="LastN", timezone="Europe/Warsaw")
 
 
 @pytest.fixture
@@ -98,6 +98,7 @@ def test_get_exported_users_file_with_users(
         "LAST NAME",
         "E-MAIL",
         "ACCOUNT STATUS",
+        "TIMEZONE",
         "PARTNER",
         "USER ROLES",
     )
@@ -107,6 +108,7 @@ def test_get_exported_users_file_with_users(
         user.last_name,
         user.email,
         user.status,
+        "Europe/Warsaw",
         user.partner.name,
         f"{business_area.name}-{user_role.name}",
     )

@@ -1,9 +1,12 @@
+from datetime import UTC, datetime
+
 import pytest
 
 from extras.test_utils.factories import (
     AccountFactory,
     AccountTypeFactory,
     DeliveryMechanismFactory,
+    DocumentFactory,
     FinancialServiceProviderFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -165,6 +168,15 @@ def payment_without_primary_collector(
     return payment_plan, payment
 
 
+@pytest.fixture
+def household_document(household_one):
+    return DocumentFactory(
+        individual=household_one.head_of_household,
+        issuance_date=datetime(2024, 1, 2, 13, 30, tzinfo=UTC),
+        expiry_date=datetime(2030, 2, 3, 18, 45, tzinfo=UTC),
+    )
+
+
 def test_build_snapshot(payment_plan, payments, household_one, household_two) -> None:
     create_payment_plan_snapshot_data(payment_plan)
 
@@ -187,6 +199,17 @@ def test_build_snapshot(payment_plan, payments, household_one, household_two) ->
         "financial_institution_name": "",
         "financial_institution_pk": "",
     }
+
+
+def test_build_snapshot_serializes_document_dates_as_dates(payment_plan, payments, household_document) -> None:
+    create_payment_plan_snapshot_data(payment_plan)
+    payment = payments[0]
+    payment.refresh_from_db()
+
+    document = payment.household_snapshot.snapshot_data["primary_collector"]["documents"][0]
+
+    assert document["issuance_date"] == "2024-01-02"
+    assert document["expiry_date"] == "2030-02-03"
 
 
 def test_batching(batch_payment_plan, batch_payments, monkeypatch) -> None:

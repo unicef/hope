@@ -180,6 +180,11 @@ def _user_changed(instance: User, **kwargs: Any) -> None:
     transaction.on_commit(lambda: profile_cache.bump_user(instance.pk))
 
 
+@receiver(post_save, sender=BusinessArea)
+def _business_area_changed(instance: BusinessArea, **kwargs: object) -> None:
+    transaction.on_commit(profile_cache.bump_global)
+
+
 @receiver(m2m_changed, sender=User.groups.through)
 def _user_groups_changed(instance: User, action: str, **kwargs: Any) -> None:
     if action in {"post_add", "post_remove", "post_clear"}:
