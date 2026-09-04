@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             model_name="deduplicationenginesimilaritypair",
             name="status_code",
             field=models.CharField(
-                choices=hope.models.deduplication_engine_similarity_pair.DeduplicationEngineSimilarityPair.StatusCode._status_code_choices,
+                choices=hope.models.deduplication_engine_similarity_pair.BiometricDedupeSimilarityPair.StatusCode._status_code_choices,
                 max_length=20,
             ),
         ),
