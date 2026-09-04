@@ -43889,14 +43889,6 @@
                             "type": "boolean",
                             "readOnly": true
                         },
-                        "deduplication_engine_status": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/DeduplicationEngineStatusEnum"
-                                }
-                            ],
-                            "nullable": true
-                        },
                         "batch_duplicates_count_and_percentage": {
                             "type": "array",
                             "items": {

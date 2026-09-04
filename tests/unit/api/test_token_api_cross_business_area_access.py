@@ -24,6 +24,20 @@ def beneficiary_ticket_client(business_area: BusinessArea) -> APIClient:
 
 
 @pytest.fixture
+def cw_only_business_area(user_business_area: BusinessArea) -> BusinessArea:
+    """The token's own BA switched to the Country Workspace ingest path.
+
+    `CreateRDIView` is gated behind `BusinessAreaIngestCWOnlyPermission`, so a
+    legacy BA is rejected with 403 before the serializer runs. Flipping the
+    token's existing BA (rather than building a new one) keeps it inside
+    `APIToken.valid_for`, which the 404 scoping check in `HOPEPermission` needs.
+    """
+    user_business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    user_business_area.save()
+    return user_business_area
+
+
+@pytest.fixture
 def other_business_area() -> BusinessArea:
     return BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0070")
 
@@ -35,11 +49,11 @@ def other_program(other_business_area: BusinessArea) -> Program:
 
 def test_create_rdi_for_program_from_other_business_area_is_denied(
     token_api_client: APIClient,
-    user_business_area: BusinessArea,
+    cw_only_business_area: BusinessArea,
     other_program: Program,
     imported_by_user: User,
 ) -> None:
-    url = reverse("api:rdi-create", args=[user_business_area.slug])
+    url = reverse("api:rdi-create", args=[cw_only_business_area.slug])
 
     response = token_api_client.post(
         url,

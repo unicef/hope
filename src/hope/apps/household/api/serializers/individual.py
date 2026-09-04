@@ -219,7 +219,7 @@ class DeduplicationResultSerializer(serializers.Serializer):
         return bool(obj.get("distinct", False))
 
 
-class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
+class BiometricDeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
     id = serializers.CharField()
     photo = serializers.SerializerMethodField()
     full_name = serializers.CharField()
@@ -305,10 +305,12 @@ class IndividualListSerializer(serializers.ModelSerializer):
         serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
         return serializer.data
 
-    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    @extend_schema_field(BiometricDeduplicationEngineSimilarityPairIndividualSerializer(many=True))
     def get_biometric_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
         results = obj.biometric_deduplication_batch_results
-        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        serializer = BiometricDeduplicationEngineSimilarityPairIndividualSerializer(
+            results, many=True, context=self.context
+        )
         return serializer.data
 
     @extend_schema_field(DeduplicationResultSerializer(many=True))
@@ -318,10 +320,12 @@ class IndividualListSerializer(serializers.ModelSerializer):
         serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
         return serializer.data
 
-    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    @extend_schema_field(BiometricDeduplicationEngineSimilarityPairIndividualSerializer(many=True))
     def get_biometric_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
         results = obj.biometric_deduplication_golden_record_results
-        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        serializer = BiometricDeduplicationEngineSimilarityPairIndividualSerializer(
+            results, many=True, context=self.context
+        )
         return serializer.data
 
 

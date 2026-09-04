@@ -59,7 +59,6 @@ def test_upload_single_household_with_head_as_primary(
     rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
     assert rdi is not None
     assert rdi.program == program
-    assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PENDING
 
     hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
     assert hh is not None

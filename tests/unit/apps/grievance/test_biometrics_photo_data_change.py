@@ -7,8 +7,8 @@ import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
+    BiometricDeduplicationEngineSimilarityPairFactory,
     BusinessAreaFactory,
-    DeduplicationEngineSimilarityPairFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
@@ -26,7 +26,7 @@ from hope.apps.grievance.services.biometric_photo_ticket import (
 from hope.apps.grievance.services.ticket_status_changer_service import (
     TicketStatusChangerService,
 )
-from hope.models import BusinessArea, DeduplicationEngineSimilarityPair, User
+from hope.models import BiometricDedupeSimilarityPair, BusinessArea, User
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -57,12 +57,12 @@ def one_bad_photo_context(business_area: BusinessArea, user: User) -> dict[str, 
         deduplication_golden_record_results={"duplicates": [], "possible_duplicates": []},
         photo=ContentFile(b"aaa", name="bad.png"),
     )
-    DeduplicationEngineSimilarityPairFactory(
+    BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=individual,
         individual2=None,
         similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_412,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_412,
     )
     return {"user": user, "rdi": rdi, "individual": individual}
 
@@ -80,7 +80,7 @@ def integer_status_code_context(business_area: BusinessArea) -> dict[str, Any]:
         deduplication_golden_record_results={"duplicates": [], "possible_duplicates": []},
         photo=ContentFile(b"aaa", name="bad.png"),
     )
-    DeduplicationEngineSimilarityPairFactory(
+    BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=individual,
         individual2=None,
@@ -112,19 +112,19 @@ def two_bad_photos_context(business_area: BusinessArea) -> dict[str, Any]:
         deduplication_golden_record_results={"duplicates": [], "possible_duplicates": []},
         photo=ContentFile(b"bbb", name="b.png"),
     )
-    DeduplicationEngineSimilarityPairFactory(
+    BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=ind_a,
         individual2=None,
         similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_412,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_412,
     )
-    DeduplicationEngineSimilarityPairFactory(
+    BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=ind_b,
         individual2=None,
         similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_429,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_429,
     )
     return {"rdi": rdi, "ind_a": ind_a, "ind_b": ind_b}
 
@@ -152,12 +152,12 @@ def two_sided_error_context(business_area: BusinessArea) -> dict[str, Any]:
         photo=ContentFile(b"bbb", name="b.png"),
     )
     # Deliberately malformed input to exercise the defensive guard - a photo error (score 0) only names 1 individual
-    DeduplicationEngineSimilarityPairFactory(
+    BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=ind_a,
         individual2=ind_b,
         similarity_score=0.0,
-        status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_412,
+        status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_412,
     )
     return {"rdi": rdi}
 
@@ -168,7 +168,7 @@ def test_single_sided_error_finding_creates_photo_data_change_ticket(
     rdi = one_bad_photo_context["rdi"]
     individual = one_bad_photo_context["individual"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
 
     assert TicketNeedsAdjudicationDetails.objects.count() == 0
     assert GrievanceTicket.objects.count() == 1
@@ -186,7 +186,7 @@ def test_single_sided_error_finding_creates_photo_data_change_ticket(
 def test_ticket_description_reports_the_engine_status_code(one_bad_photo_context: dict[str, Any]) -> None:
     rdi = one_bad_photo_context["rdi"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
 
     assert GrievanceTicket.objects.get().description == (
         "Biometric deduplication could not read this individual's photo "
@@ -199,7 +199,7 @@ def test_ticket_description_labels_a_status_code_reported_as_an_integer(
 ) -> None:
     rdi = integer_status_code_context["rdi"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
 
     assert GrievanceTicket.objects.get().description == (
         "Biometric deduplication could not read this individual's photo "
@@ -212,7 +212,7 @@ def test_each_bad_photo_individual_gets_its_own_ticket(two_bad_photos_context: d
     ind_a = two_bad_photos_context["ind_a"]
     ind_b = two_bad_photos_context["ind_b"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
 
     assert GrievanceTicket.objects.count() == 2
     assert {str(d.individual_id) for d in TicketIndividualDataUpdateDetails.objects.all()} == {
@@ -226,7 +226,7 @@ def test_two_sided_finding_creates_no_photo_ticket(two_sided_error_context: dict
     # occur, but if it did we skip it rather than guess whose photo is bad.
     rdi = two_sided_error_context["rdi"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
 
     assert GrievanceTicket.objects.count() == 0
 
@@ -234,17 +234,17 @@ def test_two_sided_finding_creates_no_photo_ticket(two_sided_error_context: dict
 def test_photo_error_ticket_not_duplicated_on_rerun(one_bad_photo_context: dict[str, Any]) -> None:
     rdi = one_bad_photo_context["rdi"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
     assert GrievanceTicket.objects.count() == 1
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
     assert GrievanceTicket.objects.count() == 1
 
 
 def test_empty_queryset_creates_nothing(one_bad_photo_context: dict[str, Any]) -> None:
     rdi = one_bad_photo_context["rdi"]
 
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.none(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.none(), rdi)
 
     assert GrievanceTicket.objects.count() == 0
 
@@ -252,7 +252,7 @@ def test_empty_queryset_creates_nothing(one_bad_photo_context: dict[str, Any]) -
 def test_photo_ticket_cannot_be_sent_for_approval_without_photo(one_bad_photo_context: dict[str, Any]) -> None:
     rdi = one_bad_photo_context["rdi"]
     user = one_bad_photo_context["user"]
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
     ticket = GrievanceTicket.objects.get(issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO)
     ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
     ticket.save()
@@ -267,7 +267,7 @@ def test_photo_ticket_cannot_be_sent_for_approval_without_photo(one_bad_photo_co
 def test_photo_ticket_sent_for_approval_after_photo_assigned(one_bad_photo_context: dict[str, Any]) -> None:
     rdi = one_bad_photo_context["rdi"]
     user = one_bad_photo_context["user"]
-    create_biometrics_photo_data_change_tickets(DeduplicationEngineSimilarityPair.objects.all(), rdi)
+    create_biometrics_photo_data_change_tickets(BiometricDedupeSimilarityPair.objects.all(), rdi)
     ticket = GrievanceTicket.objects.get(issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO)
     ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
     ticket.save()
