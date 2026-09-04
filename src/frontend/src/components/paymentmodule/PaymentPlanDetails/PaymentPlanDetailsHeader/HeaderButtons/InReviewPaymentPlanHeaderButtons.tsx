@@ -26,7 +26,7 @@ export function InReviewPaymentPlanHeaderButtons({
       }}
     >
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
-      {canMarkAsReleased && (
+      {canMarkAsReleased && !paymentPlan.visionManaged && (
         <MarkAsReleasedPaymentPlan paymentPlan={paymentPlan} />
       )}
       {canAbort && <AbortPaymentPlan paymentPlan={paymentPlan} />}

@@ -37,15 +37,19 @@ export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
+  const visionManaged = paymentPlan.visionManaged;
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesRetrieve, {
-      businessAreaSlug: businessArea,
-      id: programCycleId,
-      programCode: programId,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCyclesRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: programCycleId,
+        programCode: programId,
+      },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
@@ -74,7 +78,8 @@ export const PaymentPlanDetailsHeader = ({
     });
   }
 
-  const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
+  const canRemove =
+    hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
@@ -90,15 +95,17 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
     permissions,
   );
-  const canMarkAsReleased = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
-  );
+  const canMarkAsReleased =
+    hasPermissions(
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+      permissions,
+    ) && !visionManaged;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
+    paymentPlan.canSendToPaymentGateway &&
+    !visionManaged;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canMarkReadyForClosure = hasPermissions(

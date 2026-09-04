@@ -39,7 +39,7 @@ from extras.test_utils.factories.payment import PaymentVerificationPlanFactory, 
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     FileTemp,
     FinancialServiceProvider,
@@ -135,7 +135,6 @@ def payment_plan_actions_context(
         "url_pp_send_back_to_finished": reverse("api:payments:payment-plans-send-back-to-finished", kwargs=url_kwargs),
         "url_pp_abort": reverse("api:payments:payment-plans-abort", kwargs=url_kwargs),
         "url_pp_reactivate_abort": reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs),
-        "url_send_to_vision": reverse("api:payments:payment-plans-send-to-vision", kwargs=url_kwargs),
     }
 
 
@@ -1613,11 +1612,22 @@ def test_assign_funds_commitments(
         rec_serial_number=999,
         payment_plan=None,
     )
+    second_funds_commitment_item = FundsCommitmentItemFactory(
+        funds_commitment_group=group,
+        office=payment_plan_actions_context["business_area"],
+        rec_serial_number=1000,
+        payment_plan=None,
+    )
     assert funds_commitment_item.payment_plan is None
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
-        {"fund_commitment_items_ids": ["999"]},
+        {
+            "fund_commitment_items_ids": [
+                str(funds_commitment_item.pk),
+                str(second_funds_commitment_item.pk),
+            ]
+        },
         format="json",
     )
     assert response.status_code == expected_status
@@ -1625,7 +1635,9 @@ def test_assign_funds_commitments(
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.json()
         funds_commitment_item.refresh_from_db()
+        second_funds_commitment_item.refresh_from_db()
         assert funds_commitment_item.payment_plan_id == payment_plan_actions_context["pp"].pk
+        assert second_funds_commitment_item.payment_plan_id == payment_plan_actions_context["pp"].pk
 
 
 def test_assign_funds_commitments_validation_errors(
@@ -1658,7 +1670,7 @@ def test_assign_funds_commitments_validation_errors(
     group = FundsCommitmentGroupFactory()
     FundsCommitmentItemFactory(
         funds_commitment_group=group,
-        office=None,
+        office=payment_plan_actions_context["business_area"],
         rec_serial_number=333,
         payment_plan=other_pp,
     )
@@ -1669,10 +1681,11 @@ def test_assign_funds_commitments_validation_errors(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Chosen Funds Commitments are already assigned to different Payment Plan" in response.json()
+    assert "Chosen Funds Commitments are already assigned to a different Payment Plan" in response.json()
 
+    wrong_business_area_group = FundsCommitmentGroupFactory()
     FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+        funds_commitment_group=wrong_business_area_group,
         office=None,
         rec_serial_number=2355,
         payment_plan=None,
@@ -1683,7 +1696,53 @@ def test_assign_funds_commitments_validation_errors(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Chosen Funds Commitments have wrong Business Area" in response.json()
+    assert "Chosen Funds Commitments have the wrong Business Area" in response.json()
+
+
+@pytest.fixture
+def funds_commitment_items_from_different_groups(
+    payment_plan_actions_context: dict[str, Any],
+) -> list:
+    return [
+        FundsCommitmentItemFactory(
+            funds_commitment_group=FundsCommitmentGroupFactory(),
+            office=payment_plan_actions_context["business_area"],
+        ),
+        FundsCommitmentItemFactory(
+            funds_commitment_group=FundsCommitmentGroupFactory(),
+            office=payment_plan_actions_context["business_area"],
+        ),
+    ]
+
+
+def test_assign_funds_commitments_rejects_items_from_different_groups(
+    payment_plan_actions_context: dict[str, Any],
+    funds_commitment_items_from_different_groups: list,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
+    first_item, second_item = funds_commitment_items_from_different_groups
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_funds_commitments"],
+        {
+            "fund_commitment_items_ids": [
+                str(first_item.pk),
+                str(second_item.pk),
+            ]
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == ["Chosen Funds Commitment Items must belong to the same Funds Commitment Group"]
 
 
 def test_fsp_xlsx_template_list(
@@ -1713,7 +1772,7 @@ def test_fsp_xlsx_template_list(
             "api:payments:payment-plans-fsp-xlsx-template-list",
             kwargs=payment_plan_actions_context["url_kwargs_ba_program"],
         ),
-        {"fund_commitment_items_ids": ["333"]},
+        {},
         format="json",
     )
 
@@ -2306,149 +2365,227 @@ def test_get_object_raises_for_instruction_managed_blocked_action(
     assert "This Payment Plan is managed by a Follow Up Instruction." in str(response.data)
 
 
-def _enable_vision_flag() -> None:
+def _enable_vision_flag(payment_plan_actions_context: dict[str, Any]) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
+    business_area = payment_plan_actions_context["business_area"]
+    business_area.vision_integration_active = True
+    business_area.save(update_fields=["vision_integration_active"])
 
 
-def test_send_to_vision_flag_disabled_returns_403(
+@pytest.fixture
+def vision_reject_approval_process(payment_plan_actions_context: dict[str, Any]) -> None:
+    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
+
+
+@pytest.fixture
+def vision_enabled_payment_plan_actions(payment_plan_actions_context: dict[str, Any]) -> None:
+    _enable_vision_flag(payment_plan_actions_context)
+
+
+def test_mark_as_released_is_blocked_for_vision_managed_plan(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
+    _enable_vision_flag(payment_plan_actions_context)
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_VISION],
+        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
+
     response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
+        payment_plan_actions_context["url_approval_process_mark_as_released"],
+        {"comment": "release"},
     )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "released automatically after FC assignment" in str(response.data)
 
 
-def test_send_to_vision_wrong_status_returns_403(
+def test_mark_as_released_is_allowed_after_vision_flags_are_disabled(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
+    vision_reject_approval_process: None,
 ) -> None:
-    _enable_vision_flag()
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_VISION],
+        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.DRAFT
-    payment_plan_actions_context["pp"].save()
+    payment_plan = payment_plan_actions_context["pp"]
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.internal_data = {"vision": {"sent": True, "status": "WAITING_FOR_CALLBACK"}}
+    payment_plan.save(update_fields=["status", "internal_data"])
+
     response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
+        payment_plan_actions_context["url_approval_process_mark_as_released"],
+        {"comment": "release"},
     )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
 
-
-@patch("hope.apps.payment.api.views.VisionAPI")
-def test_send_to_vision_already_sent_returns_403(
-    mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    _enable_vision_flag()
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_VISION],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True}}
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
-    )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    mock_vision.assert_not_called()
-
-
-def test_send_to_vision_no_permission_returns_403(
-    payment_plan_actions_context: dict[str, Any],
-) -> None:
-    _enable_vision_flag()
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
-    )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-@patch("hope.apps.payment.api.views.VisionAPI")
-def test_send_to_vision_success(
-    mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    _enable_vision_flag()
-    mock_vision.return_value.send_payment_plan.return_value = {"status": "ok", "messageId": "test-msg-id"}
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_VISION],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
-    )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["message"] == "Payment plan sent to Vision successfully: test-msg-id"
-    mock_vision.return_value.send_payment_plan.assert_called_once_with(payment_plan_actions_context["pp"])
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.ACCEPTED
+    assert payment_plan.vision_data == {"status": VisionStatus.NOT_SENT.value}
+
+    _enable_vision_flag(payment_plan_actions_context)
+    assert payment_plan.vision_managed is False
 
 
-@patch("hope.apps.payment.api.views.VisionAPI")
-def test_send_to_vision_api_error_returns_400(
-    mock_vision: Mock,
+@pytest.mark.parametrize(
+    "vision_status",
+    [
+        VisionStatus.WAITING_FOR_CALLBACK,
+        VisionStatus.SEND_FAILED,
+        VisionStatus.CALLBACK_FAILED,
+        VisionStatus.FC_MISSING,
+        VisionStatus.FC_NOT_FOUND,
+    ],
+)
+@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
+def test_reject_invalidates_vision_attempt(
+    mock_notify_vision_status,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    vision_status: VisionStatus,
+    vision_reject_approval_process: None,
+    vision_enabled_payment_plan_actions: None,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW, Permissions.PM_VIEW_LIST],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan = payment_plan_actions_context["pp"]
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": vision_status.value,
+            "vision_id": "VISION-1",
+            "fc_num": "FC123",
+            "error_code": "ERROR",
+            "log": [{"type": "api-call"}],
+        }
+    }
+    payment_plan.save(update_fields=["status", "internal_data"])
+
+    with django_capture_on_commit_callbacks(execute=True):
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_approval_process_reject"],
+            {"comment": "reject"},
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.LOCKED_FSP
+    assert payment_plan.vision_data == {
+        "status": VisionStatus.NOT_SENT.value,
+        "log": [{"type": "api-call"}],
+    }
+    mock_notify_vision_status.assert_called_once_with(
+        payment_plan,
+        str(payment_plan_actions_context["user"].pk),
+        "REJECTED",
+    )
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
+def test_abort_invalidates_vision_attempt(
+    mock_notify_vision_status,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    vision_enabled_payment_plan_actions: None,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_ABORT],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan = payment_plan_actions_context["pp"]
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
+            "log": [{"type": "api-call"}],
+        }
+    }
+    payment_plan.save(update_fields=["status", "internal_data"])
+
+    with django_capture_on_commit_callbacks(execute=True):
+        response = payment_plan_actions_context["client"].post(
+            payment_plan_actions_context["url_pp_abort"],
+            {"abort_comment": "Cancelled during Vision processing"},
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.ABORTED
+    assert payment_plan.vision_data == {
+        "status": VisionStatus.NOT_SENT.value,
+        "log": [{"type": "api-call"}],
+    }
+    mock_notify_vision_status.assert_called_once_with(
+        payment_plan,
+        str(payment_plan_actions_context["user"].pk),
+        "ABORTED",
+    )
+
+
+def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
-    _enable_vision_flag()
-    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIError("boom")
+    _enable_vision_flag(payment_plan_actions_context)
     create_user_role_with_permissions(
         payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_VISION],
+        [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_funds_commitments"],
+        {"fund_commitment_items_ids": ["1"]},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "assigned automatically" in str(response.data)
+
+
+def test_manual_pg_send_is_blocked_for_vision_managed_plan(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    _enable_vision_flag(payment_plan_actions_context)
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
-    )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value}}
+    payment_plan_actions_context["pp"].save(update_fields=["status", "internal_data"])
 
+    response = payment_plan_actions_context["client"].get(
+        payment_plan_actions_context["url_send_to_payment_gate_way"],
+    )
 
-@patch("hope.apps.payment.api.views.VisionAPI")
-def test_send_to_vision_missing_creds_returns_400(
-    mock_vision: Mock,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    _enable_vision_flag()
-    mock_vision.return_value.send_payment_plan.side_effect = VisionAPIMissingCredentialsError("no creds")
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_VISION],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_send_to_vision"],
-    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "only be sent to Payment Gateway automatically" in str(response.data)

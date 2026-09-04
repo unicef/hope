@@ -226,7 +226,7 @@ class FollowUpInstructionService:
         instruction = self._require_instruction()
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
-            updated_payment_plan = PaymentPlanService(payment_plan).abort(abort_comment)
+            updated_payment_plan = PaymentPlanService(payment_plan).abort(abort_comment, user_id=str(user.pk))
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
         return instruction
 

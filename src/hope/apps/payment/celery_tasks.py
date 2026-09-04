@@ -1011,14 +1011,20 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.models import PaymentPlan
 
     with transaction.atomic():
-        payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+        payment_plan = PaymentPlan.all_objects.get(id=job.config["payment_plan_id"])
         set_sentry_business_area_tag(payment_plan.business_area.name)
 
         # Lock the source plan so concurrent child-plan copies from the same source
         # run serially — each one then computes its eligible payments on a consistent
         # state instead of racing for the "one child per beneficiary" pool.
+        # PaymentPlanService.delete() takes the same lock, so a concurrent delete of
+        # this plan cannot interleave with the copy below.
         if payment_plan.source_payment_plan_id:
             PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
+            payment_plan.refresh_from_db()
+        if payment_plan.is_removed:
+            logger.warning(f"Child payment plan {payment_plan.id} was deleted before its payments were copied.")
+            return True
 
         fixed_amount = job.config.get("fixed_amount")
         amounts = job.config.get("amounts")

@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <p class="messagelist warning">
+    {% if vision_receipt_unconfirmed %}
+      HOPE could not confirm that this Payment Plan was successfully sent to Vision. The request may have failed, or
+      processing may have stopped before confirmation was recorded.
+    {% endif %}
+    Assigning these FC items will automatically release the Payment Plan and immediately send it to Payment Gateway if
+    it is a PG plan. All selected items must belong to the same FC group.
+  </p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-row">
+      {{ form.funds_commitment_group.errors }}
+      {{ form.funds_commitment_group.label_tag }}
+      {{ form.funds_commitment_group }}
+    </div>
+    <div id="vision-fc-items-section" class="form-row" hidden>
+      {{ form.funds_commitment_items.errors }}
+      <p><strong>Funds Commitment Items</strong></p>
+      <div id="vision-fc-items"></div>
+    </div>
+    <input type="submit" value="Assign FC Items and Continue" class="default">
+    <a href="{% url 'admin:payment_paymentplan_change' payment_plan.id %}">Cancel</a>
+  </form>
+  {{ funds_commitment_options|json_script:"vision-fc-options" }}
+  {{ selected_funds_commitment_item_ids|json_script:"vision-selected-fc-items" }}
+  <script>
+    (() => {
+      const groups = JSON.parse(document.getElementById("vision-fc-options").textContent);
+      const selectedItemIds = new Set(
+        JSON.parse(document.getElementById("vision-selected-fc-items").textContent).map(String),
+      );
+      const groupSelect = document.getElementById("id_funds_commitment_group");
+      const itemsSection = document.getElementById("vision-fc-items-section");
+      const itemsContainer = document.getElementById("vision-fc-items");
+
+      const renderItems = () => {
+        const group = groups.find((option) => String(option.id) === groupSelect.value);
+        itemsContainer.replaceChildren();
+        itemsSection.hidden = !group;
+        if (!group) return;
+
+        group.items.forEach((item) => {
+          const label = document.createElement("label");
+          label.style.display = "block";
+          label.style.marginBottom = "8px";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = "funds_commitment_items";
+          checkbox.value = item.id;
+          checkbox.checked = selectedItemIds.has(String(item.id));
+
+          label.append(
+            checkbox,
+            ` Item ${item.number} | Serial ${item.serialNumber} | ${item.currency} | ` +
+              `Committed ${item.commitmentAmountLocal} | Open ${item.totalOpenAmountLocal}`,
+          );
+          itemsContainer.append(label);
+        });
+      };
+
+      groupSelect.addEventListener("change", () => {
+        selectedItemIds.clear();
+        renderItems();
+      });
+      renderItems();
+    })();
+  </script>
+{% endblock content %}
