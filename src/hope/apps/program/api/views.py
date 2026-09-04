@@ -68,9 +68,6 @@ from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.apps.registration_data.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
 from hope.apps.utils.filterset_to_openapi_params import filterset_to_openapi_params
 from hope.models import (
     BeneficiaryGroup,
@@ -79,7 +76,6 @@ from hope.models import (
     PaymentPlan,
     Program,
     ProgramCycle,
-    RegistrationDataImport,
     log_create,
 )
 
@@ -111,7 +107,6 @@ class ProgramViewSet(
         "copy": [Permissions.PROGRAMME_DUPLICATE],
         "destroy": [Permissions.PROGRAMME_REMOVE],
         "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
-        "deduplication_flags": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
         "payments_count": [Permissions.PM_VIEW_PAYMENT_LIST],
     }
@@ -215,9 +210,6 @@ class ProgramViewSet(
 
         program.status = Program.FINISHED
         program.save(update_fields=["status"])
-
-        if program.biometric_deduplication_enabled:
-            BiometricDeduplicationService().delete_deduplication_set(program)
 
         log_create(
             Program.ACTIVITY_LOG_MAPPING,
@@ -410,43 +402,6 @@ class ProgramViewSet(
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
-
-    @action(detail=True, methods=["get"])
-    def deduplication_flags(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        program = self.get_object()
-
-        # deduplication engine in progress
-        is_still_processing = RegistrationDataImport.objects.filter(
-            program=program,
-            deduplication_engine_status__in=[
-                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
-            ],
-        ).exists()
-        # all RDIs are deduplicated
-        all_rdis_deduplicated = (
-            RegistrationDataImport.objects.filter(program=program).all().count()
-            == RegistrationDataImport.objects.filter(
-                deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
-                program=program,
-            ).count()
-        )
-        # RDI merge in progress
-        rdi_merging = RegistrationDataImport.objects.filter(
-            program=program,
-            status__in=[
-                RegistrationDataImport.MERGE_SCHEDULED,
-                RegistrationDataImport.MERGING,
-                RegistrationDataImport.MERGE_ERROR,
-            ],
-        ).exists()
-        is_deduplication_disabled = is_still_processing or all_rdis_deduplicated or rdi_merging
-
-        return Response(
-            {
-                "can_run_deduplication": program.biometric_deduplication_enabled,
-                "is_deduplication_disabled": is_deduplication_disabled,
-            }
-        )
 
     @extend_schema(
         parameters=filterset_to_openapi_params(PaymentSearchFilter),

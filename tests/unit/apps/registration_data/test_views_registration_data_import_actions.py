@@ -7,7 +7,6 @@ from unittest.mock import ANY, Mock, patch
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.test import override_settings
 from django.urls import reverse
-from flags.models import FlagState
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -30,7 +29,6 @@ from extras.test_utils.factories import (
 )
 from extras.test_utils.factories.api import APITokenFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     APIToken,
     BusinessArea,
@@ -95,7 +93,6 @@ def user(unicef_hq: Partner, business_area: BusinessArea) -> User:
         Permissions.RDI_REFUSE_IMPORT,
         Permissions.RDI_RERUN_DEDUPE,
         Permissions.RDI_IMPORT_DATA,
-        Permissions.RDI_WEBHOOK_DEDUPLICATION,
     ]
     user = UserFactory(
         username="Hope_Test_DRF",
@@ -152,7 +149,7 @@ def api_client_no_permissions(user_no_permissions: User) -> APIClient:
 def api_token(user: User, business_area: BusinessArea) -> APIToken:
     token = APITokenFactory(
         user=user,
-        grants=[Grant.API_DEDUP_FETCH_FINDINGS.name],
+        grants=[Grant.API_RDI_CREATE.name],
     )
     token.valid_for.add(business_area)
     return token
@@ -176,131 +173,14 @@ def program_with_sanction_list(business_area: BusinessArea) -> Program:
     return program
 
 
-def test_run_deduplication_without_permission(
-    api_client_no_permissions: APIClient,
-    program: Program,
-) -> None:
-    url = reverse(
-        "api:registration-data:registration-data-imports-run-deduplication",
-        args=["afghanistan", program.code],
-    )
-    response = api_client_no_permissions.post(url, {}, format="json")
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-@patch("hope.apps.registration_data.api.views.deduplication_engine_process_async_task")
-def test_run_deduplication(
-    mock_deduplication_engine_process: Mock,
-    api_client: APIClient,
-    program: Program,
-) -> None:
-    url = reverse(
-        "api:registration-data:registration-data-imports-run-deduplication",
-        args=["afghanistan", program.code],
-    )
-    resp = api_client.post(url, {}, format="json")
-
-    assert resp.status_code == status.HTTP_200_OK
-    assert resp.data == {"message": "Deduplication process started"}
-    mock_deduplication_engine_process.assert_called_once_with(str(program.pk))
-
-    RegistrationDataImportFactory(
-        program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
-    )
-    resp = api_client.post(url, {}, format="json")
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json() == ["Deduplication is already in progress for some RDIs"]
-
-    program.biometric_deduplication_enabled = False
-    program.save()
-    resp = api_client.post(url, {}, format="json")
-    assert resp.status_code == status.HTTP_400_BAD_REQUEST
-    assert resp.json() == ["Biometric deduplication is not enabled for this program"]
-
-
-@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
-def test_webhook_deduplication(mock_fetch_dedup_results: Mock, api_client: APIClient, program: Program) -> None:
-    url = reverse(
-        "api:registration-data:registration-data-imports-webhook-deduplication",
-        args=["afghanistan", program.code],
-    )
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-    mock_fetch_dedup_results.assert_called_once_with(str(program.pk))
-
-
-@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
-def test_webhook_deduplication_with_api_token(
-    mock_fetch_dedup_results: Mock, token_api_client: APIClient, program: Program
-) -> None:
-    url = reverse(
-        "api:registration-data:registration-data-imports-webhook-deduplication",
-        args=["afghanistan", program.code],
-    )
-    response = token_api_client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-    mock_fetch_dedup_results.assert_called_once_with(str(program.pk))
-
-
-def test_webhook_deduplication_with_api_token_missing_grant(
-    api_token: APIToken, business_area: BusinessArea, program: Program
-) -> None:
-    api_token.grants = []
-    api_token.save(update_fields=["grants"])
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION="Token " + api_token.key)
-    url = reverse(
-        "api:registration-data:registration-data-imports-webhook-deduplication",
-        args=["afghanistan", program.code],
-    )
-    response = client.get(url)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-@patch("hope.apps.registration_data.api.views.fetch_biometric_deduplication_results_and_process_async_task")
-def test_webhook_deduplication_with_api_token_not_valid_for_business_area(
-    mock_fetch_dedup_results: Mock, user: User, program: Program
-) -> None:
-    other_business_area = BusinessAreaFactory(slug="ukraine", name="Ukraine")
-    token = APITokenFactory(
-        user=user,
-        grants=[Grant.API_DEDUP_FETCH_FINDINGS.name],
-    )
-    token.valid_for.add(other_business_area)
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-    url = reverse(
-        "api:registration-data:registration-data-imports-webhook-deduplication",
-        args=["afghanistan", program.code],
-    )
-
-    response = client.get(url)
-
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    mock_fetch_dedup_results.assert_not_called()
-
-
-@patch("hope.apps.registration_data.api.views.merge_registration_data_import_async_task")
-def test_api_token_forbidden_on_action_without_token_permission(
-    mock_merge_task: Mock, api_token: APIToken, business_area: BusinessArea, program: Program
-) -> None:
-    rdi = RegistrationDataImportFactory(
+@pytest.fixture
+def rdi(business_area: BusinessArea, program: Program) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(
         business_area=business_area,
         program=program,
         name="Test RDI",
         status=RegistrationDataImport.IN_REVIEW,
     )
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION="Token " + api_token.key)
-    url = reverse(
-        "api:registration-data:registration-data-imports-merge",
-        args=["afghanistan", program.code, rdi.id],
-    )
-
-    response = client.post(url, {}, format="json")
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    mock_merge_task.assert_not_called()
 
 
 def test_merge_rdi_without_permission(
@@ -320,6 +200,21 @@ def test_merge_rdi_without_permission(
         args=["afghanistan", program.code, rdi.id],
     )
     response = api_client_no_permissions.post(url, {}, format="json")
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_merge_rdi_with_api_token_returns_403(
+    token_api_client: APIClient,
+    program: Program,
+    rdi: RegistrationDataImport,
+) -> None:
+    url = reverse(
+        "api:registration-data:registration-data-imports-merge",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    response = token_api_client.post(url, {}, format="json")
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -411,18 +306,13 @@ def test_erase_rdi_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@patch("hope.apps.registration_data.api.views.BiometricDeduplicationService")
-@patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
 def test_erase_rdi(
     mock_remove_es: Mock,
-    mock_biometric_service: Mock,
     api_client: APIClient,
     program: Program,
     business_area: BusinessArea,
 ) -> None:
-    mock_biometric_service.INDIVIDUALS_REFUSED = BiometricDeduplicationService.INDIVIDUALS_REFUSED
-    mock_service = mock_biometric_service.return_value
-
     rdi = RegistrationDataImportFactory(
         business_area=business_area,
         program=program,
@@ -469,12 +359,6 @@ def test_erase_rdi(
     assert set(es_call_args_2[0]) == {household.id}
     assert es_call_args_2[1].__name__ == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
 
-    mock_service.report_individuals_status.assert_called_once()
-    report_call_args = mock_service.report_individuals_status.call_args[0]
-    assert report_call_args[0] == program
-    assert set(report_call_args[1]) == {str(_id) for _id in individual_ids}  # Order doesn't matter
-    assert report_call_args[2] == mock_biometric_service.INDIVIDUALS_REFUSED
-
 
 def test_erase_rdi_with_invalid_status(api_client: APIClient, program: Program, business_area: BusinessArea) -> None:
     rdi = RegistrationDataImportFactory(
@@ -509,6 +393,46 @@ def test_erase_rdi_with_invalid_status(api_client: APIClient, program: Program, 
     assert not rdi.erased
 
 
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
+def test_erase_rdi_rolls_back_when_elasticsearch_fails(
+    mock_remove_es: Mock,
+    api_client: APIClient,
+    program: Program,
+    business_area: BusinessArea,
+) -> None:
+    mock_remove_es.side_effect = Exception("Elasticsearch is down")
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IMPORT_ERROR,
+    )
+    create_household_and_individuals(
+        household_data={
+            "registration_data_import": rdi,
+            "program": program,
+            "business_area": business_area,
+        },
+        individuals_data=[
+            {"program": program, "registration_data_import": rdi},
+            {"program": program, "registration_data_import": rdi},
+        ],
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-erase",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    with pytest.raises(Exception, match="Elasticsearch is down"):
+        api_client.post(url, {}, format="json")
+
+    assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+    assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
+    rdi.refresh_from_db()
+    assert not rdi.erased
+
+
 @override_settings(
     DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
     DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
@@ -536,31 +460,17 @@ def test_refuse_rdi_without_permission(
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     FLAGS={
-        "BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS": [
-            {"condition": "boolean", "value": True, "required": True},
-        ],
         "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
         "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
     },
 )
-@patch("hope.apps.registration_data.api.views.BiometricDeduplicationService")
-@patch("hope.apps.registration_data.api.views.remove_elasticsearch_documents_by_matching_ids")
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
 def test_refuse_rdi(
     remove_elasticsearch_documents_by_matching_ids_moc: Any,
-    mock_biometric_service: Any,
     api_client: APIClient,
     program: Program,
     business_area: BusinessArea,
 ) -> None:
-    mock_biometric_service.INDIVIDUALS_REFUSED = "rejected"
-
-    FlagState.objects.get_or_create(
-        name="BIOMETRIC_DEDUPLICATION_REPORT_INDIVIDUALS_STATUS",
-        condition="boolean",
-        value="True",
-        required=False,
-    )
-
     rdi = RegistrationDataImportFactory(
         business_area=business_area,
         program=program,
@@ -601,11 +511,6 @@ def test_refuse_rdi(
     assert rdi.status == RegistrationDataImport.REFUSED_IMPORT
     assert rdi.refuse_reason == "Testing refuse endpoint"
 
-    mock_biometric_service.assert_called_once()
-    mock_service_instance = mock_biometric_service.return_value
-    mock_service_instance.report_individuals_status.assert_called_once_with(
-        rdi.program, [str(_id) for _id in individuals_ids_to_remove], "rejected"
-    )
     assert remove_elasticsearch_documents_by_matching_ids_moc.call_count == 2
     remove_elasticsearch_documents_by_matching_ids_moc.assert_any_call(individuals_ids_to_remove, ANY)
 
@@ -617,6 +522,47 @@ def test_refuse_rdi(
         remove_elasticsearch_documents_by_matching_ids_moc.call_args_list[1][0][1].__name__
         == f"HouseholdDocument_{program.business_area.slug}_{program.code}"
     )
+
+
+@patch("hope.apps.registration_data.services.rdi_removal.remove_elasticsearch_documents_by_matching_ids")
+def test_refuse_rdi_rolls_back_when_elasticsearch_fails(
+    mock_remove_es: Mock,
+    api_client: APIClient,
+    program: Program,
+    business_area: BusinessArea,
+) -> None:
+    mock_remove_es.side_effect = Exception("Elasticsearch is down")
+    rdi = RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        name="Test RDI",
+        status=RegistrationDataImport.IN_REVIEW,
+    )
+    create_household_and_individuals(
+        household_data={
+            "registration_data_import": rdi,
+            "program": program,
+            "business_area": business_area,
+        },
+        individuals_data=[
+            {"program": program, "registration_data_import": rdi},
+            {"program": program, "registration_data_import": rdi},
+        ],
+    )
+
+    url = reverse(
+        "api:registration-data:registration-data-imports-refuse",
+        args=["afghanistan", program.code, rdi.id],
+    )
+
+    with pytest.raises(Exception, match="Elasticsearch is down"):
+        api_client.post(url, {"reason": "Testing refuse endpoint"}, format="json")
+
+    assert Household.all_objects.filter(registration_data_import=rdi).count() == 1
+    assert Individual.all_objects.filter(registration_data_import=rdi).count() == 2
+    rdi.refresh_from_db()
+    assert rdi.status == RegistrationDataImport.IN_REVIEW
+    assert rdi.refuse_reason in (None, "")
 
 
 def test_refuse_rdi_with_invalid_status(api_client: APIClient, program: Program, business_area: BusinessArea) -> None:
@@ -765,6 +711,17 @@ def test_status_choices_without_permission(
         args=["afghanistan", program.code],
     )
     response = api_client_no_permissions.get(url)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_status_choices_with_api_token_returns_403(token_api_client: APIClient, program: Program) -> None:
+    url = reverse(
+        "api:registration-data:registration-data-imports-status-choices",
+        args=["afghanistan", program.code],
+    )
+
+    response = token_api_client.get(url)
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -1178,6 +1135,9 @@ def test_create_rdi_social_worker_program_with_household_ids(
     assert response.data["number_of_individuals"] == 2
     mock_registration_task.assert_called_once()
 
+    rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+    assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+
 
 @patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_rdi_social_worker_program_with_individual_ids(
@@ -1261,6 +1221,9 @@ def test_create_rdi_social_worker_program_with_individual_ids(
     assert response.data["number_of_households"] == 2
     assert response.data["number_of_individuals"] == 2
     mock_registration_task.assert_called_once()
+
+    rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+    assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
 
 
 @patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
@@ -1376,6 +1339,9 @@ def test_create_registration_data_import(
     assert "id" in response.data
     mock_registration_task.assert_called_once()
 
+    rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+    assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+
 
 @patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")
 def test_create_registration_data_import_with_ids_filter(
@@ -1442,6 +1408,9 @@ def test_create_registration_data_import_with_ids_filter(
     assert response.data["number_of_households"] == 1
     assert response.data["number_of_individuals"] == 2
     mock_registration_task.assert_called_once()
+
+    rdi = RegistrationDataImport.objects.get(id=response.data["id"])
+    assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
 
 
 @patch("hope.apps.registration_data.api.views.registration_program_population_import_async_task")

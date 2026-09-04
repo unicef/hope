@@ -50,23 +50,7 @@ function RegistrationDataImportTable({
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { businessAreaSlug, programCode, businessArea, programId } =
-    useBaseUrl();
-
-  const deduplicationFlagsParams = {
-    businessAreaSlug,
-    code: programCode,
-  };
-  const { data: deduplicationFlags } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve,
-      deduplicationFlagsParams,
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve(
-        deduplicationFlagsParams,
-      ),
-  });
+  const { programCode, businessArea, programId } = useBaseUrl();
 
   const initialVariables = useMemo(
     () => ({
@@ -123,15 +107,6 @@ function RegistrationDataImportTable({
       return enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1);
     }
     let header = adjustedHeadCells.slice();
-    if (deduplicationFlags?.canRunDeduplication) {
-      header.splice(4, 0, {
-        disablePadding: false,
-        label: 'Biometric Deduplicated',
-        id: 'biometricDeduplicated',
-        numeric: false,
-        disableSort: true,
-      });
-    }
     if (!enableRadioButton) {
       header = header.slice(1);
     }
@@ -192,9 +167,6 @@ function RegistrationDataImportTable({
             selectedRDI={selectedRDI}
             registrationDataImport={row}
             canViewDetails={canViewDetails}
-            biometricDeduplicationEnabled={
-              deduplicationFlags?.canRunDeduplication
-            }
           />
         )}
         title={noTitle ? null : `${t('List of Imports')} (${itemsCount || 0})`}

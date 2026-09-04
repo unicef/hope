@@ -8,11 +8,17 @@ from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
-from hope.api.auth import HOPEAuthentication, HOPEPermission
+from hope.api.auth import (
+    BusinessAreaIngestAllExceptCWPermission,
+    BusinessAreaIngestCWOnlyPermission,
+    HOPEAuthentication,
+    HOPEPermission,
+)
 from hope.models import APILogEntry, BusinessArea, Grant
 
 
@@ -28,6 +34,16 @@ class SelectedBusinessAreaMixin:
             return self.request.auth.valid_for.all().get(slug=self.kwargs.get("business_area", None))
         except ObjectDoesNotExist:
             raise Http404
+
+
+class BusinessAreaIngestCWOnlyMixin(SelectedBusinessAreaMixin):
+    def get_permissions(self) -> list[BasePermission]:
+        return [*super().get_permissions(), BusinessAreaIngestCWOnlyPermission()]
+
+
+class BusinessAreaIngestAllExceptCWMixin:
+    def get_permissions(self) -> list[BasePermission]:
+        return [*super().get_permissions(), BusinessAreaIngestAllExceptCWPermission()]
 
 
 class HOPEAPIView(APIView):

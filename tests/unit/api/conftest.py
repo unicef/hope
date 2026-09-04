@@ -57,7 +57,7 @@ def api_user(db) -> User:
 
 @pytest.fixture
 def api_token(api_user: User, business_area: BusinessArea) -> APIToken:
-    grants = [Grant.API_RDI_CREATE.name, Grant.API_RDI_UPLOAD.name]
+    grants = [Grant.API_RDI_CREATE.name, Grant.API_RDI_UPLOAD.name, Grant.API_RDI_DELETE.name]
     role = RoleFactory(name="api-role", permissions=grants)
     api_user.role_assignments.create(role=role, business_area=business_area)
     token = APITokenFactory(user=api_user, grants=grants)

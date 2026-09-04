@@ -2,7 +2,6 @@
 
 from typing import Any
 from unittest.mock import Mock, patch
-import uuid
 
 from constance.test import override_config
 from django.contrib.auth import get_user_model
@@ -26,6 +25,7 @@ from extras.test_utils.factories import (
 )
 from hope.admin.registration_data import (
     RegistrationDataImportAdmin,
+    is_non_country_workspace_rdi_merge_retry_enabled,
 )
 from hope.apps.grievance.models import (
     GrievanceTicket,
@@ -46,6 +46,7 @@ from hope.models import (
     Program,
     RegistrationDataImport,
 )
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 from hope.models.utils import MergeStatusModel
 
 pytestmark = [
@@ -165,6 +166,45 @@ def test_rerun_rdi_unsupported_data_source_shows_error_message(
     assert "Cannot rerun RDI if it's not a XLS or KOBO." in messages
 
 
+@pytest.fixture
+def country_workspace_only_business_area(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        name="CW Only",
+        slug="cw-only",
+        ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY,
+    )
+
+
+@pytest.fixture
+def cw_only_program(country_workspace_only_business_area: BusinessArea) -> Program:
+    return ProgramFactory(name="CW Only Program", business_area=country_workspace_only_business_area)
+
+
+@patch("hope.apps.registration_data.celery_tasks.registration_xlsx_import_async_task")
+def test_rerun_rdi_rejected_for_country_workspace_only_business_area(
+    mock_registration_xlsx_import_task: Mock,
+    admin_client: Client,
+    country_workspace_only_business_area: BusinessArea,
+    cw_only_program: Program,
+) -> None:
+    import_data = ImportDataFactory(business_area_slug=country_workspace_only_business_area.slug)
+    rdi = RegistrationDataImportFactory(
+        business_area=country_workspace_only_business_area,
+        program=cw_only_program,
+        status=RegistrationDataImport.IMPORT_ERROR,
+        data_source=RegistrationDataImport.XLS,
+        import_data=import_data,
+    )
+
+    url = reverse("admin:registration_data_registrationdataimport_rerun_rdi", args=[rdi.pk])
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    messages = [m.message for m in get_messages(response.wsgi_request)]
+    assert ALL_EXCEPT_CW_INGEST_REJECT_MSG in messages
+    mock_registration_xlsx_import_task.assert_not_called()
+
+
 @patch("hope.admin.registration_data.merge_registration_data_import_async_task")
 def test_rerun_merge_rdi_schedules_async_job(
     mock_merge_registration_data_import_task: Mock,
@@ -185,28 +225,19 @@ def test_rerun_merge_rdi_schedules_async_job(
     mock_merge_registration_data_import_task.assert_called_once_with(rdi)
 
 
-@patch("hope.apps.registration_data.celery_tasks.classify_findings_and_schedule_merge_async_task")
-@patch("hope.admin.registration_data.merge_registration_data_import_async_task")
-def test_rerun_merge_rdi_cw_routes_to_classify_findings_task(
-    mock_merge_registration_data_import_task: Mock,
-    mock_classify_findings_task: Mock,
-    admin_client: Client,
-    afghanistan: BusinessArea,
-    program: Program,
-) -> None:
-    rdi = RegistrationDataImportFactory(
-        business_area=afghanistan,
-        program=program,
-        status=RegistrationDataImport.MERGE_ERROR,
-        country_workspace_id=str(uuid.uuid4()),
-    )
+@pytest.mark.parametrize(
+    ("ingest_source", "expected"),
+    [
+        (BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY, False),
+        (BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE, True),
+    ],
+)
+def test_is_non_cw_merge_rerunnable_excludes_cw_ingest(ingest_source: str, expected: bool) -> None:
+    business_area = BusinessArea(ingest_source=ingest_source)
+    rdi = RegistrationDataImport(business_area=business_area, status=RegistrationDataImport.MERGE_ERROR)
+    button = type("Button", (), {"original": rdi})()
 
-    url = reverse("admin:registration_data_registrationdataimport_rerun_merge_rdi", args=[rdi.pk])
-    response = admin_client.post(url)
-
-    assert response.status_code == 302
-    mock_classify_findings_task.assert_called_once_with(rdi)
-    mock_merge_registration_data_import_task.assert_not_called()
+    assert is_non_country_workspace_rdi_merge_retry_enabled(button) is expected
 
 
 @pytest.mark.elasticsearch
@@ -391,48 +422,3 @@ def test_delete_rdi_merged(
 
     assert Document.objects.count() == 0
     assert Document.objects.filter(id=document.id).first() is None
-
-
-@pytest.mark.parametrize(
-    ("status", "expected"),
-    [
-        (RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS, True),
-        (RegistrationDataImport.DEDUP_ENGINE_ERROR, True),
-        (RegistrationDataImport.DEDUP_ENGINE_PROCESSING, False),
-    ],
-)
-def test_fetch_biometric_deduplication_results_visible(biometric_program: Program, status: str, expected: bool) -> None:
-    rdi = RegistrationDataImportFactory(
-        program=biometric_program,
-        business_area=biometric_program.business_area,
-        deduplication_engine_status=status,
-    )
-
-    assert RegistrationDataImportAdmin.fetch_biometric_deduplication_results_visible(rdi) is expected
-
-
-@patch("hope.admin.registration_data.fetch_biometric_deduplication_results_and_process_async_task")
-def test_fetch_biometric_deduplication_results_button(
-    mock_fetch_results_delay: Mock,
-    admin_client: Client,
-    biometric_program: Program,
-) -> None:
-    rdi = RegistrationDataImportFactory(
-        name="RDI To Fetch Results",
-        business_area=biometric_program.business_area,
-        program=biometric_program,
-        status=RegistrationDataImport.IN_REVIEW,
-        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR,
-    )
-
-    url = reverse(
-        "admin:registration_data_registrationdataimport_fetch_biometric_deduplication_results",
-        args=[rdi.pk],
-    )
-    response = admin_client.post(url)
-
-    rdi.refresh_from_db()
-
-    assert response.status_code == 302
-    assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_PROCESSING
-    mock_fetch_results_delay.assert_called_once_with(str(biometric_program.id), str(rdi.id))

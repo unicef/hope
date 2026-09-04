@@ -1,5 +1,7 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
+from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.urls import reverse
 import pytest
@@ -13,7 +15,12 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from extras.test_utils.factories.api import APITokenFactory
-from hope.api.auth import HOPEAuthentication, HOPEPermission
+from hope.api.auth import (
+    BusinessAreaIngestAllExceptCWPermission,
+    BusinessAreaIngestCWOnlyPermission,
+    HOPEAuthentication,
+    HOPEPermission,
+)
 from hope.models import APIToken, BusinessArea
 from hope.models.grant import Grant
 
@@ -107,3 +114,89 @@ def test_missing_grant_returns_403(read_only_client: APIClient, business_area: B
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.json() == {"detail": "You do not have permission to perform this action. API_RDI_CREATE"}
+
+
+@pytest.fixture
+def cw_only_business_area() -> BusinessArea:
+    return BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
+
+
+@pytest.fixture
+def non_cw_business_area() -> BusinessArea:
+    return BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE)
+
+
+@pytest.mark.parametrize("business_area_attr", ["selected_business_area", "business_area"])
+def test_cw_only_permission_allows_cw_only_business_area_on_both_view_shapes(
+    business_area_attr: str, cw_only_business_area: BusinessArea
+) -> None:
+    view = SimpleNamespace(**{business_area_attr: cw_only_business_area})
+
+    assert BusinessAreaIngestCWOnlyPermission().has_permission(Mock(), view)
+
+
+@pytest.mark.parametrize("business_area_attr", ["selected_business_area", "business_area"])
+def test_cw_only_permission_denies_non_cw_business_area_on_both_view_shapes(
+    business_area_attr: str, non_cw_business_area: BusinessArea
+) -> None:
+    view = SimpleNamespace(**{business_area_attr: non_cw_business_area})
+
+    assert not BusinessAreaIngestCWOnlyPermission().has_permission(Mock(), view)
+
+
+@pytest.mark.parametrize("business_area_attr", ["selected_business_area", "business_area"])
+def test_all_except_cw_permission_denies_cw_only_business_area_on_both_view_shapes(
+    business_area_attr: str, cw_only_business_area: BusinessArea
+) -> None:
+    view = SimpleNamespace(**{business_area_attr: cw_only_business_area})
+
+    assert not BusinessAreaIngestAllExceptCWPermission().has_permission(Mock(method="POST"), view)
+
+
+@pytest.mark.parametrize("business_area_attr", ["selected_business_area", "business_area"])
+def test_all_except_cw_permission_allows_non_cw_business_area_on_both_view_shapes(
+    business_area_attr: str, non_cw_business_area: BusinessArea
+) -> None:
+    view = SimpleNamespace(**{business_area_attr: non_cw_business_area})
+
+    assert BusinessAreaIngestAllExceptCWPermission().has_permission(Mock(method="POST"), view)
+
+
+def test_selected_business_area_takes_precedence_over_business_area(
+    cw_only_business_area: BusinessArea, non_cw_business_area: BusinessArea
+) -> None:
+    view = SimpleNamespace(selected_business_area=cw_only_business_area, business_area=non_cw_business_area)
+
+    assert BusinessAreaIngestCWOnlyPermission().has_permission(Mock(), view)
+
+
+def test_cw_only_permission_raises_when_view_exposes_no_business_area() -> None:
+    view = SimpleNamespace()
+
+    with pytest.raises(ImproperlyConfigured) as exc_info:
+        BusinessAreaIngestCWOnlyPermission().has_permission(Mock(), view)
+
+    assert str(exc_info.value) == (
+        "SimpleNamespace exposes neither `selected_business_area` nor `business_area`, "
+        "so RDI ingest permissions cannot resolve the business area to check."
+    )
+
+
+def test_all_except_cw_permission_raises_when_view_exposes_no_business_area() -> None:
+    view = SimpleNamespace()
+
+    with pytest.raises(ImproperlyConfigured) as exc_info:
+        BusinessAreaIngestAllExceptCWPermission().has_permission(Mock(method="POST"), view)
+
+    assert str(exc_info.value) == (
+        "SimpleNamespace exposes neither `selected_business_area` nor `business_area`, "
+        "so RDI ingest permissions cannot resolve the business area to check."
+    )
+
+
+def test_all_except_cw_permission_allows_safe_method_on_cw_only_business_area(
+    cw_only_business_area: BusinessArea,
+) -> None:
+    view = SimpleNamespace(business_area=cw_only_business_area)
+
+    assert BusinessAreaIngestAllExceptCWPermission().has_permission(Mock(method="GET"), view)
