@@ -71,6 +71,11 @@ def program2(afghanistan: BusinessArea) -> Program:
 
 
 @pytest.fixture
+def program3(afghanistan: BusinessArea) -> Program:
+    return ProgramFactory(name="Program 3", business_area=afghanistan)
+
+
+@pytest.fixture
 def household_original_already_enrolled(program1: Program) -> Household:
     return HouseholdFactory(
         program=program1,
@@ -621,9 +626,8 @@ def test_copy_program_population_clears_country_workspace_id_and_originating_id(
 
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_copy_program_population_twice_does_not_violate_unique_constraints(
-    afghanistan: BusinessArea, program1: Program, program2: Program
+    afghanistan: BusinessArea, program1: Program, program2: Program, program3: Program
 ) -> None:
-    program3 = ProgramFactory(name="Program 3", business_area=afghanistan)
     source_individual = IndividualFactory(
         household=None,
         business_area=afghanistan,
@@ -638,14 +642,21 @@ def test_copy_program_population_twice_does_not_violate_unique_constraints(
         originating_id="API#HH-2",
     )
 
-    for target_program in (program2, program3):
-        CopyProgramPopulation(
-            copy_from_individuals=Individual.objects.filter(pk=source_individual.pk),
-            copy_from_households=Household.objects.filter(pk=source_household.pk),
-            program=target_program,
-            rdi=RegistrationDataImportFactory(business_area=afghanistan, program=target_program),
-            create_collection=False,
-        ).copy_program_population()
+    CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=source_individual.pk),
+        copy_from_households=Household.objects.filter(pk=source_household.pk),
+        program=program2,
+        rdi=RegistrationDataImportFactory(business_area=afghanistan, program=program2),
+        create_collection=False,
+    ).copy_program_population()
+
+    CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=source_individual.pk),
+        copy_from_households=Household.objects.filter(pk=source_household.pk),
+        program=program3,
+        rdi=RegistrationDataImportFactory(business_area=afghanistan, program=program3),
+        create_collection=False,
+    ).copy_program_population()
 
     assert Individual.objects.filter(copied_from=source_individual).count() == 2
     assert Household.objects.filter(copied_from=source_household).count() == 2
