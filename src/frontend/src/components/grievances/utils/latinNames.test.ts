@@ -75,7 +75,7 @@ describe('validateUsingSteps - latin name format for add individual', () => {
       fullNameLatin: 'Иван',
     });
 
-    expect(errors.individualData.fullNameLatin).toBe(FORMAT_ERROR);
+    expect(errors.individualData).toEqual({ fullNameLatin: FORMAT_ERROR });
   });
 
   it('does not require latin names', () => {
