@@ -39,6 +39,7 @@ import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
+import { getErrorMessage } from '@utils/errors';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -189,7 +190,7 @@ export const SupportingDocumentsSection = ({
       showMessage(t('File deleted successfully.'));
     } catch (err) {
       setErrorMessage(
-        t(`Failed to delete supporting document: ${err.message}`),
+        t(`Failed to delete supporting document: ${getErrorMessage(err)}`),
       );
     }
   };

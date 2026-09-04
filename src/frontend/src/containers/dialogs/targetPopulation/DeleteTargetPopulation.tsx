@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { getErrorMessage, isEmptyJsonResponseError } from '@utils/errors';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
@@ -68,11 +69,11 @@ export const DeleteTargetPopulation = ({
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
       // Ignore empty response error
-      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+      if (isEmptyJsonResponseError(e)) {
         showMessage(t('Target Population Deleted'));
         navigate(`/${baseUrl}/target-population`);
       } else {
-        showMessage(e.message);
+        showMessage(getErrorMessage(e));
       }
     }
   };

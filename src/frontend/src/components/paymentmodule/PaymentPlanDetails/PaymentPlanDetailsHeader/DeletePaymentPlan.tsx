@@ -19,6 +19,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
+import { isEmptyJsonResponseError, toApiError } from '@utils/errors';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -74,11 +75,15 @@ export function DeletePaymentPlan({
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
       // Ignore empty response error
-      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+      if (isEmptyJsonResponseError(e)) {
         showMessage(t('Payment Plan Deleted'));
         navigate(`/${baseUrl}/payment-module/payment-plans`);
       } else {
-        showApiErrorMessages(e, showMessage, t('Failed to delete the Payment Plan'));
+        showApiErrorMessages(
+          toApiError(e),
+          showMessage,
+          t('Failed to delete the Payment Plan'),
+        );
       }
     }
   };
