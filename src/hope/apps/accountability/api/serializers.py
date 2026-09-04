@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
+from hope.apps.core.api.fields import ScopedRelatedField, ScopedSlugRelatedField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
 from hope.apps.household.api.serializers.household import HouseholdSmallSerializer
@@ -187,14 +188,18 @@ class MessageCreateSerializer(serializers.Serializer):
     sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = FullListSerializer(required=False, allow_null=True)
     random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
-    payment_plan = serializers.PrimaryKeyRelatedField(
-        queryset=PaymentPlan.objects.all(), required=False, allow_null=True
+    payment_plan = ScopedRelatedField(
+        queryset=PaymentPlan.objects.all(),
+        scope="program",
+        scope_path="program_cycle__program",
+        required=False,
+        allow_null=True,
     )
-    registration_data_import = serializers.PrimaryKeyRelatedField(
-        queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
+    registration_data_import = ScopedRelatedField(
+        queryset=RegistrationDataImport.objects.all(), scope="program", required=False, allow_null=True
     )
     households = serializers.ListSerializer(
-        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
+        child=ScopedRelatedField(queryset=Household.objects.all(), scope="program"),
         required=False,
         allow_empty=True,
     )
@@ -221,8 +226,10 @@ class SurveySerializer(serializers.ModelSerializer):
     body = serializers.CharField(required=False, allow_blank=True)
     sampling_type = serializers.CharField()
     flow = serializers.CharField(required=False, write_only=True, allow_blank=True)
-    payment_plan = serializers.SlugRelatedField(
+    payment_plan = ScopedSlugRelatedField(
         slug_field="id",
+        scope="program",
+        scope_path="program_cycle__program",
         required=False,
         allow_null=True,
         queryset=PaymentPlan.objects.all(),
@@ -295,8 +302,12 @@ class SurveyRapidProFlowSerializer(serializers.Serializer):
 
 
 class SurveySampleSizeSerializer(serializers.Serializer):
-    payment_plan = serializers.PrimaryKeyRelatedField(
-        queryset=PaymentPlan.objects.all(), required=False, allow_null=True
+    payment_plan = ScopedRelatedField(
+        queryset=PaymentPlan.objects.all(),
+        scope="program",
+        scope_path="program_cycle__program",
+        required=False,
+        allow_null=True,
     )
     sampling_type = serializers.ChoiceField(required=True, choices=Survey.SAMPLING_CHOICES, allow_null=True)
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
@@ -311,15 +322,19 @@ class SampleSizeSerializer(serializers.Serializer):
 
 class MessageSampleSizeSerializer(serializers.Serializer):
     households = serializers.ListSerializer(
-        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()),
+        child=ScopedRelatedField(queryset=Household.objects.all(), scope="program"),
         required=False,
         allow_empty=True,
     )
-    payment_plan = serializers.PrimaryKeyRelatedField(
-        queryset=PaymentPlan.objects.all(), required=False, allow_null=True
+    payment_plan = ScopedRelatedField(
+        queryset=PaymentPlan.objects.all(),
+        scope="program",
+        scope_path="program_cycle__program",
+        required=False,
+        allow_null=True,
     )
-    registration_data_import = serializers.PrimaryKeyRelatedField(
-        queryset=RegistrationDataImport.objects.all(), required=False, allow_null=True
+    registration_data_import = ScopedRelatedField(
+        queryset=RegistrationDataImport.objects.all(), scope="program", required=False, allow_null=True
     )
     sampling_type = serializers.ChoiceField(choices=Message.SamplingChoices)  # type: ignore[arg-type]
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False, allow_null=True)
