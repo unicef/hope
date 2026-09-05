@@ -1442,16 +1442,16 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        def _get_reject_permission(status: str) -> Any:
-            status_to_perm_map = {
-                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            }
-            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
-
-        reject_permission = _get_reject_permission(payment_plan.status)
-        request.user.has_perm(reject_permission)
+        status_to_perm_map = {
+            PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.value,
+            PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.value,
+            PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.value,
+        }
+        permission = status_to_perm_map.get(payment_plan.status)
+        if permission is None:
+            raise ValidationError(f"Cannot reject a Payment Plan in status {payment_plan.status}")
+        if not request.user.has_perm(permission, payment_plan.program):
+            raise PermissionDenied
         data = dict(request.data)
         data["action"] = PaymentPlan.Action.REJECT
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
@@ -2223,7 +2223,7 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
+        request.data["target_population_id"] = kwargs.get("pk")
 
         serializer = self.get_serializer(
             data=request.data,

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, cast
+from typing import TYPE_CHECKING, Any, Iterable, cast
 
 from django.core.cache import cache
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 _NS = "v2"  # if we change something, bump the version
 
@@ -14,13 +17,13 @@ class ProfileVersioner:
     def _global_key(self) -> str:
         return f"profile:global:{_NS}"
 
-    def _user_key(self, user_id: int) -> str:
+    def _user_key(self, user_id: UUID) -> str:
         return f"profile:user:{_NS}:{user_id}"
 
     def _get_or_init(self, key: str, default: int = 1) -> int:
         return cast("int", cache.get_or_set(key, default, timeout=None))
 
-    def get_versions(self, user_id: int) -> tuple[int, int]:
+    def get_versions(self, user_id: UUID) -> tuple[int, int]:
         g = self._get_or_init(self._global_key())
         u = self._get_or_init(self._user_key(user_id))
         return g, u
@@ -29,20 +32,20 @@ class ProfileVersioner:
         self._get_or_init(self._global_key())
         cache.incr(self._global_key())
 
-    def bump_user(self, user_id: int) -> None:
+    def bump_user(self, user_id: UUID) -> None:
         key = self._user_key(user_id)
         self._get_or_init(key)
         cache.incr(key)
 
-    def bump_users(self, user_ids: Iterable[int]) -> None:
+    def bump_users(self, user_ids: Iterable[UUID]) -> None:
         for uid in set(filter(None, user_ids)):
             self.bump_user(uid)
 
-    def etag_for(self, user_id: int) -> str:
+    def etag_for(self, user_id: UUID) -> str:
         g, u = self.get_versions(user_id)
         return f'W/"profile:{user_id}:{g}.{u}"'
 
-    def cache_key_for(self, user_id: int) -> str:
+    def cache_key_for(self, user_id: UUID) -> str:
         g, u = self.get_versions(user_id)
         return f"profile:{user_id}:{g}.{u}"
 

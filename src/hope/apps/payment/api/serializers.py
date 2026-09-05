@@ -79,6 +79,8 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
 
     def validate_file(self, file: Any) -> Any:
+        if file.size is None:
+            raise serializers.ValidationError("File size is not available.")
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
             raise serializers.ValidationError("File size must be ≤ 10MB.")
 

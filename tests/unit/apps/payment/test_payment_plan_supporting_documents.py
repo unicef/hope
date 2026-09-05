@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import FileResponse
 from django.urls import reverse
 import pytest
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.test import APIClient, APIRequestFactory
 
 from extras.test_utils.factories import (
@@ -158,6 +158,15 @@ def test_validate_file_extension_success(serializer_context: dict[str, Any]) -> 
     document_data = {"file": valid_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
     assert serializer.is_valid()
+
+
+def test_validate_file_size_none(serializer_context: dict[str, Any]) -> None:
+    file = SimpleUploadedFile("test.pdf", b"123", content_type="application/pdf")
+    file.size = None
+    serializer = PaymentPlanSupportingDocumentSerializer(context=serializer_context)
+    with pytest.raises(serializers.ValidationError) as exc_info:
+        serializer.validate_file(file)
+    assert exc_info.value.detail == ["File size is not available."]
 
 
 def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> None:
