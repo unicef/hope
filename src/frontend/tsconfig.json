@@ -29,7 +29,6 @@
     "noFallthroughCasesInSwitch": true,
     "allowUnreachableCode": false,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
       "@api/*": ["./src/api/*"],
       "@components/*": ["./src/components/*"],
