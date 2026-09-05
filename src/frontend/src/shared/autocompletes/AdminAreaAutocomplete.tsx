@@ -1,4 +1,5 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +12,7 @@ import {
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
-import { AreaList } from '@restgenerated/models/AreaList';
+import type { AreaList } from '@restgenerated/models/AreaList';
 
 export function AdminAreaAutocomplete({
   disabled,

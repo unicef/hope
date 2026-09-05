@@ -1,8 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { styled } from '@mui/system';
-import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
-import { ReactElement, isValidElement } from 'react';
+import type { BreadCrumbsItem } from './BreadCrumbs';
+import { BreadCrumbs } from './BreadCrumbs';
+import type { ReactElement } from 'react';
+import { isValidElement } from 'react';
 
 const Wrapper = styled('div')({
   boxShadow:

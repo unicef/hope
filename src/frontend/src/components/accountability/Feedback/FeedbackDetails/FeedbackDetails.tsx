@@ -6,9 +6,10 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid, GridSize, Typography } from '@mui/material';
-import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
-import { ReactElement } from 'react';
+import type { GridSize } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
+import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 

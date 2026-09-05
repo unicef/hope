@@ -1,4 +1,5 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -11,8 +12,8 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpTargetPopulationTableCommunicationProps {

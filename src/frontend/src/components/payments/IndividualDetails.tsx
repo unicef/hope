@@ -5,7 +5,7 @@ import { Grid, Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
 import { getPhoneNoLabel } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export const IndividualDetails = ({ individual }): ReactElement => {
   const { t } = useTranslation();

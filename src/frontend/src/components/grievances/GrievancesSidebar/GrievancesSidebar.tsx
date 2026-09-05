@@ -9,9 +9,9 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function GrievancesSidebar({
   ticket,
@@ -24,8 +24,8 @@ export function GrievancesSidebar({
     const { category, issueType, status } = ticket;
 
     if (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-      individual = ticket.ticketDetails.selectedIndividual;
-      household = ticket.ticketDetails.selectedIndividual?.household;
+      individual = ticket.ticketDetails?.selectedIndividual;
+      household = ticket.ticketDetails?.selectedIndividual?.household;
     }
     const isOneIndividual = household?.activeIndividualsCount === 1;
     if (isOneIndividual) return false;
@@ -68,10 +68,10 @@ export function GrievancesSidebar({
     let isProperDataChange = true;
     if (
       category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+      issueType?.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
-      const { role, relationship } = ticket.ticketDetails.individualData;
-      if (isEmpty(role) && isEmpty(relationship)) {
+      const individualData = ticket.ticketDetails?.individualData;
+      if (isEmpty(individualData?.role) && isEmpty(individualData?.relationship)) {
         isProperDataChange = false;
       }
     }
@@ -85,7 +85,7 @@ export function GrievancesSidebar({
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-    ticket.ticketDetails.isMultipleDuplicatesVersion &&
+    Boolean(ticket.ticketDetails?.isMultipleDuplicatesVersion) &&
     !isSocialDctType;
 
   const renderRightSection = (): ReactElement => {
@@ -109,7 +109,7 @@ export function GrievancesSidebar({
                 verifications={
                   ticket.ticketDetails?.paymentVerifications.map((edge) => ({
                     id: edge.id,
-                    paymentId: ticket.paymentRecord.unicefId,
+                    paymentId: ticket.paymentRecord?.unicefId,
                   })) || []
                 }
               />

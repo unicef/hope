@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { PropsWithChildren, ComponentProps, ReactElement } from 'react';
+import type { PropsWithChildren, ComponentProps, ReactElement } from 'react';
 import styled from 'styled-components';
 
 const StyledGreyBox = styled(Box)`

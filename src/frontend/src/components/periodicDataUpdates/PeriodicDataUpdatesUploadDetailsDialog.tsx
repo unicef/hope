@@ -7,7 +7,7 @@ import {
   Button,
   Typography,
 } from '@mui/material';
-import React, { FC } from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';

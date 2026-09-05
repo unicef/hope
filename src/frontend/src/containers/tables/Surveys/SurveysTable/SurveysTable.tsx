@@ -1,4 +1,5 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -11,9 +12,9 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
-import { Survey } from '@restgenerated/models/Survey';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedSurveyList } from '@restgenerated/models/PaginatedSurveyList';
+import type { Survey } from '@restgenerated/models/Survey';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface SurveysTableProps {

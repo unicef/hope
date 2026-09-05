@@ -1,4 +1,5 @@
-import React, { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import React, { useEffect } from 'react';
 import { Button, Grid, Typography } from '@mui/material';
 import { Field, FieldArray } from 'formik';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -15,7 +16,7 @@ import { DarkGrey } from '@components/grievances/LookUps/LookUpStyles';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 import { roleDisplayMap } from '@components/grievances/utils/createGrievanceUtils';
 
@@ -263,7 +264,7 @@ function EditHouseholdDataChange({
                 </Grid>
                 <Grid size={4}>
                   {currentRoleObj
-                    ? roleDisplayMap[currentRoleObj.role] || currentRoleObj.role
+                    ? roleDisplayMap[currentRoleObj.role ?? ''] || currentRoleObj.role
                     : 'No role'}
                 </Grid>
                 <Grid size={3}>

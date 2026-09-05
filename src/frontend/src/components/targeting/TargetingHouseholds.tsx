@@ -1,7 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetPopulationHouseholdTable } from '@containers/tables/targeting/TargetPopulationHouseholdTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 function TargetingHouseholds({ id, canViewDetails }): ReactElement {
   const { businessArea } = useBaseUrl();

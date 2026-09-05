@@ -11,7 +11,8 @@ import { SelectedProgramRoutesSwitch } from '@containers/routers/SelectedProgram
 import { AutoLogout } from '@core/AutoLogout';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import * as Sentry from '@sentry/react';
-import { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import { useEffect } from 'react';
 import {
   createBrowserRouter,
   Route,

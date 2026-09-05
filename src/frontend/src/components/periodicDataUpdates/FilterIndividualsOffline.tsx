@@ -4,7 +4,7 @@ import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { YES_NO_CHOICES } from '@utils/constants';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
@@ -13,7 +13,7 @@ import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/re
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { t } from 'i18next';
-import React, { FC } from 'react';
+import type { FC } from 'react';
 
 interface FilterIndividualsOfflineProps {
   filter;
@@ -29,9 +29,12 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
 }) => {
   const { businessArea } = useBaseUrl();
   const { data: individualChoicesData } = useQuery<IndividualChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasIndividualsChoicesRetrieve,
+      {
+        businessAreaSlug: businessArea,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasIndividualsChoicesRetrieve({
         businessAreaSlug: businessArea,

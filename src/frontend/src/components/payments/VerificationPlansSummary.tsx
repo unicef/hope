@@ -5,8 +5,8 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import type { ReactElement } from 'react';
+import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 interface VerificationPlansSummaryProps {
   planNode: PaymentVerificationPlanDetails;

@@ -1,6 +1,6 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BlackLink } from '@components/core/BlackLink';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { DividerLine } from '@components/core/DividerLine';
 import { LabelizedField } from '@components/core/LabelizedField';
@@ -33,8 +33,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
@@ -59,7 +59,7 @@ import {
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { Field, Formik } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -268,6 +268,11 @@ const EditGrievancePage = (): ReactElement => {
     return <LoadingComponent />;
   if (isPermissionDeniedError(error))
     return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_UPDATE} />;
+  // The loading flags going false does not guarantee data: a query that errored
+  // or is disabled settles with `data` undefined, and everything below
+  // dereferences these three unconditionally.
+  if (!ticketData || !currentUserData || !choicesData)
+    return <LoadingComponent />;
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);

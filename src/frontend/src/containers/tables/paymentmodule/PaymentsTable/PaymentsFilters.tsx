@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentsFiltersProps {

@@ -1,4 +1,5 @@
-import { Box, Grid, Paper, Theme, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -16,11 +17,11 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement, ReactNode } from 'react';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { ReactElement, ReactNode } from 'react';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
@@ -234,12 +235,12 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Marital Status')}>
-            {maritalStatusChoicesDict[individual?.maritalStatus]}
+            {maritalStatusChoicesDict[individual?.maritalStatus ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Work Status')}>
-            {workStatusChoicesDict[individual?.workStatus]}
+            {workStatusChoicesDict[individual?.workStatus ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -262,14 +263,14 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Role')}>
-            {roleChoicesDict[individual?.role]}
+            {roleChoicesDict[individual?.role ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={`Relationship to Head Of ${beneficiaryGroup?.groupLabel}`}
           >
-            {relationshipChoicesDict[individual?.relationship]}
+            {relationshipChoicesDict[individual?.relationship ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -283,39 +284,39 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {observedDisabilityChoicesDict[individual?.observedDisability]}
+            {observedDisabilityChoicesDict[individual?.observedDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Seeing disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.seeingDisability]}
+            {severityOfDisabilityChoicesDict[individual?.seeingDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Hearing disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.hearingDisability]}
+            {severityOfDisabilityChoicesDict[individual?.hearingDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Physical disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.physicalDisability]}
+            {severityOfDisabilityChoicesDict[individual?.physicalDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={t('Remembering or concentrating disability severity')}
           >
-            {severityOfDisabilityChoicesDict[individual?.memoryDisability]}
+            {severityOfDisabilityChoicesDict[individual?.memoryDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Self-care disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.selfcareDisability]}
+            {severityOfDisabilityChoicesDict[individual?.selfcareDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Communicating disability severity')}>
-            {severityOfDisabilityChoicesDict[individual?.commsDisability]}
+            {severityOfDisabilityChoicesDict[individual?.commsDisability ?? '']}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

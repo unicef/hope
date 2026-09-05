@@ -11,7 +11,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function LookUpPaymentRecordModal({
   onValueChange,

@@ -1,11 +1,15 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useQuery,
+  type UseQueryOptions,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 
 export const useHopeDetailsQuery = <TData, TOptions = any>(
   id: string,
   queryFn: (data: TOptions) => Promise<TData>,
-  options: any,
+  options: Partial<UseQueryOptions<TData>>,
 ): UseQueryResult<TData> => {
   const { businessAreaSlug, programCode } = useBaseUrl();
   return useQuery({

@@ -14,9 +14,9 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import PhotoModal from '@components/core/PhotoModal/PhotoModal';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledTable = styled(Table)`
   color: #9e9e9e;

@@ -7,9 +7,9 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, Typography } from '@mui/material';
-import { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
-import { Survey } from '@restgenerated/models/Survey';
-import { ReactElement } from 'react';
+import type { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
+import type { Survey } from '@restgenerated/models/Survey';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 

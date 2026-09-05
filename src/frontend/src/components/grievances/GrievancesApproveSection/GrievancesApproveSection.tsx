@@ -10,9 +10,9 @@ import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDet
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
 import { RequestedPhotoErrorDataChange } from '../RequestedPhotoErrorDataChange';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface GrievancesApproveSectionProps {
   ticket: GrievanceTicketDetail;
@@ -40,7 +40,7 @@ function GrievancesApproveSection({
     if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION
     ) {
-      if (ticket.ticketDetails.isMultipleDuplicatesVersion) {
+      if (ticket.ticketDetails?.isMultipleDuplicatesVersion) {
         return (
           <NeedsAdjudicationDetailsNew
             ticket={ticket}
@@ -107,7 +107,8 @@ function GrievancesApproveSection({
       );
     }
     if (
-      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR
+      ticket?.issueType?.toString() ===
+      GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR
     ) {
       return (
         <RequestedPhotoErrorDataChange
@@ -119,7 +120,7 @@ function GrievancesApproveSection({
     if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {
-      if (ticket.ticketDetails.hasMultiplePaymentVerifications === false) {
+      if (ticket.ticketDetails?.hasMultiplePaymentVerifications === false) {
         return (
           <PaymentGrievanceDetails
             ticket={ticket}

@@ -14,11 +14,12 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ApproveBox,
@@ -28,7 +29,7 @@ import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { NaReassignRoleModal } from './NaReassignRoleModal';
 import { applyMark, clearMark, individualRole } from './naDecision';
 import { reassignmentKey, roleLabel } from './naRoleUtils';
-import { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
+import type { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
 
 // Light red used to flag fields whose values differ between the two individuals.
 const DIFF_BACKGROUND = '#fdecea';
@@ -182,10 +183,13 @@ export const NaComparisonPanel = ({
     isLoading,
     isError,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsRetrieve, {
-      businessAreaSlug,
-      id: ticketId,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasGrievanceTicketsRetrieve,
+      {
+        businessAreaSlug,
+        id: ticketId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,

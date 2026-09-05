@@ -3,14 +3,15 @@ import { headCells } from '@containers/pages/paymentmodule/Groups/PaymentPlanGro
 import { PaymentPlanGroupTableRow } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePersistedCount } from '@hooks/usePersistedCount';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
-import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
+import type { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 
 interface PaymentPlanGroupsTableProps {
   filter?: { search?: string; cycle?: string };
@@ -40,15 +41,18 @@ export const PaymentPlanGroupsTable = ({
     programCode: programId,
     ...queryVariables,
   };
-  const { data, isLoading, error } = useQuery<PaginatedPaymentPlanGroupListList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
-      groupsListParams,
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList(groupsListParams),
-    enabled: !!businessArea && !!programId,
-  });
+  const { data, isLoading, error } =
+    useQuery<PaginatedPaymentPlanGroupListList>({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+        groupsListParams,
+      ),
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsList(
+          groupsListParams,
+        ),
+      enabled: !!businessArea && !!programId,
+    });
 
   const groupsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },

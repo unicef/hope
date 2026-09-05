@@ -7,7 +7,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { isStaticReferenceQuery } from '@utils/queryCacheUtils';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { ConfirmationDialogProvider } from '@core/ConfirmationDialog';
 import { theme } from './theme';

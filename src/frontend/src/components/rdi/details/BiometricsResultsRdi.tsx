@@ -17,7 +17,8 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { FC, ReactElement, useState, useEffect } from 'react';
+import type { FC, ReactElement } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
@@ -80,7 +81,9 @@ const BiometricsResultsRdi = ({
       individual1Params,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve(individual1Params),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(
+        individual1Params,
+      ),
     enabled: dialogOpen && !!individual1?.id,
   });
 
@@ -95,7 +98,9 @@ const BiometricsResultsRdi = ({
       individual2Params,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve(individual2Params),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(
+        individual2Params,
+      ),
     enabled: dialogOpen && !!individual2?.id,
   });
 

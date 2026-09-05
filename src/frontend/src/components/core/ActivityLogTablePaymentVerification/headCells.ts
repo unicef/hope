@@ -1,5 +1,5 @@
-import { LogEntry } from '@restgenerated/models/LogEntry';
-import { HeadCell } from '../Table/EnhancedTableHead';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
+import type { HeadCell } from '../Table/EnhancedTableHead';
 
 export const headCells: HeadCell<LogEntry>[] = [
   {

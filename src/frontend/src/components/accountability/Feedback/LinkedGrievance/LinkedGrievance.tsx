@@ -9,9 +9,9 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackDetail;

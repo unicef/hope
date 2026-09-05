@@ -1,8 +1,8 @@
 import { usePermissions } from '@hooks/usePermissions';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import { PaymentPlanGroupDetail } from '../types';
+import type { PaymentPlanGroupDetail } from '../types';
 import {
   exportablePlanTypeOptions,
   isGroupBackgroundActionBusy,

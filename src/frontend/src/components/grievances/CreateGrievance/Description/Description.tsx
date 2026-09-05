@@ -5,8 +5,9 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { GridSize } from '@mui/material';
+import { Box, FormHelperText, Grid, Typography } from '@mui/material';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -16,7 +17,8 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { choicesToDict } from '@utils/utils';
 import { Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -25,7 +27,7 @@ import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentation
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpDelegate } from '../../LookUps/LookUpDelegate/LookUpDelegate';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -96,7 +98,8 @@ function Description({
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
   const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
-  const submissionChannelChoicesData = choicesData?.grievanceTicketManualSubmissionChannelChoices;
+  const submissionChannelChoicesData =
+    choicesData?.grievanceTicketManualSubmissionChannelChoices;
   const canAddDocumentation = hasPermissions(
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
     permissions,

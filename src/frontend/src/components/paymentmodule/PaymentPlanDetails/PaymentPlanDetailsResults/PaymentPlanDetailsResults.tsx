@@ -13,8 +13,8 @@ import {
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { ResultsForHouseholds } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForHouseholds';
 import { ResultsForPeople } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForPeople';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsResultsProps {
   paymentPlan: PaymentPlanDetail;

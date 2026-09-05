@@ -1,4 +1,4 @@
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { FlagTooltip } from '@components/core/FlagTooltip';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -21,13 +21,13 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { Theme } from '@mui/material/styles';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { Theme } from '@mui/material/styles';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -35,7 +35,7 @@ import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Container = styled.div`
   padding: 20px;

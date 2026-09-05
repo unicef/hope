@@ -8,8 +8,8 @@ import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -41,14 +41,14 @@ export function ReassignMultipleRoleBox({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const reassignData = ticket.ticketDetails.roleReassignData;
+  const reassignData = ticket.ticketDetails?.roleReassignData ?? {};
   const reassignDataDictByIndividualId = {};
   for (const key of Object.keys(reassignData)) {
     reassignDataDictByIndividualId[reassignData[key].individual] =
       reassignData[key];
   }
   const selectedIndividualsToReassign =
-    ticket.ticketDetails.selectedDuplicates?.filter(
+    ticket.ticketDetails?.selectedDuplicates?.filter(
       (el) =>
         el.role === 'PRIMARY' || el.id === el.household?.headOfHousehold?.id,
     );

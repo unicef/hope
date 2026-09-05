@@ -20,7 +20,8 @@ import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
@@ -30,7 +31,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { FspChoices } from '@restgenerated/models/FspChoices';
+import type { FspChoices } from '@restgenerated/models/FspChoices';
 import { fieldNameToLabel } from '@utils/utils';
 
 interface CriteriaElementProps {

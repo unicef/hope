@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { TicketsByLocationAndCategoryChart } from '../../charts/TicketsByLocationAndCategoryChart';
 import { DashboardPaper } from '../../DashboardPaper';
-import { DetailedChartData } from '@restgenerated/models/DetailedChartData';
-import { ReactElement } from 'react';
+import type { DetailedChartData } from '@restgenerated/models/DetailedChartData';
+import type { ReactElement } from 'react';
 
 interface TicketsByLocationAndCategorySectionProps {
   data: DetailedChartData;

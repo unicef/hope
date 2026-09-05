@@ -1,6 +1,6 @@
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
-import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
+import type { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 export const PROGRAM_STATE_FILTER = {
   ACTIVE: 'active',

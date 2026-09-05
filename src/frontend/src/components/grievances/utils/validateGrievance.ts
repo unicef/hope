@@ -319,7 +319,7 @@ export function validateUsingSteps(
       }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
-        values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
+        values.individualDataUpdateFieldsDocuments.forEach((_el, index) => {
           const doc = values.individualDataUpdateFieldsDocuments[index];
           const docValue = doc.value || doc;
           if (!docValue.country || !docValue.key || !docValue.number) {
@@ -330,7 +330,7 @@ export function validateUsingSteps(
       }
       if (values.individualDataUpdateFieldsDocumentsToEdit?.length) {
         values.individualDataUpdateFieldsDocumentsToEdit.forEach(
-          (el, index) => {
+          (_el, index) => {
             const doc = values.individualDataUpdateFieldsDocumentsToEdit[index];
             const docValue = doc.value || doc;
             if (!docValue.country || !docValue.key || !docValue.number) {
@@ -341,7 +341,7 @@ export function validateUsingSteps(
         );
       }
       if (values.individualDataUpdateFieldsIdentities?.length) {
-        values.individualDataUpdateFieldsIdentities.forEach((el, index) => {
+        values.individualDataUpdateFieldsIdentities.forEach((_el, index) => {
           const doc = values.individualDataUpdateFieldsIdentities[index];
           const docValue = doc.value || doc;
           const partner = docValue.partner || docValue.agency;
@@ -353,7 +353,7 @@ export function validateUsingSteps(
       }
       if (values.individualDataUpdateFieldsIdentitiesToEdit?.length) {
         values.individualDataUpdateFieldsIdentitiesToEdit.forEach(
-          (el, index) => {
+          (_el, index) => {
             const doc =
               values.individualDataUpdateFieldsIdentitiesToEdit[index];
             const docValue = doc.value || doc;

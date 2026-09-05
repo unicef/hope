@@ -11,20 +11,22 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Field, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { IndividualsFilter } from '../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUps/LookUpIndividualTable/LookUpIndividualTable';
-import { NaIndividual, roleLabel } from './naRoleUtils';
-import { NaRequiredRole } from './naTypes';
+import type { NaIndividual } from './naRoleUtils';
+import { roleLabel } from './naRoleUtils';
+import type { NaRequiredRole } from './naTypes';
 
 interface NaReassignRoleModalProps {
   open: boolean;
@@ -132,8 +134,7 @@ export const NaReassignRoleModal = ({
           {open && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle>
-              {t('Reassign Role')}: {t(roleLabel(role))} —{' '}
-              {household.unicefId}
+              {t('Reassign Role')}: {t(roleLabel(role))} — {household.unicefId}
             </DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
@@ -175,7 +176,9 @@ export const NaReassignRoleModal = ({
                   type="submit"
                   color="primary"
                   variant="contained"
-                  disabled={!values.identityVerified || !values.selectedIndividual}
+                  disabled={
+                    !values.identityVerified || !values.selectedIndividual
+                  }
                   onClick={submitForm}
                   data-cy="button-na-reassign-save"
                 >

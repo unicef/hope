@@ -10,7 +10,8 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
-import React, { ReactElement, useState, useRef, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { api } from '../api/api';
 
 const UserProfileButton = styled(Button)`

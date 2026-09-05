@@ -11,7 +11,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
-import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
   formatFigure,
@@ -22,7 +22,7 @@ import {
   safeStringify,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 

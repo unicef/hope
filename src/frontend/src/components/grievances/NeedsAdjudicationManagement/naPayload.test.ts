@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildExecutePayload } from './naPayload';
-import { NaTicketDecision } from './naTypes';
+import type { NaTicketDecision } from './naTypes';
 
 describe('buildExecutePayload', () => {
   it('sends the replacement so the server can hand over the role', () => {
@@ -88,6 +88,10 @@ describe('buildExecutePayload', () => {
     };
 
     const roleReassignData = buildExecutePayload(decisions)[0].roleReassignData;
+    // roleReassignData is optional on the payload; a missing one is the very
+    // regression these cases exist to catch, so fail here rather than let the
+    // assertions below pass vacuously.
+    if (!roleReassignData) throw new Error('expected roleReassignData');
 
     expect(Object.keys(roleReassignData).sort()).toEqual([
       'HEAD-hh-1',
@@ -125,6 +129,10 @@ describe('buildExecutePayload', () => {
     };
 
     const roleReassignData = buildExecutePayload(decisions)[0].roleReassignData;
+    // roleReassignData is optional on the payload; a missing one is the very
+    // regression these cases exist to catch, so fail here rather than let the
+    // assertions below pass vacuously.
+    if (!roleReassignData) throw new Error('expected roleReassignData');
 
     expect(Object.keys(roleReassignData).sort()).toEqual([
       'PRIMARY-hh-1',

@@ -1,5 +1,5 @@
 import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { FormikEffect } from '@components/core/FormikEffect';
 import { LoadingButton } from '@components/core/LoadingButton';
@@ -10,7 +10,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { MessageCreate } from '@restgenerated/models/MessageCreate';
+import type { MessageCreate } from '@restgenerated/models/MessageCreate';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
@@ -31,8 +31,8 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { AreaList } from '@restgenerated/models/AreaList';
-import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import type { AreaList } from '@restgenerated/models/AreaList';
+import type { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
@@ -42,13 +42,8 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
 import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import {
-  ReactElement,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

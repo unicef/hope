@@ -2,19 +2,21 @@ import { BlackLink } from '@components/core/BlackLink';
 import { Bold } from '@components/core/Bold';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { Order, TableComponent } from '@components/core/Table/TableComponent';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { Order } from '@components/core/Table/TableComponent';
+import { TableComponent } from '@components/core/Table/TableComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualSimple } from '@restgenerated/models/IndividualSimple';
-import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualSimple } from '@restgenerated/models/IndividualSimple';
+import type { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
-import { ReactElement, ReactNode, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 
@@ -160,15 +162,13 @@ export const CollectorsTable = ({
               </BlackLink>
             );
           }
-          if (household?.id === row?.household?.id) {
-            return (
-              <span>
-                {renderTableCellContent(
-                  relationshipChoicesDict[row.relationship],
-                )}
-              </span>
-            );
-          }
+          return (
+            <span>
+              {renderTableCellContent(
+                relationshipChoicesDict[row.relationship ?? ''],
+              )}
+            </span>
+          );
         };
 
         return (
@@ -178,7 +178,7 @@ export const CollectorsTable = ({
             role="checkbox"
             key={row.id}
           >
-            <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
+            <TableCell align="left">{roleChoicesDict[row.role ?? '']}</TableCell>
             <TableCell align="left">{row.fullName}</TableCell>
             <TableCell align="left">{renderRelationship()}</TableCell>
           </ClickableTableRow>

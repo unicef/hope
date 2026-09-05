@@ -1,4 +1,5 @@
-import { ReactElement, useCallback, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../../config';
 

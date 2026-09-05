@@ -1,10 +1,11 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { render, RenderOptions } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import type { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { DataCollectingTypeTypeEnum } from '@restgenerated/models/DataCollectingTypeTypeEnum';
 
 const customRender = (

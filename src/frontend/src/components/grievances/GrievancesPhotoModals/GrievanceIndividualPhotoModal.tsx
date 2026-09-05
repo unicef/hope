@@ -1,9 +1,9 @@
 import PhotoModal from '@core/PhotoModal/PhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { IndividualPhotoDetail } from '@restgenerated/models/IndividualPhotoDetail';
+import type { IndividualPhotoDetail } from '@restgenerated/models/IndividualPhotoDetail';
 import { useQuery } from '@tanstack/react-query';
 import { useProgramContext } from 'src/programContext';
 
@@ -39,10 +39,7 @@ export function GrievanceIndividualPhotoModal({
         individualPhotosParams,
       ),
     enabled:
-      !!isCurrent &&
-      !!businessArea &&
-      !!effectiveProgramCode &&
-      !!individualId,
+      !!isCurrent && !!businessArea && !!effectiveProgramCode && !!individualId,
   });
 
   // For current value: fetch from API

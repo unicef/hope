@@ -1,10 +1,11 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { FC, useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
-import { DetailedChartData } from '@restgenerated/models/DetailedChartData';
+import type { DetailedChartData } from '@restgenerated/models/DetailedChartData';
 import { categoriesAndColors } from '@components/grievances/utils/createGrievanceUtils';
 
 interface TicketsByLocationAndCategoryChartProps {

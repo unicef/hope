@@ -10,12 +10,13 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ConfirmWorkflowButtonProps {

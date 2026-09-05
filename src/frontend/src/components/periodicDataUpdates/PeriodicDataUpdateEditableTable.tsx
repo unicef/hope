@@ -20,7 +20,7 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { t } from 'i18next';
-import { PduField } from './PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
+import type { PduField } from './PeriodicDataUpdatesOnlineEditsTemplateDetailsPage';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 type Individual = {
@@ -172,7 +172,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                 {allPduFields.map((col) => {
                   const fieldKey = col.fieldName;
                   const field = individual.pduFields
-                    ? individual.pduFields[fieldKey]
+                    ? individual.pduFields[fieldKey ?? '']
                     : null;
                   return (
                     <TableCell key={fieldKey} align="center">
@@ -200,8 +200,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                         'yyyy-MM-dd',
                                       );
                                     }
-                                    pduFieldsObj[fieldKey] = {
-                                      ...pduFieldsObj[fieldKey],
+                                    pduFieldsObj[fieldKey ?? ''] = {
+                                      ...pduFieldsObj[fieldKey ?? ''],
                                       value: formattedValue,
                                     };
                                     updated[idx] = {
@@ -237,8 +237,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                     const pduFieldsObj = {
                                       ...updated[idx].pduFields,
                                     };
-                                    pduFieldsObj[fieldKey] = {
-                                      ...pduFieldsObj[fieldKey],
+                                    pduFieldsObj[fieldKey ?? ''] = {
+                                      ...pduFieldsObj[fieldKey ?? ''],
                                       value: true,
                                     };
                                     updated[idx] = {
@@ -266,8 +266,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                     const pduFieldsObj = {
                                       ...updated[idx].pduFields,
                                     };
-                                    pduFieldsObj[fieldKey] = {
-                                      ...pduFieldsObj[fieldKey],
+                                    pduFieldsObj[fieldKey ?? ''] = {
+                                      ...pduFieldsObj[fieldKey ?? ''],
                                       value: false,
                                     };
                                     updated[idx] = {
@@ -295,8 +295,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                     const pduFieldsObj = {
                                       ...updated[idx].pduFields,
                                     };
-                                    pduFieldsObj[fieldKey] = {
-                                      ...pduFieldsObj[fieldKey],
+                                    pduFieldsObj[fieldKey ?? ''] = {
+                                      ...pduFieldsObj[fieldKey ?? ''],
                                       value: null,
                                     };
                                     updated[idx] = {
@@ -341,8 +341,8 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                   const pduFieldsObj = {
                                     ...updated[idx].pduFields,
                                   };
-                                  pduFieldsObj[fieldKey] = {
-                                    ...pduFieldsObj[fieldKey],
+                                  pduFieldsObj[fieldKey ?? ''] = {
+                                    ...pduFieldsObj[fieldKey ?? ''],
                                     value: newValue,
                                   };
                                   updated[idx] = {

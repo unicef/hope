@@ -1,12 +1,13 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
-import { PaginatedPaymentPlanPurposeList } from '@restgenerated/models/PaginatedPaymentPlanPurposeList';
+import type { PaginatedPaymentPlanPurposeList } from '@restgenerated/models/PaginatedPaymentPlanPurposeList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { FieldInputProps, FormikProps } from 'formik';
+import type { FieldInputProps, FormikProps } from 'formik';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Choice {

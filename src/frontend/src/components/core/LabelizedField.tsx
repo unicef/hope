@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
-import { ReactNode, ReactElement } from 'react';
+import type { MiśTheme } from '../../theme';
+import type { ReactNode, ReactElement } from 'react';
 
 const Label = styled.span`
   ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}

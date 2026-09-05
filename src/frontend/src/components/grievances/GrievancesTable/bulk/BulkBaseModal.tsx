@@ -10,8 +10,9 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { ReactElement, ReactNode, useState } from 'react';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../../programContext';

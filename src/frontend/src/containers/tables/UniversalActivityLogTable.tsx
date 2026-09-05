@@ -1,10 +1,11 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from 'src/restgenerated';
 import { restQueryKey } from '@utils/queryKeys';
-import { ActivityLogEntry } from '@components/core/ActivityLogTable/types';
+import type { ActivityLogEntry } from '@components/core/ActivityLogTable/types';
 import { useQuery } from '@tanstack/react-query';
 
 const TableWrapper = styled.div`

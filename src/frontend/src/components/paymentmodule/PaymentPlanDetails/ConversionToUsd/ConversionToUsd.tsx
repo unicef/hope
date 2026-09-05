@@ -13,14 +13,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { ApplyCustomExchangeRate } from '@restgenerated/models/ApplyCustomExchangeRate';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ApplyCustomExchangeRate } from '@restgenerated/models/ApplyCustomExchangeRate';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -94,7 +95,9 @@ function ConversionToUsd({
         t('Exchange rate is being applied, please wait until completed'),
       );
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
     },
     onError: (error: any) => {

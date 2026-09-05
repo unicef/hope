@@ -18,10 +18,11 @@ import {
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PaymentPlanGroupDetail } from '../types';
+import type { PaymentPlanGroupDetail } from '../types';
 import { showApiErrorMessages } from '@utils/utils';
 
 interface DeletePaymentPlanGroupProps {
@@ -42,7 +43,7 @@ export function DeletePaymentPlanGroup({
       RestService.restBusinessAreasProgramsPaymentPlanGroupsDestroy({
         businessAreaSlug: businessArea,
         programCode: programId,
-        id: group.id,
+        id: group?.id ?? '',
       }),
   });
 

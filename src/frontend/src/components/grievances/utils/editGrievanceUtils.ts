@@ -4,12 +4,12 @@ import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import AddIndividualDataChange from '../AddIndividualDataChange';
 import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -48,19 +48,23 @@ function prepareInitialValueAddIndividual(
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
-    ...ticket.ticketDetails.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   const flexFields = individualData.flexFields;
   delete individualData.flexFields;
-  initialValues.individualData = Object.entries(individualData).reduce(
-    (previousValue, currentValue: [string, { value: string }]) => {
+  initialValues.individualData = Object.entries(
+    individualData as Record<string, { value: string }>,
+  ).reduce(
+    (previousValue, currentValue) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
     {} as EditValuesTypes['individualData'],
   );
-  initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
-    (previousValue, currentValue: [string, { value: string }]) => {
+  initialValues.individualData.flexFields = Object.entries(
+    flexFields as Record<string, { value: string }>,
+  ).reduce(
+    (previousValue, currentValue) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -129,18 +133,18 @@ function prepareInitialValueEditHousehold(
   };
   const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;
-  const householdDataArray = Object.entries(householdData || {}).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1]?.value,
-    }),
-  );
-  const flexFieldsArray = Object.entries(flexFields || {}).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1]?.value,
-    }),
-  );
+  const householdDataArray = Object.entries(
+    (householdData || {}) as Record<string, { value: string }>,
+  ).map((entry) => ({
+    fieldName: entry[0],
+    fieldValue: entry[1]?.value,
+  }));
+  const flexFieldsArray = Object.entries(
+    (flexFields || {}) as Record<string, { value: string }>,
+  ).map((entry) => ({
+    fieldName: entry[0],
+    fieldValue: entry[1]?.value,
+  }));
   initialValues.householdDataUpdateFields = [
     ...householdDataArray,
     ...flexFieldsArray,

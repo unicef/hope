@@ -1,20 +1,15 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
-import {
-  ReactElement,
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -149,12 +144,13 @@ export const TargetPopulationAutocompleteRestFilter = ({
         setInputValue('');
       }}
       handleOptionSelected={(
-        option: TargetPopulationOption,
+        option: TargetPopulationOption | string,
         selectedValue: TargetPopulationOption | string,
       ) =>
-        typeof selectedValue === 'string'
-          ? option?.value === selectedValue
-          : option?.value === selectedValue?.value
+        (typeof option === 'string' ? option : option?.value) ===
+        (typeof selectedValue === 'string'
+          ? selectedValue
+          : selectedValue?.value)
       }
       handleOptionLabel={(option: TargetPopulationOption | string) => {
         if (typeof option === 'string') {

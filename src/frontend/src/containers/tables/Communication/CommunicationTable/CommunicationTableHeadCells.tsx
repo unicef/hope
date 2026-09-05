@@ -1,4 +1,4 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import type { MessageList } from '@restgenerated/models/MessageList';
 
 export const headCells: HeadCell<MessageList>[] = [

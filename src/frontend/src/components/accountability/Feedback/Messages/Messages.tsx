@@ -10,14 +10,15 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { renderUserName, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -90,7 +91,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     }
   };
 
-  if (meLoading) {
+  if (meLoading || !meData) {
     return null;
   }
 

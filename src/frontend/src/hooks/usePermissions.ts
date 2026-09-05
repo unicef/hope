@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from './useBaseUrl';
-import { Profile } from '@restgenerated/models/Profile';
+import type { Profile } from '@restgenerated/models/Profile';
 import { restQueryKey } from '@utils/queryKeys';
 import { useMemo } from 'react';
 

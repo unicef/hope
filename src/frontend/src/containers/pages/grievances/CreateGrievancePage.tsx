@@ -1,7 +1,8 @@
-import React, { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 import { Formik, useFormikContext } from 'formik';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -34,9 +35,9 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
-import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
-import { IndividualRoleInHouseholdForHousehold } from '@restgenerated/models/IndividualRoleInHouseholdForHousehold';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import type { IndividualRoleInHouseholdForHousehold } from '@restgenerated/models/IndividualRoleInHouseholdForHousehold';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -293,7 +294,8 @@ const CreateGrievancePage = (): ReactElement => {
         : null;
 
     const alternateRole = (
-      indObject?.household?.rolesInHousehold as IndividualRoleInHouseholdForHousehold[]
+      indObject?.household
+        ?.rolesInHousehold as IndividualRoleInHouseholdForHousehold[]
     )?.find((r) => r.role === 'ALTERNATE');
     return alternateRole?.individual ?? null;
   })();

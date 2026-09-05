@@ -5,7 +5,7 @@ import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
 import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
@@ -85,7 +85,9 @@ export function VerificationRecordsFilters({
         </Grid>
         <Grid size={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('verificationStatus', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('verificationStatus', e.target.value)
+            }
             label={t('Verification Status')}
             value={filter.verificationStatus}
             fullWidth

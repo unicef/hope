@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 const Container = styled.div`
   background-color: #ffffff;

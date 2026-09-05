@@ -6,7 +6,8 @@ import { TableWrapper } from '@core/TableWrapper';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { getFilterFromQueryParams } from '@utils/utils';
@@ -28,7 +29,9 @@ const PaymentPlanGroupsPage = (): ReactElement => {
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST, permissions))
     return (
-      <PermissionDenied permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST} />
+      <PermissionDenied
+        permission={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST}
+      />
     );
 
   return (

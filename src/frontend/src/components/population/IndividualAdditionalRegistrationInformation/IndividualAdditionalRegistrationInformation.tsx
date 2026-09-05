@@ -1,10 +1,11 @@
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { Grid, Theme, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { ReactElement } from 'react';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';

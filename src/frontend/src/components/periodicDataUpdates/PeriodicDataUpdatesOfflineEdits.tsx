@@ -1,6 +1,6 @@
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
@@ -8,14 +8,15 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IconButton, TableCell } from '@mui/material';
-import { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedPDUXlsxUploadListList';
-import { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
+import type { PaginatedPDUXlsxUploadListList } from '@restgenerated/models/PaginatedPDUXlsxUploadListList';
+import type { PDUXlsxUploadList } from '@restgenerated/models/PDUXlsxUploadList';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const updatesHeadCells: HeadCell<PDUXlsxUploadList>[] = [
   {

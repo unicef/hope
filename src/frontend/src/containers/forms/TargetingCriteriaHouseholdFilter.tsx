@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 import SubField from '@components/targeting/SubField';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;

@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useTranslation } from 'react-i18next';
 import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';
 import { LinkedTicketIdDisplay } from './LinkedTicketIdDisplay';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface LookUpLinkedTicketsDisplayProps {
   values;

@@ -13,8 +13,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { ReactElement } from 'react';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

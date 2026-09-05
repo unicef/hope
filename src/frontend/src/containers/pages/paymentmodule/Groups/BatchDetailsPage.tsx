@@ -7,7 +7,8 @@ import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -25,7 +26,10 @@ const initialFilter = {
 };
 
 const BatchDetailsPage = (): ReactElement => {
-  const { groupId, tag: rawTag } = useParams<{ groupId: string; tag: string }>();
+  const { groupId, tag: rawTag } = useParams<{
+    groupId: string;
+    tag: string;
+  }>();
   const tag = rawTag ? decodeURIComponent(rawTag) : '';
   const { t } = useTranslation();
   const [filter] = useState(initialFilter);
@@ -71,7 +75,14 @@ const BatchDetailsPage = (): ReactElement => {
 
   return (
     <>
-      <BatchDetailsHeader groupId={groupId} tag={tag} planType={batch?.planType} hasExportFile={hasExportFile} hasPassword={hasPassword} isBusy={isBusy} />
+      <BatchDetailsHeader
+        groupId={groupId}
+        tag={tag}
+        planType={batch?.planType}
+        hasExportFile={hasExportFile}
+        hasPassword={hasPassword}
+        isBusy={isBusy}
+      />
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}

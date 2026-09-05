@@ -1,6 +1,7 @@
 import { IconButton, Box } from '@mui/material';
 import { Info } from '@mui/icons-material';
-import { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';

@@ -1,10 +1,10 @@
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
+import type { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { DownloadBatchButton } from './actions/DownloadBatchButton';
 import { ExportBatchButton } from './actions/ExportBatchButton';
 import { SendXlsxPasswordBatchButton } from './actions/SendXlsxPasswordBatchButton';

@@ -7,13 +7,14 @@ import Grid from '@mui/material/Grid';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 import { usePersistedCount } from '@hooks/usePersistedCount';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -99,7 +100,8 @@ function ImportedIndividualsTable({
       RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
         individualsCountParams,
       ),
-    enabled: page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
+    enabled:
+      page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
   });
 
   const itemsCount = usePersistedCount(page, countData);
@@ -127,7 +129,11 @@ function ImportedIndividualsTable({
       <UniversalRestQueryTable
         title={title}
         isOnPaper={false}
-        headCells={isMerged ? adjustedMergedIndividualsHeadCells : adjustedImportedIndividualsHeadCells}
+        headCells={
+          isMerged
+            ? adjustedMergedIndividualsHeadCells
+            : adjustedImportedIndividualsHeadCells
+        }
         query={RestService.restBusinessAreasProgramsIndividualsList}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}

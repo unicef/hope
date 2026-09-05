@@ -1,4 +1,5 @@
-import React, { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { Box, Button } from '@mui/material';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';

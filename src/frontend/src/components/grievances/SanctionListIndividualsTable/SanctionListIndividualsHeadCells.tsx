@@ -1,5 +1,5 @@
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
 
 export const headCells: HeadCell<SanctionListIndividual>[] = [
   {

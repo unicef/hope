@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -39,14 +39,14 @@ export function KoboProjectSelect(): ReactElement {
     queryKey: restQueryKey(RestService.restBusinessAreasAllKoboProjectsCreate, {
       slug: businessArea,
     }),
-    queryFn: async() => {
+    queryFn: async () => {
       return RestService.restBusinessAreasAllKoboProjectsCreate({
         slug: businessArea,
       });
     },
     enabled: !!businessArea,
   });
-  
+
   const koboProjects = koboProjectsData || [];
 
   const formatError = (errorObject): string | null => {

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 
 /** Variables accepted by the managerial-console bulk-action mutation. */
 export interface BulkActionVariables {

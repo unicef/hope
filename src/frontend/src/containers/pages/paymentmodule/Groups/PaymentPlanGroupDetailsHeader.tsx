@@ -1,11 +1,11 @@
 import { AdminButton } from '@core/AdminButton';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import { paymentPlanBackgroundActionStatusToColor } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroupName } from './actions/EditGroupName';
@@ -13,7 +13,7 @@ import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroup
 import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExportXlsxWithAuthCodeGroupButton';
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
-import { PaymentPlanGroupDetail } from './types';
+import type { PaymentPlanGroupDetail } from './types';
 
 interface PaymentPlanGroupDetailsHeaderProps {
   group: PaymentPlanGroupDetail | null;

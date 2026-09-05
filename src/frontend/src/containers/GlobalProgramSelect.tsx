@@ -9,32 +9,24 @@ import {
   InputAdornment,
   TextField,
 } from '@mui/material';
-import Autocomplete, {
-  autocompleteClasses,
-  AutocompleteCloseReason,
-} from '@mui/material/Autocomplete';
+import type { AutocompleteCloseReason } from '@mui/material/Autocomplete';
+import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Popper from '@mui/material/Popper';
 import { styled } from '@mui/material/styles';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { programStatusToColor } from '@utils/utils';
-import {
-  ChangeEvent,
-  KeyboardEvent,
-  MouseEvent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { SyntheticEvent, KeyboardEvent, MouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../programContext';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { ApiError } from '@restgenerated/core/ApiError';
 import { NotFoundError } from '@utils/errors';
 
@@ -390,7 +382,10 @@ export const GlobalProgramSelect = () => {
         <ClickAwayListener onClickAway={handleClose}>
           <Autocomplete
             open
-            onClose={(_event: ChangeEvent, reason: AutocompleteCloseReason) => {
+            onClose={(
+              _event: SyntheticEvent,
+              reason: AutocompleteCloseReason,
+            ) => {
               if (reason === 'escape') {
                 handleClose();
               }

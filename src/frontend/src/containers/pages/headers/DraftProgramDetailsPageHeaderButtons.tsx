@@ -1,10 +1,10 @@
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
 import { Box } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramDetail;

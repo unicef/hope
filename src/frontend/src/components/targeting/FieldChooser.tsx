@@ -3,7 +3,7 @@ import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import CriteriaAutocomplete from './TargetingCriteriaDisplay/CriteriaAutocomplete';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export const FieldChooser = ({
   onChange,

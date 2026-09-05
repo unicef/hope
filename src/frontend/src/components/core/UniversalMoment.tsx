@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns';
 import { DATE_FORMAT, DATE_FORMAT_LONG } from '../../config';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface Props {
   children: string;

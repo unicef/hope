@@ -5,14 +5,15 @@ import XlsxErrorsDisplay from '@core/XlsxErrorsDisplay';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
-import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import type { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import {
   useMutation,
   useQueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
 import { getApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const MAX_FILE_SIZE_MB = 200;

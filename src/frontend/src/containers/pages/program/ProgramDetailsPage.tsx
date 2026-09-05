@@ -4,15 +4,16 @@ import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetai
 import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { BusinessArea } from '@restgenerated/models/BusinessArea';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -93,9 +94,12 @@ function ProgramDetailsPage(): ReactElement {
 
   const { data: choices, isLoading: choicesLoading } = useQuery<ProgramChoices>(
     {
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
@@ -157,7 +161,7 @@ function ProgramDetailsPage(): ReactElement {
           </TableWrapper>
         )}
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={program.id} />
+          <UniversalActivityLogTable objectId={program?.id} />
         )}
       </Container>
     </>

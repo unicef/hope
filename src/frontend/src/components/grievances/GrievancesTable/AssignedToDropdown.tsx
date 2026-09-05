@@ -1,8 +1,9 @@
-import { ChangeEvent, FC, SyntheticEvent, useEffect, useState } from 'react';
+import type { ChangeEvent, FC, SyntheticEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { TextField, Autocomplete } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
-import { User } from '@restgenerated/models/User';
+import type { User } from '@restgenerated/models/User';
 import styled from 'styled-components';
 
 const StyledAutocomplete = styled(Autocomplete<User, false, boolean, false>)<{

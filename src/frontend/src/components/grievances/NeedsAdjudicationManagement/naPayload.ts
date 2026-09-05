@@ -1,6 +1,6 @@
-import { NeedsAdjudicationResolution } from '@restgenerated/models/NeedsAdjudicationResolution';
-import { NeedsAdjudicationRoleReassignEntry } from '@restgenerated/models/NeedsAdjudicationRoleReassignEntry';
-import { NaTicketDecision } from './naTypes';
+import type { NeedsAdjudicationResolution } from '@restgenerated/models/NeedsAdjudicationResolution';
+import type { NeedsAdjudicationRoleReassignEntry } from '@restgenerated/models/NeedsAdjudicationRoleReassignEntry';
+import type { NaTicketDecision } from './naTypes';
 
 /**
  * Key for one `roleReassignData` entry. The backend ignores these keys —

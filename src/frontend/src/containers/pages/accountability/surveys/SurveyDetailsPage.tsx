@@ -1,7 +1,7 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -16,10 +16,10 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
-import { Survey } from '@restgenerated/models/Survey';
+import type { Survey } from '@restgenerated/models/Survey';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import RecipientsTable from '@containers/tables/Surveys/RecipientsTable/RecipientsTable';
 

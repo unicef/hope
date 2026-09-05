@@ -1,4 +1,4 @@
-import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import type { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -28,7 +28,9 @@ export function isShowIssueType(category: string | number): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
-export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR];
+export const SYSTEM_GENERATED_ISSUE_TYPES = [
+  GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR,
+];
 
 export function isSystemGenerated(category: any, issueType?: number): boolean {
   const cat = category?.toString();
@@ -96,7 +98,8 @@ export const roleDisplayMap = {
 };
 
 export function prepareExistingAccountValues(
-  individualDataUpdateAccountsToEdit: Record<string, unknown>[] | null | undefined,
+  individualDataUpdateAccountsToEdit:
+    Record<string, unknown>[] | null | undefined,
 ) {
   if (!individualDataUpdateAccountsToEdit) {
     return [];

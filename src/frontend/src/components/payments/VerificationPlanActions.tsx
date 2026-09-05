@@ -17,8 +17,9 @@ import { DiscardVerificationPlan } from './DiscardVerificationPlan';
 import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
-import { ReactElement, useEffect, useRef } from 'react';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import type { ReactElement } from 'react';
+import { useEffect, useRef } from 'react';
+import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { showApiErrorMessages } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
 

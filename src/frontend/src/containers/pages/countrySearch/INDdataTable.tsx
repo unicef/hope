@@ -11,7 +11,7 @@ import {
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
-import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 interface INDDataTableProps {
   indData: PaginatedIndividualListList;

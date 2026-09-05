@@ -5,13 +5,14 @@ import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/
 import { usePermissions } from '@hooks/usePermissions';
 import AddIcon from '@mui/icons-material/Add';
 import { Dialog } from '@mui/material';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQueryClient } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 

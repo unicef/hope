@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import PhotoModal from '@components/core/PhotoModal/PhotoModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -22,7 +22,9 @@ export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
       individualParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve(individualParams),
+      RestService.restBusinessAreasProgramsIndividualsRetrieve(
+        individualParams,
+      ),
     enabled: !!businessArea && !!programId && !!id,
   });
 

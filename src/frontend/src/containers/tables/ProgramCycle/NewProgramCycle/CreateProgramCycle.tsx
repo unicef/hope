@@ -16,8 +16,8 @@ import {
   FormHelperText,
   Grid,
 } from '@mui/material';
-import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -25,7 +25,8 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
-import { Field, Form, Formik, FormikValues } from 'formik';
+import type { FormikValues } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import moment from 'moment/moment';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';

@@ -1,5 +1,5 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -17,7 +17,8 @@ import { useQuery } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -108,6 +109,7 @@ const NewOfflineTemplatePage = (): ReactElement => {
 
   const initialValues = {
     roundsData: mappedRoundsData,
+    name: '',
   };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

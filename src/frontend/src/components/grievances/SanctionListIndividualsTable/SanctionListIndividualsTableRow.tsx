@@ -1,8 +1,8 @@
 import { TableCell, TableRow } from '@mui/material';
 import moment from 'moment';
 import { DATE_FORMAT } from '../../../config';
-import { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
-import { ReactElement } from 'react';
+import type { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
+import type { ReactElement } from 'react';
 
 export function SanctionListIndividualsTableRow({
   individual,

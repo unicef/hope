@@ -2,8 +2,8 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { Box, Grid, Typography } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 

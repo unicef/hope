@@ -8,8 +8,8 @@ import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
 import { Grid, MenuItem } from '@mui/material';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { ProgramList } from '@restgenerated/models/ProgramList';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
@@ -17,7 +17,7 @@ import {
   PROGRAM_STATE_CHOICES,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';

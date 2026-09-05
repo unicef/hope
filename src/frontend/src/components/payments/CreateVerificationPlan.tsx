@@ -7,13 +7,8 @@ import {
   Grid,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import {
-  ChangeEvent,
-  ReactElement,
-  useEffect,
-  useState,
-  useCallback,
-} from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -40,8 +35,8 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
-import { AreaList } from '@restgenerated/models/AreaList';
-import { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
+import type { AreaList } from '@restgenerated/models/AreaList';
+import type { PaymentVerificationPlanCreate } from '@restgenerated/models/PaymentVerificationPlanCreate';
 import { RestService } from '@restgenerated/services/RestService';
 import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useSexChoices } from '@hooks/useSexChoices';
@@ -395,7 +390,7 @@ export const CreateVerificationPlan = ({
                       data-cy="tabs"
                       value={selectedTab}
                       onChange={(
-                        event: ChangeEvent<unknown>,
+                        _event: ChangeEvent<unknown>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);

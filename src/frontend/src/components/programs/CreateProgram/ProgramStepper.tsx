@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import type { FC } from 'react';
 import { Stepper, Step, StepButton } from '@mui/material';
 
 interface StepData {
@@ -13,7 +13,7 @@ interface ProgramStepperProps {
   stepsData: StepData[];
 }
 
-export const handleNext = async({
+export const handleNext = async ({
   validateForm,
   stepFields,
   step,
