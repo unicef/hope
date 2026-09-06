@@ -657,9 +657,11 @@ def test_geopoint_validator_invalid(
         ("2020-05-28", None),
         (
             "2020-13-32T25:13:31.590+02:00",
-            "Invalid datetime/date 2020-13-32T25:13:31.590+02:00 for "
-            "field birth_date_i_c, "
-            "accepted formats: datetime ISO 8601, date YYYY-MM-DD",
+            (
+                "Invalid datetime/date 2020-13-32T25:13:31.590+02:00 for "
+                "field birth_date_i_c, "
+                "accepted formats: datetime ISO 8601, date YYYY-MM-DD"
+            ),
         ),
         (
             None,

@@ -240,6 +240,20 @@ def test_update_sets_previous_value_for_phone_and_date(update_context: dict[str,
     assert Document.objects.filter(document_number="111111").count() == 0
 
 
+def test_update_without_extras_keeps_requested_data_and_approvals(update_context: dict[str, Any]) -> None:
+    ticket_details = TicketIndividualDataUpdateDetailsFactory(
+        individual=update_context["individual"],
+        ticket__business_area=update_context["business_area"],
+        individual_data={"given_name": {"value": "NewName", "approve_status": True}},
+    )
+
+    updated_ticket = IndividualDataUpdateService(ticket_details.ticket, {}).update()
+
+    assert updated_ticket.individual_data_update_ticket_details.individual_data == {
+        "given_name": {"value": "NewName", "approve_status": True}
+    }
+
+
 def test_add_document_of_same_type_unique_per_individual_pending(update_context: dict[str, Any]) -> None:
     DocumentFactory(
         individual=update_context["individual"],

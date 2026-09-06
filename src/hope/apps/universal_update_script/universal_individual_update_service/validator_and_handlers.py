@@ -64,7 +64,7 @@ def validate_admin(
 FACILITY_ADMIN_P_CODE_COLUMN = "facility_admin_p_code"
 
 
-def handle_facility_field(  # noqa: PLR0913
+def handle_facility_field(  # noqa: PLR0913, PLR0917
     value: Any,
     name: str,
     household: Any,
@@ -81,7 +81,7 @@ def handle_facility_field(  # noqa: PLR0913
     )
 
 
-def validate_facility(  # noqa: PLR0913
+def validate_facility(  # noqa: PLR0913, PLR0917
     value: Any,
     name: str,
     model_class: Any,

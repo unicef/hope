@@ -31,7 +31,7 @@ export function UniversalActivityLogTablePaymentVerification({
     enabled: !!(businessAreaSlug && objectId),
   });
 
-  const activityLogsCountParams = { businessAreaSlug };
+  const activityLogsCountParams = { businessAreaSlug, objectId };
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasActivityLogsCountRetrieve,
@@ -41,7 +41,7 @@ export function UniversalActivityLogTablePaymentVerification({
       RestService.restBusinessAreasActivityLogsCountRetrieve(
         activityLogsCountParams,
       ),
-    enabled: !!businessAreaSlug,
+    enabled: !!(businessAreaSlug && objectId),
   });
 
   if (!logData || !countData) {

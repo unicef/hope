@@ -3,9 +3,11 @@
 from typing import Any
 from unittest.mock import MagicMock
 
+from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
 from django.forms.models import inlineformset_factory
+from django.http import HttpRequest
 from django.test import RequestFactory
 from django.urls import reverse
 import pytest
@@ -124,7 +126,7 @@ def request_factory() -> RequestFactory:
 
 @pytest.fixture
 def admin_site() -> AdminSite:
-    return AdminSite()
+    return admin.site
 
 
 def test_role_history(role_1: Role, superuser: User, django_app):
@@ -285,6 +287,36 @@ def test_role_assignment_inline_formfield_for_foreignkey_business_area(
     assert business_area_ukr in field.queryset
 
 
+def test_role_assignment_inline_business_area_not_autocomplete(
+    request_factory: RequestFactory,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "business_area" not in fields
+
+    form_set = model_admin.get_formset(request, partner)
+    field = form_set.form.base_fields["business_area"]
+    assert list(field.queryset) == [business_area_afg]
+
+
+def test_role_assignment_inline_role_not_autocomplete(
+    request_factory: RequestFactory,
+    partner: Partner,
+):
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
+    fields = model_admin.get_autocomplete_fields(request)
+    assert "role" not in fields
+
+
 def test_role_assignment_inline_formfield_for_foreignkey_role(
     request_factory: RequestFactory,
     admin_site: AdminSite,
@@ -319,6 +351,42 @@ def test_role_assignment_inline_formfield_for_foreignkey_role_regular_partner(
     field = admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
     assert role_available_for_partner in field.queryset
     assert role_not_available_for_partner not in field.queryset
+
+
+def test_user_role_assignment_admin_business_area_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_autocomplete_fields(request)
+    assert "business_area" not in fields
+
+
+def test_partner_role_assignment_admin_role_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_autocomplete_fields(request)
+    assert "role" not in fields
+
+
+def test_partner_role_assignment_admin_business_area_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    staff_user: User,
+):
+    admin = PartnerRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+
+    request = get_mock_request(request_factory, user=staff_user)
+    fields = admin.get_autocomplete_fields(request)
+    assert "business_area" not in fields
 
 
 def test_role_assignment_inline_has_permissions(
@@ -895,3 +963,73 @@ def test_partner_admin_get_form(
     assert parent_partner in form.base_fields["parent"].queryset
     assert unicef_subpartner not in form.base_fields["parent"].queryset
     assert partner not in form.base_fields["parent"].queryset
+
+
+def test_role_assignment_inline_formset_post_disallowed_business_area(  # noqa: PLR0917
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    role_available_for_partner: Role,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    inline = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    form_set = inline.get_formset(request, partner)
+
+    data = {
+        "role_assignments-TOTAL_FORMS": "1",
+        "role_assignments-INITIAL_FORMS": "0",
+        "role_assignments-0-business_area": str(business_area_ukr.id),
+        "role_assignments-0-role": str(role_available_for_partner.id),
+        "role_assignments-0-program": "",
+        "role_assignments-0-expiry_date": "",
+        "role_assignments-0-id": "",
+        "role_assignments-0-DELETE": "",
+    }
+    formset = form_set(data=data, instance=partner)
+
+    assert formset.is_valid() is False
+    assert formset.errors[0].get("business_area")
+
+
+def test_role_assignment_inline_formset_post_allowed_business_area(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    business_area_afg: BusinessArea,
+    role_available_for_partner: Role,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg)
+
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    inline = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    form_set = inline.get_formset(request, partner)
+
+    data = {
+        "role_assignments-TOTAL_FORMS": "1",
+        "role_assignments-INITIAL_FORMS": "0",
+        "role_assignments-0-business_area": str(business_area_afg.id),
+        "role_assignments-0-role": str(role_available_for_partner.id),
+        "role_assignments-0-program": "",
+        "role_assignments-0-expiry_date": "",
+        "role_assignments-0-id": "",
+        "role_assignments-0-DELETE": "",
+    }
+    formset = form_set(data=data, instance=partner)
+
+    assert formset.is_valid()
+
+
+def test_user_role_assignment_admin_get_actions(admin_site: Any) -> None:
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+    request = HttpRequest()
+    request.user = MagicMock()
+    request.user.is_staff = True
+
+    actions = admin.get_actions(request)
+    assert isinstance(actions, dict)

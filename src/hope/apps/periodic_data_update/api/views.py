@@ -189,7 +189,7 @@ class PDUXlsxUploadViewSet(
             serializer.validated_data["created_by"] = request.user
             try:
                 serializer.validated_data["template"] = PDUXlsxImportService.read_periodic_data_update_template_object(
-                    serializer.validated_data["file"]
+                    serializer.validated_data["file"], self.program
                 )
             except DjangoValidationError as e:
                 return Response(

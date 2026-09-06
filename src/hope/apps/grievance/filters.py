@@ -1,7 +1,9 @@
+from functools import cached_property
 import logging
 from typing import Any
+from uuid import UUID
 
-from django.db.models import Count, F, Func, Q, QuerySet, Window
+from django.db.models import Count, Exists, F, Func, OuterRef, Q, QuerySet, Window
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -25,6 +27,21 @@ logger = logging.getLogger(__name__)
 
 class IsNull(Func):
     template = "%(expressions)s IS NULL"
+
+
+def program_with_status_exists(program_status: str) -> Exists:
+    through_model = GrievanceTicket.programs.through
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__status=program_status))
+
+
+def program_with_id_exists(program_id: UUID) -> Exists:
+    through_model = GrievanceTicket.programs.through
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__id=program_id))
+
+
+def without_program_q() -> Q:
+    through_model = GrievanceTicket.programs.through
+    return ~Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
 
 
 class GrievanceOrderingFilter(OrderingFilter):
@@ -102,7 +119,7 @@ class GrievanceTicketFilter(FilterSet):
     submission_channel = ChoiceFilter(field_name="submission_channel", choices=SUBMISSION_CHANNEL_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
-    program = CharFilter(method="filter_by_program")
+    program = UUIDFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
     admin1 = CharFilter(field_name="admin2__parent_id")
@@ -139,9 +156,13 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
-    def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    @cached_property
+    def business_area(self) -> BusinessArea:
+        return BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
+
+    def filter_by_program(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
         if value:
-            return qs.filter(programs__code=value)
+            return qs.filter(program_with_id_exists(value))
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
@@ -165,19 +186,21 @@ class GrievanceTicketFilter(FilterSet):
             if search.startswith("HH-"):
                 return qs.filter(household_unicef_id__istartswith=search)
             if search.startswith("IND-"):
-                household_unicef_ids = (
-                    Individual.objects.filter(unicef_id__istartswith=search)
-                    .order_by("household__unicef_id")
-                    .distinct("household__unicef_id")
-                    .values_list("household__unicef_id", flat=True)
+                return qs.filter(
+                    Exists(
+                        Individual.objects.filter(
+                            business_area=self.business_area,
+                            unicef_id__istartswith=search,
+                            household__unicef_id=OuterRef("household_unicef_id"),
+                        )
+                    )
                 )
-                return qs.filter(household_unicef_id__in=household_unicef_ids)
             if search.startswith("GRV-"):
                 return qs.filter(unicef_id__istartswith=search)
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (
-            Individual.objects.filter(relationship=HEAD)
+            Individual.objects.filter(business_area=self.business_area, relationship=HEAD)
             .filter(
                 Q(full_name__icontains=search)
                 | Q(detail_id__icontains=search)
@@ -186,7 +209,6 @@ class GrievanceTicketFilter(FilterSet):
                 | Q(phone_no_alternative__icontains=search)
                 | Q(unicef_id=search)
             )
-            .select_related("household")
             .values_list("household__unicef_id", flat=True)
         )
         query |= Q(household_unicef_id__in=unicef_ids)
@@ -198,15 +220,12 @@ class GrievanceTicketFilter(FilterSet):
     def document_number_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         document_number = value.strip()
         document_type = self.data.get("document_type")
-        unicef_ids = (
-            Individual.objects.filter(
-                Q(relationship=HEAD)
-                & Q(documents__type__key=document_type)
-                & Q(documents__document_number__icontains=document_number)
-            )
-            .select_related("household")
-            .values_list("household__unicef_id", flat=True)
-        )
+        unicef_ids = Individual.objects.filter(
+            Q(business_area=self.business_area)
+            & Q(relationship=HEAD)
+            & Q(documents__type__key=document_type)
+            & Q(documents__document_number__icontains=document_number)
+        ).values_list("household__unicef_id", flat=True)
         return qs.filter(household_unicef_id__in=unicef_ids)
 
     def fsp_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
@@ -236,14 +255,14 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
-            return qs.filter(Q(programs__status=Program.ACTIVE) | Q(programs__isnull=True))
+            return qs.filter(program_with_status_exists(Program.ACTIVE) | without_program_q())
         if value is False:
-            return qs.filter(programs__status=Program.FINISHED)
+            return qs.filter(program_with_status_exists(Program.FINISHED))
         return qs
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
-        business_area = BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
+        business_area = self.business_area
         program_code = self.request.parser_context["kwargs"].get("program_code")
         program = Program.objects.filter(code=program_code, business_area=business_area).first()
 
@@ -346,7 +365,7 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
 
     def filter_active_programs_only(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
         if value:
-            return queryset.filter(programs__status=Program.ACTIVE).order_by("-created_at").distinct()
+            return queryset.filter(program_with_status_exists(Program.ACTIVE)).order_by("-created_at")
         return queryset
 
 

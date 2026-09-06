@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 from collections import defaultdict, namedtuple
 import csv
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, Sequence, Union, cast
+from typing import TYPE_CHECKING, Any, Sequence, cast
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import ActionLocation
+    from django.forms.forms import Form
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -14,7 +20,6 @@ from django.core.validators import validate_email
 from django.db import Error
 from django.db.models import JSONField, Q, QuerySet
 from django.db.transaction import atomic
-from django.forms.forms import Form
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -276,6 +281,12 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         ),
     )
 
+    def get_autocomplete_fields(self, request: HttpRequest) -> list[str]:
+        # partner is intentionally excluded: its choices are restricted to non-parent
+        # partners, and the autocomplete widget would bypass that restriction by
+        # listing every partner.
+        return [field for field in super().get_autocomplete_fields(request) if field != "partner"]
+
     def get_inline_instances(self, request: HttpRequest, obj: Any = None) -> list:
         return super().get_inline_instances(request, obj) if obj else []
 
@@ -315,7 +326,7 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
 
-    def get_deleted_objects(self, objs: Union[Sequence[Any], "_QuerySet[Any, Any]"], request: HttpRequest) -> Any:
+    def get_deleted_objects(self, objs: Sequence[Any] | "_QuerySet[Any, Any]", request: HttpRequest) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -350,8 +361,10 @@ class UserAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, UserAdminPlus,
         context["business_ares_roles"] = dict(ba_roles)
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    def get_actions(self, request: HttpRequest) -> dict:
-        actions = super().get_actions(request)
+    def get_actions(self, request: HttpRequest, action_location: ActionLocation | None = None) -> dict:
+        actions = super().get_actions(
+            request, **({"action_location": action_location} if action_location is not None else {})
+        )
         if not request.user.has_perm("account.add_userrole") and "add_business_area_role" in actions:
             del actions["add_business_area_role"]
         return actions

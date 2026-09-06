@@ -457,8 +457,10 @@ def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: Any, program1: Pr
     [
         (
             "HH-001",
-            'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
-            " DETAIL: Key (document_number, country_id)=(123, AF) already exists.",
+            (
+                'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
+                " DETAIL: Key (document_number, country_id)=(123, AF) already exists."
+            ),
             "Document already exists: 123",
         ),
         (
@@ -473,8 +475,10 @@ def test_generate_rdi_unique_name_no_conflicts(mock_randbelow: Any, program1: Pr
         ),
         (
             "HH-004",
-            'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
-            " but no key-value pairs here",
+            (
+                'duplicate key value violates unique constraint "unique_if_not_removed_and_valid_for_representations"'
+                " but no key-value pairs here"
+            ),
             'unique_if_not_removed_and_valid_for_representations" but no key-value pairs here',
         ),
     ],

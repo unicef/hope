@@ -75,10 +75,12 @@ def test_funds_commitment_serializer() -> None:
         commitment_amount_usd=1000.00,
     )
     data: dict[str, Any] = {
+        "id": fcg.pk,
         "funds_commitment_number": "FC-001",
         "funds_commitment_items": [fci],
     }
     serializer = FundsCommitmentSerializer(data)
+    assert serializer.data["id"] == fcg.pk
     assert serializer.data["funds_commitment_number"] == "FC-001"
     items = serializer.data["funds_commitment_items"]
     assert len(items) == 1
@@ -139,6 +141,16 @@ def test_payment_plan_callback_request_serializer_ack_payload_uses_initial_data_
     }
 
 
+def test_payment_plan_callback_request_serializer_ack_payload_includes_message() -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(data={"messageId": "msg-001", "payplanSno": "PP001"})
+    assert serializer.ack_payload("KO", message="FC not found") == {
+        "status": "KO",
+        "message_id": "msg-001",
+        "payplan_sno": "PP001",
+        "message": "FC not found",
+    }
+
+
 def test_payment_plan_callback_ack_serializer_to_representation() -> None:
     serializer = PaymentPlanCallbackAckSerializer(
         {
@@ -151,4 +163,21 @@ def test_payment_plan_callback_ack_serializer_to_representation() -> None:
         "status": "OK",
         "messageId": "msg-001",
         "payplanSno": "PP001",
+    }
+
+
+def test_payment_plan_callback_ack_serializer_to_representation_includes_message() -> None:
+    serializer = PaymentPlanCallbackAckSerializer(
+        {
+            "status": "KO",
+            "message_id": "msg-001",
+            "payplan_sno": "PP001",
+            "message": "FC not found",
+        }
+    )
+    assert serializer.data == {
+        "status": "KO",
+        "messageId": "msg-001",
+        "payplanSno": "PP001",
+        "message": "FC not found",
     }
