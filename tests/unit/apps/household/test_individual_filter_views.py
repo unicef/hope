@@ -40,7 +40,7 @@ from hope.apps.household.const import (
     STATUS_WITHDRAWN,
     UNIQUE,
 )
-from hope.apps.household.filters import IndividualFilter, IndividualOfficeSearchFilter, MergedIndividualFilter
+from hope.apps.household.filters import IndividualFilter, IndividualOfficeSearchFilter
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, Individual, MergeStatusModel, Program
 
@@ -145,15 +145,6 @@ def flagged_individuals(afghanistan: BusinessArea, program: Program) -> dict[str
         "possible_match": possible_match,
         "confirmed_match": confirmed_match,
     }
-
-
-@pytest.fixture
-def golden_duplicate_individual(afghanistan: BusinessArea, program: Program) -> Individual:
-    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
-    individual = household.head_of_household
-    individual.deduplication_golden_record_status = DUPLICATE
-    individual.save(update_fields=["deduplication_golden_record_status"])
-    return individual
 
 
 @pytest.fixture
@@ -672,35 +663,6 @@ def test_filter_is_active_program_with_none_returns_queryset_unchanged(db: Any) 
     individual_filter = IndividualFilter(data={}, queryset=queryset, request=None)
 
     assert individual_filter.filter_is_active_program(queryset, "is_active_program", None) is queryset
-
-
-def test_merged_individual_filter_rdi_id_filters_by_rdi(golden_duplicate_individual: Individual) -> None:
-    queryset = Individual.all_objects.all()
-    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
-
-    result = individual_filter.filter_rdi_id(
-        queryset, None, str(golden_duplicate_individual.registration_data_import_id)
-    )
-
-    assert list(result) == [golden_duplicate_individual]
-
-
-def test_merged_individual_filter_duplicates_only_true(golden_duplicate_individual: Individual) -> None:
-    queryset = Individual.all_objects.all()
-    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
-
-    result = individual_filter.filter_duplicates_only(queryset, None, True)
-
-    assert list(result) == [golden_duplicate_individual]
-
-
-def test_merged_individual_filter_duplicates_only_false_returns_queryset_unchanged(
-    golden_duplicate_individual: Individual,
-) -> None:
-    queryset = Individual.all_objects.all()
-    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
-
-    assert individual_filter.filter_duplicates_only(queryset, None, False) is queryset
 
 
 def test_office_search_filter_by_grievance_returns_ticket_individual(

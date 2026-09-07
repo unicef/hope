@@ -204,17 +204,6 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
         )
 
 
-# New serializers for the GraphQL mutations conversion
-
-
-class XlsxRowErrorSerializer(serializers.Serializer):
-    """Serializer for XLSX validation errors."""
-
-    row_number = serializers.IntegerField()
-    header = serializers.CharField()
-    message = serializers.CharField()
-
-
 class ImportDataSerializer(serializers.ModelSerializer):
     xlsx_validation_errors = serializers.SerializerMethodField()
 
@@ -241,13 +230,6 @@ class ImportDataSerializer(serializers.ModelSerializer):
             with contextlib.suppress(json.JSONDecodeError, TypeError):
                 errors.extend(json.loads(obj.validation_errors))
         return errors
-
-
-class KoboErrorSerializer(serializers.Serializer):
-    """Serializer for Kobo validation errors."""
-
-    header = serializers.CharField()
-    message = serializers.CharField()
 
 
 class KoboImportDataSerializer(serializers.ModelSerializer):

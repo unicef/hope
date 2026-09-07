@@ -18,7 +18,7 @@ from django_filters import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.constants import PRIORITY_CHOICES, SUBMISSION_CHANNEL_CHOICES, URGENCY_CHOICES
-from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Individual, Program
 
@@ -367,11 +367,3 @@ class GrievanceTicketOfficeSearchFilter(OfficeSearchFilterMixin, GrievanceTicket
         if value:
             return queryset.filter(program_with_status_exists(Program.ACTIVE)).order_by("-created_at")
         return queryset
-
-
-class TicketNoteFilter(FilterSet):
-    ticket = UUIDFilter(field_name="ticket", required=True)
-
-    class Meta:
-        fields = ("id",)
-        model = TicketNote
