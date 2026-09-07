@@ -6,11 +6,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
     class="styled-normalized"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 styled-normalized css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 styled-normalized css-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="MuiTableContainer-root styled-normalized css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
       >
         <div
           class="styled-normalized MuiBox-root css-0"
@@ -30,7 +30,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
           />
         </div>
         <table
-          class="MuiTable-root styled-normalized styled-normalized css-14k3lwa-MuiTable-root"
+          class="MuiTable-root styled-normalized styled-normalized css-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -110,11 +110,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
             class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -124,11 +124,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -138,11 +138,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -152,11 +152,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -166,11 +166,11 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -193,11 +193,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
     class="styled-normalized"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 styled-normalized css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 styled-normalized css-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="MuiTableContainer-root styled-normalized css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
       >
         <div
           class="styled-normalized MuiBox-root css-0"
@@ -217,7 +217,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
           />
         </div>
         <table
-          class="MuiTable-root styled-normalized styled-normalized css-14k3lwa-MuiTable-root"
+          class="MuiTable-root styled-normalized styled-normalized css-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -297,11 +297,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
             class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -311,11 +311,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -325,11 +325,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -339,11 +339,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -353,11 +353,11 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -380,11 +380,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
     class="styled-normalized"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 styled-normalized css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 styled-normalized css-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="MuiTableContainer-root styled-normalized css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
       >
         <div
           class="styled-normalized MuiBox-root css-0"
@@ -404,7 +404,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
           />
         </div>
         <table
-          class="MuiTable-root styled-normalized styled-normalized css-14k3lwa-MuiTable-root"
+          class="MuiTable-root styled-normalized styled-normalized css-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -484,11 +484,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
             class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -498,11 +498,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -512,11 +512,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -526,11 +526,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -540,11 +540,11 @@ exports[`HouseholdMembersTable > should render multiple household members with d
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root styled-normalized css-1o8lslm-MuiTableRow-root"
+              class="MuiTableRow-root styled-normalized css-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-1dc80h3-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium styled-normalized css-MuiTableCell-root"
                 colspan="6"
               >
                 <span

@@ -70,6 +70,10 @@ afterAll(() => server.close());
 // snapshots stay deterministic.
 const SC_COMPONENT_ID = /^sc-[a-zA-Z]+$/;
 const SC_GENERATED_CLASS = /^[a-zA-Z]{4,8}$/;
+// Emotion folds the class name it receives into its own hash, so a labelled
+// `css-<hash>-<Label>` class on a styled-components element inherits that
+// instability. Keep the label, drop the hash.
+const EMOTION_LABELLED_CLASS = /^css-[0-9a-z]+-(.+)$/;
 
 const styledClasses = (element: Element): string[] =>
   (element.getAttribute('class') || '').split(/\s+/).filter(Boolean);
@@ -84,7 +88,8 @@ expect.addSnapshotSerializer({
     const clone = (value as Element).cloneNode(true) as Element;
     const normalized = styledClasses(clone)
       .filter((name) => !SC_GENERATED_CLASS.test(name))
-      .map((name) => (SC_COMPONENT_ID.test(name) ? 'styled-normalized' : name));
+      .map((name) => (SC_COMPONENT_ID.test(name) ? 'styled-normalized' : name))
+      .map((name) => name.replace(EMOTION_LABELLED_CLASS, 'css-$1'));
     clone.setAttribute('class', normalized.join(' '));
     return printer(clone, config, indentation, depth, refs);
   },
