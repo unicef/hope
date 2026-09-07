@@ -18,7 +18,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
     )
     start_date = filters.DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = filters.DateFilter(field_name="end_date", lookup_expr="lte")
-    title = filters.CharFilter(field_name="title", lookup_expr="istartswith")
+    title = filters.CharFilter(field_name="title", lookup_expr="icontains")
     total_delivered_quantity_usd_from = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
     total_delivered_quantity_usd_to = filters.NumberFilter(method="filter_total_delivered_quantity_usd")
     total_entitled_quantity_usd_from = filters.NumberFilter(method="filter_total_entitled_quantity_usd")
@@ -40,7 +40,7 @@ class ProgramCycleFilter(UpdatedAtFilter):
     def search_filter(self, qs: QuerySet, name: str, values: Any) -> QuerySet:
         q_obj = Q()
         for value in values.split(" "):
-            q_obj |= Q(Q(title__istartswith=value))
+            q_obj |= Q(Q(title__icontains=value))
         return qs.filter(q_obj)
 
     def filter_total_delivered_quantity_usd(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:

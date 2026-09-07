@@ -706,6 +706,50 @@ def test_filter_by_search(payment_plan_filter_context: dict[str, Any]) -> None:
     assert response_data[0]["name"] == "TEST_ABC_999"
 
 
+def test_filter_by_search_matches_name_substring(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="Reconciled Payment Plan",
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"search": "Payment Plan"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    assert len(response_data) == 1
+    assert response_data[0]["name"] == "Reconciled Payment Plan"
+
+
+def test_filter_by_search_matches_program_cycle_title(payment_plan_filter_context: dict[str, Any]) -> None:
+    cycle = ProgramCycleFactory(
+        program=payment_plan_filter_context["program_active"],
+        title="Programme Cycle Zebra",
+    )
+    PaymentPlanFactory(
+        name="PP On Zebra Cycle",
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=cycle,
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"search": "Programme Cycle Zebra"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    response_data = response.json()["results"]
+    assert len(response_data) == 1
+    assert response_data[0]["name"] == "PP On Zebra Cycle"
+
+
 def test_filter_by_entitled_quantity(payment_plan_filter_context: dict[str, Any]) -> None:
     PaymentPlanFactory(
         name="PP_1",

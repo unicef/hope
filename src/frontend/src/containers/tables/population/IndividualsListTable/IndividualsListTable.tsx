@@ -43,6 +43,7 @@ export function IndividualsListTable({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: filter.phone?.trim() ?? '',
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
       admin2: filter.admin2,
@@ -53,6 +54,7 @@ export function IndividualsListTable({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
+      birthDate: filter.birthDate,
       page,
     }),
     [
@@ -60,6 +62,7 @@ export function IndividualsListTable({
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin2,
@@ -72,6 +75,7 @@ export function IndividualsListTable({
       businessArea,
       page,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
   useEffect(() => {
@@ -82,6 +86,7 @@ export function IndividualsListTable({
     filter.ageMax,
     filter.sex,
     filter.search,
+    filter.phone,
     filter.documentType,
     filter.documentNumber,
     filter.admin2,
@@ -93,6 +98,7 @@ export function IndividualsListTable({
     programId,
     businessArea,
     filter.rdiId,
+    filter.birthDate,
   ]);
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
@@ -140,6 +146,7 @@ export function IndividualsListTable({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search?.trim(),
+      phone: filter.phone?.trim() ?? '',
       documentType: filter.documentType,
       documentNumber: filter.documentNumber?.trim(),
       admin2: filter.admin2,
@@ -149,6 +156,7 @@ export function IndividualsListTable({
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
+      birthDate: filter.birthDate,
     },
   );
   const { data: countData } = useQuery<CountResponse>({

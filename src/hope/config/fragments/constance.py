@@ -262,6 +262,11 @@ Clear Cache,clear-cache/
         "Image shown on the surprise/easter-egg page (leave blank for default).",
         "image_field",
     ),
+    "ES_USE_EXACT_ID_AND_ADDRESS_SEARCH": (
+        False,
+        "Individual search uses exact HOPE ID, household address and fuzzy name (needs a fleet reindex)",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
