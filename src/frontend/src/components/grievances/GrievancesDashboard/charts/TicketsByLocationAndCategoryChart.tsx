@@ -46,6 +46,20 @@ export const TicketsByLocationAndCategoryChart: FC<
 
   const options: any = {
     indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      datalabels: {
+        anchor: 'start',
+        align: 'left',
+        offset: 4,
+        color: '#FFF',
+        font: {
+          weight: 'bold',
+        },
+        formatter: formatThousands,
+      },
+    },
     legend: {
       labels: {
         padding: 40,
@@ -55,8 +69,9 @@ export const TicketsByLocationAndCategoryChart: FC<
       x: {
         display: true,
         position: 'top',
-        beginAtZero: true,
         ticks: {
+          beginAtZero: true,
+          stepSize: 1,
           callback: formatThousands,
         },
       },
@@ -69,13 +84,16 @@ export const TicketsByLocationAndCategoryChart: FC<
     },
   };
 
+  const visibleRowCount = matchDataSize(data.labels).length;
+  const chartHeight = Math.max(400, visibleRowCount * 45 + 80);
+
   return (
     <Box
       sx={{
         flexDirection: 'column',
       }}
     >
-      <div style={{ height: '400px' }}>
+      <div style={{ height: `${chartHeight}px` }}>
         <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
       </div>
       {data.labels.length > lessDataCount ? (

@@ -189,7 +189,10 @@ def test_update_grievance_documents_replaces_file_and_metadata(grievance_documen
     assert "old" in grievance_document.file.name
     new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
 
-    update_grievance_documents([{"id": grievance_document.id, "name": "updated name", "file": new_file}])
+    update_grievance_documents(
+        grievance_document.grievance_ticket_id,
+        [{"id": grievance_document.id, "name": "updated name", "file": new_file}],
+    )
 
     grievance_document.refresh_from_db()
     assert grievance_document.name == "updated name"
@@ -201,7 +204,22 @@ def test_update_grievance_documents_replaces_file_and_metadata(grievance_documen
 def test_update_grievance_documents_skips_missing_document(grievance_document: Any) -> None:
     new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
 
-    update_grievance_documents([{"id": uuid4(), "name": "updated name", "file": new_file}])
+    update_grievance_documents(
+        grievance_document.grievance_ticket_id, [{"id": uuid4(), "name": "updated name", "file": new_file}]
+    )
 
     grievance_document.refresh_from_db()
     assert grievance_document.name != "updated name"
+
+
+def test_update_grievance_documents_skips_document_of_another_ticket(grievance_document: Any) -> None:
+    other_ticket = GrievanceTicketFactory()
+    new_file = SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg")
+
+    update_grievance_documents(
+        other_ticket.id, [{"id": grievance_document.id, "name": "updated name", "file": new_file}]
+    )
+
+    grievance_document.refresh_from_db()
+    assert grievance_document.name != "updated name"
+    assert "old" in grievance_document.file.name

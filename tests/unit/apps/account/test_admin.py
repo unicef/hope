@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
 from django.forms.models import inlineformset_factory
+from django.http import HttpRequest
 from django.test import RequestFactory
 from django.urls import reverse
 import pytest
@@ -23,6 +24,7 @@ from hope.admin.account_forms import (
     RoleAssignmentInlineFormSet,
 )
 from hope.admin.partner import PartnerAdmin
+from hope.admin.project import ProjectAdmin
 from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
@@ -386,6 +388,28 @@ def test_partner_role_assignment_admin_business_area_not_autocomplete(
     request = get_mock_request(request_factory, user=staff_user)
     fields = admin.get_autocomplete_fields(request)
     assert "business_area" not in fields
+
+
+def test_partner_admin_parent_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+):
+    admin = PartnerAdmin(model=Partner, admin_site=admin_site)
+    request = get_mock_request(request_factory)
+    fields = admin.get_autocomplete_fields(request)
+    assert "parent" not in fields
+
+
+def test_project_admin_programme_not_autocomplete(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+):
+    from hope.contrib.aurora.models import Project
+
+    admin = ProjectAdmin(model=Project, admin_site=admin_site)
+    request = get_mock_request(request_factory)
+    fields = admin.get_autocomplete_fields(request)
+    assert "programme" not in fields
 
 
 def test_role_assignment_inline_has_permissions(
@@ -1022,3 +1046,13 @@ def test_role_assignment_inline_formset_post_allowed_business_area(
     formset = form_set(data=data, instance=partner)
 
     assert formset.is_valid()
+
+
+def test_user_role_assignment_admin_get_actions(admin_site: Any) -> None:
+    admin = UserRoleAssignmentAdmin(model=RoleAssignment, admin_site=admin_site)
+    request = HttpRequest()
+    request.user = MagicMock()
+    request.user.is_staff = True
+
+    actions = admin.get_actions(request)
+    assert isinstance(actions, dict)

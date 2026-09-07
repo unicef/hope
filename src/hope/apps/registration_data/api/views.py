@@ -23,8 +23,7 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.api.serializers import ChoiceSerializer
-from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
+from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
@@ -76,7 +75,6 @@ class RegistrationDataImportViewSet(
         "retrieve": RegistrationDataImportDetailSerializer,
         "refuse": RefuseRdiSerializer,
         "create": RegistrationDataImportCreateSerializer,
-        "status_choices": ChoiceSerializer,
         "registration_xlsx_import": RegistrationXlsxImportSerializer,
         "registration_kobo_import": RegistrationKoboImportSerializer,
     }
@@ -93,9 +91,6 @@ class RegistrationDataImportViewSet(
         "refuse": [Permissions.RDI_REFUSE_IMPORT],
         "deduplicate": [Permissions.RDI_RERUN_DEDUPE],
         "run_deduplication": [Permissions.RDI_RERUN_DEDUPE],
-        "status_choices": [
-            Permissions.RDI_VIEW_LIST,
-        ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
         "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
@@ -340,7 +335,7 @@ class RegistrationDataImportViewSet(
         serializer.is_valid(raise_exception=True)
         registration_data_import = serializer.get_object(serializer.validated_data)
         import_from_program_id = serializer.validated_data["import_from_program_id"]
-        import_from_program = Program.objects.get(id=import_from_program_id)
+        import_from_program = serializer.import_from_program  # already scoped to the business area of the url path
         if self.program.status == Program.FINISHED:
             raise ValidationError("In order to perform this action, program status must not be finished.")
 
@@ -385,21 +380,6 @@ class RegistrationDataImportViewSet(
         return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-        responses=ChoiceSerializer(many=True),
-        filters=False,
-    )
-    @action(
-        detail=False,
-        methods=["get"],
-        pagination_class=None,
-        url_path="status-choices",
-    )
-    def status_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        status_choices = to_choice_object(RegistrationDataImport.STATUS_CHOICE)
-
-        return Response(status=200, data=self.get_serializer(status_choices, many=True).data)
-
-    @extend_schema(
         request=RegistrationXlsxImportSerializer,
         responses=RegistrationDataImportDetailSerializer,
     )
@@ -419,7 +399,7 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        import_data = ImportData.objects.filter(id=import_data_id).first()
+        import_data = ImportData.objects.filter(id=import_data_id, business_area_slug=self.business_area.slug).first()
         if not import_data:
             raise ValidationError("Import data not found")
         if import_data.status != ImportData.STATUS_FINISHED:
@@ -428,8 +408,8 @@ class RegistrationDataImportViewSet(
         # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
-        import_data_id = validated_data.pop("import_data_id")
-        import_data_obj = ImportData.objects.get(id=import_data_id)
+        validated_data.pop("import_data_id")
+        import_data_obj = import_data
         business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
 
         registration_data_import = RegistrationDataImport(
@@ -500,7 +480,9 @@ class RegistrationDataImportViewSet(
 
         # Validate import data exists and is finished
         import_data_id = validated_data["import_data_id"]
-        import_data = KoboImportData.objects.filter(id=import_data_id).first()
+        import_data = KoboImportData.objects.filter(
+            id=import_data_id, business_area_slug=self.business_area.slug
+        ).first()
         if not import_data:
             raise ValidationError("Kobo import data not found")
         if import_data.status != ImportData.STATUS_FINISHED:
@@ -509,8 +491,8 @@ class RegistrationDataImportViewSet(
         # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
-        import_data_id = validated_data.pop("import_data_id")
-        import_data_obj = KoboImportData.objects.get(id=import_data_id)
+        validated_data.pop("import_data_id")
+        import_data_obj = import_data
         business_area = BusinessArea.objects.get(slug=validated_data.pop("business_area_slug"))
 
         registration_data_import = RegistrationDataImport(

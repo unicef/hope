@@ -1,0 +1,36 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "232"
+    },
+    "data": {
+        "role_choices": [
+            {
+                "name": "Role with all permissions",
+                "value": "a564747a-c99a-4118-8ec6-cfa2019a93ac"
+            }
+        ],
+        "status_choices": [
+            {
+                "name": "Active",
+                "value": "ACTIVE"
+            },
+            {
+                "name": "Inactive",
+                "value": "INACTIVE"
+            },
+            {
+                "name": "Invited",
+                "value": "INVITED"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

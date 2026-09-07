@@ -2,7 +2,6 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@core/LoadingComponent';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Box,
   Button,
@@ -16,6 +15,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -54,23 +54,18 @@ export const NaReassignRoleModal = ({
 }: NaReassignRoleModalProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { businessArea } = useBaseUrl();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const initialFilterIND = {
     search: '',
-    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',
@@ -132,8 +127,7 @@ export const NaReassignRoleModal = ({
           {open && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
             <DialogTitle>
-              {t('Reassign Role')}: {t(roleLabel(role))} —{' '}
-              {household.unicefId}
+              {t('Reassign Role')}: {t(roleLabel(role))} — {household.unicefId}
             </DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
@@ -175,7 +169,9 @@ export const NaReassignRoleModal = ({
                   type="submit"
                   color="primary"
                   variant="contained"
-                  disabled={!values.identityVerified || !values.selectedIndividual}
+                  disabled={
+                    !values.identityVerified || !values.selectedIndividual
+                  }
                   onClick={submitForm}
                   data-cy="button-na-reassign-save"
                 >

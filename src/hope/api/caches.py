@@ -133,7 +133,7 @@ def increment_business_area_and_program_version(
 
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -150,7 +150,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
 class RendererKeyBit(KeyBitBase):
     """Key bit that includes renderer class information in cache keys."""
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -177,7 +177,7 @@ class KeyConstructorMixin(KeyConstructor):
 class BusinessAreaKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -197,7 +197,7 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
 class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -214,7 +214,7 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
 
 
 class AreaLimitKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

@@ -30,13 +30,15 @@ def enable_vision_flag():
     )
 
 
-def test_can_send_to_vision_returns_true_when_accepted(program_cycle, enable_vision_flag) -> None:
+def test_can_send_to_vision_returns_true_when_in_review(program_cycle, enable_vision_flag) -> None:
     program = ProgramFactory()
     cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentPlan.Status.IN_REVIEW,
     )
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
     assert payment_plan.can_send_to_vision is True
 
 
@@ -47,6 +49,8 @@ def test_can_send_to_vision_returns_false_when_not_accepted(program_cycle) -> No
         program_cycle=cycle,
         status=PaymentPlan.Status.DRAFT,
     )
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
     assert payment_plan.can_send_to_vision is False
 
 
@@ -55,8 +59,10 @@ def test_can_send_to_vision_returns_false_when_flag_disabled(program_cycle) -> N
     cycle = program.cycles.first()
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
-        status=PaymentPlan.Status.ACCEPTED,
+        status=PaymentPlan.Status.IN_REVIEW,
     )
+    payment_plan.business_area.vision_integration_active = True
+    payment_plan.business_area.save(update_fields=["vision_integration_active"])
     assert payment_plan.can_send_to_vision is False
 
 

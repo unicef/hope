@@ -16,8 +16,27 @@ export const headCells: HeadCell<PaymentList>[] = [
   },
   {
     disablePadding: false,
+    label: 'Payment Purpose',
+    id: 'paymentPlanPurposes',
+    numeric: false,
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Cycle',
+    id: 'paymentPlanCycle',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Head of Household',
-    id: 'headOfHousehold',
+    id: 'hohFullName',
     numeric: false,
   },
 
@@ -52,6 +71,25 @@ export const headCellsPeople: HeadCell<any>[] = [
     disablePadding: false,
     label: 'Status',
     id: 'status',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Payment Purpose',
+    id: 'paymentPlanPurposes',
+    numeric: false,
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Cycle',
+    id: 'paymentPlanCycle',
     numeric: false,
   },
   {

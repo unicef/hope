@@ -33,24 +33,30 @@ describe('isStaticReferenceQuery', () => {
   });
 
   it('returns true for any choices endpoint key', () => {
-    expect(isStaticReferenceQuery(['programChoices', 'afghanistan'])).toBe(true);
-    expect(isStaticReferenceQuery(['householdChoices', 'afghanistan'])).toBe(true);
+    expect(isStaticReferenceQuery(['programChoices', 'afghanistan'])).toBe(
+      true,
+    );
+    expect(isStaticReferenceQuery(['householdChoices', 'afghanistan'])).toBe(
+      true,
+    );
     expect(isStaticReferenceQuery(['choicesPaymentPlanStatusList'])).toBe(true);
     expect(
-      isStaticReferenceQuery(['businessAreasGrievanceTicketsChoices', 'afg']),
+      isStaticReferenceQuery([
+        'businessAreasDataCollectingTypesChoicesList',
+        'afg',
+      ]),
     ).toBe(true);
     // Matched by the heuristic, not the explicit set.
     expect(isStaticReferenceQuery(['restChoicesCountriesList'])).toBe(true);
-    expect(
-      isStaticReferenceQuery([
-        'businessAreasGrievanceTicketsChoicesRetrieve',
-        { businessAreaSlug: 'afg' },
-      ]),
-    ).toBe(true);
+    expect(isStaticReferenceQuery(['choicesGrievanceTicketsRetrieve'])).toBe(
+      true,
+    );
   });
 
   it('returns false for mutable data readers that must refetch after a write', () => {
-    expect(isStaticReferenceQuery(['program', 'afghanistan', 'prog-1'])).toBe(false);
+    expect(isStaticReferenceQuery(['program', 'afghanistan', 'prog-1'])).toBe(
+      false,
+    );
     expect(
       isStaticReferenceQuery(['businessAreasProgramsList', {}, 'afghanistan']),
     ).toBe(false);
@@ -73,7 +79,10 @@ describe('isStaticReferenceQuery', () => {
 
   it('does not treat businessArea-prefixed data keys as static via prefix', () => {
     expect(
-      isStaticReferenceQuery(['businessAreasProgramsTargetPopulationsList', {}]),
+      isStaticReferenceQuery([
+        'businessAreasProgramsTargetPopulationsList',
+        {},
+      ]),
     ).toBe(false);
   });
 

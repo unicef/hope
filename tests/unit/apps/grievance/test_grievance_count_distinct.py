@@ -143,7 +143,7 @@ def test_count_reports_a_ticket_on_two_programs_once_when_filtered_by_program(
 ) -> None:
     create_user_role_with_permissions(user, LIST_PERMISSIONS, afghanistan, whole_business_area_access=True)
 
-    response = api_client(user).get(count_url, {"program": first_program.code})
+    response = api_client(user).get(count_url, {"program": str(first_program.id)})
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["count"] == 1

@@ -1011,14 +1011,20 @@ def prepare_child_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.models import PaymentPlan
 
     with transaction.atomic():
-        payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+        payment_plan = PaymentPlan.all_objects.get(id=job.config["payment_plan_id"])
         set_sentry_business_area_tag(payment_plan.business_area.name)
 
         # Lock the source plan so concurrent child-plan copies from the same source
         # run serially — each one then computes its eligible payments on a consistent
         # state instead of racing for the "one child per beneficiary" pool.
+        # PaymentPlanService.delete() takes the same lock, so a concurrent delete of
+        # this plan cannot interleave with the copy below.
         if payment_plan.source_payment_plan_id:
             PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
+            payment_plan.refresh_from_db()
+        if payment_plan.is_removed:
+            logger.warning(f"Child payment plan {payment_plan.id} was deleted before its payments were copied.")
+            return True
 
         fixed_amount = job.config.get("fixed_amount")
         amounts = job.config.get("amounts")
@@ -1066,6 +1072,7 @@ def prepare_child_payment_plan_async_task(
 def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> None:  # noqa: PLR0915
     from django.db.models import Q
 
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
     from hope.models import Payment, PaymentPlan
 
     payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=job.config["payment_plan_id"])
@@ -1106,8 +1113,6 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
                 Payment.objects.exclude(parent__id=payment_plan.pk)
                 .filter(parent__program_cycle_id=payment_plan.program_cycle_id)
                 .filter(
-                    Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
-                    & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
                     ~Q(parent__status=PaymentPlan.Status.OPEN),
                     Q(**{f"{filter_key}__in": undo_exclude_hh_ids}) & Q(conflicted=False),
                 )
@@ -1166,6 +1171,8 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
 
         if error_msg:
             payment_plan.exclude_household_error = str([*error_msg, *info_msg])
+        else:
+            payment_plan.exclude_household_error = str([*info_msg, "Exclusion failed due to an unexpected error."])
         payment_plan.save(
             update_fields=[
                 "exclusion_reason",
@@ -1175,7 +1182,7 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
         )
         if error_msg:
             return
-        raise
+        raise NonRetriableTaskError(str(exc)) from exc
 
 
 def payment_plan_exclude_beneficiaries_async_task(
@@ -1364,7 +1371,7 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         payment_plan,
         job.config["action"],
         action_user,
-        job.config["action_date_formatted"],
+        datetime.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -1372,14 +1379,14 @@ def send_payment_notification_emails_async_task(
     payment_plan: PaymentPlan,
     action: str,
     action_user_id: str,
-    action_date_formatted: str,
+    action_date: str,
 ) -> None:
     payment_plan_id = str(payment_plan.id)
     config = {
         "payment_plan_id": payment_plan_id,
         "action": action,
         "action_user_id": action_user_id,
-        "action_date_formatted": action_date_formatted,
+        "action_date": action_date,
     }
     AsyncJob.queue_task(
         instance=payment_plan,

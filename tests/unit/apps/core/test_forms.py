@@ -120,8 +120,10 @@ def test_dct_form_rejects_type_change_and_incompatible_compatible_types(
     assert form.is_valid() is False
     assert form.errors["type"] == ["Type of DCT cannot be changed if it has compatible DCTs of different type"]
     assert form.errors["compatible_types"] == [
-        "DCTs of different types cannot be compatible with each other. "
-        "Following DCTs are not of type STANDARD: ['Social']"
+        (
+            "DCTs of different types cannot be compatible with each other. "
+            "Following DCTs are not of type STANDARD: ['Social']"
+        )
     ]
 
 
@@ -142,8 +144,10 @@ def test_dct_form_keeps_type_error_out_when_type_is_unchanged(
     assert form.is_valid() is False
     assert "type" not in form.errors
     assert form.errors["compatible_types"] == [
-        "DCTs of different types cannot be compatible with each other. "
-        "Following DCTs are not of type STANDARD: ['Social']"
+        (
+            "DCTs of different types cannot be compatible with each other. "
+            "Following DCTs are not of type STANDARD: ['Social']"
+        )
     ]
 
 

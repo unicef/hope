@@ -4,6 +4,7 @@ from typing import Any, Callable
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils.encoding import force_str
 import pytest
 from rest_framework import status
 
@@ -19,6 +20,7 @@ from extras.test_utils.factories import (
 from extras.test_utils.sql import joined_tables, statements_from
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.dashboard_datasets import TICKET_SERIES
 from hope.models import Program
 
 pytestmark = pytest.mark.django_db
@@ -546,6 +548,18 @@ def ticket_without_admin_area(dashboard_context: dict[str, Any]) -> Any:
 
 
 @pytest.fixture
+def beneficiary_ticket_with_admin_area(dashboard_context: dict[str, Any]) -> Any:
+    return GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_BENEFICIARY,
+        issue_type=None,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=dashboard_context["user"],
+        business_area=dashboard_context["business_area"],
+        admin2=dashboard_context["tickets"][0].admin2,
+    )
+
+
+@pytest.fixture
 def two_referral_tickets(dashboard_context: dict[str, Any]) -> None:
     GrievanceTicketFactory.create_batch(
         2,
@@ -694,6 +708,7 @@ def test_global_dashboard_counts_tickets_per_area_and_category(
             {"label": "Referral", "data": [0]},
             {"label": "Sensitive Grievance", "data": [0]},
             {"label": "System Flagging", "data": [0]},
+            {"label": "Beneficiary", "data": [0]},
         ],
     }
 
@@ -741,3 +756,32 @@ def test_global_dashboard_omits_tickets_without_an_admin_area_from_the_location_
     assert {"label": "Referral", "data": [0]} in chart["datasets"]
     # the ticket is still counted everywhere the area is not the key
     assert data["tickets_by_type"]["user_generated_count"] == 5
+
+
+def test_global_dashboard_charts_a_beneficiary_ticket_that_has_an_admin_area(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    beneficiary_ticket_with_admin_area: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(dashboard_context["global_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    chart = response.json()["tickets_by_location_and_category"]
+    assert chart["labels"] == ["City Test"]
+    assert chart["datasets"][-1] == {"label": "Beneficiary", "data": [1]}
+
+
+def test_location_chart_ordering_covers_every_ticket_category() -> None:
+    assert set(TICKET_SERIES) == {code for code, _label in GrievanceTicket.CATEGORY_CHOICES}
+    assert [series["index"] for series in TICKET_SERIES.values()] == list(range(len(GrievanceTicket.CATEGORY_CHOICES)))
+    assert [series["label"] for series in TICKET_SERIES.values()] == [
+        force_str(dict(GrievanceTicket.CATEGORY_CHOICES)[code]) for code in TICKET_SERIES
+    ]

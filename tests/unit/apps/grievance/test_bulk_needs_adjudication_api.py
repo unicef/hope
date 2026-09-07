@@ -13,6 +13,8 @@ from extras.test_utils.factories import (
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -27,7 +29,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.api.serializers.grievance_ticket import MAX_NEEDS_ADJUDICATION_BATCH
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, UNIQUE
-from hope.models import BusinessArea, IndividualRoleInHousehold, User
+from hope.models import BusinessArea, Document, IndividualRoleInHousehold, User
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -1380,3 +1382,118 @@ def test_bulk_needs_adjudication_rejects_one_individual_marked_both_ways_across_
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert first_ticket.ticket.status == GrievanceTicket.STATUS_NEW
     assert shared.duplicate is False
+
+
+@pytest.fixture
+def na_ticket_sharing_a_document_number(
+    business_area: BusinessArea, program: Any, make_na_ticket: Callable
+) -> TicketNeedsAdjudicationDetails:
+    # the shape hard document deduplication leaves behind: one number, one VALID doc, one flagged doc
+    golden = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
+    duplicate = HouseholdFactory(program=program, business_area=business_area, create_role=False).head_of_household
+    country = CountryFactory()
+    document_type = DocumentTypeFactory(key="national_id")
+    DocumentFactory(
+        individual=golden,
+        type=document_type,
+        country=country,
+        document_number="1354917433",
+        status=Document.STATUS_VALID,
+    )
+    DocumentFactory(
+        individual=duplicate,
+        type=document_type,
+        country=country,
+        document_number="1354917433",
+        status=Document.STATUS_NEED_INVESTIGATION,
+    )
+    return make_na_ticket(golden, duplicate)
+
+
+def test_bulk_needs_adjudication_both_distinct_on_a_shared_document_number_is_rejected(
+    api_client: Any,
+    user: User,
+    business_area: BusinessArea,
+    na_ticket_sharing_a_document_number: TicketNeedsAdjudicationDetails,
+    bulk_na_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
+        business_area,
+        whole_business_area_access=True,
+    )
+    golden = na_ticket_sharing_a_document_number.golden_records_individual
+    duplicate = na_ticket_sharing_a_document_number.possible_duplicates.get()
+
+    client = api_client(user)
+    response = client.post(
+        bulk_na_url,
+        {
+            "tickets": [
+                {
+                    "ticket_id": str(na_ticket_sharing_a_document_number.ticket.id),
+                    "duplicate_individual_ids": [],
+                    "distinct_individual_ids": [str(golden.id), str(duplicate.id)],
+                }
+            ]
+        },
+        format="json",
+    )
+
+    na_ticket_sharing_a_document_number.ticket.refresh_from_db()
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "1354917433" in str(response.data)
+    assert na_ticket_sharing_a_document_number.ticket.status == GrievanceTicket.STATUS_NEW
+
+
+def test_bulk_needs_adjudication_error_names_the_ticket_that_failed(
+    api_client: Any,
+    user: User,
+    business_area: BusinessArea,
+    na_ticket: TicketNeedsAdjudicationDetails,
+    na_ticket_with_withdrawn_duplicate: TicketNeedsAdjudicationDetails,
+    bulk_na_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ],
+        business_area,
+        whole_business_area_access=True,
+    )
+    withdrawn = na_ticket_with_withdrawn_duplicate.possible_duplicates.get()
+
+    client = api_client(user)
+    response = client.post(
+        bulk_na_url,
+        {
+            "tickets": [
+                {
+                    "ticket_id": str(na_ticket.ticket.id),
+                    "duplicate_individual_ids": [str(na_ticket.golden_records_individual.id)],
+                    "distinct_individual_ids": [str(na_ticket.possible_duplicates.get().id)],
+                },
+                {
+                    "ticket_id": str(na_ticket_with_withdrawn_duplicate.ticket.id),
+                    "duplicate_individual_ids": [],
+                    "distinct_individual_ids": [str(withdrawn.id)],
+                },
+            ]
+        },
+        format="json",
+    )
+
+    na_ticket.ticket.refresh_from_db()
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert na_ticket_with_withdrawn_duplicate.ticket.unicef_id in str(response.data)
+    assert na_ticket.ticket.status == GrievanceTicket.STATUS_NEW
