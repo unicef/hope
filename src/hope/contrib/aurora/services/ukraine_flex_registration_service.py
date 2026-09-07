@@ -52,7 +52,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         "middle_name": "patronymic",
         "given_name_latin": "given_name_latin_i_c",
         "family_name_latin": "family_name_latin_i_c",
-        "middle_name_latin": "patronymic_local",
+        "middle_name_latin": "middle_name_latin_i_c",
         "birth_date": "birth_date",
         "sex": "gender_i_c",
         "relationship": "relationship_i_c",

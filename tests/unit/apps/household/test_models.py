@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.db import IntegrityError
 from django.utils import timezone
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -301,7 +302,10 @@ def test_mark_as_distinct_raise_errors(program) -> None:
     doc_2.document_number = "123456ABC"
     doc_2.save()
 
-    with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
+    with pytest.raises(
+        ValidationError,
+        match="Individual IND-333 cannot be marked as distinct: document 123456ABC conflicts",
+    ):
         ind.mark_as_distinct()
 
 
@@ -387,6 +391,45 @@ def test_facility_str(business_area: BusinessArea, area_hierarchy: tuple[Area, A
     facility = Facility.objects.create(name="test facility", business_area=business_area, admin_area=area1)
 
     assert str(facility) == "TEST FACILITY"
+
+
+# --- DocumentType ---
+
+
+def test_get_all_doc_types_choices_is_cached_and_invalidated(django_capture_on_commit_callbacks) -> None:
+    from django.core.cache import cache
+
+    cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
+    DocumentTypeFactory(key="key_a", label="Label A")
+
+    # First call populates the cache from the DB.
+    choices = DocumentType.get_all_doc_types_choices()
+    assert ("key_a", "Label A") in choices
+    assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) == choices
+
+    # While cached, a directly inserted row (bypassing signals) is not reflected.
+    DocumentType.objects.bulk_create([DocumentType(key="key_b", label="Label B")])
+    assert ("key_b", "Label B") not in DocumentType.get_all_doc_types_choices()
+
+    # Saving a DocumentType invalidates the cache on commit, so the next call is fresh.
+    with django_capture_on_commit_callbacks(execute=True):
+        DocumentTypeFactory(key="key_c", label="Label C")
+    refreshed = DocumentType.get_all_doc_types_choices()
+    assert ("key_b", "Label B") in refreshed
+    assert ("key_c", "Label C") in refreshed
+
+
+def test_get_all_doc_types_choices_cache_cleared_on_delete(django_capture_on_commit_callbacks) -> None:
+    from django.core.cache import cache
+
+    cache.delete(DocumentType.CACHE_KEY_ALL_DOC_TYPES)
+    doc_type = DocumentTypeFactory(key="key_to_delete", label="To Delete")
+    assert ("key_to_delete", "To Delete") in DocumentType.get_all_doc_types_choices()
+
+    with django_capture_on_commit_callbacks(execute=True):
+        doc_type.delete()
+    assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) is None
+    assert ("key_to_delete", "To Delete") not in DocumentType.get_all_doc_types_choices()
 
 
 def test_individual_erase(business_area: BusinessArea) -> None:

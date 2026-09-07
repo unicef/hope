@@ -39,7 +39,6 @@ from hope.apps.household.const import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hope.apps.household.utils import LATIN_NAME_FIELDS
 from hope.apps.registration_data.utils import (
     calculate_hash_for_kobo_submission,
     collectors_str_ids_to_list,
@@ -49,6 +48,8 @@ from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmi
 from hope.models.individual import ascii_name_validator
 
 logger = logging.getLogger(__name__)
+
+LATIN_NAME_FIELDS = ("given_name_latin", "middle_name_latin", "family_name_latin", "full_name_latin")
 
 
 class XlsxError(Exception):

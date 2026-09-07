@@ -32,7 +32,7 @@
                 "individual_questions/full_name_i_c": "Test Testowski",
                 "individual_questions/relationship_i_c": "head",
                 "individual_questions/individual_vulnerabilities/work_status_i_c": "1",
-                "individual_questions/family_name_i_c": "Testowśki",
+                "individual_questions/family_name_i_c": "Testowski",
                 "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                 "individual_questions/more_information/birth_certificate_no_i_c": "123123123",
                 "individual_questions/more_information/birth_certificate_issuer_i_c": "AFG",
@@ -45,11 +45,7 @@
                 "individual_questions/bank_info/bank_branch_name_i_c": "Privat 2",
                 "individual_questions/account__mobile__service_provider_i_c": "ABD",
                 "individual_questions/account__mobile__delivery_phone_number_i_c": "+48880110457",
-                "individual_questions/account__mobile__provider_i_c": "ALFA",
-                "individual_questions/full_name_local_i_c": "Full_local",
-                "individual_questions/given_name_local_i_c": "Given_local",
-                "individual_questions/middle_name_local_i_c": "Middle_local",
-                "individual_questions/family_name_local_i_c": "Family_local"
+                "individual_questions/account__mobile__provider_i_c": "ALFA"
             },
             {
                 "individual_questions/role_i_c": "alternate",

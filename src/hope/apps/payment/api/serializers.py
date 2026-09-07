@@ -1435,10 +1435,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
 
     def get_snapshot_collector_full_name_latin(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(
-            obj,
-            "full_name_latin",
-        )
+        return PaymentListSerializer.get_collector_field(obj, "full_name_latin")
 
     def get_snapshot_alternate_collector_full_name_latin(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name_latin", ROLE_ALTERNATE)

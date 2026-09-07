@@ -133,8 +133,7 @@ def test_upload_invalid_template_returns_expected_errors(
             "Field: program_registration_id_h_c - Field is missing",
         ]
     }
-    form_errors = {field: [e["message"] for e in errs] for field, errs in form.errors.get_json_data().items()}
-    assert form_errors == expected_errors
+    assert form.errors == expected_errors
 
 
 @patch(

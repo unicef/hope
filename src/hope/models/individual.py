@@ -13,6 +13,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
@@ -202,25 +203,13 @@ class Individual(
         db_collation="und-ci-det",
     )
     given_name = models.CharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="First name of the Beneficiary",
-        db_collation="und-ci-det",
+        max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary", db_collation="und-ci-det"
     )
     middle_name = models.CharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="Middle name of the Beneficiary",
-        db_collation="und-ci-det",
+        max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary", db_collation="und-ci-det"
     )
     family_name = models.CharField(
-        max_length=85,
-        blank=True,
-        db_index=True,
-        help_text="Last name of the Beneficiary",
-        db_collation="und-ci-det",
+        max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
     )
     full_name_latin = models.CharField(
         max_length=500,
@@ -568,8 +557,10 @@ class Individual(
                 doc.save()
             # AB#244721
             except IntegrityError:
-                error_message = f"{self.unicef_id}: Valid Document already exists: {doc.document_number}."
-                raise Exception(error_message)
+                raise ValidationError(
+                    f"Individual {self.unicef_id} cannot be marked as distinct: document "
+                    f"{doc.document_number} conflicts with an existing valid document."
+                )
         self.accounts.update(active=True)
         self.duplicate = False
         self.duplicate_date = timezone.now()
