@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock
 
 from django.core.cache import cache
@@ -56,9 +57,11 @@ def test_celery_lock_releases_on_exception() -> None:
 
 
 def test_celery_lock_raises_non_retriable_when_held(no_wait: None, held_lock: LocMemLock) -> None:
-    with pytest.raises(AlreadyRunningError, match="Lock celery_lock_task:1 is held by another task"):
-        with celery_lock("task", 1):
-            pass  # pragma: no cover
+    with (
+        pytest.raises(AlreadyRunningError, match="Lock celery_lock_task:1 is held by another task"),
+        ExitStack() as stack,
+    ):
+        stack.enter_context(celery_lock("task", 1))
 
     assert held_lock.locked()
 

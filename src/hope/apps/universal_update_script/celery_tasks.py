@@ -33,7 +33,7 @@ def run_universal_individual_update_async_task_action(job: AsyncJob) -> str:
             )
             engine.execute()
             return RESULT_SUCCESS
-        except SoftTimeLimitExceeded:  # pragma: no cover
+        except SoftTimeLimitExceeded:
             universal_update.save_logs("Task time limit exceeded")
             return RESULT_FAILED
         except Exception:
@@ -71,7 +71,7 @@ def generate_universal_individual_update_template_async_task_action(job: AsyncJo
             universal_update.save()
             universal_update.save_logs("Finished Generating Template")
             return RESULT_SUCCESS
-        except SoftTimeLimitExceeded:  # pragma: no cover
+        except SoftTimeLimitExceeded:
             universal_update.save_logs("Task time limit exceeded")
             return RESULT_FAILED
         except Exception:

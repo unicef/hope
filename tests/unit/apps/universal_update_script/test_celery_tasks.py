@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from unittest.mock import patch
 
+from celery.exceptions import SoftTimeLimitExceeded
 from constance.test import override_config
 from django.core.cache import cache
 import pytest
@@ -10,6 +11,7 @@ from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
+    RESULT_FAILED,
     generate_universal_individual_update_template_async_task,
     generate_universal_individual_update_template_async_task_action,
     run_universal_individual_update_async_task,
@@ -273,3 +275,29 @@ def test_universal_update_action_raises_when_lock_held(
 
     universal_update.refresh_from_db()
     assert not universal_update.saved_logs
+
+
+@pytest.mark.parametrize(
+    ("action", "service_method"),
+    [
+        (run_universal_individual_update_async_task_action, "execute"),
+        (generate_universal_individual_update_template_async_task_action, "generate_xlsx_template"),
+    ],
+)
+def test_universal_update_action_logs_and_returns_failed_on_soft_time_limit(
+    action: Callable[[AsyncJob], str], service_method: str, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+
+    with (
+        patch("hope.apps.universal_update_script.celery_tasks.create_and_save_snapshot_chunked"),
+        patch(
+            f"hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.{service_method}",
+            side_effect=SoftTimeLimitExceeded,
+        ),
+    ):
+        result = action(AsyncJob(config={"universal_update_id": str(universal_update.pk)}))
+
+    universal_update.refresh_from_db()
+    assert result == RESULT_FAILED
+    assert "Task time limit exceeded" in universal_update.saved_logs

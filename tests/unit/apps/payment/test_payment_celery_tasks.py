@@ -860,6 +860,39 @@ def test_payment_plan_apply_engine_rule_action_updates_payments_and_entitlement_
     mock_get_quantity_in_usd.assert_called_once()
 
 
+@patch("hope.apps.payment.celery_tasks.log_payment_plan_change")
+@patch("hope.apps.payment.celery_tasks.bulk_log_payment_changes")
+@patch("hope.models.Payment.signature_manager.bulk_update_with_signature")
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd", return_value=Decimal(1))
+@patch("hope.apps.payment.celery_tasks.copy_model_object", side_effect=lambda obj: obj)
+@patch("hope.apps.payment.celery_tasks.get_object_or_404")
+def test_payment_plan_apply_engine_rule_action_bulk_updates_in_chunks(
+    mock_get_object_or_404: Mock,
+    mock_copy_model_object: Mock,
+    mock_get_quantity_in_usd: Mock,
+    mock_bulk_update: Mock,
+    mock_bulk_log: Mock,
+    mock_log_payment_plan_change: Mock,
+) -> None:
+    payments = [Mock(household=Mock()) for _ in range(1001)]
+    payment_plan = Mock(background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN)
+    payment_plan.business_area.name = "Test BA"
+    payment_plan.eligible_payments.select_related.return_value.iterator.return_value = payments
+    rule = Mock(id=1)
+    rule.execute.return_value = Mock(value=Decimal(500))
+    payment_plan.steficon_rule_id = 1
+    mock_get_object_or_404.side_effect = [payment_plan, Mock(latest=rule)]
+    chunk_sizes: list[int] = []
+    mock_bulk_update.side_effect = lambda objs, fields: chunk_sizes.append(len(objs))
+
+    payment_plan_apply_engine_rule_async_task_action(
+        Mock(config={"payment_plan_id": "payment-plan-id", "engine_rule_id": "engine-rule-id"})
+    )
+
+    assert chunk_sizes == [1000, 1]
+    assert mock_bulk_log.call_count == 2
+
+
 @patch("hope.apps.payment.celery_tasks.logger")
 @patch("hope.models.rule.RuleCommit.execute", side_effect=Exception("rule failure"))
 def test_payment_plan_apply_engine_rule_action_sets_error_status_on_exception(

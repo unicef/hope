@@ -812,7 +812,7 @@ def payment_plan_apply_engine_rule_async_task_action(job: AsyncRetryJob) -> None
                     updates_buffer.append(payment)
                     log_pairs_buffer.append((old_payment, payment))
 
-                    if len(updates_buffer) >= bulk_size:  # pragma: no cover
+                    if len(updates_buffer) >= bulk_size:
                         Payment.signature_manager.bulk_update_with_signature(
                             updates_buffer,
                             ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"],
