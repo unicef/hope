@@ -187,7 +187,7 @@ def test_household_list_with_permissions(
         assert household_result["residence_status"] == household.get_residence_status_display()
         assert household_result["total_cash_received"] == household.total_cash_received
         assert household_result["total_cash_received_usd"] == household.total_cash_received_usd
-        assert household_result["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+        assert household_result["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%d}"
 
 
 def test_household_count_with_permissions(
@@ -498,7 +498,7 @@ def test_household_all_accountability_communication_message_recipients(
         },
         "status": household_list_context["household1"].status,
         "residence_status": household_list_context["household1"].get_residence_status_display(),
-        "last_registration_date": f"{household_list_context['household1'].last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        "last_registration_date": f"{household_list_context['household1'].last_registration_date:%Y-%m-%d}",
     }
 
 
@@ -726,8 +726,8 @@ def test_household_detail_with_permissions(
     assert data["female_children_count"] == household.female_children_count
     assert data["children_disabled_count"] == household.children_disabled_count
     assert data["currency"] == household.currency.code
-    assert data["first_registration_date"] == f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-    assert data["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+    assert data["first_registration_date"] == f"{household.first_registration_date:%Y-%m-%d}"
+    assert data["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%d}"
     assert data["unhcr_id"] == household.unhcr_id
     assert data["village"] == household.village
     assert data["address"] == household.address

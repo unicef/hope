@@ -11,6 +11,7 @@ from django.utils import timezone
 import openpyxl
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
@@ -229,7 +230,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
     @staticmethod
     def _normalize_delivery_date(payment: Payment, delivered_quantity: Decimal | None) -> datetime.datetime | None:
         if delivered_quantity and delivered_quantity > 0:
-            return payment.delivery_date or timezone.now()
+            return payment.delivery_date or to_utc_midnight(timezone.now())
         return None
 
     def _import_household(self, household_unicef_id: str, delivered_quantity: Decimal) -> None:

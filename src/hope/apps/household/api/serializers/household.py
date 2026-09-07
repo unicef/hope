@@ -3,6 +3,7 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from hope.apps.core.api.fields import UTCDateField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string, to_choice_object
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
@@ -42,6 +43,8 @@ class DeliveredQuantitySerializer(serializers.Serializer):
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
+    first_registration_date = UTCDateField(read_only=True)
+    last_registration_date = UTCDateField(read_only=True)
     head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()
@@ -100,6 +103,8 @@ class IndividualListHouseholdSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
+    first_registration_date = UTCDateField(read_only=True)
+    last_registration_date = UTCDateField(read_only=True)
     admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()
     admin3 = AreaSimpleSerializer()
@@ -175,6 +180,7 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
 
 
 class RecipientSerializer(serializers.ModelSerializer):
+    last_registration_date = UTCDateField(read_only=True)
     head_of_household = HeadOfHouseholdSerializer()
     admin2 = AreaSimpleSerializer()
     residence_status = serializers.CharField(source="get_residence_status_display")
@@ -219,6 +225,8 @@ class IndividualRoleInHouseholdForHouseholdSerializer(serializers.ModelSerialize
 
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    first_registration_date = UTCDateField(read_only=True)
+    last_registration_date = UTCDateField(read_only=True)
     head_of_household = HeadOfHouseholdSerializer()
     admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()

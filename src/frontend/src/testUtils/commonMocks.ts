@@ -58,6 +58,7 @@ const _utilsMock = vi.hoisted(() => ({
   decodeIdString: vi.fn((id) => id),
   programCycleStatusToColor: vi.fn(() => 'primary'),
   individualStatusToColor: vi.fn(() => '#000000'),
+  showApiErrorMessages: vi.fn(),
 }));
 
 const _restServiceMethods = vi.hoisted(() => {
@@ -85,6 +86,9 @@ const _restServiceMethods = vi.hoisted(() => {
     restBusinessAreasProgramsCyclesFinishCreate: vi.fn(),
     restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
     restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
+    restBusinessAreasRetrieve: vi.fn(),
+    restChoicesTimezonesList: vi.fn(() => Promise.resolve([])),
+    restBusinessAreasUsersProfileTimezonePartialUpdate: vi.fn(),
   };
   // restQueryKey derives the key root from `fn.name`, and every bare spy is named 'spy'.
   // Without this, all mocked fetchers share one root and collapse into one cache entry.

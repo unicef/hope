@@ -59,6 +59,7 @@ def test_choices_cover_all_enum_source_actions(generated: SimpleNamespace) -> No
         "registration-data-import-statuses",
         "sex",
         "survey-categories",
+        "timezones",
     }
 
 
