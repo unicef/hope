@@ -76,9 +76,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         obj: Any | None = None,
         change: bool = False,
         **kwargs: Any,
-    ) -> Any:
+    ) -> type[forms.ModelForm]:
         if obj is None:
-            return XLSImportForm
+            return cast("type[forms.ModelForm]", XLSImportForm)
         return super().get_form(request, obj, change, **kwargs)
 
     @button(permission="core.download_last_valid_file")
