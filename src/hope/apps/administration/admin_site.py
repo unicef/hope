@@ -9,6 +9,7 @@ from django.urls import path
 from django.utils.html import format_html
 from smart_admin.site import SmartAdminSite
 
+from hope.apps.administration.celery_locks import celery_locks_view
 from hope.apps.administration.forms import ClearCacheForm
 
 if TYPE_CHECKING:
@@ -97,6 +98,7 @@ class HopeAdminSite(SmartAdminSite):
         urls = super().get_urls()
         custom_urls = [
             path("clear-cache/", self.admin_view(clear_cache_view), name="clear_cache"),
+            path("celery-locks/", self.admin_view(celery_locks_view), name="celery_locks"),
         ]
         return custom_urls + urls
 

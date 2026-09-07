@@ -1,6 +1,8 @@
+from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
+from django.core.cache import cache
 from django.db import Error
 from django.test.utils import override_settings
 from openpyxl.utils.exceptions import InvalidFileException
@@ -15,6 +17,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
@@ -258,6 +261,16 @@ VALID_JSON = [
 
 
 @pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
+
+
+@pytest.fixture
 def registration_import_context() -> dict[str, object]:
     business_area = BusinessAreaFactory(name="Afghanistan")
     program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
@@ -340,20 +353,17 @@ def test_registration_kobo_import_task_action_handles_exception(
     mock_handle_rdi_exception.assert_called_once_with(str(registration_data_import.id), exc)
 
 
-@patch("hope.apps.registration_data.celery_tasks.logger.info")
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
 @patch("hope.apps.registration_data.tasks.rdi_kobo_create.RdiKoboCreateTask")
-def test_registration_kobo_import_task_action_noops_when_lock_not_acquired(
+def test_registration_kobo_import_task_action_raises_when_lock_held(
     mock_rdi_kobo_create_task: Mock,
-    mock_locked_cache: Mock,
-    mock_info: Mock,
     registration_import_context: dict[str, object],
+    hold_lock: Callable[..., None],
 ) -> None:
     registration_data_import = registration_import_context["registration_data_import"]
     import_data = registration_import_context["import_data"]
     business_area = registration_import_context["business_area"]
     program = registration_import_context["program"]
-    mock_locked_cache.return_value.__enter__.return_value = False
+    hold_lock("registration_kobo_import", registration_data_import.id)
     job = AsyncRetryJob(
         config={
             "registration_data_import_id": str(registration_data_import.id),
@@ -363,21 +373,20 @@ def test_registration_kobo_import_task_action_noops_when_lock_not_acquired(
         }
     )
 
-    result = registration_kobo_import_async_task_action(job)
+    with pytest.raises(
+        AlreadyRunningError, match=f"celery_lock_registration_kobo_import:{registration_data_import.id}"
+    ):
+        registration_kobo_import_async_task_action(job)
 
-    assert result is True
+    registration_data_import.refresh_from_db()
+    assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
     mock_rdi_kobo_create_task.return_value.execute.assert_not_called()
-    mock_info.assert_called_once_with(
-        f"Task with key registration_kobo_import_async_task {registration_data_import.id} is already running"
-    )
 
 
 @patch("hope.apps.registration_data.celery_tasks.logger.info")
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
 @patch("hope.apps.registration_data.tasks.rdi_kobo_create.RdiKoboCreateTask")
 def test_registration_kobo_import_task_action_noops_when_status_not_importable(
     mock_rdi_kobo_create_task: Mock,
-    mock_locked_cache: Mock,
     mock_info: Mock,
     registration_import_context: dict[str, object],
 ) -> None:
@@ -385,7 +394,6 @@ def test_registration_kobo_import_task_action_noops_when_status_not_importable(
     import_data = registration_import_context["import_data"]
     business_area = registration_import_context["business_area"]
     program = registration_import_context["program"]
-    mock_locked_cache.return_value.__enter__.return_value = True
     assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
     job = AsyncRetryJob(
         config={
@@ -656,22 +664,27 @@ def test_merge_registration_data_import_task_queues_retry_job_with_rdi_content_o
     mock_queue.assert_called_once_with(job)
 
 
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
-def test_merge_registration_data_import_task_returns_true_when_lock_not_acquired(
-    mock_locked_cache: Mock,
+def test_merge_registration_data_import_task_fails_without_retry_when_lock_held(
     registration_import_context: dict[str, object],
+    hold_lock: Callable[..., None],
 ) -> None:
     registration_data_import = registration_import_context["registration_data_import"]
-    mock_locked_cache.return_value.__enter__.return_value = False
+    hold_lock("merge_registration_data_import", registration_data_import.id)
 
     with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
         merge_registration_data_import_async_task(
             registration_data_import=registration_data_import,
         )
     job = AsyncRetryJob.objects.latest("pk")
-    result = async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    with pytest.raises(AlreadyRunningError):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
-    assert result is True
+    job.refresh_from_db()
+    assert job.errors["exception"] == (
+        f"Lock celery_lock_merge_registration_data_import:{registration_data_import.id} is held by another task"
+    )
+    registration_data_import.refresh_from_db()
+    assert registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
 
 @patch("hope.apps.registration_data.tasks.deduplicate.DeduplicateTask")
@@ -806,26 +819,23 @@ def test_check_and_set_taxid_updates_unique_field_from_primary_individual() -> N
     assert result == {"updated": [1], "processed": [1], "errors": []}
 
 
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
 @patch("hope.apps.registration_data.celery_tasks.HardDocumentDeduplication.deduplicate")
-def test_deduplicate_documents_for_rdi_returns_early_when_lock_not_acquired(
+def test_deduplicate_documents_for_rdi_raises_when_lock_held(
     mock_deduplicate: Mock,
-    mock_locked_cache: Mock,
+    hold_lock: Callable[..., None],
 ) -> None:
-    mock_locked_cache.return_value.__enter__.return_value = False
+    hold_lock("deduplicate_documents")
 
-    assert deduplicate_documents_for_rdi("rdi-id") is True
+    with pytest.raises(AlreadyRunningError, match="celery_lock_deduplicate_documents"):
+        deduplicate_documents_for_rdi("rdi-id")
 
     mock_deduplicate.assert_not_called()
 
 
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
 @patch("hope.apps.registration_data.celery_tasks.HardDocumentDeduplication.deduplicate")
 def test_deduplicate_documents_for_rdi_deduplicates_pending_documents_for_rdi(
     mock_deduplicate: Mock,
-    mock_locked_cache: Mock,
 ) -> None:
-    mock_locked_cache.return_value.__enter__.return_value = True
     rdi = RegistrationDataImportFactory()
     matching_individual = PendingIndividualFactory(
         registration_data_import=rdi,

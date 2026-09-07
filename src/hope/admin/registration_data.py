@@ -17,7 +17,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from kombu.exceptions import OperationalError
 
-from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
+from hope.admin.utils import CeleryLocksAdminMixin, HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.documents import get_household_doc, get_individual_doc
@@ -44,7 +44,9 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(ViewOnUiMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
+class RegistrationDataImportAdmin(
+    CeleryLocksAdminMixin, ViewOnUiMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase
+):
     list_display = (
         "name",
         "business_area",

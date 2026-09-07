@@ -21,12 +21,14 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, OneToOneRel, QuerySet
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
+from hope.apps.administration.celery_locks import celery_locks_for, remove_celery_lock
+from hope.apps.administration.forms import ConfirmDangerForm
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.payment.utils import generate_cache_key, get_link
 from hope.apps.utils.security import is_root
@@ -180,6 +182,21 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
     def count_queryset(self, request: HttpRequest, queryset: QuerySet) -> None:
         count = queryset.count()
         self.message_user(request, f"Selection contains {count} records")
+
+
+class CeleryLocksAdminMixin(ExtraButtonsMixin):
+    @button(permission=lambda request, obj, handler: is_root(request), label="Remove task locks")
+    def remove_task_locks(self, request: HttpRequest, pk: str) -> HttpResponse:
+        obj = get_object_or_404(self.model, pk=pk)
+        locks = celery_locks_for(obj)
+        form = ConfirmDangerForm(request.POST or None)
+        if request.method == "POST" and form.is_valid():
+            for key in locks:
+                remove_celery_lock(request, key, obj)
+            self.message_user(request, f"Removed {len(locks)} lock(s)", messages.WARNING)
+            return redirect(f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change", pk)
+        context = self.get_common_context(request, pk, title="Remove task locks", form=form, locks=locks)
+        return TemplateResponse(request, "admin/celery_locks_confirm.html", context)
 
 
 class ViewOnUiMixin:

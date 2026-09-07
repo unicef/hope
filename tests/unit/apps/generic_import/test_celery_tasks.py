@@ -1,7 +1,8 @@
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 import contextlib
 from unittest.mock import MagicMock, Mock, patch
 
+from django.core.cache import cache
 from django_celery_boost.models import AsyncJobModel
 import pytest
 
@@ -12,6 +13,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.generic_import.celery_tasks import (
     process_generic_import_async_task,
     process_generic_import_async_task_action,
@@ -88,6 +90,16 @@ def mock_importer_class() -> Generator[MagicMock, None, None]:
         importer.import_data.return_value = []
         mock_cls.return_value = importer
         yield mock_cls
+
+
+@pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
 
 
 @pytest.fixture
@@ -238,20 +250,14 @@ def test_process_generic_import_task_sets_error_status_on_validation_errors(
 
 
 @pytest.mark.django_db
-@patch("hope.apps.generic_import.celery_tasks.logger")
-def test_process_generic_import_task_returns_when_already_running(mock_logger, async_job):
-    @contextlib.contextmanager
-    def mock_locked_cache(*args, **kwargs):
-        yield False
+def test_process_generic_import_task_raises_when_lock_held(rdi, async_job, hold_lock):
+    hold_lock("process_generic_import", rdi.id)
 
-    with patch(
-        "hope.apps.generic_import.celery_tasks.locked_cache",
-        new=mock_locked_cache,
-    ):
-        result = process_generic_import_async_task_action(async_job)
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_process_generic_import:{rdi.id}"):
+        process_generic_import_async_task_action(async_job)
 
-    assert result is None
-    mock_logger.info.assert_called_once_with("Generic import task already running")
+    rdi.refresh_from_db()
+    assert rdi.status != RegistrationDataImport.IMPORT_ERROR
 
 
 @pytest.mark.django_db
@@ -359,24 +365,6 @@ def test_process_generic_import_task_passes_parsed_data_to_importer(
         accounts_data=[{"id": "a1"}],
         identities_data=[{"id": "id1"}],
     )
-
-
-@pytest.mark.django_db
-def test_process_generic_import_task_uses_correct_cache_key_format(
-    rdi, async_job, mock_parser_class, mock_importer_class
-):
-    cache_keys = []
-
-    @contextlib.contextmanager
-    def track_cache_key(key, **kwargs):
-        cache_keys.append(key)
-        yield True
-
-    with patch("hope.apps.generic_import.celery_tasks.locked_cache", new=track_cache_key):
-        process_generic_import_async_task_action(async_job)
-
-    assert len(cache_keys) == 1
-    assert cache_keys[0] == f"process_generic_import_async_task-{rdi.id}"
 
 
 @pytest.mark.django_db
@@ -495,17 +483,12 @@ def rdi_without_business_area(user, import_data):
 def test_process_generic_import_task_raises_value_error_when_rdi_has_no_business_area(
     import_data, rdi_without_business_area
 ):
-    @contextlib.contextmanager
-    def always_locked(key, **kwargs):
-        yield True
-
-    with patch("hope.apps.generic_import.celery_tasks.locked_cache", new=always_locked):
-        with pytest.raises(ValueError, match=f"RDI {rdi_without_business_area.id} has no business_area"):
-            process_generic_import_async_task_action(
-                AsyncRetryJob(
-                    config={
-                        "registration_data_import_id": str(rdi_without_business_area.id),
-                        "import_data_id": str(import_data.id),
-                    }
-                )
+    with pytest.raises(ValueError, match=f"RDI {rdi_without_business_area.id} has no business_area"):
+        process_generic_import_async_task_action(
+            AsyncRetryJob(
+                config={
+                    "registration_data_import_id": str(rdi_without_business_area.id),
+                    "import_data_id": str(import_data.id),
+                }
             )
+        )

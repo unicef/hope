@@ -2,10 +2,10 @@ import datetime
 import logging
 
 from django.contrib.admin.options import get_content_type_for_model
-from django.core.cache import cache
 from django.db import transaction
 
 from hope.apps.core.celery import app
+from hope.apps.core.celery_lock import celery_lock
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
@@ -115,11 +115,7 @@ def generate_pdu_online_edit_data_async_task(pdu_online_edit: PDUOnlineEdit, fil
 
 
 def merge_pdu_online_edit_async_task_action(job: AsyncRetryJob) -> bool:
-    with cache.lock(
-        "pdu_online_edit_merge",
-        blocking_timeout=60 * 10,
-        timeout=60 * 60 * 2,
-    ):
+    with celery_lock("merge_pdu_online_edit"):
         pdu_online_edit = PDUOnlineEdit.objects.get(id=job.config["pdu_online_edit_id"])
         try:
             service = PDUOnlineEditMergeService(pdu_online_edit)

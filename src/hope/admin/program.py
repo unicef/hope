@@ -27,6 +27,7 @@ from django.utils.html import format_html
 from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.utils import (
+    CeleryLocksAdminMixin,
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
@@ -213,6 +214,7 @@ class ProgramAdminForm(forms.ModelForm):
 
 @admin.register(Program)
 class ProgramAdmin(
+    CeleryLocksAdminMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
     AdminAutoCompleteSearchMixin,

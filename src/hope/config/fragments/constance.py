@@ -194,6 +194,7 @@ Datamart,https://datamart.unicef.io
 Flower,https://stg-hope.unitst.org/flower/
 Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/
 Clear Cache,clear-cache/
+Celery Locks,celery-locks/
 """,
         "",
         str,

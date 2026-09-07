@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.celery import app
+from hope.apps.core.celery_lock import celery_lock
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
@@ -241,11 +242,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
     from hope.models import PaymentPlanGroup, User
 
     payment_plan_group_id = job.config["payment_plan_group_id"]
-    with cache.lock(
-        f"export_payment_plan_group_delivery_xlsx_{payment_plan_group_id}",
-        blocking_timeout=60 * 10,
-        timeout=60 * 60 * 2,
-    ):
+    with celery_lock("export_payment_plan_group_delivery_xlsx", payment_plan_group_id):
         payment_plan_group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(
             id=payment_plan_group_id
         )
@@ -264,11 +261,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
             if service.payment_plans and service.payment_generate_token_and_order_numbers:
                 program = payment_plan_group.cycle.program
                 with (
-                    cache.lock(
-                        f"payment_plan_generate_token_and_order_numbers_{str(program.id)}",
-                        blocking_timeout=60 * 10,
-                        timeout=60 * 20,
-                    ),
+                    celery_lock("payment_plan_generate_token_and_order_numbers", program.id),
                     transaction.atomic(),
                 ):
                     service.generate_token_and_order_numbers(program)
@@ -1510,11 +1503,7 @@ def payment_plan_rebuild_stats_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlan
 
     payment_plan_id = job.config["payment_plan_id"]
-    with cache.lock(
-        f"payment_plan_rebuild_stats_{payment_plan_id}",
-        blocking_timeout=60 * 10,
-        timeout=60 * 60 * 2,
-    ):
+    with celery_lock("payment_plan_rebuild_stats", payment_plan_id):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         flow = PaymentPlanFlow(payment_plan)
@@ -1548,11 +1537,7 @@ def payment_plan_full_rebuild_async_task_action(job: AsyncRetryJob) -> None:
     payment_plan_id = job.config["payment_plan_id"]
     update_money_fields = bool(job.config.get("update_money_fields", False))
 
-    with cache.lock(
-        f"payment_plan_full_rebuild_{payment_plan_id}",
-        blocking_timeout=60 * 10,
-        timeout=60 * 60 * 2,
-    ):
+    with celery_lock("payment_plan_full_rebuild", payment_plan_id):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         flow = PaymentPlanFlow(payment_plan)
@@ -1684,11 +1669,7 @@ def send_western_union_report_email_notifications_async_task_action(job: AsyncRe
     from hope.models import WesternUnionPaymentPlanReport
 
     report_id = job.config.get("western_union_report_id") or job.config["qcf_report_id"]
-    with cache.lock(
-        f"send_western_union_report_email_notifications_{report_id}",
-        blocking_timeout=60 * 10,
-        timeout=60 * 60 * 2,
-    ):
+    with celery_lock("send_western_union_report_email_notifications", report_id):
         report = WesternUnionPaymentPlanReport.objects.get(id=report_id)
         set_sentry_business_area_tag(report.payment_plan.business_area.name)
 
@@ -1742,11 +1723,7 @@ def send_payment_plan_reconciliation_overdue_email_async_task_action(job: AsyncR
     from hope.models import PaymentPlan
 
     payment_plan_id = job.config["payment_plan_id"]
-    with cache.lock(
-        f"send_payment_plan_reconciliation_overdue_email_{payment_plan_id}",
-        blocking_timeout=60 * 10,
-        timeout=60 * 60 * 2,
-    ):
+    with celery_lock("send_payment_plan_reconciliation_overdue_email", payment_plan_id):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         service = PaymentPlanService(payment_plan)

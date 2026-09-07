@@ -11,7 +11,7 @@ from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import CeleryLocksAdminMixin, HOPEModelAdminBase
 from hope.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template_async_task,
     run_universal_individual_update_async_task,
@@ -148,7 +148,7 @@ class UniversalUpdateAdminForm(forms.ModelForm):
 
 
 @admin.register(UniversalUpdate)
-class UniversalUpdateAdmin(HOPEModelAdminBase):
+class UniversalUpdateAdmin(CeleryLocksAdminMixin, HOPEModelAdminBase):
     form = UniversalUpdateAdminForm
     filter_horizontal = (
         "document_types",

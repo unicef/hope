@@ -1,10 +1,10 @@
 import base64
-from contextlib import contextmanager
 import datetime
 import json
 from typing import Any, Callable, Optional
 from unittest.mock import Mock, patch
 
+from django.core.cache import cache
 from django.utils import timezone
 import pytest
 
@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     RegistrationFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
@@ -259,18 +260,21 @@ def ukraine_context() -> dict[str, object]:
 
 
 @pytest.fixture
-def run_automate_rdi_creation_task() -> Callable[..., list]:
-    @contextmanager
-    def unlocked_cache(*_args: Any, **_kwargs: Any) -> Any:
-        yield True
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
 
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
+
+
+@pytest.fixture
+def run_automate_rdi_creation_task() -> Callable[..., list]:
     def _run(*args: Any, **kwargs: Any) -> list:
         registration_id = kwargs.pop("registration_id")
         registration = Registration.objects.get(source_id=registration_id)
-        with (
-            patch("hope.contrib.aurora.celery_tasks.locked_cache", unlocked_cache),
-            patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True),
-        ):
+        with patch("hope.contrib.aurora.celery_tasks.AsyncRetryJob.queue", autospec=True):
             automate_rdi_creation_async_task(registration.source_id, *args, **kwargs)
         job = AsyncRetryJob.objects.latest("pk")
         return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
@@ -762,11 +766,8 @@ def test_fresh_extract_records_task_schedules_async_job() -> None:
     assert callback.__func__ == job.queue.__func__
 
 
-def test_automate_rdi_creation_task_action_returns_empty_list_when_locked() -> None:
-    @contextmanager
-    def locked_cache_false(*_args: Any, **_kwargs: Any) -> Any:
-        yield False
-
+def test_automate_rdi_creation_task_action_raises_when_lock_held(hold_lock: Callable[..., None]) -> None:
+    hold_lock("automate_rdi_creation", 9999)
     job = AsyncRetryJob.objects.create(
         type="JOB_TASK",
         action="hope.contrib.aurora.celery_tasks.automate_rdi_creation_async_task_action",
@@ -780,8 +781,8 @@ def test_automate_rdi_creation_task_action_returns_empty_list_when_locked() -> N
         },
     )
 
-    with patch("hope.contrib.aurora.celery_tasks.locked_cache", locked_cache_false):
-        assert automate_rdi_creation_async_task_action(job) == []
+    with pytest.raises(AlreadyRunningError, match="celery_lock_automate_rdi_creation:9999"):
+        automate_rdi_creation_async_task_action(job)
 
 
 def test_automate_rdi_creation_task_action_raises_non_retriable_error_without_service(
@@ -790,10 +791,6 @@ def test_automate_rdi_creation_task_action_raises_non_retriable_error_without_se
     registration = ukraine_context["registration"]
     registration.rdi_parser = None
     registration.save(update_fields=["rdi_parser"])
-
-    @contextmanager
-    def unlocked_cache(*_args: Any, **_kwargs: Any) -> Any:
-        yield True
 
     job = AsyncRetryJob.objects.create(
         type="JOB_TASK",
@@ -808,9 +805,8 @@ def test_automate_rdi_creation_task_action_raises_non_retriable_error_without_se
         },
     )
 
-    with patch("hope.contrib.aurora.celery_tasks.locked_cache", unlocked_cache):
-        with pytest.raises(
-            NonRetriableTaskError,
-            match=f"Aurora registration {registration.source_id} has no RDI parser",
-        ):
-            automate_rdi_creation_async_task_action(job)
+    with pytest.raises(
+        NonRetriableTaskError,
+        match=f"Aurora registration {registration.source_id} has no RDI parser",
+    ):
+        automate_rdi_creation_async_task_action(job)

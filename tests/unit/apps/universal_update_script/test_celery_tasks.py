@@ -1,9 +1,12 @@
-from unittest.mock import MagicMock, patch
+from collections.abc import Callable
+from unittest.mock import patch
 
 from constance.test import override_config
+from django.core.cache import cache
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
+from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
@@ -34,6 +37,16 @@ pytestmark = [
     pytest.mark.xdist_group(name="elasticsearch"),
     pytest.mark.usefixtures("django_elasticsearch_setup"),
 ]
+
+
+@pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
 
 
 @pytest.fixture
@@ -207,11 +220,8 @@ def test_run_universal_individual_update_creates_related_async_job(
 def test_run_universal_individual_update_action_reraises_unexpected_error(program: Program) -> None:
     universal_update = UniversalUpdate.objects.create(program=program)
     job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
-    lock = MagicMock()
-    lock.acquire.return_value = True
 
     with (
-        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
         patch("hope.apps.universal_update_script.celery_tasks.create_and_save_snapshot_chunked"),
         patch(
             "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.execute",
@@ -223,17 +233,13 @@ def test_run_universal_individual_update_action_reraises_unexpected_error(progra
 
     universal_update.refresh_from_db()
     assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
-    lock.release.assert_called_once_with()
 
 
 def test_generate_universal_individual_update_template_action_reraises_unexpected_error(program: Program) -> None:
     universal_update = UniversalUpdate.objects.create(program=program)
     job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
-    lock = MagicMock()
-    lock.acquire.return_value = True
 
     with (
-        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
         patch(
             "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.generate_xlsx_template",
             side_effect=RuntimeError("boom"),
@@ -244,4 +250,26 @@ def test_generate_universal_individual_update_template_action_reraises_unexpecte
 
     universal_update.refresh_from_db()
     assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
-    lock.release.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    ("task", "action"),
+    [
+        ("run_universal_individual_update", run_universal_individual_update_async_task_action),
+        (
+            "generate_universal_individual_update_template",
+            generate_universal_individual_update_template_async_task_action,
+        ),
+    ],
+)
+def test_universal_update_action_raises_when_lock_held(
+    task: str, action: Callable[[AsyncJob], str], program: Program, hold_lock: Callable[..., None]
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    hold_lock(task, universal_update.pk)
+
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_{task}:{universal_update.pk}"):
+        action(AsyncJob(config={"universal_update_id": str(universal_update.pk)}))
+
+    universal_update.refresh_from_db()
+    assert not universal_update.saved_logs

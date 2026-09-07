@@ -1,5 +1,21 @@
 from django import forms
 
+CONFIRMATION_PHRASE = "I confirm"
+
+
+class ConfirmDangerForm(forms.Form):
+    confirmation = forms.CharField(label=f'Type "{CONFIRMATION_PHRASE}" to proceed')
+
+    def clean_confirmation(self) -> str:
+        value = self.cleaned_data["confirmation"]
+        if value != CONFIRMATION_PHRASE:
+            raise forms.ValidationError(f'You must type "{CONFIRMATION_PHRASE}" exactly.')
+        return value
+
+
+class CeleryLockDeleteForm(ConfirmDangerForm):
+    key = forms.CharField(widget=forms.HiddenInput)
+
 
 class ClearCacheForm(forms.Form):
     # Report

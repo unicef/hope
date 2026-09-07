@@ -76,7 +76,7 @@ class VerificationPlanStatusChangeServices:
     def activate(self) -> PaymentVerificationPlan:
         lock = cache.lock(
             f"payment_verification_plan_activate_rapidpro_{str(self.payment_verification_plan.id)}",
-            timeout=60 * 5,
+            expire=60 * 5,
         )
         if not lock.acquire(blocking=False):
             raise ValidationError("RapidPro activation already in progress")

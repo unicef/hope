@@ -9,6 +9,7 @@ from django.utils.module_loading import import_string
 from sentry_sdk import set_tag
 
 from hope.apps.core.celery import app
+from hope.apps.core.celery_lock import NonRetriableTaskError
 from hope.apps.utils.logs import log_start_and_end
 from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncJob, AsyncRetryJob, PeriodicAsyncJob, XLSXKoboTemplate
@@ -25,10 +26,6 @@ DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MAX_AGE_SECONDS = max(
     12 * 60 * 60,
     DEFAULT_RECOVER_MISSING_ASYNC_JOBS_MIN_AGE_SECONDS,
 )
-
-
-class NonRetriableTaskError(Exception):
-    pass
 
 
 def set_async_job_sentry_tags(job: AsyncJob | PeriodicAsyncJob, model_label: str) -> None:

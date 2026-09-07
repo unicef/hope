@@ -445,7 +445,7 @@ def test_activate_raises_when_cache_lock_is_taken(
     verification = rapidpro_verification_setup["verification"]
     lock_key = f"payment_verification_plan_activate_rapidpro_{verification.id}"
 
-    holder = cache.lock(lock_key, timeout=60 * 5)
+    holder = cache.lock(lock_key, expire=60 * 5)
     holder.acquire(blocking=False)
 
     try:
