@@ -1,4 +1,5 @@
 from typing import Any
+from zoneinfo import available_timezones
 
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -47,6 +48,11 @@ from hope.models import (
     PaymentVerificationSummary,
     Program,
     RoleAssignment,
+)
+
+# "Factory" is a tzdb test entry with an unspecified -00 offset, not a user-selectable timezone.
+TIMEZONE_CHOICES: tuple[dict[str, str], ...] = tuple(
+    {"name": timezone_name, "value": timezone_name} for timezone_name in sorted(available_timezones() - {"Factory"})
 )
 
 
@@ -155,6 +161,11 @@ class ChoicesViewSet(ViewSet):
 
         currencies = Currency.objects.filter(active=True).order_by("code")
         return Response(CurrencyChoiceSerializer(currencies, many=True).data)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="timezones")
+    def timezones(self, request: Request) -> Response:
+        return Response(ChoiceSerializer(TIMEZONE_CHOICES, many=True).data)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="payment-plan-status")
