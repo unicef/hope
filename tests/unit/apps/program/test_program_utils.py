@@ -1,5 +1,6 @@
 """Tests for program utility functions."""
 
+from collections.abc import Callable
 import hashlib
 import json
 from typing import Any
@@ -21,6 +22,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
+from hope.apps.core.celery_lock import lock_key
 from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
@@ -35,6 +37,7 @@ from hope.apps.program.utils import (
     generate_rdi_unique_name,
 )
 from hope.models import (
+    AsyncJob,
     BusinessArea,
     Document,
     Household,
@@ -47,6 +50,16 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
 
 
 @pytest.fixture
@@ -393,20 +406,13 @@ def test_enroll_households_to_program_task(enrollment_test_data: dict, django_ca
 @pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.xdist_group(name="elasticsearch")
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_enroll_households_to_program_task_already_running(
-    enrollment_test_data: dict, django_capture_on_commit_callbacks: Any
+def test_enroll_households_to_program_task_fails_when_lock_held(
+    enrollment_test_data: dict, django_capture_on_commit_callbacks: Any, hold_lock: Callable[..., None]
 ) -> None:
     hh_count = Household.objects.count()
     ind_count = Individual.objects.count()
-
-    task_params = {
-        "task_name": "enroll_households_to_program_async_task",
-        "household_ids": [str(enrollment_test_data["household"].id)],
-        "program_for_enroll_id": str(enrollment_test_data["program2"].pk),
-    }
-    task_params_str = json.dumps(task_params, sort_keys=True)
-    cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
-    cache.set(cache_key, True, timeout=24 * 60 * 60)
+    digest = hashlib.sha256(json.dumps([str(enrollment_test_data["household"].id)]).encode()).hexdigest()
+    hold_lock("enroll_households_to_program", enrollment_test_data["program2"].pk, digest)
 
     with django_capture_on_commit_callbacks(execute=True):
         enroll_households_to_program_async_task(
@@ -415,10 +421,13 @@ def test_enroll_households_to_program_task_already_running(
             str(enrollment_test_data["user"].pk),
         )
 
+    assert (
+        AsyncJob.objects.latest("pk").errors["exception"].startswith("Lock celery_lock_enroll_households_to_program:")
+    )
     assert hh_count == Household.objects.count()
     assert ind_count == Individual.objects.count()
 
-    cache.delete(cache_key)
+    cache.delete_celery_lock(lock_key("enroll_households_to_program", enrollment_test_data["program2"].pk, digest))
 
     with django_capture_on_commit_callbacks(execute=True):
         enroll_households_to_program_async_task(

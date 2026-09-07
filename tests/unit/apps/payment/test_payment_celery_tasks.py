@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import datetime
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
@@ -30,6 +31,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task,
@@ -86,7 +88,6 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments_async_task_action,
 )
 from hope.apps.payment.services import western_union_reports_service
-from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     AsyncJob,
     AsyncJobModel,
@@ -118,6 +119,16 @@ def queue_and_run_retry_task(
         task(*args, **kwargs)
     job = job_model.objects.latest("pk")
     return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+
+@pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
 
 
 @pytest.fixture
@@ -382,25 +393,18 @@ def test_prepare_payment_plan_task_wrong_pp_status(mock_logger: Mock) -> None:
     mock_logger.info.assert_called_with("The Payment Plan must have the status TP_OPEN.")
 
 
-@patch("hope.apps.payment.celery_tasks.logger")
-def test_prepare_payment_plan_task_already_running(mock_logger: Mock) -> None:
+def test_prepare_payment_plan_task_fails_without_retry_when_lock_held(hold_lock: Callable[..., None]) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_OPEN,
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
     )
+    hold_lock("prepare_payment_plan", payment_plan.pk)
+
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_prepare_payment_plan:{payment_plan.pk}"):
+        queue_and_run_retry_task(prepare_payment_plan_async_task, payment_plan)
+
     payment_plan.refresh_from_db()
-    pp_id_str = str(payment_plan.pk)
-    cache_key = generate_cache_key(
-        {
-            "task_name": "prepare_payment_plan_async_task",
-            "payment_plan_id": str(payment_plan.id),
-        }
-    )
-    cache.set(cache_key, True, timeout=300)
-    queue_and_run_retry_task(prepare_payment_plan_async_task, payment_plan)
-    mock_logger.info.assert_called_with(
-        f"Task prepare_payment_plan_async_task with payment_plan_id {pp_id_str} already running."
-    )
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")

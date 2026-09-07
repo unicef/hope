@@ -7,12 +7,12 @@ from uuid import UUID
 
 from concurrency.api import disable_concurrency
 from constance import config
-from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
 
 from hope.apps.core.celery import app
+from hope.apps.core.celery_lock import celery_lock
 from hope.apps.household.documents import (
     get_household_doc,
     get_individual_doc,
@@ -221,20 +221,8 @@ def enroll_households_to_program_async_task_action(job: AsyncJob) -> None:
     households_ids = job.config["households_ids"]
     program_for_enroll_id = job.config["program_for_enroll_id"]
     user_id = job.config["user_id"]
-    task_params = {
-        "task_name": "enroll_households_to_program_async_task",
-        "household_ids": sorted([str(household_id) for household_id in households_ids]),
-        "program_for_enroll_id": program_for_enroll_id,
-    }
-    task_params_str = json.dumps(task_params, sort_keys=True)
-    cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
-    if cache.get(cache_key):
-        logger.info("Task enroll_households_to_program_async_task with this data is already running.")
-        return
-
-    # 1 day timeout
-    cache.set(cache_key, True, timeout=24 * 60 * 60)
-    try:
+    households_digest = hashlib.sha256(json.dumps(sorted(map(str, households_ids))).encode()).hexdigest()
+    with celery_lock("enroll_households_to_program", program_for_enroll_id, households_digest):
         households = Household.objects.filter(pk__in=households_ids)
         program_for_enroll = Program.objects.get(id=program_for_enroll_id)
         enroll_households_to_program(households, program_for_enroll, user_id)
@@ -247,8 +235,6 @@ def enroll_households_to_program_async_task_action(job: AsyncJob) -> None:
                 Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll),
                 get_household_doc(str(program_for_enroll.id)),
             )
-    finally:
-        cache.delete(cache_key)
 
 
 def enroll_households_to_program_async_task(

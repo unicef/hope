@@ -5,7 +5,6 @@ from typing import Any, cast
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -28,7 +27,6 @@ from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     calculate_counts,
     from_received_to_status,
-    generate_cache_key,
     get_quantity_in_usd,
     log_payment_plan_change,
     log_payment_plan_group_change,
@@ -944,44 +942,29 @@ def prepare_payment_plan_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.models import PaymentPlan
 
     payment_plan_id = job.config["payment_plan_id"]
-    cache_key = generate_cache_key(
-        {
-            "task_name": "prepare_payment_plan_async_task",
-            "payment_plan_id": payment_plan_id,
-        }
-    )
-    if cache.get(cache_key):
-        logger.info(f"Task prepare_payment_plan_async_task with payment_plan_id {payment_plan_id} already running.")
-        return False
+    with celery_lock("prepare_payment_plan", payment_plan_id):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        try:
+            if payment_plan.status != PaymentPlan.Status.TP_OPEN:
+                logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
+                return False
 
-    # 10 hours timeout
-    cache.set(cache_key, True, timeout=60 * 60 * 10)
-    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+            with transaction.atomic():
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_building()
+                payment_plan.save(update_fields=("build_status", "built_at"))
+                set_sentry_business_area_tag(payment_plan.business_area.name)
 
-    try:
-        if payment_plan.status != PaymentPlan.Status.TP_OPEN:
-            logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
-            return False
-
-        with transaction.atomic():
+                PaymentPlanService.create_payments(payment_plan)
+                payment_plan.update_population_count_fields()
+                flow.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
+        except Exception:
             flow = PaymentPlanFlow(payment_plan)
-            flow.build_status_building()
+            flow.build_status_failed()
             payment_plan.save(update_fields=("build_status", "built_at"))
-            set_sentry_business_area_tag(payment_plan.business_area.name)
-
-            PaymentPlanService.create_payments(payment_plan)
-            payment_plan.update_population_count_fields()
-            flow.build_status_ok()
-            payment_plan.save(update_fields=("build_status", "built_at"))
-    except Exception:
-        flow = PaymentPlanFlow(payment_plan)
-        flow.build_status_failed()
-        payment_plan.save(update_fields=("build_status", "built_at"))
-        logger.exception("Prepare Payment Plan Error")
-        raise
-    finally:
-        cache.delete(cache_key)
-
+            logger.exception("Prepare Payment Plan Error")
+            raise
     return True
 
 

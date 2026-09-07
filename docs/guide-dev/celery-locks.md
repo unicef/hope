@@ -87,6 +87,7 @@ second job fails with `AlreadyRunningError` instead of starting a duplicate.
 
 | Lock key | Taken by |
 |----------|----------|
+| `celery_lock_prepare_payment_plan:<payment plan>` | `prepare_payment_plan_async_task_action` |
 | `celery_lock_payment_plan_full_rebuild:<payment plan>` | `payment_plan_full_rebuild_async_task_action` |
 | `celery_lock_payment_plan_rebuild_stats:<payment plan>` | `payment_plan_rebuild_stats_async_task_action` |
 | `celery_lock_export_payment_plan_group_delivery_xlsx:<payment plan group>` | delivery XLSX export |
@@ -104,6 +105,7 @@ second job fails with `AlreadyRunningError` instead of starting a duplicate.
 | `celery_lock_classify_findings_and_schedule_merge:<rdi>` | Country Workspace arrival hook |
 | `celery_lock_automate_rdi_creation:<aurora registration>` | Aurora automatic RDI creation |
 | `celery_lock_process_generic_import:<rdi>` | generic XLSX import |
+| `celery_lock_enroll_households_to_program:<programme>:<sha256 of household ids>` | enrolling households into a programme |
 
 ## Adding a lock to a task
 
