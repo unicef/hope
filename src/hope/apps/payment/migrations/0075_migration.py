@@ -4,6 +4,8 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
+import hope.models.account_attachment
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -25,7 +27,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("title", models.CharField(blank=True, default="", max_length=255)),
-                ("file", models.FileField(upload_to="")),
+                (
+                    "file",
+                    models.FileField(
+                        max_length=500,
+                        upload_to=hope.models.account_attachment.account_attachment_path,
+                    ),
+                ),
                 ("uploaded_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "account",

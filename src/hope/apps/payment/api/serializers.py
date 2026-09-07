@@ -103,10 +103,6 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
         data["account"] = account
         data["created_by"] = self.context["request"].user
 
-        if account.attachments.count() >= AccountAttachment.FILE_LIMIT:
-            raise serializers.ValidationError(
-                f"Account already has the maximum of {AccountAttachment.FILE_LIMIT} attachments."
-            )
         return data
 
     @transaction.atomic

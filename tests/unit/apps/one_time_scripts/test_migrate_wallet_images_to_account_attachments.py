@@ -136,11 +136,16 @@ def test_failed_attachment_creation_removes_the_copied_file(
     individual = IndividualFactory(flex_fields={"wallet_num_image_i_f": stored_image})
     account = AccountFactory(individual=individual, account_type=wallet_account_type)
     AccountAttachmentFactory.create_batch(AccountAttachment.FILE_LIMIT, account=account, title="other")
-    names_before = set(default_storage.listdir("")[1])
+    program = individual.program
+    attachment_dir = (
+        f"{program.start_date.year}/ba/{individual.business_area_id}/programs/{program.pk}"
+        f"/individuals/{individual.pk}/accounts/{account.pk}"
+    )
+    names_before = set(default_storage.listdir(attachment_dir)[1])
 
     migrate_wallet_images_to_account_attachments()
 
     individual.refresh_from_db()
     assert individual.flex_fields == {"wallet_num_image_i_f": stored_image}
     assert default_storage.exists(stored_image)
-    assert set(default_storage.listdir("")[1]) == names_before
+    assert set(default_storage.listdir(attachment_dir)[1]) == names_before

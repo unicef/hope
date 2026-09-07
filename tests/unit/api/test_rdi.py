@@ -392,7 +392,13 @@ def test_push_creates_account_attachments(
     attachments = list(account.attachments.all())
     assert len(attachments) == 2
     assert {attachment.title for attachment in attachments} == {"Wallet number image", ""}
-    assert all(attachment.file.name for attachment in attachments)
+    individual = hh.head_of_household
+    program = individual.program
+    expected_prefix = (
+        f"{program.start_date.year}/ba/{individual.business_area_id}/programs/{program.pk}"
+        f"/individuals/{individual.pk}/accounts/{account.pk}/"
+    )
+    assert all(attachment.file.name.startswith(expected_prefix) for attachment in attachments)
 
 
 def test_push_without_accounts_creates_no_attachments(

@@ -7,13 +7,22 @@ from django.db import models
 from hope.models.account import Account
 
 
+def account_attachment_path(instance: "AccountAttachment", filename: str) -> str:
+    individual = instance.account.individual
+    program = individual.program
+    return (
+        f"{program.start_date.year}/ba/{individual.business_area_id}/programs/{program.pk}"
+        f"/individuals/{individual.pk}/accounts/{instance.account_id}/{filename}"
+    )
+
+
 class AccountAttachment(models.Model):
     FILE_LIMIT = 10  # max 10 files per Account
     FILE_SIZE_LIMIT = 10 * 1024 * 1024  # 10 MB
 
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="attachments")
     title = models.CharField(max_length=255, blank=True, default="")
-    file = models.FileField()
+    file = models.FileField(max_length=500, upload_to=account_attachment_path)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"

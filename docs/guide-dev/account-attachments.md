@@ -13,7 +13,7 @@ An **Account Attachment** is a file attached to one of an individual's payment a
 |---|---|
 | `account` | FK to `Account`, `CASCADE` |
 | `title` | free text, optional — falls back to the file name in `__str__` |
-| `file` | `FileField` |
+| `file` | `FileField`, stored under `{program_start_year}/ba/{business_area_id}/programs/{program_id}/individuals/{individual_id}/accounts/{account_id}/` (`account_attachment_path`) |
 | `uploaded_at` | `auto_now_add`, also the `ordering` key |
 | `created_by` | FK to user, `SET_NULL`. Only the REST upload fills it in — the RDI import, the Aurora parser and the one-time script leave it null |
 
@@ -68,7 +68,7 @@ The size check for the wallet image is explicit in the service rather than left 
 
 ### Existing data
 
-Some records were imported with the wallet image written to the individual's `wallet_num_image_i_f` flex field. `src/hope/one_time_scripts/migrate_wallet_images_to_account_attachments.py` relocates those: for each such individual it copies the file to a new name, creates the attachment on that individual's `transfer_to_digital_wallet` account, and drops the flex key — the copy and the flex-key deletion happen in one transaction.
+Some records were imported with the wallet image written to the individual's `wallet_num_image_i_f` flex field. `src/hope/one_time_scripts/migrate_wallet_images_to_account_attachments.py` relocates those: for each such individual it copies the file through the model field, so the copy lands under the structured upload path, creates the attachment on that individual's `transfer_to_digital_wallet` account, and drops the flex key — the copy and the flex-key deletion happen in one transaction.
 
 Run it from the Django shell:
 

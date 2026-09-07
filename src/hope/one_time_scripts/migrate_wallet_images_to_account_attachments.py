@@ -2,7 +2,9 @@
 
 The image belongs to the wallet, not to the individual, so every ``wallet_num_image_i_f``
 flex value is copied to an AccountAttachment on that individual's digital wallet account and
-the flex key is dropped. The source file is left in storage; only the flex key is removed.
+the flex key is dropped. The copy is written through the model field, so it lands under the
+structured ``AccountAttachment.file`` upload path. The source file is left in storage; only
+the flex key is removed.
 
 Run from Django shell:
     from hope.one_time_scripts.migrate_wallet_images_to_account_attachments import (
@@ -12,7 +14,6 @@ Run from Django shell:
 """
 
 import os
-import uuid
 
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -49,15 +50,16 @@ def migrate_wallet_images_to_account_attachments() -> None:
             print(f"[SKIP] {individual.pk}: source file '{source_name}' missing from storage")
             skipped += 1
             continue
-        copied_name = None
+        attachment = AccountAttachment(account=account, title=WALLET_NUMBER_IMAGE_TITLE)
         try:
             with default_storage.open(source_name) as source:
-                copied_name = default_storage.save(_copy_name(source_name), source)
+                # The field applies upload_to; save=False leaves the DB insert to the transaction below.
+                attachment.file.save(os.path.basename(source_name), source, save=False)
             with transaction.atomic():
-                AccountAttachment.objects.create(account=account, title=WALLET_NUMBER_IMAGE_TITLE, file=copied_name)
+                attachment.save()
                 _drop_flex_field(individual)
         except Exception as e:  # noqa: BLE001 - one bad record must not stop the run
-            if copied_name:
+            if copied_name := attachment.file.name:
                 default_storage.delete(copied_name)
             print(f"[ERROR] {individual.pk}: failed to migrate '{source_name}': {e}")
             failed += 1
@@ -66,10 +68,6 @@ def migrate_wallet_images_to_account_attachments() -> None:
         migrated += 1
 
     print(f"Done. migrated={migrated} skipped={skipped} failed={failed}")
-
-
-def _copy_name(source_name: str) -> str:
-    return f"{uuid.uuid4().hex}{os.path.splitext(source_name)[1]}"
 
 
 def _drop_flex_field(individual: Individual) -> None:

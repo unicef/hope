@@ -107,3 +107,17 @@ def test_existing_attachment_can_be_updated_when_limit_reached(account: Account)
 
     attachment.refresh_from_db()
     assert attachment.title == "renamed"
+
+
+def test_file_is_stored_under_the_structured_upload_path(account: Account) -> None:
+    attachment = AccountAttachmentFactory(
+        account=account,
+        file=SimpleUploadedFile("wallet.jpg", b"abc", content_type="image/jpeg"),
+    )
+
+    individual = account.individual
+    program = individual.program
+    assert attachment.file.name.startswith(
+        f"{program.start_date.year}/ba/{individual.business_area_id}/programs/{program.pk}"
+        f"/individuals/{individual.pk}/accounts/{account.pk}/"
+    )

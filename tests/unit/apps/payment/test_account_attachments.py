@@ -186,18 +186,18 @@ def test_validate_file_extension_failure(serializer_context: dict[str, Any]) -> 
     assert serializer.errors["file"][0] == "Unsupported file type."
 
 
-def test_validate_file_limit_failure(account: Account, serializer_context: dict[str, Any]) -> None:
+def test_post_rejects_upload_when_file_limit_reached(
+    api_client: APIClient, attachments_list_url: str, attachment_user: User, account: Account
+) -> None:
     AccountAttachmentFactory.create_batch(AccountAttachment.FILE_LIMIT, account=account)
-    serializer = AccountAttachmentUploadSerializer(
-        data={"file": SimpleUploadedFile("test.jpg", b"abc", content_type="image/jpeg"), "title": "test"},
-        context=serializer_context,
-    )
+    api_client.force_authenticate(user=attachment_user)
+    data = {"file": SimpleUploadedFile("wallet.jpg", b"abc", content_type="image/jpeg"), "title": "Wallet"}
 
-    assert not serializer.is_valid()
-    assert (
-        serializer.errors["non_field_errors"][0]
-        == f"Account already has the maximum of {AccountAttachment.FILE_LIMIT} attachments."
-    )
+    response = api_client.post(attachments_list_url, data, format="multipart")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert f"Account already has the maximum of {AccountAttachment.FILE_LIMIT} attachments." in str(response.data)
+    assert AccountAttachment.objects.filter(account=account).count() == AccountAttachment.FILE_LIMIT
 
 
 def test_post_uploads_attachment(
@@ -279,7 +279,7 @@ def test_download_returns_file(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f"attachment; filename={attachment.file.name}"
+    assert response["Content-Disposition"] == f"attachment; filename={attachment.file.name.split('/')[-1]}"
 
 
 def test_download_denied_without_permission(
