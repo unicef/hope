@@ -18,6 +18,7 @@ from hope.contrib.aurora.services.nigeria_people_registration_service import Nig
 
 @smart_register(models.Registration)
 class RegistrationAdmin(CeleryLocksAdminMixin, AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
+    celery_lock_field = "source_id"
     list_display = ("name", "slug", "project", "rdi_policy")
     readonly_fields = ("name", "project", "slug", "extra", "metadata")
     list_filter = ("rdi_policy", ("project", AutoCompleteFilter))

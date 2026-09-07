@@ -2,7 +2,6 @@ from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
-from django.core.cache import cache
 from django.db import Error
 from django.test.utils import override_settings
 from openpyxl.utils.exceptions import InvalidFileException
@@ -17,7 +16,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
@@ -258,16 +257,6 @@ VALID_JSON = [
         "_id": 23456,
     },
 ]
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

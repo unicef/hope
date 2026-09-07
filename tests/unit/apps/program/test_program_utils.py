@@ -53,16 +53,6 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
-
-
-@pytest.fixture
 def afghanistan(db: Any) -> BusinessArea:
     return BusinessAreaFactory(name="Afghanistan", slug="afghanistan")
 

@@ -9,7 +9,6 @@ import uuid
 from celery.exceptions import Retry
 from constance.test import override_config
 from django.contrib.admin.options import get_content_type_for_model
-from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from flags.models import FlagState
@@ -32,7 +31,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task,
@@ -125,16 +124,6 @@ def queue_and_run_retry_task(
         task(*args, **kwargs)
     job = job_model.objects.latest("pk")
     return async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

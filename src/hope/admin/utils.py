@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -21,7 +21,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, OneToOneRel, QuerySet
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from jsoneditor.forms import JSONEditor
@@ -186,10 +186,12 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
 
 
 class CeleryLocksAdminMixin(ExtraButtonsMixin):
+    celery_lock_field = "pk"
+
     @button(permission=lambda request, obj, handler: is_root(request), label="Remove task locks")
     def remove_task_locks(self, request: HttpRequest, pk: str) -> HttpResponse:
-        obj = get_object_or_404(self.model, pk=pk)
-        locks = celery_locks_for(obj)
+        obj = cast("Model", self.get_object(request, pk))
+        locks = celery_locks_for(getattr(obj, self.celery_lock_field))
         form = ConfirmDangerForm(request.POST or None)
         if request.method == "POST" and form.is_valid():
             for key in locks:

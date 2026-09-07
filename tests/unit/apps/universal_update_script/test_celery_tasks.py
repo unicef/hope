@@ -3,11 +3,10 @@ from unittest.mock import patch
 
 from celery.exceptions import SoftTimeLimitExceeded
 from constance.test import override_config
-from django.core.cache import cache
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
@@ -39,16 +38,6 @@ pytestmark = [
     pytest.mark.xdist_group(name="elasticsearch"),
     pytest.mark.usefixtures("django_elasticsearch_setup"),
 ]
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

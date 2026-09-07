@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from django.db import transaction
 
 from hope.apps.core.celery import app
-from hope.apps.core.celery_lock import AlreadyRunningError, celery_lock
+from hope.apps.core.celery_lock import LOCK_QUEUE_WAIT, AlreadyRunningError, celery_lock
 from hope.apps.registration_data.exceptions import WrongStatusError
 from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.registration_data.tasks.rdi_program_population_create import (
@@ -441,7 +441,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> dict:
 
 
 def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
-    with celery_lock("deduplicate_documents"):
+    with celery_lock("deduplicate_documents", wait=LOCK_QUEUE_WAIT):
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         with transaction.atomic():
             documents_query = Document.objects.filter(

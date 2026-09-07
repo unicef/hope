@@ -113,6 +113,11 @@ Both ask you to type `I confirm` before anything is deleted.
     twice, corrupted counters. Only remove a lock when Flower shows no running task for it, or the
     worker that held it is known to be gone.
 
+A task whose lock was removed keeps running; when it finishes it logs a warning about the missing
+lock and still reports its normal result. Restarting a job from the admin (for example *restart
+preparing payment plan*) does not release the lock of the killed job either - the new job simply
+waits for it to expire, so "Task is already running" can show for up to five minutes afterwards.
+
 Every removal is written to the admin log (*Recent actions*, and the *Log entries* admin) with the
 user, the lock key and, for the button, the object it was removed for.
 

@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.celery import app
-from hope.apps.core.celery_lock import celery_lock
+from hope.apps.core.celery_lock import LOCK_QUEUE_WAIT, celery_lock
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.core.utils import (
     send_email_notification,
@@ -259,7 +259,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
             if service.payment_plans and service.payment_generate_token_and_order_numbers:
                 program = payment_plan_group.cycle.program
                 with (
-                    celery_lock("payment_plan_generate_token_and_order_numbers", program.id),
+                    celery_lock("payment_plan_generate_token_and_order_numbers", program.id, wait=LOCK_QUEUE_WAIT),
                     transaction.atomic(),
                 ):
                     service.generate_token_and_order_numbers(program)

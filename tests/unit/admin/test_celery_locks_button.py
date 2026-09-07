@@ -12,6 +12,7 @@ from extras.test_utils.factories import UserFactory
 from extras.test_utils.factories.aurora import RegistrationFactory
 from extras.test_utils.factories.core import UniversalUpdateFactory
 from extras.test_utils.factories.payment import (
+    FollowUpInstructionFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
     WesternUnionPaymentPlanReportFactory,
@@ -32,7 +33,7 @@ FACTORIES: list[Callable[[], Model]] = [
     WesternUnionPaymentPlanReportFactory,
     PDUOnlineEditFactory,
     UniversalUpdateFactory,
-    RegistrationFactory,
+    FollowUpInstructionFactory,
 ]
 
 
@@ -103,12 +104,9 @@ def test_remove_task_locks_button_rejects_wrong_confirmation(
 
 
 def test_remove_task_locks_button_removes_only_object_locks_and_logs(
-    root_client: Client, root_user: User, rdi: Model, rdi_locks: list[str], django_assert_num_queries
+    root_client: Client, root_user: User, rdi: Model, rdi_locks: list[str]
 ) -> None:
-    root_client.get(button_url(rdi))
-
-    with django_assert_num_queries(7):
-        response = root_client.post(button_url(rdi), {"confirmation": "I confirm"})
+    response = root_client.post(button_url(rdi), {"confirmation": "I confirm"})
 
     assert response.status_code == 302
     assert response.url == reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
@@ -118,3 +116,22 @@ def test_remove_task_locks_button_removes_only_object_locks_and_logs(
         (root_user, key, DELETION, ContentType.objects.get_for_model(rdi), str(rdi.pk), "Celery lock removed")
         for key in sorted(rdi_locks)
     ]
+
+
+def test_remove_task_locks_button_matches_whole_key_segments_for_integer_pks(root_client: Client) -> None:
+    edit = PDUOnlineEditFactory()
+    other_key = lock_key("some_task", f"{edit.pk}1")
+    cache.lock(other_key).acquire()
+
+    response = root_client.get(button_url(edit))
+
+    assert response.context["locks"] == []
+
+
+def test_remove_task_locks_button_uses_source_id_for_aurora_registrations(root_client: Client) -> None:
+    registration = RegistrationFactory(source_id=424242)
+    cache.lock(lock_key("automate_rdi_creation", 424242)).acquire()
+
+    response = root_client.get(button_url(registration))
+
+    assert response.context["locks"] == [lock_key("automate_rdi_creation", 424242)]

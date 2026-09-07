@@ -24,12 +24,6 @@ class LocMemLock:
     def release(self) -> None:
         self.cache.delete(self.key)
 
-    def extend(self, expire: float | None = None) -> bool:
-        return bool(self.cache.touch(self.key, expire or self.expire))
-
-    def locked(self) -> bool:
-        return self.cache.has_key(self.key)
-
 
 class LocMemCache(DjangoLocMemCache):
     def delete_pattern(self, pattern: str) -> None:

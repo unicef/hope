@@ -36,9 +36,9 @@ def payment_plan_full_rebuild_async_task_action(job: AsyncRetryJob) -> None:
 | Backend | [python-redis-lock](https://python-redis-lock.readthedocs.io/) through the `default` cache (`hope.apps.core.cache.RedisCache`) |
 | Key | `celery_lock_<task>:<param>[:<param>...]` – `<task>` is the action name without `_async_task_action`, parameters are usually the object id |
 | TTL | 5 minutes (`LOCK_EXPIRE`), renewed by a heartbeat thread every ~200 s while the task runs |
-| Waiting | up to 6 minutes (`LOCK_WAIT`) for a held lock, then give up |
+| Waiting | up to 6 minutes (`LOCK_WAIT`) for a held lock, then give up; locks that serialise *different* work (global or per programme) pass `wait=LOCK_QUEUE_WAIT`, 30 minutes |
 | Held lock | `AlreadyRunningError` – the job fails and is **not** retried |
-| Release | always, including when the task raises |
+| Release | always, including when the task raises; a lock that already expired or was removed from the admin is logged as a warning, not raised |
 
 !!! danger "A held lock is a failure, never a skip"
     `AlreadyRunningError` is a `NonRetriableTaskError`. `async_retry_job_task` stores the message
@@ -91,7 +91,7 @@ second job fails with `AlreadyRunningError` instead of starting a duplicate.
 | `celery_lock_payment_plan_full_rebuild:<payment plan>` | `payment_plan_full_rebuild_async_task_action` |
 | `celery_lock_payment_plan_rebuild_stats:<payment plan>` | `payment_plan_rebuild_stats_async_task_action` |
 | `celery_lock_export_payment_plan_group_delivery_xlsx:<payment plan group>` | delivery XLSX export |
-| `celery_lock_payment_plan_generate_token_and_order_numbers:<programme>` | nested inside the export above |
+| `celery_lock_payment_plan_generate_token_and_order_numbers:<programme>` | nested inside the export above (queue lock, 30 min wait) |
 | `celery_lock_send_payment_plan_reconciliation_overdue_email:<payment plan>` | reconciliation overdue e-mail |
 | `celery_lock_send_to_payment_gateway:<payment plan>` | sending instructions to Payment Gateway |
 | `celery_lock_payment_plan_exclude_beneficiaries:<payment plan>` | excluding beneficiaries |
@@ -106,14 +106,14 @@ second job fails with `AlreadyRunningError` instead of starting a duplicate.
 | `celery_lock_import_payment_plan_group_delivery_from_xlsx:<payment plan group>` | group reconciliation XLSX import |
 | `celery_lock_copy_program:<new programme>` | copying a programme's population |
 | `celery_lock_send_western_union_report_email_notifications:<report>` | Western Union report e-mails |
-| `celery_lock_merge_pdu_online_edit` | PDU online edit merge (global, one merge at a time) |
+| `celery_lock_merge_pdu_online_edit` | PDU online edit merge (global queue lock, 30 min wait) |
 | `celery_lock_run_universal_individual_update:<universal update>` | universal update run |
 | `celery_lock_generate_universal_individual_update_template:<universal update>` | universal update template |
 | `celery_lock_registration_xlsx_import:<rdi>` | RDI XLSX import |
 | `celery_lock_registration_kobo_import:<rdi>` | RDI Kobo import |
 | `celery_lock_registration_program_population_import:<rdi>` | RDI import from another programme |
 | `celery_lock_merge_registration_data_import:<rdi>` | RDI merge |
-| `celery_lock_deduplicate_documents` | document deduplication inside the merge (global) |
+| `celery_lock_deduplicate_documents` | document deduplication inside the merge (global queue lock, 30 min wait) |
 | `celery_lock_classify_findings_and_schedule_merge:<rdi>` | Country Workspace arrival hook |
 | `celery_lock_automate_rdi_creation:<aurora registration>` | Aurora automatic RDI creation |
 | `celery_lock_process_generic_import:<rdi>` | generic XLSX import |
@@ -123,29 +123,29 @@ second job fails with `AlreadyRunningError` instead of starting a duplicate.
 
 1. Pick the task name: the action function name without `_async_task_action`.
 2. Pass the identifiers that define "the same work" as parameters. Omit them only when the lock is
-   deliberately global.
+   deliberately global, and then pass `wait=LOCK_QUEUE_WAIT`: a held global lock means another
+   object is being processed, not a duplicate.
 3. Wrap the body in `with celery_lock(...)`. Do not catch `AlreadyRunningError`.
 4. If the object has an admin page, add `CeleryLocksAdminMixin` (`hope.admin.utils`) so the lock
-   can be removed from there. The button matches locks by the object's primary key in the key.
+   can be removed from there. The button matches locks whose key has a segment equal to the
+   object's primary key (`celery_lock_field` on the admin picks another attribute, e.g. `source_id`).
 
 ## Tests
 
 Unit and e2e tests run with `CACHE_ENABLED=false`, which selects `hope.apps.core.memcache.LocMemCache`.
-Its `lock()` returns `LocMemLock`, an in-process object with the same `acquire` / `release` /
-`extend` / `locked` API and no renewal thread. Locks are therefore private to each pytest-xdist
+Its `lock()` returns `LocMemLock`, an in-process object with the same `acquire` / `release` API and
+no renewal thread. Locks are therefore private to each pytest-xdist
 worker and cleared with the cache between tests.
 
-To test the held-lock path, hold the lock yourself and shorten the wait:
+To test the held-lock path use the `hold_lock` fixture from `tests/unit/conftest.py`: it holds
+the lock for you and sets the wait to zero.
 
 ```python
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+def test_action_fails_when_lock_held(hold_lock: Callable[..., None]) -> None:
+    hold_lock("payment_plan_full_rebuild", payment_plan.pk)
 
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
+    with pytest.raises(AlreadyRunningError):
+        payment_plan_full_rebuild_async_task_action(job)
 ```
 
 ---

@@ -5,7 +5,6 @@ import json
 from unittest.mock import ANY, Mock, patch
 import uuid
 
-from django.core.cache import cache
 from django.utils import timezone
 from freezegun import freeze_time
 import pytest
@@ -22,7 +21,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.household.celery_tasks import (
     calculate_children_fields_for_not_collected_individual_data_async_task,
     cleanup_indexes_in_inactive_programs_async_task,
@@ -57,16 +56,6 @@ def create_async_job(action: str, config: dict, program: Program | None = None) 
         config=config,
         program=program,
     )
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

@@ -2,7 +2,6 @@ from collections.abc import Callable
 from typing import Any
 from unittest.mock import patch
 
-from django.core.cache import cache
 import pytest
 
 from extras.test_utils.factories.account import PartnerFactory
@@ -18,7 +17,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.registration_data.celery_tasks import (
     registration_program_population_import_async_task,
@@ -52,16 +51,6 @@ def run_registration_program_population_import_task(
         }
     )
     return registration_program_population_import_async_task_action(job)
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

@@ -5,7 +5,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 
 from hope.apps.core.celery import app
-from hope.apps.core.celery_lock import celery_lock
+from hope.apps.core.celery_lock import LOCK_QUEUE_WAIT, celery_lock
 from hope.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PDUXlsxExportTemplateService,
 )
@@ -115,7 +115,7 @@ def generate_pdu_online_edit_data_async_task(pdu_online_edit: PDUOnlineEdit, fil
 
 
 def merge_pdu_online_edit_async_task_action(job: AsyncRetryJob) -> bool:
-    with celery_lock("merge_pdu_online_edit"):
+    with celery_lock("merge_pdu_online_edit", wait=LOCK_QUEUE_WAIT):
         pdu_online_edit = PDUOnlineEdit.objects.get(id=job.config["pdu_online_edit_id"])
         try:
             service = PDUOnlineEditMergeService(pdu_online_edit)

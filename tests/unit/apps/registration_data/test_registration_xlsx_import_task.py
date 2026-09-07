@@ -3,28 +3,17 @@ from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
 
-from django.core.cache import cache
 import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.registration_data.celery_tasks import (
     registration_xlsx_import_async_task,
     registration_xlsx_import_async_task_action,
 )
 from hope.models import AsyncRetryJob, RegistrationDataImport
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

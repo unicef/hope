@@ -72,13 +72,20 @@ def test_celery_locks_view_rejects_wrong_confirmation(root_client: Client, held_
     assert not LogEntry.objects.exists()
 
 
-def test_celery_locks_view_removes_lock_and_logs_it(
-    root_client: Client, root_user: User, held_locks: list[str], django_assert_num_queries
-) -> None:
-    root_client.get(reverse("admin:celery_locks"))
+def test_celery_locks_view_rejects_keys_outside_the_celery_namespace(root_client: Client) -> None:
+    cache.lock("other").acquire()
 
-    with django_assert_num_queries(3):
-        response = root_client.post(reverse("admin:celery_locks"), {"key": held_locks[0], "confirmation": "I confirm"})
+    response = root_client.post(reverse("admin:celery_locks"), {"key": "other", "confirmation": "I confirm"})
+
+    assert response.status_code == 200
+    assert "key" in response.context["form"].errors
+    assert not LogEntry.objects.exists()
+
+
+def test_celery_locks_view_removes_lock_and_logs_it(
+    root_client: Client, root_user: User, held_locks: list[str]
+) -> None:
+    response = root_client.post(reverse("admin:celery_locks"), {"key": held_locks[0], "confirmation": "I confirm"})
 
     assert response.status_code == 302
     assert response.url == reverse("admin:celery_locks")

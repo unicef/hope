@@ -4,7 +4,6 @@ import json
 from typing import Any, Callable, Optional
 from unittest.mock import Mock, patch
 
-from django.core.cache import cache
 from django.utils import timezone
 import pytest
 
@@ -20,7 +19,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     RegistrationFactory,
 )
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
@@ -257,16 +256,6 @@ def ukraine_context() -> dict[str, object]:
         "project": project,
         "registration": registration,
     }
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

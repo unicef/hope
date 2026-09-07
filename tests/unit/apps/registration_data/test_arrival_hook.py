@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 import uuid
 
 from celery.exceptions import Retry
-from django.core.cache import cache
 import pytest
 from requests.exceptions import RequestException
 
@@ -15,7 +14,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.household.const import DUPLICATE, DUPLICATE_IN_BATCH, UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
@@ -45,16 +44,6 @@ def queue_and_run_retry_task(task: object, *args: object, **kwargs: object) -> o
 def mock_deduplication_engine_env_vars(settings) -> None:
     settings.DEDUPLICATION_ENGINE_API_KEY = "TEST"
     settings.DEDUPLICATION_ENGINE_API_URL = "TEST/"
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture

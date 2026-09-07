@@ -18,8 +18,8 @@ from hope.apps.utils.security import is_root
 logger = logging.getLogger(__name__)
 
 
-def celery_locks_for(obj: Model) -> list[str]:
-    return [key for key in cache.celery_lock_keys() if str(obj.pk) in key]
+def celery_locks_for(object_id: object) -> list[str]:
+    return [key for key in cache.celery_lock_keys() if str(object_id) in key.split(":")[1:]]
 
 
 def grouped_celery_locks() -> dict[str, list[str]]:

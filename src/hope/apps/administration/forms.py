@@ -4,17 +4,15 @@ CONFIRMATION_PHRASE = "I confirm"
 
 
 class ConfirmDangerForm(forms.Form):
-    confirmation = forms.CharField(label=f'Type "{CONFIRMATION_PHRASE}" to proceed')
-
-    def clean_confirmation(self) -> str:
-        value = self.cleaned_data["confirmation"]
-        if value != CONFIRMATION_PHRASE:
-            raise forms.ValidationError(f'You must type "{CONFIRMATION_PHRASE}" exactly.')
-        return value
+    confirmation = forms.RegexField(
+        regex=f"^{CONFIRMATION_PHRASE}$",
+        label=f'Type "{CONFIRMATION_PHRASE}" to proceed',
+        error_messages={"invalid": f'You must type "{CONFIRMATION_PHRASE}" exactly.'},
+    )
 
 
 class CeleryLockDeleteForm(ConfirmDangerForm):
-    key = forms.CharField(widget=forms.HiddenInput)
+    key = forms.RegexField(regex="^celery_lock_", widget=forms.HiddenInput)
 
 
 class ClearCacheForm(forms.Form):

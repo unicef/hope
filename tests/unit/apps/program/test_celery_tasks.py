@@ -2,11 +2,10 @@ from collections.abc import Callable
 from unittest.mock import Mock, patch
 import uuid
 
-from django.core.cache import cache
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.program.celery_tasks import (
     adjust_program_size_async_task,
@@ -17,16 +16,6 @@ from hope.apps.program.celery_tasks import (
 from hope.models import AsyncJob, Program
 
 pytestmark = pytest.mark.django_db
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @patch("hope.apps.program.celery_tasks.program_copied.send")

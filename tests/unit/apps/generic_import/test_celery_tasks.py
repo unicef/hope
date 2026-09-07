@@ -1,8 +1,7 @@
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 import contextlib
 from unittest.mock import MagicMock, Mock, patch
 
-from django.core.cache import cache
 from django_celery_boost.models import AsyncJobModel
 import pytest
 
@@ -13,7 +12,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     UserFactory,
 )
-from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.generic_import.celery_tasks import (
     process_generic_import_async_task,
     process_generic_import_async_task_action,
@@ -90,16 +89,6 @@ def mock_importer_class() -> Generator[MagicMock, None, None]:
         importer.import_data.return_value = []
         mock_cls.return_value = importer
         yield mock_cls
-
-
-@pytest.fixture
-def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
-    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
-
-    def _hold(task: str, *parts: object) -> None:
-        cache.lock(lock_key(task, *parts)).acquire()
-
-    return _hold
 
 
 @pytest.fixture
