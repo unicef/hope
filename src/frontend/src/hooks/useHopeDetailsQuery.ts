@@ -18,5 +18,5 @@ export const useHopeDetailsQuery = <TData, TOptions = any>(
       } as TOptions),
     enabled: !!businessAreaSlug && !!programCode,
     ...options,
-  }) as UseQueryResult<TData>;
+  });
 };

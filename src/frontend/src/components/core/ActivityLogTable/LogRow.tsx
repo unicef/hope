@@ -1,9 +1,9 @@
 import { ReactElement, useState } from 'react';
-import moment from 'moment';
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { ActivityLogEntry } from './types';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
@@ -52,7 +52,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
     return (
       <Row role="checkbox" data-cy="log-row">
         <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.userDisplayName || logEntry.user || null}
@@ -78,7 +78,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
         data-cy={`log-row-${logEntry.id}`}
       >
         <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.userDisplayName || logEntry.user || null}

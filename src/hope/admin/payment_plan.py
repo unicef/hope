@@ -18,12 +18,14 @@ from django.utils.html import format_html
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
-from hope.apps.payment.forms import BatchReexportForm
+from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentItemAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.utils.security import is_root
-from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
+from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
     AsyncJob,
     Payment,
@@ -39,7 +41,7 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
+class FundsCommitmentItemInline(admin.TabularInline):
     model = FundsCommitmentItem
     extra = 0
     can_delete = False
@@ -120,11 +122,22 @@ def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
     return payment_plan.can_send_to_vision
 
 
+def can_recover_vision_funds_commitment(payment_plan: PaymentPlan) -> bool:
+    return VisionService.can_recover_with_funds_commitment_items(payment_plan)
+
+
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
     return payment_plan.is_payment_gateway and payment_plan.status in [
         PaymentPlan.Status.ACCEPTED,
         PaymentPlan.Status.FINISHED,
     ]
+
+
+def can_retry_payment_gateway_send(payment_plan: PaymentPlan) -> bool:
+    return (
+        payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
+        and payment_plan.can_send_to_payment_gateway
+    )
 
 
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
@@ -375,28 +388,96 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
 
     @button(
         visible=lambda btn: can_send_to_vision(btn.original),
-        permission="payment.pm_send_payment_plan",
+        permission="payment.pm_manage_vision_workflow",
     )
     def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            try:
-                response = VisionAPI().send_payment_plan(payment_plan)
-                self.message_user(
-                    request,
-                    f"Payment plan sent to Vision successfully: {response.get('messageId', '')}",
-                    level="success",
-                )
-            except VisionAPIError as e:
-                self.message_user(request, f"Failed to send to Vision: {e}", level="warning")
-            except VisionAPIMissingCredentialsError as e:
-                self.message_user(request, f"Vision API not configured: {e}", level="error")
+            send_payment_plan_to_vision_async_task(payment_plan, str(request.user.pk))
+            self.message_user(request, "Sending Payment Plan to Vision started", level="success")
             return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
         return confirm_action(
             modeladmin=self,
             request=request,
             action=self.send_to_vision,
             message="Do you confirm to send this payment plan to Vision?",
+        )
+
+    @button(
+        visible=lambda btn: can_recover_vision_funds_commitment(btn.original),
+        permission="payment.pm_manage_vision_workflow",
+        label="Assign Vision FC Items",
+    )
+    def assign_vision_funds_commitment_items(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        payment_plan = PaymentPlan.objects.select_related("business_area", "created_by").get(pk=pk)
+        form = VisionFundsCommitmentItemAssignmentForm(
+            data=request.POST or None,
+            payment_plan=payment_plan,
+        )
+        if request.method == "POST" and form.is_valid():
+            try:
+                with transaction.atomic():
+                    locked_payment_plan = (
+                        PaymentPlan.objects.select_for_update().select_related("business_area", "created_by").get(pk=pk)
+                    )
+                    VisionService.recover_with_funds_commitment_items(
+                        locked_payment_plan,
+                        form.cleaned_data["funds_commitment_items"],
+                    )
+            except FundsCommitmentAssignmentError:
+                form.add_error(
+                    "funds_commitment_items",
+                    "Select one or more available Funds Commitment Items from the same group.",
+                )
+            else:
+                self.message_user(
+                    request,
+                    "Funds Commitment Items assigned and the Vision flow continued.",
+                    level=messages.SUCCESS,
+                )
+                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "original": payment_plan,
+            "payment_plan": payment_plan,
+            "vision_receipt_unconfirmed": not payment_plan.sent_to_vision,
+            "form": form,
+            "funds_commitment_options": form.funds_commitment_options,
+            "selected_funds_commitment_item_ids": request.POST.getlist("funds_commitment_items"),
+            "title": "Assign Vision Funds Commitment Items",
+        }
+        return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
+
+    @button(
+        visible=lambda btn: can_retry_payment_gateway_send(btn.original),
+        permission="payment.pm_sync_payment_plan_with_pg",
+    )
+    def retry_payment_gateway_send(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            payment_plan = PaymentPlan.objects.select_related("program_cycle").get(pk=pk)
+            program_id = payment_plan.program_cycle.program_id
+            old_payment_plan = copy_model_object(payment_plan)
+            payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+                input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+                user=request.user,
+            )
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=program_id,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
+            self.message_user(request, "Payment Gateway send retry started", level="success")
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.retry_payment_gateway_send,
+            message="Do you confirm retrying the Payment Gateway send for this Payment Plan?",
         )
 
     def has_add_permission(self: Any, request: Any) -> bool:

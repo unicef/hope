@@ -125,5 +125,5 @@ The card is only rendered for users holding `POPULATION_VIEW_INDIVIDUAL_DELIVERY
 
 ## Migrations
 
-- `payment/0074_migration.py` — creates the table. Additive only: a new model, two nullable-safe FKs, no change to `Account` or `Individual`.
+- `payment/0075_migration.py` — creates the table. Additive only: a new model, two nullable-safe FKs, no change to `Account` or `Individual`.
 - The flex-field cleanup is **not** a migration. It is the one-time script above, run deliberately after deploy.

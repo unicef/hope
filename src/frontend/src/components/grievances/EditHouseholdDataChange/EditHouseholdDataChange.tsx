@@ -46,14 +46,8 @@ function EditHouseholdDataChange({
           values.selectedIndividual?.programCode));
 
   const { data: individualsChoices } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasIndividualsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasIndividualsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+    queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     enabled: Boolean(businessArea),
   });
   const roleChoices = individualsChoices?.roleChoicesForGrievance || [];
