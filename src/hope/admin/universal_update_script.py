@@ -7,6 +7,8 @@ from django.contrib import admin
 from django.contrib.admin.widgets import AutocompleteSelect, FilteredSelectMultiple
 from django.contrib.postgres.forms import SimpleArrayField
 from django.db.models import Q, QuerySet
+from django.db.models.fields.related import ForeignKey
+from django.forms import ModelChoiceField
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
@@ -204,7 +206,9 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         ),
     )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "program":
             kwargs["queryset"] = Program.objects.select_related("business_area")
             kwargs["widget"] = ProgramAutocompleteSelect(db_field, self.admin_site)

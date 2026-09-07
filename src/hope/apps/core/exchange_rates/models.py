@@ -1,5 +1,5 @@
 import dataclasses
-from datetime import datetime
+from datetime import date, datetime
 
 from dateutil.parser import parse
 from django.conf import settings
@@ -28,7 +28,7 @@ class HistoryExchangeRate:
             past_ratio=float(data["PAST_RATIO"]),
         )
 
-    def is_valid(self, dispersion_date: datetime) -> bool:
+    def is_valid(self, dispersion_date: date) -> bool:
         dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
         return self.valid_from <= dispersion_date <= self.valid_to
 
@@ -67,7 +67,7 @@ class SingleExchangeRate:
             historical_exchange_rates=list(map(HistoryExchangeRate.from_dict, past_xrates)),
         )
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> float | None:
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: date) -> float | None:
         if self.is_valid(dispersion_date):
             return self.calc_exchange_rate()
 
@@ -80,7 +80,7 @@ class SingleExchangeRate:
     def calc_exchange_rate(self) -> float:
         return self.x_rate * self.ratio
 
-    def is_valid(self, dispersion_date: datetime) -> bool:
+    def is_valid(self, dispersion_date: date) -> bool:
         if not dispersion_date:
             return True
 
@@ -114,7 +114,7 @@ class ExchangeRates:
             return response_json
         return self.api_client.fetch_exchange_rates()
 
-    def get_exchange_rate_for_currency_code(self, currency_code: str | None, dispersion_date: datetime) -> float | None:
+    def get_exchange_rate_for_currency_code(self, currency_code: str | None, dispersion_date: date) -> float | None:
         if currency_code is None:
             return None
 

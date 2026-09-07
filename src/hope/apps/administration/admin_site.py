@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from constance import config
 from django.contrib import messages
 from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache, caches
+from django.http import HttpRequest
 from django.shortcuts import render
 from django.urls import path
 from django.utils.html import format_html
@@ -12,7 +13,7 @@ from smart_admin.site import SmartAdminSite
 from hope.apps.administration.forms import ClearCacheForm
 
 if TYPE_CHECKING:
-    from django.http import HttpRequest, HttpResponse
+    from django.http import HttpResponse
 
 cache = caches["default"]
 
@@ -21,7 +22,7 @@ def clean(v: str) -> str:
     return v.replace(r"\n", "").strip()
 
 
-def get_bookmarks(request: Any) -> list:
+def get_bookmarks(request: HttpRequest) -> list:
     quick_links = []
     for entry in config.QUICK_LINKS.split("\n"):
         if entry := clean(entry):
