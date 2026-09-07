@@ -318,12 +318,15 @@ class BiometricDeduplicationService:
         ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
 
         if exclude_not_valid:
-            qs.exclude(similarity_score=0)
+            qs = qs.exclude(similarity_score=0)
 
         return qs.distinct()
 
     def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
+        from hope.apps.grievance.services.biometric_photo_ticket import (
+            create_biometrics_photo_data_change_tickets,
+        )
         from hope.apps.grievance.services.needs_adjudication_ticket_services import (
             create_needs_adjudication_tickets_for_biometrics,
         )
@@ -332,7 +335,11 @@ class BiometricDeduplicationService:
             rdi, rdi_merged=True, exclude_not_valid=False
         )
 
-        create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)
+        photo_error_codes = DeduplicationEngineSimilarityPair.StatusCode.photo_error_codes()
+        create_needs_adjudication_tickets_for_biometrics(
+            deduplication_pairs.exclude(status_code__in=photo_error_codes), rdi
+        )
+        create_biometrics_photo_data_change_tickets(deduplication_pairs.filter(status_code__in=photo_error_codes), rdi)
 
     def fetch_biometric_deduplication_results_and_process(
         self, program: Program, rdi: RegistrationDataImport | None = None

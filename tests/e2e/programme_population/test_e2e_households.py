@@ -56,6 +56,10 @@ def add_household(create_programs) -> Household:
         head_of_household=hoh,
         country_origin=afghanistan_country,
         country=afghanistan_country,
+        kab_female_age_group_0_5_count=2,
+        kab_female_age_group_0_5_disabled_count=1,
+        kab_male_age_group_0_5_count=0,
+        kab_size=3,
     )
     household.unicef_id = "HH-00-0000.1380"
     household.save()
@@ -97,7 +101,7 @@ class TestSmokeHouseholds:
         page_households.get_nav_programme_population().click()
         page_households.get_nav_households().click()
         page_households.get_households_row_by_number(0).click()
-        assert "7" in page_households_details.get_label_household_size().text
+        assert "3" in page_households_details.get_label_household_size().text
         assert "Displaced | Refugee / Asylum Seeker" in page_households_details.get_label_residence_status().text
         assert "Agata Kowalska" in page_households_details.get_label_head_of_household().text
         assert "Afghanistan" in page_households_details.get_label_country().text
@@ -131,3 +135,10 @@ class TestSmokeHouseholds:
             add_household.registration_data_import.imported_by.email
             in page_households_details.get_label_user_name().text
         )
+
+        assert "Known Affected Beneficiaries" in page_households_details.get_known_affected_beneficiaries().text
+        # age group, females, with disability, pregnant, (spacer), males, with disability;
+        # the unset male disabled counter renders as "-", the zero as "0"
+        assert page_households_details.get_row05().text.split() == ["0", "-", "5", "2", "1", "-", "0", "-"]
+        assert "3" in page_households_details.get_kab_size().text
+        assert page_households_details.get_kab_info().is_displayed()

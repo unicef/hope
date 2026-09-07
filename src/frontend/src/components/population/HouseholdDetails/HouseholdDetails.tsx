@@ -59,7 +59,7 @@ export function HouseholdDetails({
         <Grid container spacing={3}>
           <Grid size={3}>
             <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
-              {household?.size}
+              {household?.kabSize ?? '-'}
             </LabelizedField>
           </Grid>
           <Grid size={3}>

@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 import zipfile
 
 from admin_extra_buttons.decorators import button, choice
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
@@ -30,8 +31,9 @@ from hope.admin.utils import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
+from hope.apps.household.celery_tasks import rebuild_program_indexes_async_task
 from hope.apps.household.forms import CreateTargetPopulationTextForm
-from hope.apps.household.services.index_management import check_program_indexes, rebuild_program_indexes
+from hope.apps.household.services.index_management import check_program_indexes
 from hope.apps.registration_data.api.deduplication_engine import DeduplicationEngineAPI
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.apps.targeting.celery_tasks import create_tp_from_list_async_task
@@ -386,13 +388,30 @@ class ProgramAdmin(
         return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
 
     @button(permission="account.can_reindex_programs", label="Rebuild Index", visible=False)
-    def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
+    def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponse:
         program = Program.objects.get(pk=pk)
-        ok, msg = rebuild_program_indexes(str(program.id))
-        level = messages.SUCCESS if ok else messages.ERROR
-        message = "Rebuild indexes for program successful." if ok else f"Failed to rebuild indexes: {msg}"
-        messages.add_message(request, level, message)
-        return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
+
+        def _rebuild(request: HttpRequest) -> HttpResponseRedirect:
+            job = rebuild_program_indexes_async_task(str(program.id), owner=request.user)
+            if job is None:
+                messages.add_message(
+                    request, messages.WARNING, "A rebuild for this program is already running - not queued again."
+                )
+            else:
+                messages.add_message(request, messages.SUCCESS, f"Rebuild scheduled [{job.pk}]AsyncJob")
+            return HttpResponseRedirect(reverse("admin:program_program_change", args=[pk]))
+
+        return confirm_action(
+            self,
+            request,
+            _rebuild,
+            message="""<h1>DESTRUCTIVE: rebuilds the LIVE Elasticsearch indexes of this program</h1>
+            <h3>The current indexes are DELETED first — search and deduplication return empty results
+            until repopulation finishes (runs in the background as an AsyncJob). This does NOT touch
+            aliases/versions; for mapping changes use the blue-green reindex tooling instead.</h3>
+            """,
+            pk=pk,
+        )
 
     @button(label="Bulk Upload Individual Photos", permission="program.can_bulk_upload_individual_photos")
     def bulk_upload_individuals_photos(self, request: HttpRequest, pk: int) -> TemplateResponse:

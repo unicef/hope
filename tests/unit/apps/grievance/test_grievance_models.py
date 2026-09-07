@@ -7,8 +7,10 @@ import pytest
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     GrievanceTicketFactory,
+    TicketSystemFlaggingDetailsFactory,
     UserFactory,
 )
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_CALL_CENTER, SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket
 
 pytestmark = pytest.mark.django_db
@@ -34,6 +36,22 @@ def ticket_grievance_complaint_no_issue_type(business_area: Any, user: Any) -> A
         issue_type=None,
         business_area=business_area,
         created_by=user,
+    )
+
+
+@pytest.fixture
+def system_flagging_ticket(business_area: Any) -> Any:
+    return TicketSystemFlaggingDetailsFactory(ticket__business_area=business_area).ticket
+
+
+@pytest.fixture
+def photo_error_ticket(business_area: Any, user: Any) -> Any:
+    return GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_PHOTO,
+        business_area=business_area,
+        created_by=user,
+        submission_channel=SUBMISSION_CHANNEL_HOPE,
     )
 
 
@@ -85,3 +103,31 @@ def test_get_issue_type_returns_label_when_issue_type_is_set(business_area: Any,
     result = ticket.get_issue_type()
     assert result != ""
     assert "Individual" in str(result)
+
+
+def test_system_generated_ticket_gets_hope_submission_channel(system_flagging_ticket: Any) -> None:
+    system_flagging_ticket.refresh_from_db()
+    assert system_flagging_ticket.submission_channel == SUBMISSION_CHANNEL_HOPE
+
+
+def test_manual_ticket_without_channel_keeps_null_submission_channel(
+    ticket_grievance_complaint_no_issue_type: Any,
+) -> None:
+    ticket_grievance_complaint_no_issue_type.refresh_from_db()
+    assert ticket_grievance_complaint_no_issue_type.submission_channel is None
+
+
+def test_system_ticket_submission_channel_forced_to_hope(system_flagging_ticket: Any) -> None:
+    system_flagging_ticket.submission_channel = SUBMISSION_CHANNEL_CALL_CENTER
+    system_flagging_ticket.save()
+
+    system_flagging_ticket.refresh_from_db()
+    assert system_flagging_ticket.submission_channel == SUBMISSION_CHANNEL_HOPE
+
+
+def test_system_issue_type_submission_channel_forced_to_hope(photo_error_ticket: Any) -> None:
+    photo_error_ticket.submission_channel = SUBMISSION_CHANNEL_CALL_CENTER
+    photo_error_ticket.save()
+
+    photo_error_ticket.refresh_from_db()
+    assert photo_error_ticket.submission_channel == SUBMISSION_CHANNEL_HOPE

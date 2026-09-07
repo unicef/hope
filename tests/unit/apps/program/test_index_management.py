@@ -212,6 +212,14 @@ def test_populate_program_indexes_empty_program(
 # --- rebuild_program_indexes ---
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
+def test_rebuild_program_indexes_refuses_when_elasticsearch_disabled(program: Program) -> None:
+    ok, msg = rebuild_program_indexes(str(program.id))
+
+    assert ok is False
+    assert "disabled" in msg
+
+
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_rebuild_program_indexes(
     django_elasticsearch_setup: None, create_program_es_index: Callable, program: Program

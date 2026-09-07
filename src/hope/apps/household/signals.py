@@ -130,7 +130,7 @@ def capture_program_old_status(sender: type[Program], instance: Program, **kwarg
 @receiver(post_save, sender="program.Program")
 def handle_program_status_change(sender: type[Program], instance: Program, created: bool, **kwargs: Any) -> None:
     """Manage Elasticsearch indexes based on Program status changes."""
-    from hope.apps.household.services.index_management import rebuild_program_indexes
+    from hope.apps.household.services.index_management import ensure_program_indexes
     from hope.models import Program
 
     if not _is_elasticsearch_enabled():
@@ -140,7 +140,7 @@ def handle_program_status_change(sender: type[Program], instance: Program, creat
     current_status = instance.status
     try:
         if old_status != current_status and current_status == Program.ACTIVE:
-            rebuild_program_indexes(str(instance.pk))
+            ensure_program_indexes(str(instance.pk))
     except Exception as e:  # pragma: no cover  # noqa
         logger.error(f"Failed to manage indexes for program {instance.id}: {e}")
     instance.__dict__.pop("_old_status", None)

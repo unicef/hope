@@ -1,3 +1,6 @@
+from datetime import UTC, datetime
+
+from freezegun import freeze_time
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -10,6 +13,8 @@ from hope.models import APIToken, BusinessArea, Program, User
 from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
+
+ASSIGNED_AT = datetime(2030, 6, 1, 10, 30, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -98,6 +103,33 @@ def test_create_beneficiary_ticket_all_fields(
     resp_data = response.json()
     assert resp_data["assigned_to"]["id"] == str(assignee.id)
     assert resp_data["assigned_to"]["email"] == assignee.email
+
+
+def test_create_beneficiary_ticket_records_the_assignment(
+    authenticated_client: APIClient, url: str, api_token: APIToken, assignee: User
+) -> None:
+    data = {"description": "Assigned beneficiary ticket", "assigned_to": str(assignee.id)}
+
+    with freeze_time(ASSIGNED_AT):
+        response = authenticated_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+
+    ticket = GrievanceTicket.objects.get(id=response.json()["id"])
+    assert ticket.assigned_at == ASSIGNED_AT
+    assert ticket.assigned_by == api_token.user
+
+
+def test_create_unassigned_beneficiary_ticket_records_no_assignment(authenticated_client: APIClient, url: str) -> None:
+    data = {"description": "Unassigned beneficiary ticket"}
+
+    response = authenticated_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+
+    ticket = GrievanceTicket.objects.get(id=response.json()["id"])
+    assert ticket.assigned_at is None
+    assert ticket.assigned_by is None
 
 
 def test_create_beneficiary_ticket_missing_description(authenticated_client: APIClient, url: str) -> None:

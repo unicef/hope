@@ -848,3 +848,40 @@ def test_grievance_ticket_count_changes_when_ticket_programs_change(
     response = api_client.get(count_url)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["count"] == 9
+
+
+def test_grievance_ticket_list_query_count_does_not_grow_with_page_size(
+    api_client: Any,
+    list_url: str,
+    user: User,
+    afghanistan: BusinessArea,
+    setup_grievance_tickets: list[GrievanceTicket],
+    create_user_role_with_permissions: Callable,
+) -> None:
+    # Regression guard for ticket 331051
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    # Warm the per-request caches the first call populates (business area version, the
+    # user's permissions) so the two measured calls differ only in page size.
+    api_client.get(list_url, {"limit": 1})
+
+    with CaptureQueriesContext(connection) as three_rows:
+        response_three = api_client.get(list_url, {"limit": 3})
+    with CaptureQueriesContext(connection) as six_rows:
+        response_six = api_client.get(list_url, {"limit": 6})
+
+    assert len(response_three.json()["results"]) == 3
+    assert len(response_six.json()["results"]) == 6
+    assert len(six_rows.captured_queries) == len(three_rows.captured_queries)

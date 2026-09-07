@@ -316,6 +316,17 @@ def test_filter_by_excluded_id(client: Any, list_url: str, afghanistan: Business
     assert response_data[0]["id"] == str(individual2.id)
 
 
+def test_filter_by_several_excluded_ids(
+    client: Any, list_url: str, afghanistan: BusinessArea, program: Program
+) -> None:
+    individual1, individual2 = _create_test_individuals(program, afghanistan)
+
+    response = client.get(list_url, {"excluded_id": f"{individual1.id},{individual2.id}"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == []
+
+
 @pytest.mark.parametrize(
     ("program_status", "filter_value", "expected_results"),
     [

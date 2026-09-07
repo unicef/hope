@@ -15,6 +15,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
@@ -337,6 +338,7 @@ def test_create_na_tickets_biometrics(biometric_context: dict[str, Any]) -> None
 
     assert grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION
     assert grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
+    assert grievance_ticket.submission_channel == SUBMISSION_CHANNEL_HOPE
     assert na_ticket.is_multiple_duplicates_version is True
     assert na_ticket.extra_data["dedup_engine_similarity_pair"] == pair_1.serialize_for_ticket()
 

@@ -9,6 +9,7 @@ import { NeedsAdjudicationDetailsOld } from '../NeedsAdjudication/NeedsAdjudicat
 import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
+import { RequestedPhotoErrorDataChange } from '../RequestedPhotoErrorDataChange';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
@@ -100,6 +101,16 @@ function GrievancesApproveSection({
     ) {
       return (
         <RequestedHouseholdDataChange
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
+    }
+    if (
+      ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR
+    ) {
+      return (
+        <RequestedPhotoErrorDataChange
           ticket={ticket}
           canApproveDataChange={canApproveDataChange}
         />

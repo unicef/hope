@@ -43,7 +43,6 @@ class Filters(BaseComponents):
     filters_priority = 'div[data-cy="filters-priority"]'
     filters_urgency = 'div[data-cy="filters-urgency"]'
     filters_active_tickets = 'div[data-cy="filters-active-tickets"]'
-    filters_program_state = 'div[data-cy="filters-program-state"]'
     filters_residence_status = 'div[data-cy="filters-residence-status"]'
     hh_filters_search = 'div[data-cy="hh-filters-search"]'
     hh_filters_residence_status = 'div[data-cy="hh-filters-residence-status"]'
@@ -144,9 +143,6 @@ class Filters(BaseComponents):
 
     def get_filters_active_tickets(self) -> WebElement:
         return self.wait_for(self.filters_active_tickets)
-
-    def get_filters_program_state(self) -> WebElement:
-        return self.wait_for(self.filters_program_state)
 
     def get_filters_sector(self) -> WebElement:
         return self.wait_for(self.filters_sector)

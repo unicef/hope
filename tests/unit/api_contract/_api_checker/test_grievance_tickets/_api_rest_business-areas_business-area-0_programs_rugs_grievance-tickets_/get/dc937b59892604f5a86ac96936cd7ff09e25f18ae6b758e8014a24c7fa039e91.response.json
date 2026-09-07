@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "913"
+        "Content-Length": "939"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/rugs/grievance-tickets/?limit=50&offset=50",
@@ -19,7 +19,7 @@
             {
                 "id": "5bf2b7e4-ce8b-417e-b2f3-0cb041f40fdb",
                 "admin": "",
-                "unicef_id": "GRV-0000001",
+                "unicef_id": "GRV-0000003",
                 "status": 1,
                 "household_unicef_id": "",
                 "individual_unicef_id": "",
@@ -37,6 +37,7 @@
                 "issue_type": 16,
                 "priority": 0,
                 "urgency": 0,
+                "submission_channel": null,
                 "created_at": "2025-01-01T00:00:00Z",
                 "created_by": {
                     "id": "102782d8-ef45-472d-bee9-18cc807899b6",

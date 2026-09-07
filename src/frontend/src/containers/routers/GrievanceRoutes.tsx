@@ -2,8 +2,10 @@ import { useRoutes, Navigate } from 'react-router-dom';
 import EditFeedbackPage from '../pages/accountability/feedback/EditFeedbackPage';
 import CreateGrievancePage from '../pages/grievances/CreateGrievancePage';
 import EditGrievancePage from '../pages/grievances/EditGrievancePage';
+import PictureErrorEditPage from '../pages/grievances/PictureErrorEditPage';
 import GrievancesDetailsPage from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import GrievancesTablePage from '../pages/grievances/GrievancesTablePage';
+import NaTicketsManagementPage from '../pages/grievances/NaTicketsManagementPage';
 import { ReactElement } from 'react';
 import CreateFeedbackPage from '@containers/pages/accountability/feedback/CreateFeedbackPage';
 import FeedbackDetailsPage from '@containers/pages/accountability/feedback/FeedbackDetailsPage';
@@ -28,6 +30,10 @@ export const GrievanceRoutes = (): ReactElement => {
           element: <EditGrievancePage />,
         },
         {
+          path: 'edit-ticket/picture-error/:id',
+          element: <PictureErrorEditPage />,
+        },
+        {
           path: 'tickets/user-generated/:id',
           element: <GrievancesDetailsPage />,
         },
@@ -50,6 +56,10 @@ export const GrievanceRoutes = (): ReactElement => {
         {
           path: 'tickets/system-generated',
           element: <GrievancesTablePage />,
+        },
+        {
+          path: 'na-tickets-management',
+          element: <NaTicketsManagementPage />,
         },
         {
           path: 'dashboard',

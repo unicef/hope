@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -463,7 +464,7 @@ class GrievanceMutationMixin:
             create_grievance_documents(approver, ticket, documents)
 
     @staticmethod
-    def _apply_ticket_field_updates(ticket: GrievanceTicket, input_data: dict) -> None:
+    def _apply_ticket_field_updates(ticket: GrievanceTicket, input_data: dict, editor: User) -> None:
         priority = input_data.pop("priority", ticket.priority)
         if priority != ticket.priority:
             ticket.priority = priority
@@ -471,6 +472,8 @@ class GrievanceMutationMixin:
         urgency = input_data.pop("urgency", ticket.urgency)
         if urgency != ticket.urgency:
             ticket.urgency = urgency
+
+        ticket.submission_channel = input_data.pop("submission_channel", ticket.submission_channel)
 
         if partner := input_data.pop("partner", None):
             ticket.partner = partner
@@ -482,6 +485,7 @@ class GrievanceMutationMixin:
         linked_tickets = input_data.pop("linked_tickets", [])
         ticket.linked_tickets.set(linked_tickets)
         ticket.user_modified = timezone.now()
+        ticket.user_modified_by = editor
 
         for field, value in input_data.items():
             current_value = getattr(ticket, field, None)
@@ -492,9 +496,10 @@ class GrievanceMutationMixin:
         self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
     ) -> None:
         if assigned_to != ticket.assigned_to:
-            messages.append(GrievanceNotification(ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
             self._set_status_based_on_assigned_to(approver, ticket, messages)
             ticket.assigned_to = assigned_to
+            ticket.assigned_at = timezone.now()
+            ticket.assigned_by = approver
         elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
             messages.append(
@@ -502,6 +507,7 @@ class GrievanceMutationMixin:
                     ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
+                    editor=approver,
                 )
             )
 
@@ -509,13 +515,13 @@ class GrievanceMutationMixin:
         messages = []
         self._handle_document_operations(approver, grievance_ticket, input_data)
         assigned_to = input_data.pop("assigned_to", None)
-        self._apply_ticket_field_updates(grievance_ticket, input_data)
+        self._apply_ticket_field_updates(grievance_ticket, input_data, editor=approver)
         self._handle_assignment_change(approver, grievance_ticket, assigned_to, messages)
 
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
 
-        GrievanceNotification.send_all_notifications(messages)
+        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(messages))
         return grievance_ticket
 
     def _set_status_based_on_assigned_to(
@@ -534,6 +540,7 @@ class GrievanceMutationMixin:
                     grievance_ticket,
                     GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
                     approver=approver,
+                    editor=approver,
                 )
             )
 

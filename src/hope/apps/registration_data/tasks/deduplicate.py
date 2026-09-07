@@ -11,6 +11,7 @@ from django.db.models.functions import Concat
 from psycopg2._psycopg import IntegrityError
 
 from hope.apps.core.utils import to_dict
+from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
     DUPLICATE,
@@ -1055,6 +1056,7 @@ class HardDocumentDeduplication:
 
         ticket = GrievanceTicket(
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            submission_channel=SUBMISSION_CHANNEL_HOPE,
             business_area=business_area,
             admin2=admin_level_2,
             area=area,

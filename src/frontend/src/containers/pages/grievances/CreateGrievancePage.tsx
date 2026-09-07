@@ -316,6 +316,7 @@ const CreateGrievancePage = (): ReactElement => {
     issueType: null,
     priority: null,
     urgency: null,
+    submissionChannel: null,
     partner: null,
     program: isAllPrograms ? '' : selectedProgram?.id || '',
     comments: null,

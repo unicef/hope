@@ -49,7 +49,8 @@ export function ReassignMultipleRoleBox({
   }
   const selectedIndividualsToReassign =
     ticket.ticketDetails.selectedDuplicates?.filter(
-      (el) => el.role === 'PRIMARY' || el.role === 'HEAD',
+      (el) =>
+        el.role === 'PRIMARY' || el.id === el.household?.headOfHousehold?.id,
     );
   const mappedReassignLookups = (): ReactElement => (
     <>
@@ -84,11 +85,11 @@ export function ReassignMultipleRoleBox({
                   label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
                 >
                   <ContentLink
-                    href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
+                    href={`/${baseUrl}/population/individuals/${selectedIndividualToReassign.id}`}
                   >
-                    {householdAndRole.individual.unicefId}
+                    {selectedIndividualToReassign.unicefId}
                   </ContentLink>{' '}
-                  {householdAndRole.individual.fullName}
+                  {selectedIndividualToReassign.fullName}
                 </LabelizedField>
                 <LabelizedField
                   label={t(`${beneficiaryGroup?.groupLabel.toUpperCase()} ID`)}
@@ -148,11 +149,11 @@ export function ReassignMultipleRoleBox({
                     )}
                   >
                     <ContentLink
-                      href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                      href={`/${baseUrl}/population/individuals/${selectedIndividualToReassign.id}`}
                     >
-                      {ticket.individual.unicefId}
+                      {selectedIndividualToReassign.unicefId}
                     </ContentLink>{' '}
-                    {ticket.individual.fullName}
+                    {selectedIndividualToReassign.fullName}
                   </LabelizedField>
                   <LabelizedField
                     label={t(
@@ -160,7 +161,7 @@ export function ReassignMultipleRoleBox({
                     )}
                   >
                     <ContentLink
-                      href={`/${baseUrl}/population/household/${ticket?.household.id}`}
+                      href={`/${baseUrl}/population/household/${household?.id}`}
                     >
                       {household.unicefId}
                     </ContentLink>

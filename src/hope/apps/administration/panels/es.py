@@ -19,13 +19,25 @@ logger = logging.getLogger(__name__)
 
 
 class EsForm(forms.Form):
+    # actions that write into the LIVE indexes behind the aliases - extra confirmation required
+    LIVE_INDEX_ACTIONS = {"rebuild_search_index", "populate_all_indexes"}
     ACTIONS = [
         ("info", "info()"),
         ("test_connection", "test_connection()"),
-        ("rebuild_search_index", "rebuild_search_index()"),
-        ("populate_all_indexes", "populate_all_indexes()"),
+        ("rebuild_search_index", "rebuild_search_index() — DESTRUCTIVE: DELETES and repopulates ALL live indexes"),
+        ("populate_all_indexes", "populate_all_indexes() — writes into ALL live indexes"),
     ]
     action = forms.ChoiceField(choices=ACTIONS, widget=forms.RadioSelect)
+    confirm_live_index_write = forms.BooleanField(
+        required=False,
+        label="I understand this touches the LIVE indexes (not the blue-green reindex tooling)",
+    )
+
+    def clean(self) -> dict:
+        cleaned = super().clean() or {}
+        if cleaned.get("action") in self.LIVE_INDEX_ACTIONS and not cleaned.get("confirm_live_index_write"):
+            self.add_error("confirm_live_index_write", "Required for actions that write into live indexes.")
+        return cleaned
 
 
 class ElasticsearchPanel:

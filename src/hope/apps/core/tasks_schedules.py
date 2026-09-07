@@ -23,6 +23,11 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute="*/20"),
         "options": periodic_queue_options(),
     },
+    "daily_grievance_digest_async_task": {
+        "task": "hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
+        "schedule": crontab(minute=0, hour=6),
+        "options": periodic_queue_options(),
+    },
     "extract_records_async_task": {
         "task": "hope.contrib.aurora.celery_tasks.extract_records_async_task",
         "schedule": crontab(minute=0, hour=0),

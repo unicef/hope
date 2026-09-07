@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from copy import deepcopy
 from datetime import date
 from typing import Any
@@ -5,7 +6,9 @@ from typing import Any
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.core.files.storage import default_storage
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import (
@@ -22,13 +25,17 @@ from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     can_close_as_unique,
     find_open_unique_identifiers_ticket_for_individual,
 )
+from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
+    AccountSerializer,
     HouseholdSimpleSerializer,
     IndividualForTicketSerializer,
+    IndividualRoleInHouseholdSerializer,
 )
+from hope.apps.household.const import HEAD
 from hope.apps.payment.api.serializers import PaymentVerificationSerializer
 from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
-from hope.models import BusinessArea, Individual, Program
+from hope.models import BusinessArea, Household, Individual
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
@@ -163,8 +170,8 @@ class DeduplicationResultSerializer(serializers.Serializer):
     distinct = serializers.BooleanField(default=False)
 
     def get_unicef_id(self, obj: Any) -> str:
-        individual = Individual.all_objects.get(id=obj.get("hit_id"))
-        return str(individual.unicef_id)
+        individual = Individual.all_objects.filter(id=obj.get("hit_id")).first()
+        return str(individual.unicef_id) if individual else ""
 
     def get_age(self, obj: Any) -> int | None:
         date_of_birth = obj.get("dob")
@@ -194,30 +201,152 @@ class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
     status_code = serializers.CharField()
 
 
+def can_view_biometric_results(context: Mapping[str, Any]) -> bool:
+    request = context["request"]
+    business_area = BusinessArea.objects.filter(slug=request.parser_context["kwargs"]["business_area_slug"]).first()
+    return request.user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, business_area)
+
+
+def find_score(hits: list[dict] | None, individual_id: str) -> float | None:
+    for hit in hits or []:
+        if str(hit.get("hit_id") or "") == individual_id and hit.get("score") is not None:
+            return float(hit["score"])
+    return None
+
+
 class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
     golden_records = DeduplicationResultSerializer(many=True)
     possible_duplicate = DeduplicationResultSerializer(many=True)
     dedup_engine_similarity_pair = serializers.SerializerMethodField()
 
     def get_dedup_engine_similarity_pair(self, obj: Any) -> dict:
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-        if program_code := self.context["request"].parser_context["kwargs"].get("program_code"):
-            scope = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
-        else:
-            scope = BusinessArea.objects.filter(slug=business_area_slug).first()
-        if self.context["request"].user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, scope):
+        if self.context["na_can_view_biometric_results"]:
             return DeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
         return {}
 
 
+class NaRoleHouseholdSerializer(serializers.ModelSerializer):
+    active_individuals_count = serializers.SerializerMethodField()
+
+    def get_active_individuals_count(self, obj: Household) -> int:
+        # annotated by the retrieve queryset
+        annotated = getattr(obj, "active_individuals_count_annotated", None)
+        return obj.active_individuals.count() if annotated is None else annotated
+
+    class Meta:
+        model = Household
+        fields = ("id", "unicef_id", "withdrawn", "active_individuals_count")
+
+
+class NaRoleInHouseholdSerializer(serializers.Serializer):
+    role = serializers.CharField()
+    household = NaRoleHouseholdSerializer()
+
+
+class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
+    household = HouseholdForTicketSerializer()  # type: ignore[assignment]
+    role = serializers.SerializerMethodField()
+    roles_in_households = IndividualRoleInHouseholdSerializer(source="households_and_roles", many=True)
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "household",
+            "full_name",
+            "birth_date",
+            "last_registration_date",
+            "sex",
+            "deduplication_golden_record_results",
+            "duplicate",
+            "documents",
+            "program_code",
+            "role",
+            "roles_in_households",
+        )
+
+    def get_role(self, obj: Individual) -> str | None:
+        role = obj.households_and_roles.filter(household=obj.household).first()
+        return role.role if role else None
+
+
+class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
+    roles_in_households = serializers.SerializerMethodField()
+    accounts = serializers.SerializerMethodField()
+    similarity_score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "household",
+            "full_name",
+            "given_name",
+            "family_name",
+            "phone_no",
+            "birth_date",
+            "last_registration_date",
+            "sex",
+            "deduplication_golden_record_results",
+            "duplicate",
+            "documents",
+            "accounts",
+            "program",
+            "program_code",
+            "roles_in_households",
+            "similarity_score",
+        )
+
+    @extend_schema_field(AccountSerializer(many=True))
+    def get_accounts(self, obj: Individual) -> ReturnDict:
+        if self.context["request"].user.has_perm(
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
+            obj.program,
+        ):
+            queryset = obj.accounts(manager="all_objects").all()
+        else:
+            queryset = obj.accounts.none()
+        return AccountSerializer(queryset, many=True).data
+
+    @extend_schema_field(NaRoleInHouseholdSerializer(many=True))
+    def get_roles_in_households(self, obj: Individual) -> list[dict]:
+        roles = NaRoleInHouseholdSerializer(obj.households_and_roles.all(), many=True)
+        data = list(roles.data)
+        if obj.is_head():
+            data.append({"role": HEAD, "household": NaRoleHouseholdSerializer(obj.household).data})
+        return data
+
+    def get_similarity_score(self, obj: Individual) -> float | None:
+        """Score of this individual against the ticket's golden record; None on the golden record itself.
+
+        Biometric tickets store one engine score for the pair; the other types store one hit per duplicate
+        in the golden record's deduplication results.
+        """
+        ticket_details: TicketNeedsAdjudicationDetails | None = self.context.get("na_ticket_details")
+        individual_id = str(obj.id)
+        if ticket_details is None or individual_id == str(ticket_details.golden_records_individual_id):
+            return None
+
+        extra_data = ticket_details.extra_data or {}
+        pair = extra_data.get("dedup_engine_similarity_pair") or {}
+        if self.context.get("na_can_view_biometric_results") and pair.get("similarity_score") is not None:
+            pair_ids = {str((pair.get(side) or {}).get("id") or "") for side in ("individual1", "individual2")}
+            if individual_id in pair_ids:
+                return float(pair["similarity_score"])
+
+        return find_score(extra_data.get("golden_records"), individual_id)
+
+
 class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
-    has_duplicated_document = serializers.SerializerMethodField()
+    has_duplicated_document = serializers.BooleanField(read_only=True)
     can_close_as_unique = serializers.SerializerMethodField()
-    golden_records_individual = IndividualForTicketSerializer()
+    golden_records_individual = IndividualForNaComparisonSerializer()
     extra_data = serializers.SerializerMethodField()
-    possible_duplicate = IndividualForTicketSerializer()
-    possible_duplicates = IndividualForTicketSerializer(many=True)
-    selected_duplicates = IndividualForTicketSerializer(source="selected_individuals", many=True)
+    possible_duplicate = IndividualForNaComparisonSerializer()
+    possible_duplicates = IndividualForNaComparisonSerializer(many=True)
+    selected_duplicates = IndividualForNeedsAdjudicationSerializer(source="selected_individuals", many=True)
     selected_individual = IndividualForTicketSerializer()
     selected_distinct = IndividualForTicketSerializer(many=True)
 
@@ -238,8 +367,13 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
             "role_reassign_data",
         )
 
-    def get_has_duplicated_document(self, obj: TicketNeedsAdjudicationDetails) -> bool:
-        return obj.has_duplicated_document
+    def to_representation(self, instance: TicketNeedsAdjudicationDetails) -> dict:
+        self._context = {
+            **self.context,
+            "na_ticket_details": instance,
+            "na_can_view_biometric_results": can_view_biometric_results(self.context),
+        }
+        return super().to_representation(instance)
 
     def get_can_close_as_unique(self, obj: TicketNeedsAdjudicationDetails) -> bool:
         return can_close_as_unique(obj)

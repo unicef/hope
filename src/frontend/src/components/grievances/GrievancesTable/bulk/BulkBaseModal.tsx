@@ -39,6 +39,7 @@ interface BulkBaseModalProps {
   children?: ReactNode;
   onSave: (tickets: GrievanceTicketList[]) => Promise<void>;
   disabledSave?: boolean;
+  saveLabel?: string;
 }
 
 export function BulkBaseModal({
@@ -49,6 +50,7 @@ export function BulkBaseModal({
   children,
   onSave,
   disabledSave,
+  saveLabel,
 }: BulkBaseModalProps): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
@@ -122,7 +124,7 @@ export function BulkBaseModal({
               onClick={onAccept}
               disabled={disabledSave}
             >
-              {t('SAVE')}
+              {saveLabel ?? t('SAVE')}
             </Button>
           </DialogActions>
         </DialogFooter>

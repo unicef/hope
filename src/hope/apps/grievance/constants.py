@@ -22,6 +22,21 @@ URGENCY_CHOICES = (
     (URGENCY_NOT_URGENT, _("Not urgent")),
 )
 
+# Submission channel a grievance came in through. The MANUAL channels are user-selectable on
+# creation; HOPE is reserved for system-generated tickets (set automatically, not selectable).
+SUBMISSION_CHANNEL_CALL_CENTER = 1
+SUBMISSION_CHANNEL_REDRESSAL_DESK = 2
+SUBMISSION_CHANNEL_COMMUNITY_OUTREACH = 3
+SUBMISSION_CHANNEL_SUGGESTION_BOX = 4
+SUBMISSION_CHANNEL_HOPE = 5
+SUBMISSION_CHANNEL_MANUAL_CHOICES = (
+    (SUBMISSION_CHANNEL_CALL_CENTER, _("Call Center")),
+    (SUBMISSION_CHANNEL_REDRESSAL_DESK, _("Grievances Redressal Desk at Distribution Site")),
+    (SUBMISSION_CHANNEL_COMMUNITY_OUTREACH, _("Community Outreach")),
+    (SUBMISSION_CHANNEL_SUGGESTION_BOX, _("Suggestion Boxes")),
+)
+SUBMISSION_CHANNEL_CHOICES = SUBMISSION_CHANNEL_MANUAL_CHOICES + ((SUBMISSION_CHANNEL_HOPE, _("HOPE Generated")),)
+
 
 # Callable choices wrappers: passed to model fields as ``choices=get_*_choices`` so that
 # changing the underlying tuple does not generate a (no-op) migration.
@@ -31,3 +46,7 @@ def get_priority_choices() -> tuple:
 
 def get_urgency_choices() -> tuple:
     return URGENCY_CHOICES
+
+
+def get_submission_channel_choices() -> tuple:
+    return SUBMISSION_CHANNEL_CHOICES

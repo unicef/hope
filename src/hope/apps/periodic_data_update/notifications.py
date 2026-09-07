@@ -3,12 +3,12 @@ from typing import Any
 
 from constance import config
 from django.conf import settings
-from django.db.models import Q, QuerySet
-from django.utils import timezone
+from django.db.models import QuerySet
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.mailjet import MailjetClient
-from hope.models import PDUOnlineEdit, RoleAssignment, User
+from hope.apps.utils.recipients import users_with_permissions
+from hope.models import PDUOnlineEdit, User
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,6 @@ class PDUOnlineEditNotification:
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
         permission = self.ACTION_TO_RECIPIENTS_PERMISSIONS_MAP[self.action]
-        business_area = self.pdu_online_edit.business_area
-        program = self.pdu_online_edit.program
 
         # Get authorized users for this PDU Edit
         authorized_user_ids = list(self.pdu_online_edit.authorized_users.values_list("id", flat=True))
@@ -73,27 +71,15 @@ class PDUOnlineEditNotification:
         if not authorized_user_ids:
             return User.objects.none()
 
-        role_assignments = (
-            RoleAssignment.objects.filter(
-                Q(role__permissions__contains=[permission])
-                & Q(business_area=business_area)
-                & (Q(program=None) | Q(program=program))
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .distinct()
-        )
-
-        users = (
-            User.objects.filter(
-                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
+        return (
+            users_with_permissions(
+                self.pdu_online_edit.business_area,
+                [permission],
+                [self.pdu_online_edit.program],
             )
             .filter(id__in=authorized_user_ids)  # Only authorized users
             .exclude(id=self.action_user.id)
-            .distinct()
         )
-        if not config.NOTIFY_INTERNAL_USERS:
-            users = users.exclude(is_superuser=True)
-        return users
 
     def _prepare_email(self) -> MailjetClient:
         body_variables = self._prepare_body_variables()

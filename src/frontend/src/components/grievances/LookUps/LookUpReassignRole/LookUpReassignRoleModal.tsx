@@ -120,6 +120,11 @@ export function LookUpReassignRoleModal({
     getFilterFromQueryParams(location, initialFilterIND),
   );
 
+  const programScopedFilter = {
+    ...appliedFilterIND,
+    program: individual?.program ?? ticket?.programs?.[0]?.id ?? '',
+  };
+
   if (individualChoicesLoading) return <LoadingComponent />;
 
   if (!individualChoicesData) {
@@ -179,7 +184,7 @@ export function LookUpReassignRoleModal({
               isOnPaper={false}
             />
             <LookUpIndividualTable
-              filter={appliedFilterIND}
+              filter={programScopedFilter}
               setFieldValue={setFieldValue}
               valuesInner={values}
               selectedHousehold={selectedHousehold}

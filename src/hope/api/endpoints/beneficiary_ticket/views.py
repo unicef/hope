@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.request import Request
@@ -27,13 +28,16 @@ class CreateBeneficiaryTicketView(HOPEAPIBusinessAreaView, CreateAPIView):
 
         validated_data = serializer.validated_data
 
+        assigned_to = validated_data.get("assigned_to")
         ticket = GrievanceTicket.objects.create(
             business_area=self.selected_business_area,
             category=GrievanceTicket.CATEGORY_BENEFICIARY,
             description=validated_data["description"],
             priority=validated_data.get("priority", PRIORITY_NOT_SET),
             urgency=validated_data.get("urgency", URGENCY_NOT_SET),
-            assigned_to=validated_data.get("assigned_to"),
+            assigned_to=assigned_to,
+            assigned_at=timezone.now() if assigned_to else None,
+            assigned_by=request.user if assigned_to else None,
             consent=True,
             status=GrievanceTicket.STATUS_NEW,
         )

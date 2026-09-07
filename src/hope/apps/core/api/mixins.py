@@ -56,9 +56,9 @@ class BaseAPI:
                 f"Missing {self.__class__.__name__} settings: {', '.join(missing_setting_names)}"
             )
 
-    def __init__(self) -> None:
-        self.api_url = self.get_api_url()
-        self.api_key = self.get_api_key()
+    def __init__(self, api_url: str | None = None, api_key: str | None = None) -> None:
+        self.api_url = api_url if api_url is not None else self.get_api_url()
+        self.api_key = api_key if api_key is not None else self.get_api_key()
 
         if not self.api_url or (self.API_KEY_SETTING_NAME and not self.api_key):
             raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(f"Missing {self.__class__.__name__} Key/URL")
@@ -76,7 +76,7 @@ class BaseAPI:
             self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
     def get_url(self, endpoint: str) -> str:
-        return f"{self.api_url}{endpoint}"
+        return f"{self.api_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
     def validate_response(self, response: Response) -> Response:
         if not response.ok:
