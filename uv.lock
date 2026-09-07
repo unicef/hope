@@ -2205,7 +2205,7 @@ requires-dist = [
     { name = "django-sysinfo", specifier = ">=2.6,<3" },
     { name = "django-timezone-field", specifier = ">=7.2,<8" },
     { name = "django-viewflow", specifier = ">=2.2.15" },
-    { name = "djangorestframework", specifier = ">=3.13.1" },
+    { name = "djangorestframework", specifier = ">=3.18.0,<3.19" },
     { name = "drf-extensions", specifier = ">=0.7.1,<1" },
     { name = "drf-jwt", specifier = ">=1.19.2,<2" },
     { name = "drf-nested-routers", specifier = ">=0.94,<1" },

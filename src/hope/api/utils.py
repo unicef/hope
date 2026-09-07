@@ -5,8 +5,16 @@ from rest_framework.authentication import SessionAuthentication
 
 def humanize_errors(errors: dict) -> dict:
     try:
+        errs: dict[str, Any] = {}
+        if isinstance(errors, list):
+            errors = dict(enumerate(errors))
+        if errors and all(isinstance(key, int) for key in errors):
+            hh_info = _humanize_households(errors)
+            if hh_info:
+                errs["households"] = hh_info
+            return errs
+
         households = errors.pop("households", [])
-        errs = {}
         hh_info = _humanize_households(households)
         if hh_info:
             errs["households"] = hh_info
@@ -27,7 +35,7 @@ def _humanize_households(households: Any) -> list | dict:
             if h and isinstance(h, dict):
                 _humanize_members(h)
             if h:
-                hh_info_dict[f"Household #{idx}"] = [h]
+                hh_info_dict[f"Household #{int(idx) + 1}"] = [h]
         return hh_info_dict
     hh_info_list: list[dict[str, Any]] = []
     for i, h in enumerate(households, 1):
@@ -52,7 +60,7 @@ def _humanize_members_info(members: Any) -> list | dict:
     if isinstance(members, list) and len(members) == 1 and isinstance(members[0], str):
         return members
     if isinstance(members, dict):
-        return {f"Member #{k}": [m] for k, m in members.items() if m}
+        return {f"Member #{int(k) + 1}": [m] for k, m in members.items() if m}
     return {f"Member #{i}": [m] for i, m in enumerate(members, 1) if m}
 
 
