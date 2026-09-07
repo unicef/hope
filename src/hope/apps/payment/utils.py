@@ -288,7 +288,7 @@ def get_quantity_in_usd(
     amount: Decimal | None,
     currency: "Currency | None",
     exchange_rate: None | Decimal | float,
-    currency_exchange_date: datetime.datetime,
+    currency_exchange_date: datetime.date,
     exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None,
 ) -> Decimal | None:
     if amount is None:

@@ -1,7 +1,6 @@
-from typing import Any
-
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models import PaymentPlanSplit
@@ -24,5 +23,5 @@ class PaymentPlanSplitAdmin(HOPEModelAdminBase):
         "order",
     ]
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False

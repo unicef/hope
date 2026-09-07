@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.db import transaction
+from rest_framework.request import Request
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
@@ -52,7 +53,7 @@ class PaymentPlanPurposeListVersionsKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -74,7 +75,7 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:

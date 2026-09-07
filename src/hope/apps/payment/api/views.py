@@ -2211,7 +2211,7 @@ class TargetPopulationViewSet(
         url_path="pending-payments/count",
         filter_backends=[],
     )
-    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def pending_payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
         pending_payments_count = tp.payment_items.count()
         return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)

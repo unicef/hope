@@ -7,7 +7,7 @@ from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilt
 from django.contrib import admin, messages
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.shortcuts import redirect
 from django.urls import path, reverse
@@ -407,7 +407,7 @@ class BaseAsyncJobAdmin(HOPEModelAdminBase):
         return False
 
     @button(label="Recover If Missing", enabled=is_missing, permission="core.recover_missing_async_job")
-    def recover_missing(self, request: HttpRequest, pk: str) -> Any:
+    def recover_missing(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:
         job = cast("AsyncJob | PeriodicAsyncJob | None", self.get_object(request, pk))
         if job is None:
             self.message_user(request, "Async job not found", messages.ERROR)

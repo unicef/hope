@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Any, cast
 
+from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
@@ -81,7 +82,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: UploadedFile) -> UploadedFile:
         if file.size is None:
             raise serializers.ValidationError("File size is not available.")
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
@@ -155,7 +156,7 @@ class SplitPaymentPlanSerializer(serializers.Serializer):
 class PaymentPlanImportFileSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False)
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: UploadedFile) -> UploadedFile:
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:
@@ -1743,7 +1744,7 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False)
     version = serializers.IntegerField(required=False)
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: UploadedFile) -> UploadedFile:
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:

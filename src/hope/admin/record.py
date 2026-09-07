@@ -377,7 +377,7 @@ class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
     remember = forms.BooleanField(label="Remember me", required=False)
 
-    def get_signed_cookie(self, request: HttpRequest) -> Any:
+    def get_signed_cookie(self, request: HttpRequest) -> str:
         signer = Signer(key=str(request.user.password))
         return signer.sign_object(self.cleaned_data)
 

@@ -1,8 +1,7 @@
-from typing import Any
-
 from django.conf import settings
 import jwt
 from rest_framework import authentication, exceptions
+from rest_framework.request import Request
 
 from hope.models.grant import Grant
 
@@ -25,7 +24,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
     keyword = "Bearer"
     secret_key_setting: str = ""
 
-    def authenticate(self, request: Any) -> tuple[JWTUser, JWTToken] | None:
+    def authenticate(self, request: Request) -> tuple[JWTUser, JWTToken] | None:
         auth = authentication.get_authorization_header(request).split()
         if not auth or auth[0].lower() != self.keyword.lower().encode():
             return None

@@ -12,6 +12,8 @@ from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
 from django.db import Error
 from django.db.models import Count, QuerySet
+from django.db.models.fields.related import ForeignKey
+from django.forms import ModelChoiceField
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -207,7 +209,9 @@ class IndividualAdmin(
         section = "people" if obj.program.is_social_worker_program else "individuals"
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/population/{section}/{obj.id}"
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "household":
             kwargs["queryset"] = Household.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -300,7 +304,9 @@ class IndividualRoleInHouseholdAdmin(
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         if db_field.name == "household":
@@ -324,7 +330,9 @@ class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner", "copied_from", "country")
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

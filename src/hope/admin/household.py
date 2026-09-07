@@ -17,8 +17,9 @@ from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q, QuerySet
+from django.db.models.fields.related import ForeignKey
 from django.db.transaction import atomic
-from django.forms import Form
+from django.forms import Form, ModelChoiceField
 from django.http import HttpRequest, HttpResponse, HttpResponseBase, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -497,7 +498,9 @@ class HouseholdAdmin(
     def frontend_url(self, obj: Household) -> str | None:
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/population/household/{obj.id}"
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "head_of_household":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
