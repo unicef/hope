@@ -25,11 +25,9 @@ from hope.apps.household.api.caches import (
     IndividualListKeyConstructor,
 )
 from hope.apps.household.api.serializers.household import (
-    HouseholdChoicesSerializer,
     HouseholdDetailSerializer,
     HouseholdListSerializer,
     HouseholdMemberSerializer,
-    IndividualChoicesSerializer,
     RecipientSerializer,
 )
 from hope.apps.household.api.serializers.individual import (
@@ -290,7 +288,6 @@ class HouseholdGlobalViewSet(
     queryset = Household.all_merge_status_objects.exclude(program__status=Program.DRAFT).all()
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
-        "choices": HouseholdChoicesSerializer,
     }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
@@ -341,10 +338,6 @@ class HouseholdGlobalViewSet(
             .select_related("head_of_household", "program", "admin1", "admin2", "currency")
             .order_by("created_at")
         )
-
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
 
 
 class IndividualViewSet(
@@ -463,7 +456,6 @@ class IndividualGlobalViewSet(
     queryset = Individual.all_merge_status_objects.exclude(program__status=Program.DRAFT).all()
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
-        "choices": IndividualChoicesSerializer,
     }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
@@ -495,7 +487,3 @@ class IndividualGlobalViewSet(
                 )
             )
         )
-
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}, context={"business_area": self.business_area}).data)

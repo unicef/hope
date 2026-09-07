@@ -63,13 +63,8 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
-        businessAreaSlug: businessArea,
-      }),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
   if (loadingIndividual || choicesLoading || flexFieldsDataLoading)

@@ -14,7 +14,6 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 
@@ -37,8 +36,6 @@ const RegistrationFilters = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { businessAreaSlug, programCode } = useBaseUrl();
-
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,
@@ -60,13 +57,10 @@ const RegistrationFilters = ({
   const { t } = useTranslation();
   const { data: registrationChoicesData } = useQuery({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList,
-      { businessAreaSlug, programCode },
+      RestService.restChoicesRegistrationDataImportStatusesList,
     ),
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
-        { businessAreaSlug, programCode },
-      );
+      return RestService.restChoicesRegistrationDataImportStatusesList();
     },
   });
   if (!registrationChoicesData) {

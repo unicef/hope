@@ -2,16 +2,12 @@ import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { RestService } from '@restgenerated/services/RestService';
 import { YES_NO_CHOICES } from '@utils/constants';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
+import { useSexChoices } from '@hooks/useSexChoices';
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
-import { useQuery } from '@tanstack/react-query';
-import { restQueryKey } from '@utils/queryKeys';
 import { t } from 'i18next';
 import React, { FC } from 'react';
 
@@ -27,16 +23,7 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
 
   isOnPaper = true,
 }) => {
-  const { businessArea } = useBaseUrl();
-  const { data: individualChoicesData } = useQuery<IndividualChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasIndividualsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
-    queryFn: () =>
-      RestService.restBusinessAreasIndividualsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
-  });
+  const { data: sexChoices } = useSexChoices();
 
   const handleStateFilterChange = (name, value) => {
     setFilter((prevFilter) => ({
@@ -77,7 +64,7 @@ export const FilterIndividualsOffline: FC<FilterIndividualsOfflineProps> = ({
             value={filter.gender}
             data-cy="ind-filters-gender"
           >
-            {individualChoicesData?.sexChoices?.map((each) => (
+            {sexChoices?.map((each) => (
               <MenuItem key={each.value} value={each.value}>
                 {t(each.name)}
               </MenuItem>

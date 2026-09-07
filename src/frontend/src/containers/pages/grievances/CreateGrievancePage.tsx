@@ -293,7 +293,8 @@ const CreateGrievancePage = (): ReactElement => {
         : null;
 
     const alternateRole = (
-      indObject?.household?.rolesInHousehold as IndividualRoleInHouseholdForHousehold[]
+      indObject?.household
+        ?.rolesInHousehold as IndividualRoleInHouseholdForHousehold[]
     )?.find((r) => r.role === 'ALTERNATE');
     return alternateRole?.individual ?? null;
   })();
@@ -327,14 +328,8 @@ const CreateGrievancePage = (): ReactElement => {
   };
 
   const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
   const { mutateAsync, isPending: loading } = useMutation({
