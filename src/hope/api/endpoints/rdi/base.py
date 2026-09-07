@@ -99,7 +99,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
             return RegistrationDataImport.objects.get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404
@@ -133,7 +133,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             return RegistrationDataImport.objects.get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404
@@ -203,7 +203,7 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
             return RegistrationDataImport.objects.get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404

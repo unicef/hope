@@ -66,7 +66,7 @@ class DelegatePeopleRDIView(HOPEAPIBusinessAreaView, HOPEAPIView):
         try:
             return RegistrationDataImport.objects.get(
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404

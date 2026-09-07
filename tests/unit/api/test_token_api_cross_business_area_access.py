@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories import APITokenFactory, BusinessAreaFactory, ProgramFactory
+from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import APIToken, BusinessArea, Program, RegistrationDataImport, User
 from hope.models.grant import Grant
@@ -87,3 +88,37 @@ def test_create_beneficiary_ticket_for_program_from_other_business_area_is_denie
     assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
     assert "program" in response.json()
     assert not GrievanceTicket.objects.exists()
+
+
+@pytest.fixture
+def other_rdi(other_program: Program) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(
+        business_area=other_program.business_area,
+        program=other_program,
+        status=RegistrationDataImport.LOADING,
+        number_of_individuals=0,
+        number_of_households=0,
+    )
+
+
+@pytest.mark.parametrize(
+    ("url_name", "payload"),
+    [
+        ("api:rdi-push", []),
+        ("api:rdi-complete", {}),
+        ("api:rdi-delegate-people", {}),
+    ],
+)
+def test_rdi_action_in_business_area_the_token_is_not_valid_for_is_denied(
+    token_api_client: APIClient,
+    other_rdi: RegistrationDataImport,
+    url_name: str,
+    payload: list | dict,
+) -> None:
+    url = reverse(url_name, args=[other_rdi.business_area.slug, str(other_rdi.id)])
+
+    response = token_api_client.post(url, payload, format="json")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    other_rdi.refresh_from_db()
+    assert other_rdi.status == RegistrationDataImport.LOADING
