@@ -24,7 +24,7 @@ import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import type { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
 import type { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
-import type { UserChoices } from '@restgenerated/models/UserChoices';
+import type { PartnerChoices } from '@restgenerated/models/PartnerChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -81,30 +81,22 @@ const EditProgramPage = (): ReactElement => {
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasProgramsChoicesRetrieve,
-        {
-          businessAreaSlug: businessArea,
-        },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+      queryFn: () => RestService.restChoicesProgramsRetrieve(),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
     });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
-    useQuery<UserChoices>({
+    useQuery<PartnerChoices>({
       queryKey: restQueryKey(
-        RestService.restBusinessAreasUsersChoicesRetrieve,
+        RestService.restBusinessAreasPartnersChoicesRetrieve,
         {
           businessAreaSlug: businessArea,
         },
       ),
       queryFn: () =>
-        RestService.restBusinessAreasUsersChoicesRetrieve({
+        RestService.restBusinessAreasPartnersChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });

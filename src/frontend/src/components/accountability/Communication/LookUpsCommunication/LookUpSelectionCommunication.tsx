@@ -81,14 +81,8 @@ export function LookUpSelectionCommunication({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesHouseholdsRetrieve),
+      queryFn: () => RestService.restChoicesHouseholdsRetrieve(),
     });
 
   const initialFilterHH = {

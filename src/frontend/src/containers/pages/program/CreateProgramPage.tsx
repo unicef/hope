@@ -18,7 +18,7 @@ import { Box, Fade } from '@mui/material';
 import type { AreaTree } from '@restgenerated/models/AreaTree';
 import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
-import type { UserChoices } from '@restgenerated/models/UserChoices';
+import type { PartnerChoices } from '@restgenerated/models/PartnerChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -61,31 +61,23 @@ export const CreateProgramPage = (): ReactElement => {
   });
 
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
-    useQuery<UserChoices>({
+    useQuery<PartnerChoices>({
       queryKey: restQueryKey(
-        RestService.restBusinessAreasUsersChoicesRetrieve,
+        RestService.restBusinessAreasPartnersChoicesRetrieve,
         {
           businessAreaSlug: businessArea,
         },
       ),
       queryFn: () =>
-        RestService.restBusinessAreasUsersChoicesRetrieve({
+        RestService.restBusinessAreasPartnersChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasProgramsChoicesRetrieve,
-        {
-          businessAreaSlug: businessArea,
-        },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+      queryFn: () => RestService.restChoicesProgramsRetrieve(),
       staleTime: 1000 * 60 * 10,
       gcTime: 1000 * 60 * 30,
     });
@@ -108,9 +100,7 @@ export const CreateProgramPage = (): ReactElement => {
         queryKey: restQueryKey(RestService.restBusinessAreasProgramsList),
       });
       await queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsChoicesRetrieve,
-        ),
+        queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
       });
     },
   });

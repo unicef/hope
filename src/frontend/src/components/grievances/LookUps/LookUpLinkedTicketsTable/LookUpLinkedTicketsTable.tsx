@@ -11,6 +11,7 @@ import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import type { MouseEvent, ReactElement } from 'react';
 import { useState, useEffect, useMemo } from 'react';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 
@@ -31,22 +32,18 @@ export function LookUpLinkedTicketsTable({
 }: LookUpLinkedTicketsTableProps): ReactElement {
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<GrievanceChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+      queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
     });
+
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const initialQueryVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
       programCode: programId,
       search: filter.search?.trim() || '',
-      documentType: choicesData?.documentTypeChoices?.[0]?.value,
+      documentType: documentTypeChoices?.[0]?.value,
       documentNumber: filter.documentNumber?.trim() || '',
       status: filter.status ? [filter.status] : undefined,
       fsp: filter.fsp || undefined,
@@ -64,7 +61,7 @@ export function LookUpLinkedTicketsTable({
     filter.createdAtRangeMin,
     filter.createdAtRangeMax,
     filter?.admin2?.id,
-    choicesData?.documentTypeChoices,
+    documentTypeChoices,
   ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);

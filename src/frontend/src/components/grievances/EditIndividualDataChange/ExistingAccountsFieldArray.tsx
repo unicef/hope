@@ -5,18 +5,21 @@ import { EditAccountRow } from './EditAccountRow';
 import type { ReactElement } from 'react';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
 
 export interface ExistingAccountsFieldArrayProps {
   setFieldValue;
   values;
   individual: IndividualDetail;
   individualChoicesData: IndividualChoices;
+  accountFinancialInstitutionChoices: FinancialInstitutionChoice[];
 }
 
 export function ExistingAccountsFieldArray({
   values,
   individual,
   individualChoicesData,
+  accountFinancialInstitutionChoices,
 }: ExistingAccountsFieldArrayProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -43,6 +46,9 @@ export function ExistingAccountsFieldArray({
                       id={item.id}
                       arrayHelpers={arrayHelpers}
                       individualChoicesData={individualChoicesData}
+                      accountFinancialInstitutionChoices={
+                        accountFinancialInstitutionChoices
+                      }
                     />
                   </Grid>
                 </Grid>

@@ -86,6 +86,31 @@ class ProgramsRecorder(HopeRecorder):
         return item
 
 
+class UserChoicesRecorder(HopeRecorder):
+    """Recorder for the user choices endpoint.
+
+    ``role_choices[*].value`` is the Role's UUID PK. The autouse
+    ``create_role_with_all_permissions`` fixture creates that row fresh on every
+    run, so the UUID differs from the one in the baseline. Type-check it and
+    normalize it to a constant on both sides (name is still compared).
+    """
+
+    MASKED_UUID = "00000000-0000-0000-0000-000000000000"
+
+    def compare(self, response, expected, filename, view=None):
+        normalized = json.loads(json.dumps(response, cls=_checker_utils.ResponseEncoder))
+        for role in normalized.get("role_choices", []):
+            _assert_uuid(role["value"], "role_choices.value", self.view)
+        super().compare(self._mask_role_ids(normalized), self._mask_role_ids(expected), filename, view=view)
+
+    @classmethod
+    def _mask_role_ids(cls, payload):
+        roles = payload.get("role_choices")
+        if not isinstance(roles, list):
+            return payload
+        return {**payload, "role_choices": [{**role, "value": cls.MASKED_UUID} for role in roles]}
+
+
 class JsonPostRecorder(HopeRecorder):
     """Recorder for POST endpoints that send JSON bodies."""
 
