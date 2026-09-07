@@ -126,6 +126,25 @@ def test_action_arrange_plan_without_source_act_run_assert_skips_source_lock(
 
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+def test_action_arrange_plan_deleted_act_run_assert_copy_skipped(
+    get_exchange_rate_mock: Any,
+    user: User,
+    regular_pp: PaymentPlan,
+    source_payment: Payment,
+) -> None:
+    start = regular_pp.dispersion_start_date + timedelta(days=1)
+    end = regular_pp.dispersion_end_date + timedelta(days=1)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    PaymentPlanService(payment_plan=top_up_pp).delete()
+
+    result = _run_copy_action(top_up_pp)
+
+    assert result is True
+    assert top_up_pp.payment_items.count() == 0
+
+
+@freeze_time("2023-10-10")
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_eligible_consumed_by_sibling_act_run_assert_build_status_failed(
     get_exchange_rate_mock: Any,
     user: User,

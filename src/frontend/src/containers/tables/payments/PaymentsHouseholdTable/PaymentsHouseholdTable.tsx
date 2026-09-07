@@ -89,7 +89,7 @@ function PaymentsHouseholdTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
-    headOfHousehold: (_beneficiaryGroup) =>
+    hohFullName: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
     fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>

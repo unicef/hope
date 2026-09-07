@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from typing import Any
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.request import Request
@@ -24,11 +24,13 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
 )
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import Household, Individual, IndividualRoleInHousehold, User
+from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, Program, User
 
 
-def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> dict[str, str]:
-    """Map household unicef id -> individual unicef id, for one page of tickets.
+def get_fallback_individual_unicef_ids(
+    tickets: Iterable[GrievanceTicket], business_area: BusinessArea
+) -> dict[str, str]:
+    """Map household unicef id -> individual unicef id, for one page of tickets. Scoped to the business area.
 
     Only social worker programme tickets need it, so the rest of the page is skipped.
     """
@@ -42,7 +44,7 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
         return {}
 
     return dict(
-        Individual.objects.filter(household__unicef_id__in=household_unicef_ids)
+        Individual.objects.filter(business_area=business_area, household__unicef_id__in=household_unicef_ids)
         # Lowest id per household, the same individual the old per-ticket subquery picked.
         .order_by("household__unicef_id", "id")
         .distinct("household__unicef_id")
@@ -50,8 +52,8 @@ def get_fallback_individual_unicef_ids(tickets: Iterable[GrievanceTicket]) -> di
     )
 
 
-def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str, int]:
-    """Map household unicef id -> number of *other* tickets for that household, for one page."""
+def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket], business_area: BusinessArea) -> dict[str, int]:
+    """Map household unicef id -> number of *other* tickets in this business area, for one page."""
     household_unicef_ids = {ticket.household_unicef_id for ticket in tickets if ticket.household_unicef_id}
 
     if not household_unicef_ids:
@@ -59,7 +61,9 @@ def get_existing_tickets_counts(tickets: Iterable[GrievanceTicket]) -> dict[str,
 
     return {
         row["household_unicef_id"]: row["ticket_count"] - 1
-        for row in GrievanceTicket.objects.filter(household_unicef_id__in=household_unicef_ids)
+        for row in GrievanceTicket.objects.filter(
+            business_area=business_area, household_unicef_id__in=household_unicef_ids
+        )
         .values("household_unicef_id")
         .annotate(ticket_count=Count("pk"))
     }
@@ -90,8 +94,8 @@ class GrievanceListBatchMixin:
         page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
         if page is None:  # pagination disabled - nothing to batch per page
             return super().list(request, *args, **kwargs)
-        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page)
-        self.existing_tickets_counts = get_existing_tickets_counts(page)
+        self.fallback_individual_unicef_ids = get_fallback_individual_unicef_ids(page, self.business_area)
+        self.existing_tickets_counts = get_existing_tickets_counts(page, self.business_area)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
 
@@ -268,6 +272,28 @@ class GrievancePermissionsMixin:
         return filters
 
 
+class GrievanceDashboardMixin:
+    """Common dashboard logic for grievance tickets."""
+
+    def get_dashboard_base_queryset(self, program: Program | None = None) -> QuerySet:
+        """Get base queryset for dashboard data with optional program filtering."""
+        through = GrievanceTicket.programs.through
+        base_queryset = GrievanceTicket.objects.filter(ignored=False, business_area=self.business_area)
+
+        if program:
+            return base_queryset.filter(id__in=through.objects.filter(program=program).values("grievanceticket_id"))
+
+        # evaluated on purpose: passing a subquery here brings the `program_program` join back.
+        active_program_ids = list(
+            Program.objects.filter(business_area=self.business_area, status=Program.ACTIVE).values_list("id", flat=True)
+        )
+        has_active_program = Exists(
+            through.objects.filter(grievanceticket_id=OuterRef("pk"), program_id__in=active_program_ids)
+        )
+        has_no_program = ~Exists(through.objects.filter(grievanceticket_id=OuterRef("pk")))
+        return base_queryset.filter(has_active_program | has_no_program)
+
+
 class GrievanceMutationMixin:
     def verify_required_arguments(self, input_data: dict, field_name: str, options: dict) -> None:
         for key, value in options.items():
@@ -405,78 +431,6 @@ class GrievanceMutationMixin:
         GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
     }
 
-    UPDATE_EXTRAS_OPTIONS = {
-        GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
-            "required": ["extras.household_data_update_issue_type_extras"],
-            "not_allowed": [
-                "individual_data_update_issue_type_extras",
-                "add_individual_issue_type_extras",
-            ],
-        },
-        GrievanceTicket.ISSUE_TYPE_UPDATE_DELEGATE: {
-            "required": ["extras.household_data_update_issue_type_extras"],
-            "not_allowed": [
-                "individual_data_update_issue_type_extras",
-                "add_individual_issue_type_extras",
-            ],
-        },
-        GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
-            "required": ["extras.individual_data_update_issue_type_extras"],
-            "not_allowed": [
-                "household_data_update_issue_type_extras",
-                "add_individual_issue_type_extras",
-            ],
-        },
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
-            "required": ["extras.add_individual_issue_type_extras"],
-            "not_allowed": [
-                "household_data_update_issue_type_extras",
-                "individual_data_update_issue_type_extras",
-            ],
-        },
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_FRAUD_MISUSE: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_HARASSMENT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {
-            "required": [],
-            "not_allowed": [],
-        },
-        GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
-    }
-
     MOVE_TO_STATUS_PERMISSION_MAPPING: dict[int, dict[str | int, list[Permissions]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
@@ -529,7 +483,7 @@ class GrievanceMutationMixin:
             delete_grievance_documents(ticket.id, ids_to_delete)
         if documents_to_update := input_data.pop("documentation_to_update", None):
             validate_grievance_documents_size(ticket.id, documents_to_update, is_updated=True)
-            update_grievance_documents(documents_to_update)
+            update_grievance_documents(ticket.id, documents_to_update)
         if documents := input_data.pop("documentation", None):
             validate_grievance_documents_size(ticket.id, documents)
             create_grievance_documents(approver, ticket, documents)
@@ -553,8 +507,9 @@ class GrievanceMutationMixin:
         if admin := input_data.pop("admin", None):
             ticket.admin2 = admin
 
-        linked_tickets = input_data.pop("linked_tickets", [])
-        ticket.linked_tickets.set(linked_tickets)
+        # Partial update: an absent key - do not update, an explicit [] - clear them.
+        if (linked_tickets := input_data.pop("linked_tickets", None)) is not None:
+            ticket.linked_tickets.set(linked_tickets)
         ticket.user_modified = timezone.now()
         ticket.user_modified_by = editor
 
@@ -564,9 +519,15 @@ class GrievanceMutationMixin:
                 setattr(ticket, field, value)
 
     def _handle_assignment_change(
-        self, approver: User, ticket: GrievanceTicket, assigned_to: User | None, messages: list
+        self,
+        approver: User,
+        ticket: GrievanceTicket,
+        assigned_to: User | None,
+        messages: list,
+        *,
+        assignment_provided: bool,
     ) -> None:
-        if assigned_to != ticket.assigned_to:
+        if assignment_provided and assigned_to != ticket.assigned_to:
             self._set_status_based_on_assigned_to(approver, ticket, messages)
             ticket.assigned_to = assigned_to
             ticket.assigned_at = timezone.now()
@@ -585,9 +546,14 @@ class GrievanceMutationMixin:
     def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
         messages = []
         self._handle_document_operations(approver, grievance_ticket, input_data)
+        # Partial update: `None` is a legitimate value here (explicit unassign), so the assignment
+        # may only be touched when the request actually carries the key.
+        assignment_provided = "assigned_to" in input_data
         assigned_to = input_data.pop("assigned_to", None)
         self._apply_ticket_field_updates(grievance_ticket, input_data, editor=approver)
-        self._handle_assignment_change(approver, grievance_ticket, assigned_to, messages)
+        self._handle_assignment_change(
+            approver, grievance_ticket, assigned_to, messages, assignment_provided=assignment_provided
+        )
 
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()

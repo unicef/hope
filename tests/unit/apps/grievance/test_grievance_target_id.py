@@ -214,6 +214,7 @@ def test_global_list_main_statement_does_not_touch_household(
 
 
 def test_fallback_map_is_one_query_for_a_page_of_social_worker_tickets(
+    afghanistan: BusinessArea,
     social_program_ticket: GrievanceTicket,
     second_social_program_ticket: GrievanceTicket,
     household_with_three_individuals: Household,
@@ -226,7 +227,7 @@ def test_fallback_map_is_one_query_for_a_page_of_social_worker_tickets(
     second_social_program_ticket.has_social_worker_program_annotated = True
 
     with django_assert_num_queries(1):
-        result = get_fallback_individual_unicef_ids([social_program_ticket, second_social_program_ticket])
+        result = get_fallback_individual_unicef_ids([social_program_ticket, second_social_program_ticket], afghanistan)
 
     assert result == {
         household_with_three_individuals.unicef_id: social_program_ticket.target_id,
@@ -235,13 +236,14 @@ def test_fallback_map_is_one_query_for_a_page_of_social_worker_tickets(
 
 
 def test_fallback_map_is_no_query_without_a_social_worker_ticket(
+    afghanistan: BusinessArea,
     standard_program_ticket: GrievanceTicket,
     django_assert_num_queries: Any,
 ) -> None:
     standard_program_ticket.has_social_worker_program_annotated = False
 
     with django_assert_num_queries(0):
-        result = get_fallback_individual_unicef_ids([standard_program_ticket])
+        result = get_fallback_individual_unicef_ids([standard_program_ticket], afghanistan)
 
     assert result == {}
 

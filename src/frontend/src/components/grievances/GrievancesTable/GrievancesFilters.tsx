@@ -31,6 +31,7 @@ import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface GrievancesFiltersProps {
   filter;
@@ -53,6 +54,7 @@ export const GrievancesFilters = ({
 }: GrievancesFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -86,7 +88,7 @@ export const GrievancesFilters = ({
 
   const categoryChoices = useMemo(() => {
     if (isUserGeneratedTab)
-      return choicesData.grievanceTicketManualCategoryChoices;
+      return choicesData.grievanceTicketFilterCategoryChoices;
     // Data Change is a manual category, but it also owns a system-generated issue type
     // (Biometric Photo Error), so it has to be selectable on the system tab too.
     const dataChangeCategory = choicesData.grievanceTicketCategoryChoices?.find(
@@ -161,7 +163,7 @@ export const GrievancesFilters = ({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>

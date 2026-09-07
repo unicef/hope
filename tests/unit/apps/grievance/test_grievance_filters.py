@@ -6,7 +6,9 @@ from typing import Any, Callable
 from django.utils import timezone
 import pytest
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.reverse import reverse
+from rest_framework.test import APIRequestFactory
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -666,7 +668,7 @@ def multi_active_program_ticket(afghanistan: BusinessArea, program_afghanistan1:
 
 
 @pytest.fixture
-def ticket_in_removed_and_live_program_with_same_code(afghanistan: BusinessArea) -> GrievanceTicket:
+def ticket_in_removed_and_live_program_with_same_code(afghanistan: BusinessArea) -> dict:
     # programme codes are only unique while is_removed=False, so a live and a removed
     # programme can share one code inside a business area
     removed_program = ProgramFactory(
@@ -685,7 +687,7 @@ def ticket_in_removed_and_live_program_with_same_code(afghanistan: BusinessArea)
     )
     ticket = GrievanceTicketFactory(business_area=afghanistan)
     ticket.programs.add(removed_program, live_program)
-    return ticket
+    return {"ticket": ticket, "live_program": live_program, "removed_program": removed_program}
 
 
 @pytest.fixture
@@ -1396,8 +1398,8 @@ def test_filter_by_program(
 ) -> None:
     # multi_active_program_ticket is linked to program_afghanistan1 and a second active programme.
     # The global list has no .distinct() left, so a through-table join here would return it twice
-    # programs__code matches one link per ticket, which is what the last assert pins.
-    filter_value = program_afghanistan1.code if is_filtered else ""
+    # the Exists subquery matches one link per ticket, which is what the last assert pins.
+    filter_value = str(program_afghanistan1.id) if is_filtered else ""
     client = api_client(user)
     response = client.get(list_global_url, {"program": filter_value})
     assert response.status_code == status.HTTP_200_OK
@@ -1446,22 +1448,23 @@ def test_filter_by_program_does_not_duplicate_ticket_when_removed_programme_shar
     api_client: Any,
     user: User,
     afghanistan: BusinessArea,
-    ticket_in_removed_and_live_program_with_same_code: GrievanceTicket,
+    ticket_in_removed_and_live_program_with_same_code: dict,
     list_global_url: str,
 ) -> None:
+    live_program = ticket_in_removed_and_live_program_with_same_code["live_program"]
     client = api_client(user)
-    response = client.get(list_global_url, {"program": "dupe"})
+    response = client.get(list_global_url, {"program": str(live_program.id)})
 
     assert response.status_code == status.HTTP_200_OK
     assert [ticket["id"] for ticket in response.data["results"]] == [
-        str(ticket_in_removed_and_live_program_with_same_code.id)
+        str(ticket_in_removed_and_live_program_with_same_code["ticket"].id)
     ]
 
     count_url = reverse(
         "api:grievance:grievance-tickets-global-count",
         kwargs={"business_area_slug": afghanistan.slug},
     )
-    count_response = client.get(count_url, {"program": "dupe"})
+    count_response = client.get(count_url, {"program": str(live_program.id)})
 
     assert count_response.status_code == status.HTTP_200_OK
     assert count_response.data["count"] == 1
@@ -1633,10 +1636,12 @@ def test_order_by_linked_tickets_descending_reverses_order(two_plain_tickets: li
     assert result == list(reversed(two_plain_tickets))
 
 
-def test_search_filter_with_comma_separated_unicef_ids(two_plain_tickets: list) -> None:
+def test_search_filter_with_comma_separated_unicef_ids(afghanistan: BusinessArea, two_plain_tickets: list) -> None:
     ticket1, ticket2 = two_plain_tickets
     queryset = GrievanceTicket.objects.all()
-    filterset = GrievanceTicketFilter(data={}, queryset=queryset)
+    request = Request(APIRequestFactory().get("/"))
+    request.parser_context["kwargs"] = {"business_area_slug": afghanistan.slug}
+    filterset = GrievanceTicketFilter(data={}, queryset=queryset, request=request)
 
     result = filterset.search_filter(queryset, "search", f"{ticket1.unicef_id}, {ticket2.unicef_id}")
 

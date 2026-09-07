@@ -27,6 +27,7 @@ from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
@@ -49,6 +50,7 @@ from hope.apps.payment.utils import get_link, get_quantity_in_usd, log_payment_p
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.apps.utils.recipients import users_with_permissions
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     Approval,
     ApprovalProcess,
@@ -68,6 +70,7 @@ from hope.models import (
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
     User,
+    log_create,
 )
 
 if TYPE_CHECKING:
@@ -183,7 +186,7 @@ class PaymentPlanService:
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value,
             str(self.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
         return self.payment_plan
 
@@ -204,6 +207,62 @@ class PaymentPlanService:
 
         self.payment_plan = payment_plan
         return self.payment_plan
+
+    def release_from_vision(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.IN_REVIEW:
+            raise ValidationError("Only an in-review Payment Plan can be released by Vision")
+
+        old_payment_plan = copy_model_object(self.payment_plan)
+        approval_process = self.payment_plan.approval_process.first()
+        if not approval_process:
+            raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
+
+        # Automatic Vision release uses the required, protected Payment Plan creator as its finance-release actor.
+        release_actor = self.payment_plan.created_by
+        Approval.objects.create(
+            approval_process=approval_process,
+            created_by=release_actor,
+            type=Approval.FINANCE_RELEASE,
+            comment=None,
+        )
+        log_payment_plan_approval(self.payment_plan, release_actor, Approval.FINANCE_RELEASE, None)
+
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_mark_as_reviewed()
+        self.payment_plan.save()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=release_actor,
+            programs=self.payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=self.payment_plan,
+        )
+
+        release_user_id = str(release_actor.pk)
+        transaction.on_commit(
+            lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
+        )
+        send_payment_notification_emails_async_task(
+            self.payment_plan,
+            PaymentPlan.Action.REVIEW.value,
+            release_user_id,
+            f"{timezone.now():%-d %B %Y}",
+        )
+        return self.payment_plan
+
+    def _invalidate_vision_attempt_before_manual_release(self) -> None:
+        has_pending_attempt = (
+            self.payment_plan.sent_to_vision or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value
+        )
+        if not has_pending_attempt or self.payment_plan.vision_integration_enabled:
+            return
+
+        from hope.contrib.vision.services import VisionService
+
+        # Manual release while Vision is disabled replaces the pending automatic workflow. Reset the attempt so that
+        # re-enabling Vision later does not treat the accepted plan as Vision-managed and block manual delivery.
+        VisionService.invalidate_attempt(self.payment_plan)
 
     def tp_lock(self) -> PaymentPlan:
         if self.payment_plan.build_status != PaymentPlan.BuildStatus.BUILD_STATUS_OK:
@@ -343,31 +402,40 @@ class PaymentPlanService:
         return self.payment_plan
 
     def acceptance_process(self) -> PaymentPlan | None:
-        self.validate_payment_plan_status_to_acceptance_process_approval_type()
+        if self.action == PaymentPlan.Action.REVIEW.value and self.payment_plan.vision_managed:
+            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
 
-        # every time we will create Approval for first created AcceptanceProcess
-        # init creation AcceptanceProcess added in send_for_approval()
-        approval_process = self.payment_plan.approval_process.first()
-        if not approval_process:
-            logging.exception("Approval Process object not found for PaymentPlan %s", self.payment_plan.pk)
-            raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
+        with transaction.atomic():
+            self.payment_plan = (
+                PaymentPlan.objects.select_for_update(of=("self",))
+                .select_related("program_cycle")
+                .get(pk=self.payment_plan.pk)
+            )
+            self.validate_payment_plan_status_to_acceptance_process_approval_type()
 
-        # validate approval required number and user as well
-        self.validate_acceptance_process_approval_count(approval_process)
+            # every time we will create Approval for first created AcceptanceProcess
+            # init creation AcceptanceProcess added in send_for_approval()
+            approval_process = self.payment_plan.approval_process.first()
+            if not approval_process:
+                logging.exception("Approval Process object not found for PaymentPlan %s", self.payment_plan.pk)
+                raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
 
-        approval_type = self.get_approval_type_by_action()
-        approval_comment = self.input_data.get("comment")
-        approval_data = {
-            "approval_process": approval_process,
-            "created_by": self.user,
-            "type": approval_type,
-            "comment": approval_comment,
-        }
-        Approval.objects.create(**approval_data)
-        log_payment_plan_approval(self.payment_plan, self.user, approval_type, approval_comment)
+            # validate approval required number and user as well
+            self.validate_acceptance_process_approval_count(approval_process)
 
-        # base on approval required number check if we need update PaymentPlan status after creation new Approval
-        self.check_payment_plan_and_update_status(approval_process)
+            approval_type = self.get_approval_type_by_action()
+            approval_comment = self.input_data.get("comment")
+            approval_data = {
+                "approval_process": approval_process,
+                "created_by": self.user,
+                "type": approval_type,
+                "comment": approval_comment,
+            }
+            Approval.objects.create(**approval_data)
+            log_payment_plan_approval(self.payment_plan, self.user, approval_type, approval_comment)
+
+            # base on approval required number check if we need update PaymentPlan status after creation new Approval
+            self.check_payment_plan_and_update_status(approval_process)
 
         return self.payment_plan
 
@@ -422,6 +490,7 @@ class PaymentPlanService:
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
             notification_action = None
+            should_notify_vision_of_rejection = False
             if approval_type == Approval.APPROVAL:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_approve()
@@ -430,6 +499,7 @@ class PaymentPlanService:
                 approval_process.save()
                 notification_action = PaymentPlan.Action.APPROVE
 
+            send_to_vision = False
             if approval_type == Approval.AUTHORIZATION:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_authorize()
@@ -437,8 +507,10 @@ class PaymentPlanService:
                 approval_process.sent_for_finance_release_date = timezone.now()
                 approval_process.save()
                 notification_action = PaymentPlan.Action.AUTHORIZE
+                send_to_vision = self.payment_plan.vision_integration_enabled
 
             if approval_type == Approval.FINANCE_RELEASE:
+                self._invalidate_vision_attempt_before_manual_release()
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_mark_as_reviewed()
                 notification_action = PaymentPlan.Action.REVIEW
@@ -449,6 +521,14 @@ class PaymentPlanService:
                 )
 
             if approval_type == Approval.REJECT:
+                should_notify_vision_of_rejection = self.payment_plan.sent_to_vision
+
+                # Reset every started attempt, including local SEND_FAILED state that Vision never received, so a
+                # later authorization starts a clean workflow.
+                if should_notify_vision_of_rejection or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
+                    from hope.contrib.vision.services import VisionService
+
+                    VisionService.invalidate_attempt(self.payment_plan)
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_reject()
 
@@ -457,10 +537,29 @@ class PaymentPlanService:
                     self.payment_plan,
                     notification_action.value,
                     str(self.user.id),
-                    f"{timezone.now():%-d %B %Y}",
+                    timezone.now().isoformat(),
                 )
 
             self.payment_plan.save()
+            if should_notify_vision_of_rejection:
+                from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
+
+                payment_plan = self.payment_plan
+                user_id = str(self.user.pk)
+                transaction.on_commit(
+                    lambda: notify_payment_plan_status_to_vision_async_task(
+                        payment_plan,
+                        user_id,
+                        "REJECTED",
+                    ),
+                    robust=True,
+                )
+            if send_to_vision:
+                from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
+
+                payment_plan = self.payment_plan
+                user_id = str(payment_plan.created_by_id)
+                transaction.on_commit(lambda: send_payment_plan_to_vision_async_task(payment_plan, user_id))
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
@@ -944,6 +1043,9 @@ class PaymentPlanService:
         ]:
             raise ValidationError("Deletion is only allowed when the status is 'Open'")
 
+        if self.payment_plan.plan_type != PaymentPlan.PlanType.REGULAR:
+            return self._delete_child_plan()
+
         if self.payment_plan.status == PaymentPlan.Status.OPEN:
             if self.payment_plan.program_cycle.payment_plans.count() == 1:
                 # if it's the last Payment Plan in this Cycle need to update Cycle status
@@ -961,6 +1063,22 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         return self.payment_plan
+
+    def _delete_child_plan(self) -> PaymentPlan:
+        """Soft-delete the most recent child plan (Top-Up / Follow-Up / Amendment) together with its payments."""
+        payment_plan = self.payment_plan
+        if payment_plan.has_newer_sibling_plan:
+            raise ValidationError(
+                f"Only the most recent {payment_plan.get_plan_type_display()} of this Payment Plan can be deleted"
+            )
+
+        with transaction.atomic():
+            # Take the same source-plan lock as prepare_child_payment_plan_async_task_action,
+            # so the delete cannot interleave with the async payment copy onto this plan.
+            PaymentPlan.objects.select_for_update().get(pk=payment_plan.source_payment_plan_id)
+            payment_plan.payment_items.all().delete()
+            payment_plan.delete()
+        return payment_plan
 
     def export_xlsx(self, user_id: str) -> PaymentPlan:
         flow = PaymentPlanFlow(self.payment_plan)
@@ -1458,57 +1576,71 @@ class PaymentPlanService:
                     ind_filter.save()
 
     def ready_for_closure(self, user: "User", *, notify: bool = True) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.FINISHED:
-            raise ValidationError(
-                f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
-            )
-        flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_ready_for_closure()
-        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
-        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
-        if notify:
-            send_payment_notification_emails_async_task(
-                self.payment_plan,
-                PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
-                str(user.pk),
-                f"{timezone.now():%-d %B %Y}",
-            )
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
+            if payment_plan.status != PaymentPlan.Status.FINISHED:
+                raise ValidationError(
+                    f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
+                )
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_ready_for_closure()
+            payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+            payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+            if notify:
+                send_payment_notification_emails_async_task(
+                    payment_plan,
+                    PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+                    str(user.pk),
+                    timezone.now().isoformat(),
+                )
+
+        self.payment_plan = payment_plan
         return self.payment_plan
 
     def send_back_to_finished(self, user: "User") -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
-            raise ValidationError(f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}")
-        flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_finished()
-        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
-        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
-        send_payment_notification_emails_async_task(
-            self.payment_plan,
-            PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
-            str(user.pk),
-            f"{timezone.now():%-d %B %Y}",
-        )
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
+            if payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
+                raise ValidationError(
+                    f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
+                )
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_finished()
+            payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+            payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+            send_payment_notification_emails_async_task(
+                payment_plan,
+                PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+                str(user.pk),
+                timezone.now().isoformat(),
+            )
+
+        self.payment_plan = payment_plan
         return self.payment_plan
 
     def close(self, closure_comment: str | None = None, user_id: str | None = None) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
-            raise ValidationError(
-                f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
+            if payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
+                raise ValidationError(
+                    f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
+                )
+            has_verification = payment_plan.payment_verification_plans.filter(responded_count__gt=0).exists()
+            if not has_verification and not closure_comment:
+                raise ValidationError("Closure comment is required when no payment verification was carried out.")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_close()
+            payment_plan.closure_comment = closure_comment
+            payment_plan.closed_by_id = user_id
+            payment_plan.save(update_fields=("status", "status_date", "closure_comment", "closed_by_id", "updated_at"))
+            payment_plan.refresh_from_db(
+                fields=["status", "status_date", "closure_comment", "closed_by_id", "updated_at"]
             )
-        has_verification = self.payment_plan.payment_verification_plans.filter(responded_count__gt=0).exists()
-        if not has_verification and not closure_comment:
-            raise ValidationError("Closure comment is required when no payment verification was carried out.")
-        flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_close()
-        self.payment_plan.closure_comment = closure_comment
-        self.payment_plan.closed_by_id = user_id
-        self.payment_plan.save(update_fields=("status", "status_date", "closure_comment", "closed_by_id", "updated_at"))
-        self.payment_plan.refresh_from_db(
-            fields=["status", "status_date", "closure_comment", "closed_by_id", "updated_at"]
-        )
+
+        self.payment_plan = payment_plan
         return self.payment_plan
 
-    def abort(self, abort_comment: str | None) -> PaymentPlan:
+    def abort(self, abort_comment: str | None, user_id: str | None = None) -> PaymentPlan:
         allowed_statuses = [
             PaymentPlan.Status.LOCKED,
             PaymentPlan.Status.LOCKED_FSP,
@@ -1519,11 +1651,31 @@ class PaymentPlanService:
 
         if self.payment_plan.status not in allowed_statuses:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
+        notify_vision_aborted = self.payment_plan.sent_to_vision
+        if notify_vision_aborted or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
+            from hope.contrib.vision.services import VisionService
+
+            VisionService.invalidate_attempt(self.payment_plan)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
         self.payment_plan.abort_comment = abort_comment or ""
-        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
-        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment", "internal_data"))
+        self.payment_plan.refresh_from_db(
+            fields=["status", "status_date", "updated_at", "abort_comment", "internal_data"]
+        )
+        if notify_vision_aborted:
+            from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
+
+            notification_owner_id = user_id or str(self.payment_plan.created_by_id)
+            payment_plan = self.payment_plan
+            transaction.on_commit(
+                lambda: notify_payment_plan_status_to_vision_async_task(
+                    payment_plan,
+                    notification_owner_id,
+                    "ABORTED",
+                ),
+                robust=True,
+            )
         return self.payment_plan
 
     def reactivate_abort(self) -> PaymentPlan:

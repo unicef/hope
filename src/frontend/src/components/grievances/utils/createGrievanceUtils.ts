@@ -444,6 +444,7 @@ export const categoriesAndColors = [
   { category: 'Referral', color: '#FFAA20' },
   { category: 'Sensitive Grievance', color: '#7FCB28' },
   { category: 'System Flagging', color: '#00867B' },
+  { category: 'Beneficiary', color: '#8B5CF6' },
 ];
 
 /**

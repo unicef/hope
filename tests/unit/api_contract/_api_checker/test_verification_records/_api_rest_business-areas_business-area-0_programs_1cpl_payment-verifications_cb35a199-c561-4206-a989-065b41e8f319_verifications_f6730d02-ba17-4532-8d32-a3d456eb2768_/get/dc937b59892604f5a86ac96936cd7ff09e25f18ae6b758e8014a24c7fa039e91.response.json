@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "12963"
+        "Content-Length": "9748"
     },
     "data": {
         "id": "f6730d02-ba17-4532-8d32-a3d456eb2768",
@@ -60,6 +60,11 @@
         "program_name": "Program 0",
         "program_code": "1cpl",
         "collector_type_display": "Primary collector",
+        "payment_plan_cycle": "Programme Cycle 0",
+        "payment_plan_group": "Default Group",
+        "payment_plan_purposes": [
+            "Purpose 0"
+        ],
         "parent": {
             "id": "cb35a199-c561-4206-a989-065b41e8f319",
             "unicef_id": "PP-BA0000-25-00000001",
@@ -148,8 +153,8 @@
             "female_children_count": null,
             "children_disabled_count": null,
             "currency": null,
-            "first_registration_date": "2025-01-01T00:00:00Z",
-            "last_registration_date": "2025-01-01T00:00:00Z",
+            "first_registration_date": "2025-01-01",
+            "last_registration_date": "2025-01-01",
             "unhcr_id": "",
             "village": "",
             "address": "",
@@ -263,8 +268,8 @@
                 "admin2": null,
                 "admin3": null,
                 "admin4": null,
-                "first_registration_date": "2025-01-01T00:00:00Z",
-                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01",
+                "last_registration_date": "2025-01-01",
                 "total_cash_received": null,
                 "total_cash_received_usd": null,
                 "delivered_quantities": [
@@ -319,8 +324,8 @@
                         "admin2": null,
                         "admin3": null,
                         "admin4": null,
-                        "first_registration_date": "2025-01-01T00:00:00Z",
-                        "last_registration_date": "2025-01-01T00:00:00Z",
+                        "first_registration_date": "2025-01-01",
+                        "last_registration_date": "2025-01-01",
                         "total_cash_received": null,
                         "total_cash_received_usd": null,
                         "delivered_quantities": [
