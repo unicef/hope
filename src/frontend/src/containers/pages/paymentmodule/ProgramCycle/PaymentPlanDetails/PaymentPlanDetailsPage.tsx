@@ -20,6 +20,7 @@ import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/Paymen
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
@@ -70,7 +71,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       if (
         data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
-          !errorStatuses.includes(data?.backgroundActionStatus))
+          !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+            data?.backgroundActionStatus,
+          ))
       ) {
         return 3000;
       }
