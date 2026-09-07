@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.db.models import Count, Max
+from rest_framework.request import Request
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
@@ -14,7 +15,7 @@ class UserListVersionsKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:

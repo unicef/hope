@@ -148,12 +148,12 @@ class HouseholdViewSet(
 
     @etag_decorator(HouseholdListKeyConstructor)
     @cached_response(key_func=HouseholdListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(responses={200: HouseholdMemberSerializer(many=True)})
     @action(detail=True, methods=["get"], filter_backends=())
-    def members(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def members(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instance = self.get_object()
         individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
         collectors_ids = list(instance.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
@@ -181,7 +181,7 @@ class HouseholdViewSet(
         detail=True,
         methods=["post"],
     )
-    def withdraw(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def withdraw(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instance = self.get_object()
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -192,7 +192,7 @@ class HouseholdViewSet(
         },
     )
     @action(detail=True, methods=["get"], filter_backends=(OrderingFilter,))
-    def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         hh = self.get_object()
         payments = (
             with_payment_related_data(
@@ -222,7 +222,7 @@ class HouseholdViewSet(
         filters=True,
     )
     @action(detail=True, methods=["get"], url_path="payments/count")
-    def payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         hh = self.get_object()
         payments_count = (
             hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).count()
@@ -249,7 +249,9 @@ class HouseholdViewSet(
         methods=["get"],
         url_path="all-accountability-communication-message-recipients",
     )
-    def all_accountability_communication_message_recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def all_accountability_communication_message_recipients(
+        self, request: Request, *args: Any, **kwargs: Any
+    ) -> Response:
         recipients = self.filter_queryset(
             self.get_queryset().exclude(
                 head_of_household__phone_no_valid=False,
@@ -267,7 +269,7 @@ class HouseholdViewSet(
 
     @extend_schema(responses={200: RecipientSerializer(many=True)})
     @action(detail=False, methods=["get"])
-    def recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def recipients(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         recipients = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(recipients)
         if page is not None:
@@ -422,11 +424,11 @@ class IndividualViewSet(
 
     @etag_decorator(IndividualListKeyConstructor)
     @cached_response(key_func=IndividualListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"])
-    def photos(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def photos(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         individual = self.get_object()
         return Response(IndividualPhotoDetailSerializer(individual).data, status=status.HTTP_200_OK)
 
@@ -487,3 +489,4 @@ class IndividualGlobalViewSet(
                 )
             )
         )
+

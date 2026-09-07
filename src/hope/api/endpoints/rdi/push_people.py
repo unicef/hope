@@ -105,7 +105,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value: Any) -> Any:
+    def validate_disability(self, value: str) -> str:
         if value == "":
             return NOT_DISABLED
         return value
