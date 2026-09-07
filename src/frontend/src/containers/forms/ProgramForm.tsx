@@ -152,7 +152,8 @@ const ProgramForm = ({
     isCopyProgramPage,
   ]);
 
-  if (!data || !beneficiaryGroupsData) return null;
+  if (!data || !beneficiaryGroupsData || !dataCollectingTypeChoices)
+    return null;
 
   return (
     <Form>
