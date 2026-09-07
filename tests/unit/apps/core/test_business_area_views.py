@@ -229,6 +229,7 @@ def test_business_area_list_returns_correct_fields_for_area(
     assert afghanistan_data["code"] == afghanistan.code
     assert afghanistan_data["long_name"] == afghanistan.long_name
     assert afghanistan_data["slug"] == afghanistan.slug
+    assert afghanistan_data["timezone"] == "UTC"
     assert afghanistan_data["parent"] == afghanistan.parent
     assert afghanistan_data["is_split"] == afghanistan.is_split
     assert afghanistan_data["active"] == afghanistan.active

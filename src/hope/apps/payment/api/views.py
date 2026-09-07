@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
 import logging
@@ -2567,7 +2566,6 @@ class PaymentViewSet(
         serializer.is_valid(raise_exception=True)
         delivered_quantity = serializer.validated_data.get("delivered_quantity")
         delivery_date = serializer.validated_data.get("delivery_date")
-        delivery_date = datetime.combine(delivery_date, datetime.min.time())
         revert_mark_as_failed(payment, Decimal(delivered_quantity), delivery_date, str(request.user.pk))
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data,

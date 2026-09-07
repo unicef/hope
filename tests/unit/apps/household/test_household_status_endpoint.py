@@ -137,7 +137,7 @@ def test_getting_individual_with_status_imported(api_client, pending_household_c
     data = response.json()
     info = data["info"]
     assert info["status"] == "imported"
-    assert info["date"] == pending_household.updated_at.isoformat().replace("+00:00", "Z")
+    assert info["date"] == pending_household.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     individual = info["individual"]
     assert individual is not None
@@ -161,7 +161,7 @@ def test_getting_individual_with_status_merged_to_population(
     data = response.json()
     info = data["info"]
     assert info["status"] == "merged to population"
-    assert info["date"] == household.created_at.isoformat().replace("+00:00", "Z")
+    assert info["date"] == household.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def test_getting_individual_with_status_targeted(
@@ -185,7 +185,7 @@ def test_getting_individual_with_status_targeted(
     data = response.json()
     info = data["info"]
     assert info["status"] == "merged to population"
-    assert info["date"] == household.created_at.isoformat().replace("+00:00", "Z")
+    assert info["date"] == household.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def test_getting_individual_with_status_sent_to_cash_assist(
@@ -264,7 +264,7 @@ def test_getting_household_with_status_imported(api_client, pending_household_co
     data = response.json()
     info = data["info"]
     assert info["status"] == "imported"
-    assert info["date"] == pending_household.updated_at.isoformat().replace("+00:00", "Z")
+    assert info["date"] == pending_household.updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     assert "individual" not in info
 
 

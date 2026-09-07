@@ -146,6 +146,20 @@ def test_choices_currencies_returns_only_active_currencies_from_db(authenticated
 
 
 @pytest.mark.django_db
+def test_choices_timezones_returns_sorted_iana_identifiers(authenticated_client):
+    response = authenticated_client.get(reverse("api:choices-timezones"))
+
+    assert response.status_code == 200
+    assert isinstance(response.data, list)
+    assert {"name": "Europe/Warsaw", "value": "Europe/Warsaw"} in response.data
+    assert {"name": "America/New_York", "value": "America/New_York"} in response.data
+    assert {"name": "Pacific/Auckland", "value": "Pacific/Auckland"} in response.data
+    assert {"name": "Asia/Kabul", "value": "Asia/Kabul"} in response.data
+    assert {"name": "Factory", "value": "Factory"} not in response.data
+    assert response.data == sorted(response.data, key=lambda choice: choice["name"])
+
+
+@pytest.mark.django_db
 def test_choices_permissions_returns_full_permission_catalog(authenticated_client):
     response = authenticated_client.get(reverse("api:choices-permissions"))
 

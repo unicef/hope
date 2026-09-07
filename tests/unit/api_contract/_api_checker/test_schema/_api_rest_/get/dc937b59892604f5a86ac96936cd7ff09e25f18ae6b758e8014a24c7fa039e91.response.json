@@ -9,7 +9,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "932882"
+        "Content-Length": "933853"
     },
     "data": {
         "openapi": "3.0.3",
@@ -44,7 +44,14 @@
                     ],
                     "responses": {
                         "200": {
-                            "description": "No response body"
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/HouseholdStatusResponse"
+                                    }
+                                }
+                            },
+                            "description": ""
                         }
                     }
                 }
@@ -34434,13 +34441,13 @@
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "unhcr_id": {
                             "type": "string",
@@ -34872,13 +34879,13 @@
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "currency": {
                             "type": "string",
@@ -35022,13 +35029,13 @@
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "total_cash_received": {
                             "type": "string",
@@ -35127,6 +35134,59 @@
                     },
                     "required": [
                         "id"
+                    ]
+                },
+                "HouseholdStatusIndividual": {
+                    "type": "object",
+                    "properties": {
+                        "role": {
+                            "type": "string",
+                            "nullable": true
+                        },
+                        "relationship": {
+                            "type": "string",
+                            "nullable": true
+                        },
+                        "tax_id": {
+                            "type": "string",
+                            "nullable": true
+                        }
+                    },
+                    "required": [
+                        "relationship",
+                        "role",
+                        "tax_id"
+                    ]
+                },
+                "HouseholdStatusInfo": {
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "type": "string"
+                        },
+                        "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                        },
+                        "individual": {
+                            "$ref": "#/components/schemas/HouseholdStatusIndividual"
+                        }
+                    },
+                    "required": [
+                        "date",
+                        "status"
+                    ]
+                },
+                "HouseholdStatusResponse": {
+                    "type": "object",
+                    "properties": {
+                        "info": {
+                            "$ref": "#/components/schemas/HouseholdStatusInfo"
+                        }
+                    },
+                    "required": [
+                        "info"
                     ]
                 },
                 "HouseholdUpdateData": {
@@ -40064,6 +40124,7 @@
                         },
                         "last_approval_process_date": {
                             "type": "string",
+                            "format": "date-time",
                             "readOnly": true
                         },
                         "last_approval_process_by": {
@@ -43636,8 +43697,8 @@
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         }
                     },
                     "required": [

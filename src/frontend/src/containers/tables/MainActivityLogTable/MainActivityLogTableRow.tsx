@@ -1,7 +1,6 @@
 import { IconButton } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
-import moment from 'moment';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -13,6 +12,7 @@ import {
   Row,
 } from '@components/core/ActivityLogTable/TableStyledComponents';
 import { Dashable } from '@components/core/Dashable';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './MainActivityLogTableHeadCells';
 
@@ -119,7 +119,7 @@ export function MainActivityLogTableRow({
     return (
       <Row role="checkbox" data-cy="log-row-single-change">
         <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.user || 'System'}
@@ -154,7 +154,7 @@ export function MainActivityLogTableRow({
         data-cy="log-row-multiple-changes"
       >
         <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
           {logEntry.user || 'System'}
