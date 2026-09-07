@@ -44,6 +44,7 @@ from hope.apps.household.filters import (
     IndividualFilter,
     IndividualOfficeSearchFilter,
 )
+from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.models import FlexibleAttribute, Household, Individual, IndividualRoleInHousehold, PaymentPlan, Program
 
@@ -192,15 +193,22 @@ class HouseholdViewSet(
             200: PaymentListSerializer(many=True),
         },
     )
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], filter_backends=(OrderingFilter,))
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         hh = self.get_object()
         payments = (
-            hh.payment_set.eligible()
-            .exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-            .select_related("currency")
+            with_payment_related_data(
+                hh.payment_set.eligible().exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+            )
+            # For sorting only: OrderingFilter accepts model fields and annotations.
+            .annotate(
+                payment_plan_cycle=F("parent__program_cycle__title"),
+                payment_plan_group=F("parent__payment_plan_group__name"),
+                hoh_full_name=F("head_of_household__full_name"),
+            )
         )
 
+        payments = self.filter_queryset(payments)
         page = self.paginate_queryset(payments)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

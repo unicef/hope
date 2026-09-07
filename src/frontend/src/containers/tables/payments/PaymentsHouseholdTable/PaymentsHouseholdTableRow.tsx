@@ -58,6 +58,11 @@ export function PaymentsHouseholdTableRow({
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
+      <TableCell align="left">
+        {payment.paymentPlanPurposes?.join(', ')}
+      </TableCell>
+      <TableCell align="left">{payment.paymentPlanGroup}</TableCell>
+      <TableCell align="left">{payment.paymentPlanCycle}</TableCell>
       {!isSocialDctType && (
         <TableCell align="left">{payment.hohFullName}</TableCell>
       )}

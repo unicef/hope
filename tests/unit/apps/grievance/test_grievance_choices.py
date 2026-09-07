@@ -92,6 +92,7 @@ def test_get_choices(
         "grievance_ticket_status_choices": to_choice_object(GrievanceTicket.STATUS_CHOICES),
         "grievance_ticket_category_choices": to_choice_object(GrievanceTicket.CATEGORY_CHOICES),
         "grievance_ticket_manual_category_choices": to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES),
+        "grievance_ticket_filter_category_choices": to_choice_object(GrievanceTicket.MANUAL_CATEGORIES),
         "grievance_ticket_system_category_choices": to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES),
         "grievance_ticket_priority_choices": to_choice_object(PRIORITY_CHOICES),
         "grievance_ticket_urgency_choices": to_choice_object(URGENCY_CHOICES),

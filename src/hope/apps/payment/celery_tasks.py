@@ -30,6 +30,7 @@ from hope.apps.payment.utils import (
     generate_cache_key,
     get_quantity_in_usd,
     log_payment_plan_change,
+    log_payment_plan_group_change,
     normalize_score,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
@@ -248,6 +249,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         payment_plan_group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(
             id=payment_plan_group_id
         )
+        old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
         user = User.objects.get(pk=job.config["user_id"])
         export_tag = job.config.get("export_tag")
         fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
@@ -274,6 +276,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 service.save_xlsx_file(user)
                 payment_plan_group.background_action_status = None
                 payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+                log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config["user_id"])
             if (
                 service.applied_export_tag is not None
                 and payment_plan_group.cycle.program.business_area.enable_email_notification
@@ -284,6 +287,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
             payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
             payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config["user_id"])
             job.errors = {**job.errors, "export_skipped_payment_plans": exc.skipped_reasons}
             job.save(update_fields=["errors"])
             raise NonRetriableTaskError(str(exc)) from exc
@@ -291,6 +295,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
             logger.exception("Export Payment Plan Group Delivery XLSX Error")
             payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
             payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+            log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config["user_id"])
             raise
 
 
@@ -713,9 +718,10 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         XlsxPaymentPlanGroupDeliveryImportService,
     )
 
-    payment_plan_group = PaymentPlanGroup.objects.select_related("delivery_import_file").get(
-        id=job.config["payment_plan_group_id"]
-    )
+    payment_plan_group = PaymentPlanGroup.objects.select_related(
+        "delivery_import_file", "cycle__program__business_area"
+    ).get(id=job.config["payment_plan_group_id"])
+    old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
 
     try:
         file_xlsx = payment_plan_group.delivery_import_file.file
@@ -724,10 +730,12 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         service.import_payment_list(job.config.get("user_id"))
         payment_plan_group.background_action_status = None
         payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
     except Exception:
         logger.exception("Import Payment Plan Group Delivery XLSX Error")
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
         payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
         raise
 
 

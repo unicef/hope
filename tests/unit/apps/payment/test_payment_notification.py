@@ -71,8 +71,10 @@ def notification_setup(
     create_partner_role_with_permissions,
 ):
     partner_empty = PartnerFactory(name="Empty Partner")
-    user_payment_plan_creator = UserFactory(partner=partner_empty)
-    user_action_user = UserFactory()
+    user_payment_plan_creator = UserFactory(
+        username="user_payment_plan_creator", email="user_payment_plan_creator@example.com", partner=partner_empty
+    )
+    user_action_user = UserFactory(username="user_action_user", email="user_action_user@example.com")
 
     payment_plan = PaymentPlanFactory(
         business_area=business_area,
@@ -162,24 +164,46 @@ def notification_setup(
 
     users = {}
 
-    users["user_with_partner_unicef_hq"] = UserFactory(partner=unicef_hq_partner)
-    users["user_with_partner_unicef_in_ba"] = UserFactory(partner=partner_unicef_in_ba)
+    users["user_with_partner_unicef_hq"] = UserFactory(
+        username="user_with_partner_unicef_hq",
+        email="user_with_partner_unicef_hq@example.com",
+        partner=unicef_hq_partner,
+    )
+    users["user_with_partner_unicef_in_ba"] = UserFactory(
+        username="user_with_partner_unicef_in_ba",
+        email="user_with_partner_unicef_in_ba@example.com",
+        partner=partner_unicef_in_ba,
+    )
 
-    users["user_with_no_permissions"] = UserFactory(partner=partner_empty)
+    users["user_with_no_permissions"] = UserFactory(
+        username="user_with_no_permissions", email="user_with_no_permissions@example.com", partner=partner_empty
+    )
     users["user_with_no_permissions_partner_with_different_role_in_program"] = UserFactory(
-        partner=partner_with_different_role_in_program
+        username="user_with_no_permissions_partner_with_different_role_in_program",
+        email="user_with_no_permissions_partner_with_different_role_in_program@example.com",
+        partner=partner_with_different_role_in_program,
     )
     users["user_with_no_permissions_partner_with_approval_permission_in_different_program"] = UserFactory(
-        partner=partner_with_approval_permission_in_different_program
+        username="user_with_no_permissions_partner_with_approval_permission_in_different_program",
+        email="user_with_no_permissions_partner_with_approval_permission_in_different_program@example.com",
+        partner=partner_with_approval_permission_in_different_program,
     )
     users["user_with_no_permissions_partner_with_action_permissions"] = UserFactory(
-        partner=partner_with_action_permissions
+        username="user_with_no_permissions_partner_with_action_permissions",
+        email="user_with_no_permissions_partner_with_action_permissions@example.com",
+        partner=partner_with_action_permissions,
     )
     users["user_with_no_permissions_partner_with_action_permissions_in_whole_ba"] = UserFactory(
-        partner=partner_with_action_permissions_in_whole_ba
+        username="user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
+        email="user_with_no_permissions_partner_with_action_permissions_in_whole_ba@example.com",
+        partner=partner_with_action_permissions_in_whole_ba,
     )
 
-    users["user_with_approval_permission_partner_unicef_in_ba"] = UserFactory(partner=partner_unicef_in_ba)
+    users["user_with_approval_permission_partner_unicef_in_ba"] = UserFactory(
+        username="user_with_approval_permission_partner_unicef_in_ba",
+        email="user_with_approval_permission_partner_unicef_in_ba@example.com",
+        partner=partner_unicef_in_ba,
+    )
     create_user_role_with_permissions(
         users["user_with_approval_permission_partner_unicef_in_ba"],
         [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -189,7 +213,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_partner_with_different_role_in_program"] = UserFactory(
-        partner=partner_with_different_role_in_program
+        username="user_with_approval_permission_partner_with_different_role_in_program",
+        email="user_with_approval_permission_partner_with_different_role_in_program@example.com",
+        partner=partner_with_different_role_in_program,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_partner_with_different_role_in_program"],
@@ -200,7 +226,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_partner_with_approval_permission_in_different_program"] = UserFactory(
-        partner=partner_with_approval_permission_in_different_program
+        username="user_with_approval_permission_partner_with_approval_permission_in_different_program",
+        email="user_with_approval_permission_partner_with_approval_permission_in_different_program@example.com",
+        partner=partner_with_approval_permission_in_different_program,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_partner_with_approval_permission_in_different_program"],
@@ -211,7 +239,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_partner_with_action_permissions"] = UserFactory(
-        partner=partner_with_action_permissions
+        username="user_with_approval_permission_partner_with_action_permissions",
+        email="user_with_approval_permission_partner_with_action_permissions@example.com",
+        partner=partner_with_action_permissions,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_partner_with_action_permissions"],
@@ -222,7 +252,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_partner_with_action_permissions_in_whole_ba"] = UserFactory(
-        partner=partner_with_action_permissions_in_whole_ba
+        username="user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        email="user_with_approval_permission_partner_with_action_permissions_in_whole_ba@example.com",
+        partner=partner_with_action_permissions_in_whole_ba,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_partner_with_action_permissions_in_whole_ba"],
@@ -232,7 +264,11 @@ def notification_setup(
         name="Role with approval permission",
     )
 
-    users["user_with_approval_permission_partner_empty"] = UserFactory(partner=partner_empty)
+    users["user_with_approval_permission_partner_empty"] = UserFactory(
+        username="user_with_approval_permission_partner_empty",
+        email="user_with_approval_permission_partner_empty@example.com",
+        partner=partner_empty,
+    )
     create_user_role_with_permissions(
         users["user_with_approval_permission_partner_empty"],
         [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -241,7 +277,11 @@ def notification_setup(
         name="Role with approval permission",
     )
 
-    users["user_with_approval_permission_in_ba_partner_unicef_in_ba"] = UserFactory(partner=partner_unicef_in_ba)
+    users["user_with_approval_permission_in_ba_partner_unicef_in_ba"] = UserFactory(
+        username="user_with_approval_permission_in_ba_partner_unicef_in_ba",
+        email="user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
+        partner=partner_unicef_in_ba,
+    )
     create_user_role_with_permissions(
         users["user_with_approval_permission_in_ba_partner_unicef_in_ba"],
         [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -251,7 +291,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_in_ba_partner_with_different_role_in_program"] = UserFactory(
-        partner=partner_with_different_role_in_program
+        username="user_with_approval_permission_in_ba_partner_with_different_role_in_program",
+        email="user_with_approval_permission_in_ba_partner_with_different_role_in_program@example.com",
+        partner=partner_with_different_role_in_program,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_in_ba_partner_with_different_role_in_program"],
@@ -262,7 +304,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program"] = UserFactory(
-        partner=partner_with_approval_permission_in_different_program
+        username="user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
+        email="user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program@example.com",
+        partner=partner_with_approval_permission_in_different_program,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program"],
@@ -273,7 +317,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_in_ba_partner_with_action_permissions"] = UserFactory(
-        partner=partner_with_action_permissions
+        username="user_with_approval_permission_in_ba_partner_with_action_permissions",
+        email="user_with_approval_permission_in_ba_partner_with_action_permissions@example.com",
+        partner=partner_with_action_permissions,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_in_ba_partner_with_action_permissions"],
@@ -284,7 +330,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba"] = UserFactory(
-        partner=partner_with_action_permissions_in_whole_ba
+        username="user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        email="user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba@example.com",
+        partner=partner_with_action_permissions_in_whole_ba,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba"],
@@ -294,7 +342,11 @@ def notification_setup(
         name="Role with approval permission",
     )
 
-    users["user_with_approval_permission_in_ba_partner_empty"] = UserFactory(partner=partner_empty)
+    users["user_with_approval_permission_in_ba_partner_empty"] = UserFactory(
+        username="user_with_approval_permission_in_ba_partner_empty",
+        email="user_with_approval_permission_in_ba_partner_empty@example.com",
+        partner=partner_empty,
+    )
     create_user_role_with_permissions(
         users["user_with_approval_permission_in_ba_partner_empty"],
         [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -304,7 +356,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_wrong_program_partner_unicef_in_ba"] = UserFactory(
-        partner=partner_unicef_in_ba
+        username="user_with_approval_permission_wrong_program_partner_unicef_in_ba",
+        email="user_with_approval_permission_wrong_program_partner_unicef_in_ba@example.com",
+        partner=partner_unicef_in_ba,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_wrong_program_partner_unicef_in_ba"],
@@ -315,7 +369,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_wrong_program_partner_with_different_role_in_program"] = UserFactory(
-        partner=partner_with_different_role_in_program
+        username="user_with_approval_permission_wrong_program_partner_with_different_role_in_program",
+        email="user_with_approval_permission_wrong_program_partner_with_different_role_in_program@example.com",
+        partner=partner_with_different_role_in_program,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_wrong_program_partner_with_different_role_in_program"],
@@ -326,7 +382,11 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program"] = (
-        UserFactory(partner=partner_with_approval_permission_in_different_program)
+        UserFactory(
+            username="user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program",
+            email="user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program@example.com",
+            partner=partner_with_approval_permission_in_different_program,
+        )
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program"],
@@ -337,7 +397,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_wrong_program_partner_with_action_permissions"] = UserFactory(
-        partner=partner_with_action_permissions
+        username="user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        email="user_with_approval_permission_wrong_program_partner_with_action_permissions@example.com",
+        partner=partner_with_action_permissions,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_wrong_program_partner_with_action_permissions"],
@@ -348,7 +410,9 @@ def notification_setup(
     )
 
     users["user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba"] = UserFactory(
-        partner=partner_with_action_permissions_in_whole_ba
+        username="user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
+        email="user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba@example.com",
+        partner=partner_with_action_permissions_in_whole_ba,
     )
     create_user_role_with_permissions(
         users["user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba"],
@@ -358,7 +422,11 @@ def notification_setup(
         name="Role with approval permission",
     )
 
-    users["user_with_approval_permission_wrong_program_partner_empty"] = UserFactory(partner=partner_empty)
+    users["user_with_approval_permission_wrong_program_partner_empty"] = UserFactory(
+        username="user_with_approval_permission_wrong_program_partner_empty",
+        email="user_with_approval_permission_wrong_program_partner_empty@example.com",
+        partner=partner_empty,
+    )
     create_user_role_with_permissions(
         users["user_with_approval_permission_wrong_program_partner_empty"],
         [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -367,7 +435,11 @@ def notification_setup(
         name="Role with approval permission",
     )
 
-    users["user_with_authorize_permission"] = UserFactory(partner=partner_empty)
+    users["user_with_authorize_permission"] = UserFactory(
+        username="user_with_authorize_permission",
+        email="user_with_authorize_permission@example.com",
+        partner=partner_empty,
+    )
     create_user_role_with_permissions(
         users["user_with_authorize_permission"],
         [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
@@ -376,7 +448,9 @@ def notification_setup(
         name="Role with authorize permission",
     )
 
-    users["user_with_review_permission"] = UserFactory(partner=partner_empty)
+    users["user_with_review_permission"] = UserFactory(
+        username="user_with_review_permission", email="user_with_review_permission@example.com", partner=partner_empty
+    )
     create_user_role_with_permissions(
         users["user_with_review_permission"],
         [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
@@ -385,7 +459,11 @@ def notification_setup(
         name="Role with review permission",
     )
 
-    users["user_with_download_xlsx_permission"] = UserFactory(partner=partner_empty)
+    users["user_with_download_xlsx_permission"] = UserFactory(
+        username="user_with_download_xlsx_permission",
+        email="user_with_download_xlsx_permission@example.com",
+        partner=partner_empty,
+    )
     create_user_role_with_permissions(
         users["user_with_download_xlsx_permission"],
         [Permissions.PM_DOWNLOAD_XLSX_FOR_FSP],
@@ -394,7 +472,9 @@ def notification_setup(
         name="Role with download xlsx permission",
     )
 
-    users["user_with_close_permission"] = UserFactory(partner=partner_empty)
+    users["user_with_close_permission"] = UserFactory(
+        username="user_with_close_permission", email="user_with_close_permission@example.com", partner=partner_empty
+    )
     create_user_role_with_permissions(
         users["user_with_close_permission"],
         [Permissions.PM_CLOSE_FINISHED],
@@ -403,7 +483,11 @@ def notification_setup(
         name="Role with close permission",
     )
 
-    users["user_with_mark_ready_permission"] = UserFactory(partner=partner_empty)
+    users["user_with_mark_ready_permission"] = UserFactory(
+        username="user_with_mark_ready_permission",
+        email="user_with_mark_ready_permission@example.com",
+        partner=partner_empty,
+    )
     create_user_role_with_permissions(
         users["user_with_mark_ready_permission"],
         [Permissions.PM_MARK_READY_FOR_CLOSURE],
@@ -412,7 +496,9 @@ def notification_setup(
         name="Role with mark ready for closure permission",
     )
 
-    users["user_with_action_permissions"] = UserFactory(partner=partner_empty)
+    users["user_with_action_permissions"] = UserFactory(
+        username="user_with_action_permissions", email="user_with_action_permissions@example.com", partner=partner_empty
+    )
     create_user_role_with_permissions(
         users["user_with_action_permissions"],
         action_permissions_list,
@@ -436,49 +522,28 @@ def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict)
         f"{timezone.now():%-d %B %Y}",
     )
 
-    users = notification_setup["users"]
-    assert payment_notification.user_recipients.count() == 20
-
-    for key in [
-        "user_with_partner_unicef_hq",
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_partner_empty",
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
+        "user_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_empty",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
         "user_with_approval_permission_in_ba_partner_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_in_ba_partner_empty",
+        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
+        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
+        "user_with_approval_permission_partner_empty",
+        "user_with_approval_permission_partner_unicef_in_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
+        "user_with_approval_permission_partner_with_different_role_in_program",
         "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key] in payment_notification.user_recipients.all()
-
-    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
-
-    for key in [
-        "user_with_no_permissions",
-        "user_with_no_permissions_partner_with_different_role_in_program",
-        "user_with_no_permissions_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_with_different_role_in_program",
-        "user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_empty",
-        "user_with_authorize_permission",
-        "user_with_review_permission",
-        "user_with_download_xlsx_permission",
-        "user_with_close_permission",
-        "user_with_mark_ready_permission",
-    ]:
-        assert users[key] not in payment_notification.user_recipients.all()
+        "user_with_partner_unicef_hq",
+        "user_with_partner_unicef_in_ba",
+    ]
 
 
 def test_prepare_user_recipients_for_approve(notification_setup: dict) -> None:
@@ -489,48 +554,19 @@ def test_prepare_user_recipients_for_approve(notification_setup: dict) -> None:
         f"{timezone.now():%-d %B %Y}",
     )
 
-    users = notification_setup["users"]
-    assert payment_notification.user_recipients.count() == 11
-    for key in [
-        "user_with_authorize_permission",
-        "user_with_partner_unicef_hq",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
+        "user_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
+        "user_with_authorize_permission",
         "user_with_no_permissions_partner_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key] in payment_notification.user_recipients.all()
-
-    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
-
-    for key in [
-        "user_with_no_permissions",
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_empty",
-        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_in_ba_partner_empty",
-        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
-        "user_with_no_permissions_partner_with_different_role_in_program",
-        "user_with_no_permissions_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_with_different_role_in_program",
-        "user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_empty",
-        "user_with_review_permission",
-        "user_with_download_xlsx_permission",
-        "user_with_close_permission",
-        "user_with_mark_ready_permission",
-    ]:
-        assert users[key] not in payment_notification.user_recipients.all()
+        "user_with_partner_unicef_hq",
+    ]
 
 
 def test_prepare_user_recipients_for_authorize(notification_setup: dict) -> None:
@@ -541,48 +577,19 @@ def test_prepare_user_recipients_for_authorize(notification_setup: dict) -> None
         f"{timezone.now():%-d %B %Y}",
     )
 
-    users = notification_setup["users"]
-    assert payment_notification.user_recipients.count() == 11
-    for key in [
-        "user_with_review_permission",
-        "user_with_partner_unicef_hq",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
+        "user_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key] in payment_notification.user_recipients.all()
-
-    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
-
-    for key in [
-        "user_with_no_permissions",
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_empty",
-        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_in_ba_partner_empty",
-        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
-        "user_with_no_permissions_partner_with_different_role_in_program",
-        "user_with_no_permissions_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_with_different_role_in_program",
-        "user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_empty",
-        "user_with_authorize_permission",
-        "user_with_download_xlsx_permission",
-        "user_with_close_permission",
-        "user_with_mark_ready_permission",
-    ]:
-        assert users[key] not in payment_notification.user_recipients.all()
+        "user_with_partner_unicef_hq",
+        "user_with_review_permission",
+    ]
 
 
 def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
@@ -593,48 +600,19 @@ def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
         f"{timezone.now():%-d %B %Y}",
     )
 
-    users = notification_setup["users"]
-    assert payment_notification.user_recipients.count() == 11
-    for key in [
-        "user_with_download_xlsx_permission",
-        "user_with_partner_unicef_hq",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
+        "user_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions",
         "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions",
         "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
+        "user_with_download_xlsx_permission",
         "user_with_no_permissions_partner_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key] in payment_notification.user_recipients.all()
-
-    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
-
-    for key in [
-        "user_with_no_permissions",
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_empty",
-        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_in_ba_partner_empty",
-        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
-        "user_with_no_permissions_partner_with_different_role_in_program",
-        "user_with_no_permissions_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_with_different_role_in_program",
-        "user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_wrong_program_partner_empty",
-        "user_with_authorize_permission",
-        "user_with_review_permission",
-        "user_with_close_permission",
-        "user_with_mark_ready_permission",
-    ]:
-        assert users[key] not in payment_notification.user_recipients.all()
+        "user_with_partner_unicef_hq",
+    ]
 
 
 def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: dict) -> None:
@@ -645,35 +623,19 @@ def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: 
         f"{timezone.now():%-d %B %Y}",
     )
 
-    users = notification_setup["users"]
-    assert payment_notification.user_recipients.count() == 11
-
-    for key in [
-        "user_with_partner_unicef_hq",
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
         "user_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
         "user_with_close_permission",
         "user_with_no_permissions_partner_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key] in payment_notification.user_recipients.all()
-
-    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
-
-    for key in [
-        "user_with_mark_ready_permission",
-        "user_with_partner_unicef_in_ba",
-        "user_with_no_permissions",
-        "user_with_authorize_permission",
-        "user_with_review_permission",
-        "user_with_download_xlsx_permission",
-    ]:
-        assert users[key] not in payment_notification.user_recipients.all()
+        "user_with_partner_unicef_hq",
+    ]
 
 
 def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: dict) -> None:
@@ -684,35 +646,33 @@ def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: d
         f"{timezone.now():%-d %B %Y}",
     )
 
-    users = notification_setup["users"]
-    assert payment_notification.user_recipients.count() == 11
-
-    for key in [
-        "user_with_partner_unicef_hq",
+    assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
         "user_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_partner_with_action_permissions",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
         "user_with_mark_ready_permission",
         "user_with_no_permissions_partner_with_action_permissions",
         "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key] in payment_notification.user_recipients.all()
+        "user_with_partner_unicef_hq",
+    ]
 
-    assert notification_setup["user_action_user"] not in payment_notification.user_recipients.all()
 
-    for key in [
-        "user_with_close_permission",
-        "user_with_partner_unicef_in_ba",
-        "user_with_no_permissions",
-        "user_with_authorize_permission",
-        "user_with_review_permission",
-        "user_with_download_xlsx_permission",
-    ]:
-        assert users[key] not in payment_notification.user_recipients.all()
+def test_prepare_notification_from_refetched_payment_plan_stays_within_query_budget(
+    notification_setup: dict, django_assert_num_queries: Any
+) -> None:
+    payment_plan = PaymentPlan.objects.get(pk=notification_setup["payment_plan"].pk)
+
+    with django_assert_num_queries(5):
+        PaymentNotification(
+            payment_plan,
+            PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
+            notification_setup["user_action_user"],
+            f"{timezone.now():%-d %B %Y}",
+        )
 
 
 def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_closure(
@@ -841,31 +801,28 @@ def test_send_email_notification_without_catch_all_email(notification_setup: dic
         f"{timezone.now():%-d %B %Y}",
     )
     payment_notification.send_email_notification()
-    assert len(payment_notification.email.recipients) == 20
-
-    users = notification_setup["users"]
-    for key in [
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_partner_empty",
-        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_in_ba_partner_empty",
-        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
-        "user_with_no_permissions_partner_with_action_permissions",
-        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key].email in payment_notification.email.recipients
+    assert sorted(payment_notification.email.recipients) == [
+        "user_with_action_permissions@example.com",
+        "user_with_approval_permission_in_ba_partner_empty@example.com",
+        "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program@example.com",
+        "user_with_approval_permission_in_ba_partner_with_different_role_in_program@example.com",
+        "user_with_approval_permission_partner_empty@example.com",
+        "user_with_approval_permission_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_approval_permission_partner_with_approval_permission_in_different_program@example.com",
+        "user_with_approval_permission_partner_with_different_role_in_program@example.com",
+        "user_with_approval_permission_wrong_program_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_no_permissions_partner_with_action_permissions@example.com",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_partner_unicef_hq@example.com",
+        "user_with_partner_unicef_in_ba@example.com",
+    ]
 
     assert mock_post.call_count == 1
 
@@ -888,31 +845,27 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
         f"{timezone.now():%-d %B %Y}",
     )
     payment_notification.send_email_notification()
-    assert len(payment_notification.email.recipients) == 19
-    assert users["user_with_partner_unicef_hq"].email not in payment_notification.email.recipients
-
-    for key in [
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_partner_empty",
-        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_in_ba_partner_empty",
-        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
-        "user_with_no_permissions_partner_with_action_permissions",
-        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key].email in payment_notification.email.recipients
+    assert sorted(payment_notification.email.recipients) == [
+        "user_with_action_permissions@example.com",
+        "user_with_approval_permission_in_ba_partner_empty@example.com",
+        "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program@example.com",
+        "user_with_approval_permission_in_ba_partner_with_different_role_in_program@example.com",
+        "user_with_approval_permission_partner_empty@example.com",
+        "user_with_approval_permission_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_approval_permission_partner_with_approval_permission_in_different_program@example.com",
+        "user_with_approval_permission_partner_with_different_role_in_program@example.com",
+        "user_with_approval_permission_wrong_program_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_no_permissions_partner_with_action_permissions@example.com",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_partner_unicef_in_ba@example.com",
+    ]
 
     assert mock_post.call_count == 1
 
@@ -935,31 +888,27 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
         f"{timezone.now():%-d %B %Y}",
     )
     payment_notification.send_email_notification()
-    assert len(payment_notification.email.recipients) == 19
-    assert users["user_with_partner_unicef_hq"].email not in payment_notification.email.recipients
-
-    for key in [
-        "user_with_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_unicef_in_ba",
-        "user_with_approval_permission_partner_with_different_role_in_program",
-        "user_with_approval_permission_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_partner_with_action_permissions",
-        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_partner_empty",
-        "user_with_approval_permission_in_ba_partner_unicef_in_ba",
-        "user_with_approval_permission_in_ba_partner_with_different_role_in_program",
-        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions",
-        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba",
-        "user_with_approval_permission_in_ba_partner_empty",
-        "user_with_approval_permission_wrong_program_partner_unicef_in_ba",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions",
-        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba",
-        "user_with_action_permissions",
-        "user_with_no_permissions_partner_with_action_permissions",
-        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba",
-    ]:
-        assert users[key].email in payment_notification.email.recipients
+    assert sorted(payment_notification.email.recipients) == [
+        "user_with_action_permissions@example.com",
+        "user_with_approval_permission_in_ba_partner_empty@example.com",
+        "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program@example.com",
+        "user_with_approval_permission_in_ba_partner_with_different_role_in_program@example.com",
+        "user_with_approval_permission_partner_empty@example.com",
+        "user_with_approval_permission_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_approval_permission_partner_with_approval_permission_in_different_program@example.com",
+        "user_with_approval_permission_partner_with_different_role_in_program@example.com",
+        "user_with_approval_permission_wrong_program_partner_unicef_in_ba@example.com",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions@example.com",
+        "user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_no_permissions_partner_with_action_permissions@example.com",
+        "user_with_no_permissions_partner_with_action_permissions_in_whole_ba@example.com",
+        "user_with_partner_unicef_in_ba@example.com",
+    ]
 
     assert mock_post.call_count == 1
 

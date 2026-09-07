@@ -9,12 +9,12 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.models import PaymentVerification
 
 
 @admin.register(PaymentVerification)
-class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
+class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = (
         "payment",
         "household",
@@ -66,6 +66,15 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
                 "payment_verification_plan__payment_plan",
                 "payment_verification_plan__payment_plan__business_area",
             )
+        )
+
+    def frontend_url(self, obj: PaymentVerification) -> str | None:
+        plan = obj.payment_verification_plan
+        program = plan.get_program
+        return (
+            f"/{plan.business_area.slug}/programs/{program.code}"
+            f"/payment-verification/payment-plan/{plan.payment_plan.id}"
+            f"/verification/payment/{obj.payment.id}"
         )
 
     def has_add_permission(self: Any, request: Any) -> bool:
