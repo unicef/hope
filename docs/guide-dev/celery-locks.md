@@ -93,6 +93,18 @@ second job fails with `AlreadyRunningError` instead of starting a duplicate.
 | `celery_lock_export_payment_plan_group_delivery_xlsx:<payment plan group>` | delivery XLSX export |
 | `celery_lock_payment_plan_generate_token_and_order_numbers:<programme>` | nested inside the export above |
 | `celery_lock_send_payment_plan_reconciliation_overdue_email:<payment plan>` | reconciliation overdue e-mail |
+| `celery_lock_send_to_payment_gateway:<payment plan>` | sending instructions to Payment Gateway |
+| `celery_lock_payment_plan_exclude_beneficiaries:<payment plan>` | excluding beneficiaries |
+| `celery_lock_payment_plan_apply_engine_rule:<payment plan>` | Steficon entitlement rule |
+| `celery_lock_payment_plan_apply_steficon_hh_selection:<payment plan>` | Steficon household selection |
+| `celery_lock_payment_plan_set_entitlement_flat_amount:<payment plan>` | flat entitlement amount |
+| `celery_lock_payment_plan_apply_custom_exchange_rate:<payment plan>` | custom exchange rate |
+| `celery_lock_import_payment_plan_payment_list_from_xlsx:<payment plan>` | entitlement XLSX import |
+| `celery_lock_import_payment_plan_delivery_from_xlsx:<payment plan>` | reconciliation XLSX import |
+| `celery_lock_import_payment_plan_fsp_extra_fields_from_xlsx:<payment plan>` | FSP extra fields XLSX import |
+| `celery_lock_import_follow_up_instruction_reconciliation_from_xlsx:<instruction>` | follow-up instruction reconciliation import |
+| `celery_lock_import_payment_plan_group_delivery_from_xlsx:<payment plan group>` | group reconciliation XLSX import |
+| `celery_lock_copy_program:<new programme>` | copying a programme's population |
 | `celery_lock_send_western_union_report_email_notifications:<report>` | Western Union report e-mails |
 | `celery_lock_merge_pdu_online_edit` | PDU online edit merge (global, one merge at a time) |
 | `celery_lock_run_universal_individual_update:<universal update>` | universal update run |

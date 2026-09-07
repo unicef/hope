@@ -1,9 +1,12 @@
+from collections.abc import Callable
 import datetime
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
 from types import SimpleNamespace
 from unittest.mock import patch
+import uuid
 
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 import openpyxl
@@ -28,6 +31,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError, lock_key
 from hope.apps.payment.celery_tasks import import_follow_up_instruction_reconciliation_from_xlsx_async_task_action
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service import (
     XlsxFollowUpInstructionDeliveryExportService,
@@ -35,9 +39,19 @@ from hope.apps.payment.xlsx.xlsx_follow_up_instruction_delivery_export_service i
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
-from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentPlan, PaymentVerification
+from hope.models import AsyncRetryJob, FollowUpInstruction, LogEntry, Payment, PaymentPlan, PaymentVerification
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
 
 
 @pytest.fixture
@@ -956,3 +970,15 @@ def test_validate_delivered_quantity_returns_early_for_none_household(
 
     assert service.errors == []
     assert service.household_updates == {}
+
+
+def test_import_follow_up_instruction_reconciliation_fails_without_retry_when_lock_held(
+    hold_lock: Callable[..., None],
+) -> None:
+    instruction_id = uuid.uuid4()
+    hold_lock("import_follow_up_instruction_reconciliation_from_xlsx", instruction_id)
+
+    with pytest.raises(AlreadyRunningError, match=str(instruction_id)):
+        import_follow_up_instruction_reconciliation_from_xlsx_async_task_action(
+            AsyncRetryJob(config={"follow_up_instruction_id": str(instruction_id)})
+        )

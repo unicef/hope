@@ -4,6 +4,7 @@ from decimal import Decimal
 from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest.mock import Mock, PropertyMock, patch
+import uuid
 
 from celery.exceptions import Retry
 from constance.test import override_config
@@ -45,10 +46,13 @@ from hope.apps.payment.celery_tasks import (
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
     import_payment_plan_delivery_from_xlsx_async_task,
+    import_payment_plan_delivery_from_xlsx_async_task_action,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_group_delivery_from_xlsx_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task_action,
     import_payment_plan_payment_list_from_xlsx_async_task,
+    import_payment_plan_payment_list_from_xlsx_async_task_action,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_custom_exchange_rate_async_task_action,
     payment_plan_apply_engine_rule_async_task,
@@ -56,9 +60,11 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection_async_task,
     payment_plan_apply_steficon_hh_selection_async_task_action,
     payment_plan_exclude_beneficiaries_async_task,
+    payment_plan_exclude_beneficiaries_async_task_action,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
+    payment_plan_set_entitlement_flat_amount_async_task_action,
     periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
     periodic_sync_payment_gateway_account_types_async_task,
     periodic_sync_payment_gateway_account_types_async_task_action,
@@ -2276,3 +2282,28 @@ def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
     assert lower_bound <= called_since <= upper_bound
+
+
+@pytest.mark.parametrize(
+    ("action", "config_key"),
+    [
+        (send_to_payment_gateway_async_task_action, "payment_plan_id"),
+        (payment_plan_exclude_beneficiaries_async_task_action, "payment_plan_id"),
+        (payment_plan_apply_engine_rule_async_task_action, "payment_plan_id"),
+        (payment_plan_apply_steficon_hh_selection_async_task_action, "payment_plan_id"),
+        (payment_plan_set_entitlement_flat_amount_async_task_action, "payment_plan_id"),
+        (payment_plan_apply_custom_exchange_rate_async_task_action, "payment_plan_id"),
+        (import_payment_plan_payment_list_from_xlsx_async_task_action, "payment_plan_id"),
+        (import_payment_plan_delivery_from_xlsx_async_task_action, "payment_plan_id"),
+        (import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action, "payment_plan_id"),
+        (import_payment_plan_group_delivery_from_xlsx_async_task_action, "payment_plan_group_id"),
+    ],
+)
+def test_payment_action_fails_without_retry_when_lock_held(
+    action: Callable[[AsyncRetryJob], object], config_key: str, hold_lock: Callable[..., None]
+) -> None:
+    object_id = uuid.uuid4()
+    hold_lock(action.__name__.removesuffix("_async_task_action"), object_id)
+
+    with pytest.raises(AlreadyRunningError, match=f"{action.__name__.removesuffix('_async_task_action')}:{object_id}"):
+        action(AsyncRetryJob(config={config_key: str(object_id)}))
