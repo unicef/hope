@@ -483,7 +483,7 @@ class GrievanceMutationMixin:
             delete_grievance_documents(ticket.id, ids_to_delete)
         if documents_to_update := input_data.pop("documentation_to_update", None):
             validate_grievance_documents_size(ticket.id, documents_to_update, is_updated=True)
-            update_grievance_documents(documents_to_update)
+            update_grievance_documents(ticket.id, documents_to_update)
         if documents := input_data.pop("documentation", None):
             validate_grievance_documents_size(ticket.id, documents)
             create_grievance_documents(approver, ticket, documents)
