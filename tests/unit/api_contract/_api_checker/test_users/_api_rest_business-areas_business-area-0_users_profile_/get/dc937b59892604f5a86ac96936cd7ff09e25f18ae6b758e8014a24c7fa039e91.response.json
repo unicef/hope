@@ -37,6 +37,7 @@
         "partner_roles": [],
         "status": "INVITED",
         "last_login": null,
+        "timezone": null,
         "business_areas": [
             {
                 "id": "e58164a0-3c4a-4ed5-b1f6-46167c746672",
@@ -414,7 +415,8 @@
             "USER_MANAGEMENT_VIEW_LIST"
         ],
         "cross_area_filter_available": true,
-        "job_title": ""
+        "job_title": "",
+        "effective_timezone": "UTC"
     },
     "content_type": "application/json"
 }

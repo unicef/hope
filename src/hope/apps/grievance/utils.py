@@ -101,9 +101,9 @@ def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTi
     GrievanceDocument.objects.bulk_create(grievance_documents)
 
 
-def update_grievance_documents(documents: list[dict]) -> None:
+def update_grievance_documents(ticket_id: str, documents: list[dict]) -> None:
     for document in documents:
-        current_document = GrievanceDocument.objects.filter(id=document["id"]).first()
+        current_document = GrievanceDocument.objects.filter(id=document["id"], grievance_ticket_id=ticket_id).first()
         if current_document:
             os.remove(current_document.file.path)
 

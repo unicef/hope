@@ -1,3 +1,4 @@
+from datetime import UTC, date, datetime
 from typing import Any
 from unittest.mock import Mock
 
@@ -31,6 +32,8 @@ from hope.apps.payment.api.serializers import (
     PaymentListSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanListSerializer,
+    PaymentVerificationPlanDetailsSerializer,
+    PaymentVerificationPlanListSerializer,
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
@@ -102,6 +105,7 @@ def payment_list_context(business_area: Any, user: Any) -> dict[str, Any]:
         vulnerability_score=123.012,
         entitlement_quantity=99,
         delivered_quantity=88,
+        delivery_date=datetime(2024, 1, 2, 13, 30, tzinfo=UTC),
         financial_service_provider=FinancialServiceProviderFactory(name="FSP 1"),
         fsp_auth_code="AUTH_123",
     )
@@ -130,9 +134,11 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
     program = ProgramFactory(business_area=business_area)
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=ProgramCycleFactory(program=program, end_date=date(2030, 1, 2)),
         dispersion_start_date=None,
         dispersion_end_date=None,
+        start_date=datetime(2024, 1, 2, 13, 30, tzinfo=UTC),
+        end_date=datetime(2024, 2, 3, 18, 45, tzinfo=UTC),
     )
     program = payment_plan.program_cycle.program
     admin2 = AreaFactory(name="New for PP details")
@@ -290,6 +296,7 @@ def test_payment_list_serializer_all_data(payment_list_context: dict[str, Any]) 
     assert data["household_admin2"] == "New admin22"
     assert data["entitlement_quantity"] == "99.00"
     assert data["delivered_quantity"] == "88.00"
+    assert data["delivery_date"] == "2024-01-02"
     assert data["status"] == payment.get_status_display()
     assert data["fsp_name"] == "FSP 1"
     assert data["fsp_auth_code"] == ""
@@ -410,6 +417,24 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
     assert data["status_date"] is not None
+    assert data["start_date"] == "2024-01-02"
+    assert data["end_date"] == "2024-02-03"
+
+
+@pytest.mark.parametrize(
+    "serializer_class",
+    [PaymentVerificationPlanDetailsSerializer, PaymentVerificationPlanListSerializer],
+)
+def test_payment_verification_serializer_uses_program_cycle_end_date(
+    payment_plan_detail_context: dict[str, Any],
+    serializer_class: type[PaymentVerificationPlanDetailsSerializer | PaymentVerificationPlanListSerializer],
+) -> None:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    field = serializer_class().fields["program_cycle_end_date"]
+
+    value = field.get_attribute(payment_plan)
+
+    assert field.to_representation(value) == "2030-01-02"
 
 
 def test_payment_plan_detail_serializer_vision_state(

@@ -25,6 +25,7 @@ from hope.api.endpoints.rdi.common import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
+from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
 from hope.api.utils import CurrencySlugRelatedField
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
@@ -103,8 +104,8 @@ class DocumentSerializerLax(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
-    issuance_date = serializers.DateField(required=False)
-    expiry_date = serializers.DateField(required=False)
+    issuance_date = UTCDateField(required=False)
+    expiry_date = UTCDateField(required=False)
 
     class Meta:
         model = PendingDocument
@@ -563,19 +564,22 @@ class HouseholdSerializer(serializers.ModelSerializer):
         allow_null=True,
         queryset=Currency.objects.active(),
     )
-    head_of_household_id = serializers.SlugRelatedField(
+    head_of_household_id = ScopedSlugRelatedField(
         source="head_of_household",
         slug_field="unicef_id",
+        scope="registration_data_import",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    primary_collector_id = serializers.SlugRelatedField(
+    primary_collector_id = ScopedSlugRelatedField(
         slug_field="unicef_id",
+        scope="registration_data_import",
         required=True,
         queryset=PendingIndividual.objects.all(),
     )
-    alternate_collector_id = serializers.SlugRelatedField(
+    alternate_collector_id = ScopedSlugRelatedField(
         slug_field="unicef_id",
+        scope="registration_data_import",
         required=False,
         queryset=PendingIndividual.objects.all(),
     )
@@ -677,7 +681,9 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                     "alternate_collector_id",
                 },
             )
-            serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
+            serializer: HouseholdSerializer = HouseholdSerializer(
+                data=household_data, context={"registration_data_import": self.selected_rdi}
+            )
             if serializer.is_valid():
                 data = dict(serializer.validated_data)
                 members: list[str] = data.pop("members", [])

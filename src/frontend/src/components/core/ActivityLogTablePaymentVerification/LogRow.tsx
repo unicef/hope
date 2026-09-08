@@ -1,9 +1,9 @@
 import { ReactElement, useState } from 'react';
-import moment from 'moment';
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 import { LogEntry } from '@restgenerated/models/LogEntry';
@@ -40,7 +40,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
     return (
       <Row role="checkbox">
         <Cell weight={headCells[0].weight}>
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight}>
           {logEntry.user ? `${logEntry.user}` : null}
@@ -56,7 +56,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
     <>
       <Row onClick={() => setExpanded(!expanded)} hover>
         <Cell weight={headCells[0].weight}>
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight}>
           {logEntry.user ? `${logEntry.user}` : null}
