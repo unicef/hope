@@ -1148,8 +1148,10 @@ def test_update_individual_latin_name_rejects_non_latin_value(
         ("Anna O'Neil-Kovalska", None),
         (
             "Anna1",
-            "Invalid value Anna1 for column full_name_latin: "
-            "Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
+            (
+                "Invalid value Anna1 for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
         ),
     ],
 )
