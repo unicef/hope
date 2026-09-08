@@ -26,8 +26,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from 'src/config/permissions';
 import * as Yup from 'yup';
-import { formatFigure } from '@utils/utils';
-import { getErrorMessage } from '@utils/errors';
+import { formatFigure, showApiErrorMessages } from '@utils/utils';
+import { toApiError } from '@utils/errors';
 
 interface FormValues {
   splitType: string;
@@ -122,7 +122,11 @@ export const SplitIntoPaymentLists = ({
       setDialogOpen(false);
       showMessage(t('Split was successful!'));
     } catch (e) {
-      showMessage(getErrorMessage(e));
+      showApiErrorMessages(
+        toApiError(e),
+        showMessage,
+        t('Failed to split the Payment Plan'),
+      );
     }
   };
 
