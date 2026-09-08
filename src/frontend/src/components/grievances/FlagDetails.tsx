@@ -23,8 +23,8 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -72,6 +72,7 @@ export const FlagDetails = ({
   );
   const removalText = t('Are you sure you want to remove the flag ?');
   const details = ticket.ticketDetails;
+  if (!details) return null;
   const isFlagConfirmed = details.approveStatus;
   return (
     <ApproveBox>

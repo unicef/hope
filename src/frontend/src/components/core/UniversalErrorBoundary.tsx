@@ -1,5 +1,6 @@
-import { FC, ReactNode } from 'react';
-import { ErrorBoundary, ErrorBoundaryProps } from '@sentry/react';
+import type { FC, ReactNode } from 'react';
+import type { ErrorBoundaryProps } from '@sentry/react';
+import { ErrorBoundary } from '@sentry/react';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 import { PageNotFound } from '@containers/pages/404/PageNotFound';
 import { NotFoundError } from '@utils/errors';

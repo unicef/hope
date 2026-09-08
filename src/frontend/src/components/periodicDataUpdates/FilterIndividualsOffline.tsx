@@ -9,7 +9,7 @@ import { useSexChoices } from '@hooks/useSexChoices';
 import { AdminAreaAutocompleteMultipleRestFilter } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRestFilter';
 import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { t } from 'i18next';
-import React, { FC } from 'react';
+import type { FC } from 'react';
 
 interface FilterIndividualsOfflineProps {
   filter;

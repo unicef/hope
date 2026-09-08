@@ -6,14 +6,15 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
-import { PendingPayment } from '@restgenerated/models/PendingPayment';
-import { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
+import type { PendingPayment } from '@restgenerated/models/PendingPayment';
+import type { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
 
 interface TargetPopulationHouseholdProps {
   id?: string;

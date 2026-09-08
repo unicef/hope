@@ -5,8 +5,10 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { Formik, FormikValues } from 'formik';
-import { ReactElement, useState, useRef } from 'react';
+import type { FormikValues } from 'formik';
+import { Formik } from 'formik';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';

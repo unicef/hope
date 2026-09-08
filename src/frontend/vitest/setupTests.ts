@@ -7,7 +7,14 @@ import * as useBusinessAreaModule from '../src/hooks/useBusinessArea';
 import * as useGlobalProgramModule from '../src/hooks/useGlobalProgram';
 import * as useProgramContextModule from '../src/programContext';
 import { handlers } from '../src/mocks/handlers';
-import { beforeAll, afterAll, afterEach, beforeEach, vi } from 'vitest';
+import {
+  beforeAll,
+  afterAll,
+  afterEach,
+  beforeEach,
+  expect,
+  vi,
+} from 'vitest';
 import { fakeContextProgram } from 'src/testUtils/testUtils';
 
 global.React = React;
@@ -56,3 +63,34 @@ afterEach(() => server.resetHandlers());
 
 // Clean up after the tests are finished.
 afterAll(() => server.close());
+
+// styled-components generates component ids (`sc-*`) and their paired class
+// hashes from a process-global counter, so they depend on module evaluation
+// order and differ between local runs and CI workers. Normalize them so DOM
+// snapshots stay deterministic.
+const SC_COMPONENT_ID = /^sc-[a-zA-Z]+$/;
+const SC_GENERATED_CLASS = /^[a-zA-Z]{4,8}$/;
+// Emotion folds the class name it receives into its own hash, so a labelled
+// `css-<hash>-<Label>` class on a styled-components element inherits that
+// instability. Keep the label, drop the hash.
+const EMOTION_LABELLED_CLASS = /^css-[0-9a-z]+-(.+)$/;
+
+const styledClasses = (element: Element): string[] =>
+  (element.getAttribute('class') || '').split(/\s+/).filter(Boolean);
+
+const hasStyledComponentId = (element: Element): boolean =>
+  styledClasses(element).some((name) => SC_COMPONENT_ID.test(name));
+
+expect.addSnapshotSerializer({
+  test: (value) =>
+    value instanceof Element && hasStyledComponentId(value as Element),
+  serialize: (value, config, indentation, depth, refs, printer) => {
+    const clone = (value as Element).cloneNode(true) as Element;
+    const normalized = styledClasses(clone)
+      .filter((name) => !SC_GENERATED_CLASS.test(name))
+      .map((name) => (SC_COMPONENT_ID.test(name) ? 'styled-normalized' : name))
+      .map((name) => name.replace(EMOTION_LABELLED_CLASS, 'css-$1'));
+    clone.setAttribute('class', normalized.join(' '));
+    return printer(clone, config, indentation, depth, refs);
+  },
+});

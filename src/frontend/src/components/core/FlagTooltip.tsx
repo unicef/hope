@@ -1,6 +1,6 @@
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface StyledFlagProps {

@@ -2,10 +2,10 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import LookUpHouseholdTableCommunication from '@containers/tables/Communication/LookUpHouseholdTableCommunication/LookUpHouseholdTableCommunication';
 import { usePermissions } from '@hooks/usePermissions';
 import { CommunicationTabsValues } from '@utils/constants';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import LookUpTargetPopulationTableCommunication from '@containers/tables/Communication/LookUpTargetPopulationTableCommunication/LookUpTargetPopulationTableCommunication';
 import LookUpRegistrationDataImportTableCommunication from '@containers/tables/Communication/LookUpRegistrationDataImportTableCommunication/LookUpRegistrationDataImportTableCommunication';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpSelectionTablesCommunicationProps {
   selectedTab: number;
@@ -53,7 +53,6 @@ export function LookUpSelectionTablesCommunication({
           canViewDetails={hasPermissions(
             PERMISSIONS.TARGETING_VIEW_DETAILS,
             permissions,
-
           )}
           enableRadioButton
           selectedTargetPopulation={values.targetPopulation}

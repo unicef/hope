@@ -21,16 +21,17 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
+import type { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
 import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
-import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -140,7 +141,9 @@ function Entitlement({
       onSuccess: () => {
         showMessage(t('Formula is executing, please wait until completed'));
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
       },
       onError: (error: any) => {
@@ -174,7 +177,9 @@ function Entitlement({
           t('Flat amount is being applied, please wait until completed'),
         );
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
       },
       onError: (error: any) => {
@@ -190,7 +195,10 @@ function Entitlement({
   };
   const { data: steficonData, isLoading: loading } =
     useQuery<PaginatedRuleList>({
-      queryKey: restQueryKey(RestService.restEngineRulesList, engineRulesParams),
+      queryKey: restQueryKey(
+        RestService.restEngineRulesList,
+        engineRulesParams,
+      ),
       queryFn: () => RestService.restEngineRulesList(engineRulesParams),
     });
 
@@ -214,7 +222,9 @@ function Entitlement({
     onSuccess: async () => {
       showMessage(t('Exporting XLSX started. Please check your email.'));
       await queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
     },
     onError: (error: any) => {

@@ -1,6 +1,7 @@
 import { useRoutes, Navigate, useParams } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
-import { ReactElement, Suspense } from 'react';
+import type { ReactElement } from 'react';
+import { Suspense } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 import UsersPage from '@containers/pages/core/UsersPage';
 import { LoadingComponent } from '@components/core/LoadingComponent';

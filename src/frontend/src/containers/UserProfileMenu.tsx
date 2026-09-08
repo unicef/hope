@@ -14,20 +14,19 @@ import {
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
-import React, {
+import type {
   KeyboardEvent,
   MouseEvent as ReactMouseEvent,
   ReactElement,
-  useEffect,
-  useRef,
-  useState,
 } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { api } from '../api/api';
 import { RestService } from '@restgenerated/services/RestService';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
-import { Profile } from '@restgenerated/models/Profile';
+import type { BusinessArea } from '@restgenerated/models/BusinessArea';
+import type { Profile } from '@restgenerated/models/Profile';
 import { restQueryKey } from '@utils/queryKeys';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { formatTooltip } from '@utils/timezone';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';

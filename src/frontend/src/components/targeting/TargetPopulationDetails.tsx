@@ -9,7 +9,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 

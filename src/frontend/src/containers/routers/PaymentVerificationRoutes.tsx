@@ -1,5 +1,5 @@
 import { useRoutes, Navigate } from 'react-router-dom';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import PaymentPlanVerificationDetailsPage from '@containers/pages/payments/PaymentPlanVerificationDetailsPage';
 import PaymentVerificationPage from '@containers/pages/payments/PaymentVerificationPage';
 import VerificationPaymentDetailsPage from '@containers/pages/payments/VerificationPaymentDetailsPage';

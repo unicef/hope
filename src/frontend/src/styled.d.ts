@@ -1,6 +1,6 @@
 // import original module declarations
 import 'styled-components';
-import { Theme as MuiTheme } from '@mui/material/styles';
+import type { Theme as MuiTheme } from '@mui/material/styles';
 
 // extend the module declarations
 declare module 'styled-components' {

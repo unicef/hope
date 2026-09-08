@@ -4,7 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 type VerificationId = {
   id: string;
