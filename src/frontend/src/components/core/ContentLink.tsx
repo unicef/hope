@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
-import { ReactElement, ReactNode } from 'react';
+import type { MiśTheme } from '../../theme';
+import type { ReactElement, ReactNode } from 'react';
 
 interface LinkProps {
   fullWidth?: boolean;

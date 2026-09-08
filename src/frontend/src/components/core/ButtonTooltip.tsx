@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button';
 import { Tooltip } from '@mui/material';
-import { ReactNode, FC } from 'react';
+import type { ReactNode, FC } from 'react';
 
 interface ButtonTooltipProps {
   children: ReactNode;

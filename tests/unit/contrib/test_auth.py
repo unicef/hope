@@ -11,8 +11,10 @@ def _make_request(auth_header: str | None = None) -> MagicMock:
     request = MagicMock()
     if auth_header is None:
         request.META = {}
+        request.headers = {}
     else:
         request.META = {"HTTP_AUTHORIZATION": auth_header}
+        request.headers = {"authorization": auth_header.encode()}
     return request
 
 
@@ -44,6 +46,7 @@ class TestJWTAuthentication:
     def test_empty_auth_header_list_returns_none(self) -> None:
         request = MagicMock()
         request.META = {"HTTP_AUTHORIZATION": ""}
+        request.headers = {"authorization": b""}
         auth = JWTAuthentication()
         result = auth.authenticate(request)
         assert result is None

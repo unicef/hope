@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { styled } from '@mui/system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const ErrorButton = styled(Button)({
   backgroundColor: '#C21313',

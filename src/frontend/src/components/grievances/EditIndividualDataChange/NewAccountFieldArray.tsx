@@ -5,9 +5,9 @@ import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { AccountField } from '../AccountField';
 import { removeItemById } from '../utils/helpers';
-import { ReactElement } from 'react';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
+import type { ReactElement } from 'react';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
 
 export interface NewAccountFieldArrayProps {
   values;

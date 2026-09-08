@@ -1,11 +1,12 @@
-import { Grid, Theme, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Title } from '@core/Title';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';

@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Logo } from '@components/core/Logo';
@@ -109,7 +110,11 @@ export function SurprisePage(): ReactElement {
   return (
     <Container>
       <Card>
-        <Logo transparent={false} displayLogoWithoutSubtitle={false} height={160} />
+        <Logo
+          transparent={false}
+          displayLogoWithoutSubtitle={false}
+          height={160}
+        />
         <Heading>{heading}</Heading>
         <SubHeading>{subheading}</SubHeading>
         <Photo src={imageSrc} alt="A surprise for you" />

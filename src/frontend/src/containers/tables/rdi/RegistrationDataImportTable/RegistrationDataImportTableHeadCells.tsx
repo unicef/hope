@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
 export const headCells: HeadCell<RegistrationDataImportList>[] = [
   {

@@ -2,7 +2,7 @@ import { Box, Button, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StyledBox = styled(Box)`
   width: 100%;

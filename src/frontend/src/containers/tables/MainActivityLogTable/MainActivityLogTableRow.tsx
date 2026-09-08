@@ -1,7 +1,8 @@
 import { IconButton } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import type { LogEntry } from '@restgenerated/models/LogEntry';

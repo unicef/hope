@@ -3,8 +3,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useTranslation } from 'react-i18next';
 import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
+import type { ReactElement } from 'react';
 import { displayNameWithLatin } from '@utils/utils';
-import { ReactElement } from 'react';
 
 interface LookUpDelegateDisplayProps {
   values;

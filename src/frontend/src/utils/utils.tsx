@@ -1,4 +1,4 @@
-import { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Box, Typography } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
@@ -12,9 +12,9 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import { ReactElement } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { theme as themeObj } from '../theme';
+import type { ReactElement } from 'react';
+import type { useLocation, useNavigate } from 'react-router-dom';
+import type { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
 export function displayNameWithLatin(
@@ -842,10 +842,10 @@ export function thingForSpecificGrievanceType(
   ) {
     return categoryThing;
   }
-  if (!(issueType in categoryThing)) {
+  if (!issueType || !(issueType in categoryThing)) {
     return defaultThing;
   }
-  return categoryThing[issueType];
+  return categoryThing[issueType ?? ''];
 }
 
 export const isInvalid = (fieldname: string, errors, touched): boolean =>

@@ -1,5 +1,5 @@
 import { Autocomplete, Box, TextField } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function FormikAutocomplete({
   field,
@@ -10,7 +10,7 @@ export function FormikAutocomplete({
 }): ReactElement {
   const realSelectedValue = choices.find((item) => item.value === field.value);
 
-  const handleChange = (e, option): void => {
+  const handleChange = (_e, option): void => {
     if (!option) {
       form.setFieldValue(field.name, null);
     } else {

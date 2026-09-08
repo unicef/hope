@@ -21,9 +21,9 @@ import {
   Typography,
   Grid,
 } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import { Close } from '@mui/icons-material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useSnackbar } from '@hooks/useSnackBar';
