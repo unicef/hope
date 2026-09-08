@@ -29,7 +29,7 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
-  const { mutateAsync: sendBack, isPending: loadingSendBack } = useMutation({
+  const { mutate: sendBack, isPending: loadingSendBack } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansSendBackToFinishedRetrieve(
         {

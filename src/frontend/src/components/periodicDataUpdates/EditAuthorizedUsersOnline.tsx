@@ -73,9 +73,14 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
   return (
     <Formik
       initialValues={{ authorizedUsers: [] }}
-      onSubmit={async(values, { setSubmitting }) => {
-        await updateAuthorizedUsers(values);
-        setSubmitting(false);
+      onSubmit={async (values, { setSubmitting }) => {
+        try {
+          await updateAuthorizedUsers(values);
+        } catch {
+          // handled in onError
+        } finally {
+          setSubmitting(false);
+        }
       }}
     >
       {({ setFieldValue, handleSubmit, isSubmitting }) => (

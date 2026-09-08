@@ -257,8 +257,14 @@ export const GrievanceDetailsToolbar = ({
         )
       : null;
 
-  const changeState = async (status: number): Promise<void> => {
-    await mutateAsync({ status });
+  const changeState = async (status: number): Promise<boolean> => {
+    try {
+      await mutateAsync({ status });
+      return true;
+    } catch {
+      // handled in onError
+      return false;
+    }
   };
 
   const offerLinkedNeedsAdjudicationClose = async (): Promise<void> => {
@@ -417,13 +423,9 @@ export const GrievanceDetailsToolbar = ({
           warningContent: closingWarningText,
           continueText: t('close ticket'),
         }).then(async () => {
-          try {
-            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-            if (isDataChangeCategory) {
-              await offerLinkedNeedsAdjudicationClose();
-            }
-          } catch {
-            // Error handling is done in the mutation onError callback
+          const closed = await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+          if (closed && isDataChangeCategory) {
+            await offerLinkedNeedsAdjudicationClose();
           }
         })
       }

@@ -69,7 +69,7 @@ export function GrievancesTableRow({
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
         {
@@ -90,9 +90,9 @@ export function GrievancesTableRow({
     },
   });
 
-  const onFilterChange = async (assignee, ids): Promise<void> => {
+  const onFilterChange = (assignee, ids): void => {
     if (assignee) {
-      await mutateAsync({
+      mutate({
         assignedTo: assignee.id,
         grievanceTicketIds: ids,
       });

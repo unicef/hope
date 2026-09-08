@@ -36,7 +36,7 @@ export function BulkAddNoteModal({
   const { businessAreaSlug, isAllPrograms } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (params: BulkGrievanceTicketsAddNote) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
         businessAreaSlug,
@@ -64,8 +64,8 @@ export function BulkAddNoteModal({
     },
   });
 
-  const onSave = async (): Promise<void> => {
-    await mutateAsync({
+  const onSave = (): void => {
+    mutate({
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
       note: value,
     });

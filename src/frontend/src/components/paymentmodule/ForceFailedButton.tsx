@@ -27,7 +27,7 @@ export function ForceFailedButton({
   const { showMessage } = useSnackbar();
   const { paymentPlanId } = useParams();
   const { businessArea, programId } = useBaseUrl();
-  const { mutateAsync: markAsFailed, isPending: loadingMarkAsFailed } =
+  const { mutate: markAsFailed, isPending: loadingMarkAsFailed } =
     useMutation({
       mutationFn: ({
         businessAreaSlug,

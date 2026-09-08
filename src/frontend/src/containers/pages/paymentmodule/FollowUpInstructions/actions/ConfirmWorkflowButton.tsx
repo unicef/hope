@@ -46,7 +46,7 @@ export function ConfirmWorkflowButton({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isPending } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: () => mutationFn(comment || undefined),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -108,7 +108,7 @@ export function ConfirmWorkflowButton({
               loading={isPending}
               color={color}
               variant="contained"
-              onClick={() => mutateAsync()}
+              onClick={() => mutate()}
               data-cy={`${dataCy}-confirm`}
             >
               {t('Confirm')}

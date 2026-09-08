@@ -28,7 +28,7 @@ export const ActivateProgram = ({
   const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: activateProgram, isPending: loading } = useMutation({
+  const { mutate: activateProgram, isPending: loading } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsActivateCreate({
         businessAreaSlug: businessArea,
@@ -53,8 +53,8 @@ export const ActivateProgram = ({
     },
   });
 
-  const handleActivateProgram = async (): Promise<void> => {
-    await activateProgram();
+  const handleActivateProgram = (): void => {
+    activateProgram();
   };
   return (
     <span>

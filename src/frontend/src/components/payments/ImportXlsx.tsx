@@ -69,9 +69,13 @@ export const ImportXlsx = ({
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
-      await importMutation.mutateAsync({
-        file: fileToImport,
-      });
+      try {
+        await importMutation.mutateAsync({
+          file: fileToImport,
+        });
+      } catch {
+        // handled in onError
+      }
     }
   };
 

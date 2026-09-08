@@ -26,7 +26,7 @@ export function AbortedPaymentPlanHeaderButtons({
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
-  const { mutateAsync: reactivate } = useMutation({
+  const { mutate: reactivate } = useMutation({
     mutationFn: async () => {
       setLoading(true);
       await RestService.restBusinessAreasProgramsPaymentPlansReactivateAbortRetrieve(
@@ -52,8 +52,8 @@ export function AbortedPaymentPlanHeaderButtons({
     },
   });
 
-  const handleReactivate = async () => {
-    await reactivate();
+  const handleReactivate = () => {
+    reactivate();
   };
 
   return (

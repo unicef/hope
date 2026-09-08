@@ -67,7 +67,7 @@ const RegistrationDataImportDetailsPageHeader = ({
       });
     },
   });
-  const { mutateAsync: eraseRdiMutate, isPending: eraseLoading } =
+  const { mutate: eraseRdiMutate, isPending: eraseLoading } =
     useActionMutation(
       registration.id,
       RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
@@ -88,8 +88,8 @@ const RegistrationDataImportDetailsPageHeader = ({
           content: t(
             'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
           ),
-        }).then(async () => {
-          await eraseRdiMutate();
+        }).then(() => {
+          eraseRdiMutate();
         })
       }
       variant="contained"

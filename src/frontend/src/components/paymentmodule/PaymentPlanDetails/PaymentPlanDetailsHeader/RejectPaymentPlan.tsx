@@ -41,7 +41,7 @@ export function RejectPaymentPlan({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: reject, isPending: loadingReject } = useMutation({
+  const { mutate: reject, isPending: loadingReject } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

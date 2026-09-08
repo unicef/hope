@@ -174,7 +174,7 @@ export const NeedsAdjudicationDetailsOld = ({
                   confirm({
                     content: confirmationText,
                   }).then(() => {
-                    mutation.mutateAsync({
+                    mutation.mutate({
                       grievanceTicketId: ticket.id,
                       approveStatus: true, // Marking as approved/duplicate
                     });

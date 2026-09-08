@@ -38,7 +38,7 @@ export function LockFspPaymentPlan({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: lock, isPending: loadingLock } = useMutation({
+  const { mutate: lock, isPending: loadingLock } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

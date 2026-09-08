@@ -96,7 +96,7 @@ export const FlagDetails = ({
                   confirm({
                     content: isFlagConfirmed ? removalText : confirmationText,
                   }).then(() =>
-                    mutation.mutateAsync({
+                    mutation.mutate({
                       grievanceTicketId: ticket.id,
                       approveStatus: !details.approveStatus,
                     }),

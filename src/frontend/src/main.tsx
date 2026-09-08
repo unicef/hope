@@ -22,6 +22,7 @@ import {
   useNavigationType,
 } from 'react-router-dom';
 import { FONT } from './theme';
+import { dropHandledApiErrors } from '@utils/sentryFilters';
 
 ChartJS.register(
   ArcElement,
@@ -47,6 +48,7 @@ if (process.env.NODE_ENV !== 'development' && window.SENTRY_DSN) {
     release: packageJson.version,
     environment: window.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
+    beforeSend: dropHandledApiErrors,
     integrations: [
       Sentry.reactRouterV6BrowserTracingIntegration({
         useEffect: React.useEffect,

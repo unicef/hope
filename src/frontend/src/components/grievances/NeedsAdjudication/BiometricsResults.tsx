@@ -72,7 +72,7 @@ export const BiometricsResults = ({
   const { businessAreaSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
 
-  const { mutateAsync: loadData } = useMutation({
+  const { mutate: loadData } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,

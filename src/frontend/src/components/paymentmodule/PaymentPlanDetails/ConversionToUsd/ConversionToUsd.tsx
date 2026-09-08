@@ -69,7 +69,7 @@ function ConversionToUsd({
     paymentPlan.id,
   ]);
 
-  const { mutateAsync: applyExchangeRate, isPending } = useMutation({
+  const { mutate: applyExchangeRate, isPending } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,
@@ -167,8 +167,8 @@ function ConversionToUsd({
                 color="primary"
                 loading={isPending}
                 disabled={isApplyDisabled}
-                onClick={async () => {
-                  await applyExchangeRate({
+                onClick={() => {
+                  applyExchangeRate({
                     businessAreaSlug: businessArea,
                     id: paymentPlan.id,
                     programCode: programId,

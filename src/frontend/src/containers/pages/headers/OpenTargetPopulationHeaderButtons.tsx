@@ -44,7 +44,7 @@ export function OpenTargetPopulationHeaderButtons({
   const { isActiveProgram } = useProgramContext();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: rebuild, isPending: loadingRebuild } = useMutation({
+  const { mutate: rebuild, isPending: loadingRebuild } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       programCode,

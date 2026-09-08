@@ -37,7 +37,7 @@ interface BulkBaseModalProps {
   buttonTitle: string;
   title: string;
   children?: ReactNode;
-  onSave: (tickets: GrievanceTicketList[]) => Promise<void>;
+  onSave: (tickets: GrievanceTicketList[]) => void | Promise<void>;
   disabledSave?: boolean;
   saveLabel?: string;
 }
