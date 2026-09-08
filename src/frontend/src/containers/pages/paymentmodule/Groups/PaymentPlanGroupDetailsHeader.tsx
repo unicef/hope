@@ -1,8 +1,10 @@
 import { AdminButton } from '@core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
+import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
+import { paymentPlanBackgroundActionStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
@@ -53,6 +55,15 @@ export function PaymentPlanGroupDetailsHeader({
               }}
             >
               {group.unicefId}
+            </Box>
+          )}
+          {group?.backgroundActionStatus && (
+            <Box>
+              <StatusBox
+                status={group.backgroundActionStatus}
+                statusToColor={paymentPlanBackgroundActionStatusToColor}
+                dataCy="group-background-action-status"
+              />
             </Box>
           )}
         </Box>

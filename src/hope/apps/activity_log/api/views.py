@@ -1,14 +1,9 @@
 import logging
-from typing import Any
 
 from django.db.models import QuerySet
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
-from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
-from rest_framework.request import Request
-from rest_framework.response import Response
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.api.serializers import LogEntrySerializer
@@ -19,8 +14,6 @@ from hope.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.api.serializers import ChoiceSerializer
-from hope.apps.core.utils import to_choice_object
 from hope.models import LogEntry
 
 logger = logging.getLogger(__name__)
@@ -51,8 +44,3 @@ class LogEntryViewSet(
         if code := self.kwargs.get("program_code"):
             queryset = queryset.filter(programs__code=code)
         return queryset
-
-    @extend_schema(responses={200: ChoiceSerializer(many=True)})
-    @action(detail=False, methods=["get"], url_path="action-choices")
-    def log_entry_action_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return Response(to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES))

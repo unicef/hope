@@ -3,7 +3,6 @@ from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.db import OperationalError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -46,15 +45,12 @@ class DashboardDataView(APIView):
         is_global = slug == GLOBAL_SLUG
         business_area_obj = get_object_or_404(BusinessArea, slug=slug)
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj):
-            return Response(
-                {
-                    "detail": _(
-                        "You do not have permission to view the global dashboard."
-                        if is_global
-                        else "You do not have permission to view this dashboard."
-                    )
-                },
-                status=status.HTTP_403_FORBIDDEN,
+            raise PermissionDenied(
+                detail=_(
+                    "You do not have permission to view the global dashboard."
+                    if is_global
+                    else "You do not have permission to view this dashboard."
+                )
             )
 
         data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
@@ -104,8 +100,12 @@ class CreateOrUpdateDashReportView(APIView):
                 {"detail": _("DashReport generation is already in progress.")},
                 status=status.HTTP_202_ACCEPTED,
             )
-        except OperationalError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            log.exception("Unexpected error while triggering the DashReport generation task: %s", e)
+            return Response(
+                {"detail": _("An unexpected error occurred while generating the dash report.")},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class DashboardReportView(LoginRequiredMixin, TemplateView):

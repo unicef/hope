@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -21,17 +21,17 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "maxNodeModuleJsDepth": 10,
-    "baseUrl": ".",
     "paths": {
-      "@api/*": ["src/api/*"],
-      "@components/*": ["src/components/*"],
-      "@core/*": ["src/components/core/*"],
-      "@containers/*": ["src/containers/*"],
-      "@shared/*": ["src/shared/*"],
-      "@utils/*": ["src/utils/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@generated/*": ["src/__generated__/*"],
-      "@restgenerated/*": ["src/restgenerated/*"]
+      "@api/*": ["./src/api/*"],
+      "@components/*": ["./src/components/*"],
+      "@core/*": ["./src/components/core/*"],
+      "@containers/*": ["./src/containers/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@generated/*": ["./src/__generated__/*"],
+      "@restgenerated/*": ["./src/restgenerated/*"],
+      "src/*": ["./src/*"]
     }
   },
   "include": [

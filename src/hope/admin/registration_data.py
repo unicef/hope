@@ -17,7 +17,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from kombu.exceptions import OperationalError
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.celery_tasks import enroll_households_to_program_async_task
 from hope.apps.household.documents import get_household_doc, get_individual_doc
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
+class RegistrationDataImportAdmin(ViewOnUiMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "business_area",
@@ -88,6 +88,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area", "program", "imported_by")
+
+    def frontend_url(self, obj: RegistrationDataImport) -> str | None:
+        if not obj.business_area or not obj.program:
+            return None
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/registration-data-import/{obj.id}"
 
     @button(
         label="Re-run RDI",

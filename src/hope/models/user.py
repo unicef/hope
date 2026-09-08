@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
+from timezone_field import TimeZoneField
 from unicef_security.models import SecurityMixin
 
 from hope.apps.account.permissions import Permissions
@@ -47,6 +48,7 @@ class User(AbstractUser, SecurityMixin, NaturalKeyModel, UUIDModel):
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
+    timezone = TimeZoneField(null=True, blank=True)
 
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 

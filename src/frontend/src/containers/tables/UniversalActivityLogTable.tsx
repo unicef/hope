@@ -42,7 +42,7 @@ export function UniversalActivityLogTable({
     enabled: !!(businessAreaSlug && objectId),
   });
 
-  const activityLogsCountParams = { businessAreaSlug };
+  const activityLogsCountParams = { businessAreaSlug, objectId };
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasActivityLogsCountRetrieve,
@@ -52,7 +52,7 @@ export function UniversalActivityLogTable({
       RestService.restBusinessAreasActivityLogsCountRetrieve(
         activityLogsCountParams,
       ),
-    enabled: !!businessAreaSlug,
+    enabled: !!(businessAreaSlug && objectId),
   });
 
   if (!logsData) {

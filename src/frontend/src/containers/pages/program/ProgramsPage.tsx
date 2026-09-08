@@ -48,11 +48,18 @@ function ProgramsPage(): ReactElement {
   const permissions = usePermissions();
 
   const { data: choicesData } = useQuery<ProgramChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+    queryFn: () => RestService.restChoicesProgramsRetrieve(),
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
+  const { data: dataCollectingTypeChoices } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasDataCollectingTypesChoicesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsChoicesRetrieve({
+      RestService.restBusinessAreasDataCollectingTypesChoicesList({
         businessAreaSlug: businessArea,
       }),
     staleTime: 1000 * 60 * 10,
@@ -100,6 +107,7 @@ function ProgramsPage(): ReactElement {
       <ProgrammesFilter
         filter={filter}
         choicesData={choicesData}
+        dataCollectingTypeChoices={dataCollectingTypeChoices ?? []}
         setFilter={setFilter}
         initialFilter={initialFilter}
         appliedFilter={appliedFilter}

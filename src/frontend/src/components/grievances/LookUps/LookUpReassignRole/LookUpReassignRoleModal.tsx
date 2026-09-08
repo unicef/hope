@@ -16,9 +16,14 @@ import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getFilterFromQueryParams, ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import {
+  getFilterFromQueryParams,
+  ApiErrorShape,
+  showApiErrorMessages,
+} from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -85,19 +90,15 @@ export function LookUpReassignRoleModal({
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const initialFilterIND = {
     search: '',
-    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',

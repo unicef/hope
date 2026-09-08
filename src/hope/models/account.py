@@ -1,5 +1,6 @@
 from functools import cached_property
 import hashlib
+from itertools import batched
 import re
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -12,6 +13,7 @@ from hope.models.utils import MergedManager, MergeStatusModel, PendingManager, S
 
 class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     ACCOUNT_FIELD_PREFIX = "account__"
+    VALIDATE_UNIQUENESS_BATCH_SIZE = 1000
 
     individual = models.ForeignKey(
         "household.Individual",
@@ -207,9 +209,13 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     def unique_fields(self) -> list[str]:
         return self.account_type.unique_fields
 
+    def has_no_unique_fields(self) -> bool:
+        unique_fields = getattr(self, "unique_fields", None)
+        return isinstance(unique_fields, list | tuple) and not unique_fields
+
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, list | tuple):
-            if not self.unique_fields:
+            if self.has_no_unique_fields():
                 self.is_unique = True
                 self.unique_key = None
                 self.save(update_fields=["unique_key", "is_unique"])
@@ -235,8 +241,22 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     @classmethod
     def validate_uniqueness(cls, qs: QuerySet["Account"] | list["Account"]) -> None:
-        for dmd in qs:
-            dmd.update_unique_field()
+        accounts_without_unique_fields = []
+        for account in qs:
+            if account.has_no_unique_fields():
+                account.unique_key = None
+                account.is_unique = True
+                accounts_without_unique_fields.append(account)
+            else:
+                account.update_unique_field()
+
+        if accounts_without_unique_fields:
+            account_ids = (account.pk for account in accounts_without_unique_fields)
+            for account_ids_batch in batched(account_ids, cls.VALIDATE_UNIQUENESS_BATCH_SIZE, strict=False):
+                Account.all_objects.filter(pk__in=account_ids_batch).update(
+                    unique_key=None,
+                    is_unique=True,
+                )
 
 
 class PendingAccount(Account):
