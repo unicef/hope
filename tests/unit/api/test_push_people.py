@@ -222,22 +222,22 @@ def test_upload_with_errors(token_api_client, push_people_url, program, afghanis
     ]
     response = token_api_client.post(push_people_url, data, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST, str(response.json())
-    assert response.json() == [
-        {
+    assert response.json() == {
+        "0": {
             "birth_date": ["This field is required."],
-            "documents": [
-                {
+            "documents": {
+                "0": {
                     "document_number": ["This field is required."],
                     "type": ["This field is required."],
                 }
-            ],
+            },
             "type": ["This field is required."],
         },
-        {
+        "1": {
             "birth_date": ["This field is required."],
             "type": ["This field is required."],
         },
-    ]
+    }
 
 
 @pytest.mark.parametrize(
