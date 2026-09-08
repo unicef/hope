@@ -208,3 +208,81 @@ def test_create_feedback_for_individual_from_other_business_area_is_denied(
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     assert not Feedback.objects.filter(individual_lookup=victim_individual).exists()
+
+
+@pytest.fixture
+def unauthorized_program(attacker_business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=attacker_business_area)
+
+
+@pytest.fixture
+def household_in_unauthorized_program(unauthorized_program: Program) -> Household:
+    return HouseholdFactory(
+        business_area=unauthorized_program.business_area, program=unauthorized_program, create_role=False
+    )
+
+
+@pytest.fixture
+def program_create_url(attacker_business_area: BusinessArea, attacker_program: Program) -> str:
+    return reverse(
+        "api:accountability:feedbacks-per-program-list",
+        kwargs={"business_area_slug": attacker_business_area.slug, "program_code": attacker_program.code},
+    )
+
+
+def test_create_feedback_in_program_path_ignores_program_from_body(
+    api_client: APIClient,
+    program_create_url: str,
+    attacker_program: Program,
+    unauthorized_program: Program,
+) -> None:
+    response = api_client.post(
+        program_create_url,
+        {
+            "issue_type": Feedback.POSITIVE_FEEDBACK,
+            "description": "program from the url wins",
+            "program_id": str(unauthorized_program.id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED, response.content
+    assert Feedback.objects.get(id=response.data["id"]).program == attacker_program
+
+
+def test_create_feedback_for_household_from_other_program_is_denied(
+    api_client: APIClient,
+    program_create_url: str,
+    household_in_unauthorized_program: Household,
+) -> None:
+    response = api_client.post(
+        program_create_url,
+        {
+            "issue_type": Feedback.POSITIVE_FEEDBACK,
+            "description": "household from another program",
+            "household_lookup": str(household_in_unauthorized_program.id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
+    assert not Feedback.objects.filter(household_lookup=household_in_unauthorized_program).exists()
+
+
+def test_create_feedback_for_household_from_program_without_role_is_denied(
+    api_client: APIClient,
+    create_url: str,
+    household_in_unauthorized_program: Household,
+) -> None:
+    response = api_client.post(
+        create_url,
+        {
+            "issue_type": Feedback.POSITIVE_FEEDBACK,
+            "description": "program derived from the household lookup",
+            "household_lookup": str(household_in_unauthorized_program.id),
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
+    assert not Feedback.objects.filter(household_lookup=household_in_unauthorized_program).exists()

@@ -683,7 +683,6 @@ def test_create_feedback_for_finished_program(
             "comments": "Test Comments",
             "consent": True,
             "description": "Test new description",
-            "household_lookup": str(household_1.pk),
             "issue_type": "POSITIVE_FEEDBACK",
             "admin2": str(area_1.pk),
             "language": "polish",

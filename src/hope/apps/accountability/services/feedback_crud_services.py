@@ -53,10 +53,8 @@ class FeedbackCrudServices:
         )
         cls._apply_fields(obj, input_data, business_area)
 
-        if obj.household_lookup:
-            obj.program = obj.household_lookup.program or obj.household_lookup.programs.first()
-
-        if not obj.program and cls._has_value(input_data, "program"):
+        # program is resolved and authorized by the view (url path, body or household lookup)
+        if cls._has_value(input_data, "program"):
             obj.program = get_object_or_404(Program, id=input_data["program"])
         obj.created_by = cast("User", user)
         cls.validate_lookup(obj)

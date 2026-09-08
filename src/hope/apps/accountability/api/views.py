@@ -137,9 +137,16 @@ class FeedbackViewSet(
         program = None
         if program_code:
             program = get_object_or_404(Program, code=program_code, business_area=business_area)
-
-        if program_id := serializer.validated_data.get("program_id"):
+        elif program_id := serializer.validated_data.get("program_id"):
             program = get_object_or_404(Program, id=program_id, business_area=business_area)
+
+        if household_id := serializer.validated_data.get("household_lookup"):
+            household = get_object_or_404(Household, id=household_id, business_area=business_area)
+            household_program = household.program or household.programs.first()
+            if program is None:
+                program = household_program
+            elif household_program != program:
+                raise ValidationError("Household does not belong to this program.")
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("It is not possible to create Feedback for a Finished Program.")
