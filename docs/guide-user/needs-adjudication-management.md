@@ -27,8 +27,8 @@ The Grievance Tickets list carries an **NA Tickets Management** button in its pa
 
 The page header holds a **Grievance Tickets List** breadcrumb and a back arrow, both of which return to the ticket list.
 
-!!! info "Work inside a programme, not All Programmes"
-    The workspace is available in the All Programmes scope, where it adds a **Programme** filter. However, the role-reassignment lookup resolves candidate individuals against the *selected* programme, so adjudicating from within a specific programme is the reliable way to work.
+!!! info "Works in both views"
+    The workspace is available both inside a single programme and in the All Programmes scope, where it additionally offers a **Programme** filter. Nothing is degraded in All Programmes: the ticket list, the counter, the comparison panel and **Finalize** all have their own All Programmes handling, and the role-reassignment lookup resolves candidates against the programme of the individual on the ticket rather than a selected one.
 
 ---
 
@@ -40,7 +40,7 @@ The screen is laid out in three parts:
 - the **ticket list** down the left-hand side, roughly 40% of the width;
 - the **comparison panel** filling the rest.
 
-The header shows a running counter, **Tickets managed: N**, and the **Finalize** button. The list is always restricted to the Needs Adjudication category and ordered newest first.
+The header shows a running counter, **Tickets managed: N**, and the **Finalize** button. The list is always restricted to *active* Needs Adjudication tickets — closed ones cannot be adjudicated, so they never appear — and ordered newest first.
 
 ![The workspace with the ticket list on the left and the comparison panel on the right](./_screenshots/needs-adjudication/NATicketsManagementPage.png)
 
@@ -49,6 +49,12 @@ The header shows a running counter, **Tickets managed: N**, and the **Finalize**
 ## Filtering the queue
 
 Open the filters with **SHOW FILTERS**; **HIDE FILTERS** collapses them again. **APPLY** commits the selection and returns the list to page 1, **CLEAR** resets everything. Applied filters are written into the page URL, so a narrowed queue can be bookmarked or shared with a colleague.
+
+While decisions are outstanding, both **APPLY** and **CLEAR** raise a **Change filters** confirmation first:
+
+> You have *N* ticket(s) managed but not finalized. Your decisions are kept even when the new filters hide those tickets, and Finalize will still close them. Continue?
+
+A filter only changes what is on screen. It does not drop decisions, and **Finalize** still closes every ticket decided on — including the ones the new filter hides.
 
 | Filter | Notes |
 |---|---|
@@ -75,7 +81,10 @@ Once a decision has been recorded, the row also carries a status label in its bo
 | Label | Meaning |
 |---|---|
 | ***Ticket managed*** | A complete decision has been recorded and this ticket is ready to be finalized |
+| ***Decision incomplete*** | The ticket has more than one possible duplicate and at least one pair has not been decided yet — flagged with a warning icon |
 | ***Reassignment required*** | A decision exists, but a withdrawn individual still holds a role that has to be handed over first — shown in amber with a warning icon |
+
+*Decision incomplete* takes precedence over *Reassignment required*: while any pair is still undecided that is the label shown — see [Tickets with several possible duplicates](#tickets-with-several-possible-duplicates).
 
 When no tickets match the filters the list reads *No Needs Adjudication tickets*.
 
@@ -188,7 +197,15 @@ The footer carries an **Identity Verified\*** checkbox and **CANCEL** / **SAVE**
 
 ## Finalizing
 
-**Finalize** is disabled while there is nothing to finalize, while any managed ticket still needs a reassignment, and while a finalize is already in flight. In the second case, hovering over the button explains why — *N ticket(s) need a role reassignment before finalizing*.
+**Finalize** is disabled while there is nothing to finalize, while more than 50 tickets are managed, while any managed ticket still has an undecided pair, while any managed ticket still needs a reassignment, and while a finalize is already in flight. In the blocked cases, hovering over the button explains why:
+
+| Why it is blocked | Tooltip |
+|---|---|
+| More than 50 tickets managed | *You can finalize at most 50 tickets at a time, and you have N managed. Undo some decisions, finalize, then carry on with the rest.* |
+| A multi-duplicate ticket has undecided pairs | *N ticket(s) need every duplicate decided before finalizing* |
+| A withdrawn individual still holds a blocking role | *N ticket(s) need a role reassignment before finalizing* |
+
+The cap of 50 is enforced by the server as well, so working the backlog in batches of at most 50 is part of the normal rhythm of the screen.
 
 Clicking it raises a confirmation:
 
@@ -198,27 +215,36 @@ Clicking it raises a confirmation:
 
 **CONTINUE** commits the batch, **CANCEL** returns to the workspace with every decision intact. On success a snackbar confirms *N ticket(s) finalized*, the session decisions are cleared, and the counter returns to zero.
 
-!!! warning "Finalize is all or nothing"
-    The whole batch is committed in a single transaction. If any ticket in it fails validation — it has been closed in the meantime, it is no longer a Needs Adjudication ticket, an individual appears in both the duplicate and the distinct list — **nothing at all is written**, and every decision stays on screen so it can be corrected and resubmitted.
+!!! info "Tickets someone else closed first are skipped"
+    If a ticket in the batch was closed by another user between the decision and **Finalize**, it is skipped and the rest of the batch still goes through. The confirmation message names the skipped tickets — *N ticket(s) finalized. Closed by someone else in the meantime and skipped: …*
+
+!!! warning "Errors stop the whole batch"
+    Apart from that, the batch goes through as one — all of it or none of it. If any ticket cannot be closed — an individual on it has been withdrawn somewhere else in the meantime, or the same individual is withdrawn on one ticket in the batch and kept as distinct on another — **nothing at all is written**, and every decision stays on screen so it can be corrected and resubmitted.
 
 !!! warning "Finalized tickets close immediately"
     Tickets finalized from this screen go straight to **Closed**. They do **not** pass through the **For Approval** step that the single-ticket flow uses, so there is no second pair of eyes between the decision and the data change. This is the one behavioural difference to understand before using the workspace.
-
-Users whose permission is scoped to tickets they created or own can only finalize those tickets; the scope is re-checked on every ticket in the batch, not just on the screen.
 
 ---
 
 ## Permissions
 
+Two permissions are required to reach the workspace, and **both** are needed — either one on its own is not enough to see the **NA Tickets Management** button or open the screen:
+
 | Permission | Grants |
 |---|---|
-| `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE` | Access to the workspace and the ability to finalize |
-| `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR` | The same, restricted to tickets the user created |
-| `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER` | The same, restricted to tickets the user owns |
+| `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE` | Recording the adjudication decision |
+| `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK` | Closing the ticket, which is what **Finalize** does |
+
+The pair is re-checked on the server for every ticket in the batch, not only when the screen opens.
+
+Two further permissions only widen what the comparison table shows; without them the operator sees an empty value rather than an error:
+
+| Permission | Grants |
+|---|---|
 | `GRIEVANCES_VIEW_BIOMETRIC_RESULTS` | The deduplication engine's similarity score on biometric tickets |
 | `POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION` | The **Account** row in the comparison table |
 
-Any one of the first three is enough to see the **NA Tickets Management** button and open the screen.
+There are no creator- or owner-scoped variants in play here: Needs Adjudication tickets are system-generated, so nobody is their creator, and the workspace skips the assignment step, so nobody is their owner.
 
 ---
 
