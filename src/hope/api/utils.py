@@ -15,6 +15,8 @@ class CurrencySlugRelatedField(serializers.SlugRelatedField):
             return queryset.resolve_code(data)
         except queryset.model.DoesNotExist:
             self.fail("does_not_exist", slug_name=self.slug_field, value=smart_str(data))
+        except (TypeError, ValueError):
+            self.fail("invalid")
 
 
 def humanize_errors(errors: dict) -> dict:

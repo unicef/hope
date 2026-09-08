@@ -25,8 +25,8 @@ from hope.api.endpoints.rdi.common import (
 )
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
-from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
 from hope.api.utils import CurrencySlugRelatedField
+from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,

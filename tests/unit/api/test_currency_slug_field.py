@@ -93,3 +93,18 @@ def test_field_rejects_an_overridden_slug_field() -> None:
     # by code, so the kwarg is refused outright rather than silently ignored.
     with pytest.raises(TypeError):
         CurrencySlugRelatedField(slug_field="vision_code", queryset=Currency.objects.all())
+
+
+def test_field_nul_byte_is_validation_error_not_a_driver_error(active_currency: Currency) -> None:
+    serializer = _CurrencyCarrierSerializer(data={"currency": "TS\x00T"})
+
+    assert not serializer.is_valid()
+    assert serializer.errors["currency"][0].code == "invalid"
+    assert "\x00" not in str(serializer.errors["currency"][0])
+
+
+def test_field_non_string_value_is_validation_error(active_currency: Currency) -> None:
+    serializer = _CurrencyCarrierSerializer(data={"currency": {"code": "TST"}})
+
+    assert not serializer.is_valid()
+    assert "currency" in serializer.errors
