@@ -24,8 +24,8 @@ export function GrievancesSidebar({
     const { category, issueType, status } = ticket;
 
     if (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-      individual = ticket.ticketDetails.selectedIndividual;
-      household = ticket.ticketDetails.selectedIndividual?.household;
+      individual = ticket.ticketDetails?.selectedIndividual;
+      household = ticket.ticketDetails?.selectedIndividual?.household;
     }
     const isOneIndividual = household?.activeIndividualsCount === 1;
     if (isOneIndividual) return false;
@@ -70,7 +70,7 @@ export function GrievancesSidebar({
       category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
-      const { role, relationship } = ticket.ticketDetails.individualData;
+      const { role, relationship } = ticket.ticketDetails?.individualData || {};
       if (isEmpty(role) && isEmpty(relationship)) {
         isProperDataChange = false;
       }
@@ -85,7 +85,7 @@ export function GrievancesSidebar({
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-    ticket.ticketDetails.isMultipleDuplicatesVersion &&
+    ticket.ticketDetails?.isMultipleDuplicatesVersion &&
     !isSocialDctType;
 
   const renderRightSection = (): ReactElement => {
