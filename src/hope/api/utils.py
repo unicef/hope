@@ -32,10 +32,13 @@ def _humanize_households(households: Any) -> list | dict:
     if isinstance(households, dict):
         hh_info_dict: dict[str, Any] = {}
         for idx, h in households.items():
-            if h and isinstance(h, dict):
-                _humanize_members(h)
-            if h:
-                hh_info_dict[f"Household #{int(idx) + 1}"] = [h]
+            if isinstance(idx, int):
+                if h and isinstance(h, dict):
+                    _humanize_members(h)
+                if h:
+                    hh_info_dict[f"Household #{idx + 1}"] = [h]
+            else:
+                hh_info_dict[idx] = h
         return hh_info_dict
     hh_info_list: list[dict[str, Any]] = []
     for i, h in enumerate(households, 1):
@@ -60,7 +63,11 @@ def _humanize_members_info(members: Any) -> list | dict:
     if isinstance(members, list) and len(members) == 1 and isinstance(members[0], str):
         return members
     if isinstance(members, dict):
-        return {f"Member #{int(k) + 1}": [m] for k, m in members.items() if m}
+        return {
+            (f"Member #{int(k) + 1}" if isinstance(k, int) else k): ([m] if isinstance(k, int) else m)
+            for k, m in members.items()
+            if m
+        }
     return {f"Member #{i}": [m] for i, m in enumerate(members, 1) if m}
 
 

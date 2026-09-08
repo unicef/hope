@@ -130,6 +130,37 @@ def test_households_dict_string_error() -> None:
     assert result == {"households": ["This field is required."]}
 
 
+def test_households_dict_string_keys_preserved() -> None:
+    errors = {"households": {"non_field_errors": ["Invalid RDI."], 0: {"country": ["This field is required."]}}}
+    result = humanize_errors(errors)
+
+    assert result == {
+        "households": {
+            "non_field_errors": ["Invalid RDI."],
+            "Household #1": [{"country": ["This field is required."]}],
+        }
+    }
+
+
+def test_list_input_converted_to_int_keyed(household_error: dict) -> None:
+    errors = [household_error, {}, {**household_error, "size": ["This field is required."]}]
+    result = humanize_errors(errors)
+
+    assert result == {
+        "households": {
+            "Household #1": [{"country": ["This field is required."]}],
+            "Household #3": [{"country": ["This field is required."], "size": ["This field is required."]}],
+        }
+    }
+
+
+def test_top_level_int_keyed_all_empty_returns_empty(household_error: dict) -> None:
+    errors = {0: {}, 2: {}}
+    result = humanize_errors(errors)
+
+    assert result == {}
+
+
 def test_top_level_int_keyed_errors(household_error: dict) -> None:
     errors = {0: household_error, 2: {**household_error, "size": ["This field is required."]}}
     result = humanize_errors(errors)
@@ -156,6 +187,17 @@ def test_households_dict_members_only_failing_indices_included(household_error: 
 
     hh = result["households"]["Household #1"][0]
     assert hh["members"] == {"Member #3": [{"full_name": ["This field is required."]}]}
+
+
+def test_members_dict_string_keys_preserved(household_error: dict, member_error: dict) -> None:
+    errors = {"households": {0: {**household_error, "members": {"non_field_errors": ["Invalid."], 1: member_error}}}}
+    result = humanize_errors(errors)
+
+    hh = result["households"]["Household #1"][0]
+    assert hh["members"] == {
+        "non_field_errors": ["Invalid."],
+        "Member #2": [{"full_name": ["This field is required."]}],
+    }
 
 
 def test_members_raw_string_error(household_error: dict) -> None:
