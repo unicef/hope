@@ -1222,6 +1222,34 @@ def test_payment_plan_apply_steficon_hh_selection() -> None:
     assert payment.vulnerability_score == Decimal("500.333")
 
 
+@pytest.mark.parametrize(
+    ("score_min", "score_max", "removed"),
+    [
+        (Decimal(600), None, True),
+        (None, Decimal(400), True),
+        (Decimal(400), None, False),
+        (None, Decimal(600), False),
+    ],
+)
+def test_payment_plan_apply_steficon_hh_selection_filters_by_one_sided_score_range(
+    score_min: Decimal | None, score_max: Decimal | None, removed: bool
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_STEFICON_WAIT,
+        steficon_rule_targeting=RuleCommitFactory(version=33, is_release=True),
+        vulnerability_score_min=score_min,
+        vulnerability_score_max=score_max,
+    )
+    payment = PaymentFactory(parent=payment_plan)
+    engine_rule = RuleFactory(name="Rule-test", type=Rule.TYPE_TARGETING)
+    RuleCommitFactory(definition="result.value=Decimal('500')", rule=engine_rule, version=11, is_release=True)
+
+    queue_and_run_retry_task(payment_plan_apply_steficon_hh_selection_async_task, payment_plan, str(engine_rule.id))
+
+    payment = Payment.all_objects.get(pk=payment.pk)
+    assert payment.is_removed is removed
+
+
 @patch("hope.models.Payment.objects.bulk_update")
 @patch("hope.apps.payment.celery_tasks.normalize_score", return_value=Decimal("500.333"))
 @patch("hope.apps.payment.celery_tasks.get_object_or_404")
