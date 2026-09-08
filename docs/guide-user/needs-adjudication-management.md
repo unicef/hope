@@ -25,7 +25,7 @@ The Grievance Tickets list carries an **NA Tickets Management** button in its pa
 /{business area}/programs/{programme code}/grievance/na-tickets-management
 ```
 
-The page header holds a **Grievance Tickets List** breadcrumb and a back arrow, both of which return to the ticket list.
+The page header holds a **Grievance Tickets List** link and a back arrow, both of which return to the ticket list.
 
 !!! info "Works in both views"
     The workspace is available both inside a single programme and in the All Programmes scope, where it additionally offers a **Programme** filter. Nothing is degraded in All Programmes: the ticket list, the counter, the comparison panel and **Finalize** all have their own All Programmes handling, and the role-reassignment lookup resolves candidates against the programme of the individual on the ticket rather than a selected one.
@@ -48,7 +48,7 @@ The header shows a running counter, **Tickets managed: N**, and the **Finalize**
 
 ## Filtering the queue
 
-Open the filters with **SHOW FILTERS**; **HIDE FILTERS** collapses them again. **APPLY** commits the selection and returns the list to page 1, **CLEAR** resets everything. Applied filters are written into the page URL, so a narrowed queue can be bookmarked or shared with a colleague.
+Open the filters with **SHOW FILTERS**; **HIDE FILTERS** collapses them again. **APPLY** commits the selection and returns the list to page 1, **CLEAR** resets everything. Applied filters become part of the page address, so a narrowed queue can be bookmarked or sent to a colleague.
 
 While decisions are outstanding, both **APPLY** and **CLEAR** raise a **Change filters** confirmation first:
 
@@ -92,7 +92,7 @@ The list is paginated at 10, 15 or 20 rows per page. Changing page — or the pa
 
 > You have *N* ticket(s) managed but not finalized. Your decisions are kept when you change page, but nothing is saved until you click Finalize. Continue?
 
-Decisions genuinely do survive paging within the session. What they do not survive is leaving the screen — see the warning under [Recording a decision](#recording-a-decision).
+Decisions genuinely do survive paging, as long as you stay on the screen. What they do not survive is leaving the screen — see the warning under [Recording a decision](#recording-a-decision).
 
 ---
 
@@ -108,7 +108,7 @@ Below it, a two-column table compares **Person 1** — the golden record — aga
 | **First Name** | Always |
 | **Date of Birth** | Always |
 | **Sex** | Only when the two values differ |
-| **Photo** | Always. Opens the individual's photo in a modal, and is never highlighted — two distinct people are expected to have different photos |
+| **Photo** | Always. Opens the individual's photo in a pop-up window, and is never highlighted — two distinct people are expected to have different photos |
 | **Address** | Only when different. Falls back from household address to village to Admin 2 |
 | **Phone** | Only when different |
 | **Documents** | Only when different. Shows document type and number |
@@ -121,7 +121,7 @@ An icon next to each column header reflects the current decision: a two-person i
 
 ### Rows that depend on permissions
 
-Two pieces of information are gated on the server, so a user without the permission simply sees an empty value rather than an error:
+Two pieces of information depend on permissions; a user without the permission simply sees an empty value rather than an error:
 
 - The **Account** row requires `POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION`.
 - On biometric tickets the **Similarity score** comes from the deduplication engine's own pair score, which requires `GRIEVANCES_VIEW_BIOMETRIC_RESULTS`. Without it, the score recorded on the ticket itself is shown instead.
@@ -130,7 +130,7 @@ Two pieces of information are gated on the server, so a user without the permiss
 
 A ticket may propose more than one candidate against the same golden record. A selector bar then appears above the table with **Previous** and **Next** buttons, a *Duplicate 2 of 4* position indicator, and a *1 of 4 decided* progress indicator.
 
-Each pair is adjudicated separately, and the ticket only counts as managed once a decision exists for it. The individual decisions are then reduced into one outcome for the ticket:
+Each pair is adjudicated separately, and the ticket only counts as managed once a decision exists for it. The individual decisions are then combined into one outcome for the ticket:
 
 - Person 1 counts as a duplicate as soon as **any** pair marks it so;
 - a candidate counts as a duplicate only if **its own** pair marks it so;
@@ -151,14 +151,14 @@ The comparison table ends with a **Withdraw** row carrying one button per column
 
 ![The Withdraw row, Not Duplicates and Clear at the foot of the comparison table](./_screenshots/needs-adjudication/NATicketsManagementPageBottom.png)
 
-The active choice is rendered as a filled button, the alternatives stay outlined. The ticket's row in the list picks up its ***Ticket managed*** label at the same moment, and the icons beside **Person 1** and **Person 2** switch to show which of the two is now recorded as the duplicate.
+The active choice is shown as a filled button, the alternatives stay outlined. The ticket's row in the list picks up its ***Ticket managed*** label at the same moment, and the icons beside **Person 1** and **Person 2** switch to show which of the two is now recorded as the duplicate.
 
 ![After withdrawing Person 1: the button is filled, the list row reads Ticket managed, and the column icons have changed](./_screenshots/needs-adjudication/NATicketsManagementPageWithdraw.png)
 
 Clearing the last remaining decision on a ticket removes it from **Tickets managed** entirely.
 
 !!! warning "Nothing is saved until you finalize"
-    Every decision on this screen is held in the browser session. Paging through the list keeps them, but navigating away from the workspace — following the ticket link, using the breadcrumb, reloading the page — discards all of them without warning. **Finalize** is the only action that writes anything to the server.
+    Every decision on this screen is kept only while you stay on the screen. Paging through the list keeps them, but navigating away from the workspace — following the ticket link, using the **Grievance Tickets List** link, reloading the page — discards all of them without warning. **Finalize** is the only action that saves anything.
 
 ---
 
@@ -191,21 +191,21 @@ The footer carries an **Identity Verified\*** checkbox and **CANCEL** / **SAVE**
 ![The Reassign Role dialog: individual filters, the lookup table, and Save disabled until an individual is picked and Identity Verified is ticked](./_screenshots/needs-adjudication/NAreassignRoleIndTable.png)
 
 !!! info "The dialog does not save to the server"
-    Unlike the reassignment dialog on the single-ticket flow, this one only records the choice in the session alongside the rest of the decision. The handover is performed as part of **Finalize**.
+    Unlike the reassignment dialog on the single-ticket flow, this one only records the choice on screen alongside the rest of the decision. The handover is performed as part of **Finalize**.
 
 ---
 
 ## Finalizing
 
-**Finalize** is disabled while there is nothing to finalize, while more than 50 tickets are managed, while any managed ticket still has an undecided pair, while any managed ticket still needs a reassignment, and while a finalize is already in flight. In the blocked cases, hovering over the button explains why:
+**Finalize** is disabled while there is nothing to finalize, while more than 50 tickets are managed, while any managed ticket still has an undecided pair, while any managed ticket still needs a reassignment, and while a finalize is already running. In the blocked cases, hovering over the button explains why:
 
-| Why it is blocked | Tooltip |
+| Why it is blocked | Message |
 |---|---|
 | More than 50 tickets managed | *You can finalize at most 50 tickets at a time, and you have N managed. Undo some decisions, finalize, then carry on with the rest.* |
 | A multi-duplicate ticket has undecided pairs | *N ticket(s) need every duplicate decided before finalizing* |
 | A withdrawn individual still holds a blocking role | *N ticket(s) need a role reassignment before finalizing* |
 
-The cap of 50 is enforced by the server as well, so working the backlog in batches of at most 50 is part of the normal rhythm of the screen.
+The cap of 50 is also enforced when the batch is submitted, so working the backlog in batches of at most 50 is part of the normal rhythm of the screen.
 
 Clicking it raises a confirmation:
 
@@ -213,13 +213,13 @@ Clicking it raises a confirmation:
 
 ![The Finalize confirmation dialog, with Cancel and Continue](./_screenshots/needs-adjudication/NAFinalize.png)
 
-**CONTINUE** commits the batch, **CANCEL** returns to the workspace with every decision intact. On success a snackbar confirms *N ticket(s) finalized*, the session decisions are cleared, and the counter returns to zero.
+**CONTINUE** commits the batch, **CANCEL** returns to the workspace with every decision intact. On success a confirmation message appears at the bottom of the screen — *N ticket(s) finalized* — the recorded decisions are cleared, and the counter returns to zero.
 
 !!! info "Tickets someone else closed first are skipped"
     If a ticket in the batch was closed by another user between the decision and **Finalize**, it is skipped and the rest of the batch still goes through. The confirmation message names the skipped tickets — *N ticket(s) finalized. Closed by someone else in the meantime and skipped: …*
 
 !!! warning "Errors stop the whole batch"
-    Apart from that, the batch goes through as one — all of it or none of it. If any ticket cannot be closed — an individual on it has been withdrawn somewhere else in the meantime, or the same individual is withdrawn on one ticket in the batch and kept as distinct on another — **nothing at all is written**, and every decision stays on screen so it can be corrected and resubmitted.
+    Apart from that, the batch goes through as one — all of it or none of it. If any ticket cannot be closed — an individual on it has been withdrawn somewhere else in the meantime, or the same individual is withdrawn on one ticket in the batch and kept as distinct on another — **nothing at all is saved**, and every decision stays on screen so it can be corrected and resubmitted.
 
 !!! warning "Finalized tickets close immediately"
     Tickets finalized from this screen go straight to **Closed**. They do **not** pass through the **For Approval** step that the single-ticket flow uses, so there is no second pair of eyes between the decision and the data change. This is the one behavioural difference to understand before using the workspace.
@@ -235,7 +235,7 @@ Two permissions are required to reach the workspace, and **both** are needed —
 | `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE` | Recording the adjudication decision |
 | `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK` | Closing the ticket, which is what **Finalize** does |
 
-The pair is re-checked on the server for every ticket in the batch, not only when the screen opens.
+The pair is re-checked for every ticket in the batch, not only when the screen opens.
 
 Two further permissions only widen what the comparison table shows; without them the operator sees an empty value rather than an error:
 
