@@ -262,11 +262,10 @@ const EditGrievancePage = (): ReactElement => {
     return <LoadingComponent />;
   if (isPermissionDeniedError(error))
     return <PermissionDenied permission={PERMISSIONS.GRIEVANCES_UPDATE} />;
-  // The loading flags going false does not guarantee data: a query that errored
-  // or is disabled settles with `data` undefined, and everything below
-  // dereferences these three unconditionally.
-  if (!ticketData || !currentUserData || !choicesData)
-    return <LoadingComponent />;
+  // Loading flags going false does not guarantee data: a query that errored or is
+  // disabled settles with `data` undefined. Bail out rather than spin forever —
+  // same as GrievancesDetailsPage.
+  if (!ticketData || !currentUserData || !choicesData) return null;
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
