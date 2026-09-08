@@ -72,9 +72,13 @@ export function XlsxImportDialog({
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
-      // The generated PaymentPlanImportFile types `file` as string, but the
-      // endpoint expects the File for multipart upload.
-      await mutateAsync({ file: fileToImport as unknown as string });
+      try {
+        // The generated PaymentPlanImportFile types `file` as string, but the
+        // endpoint expects the File for multipart upload.
+        await mutateAsync({ file: fileToImport as unknown as string });
+      } catch {
+        // handled in onError
+      }
     }
   };
 

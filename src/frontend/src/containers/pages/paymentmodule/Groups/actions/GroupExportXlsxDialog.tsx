@@ -97,7 +97,7 @@ export function GroupExportXlsxDialog({
     label: tmpl.name,
   }));
 
-  const { mutateAsync: exportXlsx, isPending: loadingExport } = useMutation({
+  const { mutate: exportXlsx, isPending: loadingExport } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsDeliveryExportXlsxCreate(
         {
