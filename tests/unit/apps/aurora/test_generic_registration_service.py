@@ -198,6 +198,7 @@ def individual_with_no_tax() -> dict:
         "relationship_i_c": "head",
         "given_name_i_c": "Michał",
         "given_name_latin_i_c": "Michal",
+        "full_name_latin_i_c": "Michal Brzeczacy",
         "family_name_i_c": "Brzęczący",
         "patronymic": "Janusz",
         "birth_date": "1991-11-18",
@@ -353,6 +354,7 @@ def test_import_data_to_datahub(
     assert "ff" in pending_household.flex_fields
     assert registration_data_import.program == rdi.program
 
+    assert PendingIndividual.objects.get(given_name="Michał").full_name_latin == "Michal Brzeczacy"
     assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count() == 1
     assert PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count() == 1
 
