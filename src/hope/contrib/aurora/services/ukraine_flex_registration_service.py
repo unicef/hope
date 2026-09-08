@@ -250,6 +250,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         family_name = individual_data.get("family_name")
 
         individual_data["full_name"] = " ".join(filter(None, [given_name, middle_name, family_name]))
+        latin_parts = [individual_data.get(f) for f in ("given_name_latin", "middle_name_latin", "family_name_latin")]
+        full_name_latin = " ".join(filter(None, latin_parts))
+        if full_name_latin:
+            individual_data["full_name_latin"] = full_name_latin
 
         return individual_data
 
@@ -345,6 +349,9 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         "given_name": "given_name_i_c",
         "middle_name": "middle_name_i_c",
         "family_name": "family_name_i_c",
+        "given_name_latin": "given_name_latin_i_c",
+        "middle_name_latin": "middle_name_latin_i_c",
+        "family_name_latin": "family_name_latin_i_c",
         "birth_date": "birth_date",
         "sex": "gender_i_c",
         "phone_no": "phone_no_i_c",

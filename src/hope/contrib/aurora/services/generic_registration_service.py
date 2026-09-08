@@ -340,6 +340,16 @@ class GenericRegistrationService(BaseRegistrationService):
                         if key in individual_dict
                     ]
                 )
+            if "full_name_latin" not in individual_dict:
+                full_name_latin = " ".join(
+                    [
+                        individual_dict[key]
+                        for key in ["given_name_latin", "middle_name_latin", "family_name_latin"]
+                        if individual_dict.get(key)
+                    ]
+                )
+                if full_name_latin:
+                    individual_dict["full_name_latin"] = full_name_latin
             if not self.master_detail:
                 individual_dict["relationship"] = HEAD
             individual: PendingIndividual = self._create_object_and_validate(

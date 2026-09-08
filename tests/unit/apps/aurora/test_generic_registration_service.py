@@ -402,6 +402,7 @@ def test_import_data_to_datahub_household_individual(
     assert PendingIndividual.objects.get(
         given_name="Jan",
         given_name_latin="Joniak",
+        full_name_latin="Joniak",
         middle_name="Roman",
         family_name="Romaniak",
         relationship="HEAD",

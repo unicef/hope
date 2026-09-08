@@ -20,6 +20,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.valid
     get_generator_handler,
     handle_currency_field,
     validate_currency,
+    validate_latin_name,
 )
 from hope.models import (
     FEMALE,
@@ -1083,3 +1084,74 @@ def test_schedule_population_recalculation_skips_without_recalc_fields(
     assert not AsyncJob.objects.filter(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
     ).exists()
+
+
+@pytest.fixture
+def latin_name_update(individual: Individual, program: Program) -> UniversalUpdate:
+    universal_update = UniversalUpdate(program=program)
+    universal_update.unicef_ids = individual.unicef_id
+    universal_update.individual_fields = ["full_name_latin"]
+    universal_update.save()
+    template_file = UniversalIndividualUpdateService(universal_update).generate_xlsx_template()
+    universal_update.update_file.save("template.xlsx", ContentFile(template_file.getvalue()))
+    universal_update.save()
+    universal_update.refresh_from_db()
+    return universal_update
+
+
+def _write_column(universal_update: UniversalUpdate, column: str, value: str) -> None:
+    wb = openpyxl.load_workbook(universal_update.update_file.path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    ws.cell(row=2, column=headers.index(column) + 1, value=value)
+    output = BytesIO()
+    wb.save(output)
+    universal_update.update_file.save("update.xlsx", ContentFile(output.getvalue()))
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_individual_latin_name_stored_as_provided(
+    individual: Individual, latin_name_update: UniversalUpdate
+) -> None:
+    _write_column(latin_name_update, "full_name_latin", "Anna Kovalska")
+
+    UniversalIndividualUpdateService(latin_name_update).execute()
+
+    individual.refresh_from_db()
+    latin_name_update.refresh_from_db()
+    assert individual.full_name_latin == "Anna Kovalska"
+    assert "Update successful" in latin_name_update.saved_logs
+
+
+def test_update_individual_latin_name_rejects_non_latin_value(
+    individual: Individual, latin_name_update: UniversalUpdate
+) -> None:
+    _write_column(latin_name_update, "full_name_latin", "Анна Ковальська")
+
+    UniversalIndividualUpdateService(latin_name_update).execute()
+
+    individual.refresh_from_db()
+    latin_name_update.refresh_from_db()
+    assert individual.full_name_latin is None
+    assert (
+        "Row: 2 - Invalid value Анна Ковальська for column full_name_latin: "
+        "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+    ) in latin_name_update.saved_logs
+    assert "Validation failed" in latin_name_update.saved_logs
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("", None),
+        (None, None),
+        ("Anna O'Neil-Kovalska", None),
+        (
+            "Anna1",
+            "Invalid value Anna1 for column full_name_latin: "
+            "Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
+        ),
+    ],
+)
+def test_validate_latin_name(business_area: object, program: Program, value: str | None, expected: str | None) -> None:
+    assert validate_latin_name(value, "full_name_latin", Individual, business_area, program) == expected
