@@ -4,7 +4,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField
 from natural_keys import NaturalKeyModel
+from timezone_field import TimeZoneField
 
+from hope.apps.core.timezones import get_country_timezone_name
 from hope.apps.core.utils import unique_slugify
 from hope.models.utils import (
     TimeStampedUUIDModel,
@@ -49,6 +51,10 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+    timezone = TimeZoneField(
+        blank=True,
+        help_text="Operational IANA timezone. When omitted, it is initialized from the office country or UTC.",
+    )
     payment_countries = models.ManyToManyField("geo.Country", related_name="payment_business_areas")
 
     is_split = models.BooleanField(default=False)
@@ -59,6 +65,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     rdi_import_xlsx_disabled = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
+    vision_integration_active = models.BooleanField(default=False)
 
     rapid_pro_host = models.URLField(null=True, blank=True)
     rapid_pro_payment_verification_token = models.CharField(max_length=40, null=True, blank=True)
@@ -104,6 +111,9 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     custom_fields = JSONField(default=dict, blank=True)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self.timezone:
+            office_country_code = self.office_country.iso_code2 if self.office_country_id else None
+            self.timezone = get_country_timezone_name(office_country_code)
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:
             self.parent.is_split = True

@@ -3,13 +3,13 @@ from typing import Any, Callable
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     BusinessAreaFactory,
     CountryFactory,
-    DocumentTypeFactory,
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -42,10 +42,9 @@ from hope.apps.household.const import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hope.models import AccountType, BusinessArea, DocumentType, FinancialInstitution, Individual, Program
+from hope.models import AccountType, BusinessArea, Individual, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -87,32 +86,11 @@ def client(api_client: Callable, user: Any) -> Any:
     return api_client(user)
 
 
-@pytest.fixture
-def documents() -> None:
-    DocumentTypeFactory(key="passport", label="Passport")
-    DocumentTypeFactory(key="id_card", label="ID Card")
-    DocumentTypeFactory(key="birth_certificate", label="Birth Certificate")
+def test_get_choices_returns_choices_for_user_without_any_role(client: Any) -> None:
+    response = client.get(reverse("api:choices-individuals"))
 
-
-def test_get_choices(
-    documents: None,
-    client: Any,
-    user: Any,
-    afghanistan: BusinessArea,
-    create_user_role_with_permissions: Callable,
-) -> None:
-    create_user_role_with_permissions(
-        user=user, permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], business_area=afghanistan
-    )
-    response = client.get(
-        reverse("api:households:individuals-global-choices", kwargs={"business_area_slug": afghanistan.slug})
-    )
     assert response.status_code == status.HTTP_200_OK
     assert response.data == {
-        "document_type_choices": [
-            {"name": str(dt.label), "value": dt.key} for dt in DocumentType.objects.order_by("key")
-        ],
-        "sex_choices": to_choice_object(SEX_CHOICE),
         "flag_choices": to_choice_object(INDIVIDUAL_FLAGS_CHOICES),
         "status_choices": to_choice_object(INDIVIDUAL_STATUS_CHOICES),
         "deduplication_batch_status_choices": to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE),
@@ -130,10 +108,13 @@ def test_get_choices(
         "severity_of_disability_choices": to_choice_object(SEVERITY_OF_DISABILITY_CHOICES),
         "work_status_choices": to_choice_object(WORK_STATUS_CHOICE),
         "account_type_choices": [{"name": x.label, "value": x.key} for x in AccountType.objects.all()],
-        "account_financial_institution_choices": [
-            {"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()
-        ],
     }
+
+
+def test_get_choices_denies_anonymous_access() -> None:
+    response = APIClient().get(reverse("api:choices-individuals"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.fixture

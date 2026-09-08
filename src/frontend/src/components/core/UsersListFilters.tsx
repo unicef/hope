@@ -50,21 +50,35 @@ export function UsersListFilters({
   };
 
   const { data: choicesData, isLoading } = useQuery({
-    queryKey: restQueryKey(RestService.restBusinessAreasUsersChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
-    queryFn: () =>
-      RestService.restBusinessAreasUsersChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesUsersRetrieve),
+    queryFn: () => RestService.restChoicesUsersRetrieve(),
   });
 
-  if (isLoading || !choicesData) {
+  const { data: partnerChoicesData, isLoading: partnerChoicesLoading } =
+    useQuery({
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasPartnersChoicesRetrieve,
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+      queryFn: () =>
+        RestService.restBusinessAreasPartnersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
+  if (
+    isLoading ||
+    partnerChoicesLoading ||
+    !choicesData ||
+    !partnerChoicesData
+  ) {
     return null;
   }
 
   const choices = {
-    userPartnerChoices: choicesData.partnerChoicesTemp,
+    userPartnerChoices: partnerChoicesData.partnerChoicesTemp,
     userRolesChoices: choicesData.roleChoices,
     userStatusChoices: choicesData.statusChoices,
   };

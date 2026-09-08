@@ -1,9 +1,9 @@
+from datetime import UTC, datetime
 from typing import Any
 
 from constance.test import override_config
 from django.conf import settings
 from django.test import override_settings
-from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
@@ -11,10 +11,13 @@ from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.payment import PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.timezones import format_human_datetime
 from hope.apps.payment.notifications import PaymentNotification
-from hope.models import PaymentPlan, Role, RoleAssignment
+from hope.models import PaymentPlan, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
+
+ACTION_DATETIME = datetime(2026, 8, 21, 12, 30, tzinfo=UTC)
 
 
 @pytest.fixture
@@ -514,12 +517,29 @@ def notification_setup(
     }
 
 
+@pytest.fixture
+def distinct_timezone_notification_data(notification_setup: dict) -> tuple[PaymentPlan, User]:
+    action_user = notification_setup["user_action_user"]
+    action_user.timezone = "America/New_York"
+    action_user.save(update_fields=("timezone",))
+    recipient = notification_setup["users"]["user_with_action_permissions"]
+    recipient.timezone = "Europe/Warsaw"
+    recipient.save(update_fields=("timezone",))
+    return notification_setup["payment_plan"], action_user
+
+
+@pytest.fixture
+def notification_data_without_recipients(notification_setup: dict) -> tuple[PaymentPlan, User]:
+    RoleAssignment.objects.all().delete()
+    return notification_setup["payment_plan"], notification_setup["user_action_user"]
+
+
 def test_prepare_user_recipients_for_send_for_approval(notification_setup: dict) -> None:
     payment_notification = PaymentNotification(
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
@@ -551,7 +571,7 @@ def test_prepare_user_recipients_for_approve(notification_setup: dict) -> None:
         notification_setup["payment_plan"],
         PaymentPlan.Action.APPROVE.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
@@ -574,7 +594,7 @@ def test_prepare_user_recipients_for_authorize(notification_setup: dict) -> None
         notification_setup["payment_plan"],
         PaymentPlan.Action.AUTHORIZE.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
@@ -597,7 +617,7 @@ def test_prepare_user_recipients_for_release(notification_setup: dict) -> None:
         notification_setup["payment_plan"],
         PaymentPlan.Action.REVIEW.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
@@ -620,7 +640,7 @@ def test_prepare_user_recipients_for_mark_ready_for_closure(notification_setup: 
         notification_setup["payment_plan"],
         PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
@@ -643,7 +663,7 @@ def test_prepare_user_recipients_for_send_back_to_finished(notification_setup: d
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
     assert sorted(payment_notification.user_recipients.values_list("username", flat=True)) == [
@@ -671,7 +691,7 @@ def test_prepare_notification_from_refetched_payment_plan_stays_within_query_bud
             payment_plan,
             PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
             notification_setup["user_action_user"],
-            f"{timezone.now():%-d %B %Y}",
+            ACTION_DATETIME,
         )
 
 
@@ -683,12 +703,13 @@ def test_action_user_is_ccd_and_excluded_from_recipients_for_mark_ready_for_clos
         notification_setup["payment_plan"],
         PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
         action_user,
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
 
+    assert len(payment_notification.emails) == 1
     assert action_user not in payment_notification.user_recipients.all()
-    assert action_user.email not in payment_notification.email.recipients
-    assert action_user.email in payment_notification.email.ccs
+    assert action_user.email not in payment_notification.emails[0].recipients
+    assert action_user.email in payment_notification.emails[0].ccs
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -698,9 +719,10 @@ def test_send_email_notification_subject_mark_ready_for_closure(notification_set
         notification_setup["payment_plan"],
         PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
-    assert payment_notification.email.subject == "Payment pending for Closure"
+    assert len(payment_notification.emails) == 1
+    assert payment_notification.emails[0].subject == "Payment pending for Closure"
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -710,7 +732,7 @@ def test_send_email_notification_mark_ready_for_closure(notification_setup: dict
         notification_setup["payment_plan"],
         PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -723,9 +745,10 @@ def test_send_email_notification_subject_send_back_to_finished(notification_setu
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
-    assert payment_notification.email.subject == "Payment sent back to Finished"
+    assert len(payment_notification.emails) == 1
+    assert payment_notification.emails[0].subject == "Payment sent back to Finished"
 
 
 @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -735,7 +758,7 @@ def test_send_email_notification_send_back_to_finished(notification_setup: dict,
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_BACK_TO_FINISHED.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -748,7 +771,7 @@ def test_send_email_notification(notification_setup: dict, mocker: Any) -> None:
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
     assert mock_send.call_count == 1
@@ -761,9 +784,10 @@ def test_send_email_notification_subject_send_for_approval(notification_setup: d
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
-    assert payment_notification.email.subject == "Payment pending for Approval"
+    assert len(payment_notification.emails) == 1
+    assert payment_notification.emails[0].subject == "Payment pending for Approval"
 
 
 @override_config(
@@ -778,12 +802,13 @@ def test_send_email_notification_catch_all_email(notification_setup: dict, mocke
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert len(payment_notification.email.recipients) == 2
-    assert "catchallemail@email.com" in payment_notification.email.recipients
-    assert "catchallemail2@email.com" in payment_notification.email.recipients
+    assert len(payment_notification.emails) == 1
+    assert len(payment_notification.emails[0].recipients) == 2
+    assert "catchallemail@email.com" in payment_notification.emails[0].recipients
+    assert "catchallemail2@email.com" in payment_notification.emails[0].recipients
     assert mock_post.call_count == 1
 
 
@@ -798,10 +823,10 @@ def test_send_email_notification_without_catch_all_email(notification_setup: dic
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert sorted(payment_notification.email.recipients) == [
+    assert sorted(payment_notification.emails[0].recipients) == [
         "user_with_action_permissions@example.com",
         "user_with_approval_permission_in_ba_partner_empty@example.com",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
@@ -842,10 +867,10 @@ def test_send_email_notification_exclude_superuser(notification_setup: dict, moc
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert sorted(payment_notification.email.recipients) == [
+    assert sorted(payment_notification.emails[0].recipients) == [
         "user_with_action_permissions@example.com",
         "user_with_approval_permission_in_ba_partner_empty@example.com",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
@@ -885,10 +910,10 @@ def test_send_email_notification_exclude_staff_user(notification_setup: dict, mo
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
-    assert sorted(payment_notification.email.recipients) == [
+    assert sorted(payment_notification.emails[0].recipients) == [
         "user_with_action_permissions@example.com",
         "user_with_approval_permission_in_ba_partner_empty@example.com",
         "user_with_approval_permission_in_ba_partner_unicef_in_ba@example.com",
@@ -930,8 +955,63 @@ def test_send_email_notification_include_internal_users(notification_setup: dict
         notification_setup["payment_plan"],
         PaymentPlan.Action.SEND_FOR_APPROVAL.name,
         notification_setup["user_action_user"],
-        f"{timezone.now():%-d %B %Y}",
+        ACTION_DATETIME,
     )
     payment_notification.send_email_notification()
 
-    assert users["user_with_partner_unicef_hq"].email in payment_notification.email.recipients
+    assert len(payment_notification.emails) == 1
+    assert users["user_with_partner_unicef_hq"].email in payment_notification.emails[0].recipients
+
+
+def test_notification_formats_action_datetime_in_requested_timezone(notification_setup: dict) -> None:
+    payment_notification = PaymentNotification(
+        notification_setup["payment_plan"],
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        notification_setup["user_action_user"],
+        ACTION_DATETIME,
+    )
+
+    body_variables = payment_notification._prepare_body_variables("Europe/Warsaw")
+
+    assert body_variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        timezone_name="Europe/Warsaw",
+    )
+
+
+def test_notification_groups_recipients_and_action_user_by_timezone(
+    distinct_timezone_notification_data: tuple[PaymentPlan, User],
+) -> None:
+    payment_plan, action_user = distinct_timezone_notification_data
+
+    payment_notification = PaymentNotification(
+        payment_plan,
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        action_user,
+        ACTION_DATETIME,
+    )
+
+    assert len(payment_notification.emails) == 3
+    assert payment_notification.emails[0].ccs == []
+    assert payment_notification.emails[-1].recipients == [action_user.email]
+    assert payment_notification.emails[-1].variables["action_date"] == format_human_datetime(
+        ACTION_DATETIME,
+        timezone_name="America/New_York",
+    )
+
+
+def test_notification_without_permission_recipients_notifies_action_user(
+    notification_data_without_recipients: tuple[PaymentPlan, User],
+) -> None:
+    payment_plan, action_user = notification_data_without_recipients
+
+    payment_notification = PaymentNotification(
+        payment_plan,
+        PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+        action_user,
+        ACTION_DATETIME,
+    )
+
+    assert len(payment_notification.emails) == 1
+    assert payment_notification.emails[0].recipients == [action_user.email]
+    assert payment_notification.emails[0].ccs == []

@@ -1,6 +1,7 @@
 from functools import cached_property
 import logging
 from typing import Any
+from uuid import UUID
 
 from django.db.models import Count, Exists, F, Func, OuterRef, Q, QuerySet, Window
 from django_filters import (
@@ -33,9 +34,9 @@ def program_with_status_exists(program_status: str) -> Exists:
     return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__status=program_status))
 
 
-def program_with_code_exists(program_code: str) -> Exists:
+def program_with_id_exists(program_id: UUID) -> Exists:
     through_model = GrievanceTicket.programs.through
-    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__code=program_code))
+    return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__id=program_id))
 
 
 def without_program_q() -> Q:
@@ -118,7 +119,7 @@ class GrievanceTicketFilter(FilterSet):
     submission_channel = ChoiceFilter(field_name="submission_channel", choices=SUBMISSION_CHANNEL_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
-    program = CharFilter(method="filter_by_program")
+    program = UUIDFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
     admin1 = CharFilter(field_name="admin2__parent_id")
@@ -159,9 +160,9 @@ class GrievanceTicketFilter(FilterSet):
     def business_area(self) -> BusinessArea:
         return BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
 
-    def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def filter_by_program(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
         if value:
-            return qs.filter(program_with_code_exists(value))
+            return qs.filter(program_with_id_exists(value))
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover

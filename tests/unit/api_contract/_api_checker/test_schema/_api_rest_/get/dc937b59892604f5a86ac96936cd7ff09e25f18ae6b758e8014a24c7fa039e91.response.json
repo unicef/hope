@@ -9,7 +9,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "932882"
+        "Content-Length": "933853"
     },
     "data": {
         "openapi": "3.0.3",
@@ -44,7 +44,14 @@
                     ],
                     "responses": {
                         "200": {
-                            "description": "No response body"
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "$ref": "#/components/schemas/HouseholdStatusResponse"
+                                    }
+                                }
+                            },
+                            "description": ""
                         }
                     }
                 }
@@ -30274,7 +30281,10 @@
                                 "type": "string"
                             }
                         }
-                    }
+                    },
+                    "required": [
+                        "fund_commitment_items_ids"
+                    ]
                 },
                 "AuthorizedUser": {
                     "type": "object",
@@ -32746,6 +32756,95 @@
                         "excluded_admin_areas"
                     ]
                 },
+                "FundsCommitment": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "funds_commitment_number": {
+                            "type": "string"
+                        },
+                        "funds_commitment_items": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FundsCommitmentItem"
+                            }
+                        }
+                    },
+                    "required": [
+                        "funds_commitment_items",
+                        "funds_commitment_number",
+                        "id"
+                    ]
+                },
+                "FundsCommitmentItem": {
+                    "type": "object",
+                    "properties": {
+                        "wbs_element": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 24
+                        },
+                        "grant_number": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 20
+                        },
+                        "currency_code": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 5
+                        },
+                        "commitment_amount_local": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "commitment_amount_usd": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "total_open_amount_local": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "total_open_amount_usd": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true
+                        },
+                        "rec_serial_number": {
+                            "type": "integer",
+                            "maximum": 2147483647,
+                            "minimum": -2147483648
+                        },
+                        "funds_commitment_item": {
+                            "type": "string",
+                            "maxLength": 3
+                        },
+                        "sponsor": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 10
+                        },
+                        "sponsor_name": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 100
+                        }
+                    },
+                    "required": [
+                        "funds_commitment_item",
+                        "rec_serial_number"
+                    ]
+                },
                 "GenericImportResponse": {
                     "type": "object",
                     "description": "Response serializer for ImportData and RDI information.",
@@ -34342,13 +34441,13 @@
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "unhcr_id": {
                             "type": "string",
@@ -34780,13 +34879,13 @@
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "currency": {
                             "type": "string",
@@ -34930,13 +35029,13 @@
                         },
                         "first_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household first registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         },
                         "total_cash_received": {
                             "type": "string",
@@ -35035,6 +35134,59 @@
                     },
                     "required": [
                         "id"
+                    ]
+                },
+                "HouseholdStatusIndividual": {
+                    "type": "object",
+                    "properties": {
+                        "role": {
+                            "type": "string",
+                            "nullable": true
+                        },
+                        "relationship": {
+                            "type": "string",
+                            "nullable": true
+                        },
+                        "tax_id": {
+                            "type": "string",
+                            "nullable": true
+                        }
+                    },
+                    "required": [
+                        "relationship",
+                        "role",
+                        "tax_id"
+                    ]
+                },
+                "HouseholdStatusInfo": {
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "type": "string"
+                        },
+                        "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                        },
+                        "individual": {
+                            "$ref": "#/components/schemas/HouseholdStatusIndividual"
+                        }
+                    },
+                    "required": [
+                        "date",
+                        "status"
+                    ]
+                },
+                "HouseholdStatusResponse": {
+                    "type": "object",
+                    "properties": {
+                        "info": {
+                            "$ref": "#/components/schemas/HouseholdStatusInfo"
+                        }
+                    },
+                    "required": [
+                        "info"
                     ]
                 },
                 "HouseholdUpdateData": {
@@ -39972,6 +40124,7 @@
                         },
                         "last_approval_process_date": {
                             "type": "string",
+                            "format": "date-time",
                             "readOnly": true
                         },
                         "last_approval_process_by": {
@@ -40492,16 +40645,18 @@
                             "readOnly": true
                         },
                         "funds_commitments": {
-                            "type": "object",
-                            "additionalProperties": {},
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/FundsCommitment"
+                                }
+                            ],
                             "nullable": true,
                             "readOnly": true
                         },
                         "available_funds_commitments": {
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "additionalProperties": {}
+                                "$ref": "#/components/schemas/FundsCommitment"
                             },
                             "readOnly": true
                         },
@@ -43542,8 +43697,8 @@
                         },
                         "last_registration_date": {
                             "type": "string",
-                            "format": "date-time",
-                            "description": "Household last registration date [sys]"
+                            "format": "date",
+                            "readOnly": true
                         }
                     },
                     "required": [

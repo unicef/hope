@@ -21,6 +21,10 @@ class ProjectAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAd
     )
     readonly_fields = ("name", "organization")
     search_fields = ("name",)
+    # programme is restricted by business_area, ACTIVE status, and non-deprecated
+    # data_collecting_type via get_form; the autocomplete widget bypasses that
+    # queryset, so it must be excluded.
+    autocomplete_exclude_fields = ("programme",)
 
     def get_form(
         self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any

@@ -34,21 +34,15 @@ import { useQuery } from '@tanstack/react-query';
 export const GrievancesTablePage = (): ReactElement => {
   // Scroll down by 500px after filters are applied
   const [shouldScroll, setShouldScroll] = useState(false);
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
+    queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;

@@ -4,6 +4,7 @@ from typing import Any, List
 from django.urls import reverse
 import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
@@ -87,10 +88,6 @@ def global_urls(business_area):
             "api:payments:payments-global-list",
             kwargs={"business_area_slug": business_area.slug},
         ),
-        "choices": reverse(
-            "api:payments:payments-global-choices",
-            kwargs={"business_area_slug": business_area.slug},
-        ),
         "count": reverse(
             "api:payments:payments-global-count",
             kwargs={"business_area_slug": business_area.slug},
@@ -128,33 +125,19 @@ def test_global_list(
         assert payment["status"] == "Transaction Successful"
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_VIEW_DETAILS], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_global_choices(
-    permissions: List,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-    user,
-    business_area,
-    program_active,
-    api_client_user,
-    global_urls,
-    base_payment,
-) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program_active)
-    response = api_client_user.get(global_urls["choices"])
+def test_global_choices_returns_choices_for_user_without_any_role(api_client_user) -> None:
+    response = api_client_user.get(reverse("api:choices-payments"))
 
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        data = response.json()
-        assert "status_choices" in data
-        assert isinstance(data["status_choices"], list)
-        assert any(x.get("value") == Payment.STATUS_SUCCESS for x in data["status_choices"])
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "status_choices": [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
+    }
+
+
+def test_global_choices_denies_anonymous_access() -> None:
+    response = APIClient().get(reverse("api:choices-payments"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_count_endpoint(

@@ -3,4 +3,5 @@ nav:
   - Technologies: dependencies.md
   - Docker: docker.md
   - Maintenance: maintenance.md
+  - Timezone: timezone.md
   - Permissions - Changes: permissions-changes.md

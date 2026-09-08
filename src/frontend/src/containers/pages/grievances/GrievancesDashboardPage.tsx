@@ -97,9 +97,16 @@ function GrievancesDashboardPage(): ReactElement {
     <>
       <PageHeader title={t('Grievance Dashboard')} />
       <TableWrapper>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
           <Grid size={{ xs: 4 }}>
-            <Box>
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF TICKETS')}
                 topNumber={formatFigure(
@@ -109,8 +116,6 @@ function GrievancesDashboardPage(): ReactElement {
                 userGenerated={formatFigure(userGeneratedCount)}
                 dataCy="total-number-of-tickets"
               />
-            </Box>
-            <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
                 topNumber={formatFigure(numberOfClosedTickets)}
@@ -118,8 +123,6 @@ function GrievancesDashboardPage(): ReactElement {
                 userGenerated={formatFigure(closedUserGeneratedCount)}
                 dataCy="total-number-of-closed-tickets"
               />
-            </Box>
-            <Box sx={{ mt: 5 }}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
                 topNumber={`${
@@ -135,15 +138,19 @@ function GrievancesDashboardPage(): ReactElement {
                 dataCy="tickets-average-resolution"
               />
             </Box>
-            <Box sx={{ mt: 5 }}>
-              <TicketsByStatusSection data={ticketsByStatus} />
-            </Box>
           </Grid>
           <Grid size={{ xs: 8 }}>
             <Box sx={{ ml: 3 }}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
-            <Box sx={{ ml: 3, mt: 5 }}>
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} sx={{ mt: 5 }}>
+          <Grid size={{ xs: 4 }}>
+            <TicketsByStatusSection data={ticketsByStatus} />
+          </Grid>
+          <Grid size={{ xs: 8 }}>
+            <Box sx={{ ml: 3 }}>
               <TicketsByLocationAndCategorySection
                 data={ticketsByLocationAndCategory}
               />

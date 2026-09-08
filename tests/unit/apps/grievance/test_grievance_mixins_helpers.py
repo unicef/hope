@@ -74,7 +74,7 @@ def test_handle_assignment_change_same_assignee_for_approval(
     messages = []
 
     GrievanceMutationMixin._handle_assignment_change(
-        mock_mixin_self, mock_approver, mock_ticket, mock_assigned_to, messages
+        mock_mixin_self, mock_approver, mock_ticket, mock_assigned_to, messages, assignment_provided=True
     )
 
     assert mock_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS

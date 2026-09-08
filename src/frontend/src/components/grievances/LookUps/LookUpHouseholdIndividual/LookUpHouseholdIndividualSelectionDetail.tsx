@@ -2,6 +2,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { TabPanel } from '@core/TabPanel';
 import { Tab, Tabs } from '@core/Tabs';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { Box } from '@mui/material';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
@@ -54,32 +55,22 @@ export function LookUpHouseholdIndividualSelectionDetail({
 
   const { data: householdChoicesData, isLoading: householdChoicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesHouseholdsRetrieve),
+      queryFn: () => RestService.restChoicesHouseholdsRetrieve(),
     });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const initialFilterHH = {
     program: isAllPrograms ? '' : programId,
     search: '',
-    documentType: householdChoicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     residenceStatus: '',
     admin1: '',
@@ -93,7 +84,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const initialFilterIND = {
     program: isAllPrograms ? '' : programId,
     search: '',
-    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',
