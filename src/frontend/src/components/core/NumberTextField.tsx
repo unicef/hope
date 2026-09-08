@@ -1,7 +1,7 @@
 import { Box, InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
 import { FieldLabel } from './FieldLabel';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

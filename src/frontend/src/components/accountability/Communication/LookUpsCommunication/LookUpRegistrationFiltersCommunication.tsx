@@ -8,7 +8,7 @@ import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface LookUpRegistrationFiltersCommunicationProps {
   filter: Record<string, any>;

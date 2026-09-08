@@ -1,5 +1,5 @@
 import { useRoutes } from 'react-router-dom';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import CreateProgramPage from '@containers/pages/program/CreateProgramPage';
 import DuplicateProgramPage from '@containers/pages/program/DuplicateProgramPage';
 import EditProgramPage from '@containers/pages/program/EditProgramPage';

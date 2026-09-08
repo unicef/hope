@@ -2,7 +2,8 @@ import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -11,12 +12,13 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export function RequestedIndividualDataChange({
@@ -32,7 +34,7 @@ export function RequestedIndividualDataChange({
   const queryClient = useQueryClient();
   const { businessArea } = useBaseUrl();
   const individualData = {
-    ...ticket.ticketDetails.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   let allApprovedCount = 0;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
@@ -71,12 +73,12 @@ export function RequestedIndividualDataChange({
   ).length;
   allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]) => (value as { approve_status?: boolean })?.approve_status,
   ).length;
   allApprovedCount += accounts.filter((el) => el.approve_status).length;
   allApprovedCount += accountsToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entriesFlexFields.filter(
-    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
+    ([, value]) => (value as { approveStatus?: boolean })?.approveStatus,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -259,8 +261,11 @@ export function RequestedIndividualDataChange({
     <Formik
       initialValues={{
         selected: entries
-          .filter((row: [string, Record<string, unknown>]) => {
-            const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
+          .filter((row) => {
+            const valueDetails = mapKeys(
+              row[1] as Record<string, unknown>,
+              (_v, k) => camelCase(k),
+            ) as {
               value: string;
               approveStatus: boolean;
             };
@@ -268,8 +273,11 @@ export function RequestedIndividualDataChange({
           })
           .map((row) => camelCase(row[0])),
         selectedFlexFields: entriesFlexFields
-          .filter((row: [string, Record<string, unknown>]) => {
-            const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
+          .filter((row) => {
+            const valueDetails = mapKeys(
+              row[1] as Record<string, unknown>,
+              (_v, k) => camelCase(k),
+            ) as {
               value: string;
               approveStatus: boolean;
             };

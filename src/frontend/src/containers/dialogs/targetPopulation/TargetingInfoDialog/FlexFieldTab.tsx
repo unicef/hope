@@ -1,7 +1,8 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
@@ -17,10 +18,13 @@ export function FlexFieldTab(): ReactElement {
   const { businessArea, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const { data } = useQuery({
-    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
-      slug: businessArea,
-      programId: selectedProgram?.id,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasAllFieldsAttributesList,
+      {
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,

@@ -4,7 +4,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TreeItem, SimpleTreeView } from '@mui/x-tree-view';
 import { Field } from 'formik';
-import { FC, ReactElement, useEffect, useState } from 'react';
+import type { FC, ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
@@ -14,7 +15,7 @@ import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { GreyText } from '@core/GreyText';
-import { AreaTree } from '@restgenerated/models/AreaTree';
+import type { AreaTree } from '@restgenerated/models/AreaTree';
 import { LoadingComponent } from '@core/LoadingComponent';
 
 interface ProgramPartnerCardProps {

@@ -1,18 +1,19 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface ImportedPeopleTableProps {
   rdi;

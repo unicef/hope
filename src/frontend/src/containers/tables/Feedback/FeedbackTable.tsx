@@ -1,4 +1,5 @@
-import { ReactElement, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -13,9 +14,9 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
-import { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedFeedbackListList';
-import { FeedbackList } from '@restgenerated/models/FeedbackList';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedFeedbackListList';
+import type { FeedbackList } from '@restgenerated/models/FeedbackList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface FeedbackTableProps {

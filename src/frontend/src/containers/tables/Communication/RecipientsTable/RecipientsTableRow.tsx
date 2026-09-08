@@ -5,10 +5,10 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { HeadOfHousehold } from '@restgenerated/models/HeadOfHousehold';
-import { Recipient } from '@restgenerated/models/Recipient';
+import type { HeadOfHousehold } from '@restgenerated/models/HeadOfHousehold';
+import type { Recipient } from '@restgenerated/models/Recipient';
 import { householdStatusToColor } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface RecipientsTableRowProps {

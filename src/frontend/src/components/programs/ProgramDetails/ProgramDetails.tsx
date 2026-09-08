@@ -6,17 +6,17 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { Box, Chip, Grid, Typography } from '@mui/material';
-import { PaymentPlanPurpose } from '@restgenerated/models/PaymentPlanPurpose';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { PaymentPlanPurpose } from '@restgenerated/models/PaymentPlanPurpose';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
   choicesToDict,
   isPartnerVisible,
   programStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MiśTheme } from 'src/theme';
+import type { MiśTheme } from 'src/theme';
 import styled from 'styled-components';
 import { PartnerAccess } from '../constants';
 
@@ -168,7 +168,7 @@ export const ProgramDetails = ({
           <Grid size={4}>
             <LabelizedField
               label={t('Partner Access')}
-              value={PartnerAccess[program.partnerAccess]}
+              value={PartnerAccess[program.partnerAccess ?? '']}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>

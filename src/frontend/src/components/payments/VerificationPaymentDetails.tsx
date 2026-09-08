@@ -17,8 +17,8 @@ import { Overview } from '@components/payments/Overview';
 import { HouseholdDetails } from '@components/payments/HouseholdDetails';
 import { useProgramContext } from '../../programContext';
 import { IndividualDetails } from '@components/payments/IndividualDetails';
-import { ReactElement } from 'react';
-import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import type { ReactElement } from 'react';
+import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface VerificationPaymentDetailsProps {
   payment: PaymentDetail;

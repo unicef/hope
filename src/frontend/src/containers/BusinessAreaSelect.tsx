@@ -2,14 +2,8 @@ import { MenuItem, Select } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  ReactElement,
-  useMemo,
-  useCallback,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { RestService } from '@restgenerated/index';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';

@@ -8,9 +8,9 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function GrievancesSidebar({
   ticket,
@@ -23,8 +23,8 @@ export function GrievancesSidebar({
     const { category, issueType, status } = ticket;
 
     if (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-      individual = ticket.ticketDetails.selectedIndividual;
-      household = ticket.ticketDetails.selectedIndividual?.household;
+      individual = ticket.ticketDetails?.selectedIndividual;
+      household = ticket.ticketDetails?.selectedIndividual?.household;
     }
     const isOneIndividual = household?.activeIndividualsCount === 1;
     if (isOneIndividual) return false;
@@ -65,7 +65,7 @@ export function GrievancesSidebar({
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-    ticket.ticketDetails.isMultipleDuplicatesVersion &&
+    Boolean(ticket.ticketDetails?.isMultipleDuplicatesVersion) &&
     !isSocialDctType;
 
   const renderRightSection = (): ReactElement => {
@@ -89,7 +89,7 @@ export function GrievancesSidebar({
                 verifications={
                   ticket.ticketDetails?.paymentVerifications.map((edge) => ({
                     id: edge.id,
-                    paymentId: ticket.paymentRecord.unicefId,
+                    paymentId: ticket.paymentRecord?.unicefId,
                   })) || []
                 }
               />

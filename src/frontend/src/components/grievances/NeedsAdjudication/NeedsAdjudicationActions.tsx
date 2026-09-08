@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import type { FC } from 'react';
 import { Box, Button } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
@@ -11,8 +11,9 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BiometricsResults } from './BiometricsResults';
 import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
 interface NeedsAdjudicationActionsProps {
@@ -42,7 +43,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
+  const { dedupEngineSimilarityPair } = ticket.ticketDetails?.extraData ?? {};
 
   const { mutateAsync: approve, isPending: isApproving } = useMutation({
     mutationFn: async (formData: Record<string, any>) => {

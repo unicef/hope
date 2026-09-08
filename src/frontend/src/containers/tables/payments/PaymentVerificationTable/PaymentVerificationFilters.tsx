@@ -5,12 +5,12 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { Grid, MenuItem } from '@mui/material';
-import { Choice } from '@restgenerated/models/Choice';
+import type { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface PaymentVerificationFiltersProps {
@@ -55,7 +55,9 @@ const PaymentVerificationFilters = ({
       RestService.restChoicesPaymentVerificationSummaryStatusList(),
   });
   const { data: deliveryTypeChoicesData } = useQuery<Array<Choice>>({
-    queryKey: restQueryKey(RestService.restChoicesPaymentRecordDeliveryTypeList),
+    queryKey: restQueryKey(
+      RestService.restChoicesPaymentRecordDeliveryTypeList,
+    ),
     queryFn: () => RestService.restChoicesPaymentRecordDeliveryTypeList(),
   });
 

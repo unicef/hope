@@ -1,13 +1,13 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { AdminButton } from '@core/AdminButton';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Box } from '@mui/material';
-import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
-import { ReactElement } from 'react';
+import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';

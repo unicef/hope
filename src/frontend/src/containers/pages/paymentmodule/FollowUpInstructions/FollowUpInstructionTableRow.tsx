@@ -4,12 +4,12 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TableCell } from '@mui/material';
-import { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
+import type { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface FollowUpInstructionTableRowProps {
   instruction: FollowUpInstructionList;

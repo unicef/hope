@@ -14,12 +14,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import type { BusinessArea } from '@restgenerated/models/BusinessArea';
 
 const initialFilter = {
   search: '',

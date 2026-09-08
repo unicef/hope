@@ -8,8 +8,10 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -142,8 +144,8 @@ export const RegistrationDataImportCreateDialog = ({
               defaultValue=""
               variant="outlined"
               label=""
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setImportType(e.target.value)
+              onChange={(e: SelectChangeEvent<unknown>) =>
+                setImportType(e.target.value as string)
               }
               fullWidth
               data-cy="import-type-select"

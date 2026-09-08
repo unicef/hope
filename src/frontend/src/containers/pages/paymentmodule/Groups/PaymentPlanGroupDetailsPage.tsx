@@ -14,7 +14,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement, useEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
@@ -66,7 +67,9 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
     if (wasBusy.current && !isBusy) {
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     }
     wasBusy.current = isBusy;
