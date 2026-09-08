@@ -1,5 +1,5 @@
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 export const headCellsStandardProgram: HeadCell<
   Partial<GrievanceTicketList>

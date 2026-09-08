@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Logo } from '@components/core/Logo';
 import { LOGIN_URL } from '../../../config';
-import { ReactElement, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useRef } from 'react';
 
 const Container = styled.div`
   width: 100vw;
@@ -86,11 +87,7 @@ export function LoginPage(): ReactElement {
             size="large"
             //@ts-ignore
             component="a"
-            href={
-              next
-                ? `${LOGIN_URL}?next=${next}`
-                : LOGIN_URL
-            }
+            href={next ? `${LOGIN_URL}?next=${next}` : LOGIN_URL}
           >
             {t('Sign in')}
           </LoginButton>

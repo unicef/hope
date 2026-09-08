@@ -11,19 +11,17 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Dispatch, FC, SetStateAction, useState } from 'react';
+import type { Dispatch, FC, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
 
 type ManagerialStatus =
-  | 'IN_APPROVAL'
-  | 'IN_AUTHORIZATION'
-  | 'IN_REVIEW'
-  | 'ACCEPTED';
+  'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'ACCEPTED';
 
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();

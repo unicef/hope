@@ -122,6 +122,14 @@ module.exports = defineConfig([
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
+
+      // Required by verbatimModuleSyntax: a type-only import left as a value
+      // import is emitted, and the bundler then resolves a module that only
+      // ever existed at type level.
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
+      ],
       'func-call-spacing': 'off',
       'no-unused-vars': 'off',
       'no-undef': 'error',

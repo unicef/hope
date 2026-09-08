@@ -4,15 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
+import type { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import type { ApiErrorShape } from '@utils/utils';
 import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-  ApiErrorShape, showApiErrorMessages,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
@@ -25,8 +26,8 @@ import {
   getIssueTypeToDisplay,
 } from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 interface GrievancesTableRowProps {
   ticket: GrievanceTicketList;
@@ -160,7 +161,7 @@ export function GrievancesTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={statusChoices[ticket.status]}
+          status={statusChoices[ticket.status ?? '']}
           statusToColor={grievanceTicketStatusToColor}
         />
       </TableCell>

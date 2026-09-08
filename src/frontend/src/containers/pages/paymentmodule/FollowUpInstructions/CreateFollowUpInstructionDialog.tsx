@@ -15,9 +15,9 @@ import {
   Grid,
   TextField,
 } from '@mui/material';
-import { FollowUpInstructionCreate } from '@restgenerated/models/FollowUpInstructionCreate';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
-import { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
+import type { FollowUpInstructionCreate } from '@restgenerated/models/FollowUpInstructionCreate';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -25,7 +25,8 @@ import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -73,7 +74,9 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
       groupsListParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlanGroupsList(groupsListParams),
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsList(
+        groupsListParams,
+      ),
     enabled: open && !!businessArea && !!programId,
   });
 

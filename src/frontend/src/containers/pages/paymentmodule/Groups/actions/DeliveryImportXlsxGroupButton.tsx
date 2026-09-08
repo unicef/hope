@@ -1,13 +1,13 @@
 import { XlsxImportDialog } from '@core/XlsxImportDialog';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import type { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import { PaymentPlanGroupDetail } from '../types';
+import type { PaymentPlanGroupDetail } from '../types';
 import { isGroupBackgroundActionBusy } from '../utils';
 
 interface DeliveryImportXlsxGroupButtonProps {

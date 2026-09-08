@@ -1,8 +1,8 @@
 import { FormHelperText, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
 import { EditDocumentationRow } from './EditDocumentationRow';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export interface ExistingDocumentationFieldArrayProps {
   values;

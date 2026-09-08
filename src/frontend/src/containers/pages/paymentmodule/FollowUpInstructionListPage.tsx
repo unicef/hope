@@ -6,7 +6,7 @@ import { TableWrapper } from '@core/TableWrapper';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const FollowUpInstructionListPage = (): ReactElement => {

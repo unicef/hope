@@ -1,7 +1,8 @@
 import { Box, Button, Typography } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
@@ -14,7 +15,7 @@ import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';

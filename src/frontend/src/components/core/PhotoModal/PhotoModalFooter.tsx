@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { Dispatch, SetStateAction, ReactElement } from 'react';
+import type { Dispatch, SetStateAction, ReactElement } from 'react';
 
 export function PhotoModalFooter({
   setTurnAngle,

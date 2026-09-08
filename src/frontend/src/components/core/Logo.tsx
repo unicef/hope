@@ -3,7 +3,7 @@ import logoWithoutSubtitleTransparent from '../../images/logo-transparent.png';
 import logoWithSubtitleTransparent from '../../images/logo-with-subtitle-transparent.png';
 import logoWithoutSubtitle from '../../images/logo.jpg';
 import logoWithSubtitle from '../../images/logo-with-subtitle.jpg';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const Image = styled.img`
   height: ${(props) => `${props.height}px`};

@@ -2,14 +2,17 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Typography } from '@mui/material';
-import { BulkCloseGrievanceTickets } from '@restgenerated/models/BulkCloseGrievanceTickets';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { BulkCloseGrievanceTickets } from '@restgenerated/models/BulkCloseGrievanceTickets';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_TICKET_STATES,
+} from '@utils/constants';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BulkBaseModal } from './BulkBaseModal';
 

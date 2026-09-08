@@ -10,7 +10,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, ReactNode, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -93,7 +94,8 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
     return null;
   }
 
-  const isMerged = 'MERGED' === data.status;
+  const rdi = data;
+  const isMerged = 'MERGED' === rdi.status;
 
   function RegistrationContainer({
     isErased,
@@ -132,9 +134,9 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
               </TabsContainer>
               <TabPanel value={selectedTab} index={0}>
                 <ImportedHouseholdTable
-                  key={`${data.status}-household`}
+                  key={`${rdi.status}-household`}
                   isMerged={isMerged}
-                  rdi={data}
+                  rdi={rdi}
                   businessArea={businessArea}
                 />
               </TabPanel>
@@ -145,8 +147,8 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                   rdiId={id}
                   isMerged={isMerged}
                   businessArea={businessArea}
-                  key={`${data.status}-individual`}
-                  rdi={data}
+                  key={`${rdi.status}-individual`}
+                  rdi={rdi}
                 />
               </TabPanel>
             </ContainerColumnWithBorder>

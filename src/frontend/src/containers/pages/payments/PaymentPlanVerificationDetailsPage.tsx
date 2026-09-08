@@ -1,5 +1,5 @@
 import { BlackLink } from '@components/core/BlackLink';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -13,8 +13,8 @@ import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/Payment
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Button } from '@mui/material';
-import { Choice } from '@restgenerated/models/Choice';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import type { Choice } from '@restgenerated/models/Choice';
+import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -23,7 +23,8 @@ import {
   getFilterFromQueryParams,
   isPermissionDeniedError,
 } from '@utils/utils';
-import { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';

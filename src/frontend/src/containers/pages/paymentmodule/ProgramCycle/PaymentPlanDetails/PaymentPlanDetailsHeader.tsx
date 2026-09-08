@@ -8,13 +8,13 @@ import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/Pay
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -22,7 +22,7 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';

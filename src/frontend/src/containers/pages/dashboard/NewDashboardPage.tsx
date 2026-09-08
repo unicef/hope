@@ -1,5 +1,5 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 export const NewDashboardPage: FC = () => {
   const { businessArea } = useBaseUrl();
