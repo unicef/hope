@@ -4,7 +4,7 @@ tags:
 ---
 
 
-- Postgres 15
+- Postgres 15.x
 - Redis
 - ElasticSearch
 - MongoDB (for Kobo)

@@ -1,6 +1,5 @@
 from base64 import b64decode
 from typing import Any
-from uuid import UUID
 
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
@@ -15,10 +14,8 @@ from django_filters import (
     MultipleChoiceFilter,
     NumberFilter,
     OrderingFilter,
-    UUIDFilter,
 )
 
-from hope.apps.activity_log.filters import LogEntryFilter
 from hope.apps.core.filters import IntegerFilter
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.models import (
@@ -112,15 +109,6 @@ class PaymentVerificationSummaryFilter(FilterSet):
     class Meta:
         fields = ()
         model = PaymentVerificationSummary
-
-
-class PaymentVerificationLogEntryFilter(LogEntryFilter):
-    object_id = UUIDFilter(method="object_id_filter")
-
-    def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
-        payment_plan = PaymentPlan.objects.get(pk=value)
-        verifications_ids = payment_plan.payment_verification_plans.all().values_list("pk", flat=True)
-        return qs.filter(object_id__in=verifications_ids)
 
 
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
