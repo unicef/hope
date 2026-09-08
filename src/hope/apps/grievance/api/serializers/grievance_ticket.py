@@ -269,7 +269,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         return PaymentSmallSerializer(payment_record).data if payment_record else None
 
     def get_related_tickets(self, obj: GrievanceTicket) -> dict:
-        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._related_tickets.order_by("-created_at"), many=True).data
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("-created_at"), many=True).data
