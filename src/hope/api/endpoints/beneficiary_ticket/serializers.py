@@ -2,6 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
+from hope.apps.core.api.fields import ScopedRelatedField
 from hope.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import Program, User
@@ -9,7 +10,7 @@ from hope.models import Program, User
 
 class BeneficiaryTicketCreateSerializer(serializers.Serializer):
     description = serializers.CharField(required=True)
-    program = serializers.PrimaryKeyRelatedField(
+    program = ScopedRelatedField(
         queryset=Program.objects.all(),
         required=False,
         allow_null=True,
