@@ -1,4 +1,4 @@
-import { TargetingCriteriaRule } from '@restgenerated/models/TargetingCriteriaRule';
+import type { TargetingCriteriaRule } from '@restgenerated/models/TargetingCriteriaRule';
 import * as Yup from 'yup';
 
 const hasValue = (value): boolean =>
