@@ -10,9 +10,7 @@ from django_filters import (
     BooleanFilter,
     CharFilter,
     ChoiceFilter,
-    FilterSet,
     MultipleChoiceFilter,
-    OrderingFilter,
     rest_framework as filters,
 )
 
@@ -476,67 +474,6 @@ class IndividualFilter(UpdatedAtFilter):
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
         return qs.filter(**{field_name: value})
-
-
-class MergedHouseholdFilter(FilterSet):
-    """Emulate ImportedHousehold filter for data structure which is linked to Import Preview when RDI is merged."""
-
-    business_area = CharFilter(field_name="business_area__slug")
-    rdi_id = CharFilter(method="filter_rdi_id")
-
-    class Meta:
-        model = Household
-        fields = ()
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "id",
-            Lower("head_of_household__full_name"),
-            "size",
-            "first_registration_date",
-            "admin2_title",
-        )
-    )
-
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import_id=value)
-
-
-class MergedIndividualFilter(FilterSet):
-    """Filter which emulates ImportedIndividual filter.
-
-    for data structure which is linked to Import Preview when RDI is merged.
-    """
-
-    rdi_id = CharFilter(method="filter_rdi_id")
-    duplicates_only = BooleanFilter(method="filter_duplicates_only")
-    business_area = CharFilter(field_name="business_area__slug")
-
-    class Meta:
-        model = Individual
-        fields = ("household",)
-
-    order_by = OrderingFilter(
-        fields=(
-            "unicef_id",
-            "id",
-            "full_name",
-            "birth_date",
-            "sex",
-            "deduplication_batch_status",
-            "deduplication_golden_record_status",
-        )
-    )
-
-    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import_id=value)
-
-    def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
-        if value:
-            return queryset.filter(
-                Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
-            )
-        return queryset
 
 
 class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
