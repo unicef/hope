@@ -45,8 +45,6 @@ def role(db: Any) -> Role:
 def partner_with_role_in_afg_1(business_area: BusinessArea, role: Role) -> Partner:
     partner = PartnerFactory(name="Partner with role in Afg 1")
     partner.allowed_business_areas.set([business_area])
-    # TODO: Due to temporary solution on program mutation, partner has to hold a role in business area.
-    # After temporary solution is removed, partners will just need to be allowed in business area.
     RoleAssignment.objects.create(
         partner=partner,
         role=role,
@@ -60,8 +58,6 @@ def partner_with_role_in_afg_1(business_area: BusinessArea, role: Role) -> Partn
 def partner_with_role_in_afg_2(business_area: BusinessArea, role: Role) -> Partner:
     partner = PartnerFactory(name="Partner with role in Afg 2")
     partner.allowed_business_areas.set([business_area])
-    # TODO: Due to temporary solution on program mutation, partner has to hold a role in business area.
-    # After temporary solution is removed, partners will just need to be allowed in business area.
     RoleAssignment.objects.create(
         partner=partner,
         role=role,

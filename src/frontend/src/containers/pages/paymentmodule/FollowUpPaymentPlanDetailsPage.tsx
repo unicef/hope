@@ -47,11 +47,10 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (
-        data?.status === PaymentPlanStatusEnum.PREPARING ||
-        (data?.backgroundActionStatus !== null &&
-          !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
-            data?.backgroundActionStatus,
-          ))
+        data?.backgroundActionStatus !== null &&
+        !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+          data?.backgroundActionStatus,
+        )
       ) {
         return 3000;
       }

@@ -14,6 +14,7 @@ import openpyxl
 import pyzipper
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.payment.api.caches import invalidate_payment_plan_list_cache
 from hope.apps.payment.utils import bulk_log_payment_changes, get_link
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
@@ -193,6 +194,10 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             "title": f"Payment Plan Group {group.unicef_id} {batch_name} Payment List Generated",
         }
 
+    def _invalidate_list_cache(self) -> None:
+        program = self.payment_plan_group.cycle.program
+        invalidate_payment_plan_list_cache(program.business_area.slug, program.code)
+
     def _next_export_tag(self) -> int:
         current_max = self.payment_plan_group.payment_plans.aggregate(max_tag=Max("export_tag"))["max_tag"]
         return (current_max or 0) + 1
@@ -302,7 +307,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             tmp.seek(0)
             file_temp.file.save(filename, File(tmp))
             with transaction.atomic():
-                # bump updated_at so the payment-plan list cache invalidates
                 if self.export_tag is not None:
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
                         export_file_delivery=file_temp, updated_at=timezone.now()
@@ -312,6 +316,8 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                         export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
                     )
                 self._mark_exported_payments_as_sent(user)
+                # .update() bypasses post_save, so the list caches are invalidated explicitly
+                self._invalidate_list_cache()
 
     def _save_xlsx_file_with_auth_code(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
         zip_password = get_random_string(12)
@@ -336,7 +342,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             tmp_zip.seek(0)
             file_temp.file.save(zip_filename, File(tmp_zip))
             with transaction.atomic():
-                # bump updated_at so the payment-plan list cache invalidates
                 if self.export_tag is not None:
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
                         export_file_delivery=file_temp, updated_at=timezone.now()
@@ -346,3 +351,5 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                         export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
                     )
                 self._mark_exported_payments_as_sent(user)
+                # .update() bypasses post_save, so the list caches are invalidated explicitly
+                self._invalidate_list_cache()

@@ -31,7 +31,7 @@ class KoboRequestsSession(requests.Session):
         new_parsed = urlparse(new_url)
         if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:  # pragma: no cover
             return False
-        return super().should_strip_auth(old_url, new_url)  # type: ignore # FIXME: Call to untyped function "should_strip_auth" in typed context
+        return super().should_strip_auth(old_url, new_url)  # type: ignore[no-untyped-call]
 
 
 class KoboAPI:
@@ -82,7 +82,7 @@ class KoboAPI:
         return response
 
     def _post_request(
-        self, url: str, data: dict | None = None, files: typing.IO | None = None
+        self, url: str, data: dict | None = None, files: dict[str, typing.IO] | None = None
     ) -> Response:  # pragma: no cover
         return self._client.post(url=url, data=data, files=files)
 
@@ -123,7 +123,7 @@ class KoboAPI:
         file_import_response = self._post_request(
             url=f"{self._kpi_url}/imports?format={self.FORMAT}",
             data=file_import_data,
-            files={"file": bytes_io_file},  # type: ignore # FIXME
+            files={"file": bytes_io_file},
         )
         file_import_response_dict = file_import_response.json()
         url = file_import_response_dict.get("url")

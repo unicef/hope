@@ -1,4 +1,5 @@
 import type { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Box, Typography } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
 import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
@@ -11,10 +12,36 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import _, { camelCase, startCase } from 'lodash';
 import moment from 'moment';
+import type { ReactElement } from 'react';
 import type { useLocation, useNavigate } from 'react-router-dom';
 import type { theme as themeObj } from '../theme';
 import { GRIEVANCE_CATEGORIES, PAYMENT_PLAN_STATES } from './constants';
 
+export function displayNameWithLatin(
+  obj: Record<string, any> | null | undefined,
+  key: string,
+): string | ReactElement | null {
+  if (!obj) return null;
+  const name = obj[key];
+  if (!name) return null;
+  const latinName = obj[`${key}Latin`];
+  if (!latinName) return name;
+  return (
+    <Box
+      component="span"
+      sx={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.1 }}
+    >
+      <span>{name}</span>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontSize: '0.7rem' }}
+      >
+        {latinName}
+      </Typography>
+    </Box>
+  );
+}
 const NEWLINE_RE = /[\r\n]/g;
 
 // Formats a string or array value to Normal Case using lodash's startCase
@@ -197,8 +224,6 @@ export function targetPopulationStatusDisplayMap(status: string): string {
       return 'READY FOR PAYMENT MODULE';
     case PaymentPlanStatus.TP_LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.PROCESSING:
-      return 'PROCESSING';
     case PaymentPlanStatus.STEFICON_WAIT:
       return 'STEFICON WAIT';
     case PaymentPlanStatus.STEFICON_RUN:
@@ -300,8 +325,6 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
     [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
-    [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,

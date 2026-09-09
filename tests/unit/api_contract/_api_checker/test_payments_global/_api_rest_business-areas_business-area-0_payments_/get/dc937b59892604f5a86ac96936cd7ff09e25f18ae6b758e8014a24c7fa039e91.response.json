@@ -28,6 +28,8 @@
                 "hoh_phone_no_alternative": "None",
                 "snapshot_collector_full_name": null,
                 "snapshot_alternate_collector_full_name": null,
+                "snapshot_collector_full_name_latin": null,
+                "snapshot_alternate_collector_full_name_latin": null,
                 "snapshot_alternate_collector_id": null,
                 "fsp_name": "",
                 "entitlement_quantity": null,
