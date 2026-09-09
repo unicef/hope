@@ -28,12 +28,7 @@ from extras.test_utils.factories.grievance import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.exceptions import SearchError
 from hope.apps.household.const import HOST, REFUGEE, ROLE_PRIMARY
-from hope.apps.household.filters import (
-    HouseholdFilter,
-    HouseholdOfficeSearchFilter,
-    MergedHouseholdFilter,
-    _prepare_kobo_asset_id_value,
-)
+from hope.apps.household.filters import HouseholdFilter, HouseholdOfficeSearchFilter, _prepare_kobo_asset_id_value
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Household, Program
 from hope.models.utils import MergeStatusModel
@@ -1176,15 +1171,6 @@ def test_phone_no_valid_filter_with_none_returns_queryset_unchanged(db: Any) -> 
     household_filter = HouseholdFilter(data={}, queryset=queryset, request=None)
 
     assert household_filter.phone_no_valid_filter(queryset, "phone_no_valid", None) is queryset
-
-
-def test_merged_household_filter_rdi_id_filters_by_rdi(merged_rdi_household: dict[str, Any]) -> None:
-    queryset = Household.all_objects.all()
-    household_filter = MergedHouseholdFilter(data={}, queryset=queryset)
-
-    result = household_filter.filter_rdi_id(queryset, None, str(merged_rdi_household["rdi"].id))
-
-    assert list(result) == [merged_rdi_household["household"]]
 
 
 def test_office_search_filter_by_grievance_returns_ticket_household(

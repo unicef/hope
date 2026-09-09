@@ -62,7 +62,6 @@ DEFAULTS = {
     "DATAMART_USER": (str, ""),
     "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
     "DATAMART_PASSWORD": (str, ""),
-    "POWER_QUERY_DB_ALIAS": (str, "read_only"),
     "ROOT_ACCESS_TOKEN": (str, ""),
     "SENTRY_DSN": (str, ""),
     "SENTRY_ENVIRONMENT": (str, ""),

@@ -539,10 +539,6 @@ class GrievanceComplaintTicketExtras(serializers.Serializer):
     )
 
 
-class PaymentVerificationTicketExtras(serializers.Serializer):
-    pass
-
-
 class ReferralTicketExtras(serializers.Serializer):
     household = ScopedRelatedField(required=False, queryset=Household.objects.all())
     individual = ScopedRelatedField(required=False, queryset=Individual.objects.all())

@@ -373,7 +373,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             try:
                 int(value)
                 return True
-            # need to use Exception because of how Graphene catches errors
             except (ValueError, TypeError):
                 return False
         except Exception as e:  # pragma: no cover
@@ -459,7 +458,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             try:
                 parser.parse(value)
-            # need to use Exception because of how Graphene catches errors
             except ValueError:
                 return False
             return True
