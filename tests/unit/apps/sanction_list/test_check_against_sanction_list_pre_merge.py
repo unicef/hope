@@ -149,6 +149,28 @@ def national_id_document(program, country):
     )
 
 
+@pytest.fixture
+def other_program(business_area):
+    return ProgramFactory(business_area=business_area)
+
+
+@pytest.fixture
+def other_program_flagged_individual(other_program, business_area):
+    household = HouseholdFactory(program=other_program, business_area=business_area)
+    individual = household.head_of_household
+    individual.sanction_list_possible_match = True
+    individual.save()
+    return individual
+
+
+@pytest.fixture
+def stale_flagged_individual(household_with_individuals):
+    individual = household_with_individuals.individuals.get(full_name="Choo Ryoong")
+    individual.sanction_list_possible_match = True
+    individual.save()
+    return individual
+
+
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_execute(program, sanction_list, household_with_individuals, national_id_document):
@@ -173,10 +195,9 @@ def test_execute(program, sanction_list, household_with_individuals, national_id
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_full_run_stores_last_check_for_its_own_program(
-    program, sanction_list, household_with_individuals, national_id_document
+    program, sanction_list, household_with_individuals, national_id_document, other_program
 ):
     rebuild_program_indexes(str(program.id))
-    other_program = ProgramFactory(business_area=program.business_area)
 
     check_against_sanction_list_pre_merge(program_id=program.id)
 
@@ -198,50 +219,41 @@ def test_partial_run_does_not_store_last_check(program, sanction_list, household
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_full_run_clears_stale_possible_match_flag(
-    program, sanction_list, household_with_individuals, national_id_document
+    program, sanction_list, household_with_individuals, national_id_document, stale_flagged_individual
 ):
     rebuild_program_indexes(str(program.id))
-    stale = Individual.objects.get(full_name="Choo Ryoong")
-    stale.sanction_list_possible_match = True
-    stale.save()
 
     check_against_sanction_list_pre_merge(program_id=program.id)
 
-    stale.refresh_from_db()
-    assert stale.sanction_list_possible_match is False
+    stale_flagged_individual.refresh_from_db()
+    assert stale_flagged_individual.sanction_list_possible_match is False
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_full_run_keeps_possible_match_flag_of_other_program(
-    program, sanction_list, household_with_individuals, national_id_document
+    program, sanction_list, household_with_individuals, national_id_document, other_program_flagged_individual
 ):
     rebuild_program_indexes(str(program.id))
-    other_program = ProgramFactory(business_area=program.business_area)
-    other_household = HouseholdFactory(program=other_program, business_area=program.business_area)
-    other_individual = other_household.head_of_household
-    other_individual.sanction_list_possible_match = True
-    other_individual.save()
 
     check_against_sanction_list_pre_merge(program_id=program.id)
 
-    other_individual.refresh_from_db()
-    assert other_individual.sanction_list_possible_match is True
+    other_program_flagged_individual.refresh_from_db()
+    assert other_program_flagged_individual.sanction_list_possible_match is True
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
-def test_partial_run_keeps_stale_possible_match_flag(program, sanction_list, household_with_individuals):
+def test_partial_run_keeps_stale_possible_match_flag(
+    program, sanction_list, household_with_individuals, stale_flagged_individual
+):
     rebuild_program_indexes(str(program.id))
-    stale = Individual.objects.get(full_name="Choo Ryoong")
-    stale.sanction_list_possible_match = True
-    stale.save()
-    checked = Individual.objects.get(full_name="Test Example")
+    checked = household_with_individuals.individuals.get(full_name="Test Example")
 
     check_against_sanction_list_pre_merge(program_id=program.id, individuals_ids=[str(checked.id)])
 
-    stale.refresh_from_db()
-    assert stale.sanction_list_possible_match is True
+    stale_flagged_individual.refresh_from_db()
+    assert stale_flagged_individual.sanction_list_possible_match is True
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
