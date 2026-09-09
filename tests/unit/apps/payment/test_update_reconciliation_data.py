@@ -20,7 +20,7 @@ from extras.test_utils.factories import (
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     XlsxPaymentPlanDeliveryImportService,
 )
-from hope.models import Approval, PaymentPlan, Program
+from hope.models import Approval, Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -224,6 +224,7 @@ def test_upload_reference_id(
         parent=payment_plan,
         entitlement_quantity=212,
         delivered_quantity=150,
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_1.unicef_id = "RCPT-0060-24-0.000.665"
     payment_1.save(update_fields=["unicef_id"])
@@ -232,6 +233,7 @@ def test_upload_reference_id(
         parent=payment_plan,
         entitlement_quantity=212,
         delivered_quantity=150,
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_2.unicef_id = "RCPT-0060-24-0.000.666"
     payment_2.save(update_fields=["unicef_id"])
@@ -276,6 +278,7 @@ def test_upload_transaction_status_blockchain_link(
         parent=payment_plan,
         entitlement_quantity=212,
         delivered_quantity=150,
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_1.unicef_id = "RCPT-0060-24-0.000.665"
     payment_1.save(update_fields=["unicef_id"])
@@ -284,6 +287,7 @@ def test_upload_transaction_status_blockchain_link(
         parent=payment_plan,
         entitlement_quantity=212,
         delivered_quantity=150,
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_2.unicef_id = "RCPT-0060-24-0.000.666"
     payment_2.save(update_fields=["unicef_id"])
