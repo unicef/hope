@@ -533,8 +533,6 @@ def create_program_partner_access(
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     for partner_data in partners_data:
-        #  TODO: temporary solution to avoid getting role from user's input
-        #   which is planned to be applied later outside this ticket.
         existing_roles_for_partner_in_this_ba = (
             RoleAssignment.objects.filter(
                 partner_id=partner_data["partner"],
@@ -551,7 +549,6 @@ def create_program_partner_access(
                 program=program,
                 role_id=role_id,
             )
-        # TODO: end of temporary solution - to remove after role assignment is implemented in UI
         area_limits: AdminAreaLimitedTo | None
         if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
             area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(

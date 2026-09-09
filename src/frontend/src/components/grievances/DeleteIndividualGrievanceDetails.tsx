@@ -14,10 +14,10 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { Individual } from '@restgenerated/models/Individual';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { Individual } from '@restgenerated/models/Individual';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -48,10 +48,11 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
       .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    ticket.ticketDetails.roleReassignData,
-  )?.filter(
-    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
-  ).length;
+    (ticket.ticketDetails?.roleReassignData ?? {}) as Record<
+      string,
+      RoleReassignData
+    >,
+  )?.filter((el) => el.role === 'PRIMARY' || el.role === 'HEAD').length;
 
   const approveEnabled = (): boolean => {
     if (isOneIndividual && isForApproval) {
@@ -197,7 +198,7 @@ export function DeleteIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
-  if (!ticket.ticketDetails.approveStatus) {
+  if (!ticket.ticketDetails?.approveStatus) {
     dialogText = t(
       `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
@@ -228,10 +229,10 @@ export function DeleteIndividualGrievanceDetails({
                       grievanceTicketId: ticket.id,
                       approveStatus: !ticket.ticketDetails?.approveStatus,
                     });
-                    if (ticket.ticketDetails.approveStatus) {
+                    if (ticket.ticketDetails?.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.ticketDetails.approveStatus) {
+                    if (!ticket.ticketDetails?.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
                   } catch (error) {

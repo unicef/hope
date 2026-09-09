@@ -7,7 +7,6 @@ from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
 from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
 from hope.models import (
     DeduplicationEngineSimilarityPair,
-    Program,
     RegistrationDataImport,
 )
 
@@ -46,9 +45,7 @@ class CwArrivalHookTask:
         findings = dedupe_service.get_group_findings(cast("str", rdi.country_workspace_id))
 
         similarity_pairs = self._parse_findings_to_similarity_pairs(findings)
-        dedupe_service.store_similarity_pairs(
-            cast("Program", rdi.program), similarity_pairs, id_field_name="country_workspace_id"
-        )
+        dedupe_service.store_similarity_pairs(rdi.program, similarity_pairs, id_field_name="country_workspace_id")
         logger.info(f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings")
 
         BiometricDeduplicationService().store_rdi_deduplication_statistics(rdi)

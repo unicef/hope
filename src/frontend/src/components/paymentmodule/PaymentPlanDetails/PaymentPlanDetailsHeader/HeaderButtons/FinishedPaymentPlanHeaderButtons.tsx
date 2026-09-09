@@ -8,8 +8,8 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 
@@ -44,10 +44,14 @@ export function FinishedPaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Payment Plan marked as ready for closure.'));
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     },
     onError: (error: any) => {
@@ -70,10 +74,14 @@ export function FinishedPaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Sending to Payment Gateway started'));
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     },
     onError: (error: any) => {

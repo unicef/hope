@@ -1,20 +1,21 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
-import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface IndividualsListTableProps {
   filter;

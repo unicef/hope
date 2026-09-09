@@ -1,5 +1,5 @@
 import { Button, CircularProgress } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function LoadingButton({
   loading,

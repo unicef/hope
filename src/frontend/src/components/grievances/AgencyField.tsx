@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getIndexForId } from './utils/helpers';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface AgencyFieldProps {
   id: string;

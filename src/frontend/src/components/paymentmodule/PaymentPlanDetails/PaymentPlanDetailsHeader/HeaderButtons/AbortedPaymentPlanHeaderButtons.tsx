@@ -1,8 +1,9 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../../../../programContext';
-import { ReactElement, useState } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -41,10 +42,14 @@ export function AbortedPaymentPlanHeaderButtons({
     onSuccess: () => {
       showMessage(t('Payment Plan has been reactivated.'));
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     },
     onError: () => {

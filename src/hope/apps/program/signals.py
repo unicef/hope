@@ -4,14 +4,21 @@ from django.db import transaction
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
-from hope.api.caches import get_or_create_cache_key, increment_cache_key
+from hope.api.caches import (
+    get_or_create_cache_key,
+    increment_business_area_and_program_version,
+    increment_cache_key,
+)
 from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.models import BeneficiaryGroup, Program
+from hope.models import BeneficiaryGroup, Program, ProgramCycle
 
 program_copied = Signal()
+
+# the payment verification list renders the cycle's data, so a cycle change is visible there too
+PROGRAM_CYCLE_LIST_CACHE_KEYS = ("program_cycle_list", "payment_verifications_list")
 
 
 def adjust_program_size(program: Program) -> None:
@@ -53,5 +60,20 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:program_list"
         increment_cache_key(version_key)
+
+    transaction.on_commit(_increment)
+
+
+@receiver([post_save, post_delete], sender=ProgramCycle)
+def increment_program_cycle_list_cache(sender: Any, instance: ProgramCycle, **kwargs: dict) -> None:
+    if kwargs.get("raw"):
+        return
+    program = instance.program
+    business_area_slug = program.business_area.slug
+    program_code = program.code
+
+    def _increment() -> None:
+        for specific_view_cache_key in PROGRAM_CYCLE_LIST_CACHE_KEYS:
+            increment_business_area_and_program_version(business_area_slug, program_code, specific_view_cache_key)
 
     transaction.on_commit(_increment)

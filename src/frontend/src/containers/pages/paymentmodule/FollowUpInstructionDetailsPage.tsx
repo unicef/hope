@@ -9,12 +9,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 

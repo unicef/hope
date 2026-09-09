@@ -6,8 +6,8 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Info } from '@mui/icons-material';
 import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface FollowUpPaymentPlanDetailsProps {

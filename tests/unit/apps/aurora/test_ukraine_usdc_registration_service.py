@@ -147,6 +147,34 @@ def usdc_record(registration: Any, submission_timestamp: datetime.datetime) -> R
     )
 
 
+@pytest.fixture
+def usdc_record_with_latin_names(registration: Any, submission_timestamp: datetime.datetime) -> Record:
+    return RecordFactory(
+        registration=registration.source_id,
+        timestamp=submission_timestamp,
+        source_id=2,
+        fields={
+            "consent": [{"consent_h_c": ["1"]}],
+            "individual_details": [
+                {
+                    "given_name_i_c": "Олена",
+                    "middle_name_i_c": "Іванівна",
+                    "family_name_i_c": "Шевченко",
+                    "given_name_latin_i_c": "Olena",
+                    "family_name_latin_i_c": "Shevchenko",
+                    "birth_date": "1990-05-12",
+                    "gender_i_c": "female",
+                    "phone_no_i_c": "0501112233",
+                    "tax_id_no_i_c": "1234567890",
+                    "wallet_address_i_c": "0xABCDEF0123456789",
+                    "wallet_name_i_c": "MetaMask",
+                }
+            ],
+        },
+        files=json.dumps({}).encode(),
+    )
+
+
 def test_creates_household_in_ukraine_for_regular_programme(
     registration: Any,
     user: Any,
@@ -188,6 +216,25 @@ def test_individual_full_name_concatenated_and_birth_date_not_estimated(
     assert individual.full_name == "Olena Ivanivna Shevchenko"
     assert str(individual.birth_date) == "1990-05-12"
     assert individual.estimated_birth_date is False
+
+
+def test_individual_full_name_latin_composed_from_provided_parts(
+    registration: Any,
+    user: Any,
+    ukraine_country: Any,
+    tax_id_document_type: Any,
+    digital_wallet_delivery_mechanism: DeliveryMechanism,
+    usdc_record_with_latin_names: Record,
+) -> None:
+    service = UkraineUSDCRegistrationService(registration)
+    rdi = service.create_rdi(user, "usdc rdi")
+
+    service.process_records(rdi.id, [usdc_record_with_latin_names.id])
+
+    individual = PendingIndividual.objects.get(registration_data_import=rdi)
+    assert individual.full_name == "Олена Іванівна Шевченко"
+    assert individual.full_name_latin == "Olena Shevchenko"
+    assert individual.middle_name_latin is None
 
 
 def test_ukrainian_phone_number_normalized(

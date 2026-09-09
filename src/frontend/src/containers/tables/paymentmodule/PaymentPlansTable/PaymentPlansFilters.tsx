@@ -9,9 +9,9 @@ import { NumberTextField } from '@components/core/NumberTextField';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
-import { ReactElement } from 'react';
-import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
-import { Choice } from '@restgenerated/models/Choice';
+import type { ReactElement } from 'react';
+import type { PaymentPlan } from '@restgenerated/models/PaymentPlan';
+import type { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -36,8 +36,6 @@ export const allowedStatusChoices = [
   PaymentPlanStatusEnum.LOCKED,
   PaymentPlanStatusEnum.LOCKED_FSP,
   PaymentPlanStatusEnum.OPEN,
-  PaymentPlanStatusEnum.PREPARING,
-  PaymentPlanStatusEnum.PROCESSING,
   PaymentPlanStatusEnum.STEFICON_COMPLETED,
   PaymentPlanStatusEnum.STEFICON_ERROR,
   PaymentPlanStatusEnum.STEFICON_RUN,

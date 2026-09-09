@@ -7,7 +7,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
 import { getIndexForId } from './utils/helpers';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface DocumentFieldProps {
   id: string;

@@ -1,5 +1,4 @@
 import { Box, Grid } from '@mui/material';
-import { isEmpty } from 'lodash';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -9,9 +8,9 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function GrievancesSidebar({
   ticket,
@@ -34,10 +33,6 @@ export function GrievancesSidebar({
       {
         category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
         issueType: GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
-      },
-      {
-        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
-        issueType: GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
       },
       {
         category: GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
@@ -65,27 +60,12 @@ export function GrievancesSidebar({
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign = rolesInHouseholds.some((el) => el.role !== null);
 
-    let isProperDataChange = true;
-    if (
-      category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
-    ) {
-      const { role, relationship } = ticket.ticketDetails?.individualData || {};
-      if (isEmpty(role) && isEmpty(relationship)) {
-        isProperDataChange = false;
-      }
-    }
-
-    return (
-      (isHeadOfHousehold || hasRolesToReassign) &&
-      isProperDataChange &&
-      !isSocialDctType
-    );
+    return (isHeadOfHousehold || hasRolesToReassign) && !isSocialDctType;
   };
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-    ticket.ticketDetails?.isMultipleDuplicatesVersion &&
+    Boolean(ticket.ticketDetails?.isMultipleDuplicatesVersion) &&
     !isSocialDctType;
 
   const renderRightSection = (): ReactElement => {
@@ -109,7 +89,7 @@ export function GrievancesSidebar({
                 verifications={
                   ticket.ticketDetails?.paymentVerifications.map((edge) => ({
                     id: edge.id,
-                    paymentId: ticket.paymentRecord.unicefId,
+                    paymentId: ticket.paymentRecord?.unicefId,
                   })) || []
                 }
               />

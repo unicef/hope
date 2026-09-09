@@ -13,14 +13,16 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
+import type { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GroupExportPlanTypeOption, planTypeDisplayLabel } from '../utils';
+import type { GroupExportPlanTypeOption } from '../utils';
+import { planTypeDisplayLabel } from '../utils';
 
 interface GroupExportXlsxDialogProps {
   groupId: string;

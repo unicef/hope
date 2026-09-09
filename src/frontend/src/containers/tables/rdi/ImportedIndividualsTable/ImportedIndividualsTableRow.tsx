@@ -5,14 +5,14 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { sexToCapitalize } from '@utils/utils';
-import { ReactElement } from 'react';
+import { displayNameWithLatin, sexToCapitalize } from '@utils/utils';
+import type { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 import { BiometricDeduplicationGoldenRecordStatusEnum } from '@restgenerated/models/BiometricDeduplicationGoldenRecordStatusEnum';
 import { BiometricDeduplicationBatchStatusEnum } from '@restgenerated/models/BiometricDeduplicationBatchStatusEnum';
-import { DeduplicationBatchStatusEnum } from '@restgenerated/models/DeduplicationBatchStatusEnum';
-import { DeduplicationGoldenRecordStatusEnum } from '@restgenerated/models/DeduplicationGoldenRecordStatusEnum';
+import type { DeduplicationBatchStatusEnum } from '@restgenerated/models/DeduplicationBatchStatusEnum';
+import type { DeduplicationGoldenRecordStatusEnum } from '@restgenerated/models/DeduplicationGoldenRecordStatusEnum';
 
 interface ImportedIndividualsTableRowProps {
   individual: IndividualList;
@@ -96,7 +96,7 @@ export function ImportedIndividualsTableRow({
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{individual.fullName}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(individual, 'fullName')}</AnonTableCell>
       <TableCell align="left">{individual.role}</TableCell>
       <TableCell align="left">{individual.relationshipDisplay}</TableCell>
       <TableCell align="left">

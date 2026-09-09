@@ -1,6 +1,6 @@
 import { PaymentPlanGroupDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanGroupDetailBackgroundActionStatusEnum';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
-import { PaymentPlanGroupDetail } from './types';
+import type { PaymentPlanGroupDetail } from './types';
 
 // A group runs one background XLSX action at a time. Export/import may start only
 // when the group is idle (status null) or in an error state; the in-progress states
@@ -10,13 +10,17 @@ export function isGroupBackgroundActionBusy(
 ): boolean {
   const status = group?.backgroundActionStatus;
   return (
-    status === PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_EXPORTING ||
-    status === PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION
+    status ===
+      PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_EXPORTING ||
+    status ===
+      PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION
   );
 }
 
 // Untranslated label for a plan type — pass the result through t() when rendering.
-export function planTypeDisplayLabel(planType: PlanTypeEnum | undefined): string {
+export function planTypeDisplayLabel(
+  planType: PlanTypeEnum | undefined,
+): string {
   switch (planType) {
     case PlanTypeEnum.REGULAR:
       return 'Regular';

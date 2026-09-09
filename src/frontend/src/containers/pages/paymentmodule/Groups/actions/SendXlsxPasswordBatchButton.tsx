@@ -7,7 +7,7 @@ import { Box } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 

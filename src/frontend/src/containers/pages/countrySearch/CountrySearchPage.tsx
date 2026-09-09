@@ -12,7 +12,8 @@ import {
 import { PageHeader } from '@components/core/PageHeader';
 import { useTranslation } from 'react-i18next';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
 import {
@@ -23,11 +24,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { BaseSection } from '@components/core/BaseSection';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import HHDataTable from '@containers/pages/countrySearch/HHdataTable';
 import INDDataTable from '@containers/pages/countrySearch/INDdataTable';
 import GRVDataTable from '@containers/pages/countrySearch/GRVdataTable';
@@ -158,7 +159,10 @@ const OfficeSearchPage = (): ReactElement => {
     isLoading: isLoadingHouseholds,
     error: errorHouseholds,
   } = useQuery<PaginatedHouseholdListList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasHouseholdsList, hhParams),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasHouseholdsList,
+      hhParams,
+    ),
     queryFn: () => RestService.restBusinessAreasHouseholdsList(hhParams),
     enabled: appliedFilter.searchFor === 'HH' && !!appliedFilter.officeSearch,
   });

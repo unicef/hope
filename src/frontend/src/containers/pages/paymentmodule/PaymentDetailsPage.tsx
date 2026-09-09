@@ -1,4 +1,4 @@
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -11,11 +11,11 @@ import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
-import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -56,6 +56,7 @@ function PaymentDetailsPage(): ReactElement {
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied permission={PERMISSIONS.PM_VIEW_DETAILS} />;
+  if (!payment) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

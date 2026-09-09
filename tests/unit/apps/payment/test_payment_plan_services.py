@@ -58,6 +58,7 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     AccountType,
+    BusinessArea,
     DeliveryMechanism,
     FileTemp,
     FinancialServiceProvider,
@@ -117,12 +118,15 @@ def dm_transfer_to_digital_wallet() -> Any:
 
 
 @pytest.fixture
-def fsp(dm_transfer_to_account: Any, dm_transfer_to_digital_wallet: Any) -> FinancialServiceProvider:
+def fsp(
+    business_area: BusinessArea, dm_transfer_to_account: Any, dm_transfer_to_digital_wallet: Any
+) -> FinancialServiceProvider:
     fsp = FinancialServiceProviderFactory(
         name="Test FSP 1",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
     )
     fsp.delivery_mechanisms.add(dm_transfer_to_account, dm_transfer_to_digital_wallet)
+    fsp.allowed_business_areas.add(business_area)
     return fsp
 
 
@@ -271,7 +275,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         PaymentPlanService.create(
             input_data=create_input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == f"Target Population with name: TEST_123 and program: {program.name} already exists."
 
@@ -282,7 +286,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         PaymentPlanService.create(
             input_data=create_input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == "Impossible to create Target Population for Programme within not Active status"
 
@@ -292,7 +296,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
         PaymentPlanService.create(
             input_data=create_input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == "Impossible to create Target Population for Programme Cycle within Finished status"
 
@@ -309,7 +313,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp = PaymentPlanService.create(
         input_data=create_input_data,
         user=user,
-        business_area_slug=business_area.slug,
+        program=program,
     )
     pp.status = PaymentPlan.Status.TP_OPEN
     pp.save()
@@ -405,11 +409,11 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(25):
+        with django_assert_num_queries(26):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
-                business_area_slug=business_area.slug,
+                program=program,
             )
         assert mock_transaction.on_commit.call_count == 1
 
@@ -446,7 +450,7 @@ def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: 
     }
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, business_area_slug=business_area.slug)
+        PaymentPlanService.create(input_data=input_data, user=user, program=program)
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
@@ -465,7 +469,7 @@ def test_create_raises_when_payment_plan_group_does_not_exist(user: User, busine
     }
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService.create(input_data=input_data, user=user, business_area_slug=business_area.slug)
+        PaymentPlanService.create(input_data=input_data, user=user, program=program)
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
@@ -548,7 +552,7 @@ def test_create_follow_up_pp(
     p_force_failed = payments[2]
     p_manually_cancelled = payments[3]
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     follow_up_pp.refresh_from_db()
@@ -599,12 +603,12 @@ def test_create_follow_up_pp(
     follow_up_payment.excluded = True
     follow_up_payment.save()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(60):
+    with django_assert_num_queries(66):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_child_payment_plan_async_task(follow_up_pp_2)
 
@@ -998,7 +1002,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
         PaymentPlanService.create(
             input_data=input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
     assert error.value.detail[0] == "Impossible to create Target Population for Programme Cycle within Finished status"
 
@@ -1009,7 +1013,7 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
     PaymentPlanService.create(
         input_data=input_data,
         user=user,
-        business_area_slug=business_area.slug,
+        program=program,
     )
     cycle.refresh_from_db()
     assert cycle.status == ProgramCycle.DRAFT
@@ -1067,7 +1071,7 @@ def test_full_rebuild(
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
-                business_area_slug=business_area.slug,
+                program=program,
             )
         assert mock_transaction.on_commit.call_count == 1
 
@@ -1703,7 +1707,7 @@ def test_create_payments_integrity_error_handling(
     household.save(update_fields=["size"])
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        status=PaymentPlan.Status.PREPARING,
+        status=PaymentPlan.Status.DRAFT,
         business_area=business_area,
         program_cycle=cycle,
         delivery_mechanism=dm_transfer_to_account,
@@ -1740,7 +1744,7 @@ def test_create_payments_integrity_error_handling(
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.PREPARING
+    payment_plan_base.status = PaymentPlan.Status.OPEN
     payment_plan_base.save()
 
     with pytest.raises(ValidationError) as error:
@@ -2125,7 +2129,7 @@ def test_ready_for_closure_sends_notification(
         status=PaymentPlan.Status.FINISHED,
     )
 
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(12):
         PaymentPlanService(payment_plan).ready_for_closure(user=user)
 
     payment_plan.refresh_from_db()
@@ -2165,7 +2169,7 @@ def test_send_back_to_finished_sends_notification(
         status=PaymentPlan.Status.READY_FOR_CLOSURE,
     )
 
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(12):
         PaymentPlanService(payment_plan).send_back_to_finished(user=user)
 
     payment_plan.refresh_from_db()

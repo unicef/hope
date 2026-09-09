@@ -1,7 +1,7 @@
 import { InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -29,7 +29,7 @@ export function FormikTextField({
 }): ReactElement {
   const isInvalid = Boolean(
     get(form.errors, field.name) &&
-      (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
+    (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
   );
 
   const handleKeyPress = (evt): void => {

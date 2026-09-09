@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { User } from '@sentry/react';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { User } from '@sentry/react';
 
 export const headCells: HeadCell<User>[] = [
   {

@@ -6,7 +6,8 @@ import {
   DialogTitle,
 } from '@mui/material';
 import MergeTypeRoundedIcon from '@mui/icons-material/MergeTypeRounded';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -18,7 +19,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useActionMutation } from '@hooks/useActionMutation';
-import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
+import type { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDataImportDetail;

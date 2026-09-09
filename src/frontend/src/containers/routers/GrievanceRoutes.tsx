@@ -6,7 +6,7 @@ import PictureErrorEditPage from '../pages/grievances/PictureErrorEditPage';
 import GrievancesDetailsPage from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import GrievancesTablePage from '../pages/grievances/GrievancesTablePage';
 import NaTicketsManagementPage from '../pages/grievances/NaTicketsManagementPage';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import CreateFeedbackPage from '@containers/pages/accountability/feedback/CreateFeedbackPage';
 import FeedbackDetailsPage from '@containers/pages/accountability/feedback/FeedbackDetailsPage';
 import FeedbackPage from '@containers/pages/accountability/feedback/FeedbackPage';

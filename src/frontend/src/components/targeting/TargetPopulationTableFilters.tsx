@@ -13,7 +13,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface TargetPopulationTableFiltersProps {
   filter;
@@ -58,7 +58,6 @@ export const TargetPopulationTableFilters = ({
     PaymentPlanStatusEnum.DRAFT,
     PaymentPlanStatusEnum.TP_OPEN,
     PaymentPlanStatusEnum.TP_LOCKED,
-    PaymentPlanStatusEnum.PROCESSING,
     PaymentPlanStatusEnum.STEFICON_RUN,
     PaymentPlanStatusEnum.STEFICON_WAIT,
     PaymentPlanStatusEnum.STEFICON_COMPLETED,

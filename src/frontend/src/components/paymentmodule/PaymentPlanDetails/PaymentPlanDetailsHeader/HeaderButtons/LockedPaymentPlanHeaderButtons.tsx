@@ -5,8 +5,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '@core/LoadingButton';
 import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -43,11 +43,15 @@ export function LockedPaymentPlanHeaderButtons({
     onSuccess: async () => {
       showMessage(t('Payment Plan has been unlocked.'));
       await queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
         exact: false,
       });
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     },
     onError: (error: any) => {

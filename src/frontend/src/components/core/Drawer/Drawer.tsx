@@ -7,7 +7,7 @@ import MUIDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';

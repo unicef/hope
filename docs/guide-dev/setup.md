@@ -140,8 +140,8 @@ If you prefer to run services locally without Docker:
 **PostgreSQL:**
 ```bash
 # macOS
-brew install postgresql@14
-brew services start postgresql@14
+brew install postgresql@15
+brew services start postgresql@15
 createdb postgres
 ```
 
