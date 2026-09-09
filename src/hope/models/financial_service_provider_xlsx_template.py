@@ -12,6 +12,7 @@ from multiselectfield import MultiSelectField
 
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory, get_core_fields_attributes
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hope.apps.core.timezones import utc_date
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.fields import DynamicChoiceArrayField
 from hope.models.area import Area
@@ -262,6 +263,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (snapshot_data, "admin2"),
             "village": (snapshot_data, "village"),
             "collector_name": (collector_data, "full_name"),
+            "collector_id": (collector_data, "unicef_id"),
             "collector_type": (payment, "collector_type"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
@@ -313,7 +315,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:
                 result = float(-1)
             elif column_name == "delivery_date" and payment.delivery_date is not None:
-                result = str(payment.delivery_date)
+                result = utc_date(payment.delivery_date).isoformat()
             elif isinstance(obj, dict):
                 result = obj.get(nested_field, "")
             else:

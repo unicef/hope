@@ -756,27 +756,22 @@ def test_deduplicate_rdi_with_invalid_status(
     assert rdi.status == RegistrationDataImport.IN_REVIEW
 
 
-def test_status_choices_without_permission(
-    api_client_no_permissions: APIClient,
-    program: Program,
-) -> None:
-    url = reverse(
-        "api:registration-data:registration-data-imports-status-choices",
-        args=["afghanistan", program.code],
-    )
-    response = api_client_no_permissions.get(url)
+def test_status_choices_denies_anonymous_access() -> None:
+    response = APIClient().get(reverse("api:choices-registration-data-import-statuses"))
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_status_choices(api_client: APIClient, program: Program) -> None:
-    url = reverse(
-        "api:registration-data:registration-data-imports-status-choices",
-        args=["afghanistan", program.code],
-    )
-    response = api_client.get(url)
+def test_status_choices_returns_choices_for_user_without_any_role(
+    api_client_no_permissions: APIClient,
+) -> None:
+    response = api_client_no_permissions.get(reverse("api:choices-registration-data-import-statuses"))
+
     assert response.status_code == status.HTTP_200_OK
-    assert isinstance(response.data, list)
-    assert all("name" in c and "value" in c for c in response.data)
+    assert response.json() == sorted(
+        ({"name": str(label), "value": value} for value, label in RegistrationDataImport.STATUS_CHOICE),
+        key=lambda choice: choice["name"],
+    )
 
 
 def test_registration_xlsx_import_without_permission(

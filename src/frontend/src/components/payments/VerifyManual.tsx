@@ -10,7 +10,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useVerificationStatusChoices } from '@hooks/useVerificationStatusChoices';
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
-import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
+import type { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -18,7 +18,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface Props {

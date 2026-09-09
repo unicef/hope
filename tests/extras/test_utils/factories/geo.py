@@ -106,6 +106,7 @@ def generate_small_areas_for_afghanistan_only() -> None:
             "has_data_sharing_agreement": True,
             "active": True,
             "is_accountability_applicable": True,
+            "timezone": "UTC",
         },
     )
     parent = None

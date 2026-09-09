@@ -15,6 +15,7 @@ from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.api.fields import ScopedRelatedField, UTCDateField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
@@ -43,12 +44,14 @@ from hope.apps.program.api.serializers import (
 from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
+from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import (
     Approval,
     ApprovalProcess,
     Currency,
     DeliveryMechanism,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FollowUpInstruction,
@@ -63,6 +66,7 @@ from hope.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     Program,
+    ProgramCycle,
     log_create,
 )
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
@@ -89,8 +93,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_pk"]
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        payment_plan = self.context["payment_plan"]
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
 
@@ -273,7 +276,9 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True)
     payment_verification_summary = PaymentVerificationSummarySerializer()
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
-    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     program_name = serializers.CharField(source="program_cycle.program.name")
     program_id = serializers.CharField(source="program_cycle.program_id")
     available_payment_records_count = serializers.SerializerMethodField()
@@ -336,7 +341,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
 
 class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
-    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
     program_cycle_title = serializers.CharField(source="program_cycle.title")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
@@ -367,6 +372,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_code = serializers.CharField(source="program_cycle.program.code", read_only=True)
     program_cycle_id = serializers.UUIDField(read_only=True)
+    last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
@@ -608,7 +614,7 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
 
 class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
     excluded_households_ids = serializers.ListField(child=serializers.CharField())
-    exclusion_reason = serializers.CharField(required=False)
+    exclusion_reason = serializers.CharField(required=False, allow_blank=True)
 
     def validate_excluded_households_ids(self, value: list[str]) -> list[str]:
         if len(value) != len(set(value)):
@@ -874,7 +880,16 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
         fields = FollowUpInstructionListSerializer.Meta.fields + ("payment_plans",)  # type: ignore[assignment]
 
 
+class VisionStateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=[status.value for status in VisionStatus])
+    vision_id = serializers.CharField(allow_null=True)
+    fc_num = serializers.CharField(allow_null=True)
+    error_code = serializers.CharField(allow_null=True)
+
+
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     program_cycle = ProgramCycleSmallSerializer()
     is_payment_gateway = serializers.BooleanField(read_only=True)
@@ -897,8 +912,10 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    can_send_to_payment_gateway = serializers.BooleanField()
-    can_send_to_vision = serializers.BooleanField()
+    can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
+    vision_integration_enabled = serializers.BooleanField(read_only=True)
+    vision_managed = serializers.BooleanField(read_only=True)
+    vision = serializers.SerializerMethodField()
     can_split = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
@@ -949,7 +966,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
-            "can_send_to_vision",
+            "vision_integration_enabled",
+            "vision_managed",
+            "vision",
             "can_split",
             "can_delete",
             "supporting_documents",
@@ -1143,16 +1162,19 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
+    @extend_schema_field(FundsCommitmentSerializer(allow_null=True))
     def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
-        available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
+        assigned_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj)
 
         group = (
-            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            FundsCommitmentGroup.objects.filter(
+                funds_commitment_items__in=assigned_items_qs,
+            )
             .distinct()
             .prefetch_related(
                 Prefetch(
                     "funds_commitment_items",
-                    queryset=available_items_qs,
+                    queryset=assigned_items_qs,
                     to_attr="filtered_items",
                 )
             )
@@ -1164,14 +1186,20 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
         return FundsCommitmentSerializer(
             {
+                "id": group.pk,
                 "funds_commitment_number": group.funds_commitment_number,
                 "funds_commitment_items": group.filtered_items,
             }
         ).data
 
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        if obj.vision_managed:
+            return []
+
         available_items_qs = FundsCommitmentItem.objects.filter(
-            Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
+            Q(payment_plan__isnull=True) | Q(payment_plan=obj),
+            office=obj.business_area,
         )
 
         groups = (
@@ -1189,12 +1217,23 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return [
             FundsCommitmentSerializer(
                 {
+                    "id": group.pk,
                     "funds_commitment_number": group.funds_commitment_number,
                     "funds_commitment_items": group.filtered_items,
                 }
             ).data
             for group in groups
         ]
+
+    @extend_schema_field(VisionStateSerializer)
+    def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
+        vision_data = obj.vision_data
+        return {
+            "status": obj.vision_status,
+            "vision_id": vision_data.get("vision_id"),
+            "fc_num": vision_data.get("fc_num"),
+            "error_code": vision_data.get("error_code"),
+        }
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
@@ -1210,6 +1249,8 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 
 
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    start_date = UTCDateField(read_only=True, allow_null=True)
+    end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
@@ -1298,6 +1339,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
         )
 
 
+# Served from /api/rest/choices/payments/ - keys must not depend on the business area.
 class PaymentChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
 
@@ -1342,6 +1384,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_cycle = serializers.CharField(source="parent.program_cycle.title", read_only=True)
     payment_plan_group = serializers.CharField(source="parent.payment_plan_group.name", read_only=True, allow_null=True)
     payment_plan_purposes = serializers.SerializerMethodField()
+    delivery_date = UTCDateField(read_only=True, allow_null=True)
 
     status_display = serializers.CharField(
         source="get_status_display",  # <- metoda modelu
@@ -1797,11 +1840,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program = self.get_program()
         data["program"] = program
         data["created_by"] = request.user
-        business_area = program.business_area
 
-        payment_plan = PaymentPlanService.create(
-            input_data=data, user=request.user, business_area_slug=business_area.slug
-        )
+        payment_plan = PaymentPlanService.create(input_data=data, user=request.user, program=program)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1811,6 +1851,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         )
         return payment_plan
 
+    @transaction.atomic
     def update(self, payment_plan: PaymentPlan, validated_data: dict) -> PaymentPlan:
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
@@ -1890,6 +1931,14 @@ class FspChoicesSerializer(serializers.Serializer):
     fsps = FspChoiceSerializer(many=True)
 
 
+class FinancialInstitutionChoiceSerializer(serializers.ModelSerializer):
+    value = serializers.IntegerField(source="id")
+
+    class Meta:
+        model = FinancialInstitution
+        fields = ("name", "value")
+
+
 class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -1900,7 +1949,10 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
 
 
 class AssignFundsCommitmentsSerializer(serializers.Serializer):
-    fund_commitment_items_ids = serializers.ListSerializer(child=serializers.CharField(), required=False)
+    fund_commitment_items_ids = serializers.ListSerializer(
+        child=serializers.CharField(),
+        allow_empty=False,
+    )
 
 
 class PaymentPlanAbortSerializer(serializers.Serializer):
@@ -1920,6 +1972,8 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+    cycle = ScopedRelatedField(queryset=ProgramCycle.objects.all(), scope="program")
+
     class Meta:
         model = PaymentPlanGroup
         fields = ["id", "unicef_id", "name", "cycle"]

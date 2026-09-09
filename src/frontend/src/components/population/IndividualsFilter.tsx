@@ -17,10 +17,12 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 import { DocumentSearchField } from '@core/DocumentSearchField';
-import { ReactElement } from 'react';
-import { ProgramList } from '@restgenerated/models/ProgramList';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { ReactElement } from 'react';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
+import { useSexChoices } from '@hooks/useSexChoices';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface IndividualsFilterProps {
   filter;
@@ -49,6 +51,8 @@ export function IndividualsFilter({
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { data: sexChoices } = useSexChoices();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -100,7 +104,7 @@ export function IndividualsFilter({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>
@@ -156,7 +160,7 @@ export function IndividualsFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            {choicesData?.sexChoices?.map((each) => (
+            {sexChoices?.map((each) => (
               <MenuItem key={each.value} value={each.value}>
                 {each.name}
               </MenuItem>
@@ -219,7 +223,7 @@ export function IndividualsFilter({
             data-cy="ind-filters-order-by"
             disableClearable
           >
-            {individualTableOrderOptions.map((order) => (
+            {individualTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

@@ -1,18 +1,20 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { User } from '@restgenerated/models/User';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { User } from '@restgenerated/models/User';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
+import type { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;

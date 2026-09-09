@@ -7,7 +7,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { Grid, MenuItem } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 

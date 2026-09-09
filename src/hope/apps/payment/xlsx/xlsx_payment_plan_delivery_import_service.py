@@ -14,6 +14,7 @@ import openpyxl
 import pytz
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
@@ -588,7 +589,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
 
         delivery_date = self._get_optional_cell_value_or_missing(row, "delivery_date")
         if delivery_date is not self.MISSING:
-            payment.delivery_date = self._parse_delivery_date(delivery_date) if delivery_date is not None else None
+            payment.delivery_date = (
+                to_utc_midnight(self._parse_delivery_date(delivery_date)) if delivery_date is not None else None
+            )
 
         for header, field_name in self.OPTIONAL_RECONCILIATION_FIELDS.items():
             value = self._get_optional_cell_value_or_missing(row, header)

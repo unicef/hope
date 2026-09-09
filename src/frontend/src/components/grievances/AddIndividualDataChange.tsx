@@ -16,12 +16,13 @@ import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { removeItemById } from './utils/helpers';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 export interface AddIndividualDataChangeFieldProps {
   field: any;
@@ -141,27 +142,13 @@ function AddIndividualDataChange({
       ),
   });
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
-      { businessAreaSlug },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-        businessAreaSlug,
-      }),
-  });
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
@@ -171,7 +158,7 @@ function AddIndividualDataChange({
 
   if (
     loading ||
-    choicesLoading ||
+    documentTypeChoicesLoading ||
     individualChoicesLoading ||
     countriesLoading
   ) {
@@ -181,7 +168,7 @@ function AddIndividualDataChange({
   const combinedData = {
     results: data || [],
     countriesChoices: countriesData || [],
-    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    documentTypeChoices: documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };
 

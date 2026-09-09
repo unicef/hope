@@ -1064,6 +1064,7 @@ def prepare_child_payment_plan_async_task(
 def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> None:  # noqa: PLR0915
     from django.db.models import Q
 
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
     from hope.models import Payment, PaymentPlan
 
     payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=job.config["payment_plan_id"])
@@ -1104,8 +1105,6 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
                 Payment.objects.exclude(parent__id=payment_plan.pk)
                 .filter(parent__program_cycle_id=payment_plan.program_cycle_id)
                 .filter(
-                    Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
-                    & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
                     ~Q(parent__status=PaymentPlan.Status.OPEN),
                     Q(**{f"{filter_key}__in": undo_exclude_hh_ids}) & Q(conflicted=False),
                 )
@@ -1164,6 +1163,8 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
 
         if error_msg:
             payment_plan.exclude_household_error = str([*error_msg, *info_msg])
+        else:
+            payment_plan.exclude_household_error = str([*info_msg, "Exclusion failed due to an unexpected error."])
         payment_plan.save(
             update_fields=[
                 "exclusion_reason",
@@ -1173,7 +1174,7 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
         )
         if error_msg:
             return
-        raise
+        raise NonRetriableTaskError(str(exc)) from exc
 
 
 def payment_plan_exclude_beneficiaries_async_task(
@@ -1362,7 +1363,7 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         payment_plan,
         job.config["action"],
         action_user,
-        job.config["action_date_formatted"],
+        datetime.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -1370,14 +1371,14 @@ def send_payment_notification_emails_async_task(
     payment_plan: PaymentPlan,
     action: str,
     action_user_id: str,
-    action_date_formatted: str,
+    action_date: str,
 ) -> None:
     payment_plan_id = str(payment_plan.id)
     config = {
         "payment_plan_id": payment_plan_id,
         "action": action,
         "action_user_id": action_user_id,
-        "action_date_formatted": action_date_formatted,
+        "action_date": action_date,
     }
     AsyncJob.queue_task(
         instance=payment_plan,

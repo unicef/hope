@@ -5,7 +5,7 @@ import { TestProviders } from 'src/testUtils/testProviders';
 import { PaymentPlanGroupDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanGroupDetailBackgroundActionStatusEnum';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { PaymentPlanGroupDetailsHeader } from './PaymentPlanGroupDetailsHeader';
-import { PaymentPlanGroupDetail } from './types';
+import type { PaymentPlanGroupDetail } from './types';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),

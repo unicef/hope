@@ -27,7 +27,6 @@ from hope.apps.accountability.api.serializers import (
     MessageListSerializer,
     MessageSampleSizeSerializer,
     SampleSizeSerializer,
-    SurveyCategoryChoiceSerializer,
     SurveyRapidProFlowSerializer,
     SurveySampleSizeSerializer,
     SurveySerializer,
@@ -56,7 +55,6 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.core.services.rapid_pro.api import RapidProAPI, TokenNotProvidedError
-from hope.apps.core.utils import to_choice_object
 from hope.models import BusinessArea, Feedback, FeedbackMessage, Household, Message, Program, Survey, User, log_create
 
 logger = logging.getLogger(__name__)
@@ -116,7 +114,7 @@ class FeedbackViewSet(
     program_model_field = "program"
 
     def get_object(self) -> Feedback:
-        return get_object_or_404(Feedback, id=self.kwargs.get("pk"))
+        return get_object_or_404(self.get_queryset(), id=self.kwargs.get("pk"))
 
     def get_queryset(self) -> QuerySet[Feedback]:
         queryset = super().get_queryset()
@@ -138,10 +136,17 @@ class FeedbackViewSet(
         program_code = self.kwargs.get("program_code")
         program = None
         if program_code:
-            program = Program.objects.get(code=program_code)
+            program = get_object_or_404(Program, code=program_code, business_area=business_area)
+        elif program_id := serializer.validated_data.get("program_id"):
+            program = get_object_or_404(Program, id=program_id, business_area=business_area)
 
-        if program_id := serializer.validated_data.get("program_id"):
-            program = Program.objects.get(id=program_id)
+        if household_id := serializer.validated_data.get("household_lookup"):
+            household = get_object_or_404(Household, id=household_id, business_area=business_area)
+            household_program = household.program or household.programs.first()
+            if program is None:
+                program = household_program
+            elif household_program != program:
+                raise ValidationError("Household does not belong to this program.")
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("It is not possible to create Feedback for a Finished Program.")
@@ -195,7 +200,7 @@ class FeedbackViewSet(
         program = feedback.program
 
         if program_id := serializer.validated_data.get("program_id"):
-            program = Program.objects.get(id=program_id)
+            program = get_object_or_404(Program, id=program_id, business_area=business_area)
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("It is not possible to update Feedback for a Finished Program.")
@@ -305,8 +310,8 @@ class MessageViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
-        program = Program.objects.get(code=self.program_code)
+        business_area = self.business_area
+        program = self.program
 
         input_data = serializer.validated_data
         input_data["program"] = str(program.pk)
@@ -405,8 +410,8 @@ class SurveyViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        business_area = BusinessArea.objects.get(slug=self.business_area_slug)
-        program = Program.objects.get(code=self.program_code)
+        business_area = self.business_area
+        program = self.program
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
@@ -437,11 +442,6 @@ class SurveyViewSet(
         export_survey_sample_async_task(survey, cast("User", request.user))
         serializer = self.get_serializer(survey)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-
-    @extend_schema(responses=SurveyCategoryChoiceSerializer(many=True))
-    @action(detail=False, methods=["get"], url_path="category-choices")
-    def category_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return Response(to_choice_object(Survey.CATEGORY_CHOICES))
 
     @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
     @action(detail=False, methods=["get"], url_path="available-flows", pagination_class=None)

@@ -8,16 +8,18 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { LanguageAutocompleteRestFilter } from '@shared/autocompletes/LanguageAutocompleteRestFilter';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { GRIEVANCE_CATEGORIES } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface NaTicketsFiltersProps {
   filter;
@@ -38,6 +40,7 @@ export const NaTicketsFilters = ({
 }: NaTicketsFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -119,7 +122,7 @@ export const NaTicketsFilters = ({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>

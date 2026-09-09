@@ -5,12 +5,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { choicesToDict } from '@utils/utils';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
 
 interface IndividualQuestionnaireProps {
@@ -21,23 +21,17 @@ const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData } = useQuery<IndividualChoices>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasIndividualsChoicesRetrieve,
-      { businessAreaSlug: businessArea },
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasIndividualsChoicesRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+    queryFn: () => RestService.restChoicesIndividualsRetrieve(),
   });
   const relationshipChoicesDict = choicesToDict(
-    choicesData.relationshipChoices,
+    choicesData?.relationshipChoices,
   );
 
   return (

@@ -1,10 +1,10 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
+import type { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 
 interface PaymentPlanGroupTableRowProps {
   group: PaymentPlanGroupList;

@@ -1,7 +1,7 @@
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
 import { Box } from '@mui/material';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { ReactElement } from 'react';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ReactElement } from 'react';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 

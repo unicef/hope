@@ -1,5 +1,5 @@
 import { useRoutes, Navigate } from 'react-router-dom';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import CreateSurveyPage from '@containers/pages/accountability/surveys/CreateSurveyPage';
 import SurveyDetailsPage from '@containers/pages/accountability/surveys/SurveyDetailsPage';
 import SurveysPage from '@containers/pages/accountability/surveys/SurveysPage';

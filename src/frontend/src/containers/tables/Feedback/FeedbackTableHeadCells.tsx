@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { FeedbackList } from '@restgenerated/models/FeedbackList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { FeedbackList } from '@restgenerated/models/FeedbackList';
 
 export const headCells: HeadCell<FeedbackList>[] = [
   {

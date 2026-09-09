@@ -1,15 +1,16 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './UsersTableHeadCells';
 import { UsersTableRow } from './UsersTableRow';
-import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import type { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { filterEmptyParams } from '@utils/utils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 interface UsersTableProps {
