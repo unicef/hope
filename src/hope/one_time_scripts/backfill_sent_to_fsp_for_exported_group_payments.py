@@ -97,7 +97,7 @@ def backfill(*, dry_run: bool = True, batch_size: int = BATCH_SIZE) -> dict[str,
     updated_payments = 0
     while True:
         with transaction.atomic():
-            batch_queryset = queryset.select_for_update()
+            batch_queryset = queryset.select_for_update(of=("self",))
             if last_pk is not None:
                 batch_queryset = batch_queryset.filter(pk__gt=last_pk)
             payments = list(batch_queryset[:batch_size])

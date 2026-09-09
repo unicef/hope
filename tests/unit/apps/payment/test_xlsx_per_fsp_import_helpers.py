@@ -13,8 +13,6 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     ProgramFactory,
 )
@@ -25,7 +23,6 @@ from hope.models import (
     BusinessArea,
     Payment,
     PaymentPlan,
-    PaymentVerification,
     Program,
     ProgramCycle,
 )
@@ -63,35 +60,6 @@ def payment_plan(program_cycle: ProgramCycle, business_area: BusinessArea) -> Pa
 @pytest.fixture
 def service(payment_plan: PaymentPlan) -> XlsxPaymentPlanDeliveryImportService:
     return XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO())
-
-
-@pytest.fixture
-def payment(payment_plan):
-    return PaymentFactory(parent=payment_plan)
-
-
-@pytest.fixture
-def payment_verification_plan(payment_plan):
-    return PaymentVerificationPlanFactory(payment_plan=payment_plan)
-
-
-@pytest.fixture
-def received_verification(payment_verification_plan, payment):
-    return PaymentVerificationFactory(
-        payment_verification_plan=payment_verification_plan,
-        payment=payment,
-        status=PaymentVerification.STATUS_RECEIVED,
-        received_amount=Decimal("100.00"),
-    )
-
-
-@pytest.fixture
-def pending_verification(payment_verification_plan, payment):
-    return PaymentVerificationFactory(
-        payment_verification_plan=payment_verification_plan,
-        payment=payment,
-        status=PaymentVerification.STATUS_PENDING,
-    )
 
 
 @pytest.fixture
@@ -253,31 +221,6 @@ def test_get_additional_doc_values_absent(service):
     assert number is None
 
 
-# --- _update_payment_verification ---
-
-
-def test_update_payment_verification_received(service, payment, received_verification):
-    service._update_payment_verification(payment, Decimal("100.00"))
-    assert len(service.payment_verifications_to_save) == 1
-    assert service.payment_verifications_to_save[0].status == PaymentVerification.STATUS_RECEIVED
-
-
-def test_update_payment_verification_not_received(service, payment, received_verification):
-    service._update_payment_verification(payment, Decimal(0))
-    assert service.payment_verifications_to_save[-1].status == PaymentVerification.STATUS_NOT_RECEIVED
-
-
-def test_update_payment_verification_received_with_issues(service, payment, received_verification):
-    service._update_payment_verification(payment, Decimal("50.00"))
-    assert service.payment_verifications_to_save[-1].status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-
-
-def test_update_payment_verification_pending_skipped(service, payment, pending_verification):
-    initial_count = len(service.payment_verifications_to_save)
-    service._update_payment_verification(payment, Decimal("100.00"))
-    assert len(service.payment_verifications_to_save) == initial_count  # no change
-
-
 # --- _get_optional_cell_value ---
 
 
@@ -293,25 +236,6 @@ def test_get_optional_cell_value_absent(service):
     row = _make_row_cells(["PAY-001", "100.00"])
     result = service._get_optional_cell_value(row, "reference_id")
     assert result is None
-
-
-# --- _update_payment_verification: delivered_quantity is None ---
-
-
-def test_update_payment_verification_delivered_none(service, payment, received_verification):
-    service._update_payment_verification(payment, None)
-    assert len(service.payment_verifications_to_save) >= 1
-    assert service.payment_verifications_to_save[-1].status == PaymentVerification.STATUS_NOT_RECEIVED
-
-
-# --- _update_payment_verification: no verification exists ---
-
-
-def test_update_payment_verification_no_verification(service, payment):
-    # No PaymentVerification created for this payment
-    initial_count = len(service.payment_verifications_to_save)
-    service._update_payment_verification(payment, Decimal("100.00"))
-    assert len(service.payment_verifications_to_save) == initial_count  # nothing added
 
 
 # --- _validate_headers ---

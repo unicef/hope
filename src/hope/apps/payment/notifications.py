@@ -79,7 +79,7 @@ class PaymentPlanGroupReconciliationImportNotification:
                 html_body=render_to_string(self.html_template, context=context),
                 text_body=render_to_string(self.text_template, context=context),
             )
-        except Exception:  # pragma: no cover
+        except Exception:
             logger.exception("Failed to send reconciliation import notification")
 
 

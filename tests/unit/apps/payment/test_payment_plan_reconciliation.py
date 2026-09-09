@@ -107,6 +107,7 @@ def payment_for_extras(
         collector=household.head_of_household,
         entitlement_quantity=Decimal(500),
         delivered_quantity=Decimal(400),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
 
 
@@ -189,6 +190,7 @@ def test_override_import_row_queues_verification_cleanup_when_quantity_changes(
         entitlement_quantity_usd=Decimal(100),
         delivered_quantity=Decimal(1000),
         delivered_quantity_usd=Decimal(99),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_2 = PaymentFactory(
         parent=payment_plan_finished,
@@ -198,6 +200,7 @@ def test_override_import_row_queues_verification_cleanup_when_quantity_changes(
         entitlement_quantity_usd=Decimal(100),
         delivered_quantity=Decimal(2000),
         delivered_quantity_usd=Decimal(500),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_3 = PaymentFactory(
         parent=payment_plan_finished,
@@ -207,6 +210,7 @@ def test_override_import_row_queues_verification_cleanup_when_quantity_changes(
         entitlement_quantity_usd=Decimal(300),
         delivered_quantity=Decimal(3000),
         delivered_quantity_usd=Decimal(290),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
 
     verification_1 = PaymentVerificationFactory(

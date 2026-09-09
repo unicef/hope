@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+import logging
 from typing import Any
 
 from constance.test import override_config
@@ -21,6 +22,15 @@ ACTION_DATETIME = datetime(2026, 8, 21, 12, 30, tzinfo=UTC)
 
 
 @pytest.fixture
+def reconciliation_notification():
+    return PaymentPlanGroupReconciliationImportNotification(
+        PaymentPlanGroupFactory(),
+        UserFactory(username="uploader", email="uploader@example.com"),
+        "reconciliation.xlsx",
+    )
+
+
+@pytest.fixture
 def reconciliation_notification_without_email():
     return PaymentPlanGroupReconciliationImportNotification(
         PaymentPlanGroupFactory(),
@@ -34,10 +44,28 @@ def test_reconciliation_notification_skips_user_without_email(
     django_assert_num_queries,
     caplog,
 ) -> None:
-    with django_assert_num_queries(0):
+    with caplog.at_level(logging.WARNING), django_assert_num_queries(0):
         reconciliation_notification_without_email.send_success()
 
     assert "notification skipped" in caplog.text
+
+
+def test_reconciliation_notification_logs_email_failure(
+    reconciliation_notification,
+    django_assert_num_queries,
+    caplog,
+    mocker: Any,
+) -> None:
+    mocker.patch.object(
+        reconciliation_notification.user,
+        "email_user",
+        side_effect=RuntimeError("Email service unavailable"),
+    )
+
+    with caplog.at_level(logging.ERROR), django_assert_num_queries(0):
+        reconciliation_notification.send_success()
+
+    assert "Failed to send reconciliation import notification" in caplog.text
 
 
 @pytest.fixture

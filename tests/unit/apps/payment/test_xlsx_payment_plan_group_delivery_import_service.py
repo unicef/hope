@@ -23,6 +23,7 @@ from extras.test_utils.factories.payment import (
     PaymentPlanGroupFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.apps.grievance.models import GrievanceTicket
@@ -879,6 +880,7 @@ def group_with_started_verifications(group_two_plans_one_fsp):
     payment.delivered_quantity = Decimal("100.00")
     payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
     payment.save(update_fields=["delivered_quantity", "status"])
+    PaymentVerificationSummaryFactory(payment_plan=ctx["plan_one"])
     finished_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=ctx["plan_one"],
         status=PaymentVerificationPlan.STATUS_FINISHED,
@@ -915,6 +917,7 @@ def group_with_pending_verification(group_two_plans_one_fsp):
     payment.delivered_quantity = Decimal("100.00")
     payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
     payment.save(update_fields=["delivered_quantity", "status"])
+    PaymentVerificationSummaryFactory(payment_plan=ctx["plan_one"])
     verification_plan = PaymentVerificationPlanFactory(
         payment_plan=ctx["plan_one"],
         status=PaymentVerificationPlan.STATUS_PENDING,

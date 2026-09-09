@@ -276,7 +276,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             return
 
         status_date = timezone.now()
-        old_new_pairs = []
+        old_new_pairs: list[tuple[Payment | None, Payment]] = []
         for payment in self.payments_to_mark_sent:
             old_payment = cast("Payment", copy_model_object(payment))
             payment.status = Payment.STATUS_SENT_TO_FSP

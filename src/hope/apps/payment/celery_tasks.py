@@ -666,23 +666,23 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         "delivery_import_file__created_by", "cycle__program__business_area"
     ).get(id=job.config["payment_plan_group_id"])
     old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
-    notification_user_id = (
-        job.config.get("notification_user_id") or payment_plan_group.delivery_import_file.created_by_id
-    )
-    notification_user = User.objects.filter(pk=notification_user_id).first()
-    notification = (
-        PaymentPlanGroupReconciliationImportNotification(
-            payment_plan_group,
-            notification_user,
-            payment_plan_group.delivery_import_file.file.name or "reconciliation.xlsx",
-        )
-        if notification_user
-        else None
-    )
+    notification = None
 
     try:
-        file_xlsx = payment_plan_group.delivery_import_file.file
-        saved_options = payment_plan_group.delivery_import_file.extras
+        delivery_import_file = payment_plan_group.delivery_import_file
+        notification_user_id = job.config.get("notification_user_id") or delivery_import_file.created_by_id
+        notification_user = User.objects.filter(pk=notification_user_id).first()
+        notification = (
+            PaymentPlanGroupReconciliationImportNotification(
+                payment_plan_group,
+                notification_user,
+                delivery_import_file.file.name or "reconciliation.xlsx",
+            )
+            if notification_user
+            else None
+        )
+        file_xlsx = delivery_import_file.file
+        saved_options = delivery_import_file.extras
         service = XlsxPaymentPlanGroupDeliveryImportService(
             payment_plan_group,
             file_xlsx,
