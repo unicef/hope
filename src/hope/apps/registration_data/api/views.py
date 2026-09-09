@@ -405,7 +405,6 @@ class RegistrationDataImportViewSet(
         if import_data.status != ImportData.STATUS_FINISHED:
             raise ValidationError("Import data is not ready for import")
 
-        # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
         validated_data.pop("import_data_id")
@@ -488,7 +487,6 @@ class RegistrationDataImportViewSet(
         if import_data.status != ImportData.STATUS_FINISHED:
             raise ValidationError("Kobo import data is not ready for import")
 
-        # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
         validated_data.pop("import_data_id")
