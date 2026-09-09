@@ -19,7 +19,12 @@ from rest_framework.exceptions import ValidationError
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory, FileTempFactory, FlexibleAttributeFactory
 from extras.test_utils.factories.geo import CountryFactory
-from extras.test_utils.factories.household import DocumentFactory, HouseholdFactory
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
 from extras.test_utils.factories.payment import (
     AccountFactory,
     AccountTypeFactory,
@@ -33,7 +38,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID, ROLE_PRIMARY
+from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.apps.payment.utils import to_decimal
@@ -193,6 +198,29 @@ def xlsx_invalid_file(payment_plan, user):
         file=invalid_file(),
     )
     return file_temp.file
+
+
+@pytest.fixture
+def payment_with_alternate_collector(payment_plan, payments, business_area, program):
+    payment = payment_plan.eligible_payments.order_by("unicef_id").first()
+    alternate_collector = IndividualFactory(
+        household=payment.household,
+        business_area=business_area,
+        program=program,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    IndividualRoleInHouseholdFactory(
+        role=ROLE_ALTERNATE,
+        household=payment.household,
+        individual=alternate_collector,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+    payment.collector = alternate_collector
+    payment.collector_type = ROLE_ALTERNATE
+    payment.save()
+    PaymentHouseholdSnapshot.objects.all().delete()
+    create_payment_plan_snapshot_data(payment_plan)
+    return payment
 
 
 @pytest.fixture
@@ -638,6 +666,26 @@ def test_export_payment_plan_payment_list(payment_plan, payments, user):
     assert wb.active["N2"].value == "Test_Number_National_Id_123"
 
 
+def test_export_payment_plan_payment_list_writes_collector_unicef_id(payment_plan, payments):
+    payment = payment_plan.eligible_payments.order_by("unicef_id").first()
+    PaymentHouseholdSnapshot.objects.all().delete()
+    create_payment_plan_snapshot_data(payment_plan)
+
+    wb = XlsxPaymentPlanExportService(payment_plan).generate_workbook()
+
+    assert wb.active["C1"].value == "collector_id"
+    assert wb.active["C2"].value == payment.collector.unicef_id
+
+
+def test_export_payment_plan_payment_list_writes_alternate_collector_unicef_id(
+    payment_plan, payment_with_alternate_collector
+):
+    wb = XlsxPaymentPlanExportService(payment_plan).generate_workbook()
+
+    assert wb.active["C1"].value == "collector_id"
+    assert wb.active["C2"].value == payment_with_alternate_collector.collector.unicef_id
+
+
 def test_payment_row_flex_fields(payment_plan, fsp, payments, flex_decimal_attribute, flex_date_attribute):
     core_fields = [
         "account_holder_name",
@@ -801,7 +849,7 @@ def test_headers_for_social_worker_program(payment_plan, xlsx_valid_file):
     assert len(import_service.headers) == 12
     assert "household_size" not in import_service.headers
     assert "household_id" not in import_service.headers
-    assert "collector_id" not in export_service.headers
+    assert "collector_id" not in import_service.headers
     assert "individual_id" in import_service.headers
 
 
