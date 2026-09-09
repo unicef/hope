@@ -171,6 +171,18 @@ def test_normalize_delivery_date_preserves_existing_value_when_date_is_out_of_ra
     assert result == existing_date
 
 
+def test_normalize_delivery_date_preserves_existing_value_when_date_precedes_program(
+    service, django_assert_num_queries
+):
+    service.payment_plan.program.start_date = datetime.date(2024, 2, 1)
+    existing_date = datetime.date(2024, 3, 1)
+
+    with django_assert_num_queries(0):
+        result = service._normalize_delivery_date(datetime.date(2024, 1, 1), existing_date)
+
+    assert result == existing_date
+
+
 # --- _get_values_for_update ---
 
 
@@ -313,6 +325,17 @@ def test_validate_payment_id_records_known_id(service_with_payment, sent_to_fsp_
     assert service_with_payment.errors == []
 
 
+def test_validate_payment_id_does_not_record_null_id(service, django_assert_num_queries):
+    service.xlsx_headers = ["payment_id", "delivered_quantity"]
+    row = _make_row_cells([None, 100])
+
+    with django_assert_num_queries(0):
+        service._validate_payment_id(row)
+
+    assert len(service.errors) == 1
+    assert service.payment_ids_from_xlsx == []
+
+
 def test_should_skip_row_with_null_payment_id(service, django_assert_num_queries):
     with django_assert_num_queries(0):
         result = service._should_skip_row(None)
@@ -364,6 +387,17 @@ def test_get_row_action_applies_first_reconciliation(
         action = service_with_payment._get_row_action(sent_to_fsp_payment, Decimal("100.00"))
 
     assert action == service_with_payment.ACTION_APPLY
+
+
+def test_get_row_action_skips_normal_payment_that_was_not_sent_to_fsp(
+    service_with_payment, sent_to_fsp_payment, django_assert_num_queries
+):
+    sent_to_fsp_payment.status = Payment.STATUS_MANUALLY_CANCELLED
+
+    with django_assert_num_queries(0):
+        action = service_with_payment._get_row_action(sent_to_fsp_payment, Decimal("100.00"))
+
+    assert action == service_with_payment.ACTION_SKIP
 
 
 def test_parse_delivered_quantity_rejects_unquantizable_number(service, django_assert_num_queries):
@@ -441,6 +475,16 @@ def test_validate_delivery_date_ignores_empty_cell(
         service_with_payment._validate_delivery_date(row)
 
     assert service_with_payment.errors == []
+
+
+def test_normalize_delivery_date_accepts_valid_non_empty_date(service, django_assert_num_queries):
+    service.payment_plan.program.start_date = datetime.date.today() - datetime.timedelta(days=1)
+    delivery_date = datetime.date.today()
+
+    with django_assert_num_queries(0):
+        result = service._normalize_delivery_date(delivery_date, None)
+
+    assert result == delivery_date
 
 
 # --- _validate_reference_id ---

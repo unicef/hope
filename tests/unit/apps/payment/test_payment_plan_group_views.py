@@ -2728,13 +2728,11 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
     job = AsyncRetryJob.objects.latest("pk")
     with (
         patch.object(User, "email_user", autospec=True) as mock_email_user,
-        TestCase.captureOnCommitCallbacks(execute=False) as callbacks,
+        TestCase.captureOnCommitCallbacks(execute=True),
     ):
         async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+        mock_email_user.assert_not_called()
 
-    mock_email_user.assert_not_called()
-    assert len(callbacks) == 1
-    callbacks[0]()
     mock_email_user.assert_called_once()
 
     payment_one.refresh_from_db()
@@ -2752,10 +2750,13 @@ def test_delivery_import_task_succeeds_without_notification_recipient(
 ) -> None:
     ctx = queued_reconciliation
 
-    with TestCase.captureOnCommitCallbacks(execute=False) as callbacks:
+    with (
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
         async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
 
-    assert callbacks == []
+    mock_email_user.assert_not_called()
     with django_assert_num_queries(2):
         ctx["payment_one"].refresh_from_db()
         ctx["group"].refresh_from_db()
@@ -2775,12 +2776,13 @@ def test_delivery_import_task_reports_background_conflict_without_notification_r
     payment.save(update_fields=["delivered_quantity", "status"])
 
     with (
-        TestCase.captureOnCommitCallbacks(execute=False) as callbacks,
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+        TestCase.captureOnCommitCallbacks(execute=True),
         pytest.raises(NonRetriableTaskError),
     ):
         async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
 
-    assert callbacks == []
+    mock_email_user.assert_not_called()
     with django_assert_num_queries(2):
         ctx["group"].refresh_from_db()
         ctx["job"].refresh_from_db()
@@ -2798,16 +2800,12 @@ def test_delivery_import_task_notifies_recipient_about_background_conflict(
     payment.status = Payment.STATUS_DISTRIBUTION_PARTIAL
     payment.save(update_fields=["delivered_quantity", "status"])
 
-    with (
-        patch.object(User, "email_user", autospec=True) as mock_email_user,
-        TestCase.captureOnCommitCallbacks(execute=False) as callbacks,
-        pytest.raises(NonRetriableTaskError),
-    ):
-        async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
+    with patch.object(User, "email_user", autospec=True) as mock_email_user:
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            with pytest.raises(NonRetriableTaskError):
+                async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
+            mock_email_user.assert_not_called()
 
-    mock_email_user.assert_not_called()
-    assert len(callbacks) == 1
-    callbacks[0]()
     mock_email_user.assert_called_once()
 
 

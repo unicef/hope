@@ -958,12 +958,18 @@ def group_with_pending_verification(group_two_plans_one_fsp):
 def group_with_verification_file(group_with_pending_verification):
     ctx = group_with_pending_verification
     verification_plan = ctx["verification_plan"]
+    content_type = ContentType.objects.get_for_model(PaymentVerificationPlan)
     file_temp = FileTempFactory(
-        content_type=ContentType.objects.get_for_model(PaymentVerificationPlan),
+        content_type=content_type,
         object_id=str(verification_plan.pk),
         file=ContentFile(b"verification", name="verification.xlsx"),
     )
-    return {**ctx, "verification_file": file_temp}
+    empty_file_temp = FileTempFactory(
+        content_type=content_type,
+        object_id=str(verification_plan.pk),
+        file="",
+    )
+    return {**ctx, "verification_file": file_temp, "empty_verification_file": empty_file_temp}
 
 
 def test_init_rejects_unsupported_null_delivery_policy(group_two_plans_one_fsp, django_assert_num_queries):
@@ -1247,12 +1253,12 @@ def test_verification_cleanup_deletes_attached_file_after_commit(
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=True)
     service.open_workbook()
 
-    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+    with django_capture_on_commit_callbacks(execute=True):
         service.import_payment_list()
 
-    assert len(callbacks) == 1
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         assert not FileTemp.objects.filter(pk=ctx["verification_file"].pk).exists()
+        assert not FileTemp.objects.filter(pk=ctx["empty_verification_file"].pk).exists()
     assert not storage.exists(file_name)
 
 
