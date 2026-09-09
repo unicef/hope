@@ -70,6 +70,10 @@ ascii_name_validator = RegexValidator(
 )
 
 
+def sanction_list_last_check_key(program_id: Any) -> str:
+    return f"sanction_list_last_check:{program_id}"
+
+
 class IndividualCollection(UnicefIdentifiedModel):
     """Collection of individual representations."""
 
@@ -519,9 +523,8 @@ class Individual(
 
     @property
     def sanction_list_last_check(self) -> datetime | None:
-        # TODO: SANCTION LIST CHECK PER LIST
         if self.program.sanction_lists.exists():
-            return cache.get("sanction_list_last_check")
+            return cache.get(sanction_list_last_check_key(self.program_id))
         return None
 
     def withdraw(self, notify: bool = True) -> None:

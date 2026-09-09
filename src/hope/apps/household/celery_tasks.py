@@ -151,50 +151,6 @@ def interval_recalculate_population_fields_async_task() -> None:
     )
 
 
-def calculate_children_fields_for_not_collected_individual_data_async_task_action(job: AsyncJob) -> int:
-    from django.db.models.functions import Coalesce
-
-    from hope.models import Household  # pragma: no cover
-
-    return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
-        # TODO: count differently or add all the fields for the new gender options
-        children_count=Coalesce("female_age_group_0_5_count", 0)
-        + Coalesce("female_age_group_6_11_count", 0)
-        + Coalesce("female_age_group_12_17_count", 0)
-        + Coalesce("male_age_group_0_5_count", 0)
-        + Coalesce("male_age_group_6_11_count", 0)
-        + Coalesce("male_age_group_12_17_count", 0),
-        female_children_count=Coalesce("female_age_group_0_5_count", 0)
-        + Coalesce("female_age_group_6_11_count", 0)
-        + Coalesce("female_age_group_12_17_count", 0),
-        male_children_count=Coalesce("male_age_group_0_5_count", 0)
-        + Coalesce("male_age_group_6_11_count", 0)
-        + Coalesce("male_age_group_12_17_count", 0),
-        children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
-        + Coalesce("female_age_group_6_11_disabled_count", 0)
-        + Coalesce("female_age_group_12_17_disabled_count", 0)
-        + Coalesce("male_age_group_0_5_disabled_count", 0)
-        + Coalesce("male_age_group_6_11_disabled_count", 0)
-        + Coalesce("male_age_group_12_17_disabled_count", 0),
-        female_children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
-        + Coalesce("female_age_group_6_11_disabled_count", 0)
-        + Coalesce("female_age_group_12_17_disabled_count", 0),
-        male_children_disabled_count=Coalesce("male_age_group_0_5_disabled_count", 0)
-        + Coalesce("male_age_group_6_11_disabled_count", 0)
-        + Coalesce("male_age_group_12_17_disabled_count", 0),
-    )
-
-
-def calculate_children_fields_for_not_collected_individual_data_async_task() -> None:
-    AsyncJob.queue_task(
-        job_name=calculate_children_fields_for_not_collected_individual_data_async_task.__name__,
-        action="hope.apps.household.celery_tasks.calculate_children_fields_for_not_collected_individual_data_async_task_action",
-        config={},
-        group_key="household",
-        description="Calculate children fields for households",
-    )
-
-
 def revalidate_phone_number_async_task_action(job: AsyncJob) -> None:
     individual_ids = job.config["individual_ids"]
     individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")

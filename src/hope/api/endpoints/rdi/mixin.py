@@ -119,10 +119,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
-        program = rdi.program
-        if program is None:
-            raise ValueError("RDI program must not be None")
-        member_data["flex_fields"] = populate_pdu_with_null_values(program, member_data.get("flex_fields"))
+        member_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, member_data.get("flex_fields"))
         role = member_data.pop("role", None)
         ind = PendingIndividual.objects.create(
             household=member_of,
