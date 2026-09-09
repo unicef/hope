@@ -1,4 +1,5 @@
 from datetime import timedelta
+from io import BytesIO
 from typing import Any, Callable
 from unittest.mock import patch
 
@@ -9,6 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.utils import timezone
 from django_countries import countries
+import openpyxl
 import pytest
 import requests
 
@@ -58,11 +60,15 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
 def _upload_file(client, admin_user, filename: str):
     file_path = f"{settings.TESTS_ROOT}/apps/core/test_files/{filename}"
     with open(file_path, "rb") as f:
-        uploaded_file = SimpleUploadedFile(
-            filename,
-            f.read(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
+        return _upload_content(client, admin_user, filename, f.read())
+
+
+def _upload_content(client, admin_user, filename: str, content: bytes):
+    uploaded_file = SimpleUploadedFile(
+        filename,
+        content,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
     url = reverse("admin:core_xlsxkobotemplate_add")
     client.login(username=admin_user.username, password="password")
     return client.post(url, {"xls_file": uploaded_file}, follow=True, format="multipart")
@@ -74,6 +80,22 @@ def admin_user(db):
     user.set_password("password")
     user.save()
     return user
+
+
+@pytest.fixture
+def template_without_optional_fields() -> bytes:
+    """kobo-template-valid.xlsx with the optional *_latin questions removed."""
+    wb = openpyxl.load_workbook(f"{settings.TESTS_ROOT}/apps/core/test_files/kobo-template-valid.xlsx")
+    survey = wb["survey"]
+    name_column = [cell.value for cell in survey[1]].index("name") + 1
+    latin_rows = [
+        row for row in range(2, survey.max_row + 1) if str(survey.cell(row, name_column).value).endswith("_latin_i_c")
+    ]
+    for row in reversed(latin_rows):
+        survey.delete_rows(row)
+    output = BytesIO()
+    wb.save(output)
+    return output.getvalue()
 
 
 @pytest.fixture
@@ -96,15 +118,9 @@ def test_upload_invalid_template_returns_expected_errors(
             "Field: residence_status_h_c - Choice: IDP_RETURNEE is not present in the file",
             "Field: residence_status_h_c - Choice: RETURNEE is not present in the file",
             "Field: size_h_c - Field must be required",
-            "Field: fchild_hoh_i_c - Field is missing",
-            "Field: child_hoh_i_c - Field is missing",
             "Field: relationship_i_c - Choice: OTHER is not present in the file",
             "Field: relationship_i_c - Choice: FOSTER_CHILD is not present in the file",
             "Field: relationship_i_c - Choice: FREE_UNION is not present in the file",
-            "Field: full_name_latin_i_c - Field is missing",
-            "Field: given_name_latin_i_c - Field is missing",
-            "Field: middle_name_latin_i_c - Field is missing",
-            "Field: family_name_latin_i_c - Field is missing",
             "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
             "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
             "Field: currency_h_c - Choice: BOV is not present in the file",
@@ -127,10 +143,6 @@ def test_upload_invalid_template_returns_expected_errors(
             "Field: currency_h_c - Choice: XTS is not present in HOPE",
             "Field: currency_h_c - Choice: XUA is not present in HOPE",
             "Field: currency_h_c - Choice: XXX is not present in HOPE",
-            "Field: tax_id_no_i_c - Field is missing",
-            "Field: tax_id_issuer_i_c - Field is missing",
-            "Field: national_passport_no_i_c - Field is missing",
-            "Field: program_registration_id_h_c - Field is missing",
         ]
     }
     assert form.errors == expected_errors
@@ -158,6 +170,21 @@ def test_upload_valid_template_shows_success_message(
 
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
+def test_upload_template_without_optional_fields_is_accepted(
+    mock_country_choices, client, admin_user, all_currencies, template_without_optional_fields
+):
+    mock_country_choices.return_value = _get_all_country_choices()
+
+    response = _upload_content(client, admin_user, "kobo-template.xlsx", template_without_optional_fields)
+
+    messages = [m.message for m in get_messages(response.wsgi_request)]
+    assert (
+        "Core field validation successful, running KoBo Template upload task..., "
+        "Import status will change after task completion"
+    ) in messages
+
+
+@patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
 def test_upload_template_with_validation_error_shows_errors_in_response(
     mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
 ):
@@ -169,7 +196,7 @@ def test_upload_template_with_validation_error_shows_errors_in_response(
         assert "Field: residence_status_h_c" in response.text
         assert "Choice: RETURNEE is not present" in response.text
         assert "Field: size_h_c - Field must be required" in response.text
-        assert "Field: tax_id_no_i_c - Field is missing" in response.text
+        assert "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE" in response.text
         assert "Upload XLS" in response.text
 
 
