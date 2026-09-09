@@ -16,9 +16,9 @@ import { Title } from '@core/Title';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -143,8 +143,8 @@ function AddIndividualGrievanceDetails({
     }) || [];
 
   const flexFieldLabels =
-    Object.entries(flexFields || {}).map(
-      ([key, value]: [string, string | string[]]) => (
+    Object.entries((flexFields || {}) as Record<string, string | string[]>).map(
+      ([key, value]) => (
         <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
@@ -181,7 +181,7 @@ function AddIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
   );
-  if (!ticket.ticketDetails.approveStatus) {
+  if (!ticket.ticketDetails?.approveStatus) {
     dialogText = t(
       `You are approving the following Add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
     );
@@ -206,12 +206,12 @@ function AddIndividualGrievanceDetails({
                   });
                   await mutateAsync({
                     grievanceTicketId: ticket.id,
-                    approveStatus: !ticket.ticketDetails.approveStatus,
+                    approveStatus: !ticket.ticketDetails?.approveStatus,
                   });
-                  if (ticket.ticketDetails.approveStatus) {
+                  if (ticket.ticketDetails?.approveStatus) {
                     showMessage(t('Changes Disapproved'));
                   }
-                  if (!ticket.ticketDetails.approveStatus) {
+                  if (!ticket.ticketDetails?.approveStatus) {
                     showMessage(t('Changes Approved'));
                   }
                 } catch (e) {
@@ -224,7 +224,7 @@ function AddIndividualGrievanceDetails({
               color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
-              {ticket.ticketDetails.approveStatus
+              {ticket.ticketDetails?.approveStatus
                 ? t('Disapprove')
                 : t('Approve')}
             </Button>

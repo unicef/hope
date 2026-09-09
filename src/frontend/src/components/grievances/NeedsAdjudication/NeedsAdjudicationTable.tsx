@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import { BlackLink } from '@core/BlackLink';
 import { UniversalMoment } from '@core/UniversalMoment';
 import PeopleIcon from '@mui/icons-material/People';
@@ -16,7 +16,7 @@ import { StyledTable } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface NeedsAdjudicationTableProps {
   ticket: GrievanceTicketDetail;
@@ -48,6 +48,9 @@ export const NeedsAdjudicationTable = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const details = ticket?.ticketDetails;
+  // ticketDetails is nullable and every read below goes through it. All hooks
+  // are above this point, so the hook order stays stable.
+  if (!details) return null;
 
   const handleSelect = (id: string) => {
     setSelectedIndividualIds((prevSelected: string[]) => {

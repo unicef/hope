@@ -1,13 +1,13 @@
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Button } from '@mui/material';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -55,7 +55,7 @@ export function CreatePaymentPlanHeader({
       to: '../../..',
     },
     {
-      title: `${programCycleData.title}`,
+      title: `${programCycleData?.title}`,
       to: '../..',
     },
   ];

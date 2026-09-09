@@ -2,7 +2,7 @@ import { TableCell } from '@mui/material';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { anon } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function AnonTableCell({ children, ...props }): ReactElement {
   const permissions = usePermissions();

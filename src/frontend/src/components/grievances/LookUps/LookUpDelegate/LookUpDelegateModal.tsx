@@ -6,13 +6,14 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 

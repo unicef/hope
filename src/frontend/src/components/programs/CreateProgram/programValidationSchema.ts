@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import moment from 'moment';
 import { today } from '@utils/utils';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 export const programValidationSchema = (
   t: TFunction<'translation', undefined>,
@@ -50,7 +50,7 @@ export const programValidationSchema = (
       .test({
         name: 'conditional-required',
         message: t('Beneficiary Group is required'),
-        test: function(value) {
+        test: function (value) {
           // Get parent values from the validation context
           const { dataCollectingTypeCode } = this.parent;
 

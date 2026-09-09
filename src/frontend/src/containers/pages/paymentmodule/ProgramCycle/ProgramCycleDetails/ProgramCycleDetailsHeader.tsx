@@ -1,5 +1,5 @@
 import { AdminButton } from '@core/AdminButton';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -14,13 +14,14 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCreate';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { PaymentPlanGroupCreate } from '@restgenerated/models/PaymentPlanGroupCreate';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/index';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';

@@ -4,7 +4,7 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../theme';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { ReactNode, FC } from 'react';
+import type { ReactNode, FC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface TestProvidersProps {

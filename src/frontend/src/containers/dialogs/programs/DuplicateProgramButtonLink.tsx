@@ -1,9 +1,9 @@
 import { IconButton } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface DuplicateProgramButtonLinkProps {
   program: ProgramDetail;
