@@ -135,6 +135,7 @@ RECONCILIATION_STATUS_CASES = [
 RECONCILIATION_ERROR_CASES = [
     pytest.param(600.00, Decimal("100.00"), id="delivered_exceeds_entitlement"),
     pytest.param(-2, Decimal("100.00"), id="unsupported_negative"),
+    pytest.param("", Decimal("100.00"), id="empty_quantity"),
 ]
 
 
@@ -165,7 +166,7 @@ def test_get_delivered_quantity_status_and_value_valid_inputs(
 )
 def test_get_delivered_quantity_status_and_value_raises(
     payment_plan: PaymentPlan,
-    delivered_quantity: float,
+    delivered_quantity: int | float | str | Decimal,
     entitlement_quantity: Decimal,
 ) -> None:
     service = XlsxPaymentPlanDeliveryImportService(payment_plan, None)

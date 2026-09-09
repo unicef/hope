@@ -37,7 +37,10 @@ from extras.test_utils.factories.payment import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.payment.api.serializers import PaymentPlanGroupDetailSerializer
-from hope.apps.payment.celery_tasks import export_payment_plan_group_delivery_xlsx_async_task
+from hope.apps.payment.celery_tasks import (
+    export_payment_plan_group_delivery_xlsx_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task,
+)
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import AsyncRetryJob, LogEntry, Payment, PaymentPlan, PaymentPlanGroup, User
 
@@ -399,6 +402,37 @@ def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
     )
     PaymentHouseholdSnapshotFactory(payment=payment_two, snapshot_data={})
     return {"group": group, "payment_one": payment_one, "payment_two": payment_two}
+
+
+@pytest.fixture
+def queued_reconciliation(e2e_import_setup: dict[str, Any], user: User, request: Any) -> dict[str, Any]:
+    group = e2e_import_setup["group"]
+    payment = e2e_import_setup["payment_one"]
+    notification_user = user if request.param else None
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "delivered_quantity"])
+    worksheet.append([str(payment.unicef_id), Decimal("75.00")])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    file_temp = FileTempFactory(
+        object_id=group.pk,
+        content_type=ContentType.objects.get_for_model(group),
+        created_by=notification_user,
+        file=SimpleUploadedFile(
+            "import.xlsx",
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ),
+        extras={"override": False, "null_delivery_policy": "reset"},
+    )
+    group.delivery_import_file = file_temp
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    group.save(update_fields=["delivery_import_file", "background_action_status"])
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        import_payment_plan_group_delivery_from_xlsx_async_task(group)
+    return {**e2e_import_setup, "job": AsyncRetryJob.objects.latest("pk")}
 
 
 def test_list_groups_for_cycle(
@@ -2171,6 +2205,29 @@ def test_delivery_import_xlsx_returns_400_when_no_file(
     assert "file" in response.json()
 
 
+def test_delivery_import_xlsx_rejects_invalid_null_delivery_policy(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"invalid", content_type="application/vnd.ms-excel")
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group_with_accepted_plan.id),
+        {"file": test_file, "null_delivery_policy": "unsupported"},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "null_delivery_policy" in response.json()
+
+
 def test_delivery_import_xlsx_rejects_bad_zip_file(
     client: Any,
     user: Any,
@@ -2669,7 +2726,16 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
 
     job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    with (
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+        TestCase.captureOnCommitCallbacks(execute=False) as callbacks,
+    ):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    mock_email_user.assert_not_called()
+    assert len(callbacks) == 1
+    callbacks[0]()
+    mock_email_user.assert_called_once()
 
     payment_one.refresh_from_db()
     payment_two.refresh_from_db()
@@ -2677,6 +2743,72 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
     assert payment_one.delivered_quantity == Decimal("75.00")
     assert payment_two.delivered_quantity == Decimal("125.00")
     assert group.background_action_status is None
+
+
+@pytest.mark.parametrize("queued_reconciliation", [False], indirect=True)
+def test_delivery_import_task_succeeds_without_notification_recipient(
+    queued_reconciliation: dict[str, Any],
+    django_assert_num_queries: Any,
+) -> None:
+    ctx = queued_reconciliation
+
+    with TestCase.captureOnCommitCallbacks(execute=False) as callbacks:
+        async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
+
+    assert callbacks == []
+    with django_assert_num_queries(2):
+        ctx["payment_one"].refresh_from_db()
+        ctx["group"].refresh_from_db()
+    assert ctx["payment_one"].delivered_quantity == Decimal("75.00")
+    assert ctx["group"].background_action_status is None
+
+
+@pytest.mark.parametrize("queued_reconciliation", [False], indirect=True)
+def test_delivery_import_task_reports_background_conflict_without_notification_recipient(
+    queued_reconciliation: dict[str, Any],
+    django_assert_num_queries: Any,
+) -> None:
+    ctx = queued_reconciliation
+    payment = ctx["payment_one"]
+    payment.delivered_quantity = Decimal("50.00")
+    payment.status = Payment.STATUS_DISTRIBUTION_PARTIAL
+    payment.save(update_fields=["delivered_quantity", "status"])
+
+    with (
+        TestCase.captureOnCommitCallbacks(execute=False) as callbacks,
+        pytest.raises(NonRetriableTaskError),
+    ):
+        async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
+
+    assert callbacks == []
+    with django_assert_num_queries(2):
+        ctx["group"].refresh_from_db()
+        ctx["job"].refresh_from_db()
+    assert ctx["group"].background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    assert ctx["job"].errors["xlsx_errors"][0]["message"].endswith("delivered quantity 50.00.")
+
+
+@pytest.mark.parametrize("queued_reconciliation", [True], indirect=True)
+def test_delivery_import_task_notifies_recipient_about_background_conflict(
+    queued_reconciliation: dict[str, Any],
+) -> None:
+    ctx = queued_reconciliation
+    payment = ctx["payment_one"]
+    payment.delivered_quantity = Decimal("50.00")
+    payment.status = Payment.STATUS_DISTRIBUTION_PARTIAL
+    payment.save(update_fields=["delivered_quantity", "status"])
+
+    with (
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+        TestCase.captureOnCommitCallbacks(execute=False) as callbacks,
+        pytest.raises(NonRetriableTaskError),
+    ):
+        async_retry_job_task.run(ctx["job"]._meta.label_lower, ctx["job"].pk, ctx["job"].version)
+
+    mock_email_user.assert_not_called()
+    assert len(callbacks) == 1
+    callbacks[0]()
+    mock_email_user.assert_called_once()
 
 
 @pytest.mark.enable_activity_log

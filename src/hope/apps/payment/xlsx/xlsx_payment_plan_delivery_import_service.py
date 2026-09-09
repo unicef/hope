@@ -512,9 +512,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
         if self._should_skip_row(payment_id):
             return
-        payment = self.payments_dict.get(payment_id)
-        if payment is None:
-            return
+        payment = self.payments_dict[payment_id]
         try:
             delivered_quantity = self._parse_delivered_quantity(
                 row[self.xlsx_headers.index("delivered_quantity")].value
@@ -536,7 +534,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             self._reset_payment(payment)
             self.payment_ids_for_verification_cleanup.add(payment.pk)
         else:
-            self._apply_reconciliation_values(payment, row, delivered_quantity, exchange_rate)
+            self._apply_reconciliation_values(payment, row, cast("Decimal", delivered_quantity), exchange_rate)
             if self.override and old_payment.delivered_quantity != payment.delivered_quantity:
                 self.payment_ids_for_verification_cleanup.add(payment.pk)
 
@@ -565,11 +563,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         self,
         payment: Payment,
         row: tuple[Cell, ...],
-        delivered_quantity: Decimal | None,
+        delivered_quantity: Decimal,
         exchange_rate: Decimal | float | None,
     ) -> None:
-        if delivered_quantity is None:
-            raise self.XlsxPaymentPlanDeliveryImportServiceError("Cannot apply an empty delivered quantity")
         status, stored_quantity = self._get_delivered_quantity_status_and_value(
             delivered_quantity,
             payment.entitlement_quantity or Decimal(0),

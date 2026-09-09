@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 from io import BytesIO
 from unittest.mock import patch
@@ -10,7 +11,7 @@ from django.utils import timezone
 import openpyxl
 import pytest
 
-from extras.test_utils.factories.core import BusinessAreaFactory, CurrencyFactory
+from extras.test_utils.factories.core import BusinessAreaFactory, CurrencyFactory, FileTempFactory
 from extras.test_utils.factories.grievance import TicketPaymentVerificationDetailsFactory
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -872,6 +873,23 @@ def group_with_finished_usd_plan(program_cycle, business_area, fsp, delivery_mec
 
 
 @pytest.fixture
+def group_with_finished_plan(group_two_plans_one_fsp):
+    ctx = group_two_plans_one_fsp
+    ctx["plan_one"].status = PaymentPlan.Status.FINISHED
+    ctx["plan_one"].save(update_fields=["status"])
+    return ctx
+
+
+@pytest.fixture
+def group_with_flagged_payment(group_two_plans_one_fsp, request):
+    ctx = group_two_plans_one_fsp
+    field_name, value = request.param
+    setattr(ctx["payment_one"], field_name, value)
+    ctx["payment_one"].save(update_fields=[field_name])
+    return ctx
+
+
+@pytest.fixture
 def group_with_started_verifications(group_two_plans_one_fsp):
     ctx = group_two_plans_one_fsp
     ctx["plan_one"].status = PaymentPlan.Status.FINISHED
@@ -934,6 +952,75 @@ def group_with_pending_verification(group_two_plans_one_fsp):
         received_amount=Decimal("100.00"),
     )
     return {**ctx, "verification_plan": verification_plan, "verification": verification}
+
+
+@pytest.fixture
+def group_with_verification_file(group_with_pending_verification):
+    ctx = group_with_pending_verification
+    verification_plan = ctx["verification_plan"]
+    file_temp = FileTempFactory(
+        content_type=ContentType.objects.get_for_model(PaymentVerificationPlan),
+        object_id=str(verification_plan.pk),
+        file=ContentFile(b"verification", name="verification.xlsx"),
+    )
+    return {**ctx, "verification_file": file_temp}
+
+
+def test_init_rejects_unsupported_null_delivery_policy(group_two_plans_one_fsp, django_assert_num_queries):
+    with django_assert_num_queries(0), pytest.raises(ValueError, match="Unsupported null delivery policy"):
+        XlsxPaymentPlanGroupDeliveryImportService(
+            group_two_plans_one_fsp["group"], BytesIO(), null_delivery_policy="unsupported"
+        )
+
+
+def test_import_requires_open_workbook(group_two_plans_one_fsp, django_assert_num_queries):
+    service = XlsxPaymentPlanGroupDeliveryImportService(group_two_plans_one_fsp["group"], BytesIO())
+
+    with django_assert_num_queries(0), pytest.raises(RuntimeError, match=r"open_workbook\(\) must be called"):
+        service.import_payment_list()
+
+
+def test_normal_import_reports_finished_plan_row_as_ineligible(group_with_finished_plan, django_assert_num_queries):
+    ctx = group_with_finished_plan
+    payment = ctx["payment_one"]
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [[str(payment.unicef_id), Decimal("50.00")]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
+
+    with django_assert_num_queries(4):
+        service.open_workbook()
+    with django_assert_num_queries(0):
+        service.validate()
+
+    assert service.errors == []
+    assert service.skipped_rows == [
+        {
+            "row": 2,
+            "payment_id": str(payment.unicef_id),
+            "reason": f"Payment Plan status {PaymentPlan.Status.FINISHED} is not eligible for this import mode.",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "group_with_flagged_payment",
+    [
+        pytest.param(("conflicted", True), id="conflicted"),
+        pytest.param(("excluded", True), id="excluded"),
+        pytest.param(("has_valid_wallet", False), id="invalid-wallet"),
+    ],
+    indirect=True,
+)
+def test_flagged_payment_is_not_added_to_group_payment_index(group_with_flagged_payment, django_assert_num_queries):
+    ctx = group_with_flagged_payment
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], BytesIO())
+
+    with django_assert_num_queries(4):
+        service._prepare_payment_data()
+
+    assert str(ctx["payment_one"].unicef_id) not in service.payment_to_plan
 
 
 @pytest.mark.enable_activity_log
@@ -1063,6 +1150,8 @@ def test_override_reset_clears_reconciliation_fields_but_preserves_fsp_extras(gr
     payment.additional_document_type = "Passport"
     payment.additional_document_number = "DOC-1"
     payment.transaction_status_blockchain_link = "https://example.com/transaction"
+    payment.status_date = timezone.now() - timedelta(days=1)
+    previous_status_date = payment.status_date
     payment.extras = {
         Payment.EXTRA_FIELDS_KEY: {"returned_code": "old"},
         Payment.FSP_EXTRA_FIELDS_KEY: {"fsp_reference": "keep"},
@@ -1083,6 +1172,7 @@ def test_override_reset_clears_reconciliation_fields_but_preserves_fsp_extras(gr
     assert payment.delivered_quantity_usd is None
     assert payment.delivery_date is None
     assert payment.status == Payment.STATUS_SENT_TO_FSP
+    assert payment.status_date > previous_status_date
     assert payment.transaction_reference_id is None
     assert payment.reason_for_unsuccessful_payment is None
     assert payment.additional_collector_name is None
@@ -1140,6 +1230,30 @@ def test_override_reset_deletes_verification_and_empty_pending_plan(
     with django_assert_num_queries(2):
         assert not PaymentVerification.objects.filter(pk=ctx["verification"].pk).exists()
         assert not PaymentVerificationPlan.objects.filter(pk=ctx["verification_plan"].pk).exists()
+
+
+def test_verification_cleanup_deletes_attached_file_after_commit(
+    group_with_verification_file,
+    django_capture_on_commit_callbacks,
+    django_assert_num_queries,
+):
+    ctx = group_with_verification_file
+    file_name = ctx["verification_file"].file.name
+    storage = ctx["verification_file"].file.storage
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [[str(ctx["payment_one"].unicef_id), None]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=True)
+    service.open_workbook()
+
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+        service.import_payment_list()
+
+    assert len(callbacks) == 1
+    with django_assert_num_queries(1):
+        assert not FileTemp.objects.filter(pk=ctx["verification_file"].pk).exists()
+    assert not storage.exists(file_name)
 
 
 @pytest.fixture
