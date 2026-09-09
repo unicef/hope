@@ -1,0 +1,8 @@
+{% extends "core/base_greeting_email.html" %}
+
+{% block content %}
+    <p>{{ message }}</p>
+    <p>Payment Plan Group: {{ payment_plan_group }}</p>
+    <p>File: {{ file_name }}</p>
+    {% if link %}{% include "core/_email_button.html" with label="View Payment Plan Group" %}{% endif %}
+{% endblock content %}

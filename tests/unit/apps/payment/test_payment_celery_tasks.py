@@ -42,7 +42,6 @@ from hope.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
-    import_payment_plan_delivery_from_xlsx_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_group_delivery_from_xlsx_async_task,
@@ -98,6 +97,7 @@ from hope.models import (
     PaymentVerificationPlan,
     PeriodicAsyncRetryJob,
     Rule,
+    User,
 )
 
 pytestmark = pytest.mark.django_db
@@ -148,11 +148,12 @@ def qcf_report(payment_plan):
 
 
 @pytest.fixture
-def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_plan):
+def group_with_accepted_plan_and_import_file(payment_plan_group_with_accepted_plan, user):
     group = payment_plan_group_with_accepted_plan
     import_file = FileTempFactory(
         object_id=str(group.pk),
         content_type=get_content_type_for_model(group),
+        created_by=user,
     )
     group.delivery_import_file = import_file
     group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
@@ -281,12 +282,6 @@ def payment_plan_group_with_regular_and_follow_up_plans():
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan,),
             "payment_plan_apply_custom_exchange_rate_async_task",
-        ),
-        (
-            import_payment_plan_delivery_from_xlsx_async_task,
-            AsyncRetryJob,
-            lambda payment_plan, user, rule: (payment_plan,),
-            "import_payment_plan_delivery_from_xlsx_async_task",
         ),
         (
             payment_plan_apply_engine_rule_async_task,
@@ -1059,109 +1054,6 @@ def test_import_payment_plan_fsp_extra_fields_task_queues_job(
         group_key="payment",
         description=f"Import Payment Plan FSP extra fields xlsx for {context['payment_plan'].pk}",
     )
-
-
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
-@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryImportService")
-@patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
-@patch("hope.models.payment_plan.PaymentPlan.remove_export_files")
-def test_import_payment_plan_delivery_from_xlsx(
-    mock_remove_export_files: Mock,
-    mock_update_money_fields: Mock,
-    mock_service_cls: Mock,
-    mock_payment_plan_service_cls: Mock,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-    )
-    file_temp = FileTempFactory(
-        object_id=payment_plan.pk,
-        content_type=get_content_type_for_model(payment_plan),
-        created_by=user,
-    )
-    payment_plan.reconciliation_import_file = file_temp
-    payment_plan.save(update_fields=["reconciliation_import_file"])
-
-    mock_service = mock_service_cls.return_value
-    with (
-        patch.object(PaymentPlan, "is_reconciled", new_callable=PropertyMock) as mock_is_reconciled,
-        patch("hope.models.program_cycle.ProgramCycle.save") as mock_program_cycle_save,
-    ):
-        mock_is_reconciled.return_value = True
-        queue_and_run_retry_task(import_payment_plan_delivery_from_xlsx_async_task, payment_plan)
-
-    payment_plan.refresh_from_db(fields=["background_action_status", "status"])
-    assert payment_plan.background_action_status is None
-    assert payment_plan.status == PaymentPlan.Status.FINISHED
-    mock_service_cls.assert_called_once_with(payment_plan, file_temp.file)
-    mock_service.open_workbook.assert_called_once()
-    mock_service.import_payment_list.assert_called_once()
-    mock_remove_export_files.assert_called_once()
-    mock_update_money_fields.assert_called_once()
-    mock_program_cycle_save.assert_called_once()
-    mock_payment_plan_service_cls.return_value.recalculate_signatures_in_batch.assert_called_once()
-
-
-@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryImportService")
-def test_import_payment_plan_delivery_from_xlsx_no_finish_when_not_reconciled(
-    mock_service_cls: Mock,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-    )
-    file_temp = FileTempFactory(
-        object_id=payment_plan.pk,
-        content_type=get_content_type_for_model(payment_plan),
-        created_by=user,
-    )
-    payment_plan.reconciliation_import_file = file_temp
-    payment_plan.save(update_fields=["reconciliation_import_file"])
-
-    with patch.object(PaymentPlan, "is_reconciled", new_callable=PropertyMock) as mock_is_reconciled:
-        mock_is_reconciled.return_value = False
-        queue_and_run_retry_task(import_payment_plan_delivery_from_xlsx_async_task, payment_plan)
-
-    payment_plan.refresh_from_db(fields=["status"])
-    assert payment_plan.status == PaymentPlan.Status.ACCEPTED
-    mock_service_cls.return_value.import_payment_list.assert_called_once()
-
-
-@patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryImportService")
-def test_import_payment_plan_delivery_from_xlsx_retries_on_exception(
-    mock_service_cls: Mock,
-    mock_retry: Mock,
-    mock_logger: Mock,
-    user,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-    )
-    file_temp = FileTempFactory(
-        object_id=payment_plan.pk,
-        content_type=get_content_type_for_model(payment_plan),
-        created_by=user,
-    )
-    payment_plan.reconciliation_import_file = file_temp
-    payment_plan.save(update_fields=["reconciliation_import_file"])
-
-    mock_service = mock_service_cls.return_value
-    mock_service.import_payment_list.side_effect = Exception("test")
-    mock_retry.side_effect = Retry("retry")
-
-    with pytest.raises(Retry):
-        queue_and_run_retry_task(import_payment_plan_delivery_from_xlsx_async_task, payment_plan)
-
-    payment_plan.refresh_from_db(fields=["background_action_status"])
-    assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
-    mock_logger.exception.assert_called_once_with("Unexpected error during payment plan delivery xlsx import")
-    mock_retry.assert_called_once()
 
 
 def test_payment_plan_apply_steficon_hh_selection() -> None:
@@ -2131,18 +2023,69 @@ def test_export_delivery_task_marks_error_without_retry_when_nothing_exportable(
     assert job.errors["export_skipped_payment_plans"] == ["PP-1: no FSP XLSX Template"]
 
 
-def test_import_delivery_group_task_clears_status_on_success(group_with_accepted_plan_and_import_file, user) -> None:
+def test_import_delivery_group_task_clears_status_and_emails_uploader_on_success(
+    group_with_accepted_plan_and_import_file,
+    user,
+    django_capture_on_commit_callbacks,
+    django_assert_num_queries,
+) -> None:
     group = group_with_accepted_plan_and_import_file
 
-    with patch(
-        "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service.XlsxPaymentPlanGroupDeliveryImportService"
-    ) as mock_cls:
+    with (
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service."
+            "XlsxPaymentPlanGroupDeliveryImportService"
+        ) as mock_cls,
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
         mock_cls.return_value.open_workbook.return_value = None
         mock_cls.return_value.import_payment_list.return_value = None
         queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
 
-    group.refresh_from_db()
+    with django_assert_num_queries(1):
+        group.refresh_from_db()
     assert group.background_action_status is None
+    mock_email_user.assert_called_once()
+    assert mock_email_user.call_args.args[0].pk == user.pk
+    assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import completed for {group.name}"
+
+
+def test_import_delivery_group_task_emails_uploader_when_background_validation_fails(
+    group_with_accepted_plan_and_import_file,
+    user,
+    django_capture_on_commit_callbacks,
+) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+    from hope.apps.payment.xlsx.xlsx_error import XlsxError
+    from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+        XlsxPaymentPlanGroupDeliveryImportError,
+    )
+
+    group = group_with_accepted_plan_and_import_file
+    validation_error = XlsxError("Sheet", "B2", "Delivered quantity conflicts with the existing value")
+
+    with (
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service."
+            "XlsxPaymentPlanGroupDeliveryImportService"
+        ) as mock_cls,
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        mock_cls.return_value.open_workbook.return_value = None
+        mock_cls.return_value.import_payment_list.side_effect = XlsxPaymentPlanGroupDeliveryImportError(
+            [validation_error]
+        )
+        with pytest.raises(NonRetriableTaskError):
+            queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    mock_email_user.assert_called_once()
+    assert mock_email_user.call_args.args[0].pk == user.pk
+    assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import failed for {group.name}"
+    assert "background processing" in mock_email_user.call_args.kwargs["text_body"]
 
 
 def test_import_delivery_group_task_sets_error_status_on_failure(

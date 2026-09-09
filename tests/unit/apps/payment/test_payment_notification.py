@@ -8,13 +8,33 @@ import pytest
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory, PaymentPlanGroupFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
-from hope.apps.payment.notifications import PaymentNotification
+from hope.apps.payment.notifications import PaymentNotification, PaymentPlanGroupReconciliationImportNotification
 from hope.models import PaymentPlan, Role, RoleAssignment
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def reconciliation_notification_without_email():
+    return PaymentPlanGroupReconciliationImportNotification(
+        PaymentPlanGroupFactory(),
+        UserFactory(username="uploader-without-email", email=""),
+        "reconciliation.xlsx",
+    )
+
+
+def test_reconciliation_notification_skips_user_without_email(
+    reconciliation_notification_without_email,
+    django_assert_num_queries,
+    caplog,
+) -> None:
+    with django_assert_num_queries(0):
+        reconciliation_notification_without_email.send_success()
+
+    assert "notification skipped" in caplog.text
 
 
 @pytest.fixture

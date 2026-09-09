@@ -53,6 +53,7 @@ def payment_plan(program_cycle: ProgramCycle, business_area: BusinessArea) -> Pa
     pp = PaymentPlanFactory(
         program_cycle=program_cycle,
         business_area=business_area,
+        status=PaymentPlan.Status.ACCEPTED,
         create_payment_verification_summary=False,
     )
     PaymentVerificationSummaryFactory(payment_plan=pp)
@@ -94,10 +95,10 @@ def pending_verification(payment_verification_plan, payment):
 
 
 @pytest.fixture
-def pending_payment(payment_plan):
+def sent_to_fsp_payment(payment_plan):
     return PaymentFactory(
         parent=payment_plan,
-        status=Payment.STATUS_PENDING,
+        status=Payment.STATUS_SENT_TO_FSP,
         delivered_quantity=None,
         delivered_quantity_usd=None,
         entitlement_quantity=Decimal("100.00"),
@@ -106,7 +107,7 @@ def pending_payment(payment_plan):
 
 
 @pytest.fixture
-def service_with_payment(pending_payment, payment_plan):
+def service_with_payment(sent_to_fsp_payment, payment_plan):
     return XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO())
 
 
@@ -357,18 +358,20 @@ def test_validate_reason_for_unsuccessful_payment_returns_when_payment_unknown(s
     assert service.is_updated is False
 
 
-def test_validate_reason_for_unsuccessful_payment_marks_updated_on_change(service_with_payment, pending_payment):
+def test_validate_reason_for_unsuccessful_payment_marks_updated_on_change(service_with_payment, sent_to_fsp_payment):
     service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity", "reason_for_unsuccessful_payment"]
-    row = _make_row_cells([str(pending_payment.unicef_id), 100, "Bank closed"])
+    row = _make_row_cells([str(sent_to_fsp_payment.unicef_id), 100, "Bank closed"])
     service_with_payment._validate_reason_for_unsuccessful_payment(row)
     assert service_with_payment.is_updated is True
 
 
 def test_validate_reason_for_unsuccessful_payment_keeps_not_updated_when_unchanged(
-    service_with_payment, pending_payment
+    service_with_payment, sent_to_fsp_payment
 ):
     service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity", "reason_for_unsuccessful_payment"]
-    row = _make_row_cells([str(pending_payment.unicef_id), 100, pending_payment.reason_for_unsuccessful_payment])
+    row = _make_row_cells(
+        [str(sent_to_fsp_payment.unicef_id), 100, sent_to_fsp_payment.reason_for_unsuccessful_payment]
+    )
     service_with_payment._validate_reason_for_unsuccessful_payment(row)
     assert service_with_payment.is_updated is False
 
@@ -384,11 +387,11 @@ def test_validate_delivery_date_returns_when_payment_unknown(service):
     assert service.is_updated is False
 
 
-def test_validate_delivery_date_appends_error_for_future_date(service_with_payment, pending_payment):
+def test_validate_delivery_date_appends_error_for_future_date(service_with_payment, sent_to_fsp_payment):
     service_with_payment.sheetname = "Payment Plan - Payment List"
     service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
     future_date = datetime.datetime.now(tz=UTC) + datetime.timedelta(days=30)
-    row = _make_row_cells([str(pending_payment.unicef_id), 100, future_date])
+    row = _make_row_cells([str(sent_to_fsp_payment.unicef_id), 100, future_date])
     service_with_payment._validate_delivery_date(row)
     assert len(service_with_payment.errors) == 1
     assert "cannot be greater than today's date" in service_with_payment.errors[0].message
@@ -407,9 +410,9 @@ def test_validate_reference_id_returns_when_payment_unknown(service):
 # --- _import_row ---
 
 
-def test_import_row_resets_delivery_date_for_zero_delivered_quantity(service_with_payment, pending_payment):
+def test_import_row_preserves_delivery_date_when_header_is_missing(service_with_payment, sent_to_fsp_payment):
     service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity"]
-    row = _make_row_cells([str(pending_payment.unicef_id), 0])
+    row = _make_row_cells([str(sent_to_fsp_payment.unicef_id), 0])
 
     service_with_payment._import_row(row, 1.0)
 
@@ -417,4 +420,4 @@ def test_import_row_resets_delivery_date_for_zero_delivered_quantity(service_wit
     updated_payment = service_with_payment.payments_to_save[0]
     assert updated_payment.status == Payment.STATUS_NOT_DISTRIBUTED
     assert updated_payment.delivered_quantity == 0
-    assert updated_payment.delivery_date is None
+    assert updated_payment.delivery_date == sent_to_fsp_payment.delivery_date

@@ -39,7 +39,7 @@ from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_t
 from hope.apps.payment.api.serializers import PaymentPlanGroupDetailSerializer
 from hope.apps.payment.celery_tasks import export_payment_plan_group_delivery_xlsx_async_task
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import AsyncRetryJob, LogEntry, PaymentPlan, PaymentPlanGroup
+from hope.models import AsyncRetryJob, LogEntry, Payment, PaymentPlan, PaymentPlanGroup, User
 
 pytestmark = pytest.mark.django_db
 
@@ -383,7 +383,8 @@ def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
         program=plan_one.program,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("10.00"),
-        delivered_quantity=Decimal("50.00"),
+        delivered_quantity=None,
+        status=Payment.STATUS_SENT_TO_FSP,
     )
     PaymentHouseholdSnapshotFactory(payment=payment_one, snapshot_data={})
     payment_two = PaymentFactory(
@@ -393,7 +394,8 @@ def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
         program=plan_two.program,
         entitlement_quantity=Decimal("200.00"),
         entitlement_quantity_usd=Decimal("20.00"),
-        delivered_quantity=Decimal("50.00"),
+        delivered_quantity=None,
+        status=Payment.STATUS_SENT_TO_FSP,
     )
     PaymentHouseholdSnapshotFactory(payment=payment_two, snapshot_data={})
     return {"group": group, "payment_one": payment_one, "payment_two": payment_two}
@@ -2210,6 +2212,7 @@ def test_delivery_import_xlsx_returns_400_on_validation_errors(
     with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls:
         instance = mock_cls.return_value
         instance.errors = [XlsxError(sheet="Sheet", coordinates="B2", message="Missing column")]
+        instance.conflict_errors = []
         response = client.post(
             _import_url(business_area.slug, program.code, group_with_accepted_plan.id),
             {"file": test_file},
@@ -2374,7 +2377,7 @@ def test_delivery_import_xlsx_without_accepted_plan_returns_400(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Import requires at least one payment plan in ACCEPTED or FINISHED status." in str(response.json())
+    assert "Import requires at least one payment plan in ACCEPTED, FINISHED, or CLOSED status." in str(response.json())
 
 
 def test_delivery_import_xlsx_with_only_follow_up_plan_passes_plan_check(
@@ -2411,6 +2414,40 @@ def test_delivery_import_xlsx_with_only_follow_up_plan_passes_plan_check(
     assert "Wrong file type" in str(response.json())
 
 
+def test_delivery_import_xlsx_with_only_closed_plan_starts_zero_update_import(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan
+    group.payment_plans.update(status=PaymentPlan.Status.CLOSED)
+    workbook = openpyxl.Workbook()
+    workbook.active.append(["payment_id", "delivered_quantity"])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    test_file = SimpleUploadedFile(
+        "test.xlsx",
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group.id),
+        {"file": test_file},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    group.refresh_from_db()
+    assert group.delivery_import_file.extras["skipped_rows"] == []
+
+
 def test_delivery_import_xlsx_queues_async_task_on_commit(
     client: Any,
     user: Any,
@@ -2442,6 +2479,114 @@ def test_delivery_import_xlsx_queues_async_task_on_commit(
     called_group, called_user_id = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
+    assert mocked_task.call_args.kwargs == {"override": False, "null_delivery_policy": "reset"}
+
+
+def test_delivery_import_xlsx_override_requires_additional_scoped_permission(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group_with_accepted_plan.id),
+        {"file": test_file, "override": True},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE.value in str(response.json())
+
+
+def test_delivery_import_xlsx_saves_override_options(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
+            Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
+        ],
+        business_area,
+        program=program,
+    )
+    test_file = SimpleUploadedFile("test.xlsx", b"abc", content_type="application/vnd.ms-excel")
+
+    with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls:
+        mock_cls.return_value.errors = []
+        mock_cls.return_value.skipped_rows = []
+        response = client.post(
+            _import_url(business_area.slug, program.code, group_with_accepted_plan.id),
+            {"file": test_file, "override": True, "null_delivery_policy": "ignore"},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    group_with_accepted_plan.refresh_from_db()
+    assert group_with_accepted_plan.delivery_import_file.extras == {
+        "override": True,
+        "null_delivery_policy": "ignore",
+        "skipped_rows": [],
+    }
+
+
+def test_delivery_import_xlsx_conflict_emails_uploader(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+    django_assert_num_queries: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment
+    payment = group.payment_plans.get().payment_items.get()
+    payment.entitlement_quantity = Decimal("100.00")
+    payment.delivered_quantity = Decimal("100.00")
+    payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    payment.save(update_fields=["entitlement_quantity", "delivered_quantity", "status"])
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.append(["payment_id", "delivered_quantity"])
+    worksheet.append([str(payment.unicef_id), Decimal("90.00")])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    upload = SimpleUploadedFile(
+        "conflict.xlsx",
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    with patch.object(User, "email_user", autospec=True) as mock_email_user:
+        response = client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": upload},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    with django_assert_num_queries(1):
+        payment.refresh_from_db()
+    assert payment.delivered_quantity == Decimal("100.00")
+    mock_email_user.assert_called_once()
+    assert mock_email_user.call_args.args[0].pk == user.pk
+    assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import failed for {group.name}"
+    assert "conflict.xlsx" in mock_email_user.call_args.kwargs["text_body"]
 
 
 @pytest.mark.parametrize(

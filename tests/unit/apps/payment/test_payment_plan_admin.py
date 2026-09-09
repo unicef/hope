@@ -72,6 +72,11 @@ def admin_client(client, admin_user):
 
 
 @pytest.fixture
+def original_uploader():
+    return UserFactory(email="original-uploader@example.com")
+
+
+@pytest.fixture
 def staff_user():
     user = UserFactory(
         username="staff_user",
@@ -871,9 +876,44 @@ def test_restart_import_reconciliation_post_terminates_active_job_and_requeues(
     assert response.status_code == 302
     assert reverse("admin:payment_paymentplangroup_change", args=[group.pk]) in response["Location"]
     mock_terminate.assert_called_once()
-    mock_task.assert_called_once_with(group, str(admin_user.pk))
+    mock_task.assert_called_once_with(
+        group,
+        str(admin_user.pk),
+        override=False,
+        null_delivery_policy="reset",
+        notification_user_id=str(admin_user.pk),
+    )
     messages_list = list(get_messages(response.wsgi_request))
     assert any("Successfully restarted" in str(m) for m in messages_list)
+
+
+@patch("hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task")
+def test_restart_failed_import_reuses_saved_options_and_original_uploader(
+    mock_task, admin_client, admin_user, group_with_importing_status, original_uploader
+) -> None:
+    group = group_with_importing_status
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    group.save(update_fields=["background_action_status"])
+    group.delivery_import_file.created_by = original_uploader
+    group.delivery_import_file.extras = {"override": True, "null_delivery_policy": "ignore"}
+    group.delivery_import_file.save(update_fields=["created_by", "extras"])
+    url = reverse(
+        "admin:payment_paymentplangroup_restart_importing_reconciliation_xlsx_file",
+        args=[group.pk],
+    )
+
+    response = admin_client.post(url)
+
+    assert response.status_code == 302
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    mock_task.assert_called_once_with(
+        group,
+        str(admin_user.pk),
+        override=True,
+        null_delivery_policy="ignore",
+        notification_user_id=str(original_uploader.pk),
+    )
 
 
 def test_restart_import_reconciliation_requires_permission(

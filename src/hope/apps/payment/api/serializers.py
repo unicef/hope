@@ -158,6 +158,11 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
         return file
 
 
+class PaymentPlanGroupReconciliationImportSerializer(PaymentPlanImportFileSerializer):
+    override = serializers.BooleanField(default=False)
+    null_delivery_policy = serializers.ChoiceField(choices=("reset", "ignore"), default="reset")
+
+
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
     number_of_verification_plans = serializers.SerializerMethodField()

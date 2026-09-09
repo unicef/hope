@@ -81,6 +81,7 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
         business_area=business_area,
         program_cycle=cycle,
         exchange_rate=2.0,
+        status=PaymentPlan.Status.ACCEPTED,
     )
     payment_ids = [
         "RCPT-0060-24-0.000.001",
@@ -109,7 +110,7 @@ def payment_plan_context(business_area: Any, user: Any, program: Program) -> dic
     }
 
 
-def test_uploading_delivery_date_with_xlsx(
+def test_equal_quantity_does_not_change_delivery_dates(
     payment_plan_context: dict[str, Any],
     file_without_delivery_dates: BytesIO,
 ) -> None:
@@ -136,8 +137,7 @@ def test_uploading_delivery_date_with_xlsx(
     payment_1.refresh_from_db()
     payment_2.refresh_from_db()
     payment_3.refresh_from_db()
-    date_now = datetime(2024, 11, 22, tzinfo=UTC)
-    assert payment_1.delivery_date == date_now
+    assert payment_1.delivery_date is None
     assert payment_2.delivery_date == old_delivery_date2
     assert payment_3.delivery_date == old_delivery_date3
 
@@ -170,7 +170,7 @@ def test_uploading_xlsx_file_with_existing_dates_throws_error(
     ]
 
 
-def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
+def test_equal_quantity_does_not_override_payment_date(
     payment_plan_context: dict[str, Any],
     file_one_record: BytesIO,
 ) -> None:
@@ -191,7 +191,7 @@ def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
     payment_2.refresh_from_db()
     payment_3.refresh_from_db()
 
-    assert payment_1.delivery_date == datetime(2023, 5, 5).replace(tzinfo=UTC)
+    assert payment_1.delivery_date == datetime(2023, 10, 23).replace(tzinfo=UTC)
     assert payment_2.delivery_date == datetime(2023, 10, 23).replace(tzinfo=UTC)
     assert payment_3.delivery_date == datetime(2023, 10, 23).replace(tzinfo=UTC)
 
@@ -237,7 +237,7 @@ def test_upload_reference_id(
     payment_2.save(update_fields=["unicef_id"])
 
     with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0):
-        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id)
+        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id, override=True)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()
@@ -289,7 +289,7 @@ def test_upload_transaction_status_blockchain_link(
     payment_2.save(update_fields=["unicef_id"])
 
     with patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0):
-        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id)
+        import_service = XlsxPaymentPlanDeliveryImportService(payment_plan, file_reference_id, override=True)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from io import BytesIO
 import logging
-from typing import IO, TYPE_CHECKING, cast
+from typing import IO, TYPE_CHECKING, Any, cast
 
 from django.db import transaction
 import openpyxl
@@ -13,10 +13,7 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import log_payment_plan_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
-from hope.models import (
-    Payment,
-    PaymentPlan,
-)
+from hope.models import Payment, PaymentPlan
 
 if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
@@ -26,82 +23,122 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class XlsxPaymentPlanGroupDeliveryImportService:
-    """Import a single-sheet reconciliation xlsx covering the plans of a single-FSP group.
+class XlsxPaymentPlanGroupDeliveryImportError(Exception):
+    def __init__(self, errors: list[XlsxError]) -> None:
+        self.errors = errors
+        super().__init__("Payment Plan Group reconciliation XLSX validation failed")
 
-    The group is bound to one FSP, so the file has a single flat header (the FSP template's
-    columns). A group may still hold several payment plans sharing that FSP, so rows are routed
-    to their owning plan by Payment.unicef_id; each plan's rows are handed to an unmodified
-    single-plan XlsxPaymentPlanDeliveryImportService.
-    """
+
+class XlsxPaymentPlanGroupDeliveryImportService:
+    """Validate and atomically import manual reconciliation rows for a Payment Plan Group."""
 
     REQUIRED_COLUMNS = ("payment_id", "delivered_quantity")
+    PLAN_STATUSES = (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.CLOSED)
 
-    def __init__(self, payment_plan_group: "PaymentPlanGroup", file: IO[bytes]) -> None:
+    def __init__(
+        self,
+        payment_plan_group: "PaymentPlanGroup",
+        file: IO[bytes],
+        override: bool = False,
+        null_delivery_policy: str = "reset",
+    ) -> None:
+        if null_delivery_policy not in XlsxPaymentPlanDeliveryImportService.NULL_DELIVERY_POLICIES:
+            raise ValueError(f"Unsupported null delivery policy: {null_delivery_policy}")
         self.payment_plan_group = payment_plan_group
         self.file = file
+        self.override = override
+        self.null_delivery_policy = null_delivery_policy
         self.errors: list[XlsxError] = []
-        self.payment_plans: list[PaymentPlan] = list(
-            payment_plan_group.payment_plans.filter(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-            ).order_by("unicef_id")
-        )
+        self.conflict_errors: list[XlsxError] = []
+        self.skipped_rows: list[dict[str, Any]] = []
+        self.payment_plans: list[PaymentPlan] = []
         self.eligible_plans: list[PaymentPlan] = []
         self.payment_to_plan: dict[str, PaymentPlan] = {}
+        self.ineligible_payment_reasons: dict[str, str] = {}
+        self.closed_payment_plans: dict[str, str] = {}
         self.payment_gateway_payment_ids: set[str] = set()
         self.fsp_owned_headers: set[str] = set()
+        self.source_row_numbers: dict[str, int] = {}
         self.headers: list[str] = []
-        self.sheetname: str = ""
+        self.sheetname = ""
         self.ws: Worksheet | None = None
         self.wb: openpyxl.Workbook | None = None
         self.per_plan_services: dict[str, XlsxPaymentPlanDeliveryImportService] = {}
 
+    def _load_payment_plans(self, lock: bool = False) -> None:
+        queryset = self.payment_plan_group.payment_plans.filter(status__in=self.PLAN_STATUSES).order_by("unicef_id")
+        if lock:
+            queryset = queryset.select_for_update()
+        self.payment_plans = list(queryset)
+
     def _prepare_eligible_plans(self) -> None:
-        payment_gateway_plans: list[PaymentPlan] = []
+        self.eligible_plans = []
         for payment_plan in self.payment_plans:
             if payment_plan.is_payment_gateway:
                 logger.warning(
                     f"Skipping Payment Plan {payment_plan.unicef_id}: uses payment gateway, "
                     f"manual reconciliation is not allowed."
                 )
-                payment_gateway_plans.append(payment_plan)
+                continue
+            if payment_plan.status == PaymentPlan.Status.CLOSED:
+                continue
+            if payment_plan.status == PaymentPlan.Status.FINISHED and not self.override:
                 continue
             self.eligible_plans.append(payment_plan)
-        if payment_gateway_plans:
-            self.payment_gateway_payment_ids = {
-                str(unicef_id)
-                for unicef_id in Payment.objects.filter(parent__in=payment_gateway_plans)
-                .eligible()
-                .values_list("unicef_id", flat=True)
-            }
 
-    def _build_payment_index(self) -> None:
-        payments = (
-            Payment.objects.filter(parent__in=self.eligible_plans)
-            .eligible()
-            .values_list(
-                "unicef_id",
-                "parent_id",
-                "extras",
-            )
+    def _build_payment_index(self, lock: bool = False) -> None:
+        self.payment_to_plan = {}
+        self.ineligible_payment_reasons = {}
+        self.closed_payment_plans = {}
+        self.payment_gateway_payment_ids = set()
+        self.fsp_owned_headers = set()
+
+        payment_plan_by_id = {payment_plan.id: payment_plan for payment_plan in self.payment_plans}
+        queryset = Payment.objects.filter(parent__in=self.payment_plans)
+        if lock:
+            queryset = queryset.select_for_update()
+        payments = queryset.values_list(
+            "unicef_id",
+            "parent_id",
+            "extras",
+            "conflicted",
+            "excluded",
+            "has_valid_wallet",
         )
-        payment_plan_by_id = {str(payment_plan.id): payment_plan for payment_plan in self.eligible_plans}
-        for unicef_id, parent_id, extras in payments:
-            self.payment_to_plan[str(unicef_id)] = payment_plan_by_id[str(parent_id)]
+        eligible_plan_ids = {payment_plan.id for payment_plan in self.eligible_plans}
+        for unicef_id, parent_id, extras, conflicted, excluded, has_valid_wallet in payments:
+            payment_id = str(unicef_id)
+            payment_plan = payment_plan_by_id[parent_id]
             self.fsp_owned_headers.update(extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}))
+            if payment_plan.status == PaymentPlan.Status.CLOSED:
+                self.closed_payment_plans[payment_id] = str(payment_plan.unicef_id)
+            elif payment_plan.is_payment_gateway:
+                self.payment_gateway_payment_ids.add(payment_id)
+            elif payment_plan.id not in eligible_plan_ids:
+                self.ineligible_payment_reasons[payment_id] = (
+                    f"Payment Plan status {payment_plan.status} is not eligible for this import mode."
+                )
+            elif conflicted or excluded or has_valid_wallet is False:
+                continue
+            else:
+                self.payment_to_plan[payment_id] = payment_plan
+
+    def _prepare_payment_data(self, lock: bool = False) -> None:
+        self._load_payment_plans(lock=lock)
+        self._prepare_eligible_plans()
+        self._build_payment_index(lock=lock)
 
     def open_workbook(self) -> openpyxl.Workbook:
-        wb = openpyxl.load_workbook(self.file, data_only=True)
+        wb = openpyxl.load_workbook(cast("Any", self.file), data_only=True)
         self.wb = wb
         self.ws = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]
         self.headers = [cell.value for cell in self.ws[1]]
-        self._prepare_eligible_plans()
-        self._build_payment_index()
+        self._prepare_payment_data()
         return wb
 
     def _validate_required_headers(self) -> bool:
-        missing = [col for col in self.REQUIRED_COLUMNS if col not in self.headers]
+        missing = [column for column in self.REQUIRED_COLUMNS if column not in self.headers]
         if missing:
             self.errors.append(
                 XlsxError(
@@ -115,7 +152,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         return True
 
     def _validate_row_payment_ids(self) -> None:
-        """Emit XlsxErrors for unknown, payment-gateway, or duplicated payment_id values."""
         if self.ws is None:
             return
         seen_ids: set[str] = set()
@@ -127,25 +163,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             if id_cell.value is None:
                 continue
             payment_id = str(id_cell.value)
-            if payment_id in self.payment_gateway_payment_ids:
-                self.errors.append(
-                    XlsxError(
-                        self.sheetname,
-                        id_cell.coordinate,
-                        f"Payment id {payment_id} belongs to a payment plan that uses payment gateway "
-                        f"and cannot be manually reconciled.",
-                    )
-                )
-                continue
-            if payment_id not in self.payment_to_plan:
-                self.errors.append(
-                    XlsxError(
-                        self.sheetname,
-                        id_cell.coordinate,
-                        f"Payment id {payment_id} does not belong to any payment plan in this group.",
-                    )
-                )
-                continue
             if payment_id in seen_ids:
                 self.errors.append(
                     XlsxError(
@@ -154,105 +171,160 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                         f"Payment id {payment_id} appears multiple times in the import file",
                     )
                 )
-                continue
-            seen_ids.add(payment_id)
+            else:
+                seen_ids.add(payment_id)
 
-    def _row_groups_by_plan(self) -> dict[str, list[tuple]]:
-        """Group valid rows by owning plan id.
+            if payment_id in self.closed_payment_plans:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        id_cell.coordinate,
+                        f"Payment id {payment_id} belongs to CLOSED Payment Plan "
+                        f"{self.closed_payment_plans[payment_id]}. The entire file cannot be imported.",
+                    )
+                )
+            elif payment_id in self.payment_gateway_payment_ids:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        id_cell.coordinate,
+                        f"Payment id {payment_id} belongs to a payment plan that uses payment gateway "
+                        f"and cannot be manually reconciled.",
+                    )
+                )
+            elif reason := self.ineligible_payment_reasons.get(payment_id):
+                self.skipped_rows.append({"row": id_cell.row, "payment_id": payment_id, "reason": reason})
+            elif payment_id not in self.payment_to_plan:
+                self.errors.append(
+                    XlsxError(
+                        self.sheetname,
+                        id_cell.coordinate,
+                        f"Payment id {payment_id} does not belong to any payment plan in this group.",
+                    )
+                )
 
-        Rows with unknown or duplicate payment_id values are skipped silently — validation of
-        those cases is done separately by _validate_row_payment_ids.
-        """
+    def _row_groups_by_plan(self) -> dict[str, list[tuple[Any, ...]]]:
         if self.ws is None:
             return {}
-        rows_by_plan: dict[str, list[tuple]] = {}
+        rows_by_plan: dict[str, list[tuple[Any, ...]]] = {}
+        self.source_row_numbers = {}
         seen_ids: set[str] = set()
         payment_id_idx = self.headers.index("payment_id")
         for row in self.ws.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
-            payment_id = row[payment_id_idx].value
-            if payment_id is None:
+            payment_id_value = row[payment_id_idx].value
+            if payment_id_value is None:
                 continue
-            payment_id = str(payment_id)
+            payment_id = str(payment_id_value)
             payment_plan = self.payment_to_plan.get(payment_id)
             if payment_plan is None or payment_id in seen_ids:
                 continue
             seen_ids.add(payment_id)
+            self.source_row_numbers[payment_id] = row[payment_id_idx].row
             rows_by_plan.setdefault(str(payment_plan.id), []).append(tuple(cell.value for cell in row))
         return rows_by_plan
 
-    def _build_per_plan_workbook(self, rows: list[tuple]) -> BytesIO:
+    def _build_per_plan_workbook(self, rows: list[tuple[Any, ...]]) -> BytesIO:
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = self.sheetname or "Sheet"
         ws.append(self.headers)
+        current_row = 1
+        payment_id_idx = self.headers.index("payment_id")
         for row_values in rows:
+            payment_id = str(row_values[payment_id_idx])
+            source_row = self.source_row_numbers[payment_id]
+            while current_row < source_row - 1:
+                ws.append([None])
+                current_row += 1
             ws.append(list(row_values))
+            current_row += 1
         buffer = BytesIO()
         wb.save(buffer)
         buffer.seek(0)
         return buffer
 
     def _build_per_plan_services(self) -> None:
+        self.per_plan_services = {}
         rows_by_plan = self._row_groups_by_plan()
         for payment_plan in self.eligible_plans:
             rows = rows_by_plan.get(str(payment_plan.id), [])
             if not rows:
                 continue
-            sub_workbook_file = self._build_per_plan_workbook(rows)
             service = XlsxPaymentPlanDeliveryImportService(
                 payment_plan,
-                sub_workbook_file,
+                self._build_per_plan_workbook(rows),
                 fsp_owned_headers=self.fsp_owned_headers,
+                override=self.override,
+                null_delivery_policy=self.null_delivery_policy,
             )
             service.open_workbook()
             self.per_plan_services[str(payment_plan.id)] = service
 
     def validate(self) -> None:
+        self.errors = []
+        self.conflict_errors = []
+        self.skipped_rows = []
         if not self._validate_required_headers():
             return
         self._validate_row_payment_ids()
         self._build_per_plan_services()
-        any_updated = False
         for service in self.per_plan_services.values():
             service._validate_headers()
-            if service.errors:
-                self.errors.extend(service.errors)
-                service.errors = []
-                continue
-            service._validate_rows()
-            if service.is_updated:
-                any_updated = True
+            if not service.errors:
+                service._validate_rows()
             self.errors.extend(service.errors)
-            service.errors = []
-        if not self.errors and not any_updated and self.per_plan_services:
-            self.errors.append(
-                XlsxError(
-                    self.sheetname,
-                    None,
-                    "There aren't any updates in the imported file. Reconciliation data is either empty or has "
-                    "already been uploaded and cannot be overwritten.",
-                )
+            self.conflict_errors.extend(service.conflict_errors)
+            self.skipped_rows.extend(
+                {
+                    **skipped_row,
+                    "row": self.source_row_numbers.get(skipped_row["payment_id"]),
+                }
+                for skipped_row in service.skipped_rows
             )
 
     def import_payment_list(self, user_id: str | None = None) -> None:
-        if not self.per_plan_services:
-            self._build_per_plan_services()
+        if self.ws is None:
+            raise RuntimeError("open_workbook() must be called before import_payment_list()")
+
         with transaction.atomic():
+            self._prepare_payment_data(lock=True)
+            self.validate()
+            if self.errors:
+                raise XlsxPaymentPlanGroupDeliveryImportError(self.errors)
+
+            affected_plan_ids: list[str] = []
             for payment_plan_id, service in self.per_plan_services.items():
                 payment_plan = service.payment_plan
                 old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
                 service.import_payment_list(user_id)
+                if not service.payments_to_save:
+                    continue
+
+                affected_plan_ids.append(payment_plan_id)
                 payment_plan.remove_export_files()
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_none()
                 payment_plan.update_money_fields()
                 if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
                     flow.status_finished()
+                elif not payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.FINISHED:
+                    flow.status_reopen_for_reconciliation()
                 payment_plan.save()
                 log_payment_plan_change(payment_plan, old_payment_plan, user_id)
-                logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
-            # all plans in the group share one cycle: invalidate the cycle-list cache once
-            self.payment_plan_group.cycle.save()
+
+            self._save_skipped_rows()
+            if affected_plan_ids:
+                logger.info(f"Imported reconciliation for Payment Plans: {affected_plan_ids}")
+                self.payment_plan_group.cycle.save()
+
+    def _save_skipped_rows(self) -> None:
+        # TODO: Expose this report in the UI once the product-owned response format is agreed.
+        file_temp = self.payment_plan_group.delivery_import_file
+        if file_temp is None:
+            return
+        extras = {**file_temp.extras, "skipped_rows": self.skipped_rows}
+        file_temp.extras = extras
+        file_temp.save(update_fields=["extras", "modified"])
