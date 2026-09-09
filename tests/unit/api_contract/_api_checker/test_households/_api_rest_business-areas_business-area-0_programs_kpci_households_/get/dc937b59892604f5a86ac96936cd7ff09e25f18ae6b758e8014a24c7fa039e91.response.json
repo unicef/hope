@@ -1,0 +1,43 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "bc97fd478927dd36328c00f9fa5ac6d4",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "702"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/kpci/households/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "16ecd2da-9299-4ff6-a964-8a51e57daaa3",
+                "unicef_id": "HH-25-0000.0226",
+                "head_of_household": "Person 0",
+                "admin1": null,
+                "admin2": null,
+                "status": "ACTIVE",
+                "size": null,
+                "residence_status": "None",
+                "total_cash_received": null,
+                "total_cash_received_usd": null,
+                "last_registration_date": "2025-01-01T00:00:00Z",
+                "first_registration_date": "2025-01-01T00:00:00Z",
+                "currency": null,
+                "has_duplicates": false,
+                "sanction_list_possible_match": false,
+                "sanction_list_confirmed_match": false,
+                "program_id": "99a99d1e-d46c-4ca6-8a5b-3c79ae47804a",
+                "program_name": "Program 0",
+                "program_code": "kpci"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}
