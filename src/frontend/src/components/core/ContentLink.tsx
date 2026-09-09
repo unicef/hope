@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import type { MiśTheme } from '../../theme';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 interface LinkProps {
   fullWidth?: boolean;
@@ -23,7 +23,7 @@ export function ContentLink({
   fullWidth = false,
 }: {
   href: string;
-  children: string | ReactElement;
+  children: ReactNode;
   download?: boolean;
   fullWidth?: boolean;
 }): ReactElement {

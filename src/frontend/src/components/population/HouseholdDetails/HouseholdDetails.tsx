@@ -6,7 +6,7 @@ import type { Theme } from '@mui/material';
 import { Box, Grid, Typography } from '@mui/material';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { formatCurrencyWithSymbol } from '@utils/utils';
+import { displayNameWithLatin, formatCurrencyWithSymbol } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -73,7 +73,7 @@ export function HouseholdDetails({
               <ContentLink
                 href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
               >
-                {household?.headOfHousehold?.fullName}
+                {displayNameWithLatin(household?.headOfHousehold, 'fullName')}
               </ContentLink>
             </LabelizedField>
           </Grid>

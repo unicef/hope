@@ -188,6 +188,7 @@ class HouseholdFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
+                        {"match_phrase_prefix": {"head_of_household.full_name_latin": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
@@ -218,6 +219,7 @@ class HouseholdFilter(UpdatedAtFilter):
                 Q(unicef_id__icontains=search)
                 | Q(head_of_household__unicef_id__icontains=search)
                 | Q(head_of_household__full_name__icontains=search)
+                | Q(head_of_household__full_name_latin__icontains=search)
                 | Q(phone_no_normalized__icontains=search)
                 | Q(phone_no_alt_normalized__icontains=search)
                 | Q(detail_id__icontains=search)
@@ -381,6 +383,7 @@ class IndividualFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"household.unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"full_name": {"query": search}}},
+                        {"match_phrase_prefix": {"full_name_latin": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
@@ -412,6 +415,7 @@ class IndividualFilter(UpdatedAtFilter):
                     Q(unicef_id__icontains=search)
                     | Q(household__unicef_id__icontains=search)
                     | Q(full_name__icontains=search)
+                    | Q(full_name_latin__icontains=search)
                     | Q(phone_no_normalized__icontains=search)
                     | Q(phone_no_alt_normalized__icontains=search)
                     | Q(detail_id__icontains=search)
@@ -493,6 +497,10 @@ class HouseholdOfficeSearchFilter(OfficeSearchFilterMixin, HouseholdFilter):
             | Q(individuals__given_name__icontains=value)
             | Q(individuals__middle_name__icontains=value)
             | Q(individuals__family_name__icontains=value)
+            | Q(individuals__full_name_latin__icontains=value)
+            | Q(individuals__given_name_latin__icontains=value)
+            | Q(individuals__middle_name_latin__icontains=value)
+            | Q(individuals__family_name_latin__icontains=value)
         )
         return queryset.filter(q_filters).distinct()
 
@@ -558,6 +566,10 @@ class IndividualOfficeSearchFilter(OfficeSearchFilterMixin, IndividualFilter):
             | Q(given_name__icontains=value)
             | Q(middle_name__icontains=value)
             | Q(family_name__icontains=value)
+            | Q(full_name_latin__icontains=value)
+            | Q(given_name_latin__icontains=value)
+            | Q(middle_name_latin__icontains=value)
+            | Q(family_name_latin__icontains=value)
         )
         return queryset.filter(q_filters).distinct()
 

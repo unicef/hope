@@ -298,7 +298,9 @@ class KoboTemplateValidator:
 
             core_field_from_file = core_fields_in_file.get(core_field)
             if not core_field_from_file:
-                validation_errors.append({"field": core_field, "message": "Field is missing"})
+                # optional core fields may be left out of the template; the import treats them as empty
+                if field_data["required"]:
+                    validation_errors.append({"field": core_field, "message": "Field is missing"})
                 continue
 
             # Check if the field is required

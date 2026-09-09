@@ -1065,6 +1065,44 @@ def test_search(
     assert response_data[0]["id"] == str(expected_results[0].id)
 
 
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_search_matches_hoh_latin_name(
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    response_data, expected_results = _test_search(
+        filters={"search": "Anna Kovalska"},
+        household1_data={},
+        household2_data={},
+        hoh_1_data={"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        hoh_2_data={"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        household_filter_search_context=household_filter_search_context,
+    )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(expected_results[0].id)
+
+
+def test_search_db_matches_hoh_latin_name(
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    program = household_filter_search_context["program"]
+    program.status = Program.FINISHED
+    program.save()
+
+    response_data, expected_results = _test_search(
+        filters={"search": "Anna Kovalska"},
+        household1_data={},
+        household2_data={},
+        hoh_1_data={"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        hoh_2_data={"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        household_filter_search_context=household_filter_search_context,
+    )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(expected_results[0].id)
+
+
 @pytest.mark.parametrize(*parametrize_search_context)
 def test_search_db(
     filters: Dict,

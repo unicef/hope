@@ -136,6 +136,10 @@ class PaymentPlanOfficeSearchFilter(OfficeSearchFilterMixin, PaymentPlanFilter):
             | Q(payment_items__head_of_household__given_name__icontains=value)
             | Q(payment_items__head_of_household__middle_name__icontains=value)
             | Q(payment_items__head_of_household__family_name__icontains=value)
+            | Q(payment_items__head_of_household__full_name_latin__icontains=value)
+            | Q(payment_items__head_of_household__given_name_latin__icontains=value)
+            | Q(payment_items__head_of_household__middle_name_latin__icontains=value)
+            | Q(payment_items__head_of_household__family_name_latin__icontains=value)
         )
         return queryset.filter(q_filters).distinct()
 
@@ -169,6 +173,10 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
             | Q(head_of_household__given_name__icontains=value)
             | Q(head_of_household__middle_name__icontains=value)
             | Q(head_of_household__family_name__icontains=value)
+            | Q(head_of_household__full_name_latin__icontains=value)
+            | Q(head_of_household__given_name_latin__icontains=value)
+            | Q(head_of_household__middle_name_latin__icontains=value)
+            | Q(head_of_household__family_name_latin__icontains=value)
         )
         return queryset.filter(q_filters).distinct()
 
@@ -285,10 +293,7 @@ class StableOrderingFilter(OrderingFilter):
 
 
 class PaymentSearchFilter(FilterSet):
-    collector_full_name = django_filters.CharFilter(
-        field_name="collector__full_name",
-        lookup_expr="istartswith",
-    )
+    collector_full_name = django_filters.CharFilter(method="filter_collector_full_name")
     household_unicef_id = django_filters.CharFilter(
         field_name="household__unicef_id",
         lookup_expr="istartswith",
@@ -322,6 +327,11 @@ class PaymentSearchFilter(FilterSet):
     class Meta:
         model = Payment
         fields = []
+
+    def filter_collector_full_name(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
+        return queryset.filter(
+            Q(collector__full_name__istartswith=value) | Q(collector__full_name_latin__istartswith=value)
+        )
 
     def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
         queryset = queryset.annotate(

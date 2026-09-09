@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import IntegrityError, models
 from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
 from django.utils import timezone
@@ -63,6 +63,12 @@ from hope.models.utils import (
     UnicefIdentifiedModel,
 )
 
+ascii_name_validator = RegexValidator(
+    regex=r"^[A-Za-z]+(?:[ '-][A-Za-z]+)*$",
+    message="Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
+    code="invalid_name",
+)
+
 
 class IndividualCollection(UnicefIdentifiedModel):
     """Collection of individual representations."""
@@ -100,6 +106,10 @@ class Individual(
             "given_name",
             "middle_name",
             "family_name",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
             "sex",
             "birth_date",
             "estimated_birth_date",
@@ -200,6 +210,42 @@ class Individual(
     )
     family_name = models.CharField(
         max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
+    )
+    full_name_latin = models.CharField(
+        max_length=500,
+        validators=[MinLengthValidator(2), ascii_name_validator],
+        db_index=True,
+        help_text="Full name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        blank=True,
+        null=True,
+    )
+    given_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="First name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
+        validators=[ascii_name_validator],
+    )
+    middle_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="Middle name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
+        validators=[ascii_name_validator],
+    )
+    family_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="Last name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
+        validators=[ascii_name_validator],
     )
     sex = models.CharField(
         max_length=255,
@@ -671,6 +717,10 @@ class Individual(
         self.given_name = "GDPR REMOVED"
         self.middle_name = "GDPR REMOVED"
         self.family_name = "GDPR REMOVED"
+        self.full_name_latin = "GDPR REMOVED"
+        self.given_name_latin = "GDPR REMOVED"
+        self.middle_name_latin = "GDPR REMOVED"
+        self.family_name_latin = "GDPR REMOVED"
         self.photo = ""
         self.disability_certificate_picture = ""
         self.phone_no = ""
