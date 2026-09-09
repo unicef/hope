@@ -1,13 +1,14 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { createApiParams } from '@utils/apiUtils';
-import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';

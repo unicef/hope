@@ -10,7 +10,7 @@ import { decodeIdString } from '@utils/utils';
 import { ContentLink } from '@core/ContentLink';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};

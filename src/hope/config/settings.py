@@ -297,12 +297,6 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
-GRAPHENE = {
-    "SCHEMA": "hope.schema.schema",
-    "SCHEMA_OUTPUT": "schema.json",
-    "SCHEMA_INDENT": 2,
-}
-
 # Social Auth settings.
 
 
@@ -396,11 +390,6 @@ IMPERSONATE = {
     "PAGINATE_COUNT": 50,
     "DISABLE_LOGGING": False,
 }
-
-POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
-POWER_QUERY_EXTRA_CONNECTIONS = [
-    "core.businessarea",
-]
 
 CONCURRENCY_ENABLED = False
 

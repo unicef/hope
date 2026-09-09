@@ -1,7 +1,7 @@
 import { ImportCounters } from '../ImportCounters';
 import { XlsxErrors } from './XlsxErrors';
-import { ReactElement } from 'react';
-import { ImportData } from '@restgenerated/models/ImportData';
+import type { ReactElement } from 'react';
+import type { ImportData } from '@restgenerated/models/ImportData';
 
 export interface XlsxImportDataRepresentationPropTypes {
   xlsxImportData: ImportData;
@@ -16,9 +16,7 @@ export function XlsxImportDataRepresentation({
   }
   return (
     <>
-      <XlsxErrors
-        errors={xlsxImportData.xlsxValidationErrors}
-      />
+      <XlsxErrors errors={xlsxImportData.xlsxValidationErrors} />
       <ImportCounters
         numberOfHouseholds={xlsxImportData.numberOfHouseholds}
         numberOfIndividuals={xlsxImportData.numberOfIndividuals}

@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { LookUpButton } from '../../LookUpButton';

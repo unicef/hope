@@ -14,10 +14,11 @@ import {
   TableSortLabel,
   TextField,
 } from '@mui/material';
-import { FC, useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
-import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
 
 interface ReleasedSectionProps {
   releasedData: PaginatedPaymentPlanList;
@@ -80,7 +81,15 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       field: 'hasPaymentsReconciliationOverdue',
       headerName: t('Payments Reconciliation Overdue'),
       width: 100,
-      renderCell: (params) => <>{params.value ? <span style={{ color: 'red', fontWeight: 600 }}>YES</span> : ''}</>,
+      renderCell: (params) => (
+        <>
+          {params.value ? (
+            <span style={{ color: 'red', fontWeight: 600 }}>YES</span>
+          ) : (
+            ''
+          )}
+        </>
+      ),
     },
   ];
 

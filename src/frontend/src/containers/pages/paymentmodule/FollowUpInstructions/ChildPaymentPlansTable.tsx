@@ -11,12 +11,12 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { FollowUpInstructionChildPaymentPlanSummary } from '@restgenerated/models/FollowUpInstructionChildPaymentPlanSummary';
+import type { FollowUpInstructionChildPaymentPlanSummary } from '@restgenerated/models/FollowUpInstructionChildPaymentPlanSummary';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ChildPaymentPlansTableProps {
@@ -76,7 +76,9 @@ export function ChildPaymentPlansTable({
                   '-'
                 )}
               </TableCell>
-              <TableCell align="right" data-cy={`plan-households-${index}`}>{pp.householdsCount}</TableCell>
+              <TableCell align="right" data-cy={`plan-households-${index}`}>
+                {pp.householdsCount}
+              </TableCell>
               <TableCell align="right" data-cy={`plan-entitled-${index}`}>
                 {formatInstructionAmount(
                   pp.totalEntitledQuantity,

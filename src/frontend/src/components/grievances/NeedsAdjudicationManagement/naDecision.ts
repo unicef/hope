@@ -1,9 +1,6 @@
-import {
-  getRequiredReassignments,
-  NaIndividual,
-  reassignmentKey,
-} from './naRoleUtils';
-import { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
+import type { NaIndividual } from './naRoleUtils';
+import { getRequiredReassignments, reassignmentKey } from './naRoleUtils';
+import type { NaMark, NaRoleAssignment, NaTicketDecision } from './naTypes';
 
 /**
  * A needs-adjudication ticket compares one golden record (person 1) against one
@@ -98,7 +95,8 @@ export const individualRole = (
   individualId: string | null | undefined,
 ): 'duplicate' | 'unique' | undefined => {
   if (!decision || !individualId) return undefined;
-  if (decision.duplicateIndividualIds.includes(individualId)) return 'duplicate';
+  if (decision.duplicateIndividualIds.includes(individualId))
+    return 'duplicate';
   if (decision.distinctIndividualIds.includes(individualId)) return 'unique';
   return undefined;
 };

@@ -16,7 +16,7 @@
         "program_name": "Program 0",
         "program_id": "c9bedf37-d0eb-4fd1-81f7-27aa2e448b9a",
         "program_cycle_start_date": "2025-01-01",
-        "program_cycle_end_date": "2025-01-01",
+        "program_cycle_end_date": "2025-06-30",
         "available_payment_records_count": 0,
         "eligible_payments_count": 0,
         "bank_reconciliation_success": 0,

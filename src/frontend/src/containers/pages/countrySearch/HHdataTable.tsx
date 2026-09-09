@@ -11,7 +11,7 @@ import {
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
-import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 interface HHDataTableProps {
   hhData: PaginatedHouseholdListList;

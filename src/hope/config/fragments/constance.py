@@ -18,6 +18,14 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0), MaxValueValidator(100)],
         },
     ),
+    "hour_of_day": (
+        "django.forms.fields.IntegerField",
+        {
+            "min_value": 0,
+            "max_value": 23,
+            "widget": "django.forms.widgets.NumberInput",
+        },
+    ),
     "positive_integers": (
         "django.forms.fields.IntegerField",
         {
@@ -137,6 +145,11 @@ CONSTANCE_CONFIG = {
         False,
         "Should send grievances notification",
         bool,
+    ),
+    "GRIEVANCE_NOTIFICATION_HOUR": (
+        6,
+        "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",
+        "hour_of_day",
     ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,

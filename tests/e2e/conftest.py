@@ -605,6 +605,7 @@ def business_area(create_unicef_partner: Any, create_role_with_all_permissions: 
         has_data_sharing_agreement=True,
         is_accountability_applicable=True,
         active=True,
+        defaults={"timezone": "UTC"},
     )
     FlagState.objects.get_or_create(
         name="ALLOW_ACCOUNTABILITY_MODULE",

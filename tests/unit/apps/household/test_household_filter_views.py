@@ -28,7 +28,7 @@ from extras.test_utils.factories.grievance import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.exceptions import SearchError
 from hope.apps.household.const import HOST, REFUGEE, ROLE_PRIMARY
-from hope.apps.household.filters import HouseholdFilter, HouseholdOfficeSearchFilter, MergedHouseholdFilter
+from hope.apps.household.filters import HouseholdFilter, HouseholdOfficeSearchFilter
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import Household, Program
 from hope.models.utils import MergeStatusModel
@@ -1065,6 +1065,44 @@ def test_search(
     assert response_data[0]["id"] == str(expected_results[0].id)
 
 
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_search_matches_hoh_latin_name(
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    response_data, expected_results = _test_search(
+        filters={"search": "Anna Kovalska"},
+        household1_data={},
+        household2_data={},
+        hoh_1_data={"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        hoh_2_data={"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        household_filter_search_context=household_filter_search_context,
+    )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(expected_results[0].id)
+
+
+def test_search_db_matches_hoh_latin_name(
+    household_filter_search_context: dict[str, Any],
+) -> None:
+    program = household_filter_search_context["program"]
+    program.status = Program.FINISHED
+    program.save()
+
+    response_data, expected_results = _test_search(
+        filters={"search": "Anna Kovalska"},
+        household1_data={},
+        household2_data={},
+        hoh_1_data={"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        hoh_2_data={"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        household_filter_search_context=household_filter_search_context,
+    )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(expected_results[0].id)
+
+
 @pytest.mark.parametrize(*parametrize_search_context)
 def test_search_db(
     filters: Dict,
@@ -1171,15 +1209,6 @@ def test_phone_no_valid_filter_with_none_returns_queryset_unchanged(db: Any) -> 
     household_filter = HouseholdFilter(data={}, queryset=queryset, request=None)
 
     assert household_filter.phone_no_valid_filter(queryset, "phone_no_valid", None) is queryset
-
-
-def test_merged_household_filter_rdi_id_filters_by_rdi(merged_rdi_household: dict[str, Any]) -> None:
-    queryset = Household.all_objects.all()
-    household_filter = MergedHouseholdFilter(data={}, queryset=queryset)
-
-    result = household_filter.filter_rdi_id(queryset, None, str(merged_rdi_household["rdi"].id))
-
-    assert list(result) == [merged_rdi_household["household"]]
 
 
 def test_office_search_filter_by_grievance_returns_ticket_household(

@@ -7,8 +7,8 @@ import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { ReactElement } from 'react';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { ReactElement } from 'react';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 interface LookUpLinkedTicketsFiltersProps {
   filter;

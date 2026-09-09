@@ -1,4 +1,5 @@
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';

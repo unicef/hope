@@ -28,7 +28,6 @@ from hope.apps.program.api.serializers import ProgramSmallSerializer
 from hope.models import (
     Area,
     Document,
-    DocumentType,
     Feedback,
     Household,
     Individual,
@@ -38,6 +37,7 @@ from hope.models import (
     Program,
     User,
 )
+from hope.models.individual import ascii_name_validator
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -290,6 +290,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         return ProgramSmallSerializer(obj.programs, many=True).data
 
 
+# Served from /api/rest/choices/grievance-tickets/ - keys must not depend on the business area.
 class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_status_choices = serializers.SerializerMethodField()
     grievance_ticket_category_choices = serializers.SerializerMethodField()
@@ -301,10 +302,6 @@ class GrievanceChoicesSerializer(serializers.Serializer):
     grievance_ticket_submission_channel_choices = serializers.SerializerMethodField()
     grievance_ticket_manual_submission_channel_choices = serializers.SerializerMethodField()
     grievance_ticket_issue_type_choices = serializers.SerializerMethodField()
-    document_type_choices = serializers.SerializerMethodField()
-
-    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
     def get_grievance_ticket_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
@@ -432,6 +429,10 @@ class AddIndividualDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
+    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
+    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
     sex = serializers.CharField()
     birth_date = serializers.DateField()
     estimated_birth_date = serializers.BooleanField()
@@ -469,6 +470,10 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
+    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
+    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
     sex = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
     estimated_birth_date = serializers.BooleanField(required=False)
@@ -541,10 +546,6 @@ class GrievanceComplaintTicketExtras(serializers.Serializer):
         required=False,
         child=ScopedRelatedField(queryset=Payment.objects.all()),
     )
-
-
-class PaymentVerificationTicketExtras(serializers.Serializer):
-    pass
 
 
 class ReferralTicketExtras(serializers.Serializer):

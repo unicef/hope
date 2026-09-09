@@ -23,8 +23,7 @@ from hope.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hope.apps.core.api.serializers import ChoiceSerializer
-from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
+from hope.apps.core.utils import check_concurrency_version_in_mutation
 from hope.apps.household.documents import get_household_doc, get_individual_doc
 from hope.apps.registration_data.api.caches import RDIKeyConstructor
 from hope.apps.registration_data.api.serializers import (
@@ -76,7 +75,6 @@ class RegistrationDataImportViewSet(
         "retrieve": RegistrationDataImportDetailSerializer,
         "refuse": RefuseRdiSerializer,
         "create": RegistrationDataImportCreateSerializer,
-        "status_choices": ChoiceSerializer,
         "registration_xlsx_import": RegistrationXlsxImportSerializer,
         "registration_kobo_import": RegistrationKoboImportSerializer,
     }
@@ -93,9 +91,6 @@ class RegistrationDataImportViewSet(
         "refuse": [Permissions.RDI_REFUSE_IMPORT],
         "deduplicate": [Permissions.RDI_RERUN_DEDUPE],
         "run_deduplication": [Permissions.RDI_RERUN_DEDUPE],
-        "status_choices": [
-            Permissions.RDI_VIEW_LIST,
-        ],
         "registration_xlsx_import": [Permissions.RDI_IMPORT_DATA],
         "registration_kobo_import": [Permissions.RDI_IMPORT_DATA],
         "webhook_deduplication": [Permissions.RDI_WEBHOOK_DEDUPLICATION],
@@ -385,21 +380,6 @@ class RegistrationDataImportViewSet(
         return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-        responses=ChoiceSerializer(many=True),
-        filters=False,
-    )
-    @action(
-        detail=False,
-        methods=["get"],
-        pagination_class=None,
-        url_path="status-choices",
-    )
-    def status_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        status_choices = to_choice_object(RegistrationDataImport.STATUS_CHOICE)
-
-        return Response(status=200, data=self.get_serializer(status_choices, many=True).data)
-
-    @extend_schema(
         request=RegistrationXlsxImportSerializer,
         responses=RegistrationDataImportDetailSerializer,
     )
@@ -425,7 +405,6 @@ class RegistrationDataImportViewSet(
         if import_data.status != ImportData.STATUS_FINISHED:
             raise ValidationError("Import data is not ready for import")
 
-        # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
         validated_data.pop("import_data_id")
@@ -508,7 +487,6 @@ class RegistrationDataImportViewSet(
         if import_data.status != ImportData.STATUS_FINISHED:
             raise ValidationError("Kobo import data is not ready for import")
 
-        # Create RDI objects inline instead of using GraphQL mutation helpers
         from hope.models import BusinessArea
 
         validated_data.pop("import_data_id")

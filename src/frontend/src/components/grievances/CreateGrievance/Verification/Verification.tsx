@@ -7,7 +7,7 @@ import { Consent } from '../../Consent';
 import HouseholdQuestionnaire from '../../HouseholdQuestionnaire/HouseholdQuestionnaire';
 import IndividualQuestionnaire from '../../IndividualQuestionnnaire/IndividualQuestionnaire';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`

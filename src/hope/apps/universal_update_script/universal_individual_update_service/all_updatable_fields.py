@@ -18,6 +18,7 @@ from hope.apps.universal_update_script.universal_individual_update_service.valid
     validate_facility,
     validate_flex_field_string,
     validate_integer,
+    validate_latin_name,
     validate_phone_number,
     validate_string,
 )
@@ -28,6 +29,10 @@ individual_fields: dict[str, tuple[str, Any, Any]] = {
     "given_name": ("given_name", validate_string, handle_simple_field),
     "middle_name": ("middle_name", validate_string, handle_simple_field),
     "family_name": ("family_name", validate_string, handle_simple_field),
+    "full_name_latin": ("full_name_latin", validate_latin_name, handle_simple_field),
+    "given_name_latin": ("given_name_latin", validate_latin_name, handle_simple_field),
+    "middle_name_latin": ("middle_name_latin", validate_latin_name, handle_simple_field),
+    "family_name_latin": ("family_name_latin", validate_latin_name, handle_simple_field),
     "sex": ("sex", validate_choices, handle_simple_field),
     "birth_date": ("birth_date", validate_date, handle_date_field),
     "estimated_birth_date": (

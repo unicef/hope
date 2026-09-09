@@ -1,6 +1,6 @@
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { StatusBox } from '@core/StatusBox';
@@ -16,13 +16,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
-import { PaginatedPDUXlsxTemplateListList } from '@restgenerated/models/PaginatedPDUXlsxTemplateListList';
-import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
+import type { PaginatedPDUXlsxTemplateListList } from '@restgenerated/models/PaginatedPDUXlsxTemplateListList';
+import type { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { AdminButton } from '@components/core/AdminButton';
 

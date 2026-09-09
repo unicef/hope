@@ -1,6 +1,7 @@
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -16,11 +17,12 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;

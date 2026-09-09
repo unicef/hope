@@ -3,7 +3,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import {
@@ -11,9 +11,9 @@ import {
   formatCurrency,
   programStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProgramList } from '@restgenerated/models/ProgramList';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
 
 interface ProgrammesTableRowProps {
   program: ProgramList;

@@ -65,7 +65,10 @@ def test_permission_denied_not_valid_for_business_area(token: APIToken) -> None:
 
 def test_authentication_success(token: APIToken) -> None:
     auth = HOPEAuthentication()
-    request = MagicMock(META={"HTTP_AUTHORIZATION": f"Token {token.key}"})
+    request = MagicMock(
+        META={"HTTP_AUTHORIZATION": f"Token {token.key}"},
+        headers={"authorization": f"Token {token.key}".encode()},
+    )
 
     user, returned_token = auth.authenticate(request)
 
@@ -75,7 +78,10 @@ def test_authentication_success(token: APIToken) -> None:
 
 def test_authentication_invalid_token() -> None:
     auth = HOPEAuthentication()
-    request = MagicMock(META={"HTTP_AUTHORIZATION": "Token invalid_key"})
+    request = MagicMock(
+        META={"HTTP_AUTHORIZATION": "Token invalid_key"},
+        headers={"authorization": b"Token invalid_key"},
+    )
 
     with pytest.raises(AuthenticationFailed):
         auth.authenticate(request)
