@@ -9,12 +9,6 @@ BUTTON_SUBMIT = 'button[data-cy="button-submit"]'
 INPUT_FULL_NAME_LATIN = 'input[data-cy="input-individualData.fullNameLatin"]'
 
 
-def _select_listbox(browser: HopeTestBrowser, field_name: str, option: str) -> None:
-    # choice options here carry codes (MALE, YES) in data-cy, so pick by visible text
-    browser.click(f'[data-cy="select-{field_name}"]')
-    browser.select_listbox_element(option)
-
-
 def _js_click(browser: HopeTestBrowser, selector: str) -> None:
     # toolbar buttons sit under the sticky page header in headless Chrome
     browser.wait_for_element_visible(selector)
@@ -43,9 +37,11 @@ def test_add_individual_stores_latin_name_as_provided(
     login.type('textarea[name="description"]', "Add member with Cyrillic name")
     login.type('input[data-cy="input-individualData.fullName"]', "Дмитро Коваль")
     login.fill_date('input[name="individualData.birthDate"]', "1986-05-01")
-    _select_listbox(login, "individualData.sex", "Male")
-    _select_listbox(login, "individualData.estimatedBirthDate", "Yes")
-    _select_listbox(login, "individualData.relationship", "Wife / Husband")
+    login.select_dropdown_option("individualData.sex", "MALE")
+    # bool fields render options with an index in data-cy, so pick this one by its text
+    login.click('[data-cy="select-individualData.estimatedBirthDate"]')
+    login.select_listbox_element("Yes")
+    login.select_dropdown_option("individualData.relationship", "WIFE_HUSBAND")
 
     login.type(INPUT_FULL_NAME_LATIN, "Дмитро")
     login.click(BUTTON_SUBMIT)
