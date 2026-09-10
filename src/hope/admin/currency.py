@@ -12,7 +12,7 @@ class CurrencyAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_crypto", "vision_code", "active", "number_of_decimals")
     list_filter = ("is_crypto", "active")
     search_fields = ("code", "vision_code", "name")
-    ordering = ("code", "vision_code")
+    ordering = ("code", "-active", "vision_code")
     actions = ("deprecate_currency",)
 
     @admin.action(description="Deprecate: swap the active currency for this code", permissions=["change"])
