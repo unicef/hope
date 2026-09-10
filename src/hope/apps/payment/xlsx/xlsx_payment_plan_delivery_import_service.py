@@ -322,32 +322,6 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 )
             )
 
-    def _validate_reason_for_unsuccessful_payment(self, row: tuple[Cell, ...]) -> None:
-        self._mark_updated_when_optional_value_differs(row, "reason_for_unsuccessful_payment")
-
-    def _validate_reference_id(self, row: tuple[Cell, ...]) -> None:
-        self._mark_updated_when_optional_value_differs(row, "reference_id", "transaction_reference_id")
-
-    def _validate_extras(self, row: tuple[Cell, ...]) -> None:
-        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-        payment = self.payments_dict.get(payment_id)
-        if payment and self._get_extras_for_row(row, payment.extra_fields) != payment.extra_fields:
-            self.is_updated = True
-
-    def _mark_updated_when_optional_value_differs(
-        self,
-        row: tuple[Cell, ...],
-        header_name: str,
-        field_name: str | None = None,
-    ) -> None:
-        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-        payment = self.payments_dict.get(payment_id)
-        if payment is None or header_name not in self.xlsx_headers:
-            return
-        value = self._get_optional_cell_value(row, header_name)
-        if value != getattr(payment, field_name or header_name):
-            self.is_updated = True
-
     def _validate_rows(self) -> None:
         self.is_updated = False
         self.payment_ids_from_xlsx = []
@@ -501,21 +475,6 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             value = pytz.utc.localize(value)
         return value
 
-    def _set_payment_delivery_date(self, delivery_date: Any, payment: Payment) -> tuple[Any, Any]:
-        parsed_delivery_date = self._parse_delivery_date(delivery_date) if delivery_date not in (None, "") else None
-        payment_delivery_date = payment.delivery_date
-        if payment_delivery_date:
-            payment_delivery_date = payment_delivery_date.replace(tzinfo=None)
-        return parsed_delivery_date, payment_delivery_date
-
-    def _normalize_delivery_date(self, delivery_date: Any, payment_delivery_date: Any) -> Any:
-        delivery_date = delivery_date.date() if isinstance(delivery_date, datetime.datetime) else delivery_date
-        if delivery_date and (
-            delivery_date > datetime.date.today() or delivery_date < self.payment_plan.program.start_date
-        ):
-            return payment_delivery_date
-        return delivery_date
-
     def _payment_changed(self, old_payment: Payment, payment: Payment) -> bool:
         return any(getattr(old_payment, field) != getattr(payment, field) for field in self.PAYMENT_UPDATE_FIELDS)
 
@@ -603,23 +562,6 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         for field_name, value in self._get_optional_reconciliation_updates(row).items():
             setattr(payment, field_name, value)
         payment.set_extra_fields(self._get_extras_for_row(row, payment.extra_fields))
-
-    def _get_values_for_update(self, row: tuple[Cell, ...]) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
-        return (
-            self._get_optional_cell_value(row, "additional_collector_name"),
-            self._get_optional_cell_value(row, "additional_document_number"),
-            self._get_optional_cell_value(row, "additional_document_type"),
-            self._get_optional_cell_value(row, "delivery_date"),
-            self._get_optional_cell_value(row, "reason_for_unsuccessful_payment"),
-            self._get_optional_cell_value(row, "reference_id"),
-            self._get_optional_cell_value(row, "transaction_status_blockchain_link"),
-        )
-
-    def _get_additional_doc_values(self, row: tuple[Cell, ...]) -> tuple[Any, Any]:
-        return (
-            self._get_optional_cell_value(row, "additional_document_number"),
-            self._get_optional_cell_value(row, "additional_document_type"),
-        )
 
     def _get_extras_for_row(self, row: tuple[Cell, ...], current_extras: dict[str, object] | None = None) -> dict:
         extras = dict(current_extras or {})

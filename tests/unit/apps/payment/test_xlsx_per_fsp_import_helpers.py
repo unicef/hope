@@ -7,7 +7,6 @@ import io
 from unittest.mock import MagicMock
 
 import pytest
-import pytz
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -107,170 +106,6 @@ def _make_row_cells(values: list) -> list:
 def test_init_rejects_unsupported_null_delivery_policy(payment_plan, django_assert_num_queries):
     with django_assert_num_queries(0), pytest.raises(ValueError, match="Unsupported null delivery policy"):
         XlsxPaymentPlanDeliveryImportService(payment_plan, io.BytesIO(), null_delivery_policy="unsupported")
-
-
-# --- _set_payment_delivery_date ---
-
-
-def test_set_payment_delivery_date_parses_string(service):
-    payment = MagicMock()
-    payment.delivery_date = None
-    delivery_date, payment_delivery_date = service._set_payment_delivery_date("2024-01-15", payment)
-    assert delivery_date.tzinfo is not None  # should be UTC-localized
-    assert delivery_date.year == 2024
-    assert delivery_date.month == 1
-    assert delivery_date.day == 15
-    assert payment_delivery_date is None
-
-
-def test_set_payment_delivery_date_naive_datetime(service):
-    naive_dt = datetime.datetime(2024, 6, 15, 12, 0, 0)
-    payment = MagicMock()
-    payment.delivery_date = None
-    delivery_date, payment_delivery_date = service._set_payment_delivery_date(naive_dt, payment)
-    assert delivery_date.tzinfo is not None
-    assert delivery_date.tzinfo == pytz.utc
-    assert payment_delivery_date is None
-
-
-def test_set_payment_delivery_date_aware_datetime(service):
-    aware_dt = datetime.datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
-    payment = MagicMock()
-    payment.delivery_date = None
-    delivery_date, payment_delivery_date = service._set_payment_delivery_date(aware_dt, payment)
-    assert delivery_date.tzinfo is not None
-    assert payment_delivery_date is None
-
-
-def test_set_payment_delivery_date_with_existing_payment_date(service):
-    existing_date = datetime.datetime(2024, 3, 10, 8, 0, 0, tzinfo=UTC)
-    payment = MagicMock()
-    payment.delivery_date = existing_date
-    delivery_date, payment_delivery_date = service._set_payment_delivery_date("2024-06-15", payment)
-    assert payment_delivery_date is not None
-    assert payment_delivery_date.tzinfo is None  # replace(tzinfo=None)
-
-
-def test_set_payment_delivery_date_accepts_date(service, django_assert_num_queries):
-    payment = MagicMock()
-    payment.delivery_date = None
-
-    with django_assert_num_queries(0):
-        delivery_date, payment_delivery_date = service._set_payment_delivery_date(datetime.date(2024, 6, 15), payment)
-
-    assert delivery_date == datetime.datetime(2024, 6, 15, tzinfo=pytz.UTC)
-    assert payment_delivery_date is None
-
-
-def test_normalize_delivery_date_preserves_existing_value_when_date_is_out_of_range(service, django_assert_num_queries):
-    existing_date = datetime.date(2024, 1, 1)
-
-    with django_assert_num_queries(0):
-        result = service._normalize_delivery_date(datetime.date.today() + datetime.timedelta(days=1), existing_date)
-
-    assert result == existing_date
-
-
-def test_normalize_delivery_date_preserves_existing_value_when_date_precedes_program(
-    service, django_assert_num_queries
-):
-    service.payment_plan.program.start_date = datetime.date(2024, 2, 1)
-    existing_date = datetime.date(2024, 3, 1)
-
-    with django_assert_num_queries(0):
-        result = service._normalize_delivery_date(datetime.date(2024, 1, 1), existing_date)
-
-    assert result == existing_date
-
-
-# --- _get_values_for_update ---
-
-
-def test_get_values_for_update_all_headers(service):
-    service.xlsx_headers = [
-        "payment_id",
-        "delivered_quantity",
-        "delivery_date",
-        "reference_id",
-        "reason_for_unsuccessful_payment",
-        "additional_collector_name",
-        "transaction_status_blockchain_link",
-        "additional_document_type",
-        "additional_document_number",
-    ]
-    row = _make_row_cells(
-        [
-            "PAY-001",  # payment_id
-            "100.00",  # delivered_quantity
-            "2024-06-15",  # delivery_date
-            "REF-123",  # reference_id
-            "Bank closed",  # reason
-            "John Doe",  # additional_collector_name
-            "https://link",  # transaction_status_blockchain_link
-            "Passport",  # additional_document_type
-            "DOC-456",  # additional_document_number
-        ]
-    )
-    result = service._get_values_for_update(row)
-    # Returns: (additional_collector_name, additional_document_number, additional_document_type,
-    #           delivery_date, reason, reference_id, transaction_status_blockchain_link)
-    (
-        additional_collector_name,
-        additional_document_number,
-        additional_document_type,
-        delivery_date,
-        reason,
-        reference_id,
-        transaction_status_blockchain_link,
-    ) = result
-    assert additional_collector_name == "John Doe"
-    assert additional_document_number == "DOC-456"
-    assert additional_document_type == "Passport"
-    assert delivery_date == "2024-06-15"
-    assert reason == "Bank closed"
-    assert reference_id == "REF-123"
-    assert transaction_status_blockchain_link == "https://link"
-
-
-def test_get_values_for_update_no_optional_headers(service):
-    service.xlsx_headers = ["payment_id", "delivered_quantity"]
-    row = _make_row_cells(["PAY-001", "100.00"])
-    result = service._get_values_for_update(row)
-    (
-        additional_collector_name,
-        additional_document_number,
-        additional_document_type,
-        delivery_date,
-        reason,
-        reference_id,
-        transaction_status_blockchain_link,
-    ) = result
-    assert delivery_date is None
-    assert reference_id is None
-    assert reason is None
-    assert additional_collector_name is None
-    assert transaction_status_blockchain_link is None
-    assert additional_document_number is None
-    assert additional_document_type is None
-
-
-# --- _get_additional_doc_values ---
-
-
-def test_get_additional_doc_values_present(service):
-    service.xlsx_headers = ["payment_id", "additional_document_type", "additional_document_number"]
-    row = _make_row_cells(["PAY-001", "ID Card", "DOC-789"])
-    number, doc_type = service._get_additional_doc_values(row)
-    assert doc_type == "ID Card"
-    assert number == "DOC-789"
-
-
-def test_get_additional_doc_values_absent(service):
-    service.xlsx_headers = ["payment_id", "delivered_quantity"]
-    row = _make_row_cells(["PAY-001", "100.00"])
-    number, doc_type = service._get_additional_doc_values(row)
-    assert doc_type is None
-    assert number is None
 
 
 # --- _get_optional_cell_value ---
@@ -417,34 +252,6 @@ def test_validate_delivered_quantity_returns_when_payment_unknown(service):
     assert service.is_updated is False
 
 
-# --- _validate_reason_for_unsuccessful_payment ---
-
-
-def test_validate_reason_for_unsuccessful_payment_returns_when_payment_unknown(service):
-    service.xlsx_headers = ["payment_id", "delivered_quantity", "reason_for_unsuccessful_payment"]
-    row = _make_row_cells(["PP-0060-UNKNOWN", 100, "Bank closed"])
-    service._validate_reason_for_unsuccessful_payment(row)
-    assert service.is_updated is False
-
-
-def test_validate_reason_for_unsuccessful_payment_marks_updated_on_change(service_with_payment, sent_to_fsp_payment):
-    service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity", "reason_for_unsuccessful_payment"]
-    row = _make_row_cells([str(sent_to_fsp_payment.unicef_id), 100, "Bank closed"])
-    service_with_payment._validate_reason_for_unsuccessful_payment(row)
-    assert service_with_payment.is_updated is True
-
-
-def test_validate_reason_for_unsuccessful_payment_keeps_not_updated_when_unchanged(
-    service_with_payment, sent_to_fsp_payment
-):
-    service_with_payment.xlsx_headers = ["payment_id", "delivered_quantity", "reason_for_unsuccessful_payment"]
-    row = _make_row_cells(
-        [str(sent_to_fsp_payment.unicef_id), 100, sent_to_fsp_payment.reason_for_unsuccessful_payment]
-    )
-    service_with_payment._validate_reason_for_unsuccessful_payment(row)
-    assert service_with_payment.is_updated is False
-
-
 # --- _validate_delivery_date ---
 
 
@@ -476,26 +283,6 @@ def test_validate_delivery_date_ignores_empty_cell(
         service_with_payment._validate_delivery_date(row)
 
     assert service_with_payment.errors == []
-
-
-def test_normalize_delivery_date_accepts_valid_non_empty_date(service, django_assert_num_queries):
-    service.payment_plan.program.start_date = datetime.date.today() - datetime.timedelta(days=1)
-    delivery_date = datetime.date.today()
-
-    with django_assert_num_queries(0):
-        result = service._normalize_delivery_date(delivery_date, None)
-
-    assert result == delivery_date
-
-
-# --- _validate_reference_id ---
-
-
-def test_validate_reference_id_returns_when_payment_unknown(service):
-    service.xlsx_headers = ["payment_id", "delivered_quantity", "reference_id"]
-    row = _make_row_cells(["PP-0060-UNKNOWN", 100, "REF-123"])
-    service._validate_reference_id(row)
-    assert service.is_updated is False
 
 
 # --- _import_row ---

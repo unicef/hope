@@ -324,24 +324,6 @@ def test_import_row_empty_extras_stays_empty_dict(
     assert payment.extras == {}
 
 
-def test_validate_extras_sets_is_updated_when_extras_change(
-    payment_plan_finished: PaymentPlan,
-    payment_for_extras: Payment,
-) -> None:
-    payment = payment_for_extras
-
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
-    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
-    import_service.payments_dict = {str(payment.pk): payment}
-
-    Row = namedtuple("Row", ["value"])
-    row = [Row(str(payment.pk)), Row(500), Row("new_value")]
-
-    assert import_service.is_updated is False
-    import_service._validate_extras(row)
-    assert import_service.is_updated is True
-
-
 def test_known_columns_not_in_extras(
     payment_plan_finished: PaymentPlan,
     payment_for_extras: Payment,
@@ -386,21 +368,6 @@ def test_get_extras_for_row_converts_types(
     extras = import_service._get_extras_for_row(row)
 
     assert extras == {"custom_col": expected_value}
-
-
-def test_validate_extras_skips_unknown_payment(
-    payment_plan_finished: PaymentPlan,
-) -> None:
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
-    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
-    import_service.payments_dict = {}
-
-    Row = namedtuple("Row", ["value"])
-    row = [Row("NONEXISTENT"), Row(500), Row("value")]
-
-    import_service._validate_extras(row)
-
-    assert import_service.is_updated is False
 
 
 def test_validate_rows_skips_already_reconciled_payment(
