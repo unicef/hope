@@ -73,15 +73,6 @@ signatures, and records the previous status, previous status date, export file, 
 not change CLOSED or unexported plans, Payment Gateway Payments, delivered quantities, Payment Plan lifecycle statuses,
 or money totals. Re-running it is safe because it selects only Payments that are still `PENDING`.
 
-Do not run old and new reconciliation workers at the same time during deployment: old workers expect `PENDING`, while
-new workers expect `SENT_TO_FSP`. Before deployment, confirm that no legacy single-plan reconciliation jobs are
-active. Pause Payment import/export jobs, deploy the code, run the backfill, and only then resume group imports.
-
-`Payment.PENDING_STATUSES` remains unchanged, so `SENT_TO_FSP` is still treated as unreconciled. Payment Plan
-reconciliation state, pending totals, verification eligibility, and money totals therefore do not change. Reports
-that show the exact Payment status will move these records from `PENDING` to `SENT_TO_FSP`; status labels and sorting
-must display both values correctly.
-
 ### Normal mode
 
 After confirming that the Payment belongs to an eligible, non-closed manual Payment Plan, apply these rules from top

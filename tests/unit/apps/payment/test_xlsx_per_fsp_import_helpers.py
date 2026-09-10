@@ -326,6 +326,7 @@ def test_validate_payment_id_records_known_id(service_with_payment, sent_to_fsp_
 
 
 def test_validate_payment_id_does_not_record_null_id(service, django_assert_num_queries):
+    service.sheetname = "Payment Plan - Payment List"
     service.xlsx_headers = ["payment_id", "delivered_quantity"]
     row = _make_row_cells([None, 100])
 
