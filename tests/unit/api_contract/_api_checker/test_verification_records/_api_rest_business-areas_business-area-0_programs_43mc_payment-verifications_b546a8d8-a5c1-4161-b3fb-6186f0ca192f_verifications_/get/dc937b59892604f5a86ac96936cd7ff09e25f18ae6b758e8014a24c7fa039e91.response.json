@@ -39,6 +39,7 @@
                 "status": "Pending",
                 "status_display": "Pending",
                 "currency": "PLN",
+                "currency_vision_code": "PLN",
                 "fsp_auth_code": "",
                 "hoh_id": null,
                 "hoh_unicef_id": null,

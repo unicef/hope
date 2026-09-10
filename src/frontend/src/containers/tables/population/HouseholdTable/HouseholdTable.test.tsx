@@ -34,6 +34,7 @@ describe('HouseholdTable', () => {
         totalCashReceived: '1000.00',
         totalCashReceivedUsd: '1000.00',
         currency: 'USD',
+        currencyVisionCode: 'USD',
         size: 5,
         status: 'ACTIVE',
         lastRegistrationDate: '2023-01-15T10:30:00Z',

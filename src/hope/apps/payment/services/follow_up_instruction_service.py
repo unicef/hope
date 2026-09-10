@@ -83,7 +83,11 @@ class FollowUpInstructionService:
         if None in delivery_mechanism_ids or len(delivery_mechanism_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Delivery Mechanism.")
         if None in currency_ids or len(currency_ids) != 1:
-            raise ValidationError("Applicable Payment Plans must share the same Currency.")
+            # Variants of one redenominated currency share `code`; str() carries `vision_code` to tell them apart.
+            found = sorted(
+                {str(payment_plan.currency) if payment_plan.currency else "none" for payment_plan in source_plans}
+            )
+            raise ValidationError(f"Applicable Payment Plans must share the same Currency. Found: {', '.join(found)}.")
 
     @transaction.atomic
     def create(

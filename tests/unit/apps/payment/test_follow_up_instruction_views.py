@@ -420,6 +420,9 @@ def test_create_follow_up_instruction(
     )
 
     assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["currency"] == ctx["currency"].code
+    assert response.json()["currency_vision_code"] == ctx["currency"].vision_code
+    assert response.json()["payment_plans"][0]["currency_vision_code"] == ctx["currency"].vision_code
     created = FollowUpInstruction.objects.get(id=response.json()["id"])
     assert created.payment_plans.count() == 1
     assert created.payment_plans.first().source_payment_plan_id == source_plan.id

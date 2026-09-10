@@ -666,6 +666,21 @@ export function formatCurrency(
  * A redenomination leaves two Currency rows sharing one ISO `code`, so `visionCode` is
  * appended in brackets when it differs, matching how the backend renders a Currency.
  */
+function currencyVariantSuffix(
+  currency: string,
+  visionCode?: string | null,
+): string {
+  return visionCode && visionCode !== currency ? ` (${visionCode})` : '';
+}
+
+export function formatCurrencyCode(
+  currency?: string | null,
+  visionCode?: string | null,
+): string | null {
+  if (!currency) return null;
+  return `${currency}${currencyVariantSuffix(currency, visionCode)}`;
+}
+
 export function formatCurrencyWithSymbol(
   amount: number | string | null | undefined,
   currency = 'USD',
@@ -692,7 +707,7 @@ export function formatCurrencyWithSymbol(
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
   if (!currency) return formatCurrency(numValue, true);
 
-  const suffix = visionCode && visionCode !== currency ? ` (${visionCode})` : '';
+  const suffix = currencyVariantSuffix(currency, visionCode);
 
   // Guard against non-ISO-4217 currency codes (e.g. app-specific codes like SYP01)
   // Intl.NumberFormat only accepts valid 3-letter ISO 4217 codes

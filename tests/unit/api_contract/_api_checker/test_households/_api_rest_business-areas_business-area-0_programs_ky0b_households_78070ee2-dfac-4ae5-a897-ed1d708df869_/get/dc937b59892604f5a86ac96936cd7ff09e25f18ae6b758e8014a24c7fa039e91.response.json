@@ -58,6 +58,7 @@
         "female_children_count": null,
         "children_disabled_count": null,
         "currency": null,
+        "currency_vision_code": null,
         "first_registration_date": "2025-01-01",
         "last_registration_date": "2025-01-01",
         "unhcr_id": "",

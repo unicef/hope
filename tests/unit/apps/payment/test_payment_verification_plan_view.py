@@ -19,6 +19,7 @@ from rest_framework import serializers as drf_serializers, status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
@@ -77,6 +78,7 @@ def verification_context(
         program_cycle=cycle,
         status=PaymentPlan.Status.FINISHED,
         created_by=user,
+        currency=CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound"),
     )
     build_summary(payment_plan)
 
@@ -210,6 +212,8 @@ def test_get_list(
         assert len(resp_data["results"]) == 1
         pv = resp_data["results"][0]
         assert pv["verification_status"] == "PENDING"
+        assert pv["currency"] == "SYP"
+        assert pv["currency_vision_code"] == "SYP01"
 
 
 @pytest.mark.parametrize(

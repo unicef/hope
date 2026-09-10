@@ -50,7 +50,11 @@ export function PaymentVerificationTableRow({
         />
       </TableCell>
       <TableCell align="right">
-        {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
+        {formatCurrencyWithSymbol(
+          plan.totalDeliveredQuantity,
+          plan.currency,
+          plan.currencyVisionCode,
+        )}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment> -{' '}
