@@ -1,6 +1,8 @@
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 import logging
 import os
+from urllib.parse import urlencode
 
 from constance import config
 from django.conf import settings
@@ -11,6 +13,7 @@ from django.db.models import Q, QuerySet
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.grievance.constants import MY_TASKS_PAGE
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -36,10 +39,21 @@ def overdue_q(now: "datetime | None" = None) -> Q:
     return (is_sensitive & Q(created_at__lte=sensitive_cutoff)) | (~is_sensitive & Q(created_at__lte=other_cutoff))
 
 
-def grievance_tickets_page_url(business_area: "BusinessArea", tab: str) -> str:
-    """Link to a grievance ticket list tab, e.g. "my-tickets". Not ticket-specific, so no sensitive restriction."""
+def grievance_tickets_page_url(
+    business_area: "BusinessArea", page: str, params: Mapping[str, str] | None = None
+) -> str:
+    """Link to a grievance ticket list page. Not ticket-specific, so no sensitive restriction."""
     protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-    return f"{protocol}://{settings.FRONTEND_HOST}/{business_area.slug}/programs/all/grievance/tickets/{tab}"
+    url = f"{protocol}://{settings.FRONTEND_HOST}/{business_area.slug}/programs/all/grievance/tickets/{page}"
+    return f"{url}?{urlencode(params)}" if params else url
+
+
+def my_tasks_url(business_area: "BusinessArea", preset: str, *, overdue: bool = False) -> str:
+    """Deep link to one My Tasks preset, optionally narrowed to overdue tickets."""
+    params = {"tab": preset}
+    if overdue:
+        params["overdue"] = "true"
+    return grievance_tickets_page_url(business_area, MY_TASKS_PAGE, params)
 
 
 def grievance_ticket_url(grievance_ticket: GrievanceTicket) -> str | None:

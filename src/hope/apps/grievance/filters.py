@@ -111,6 +111,8 @@ class GrievanceTicketFilter(FilterSet):
     individual_id = CharFilter(method="filter_by_individual")
     payment_record_ids = filters.BaseInFilter(method="filter_by_payment_record")
     overdue = BooleanFilter(method="filter_overdue")
+    sensitive = BooleanFilter(method="filter_sensitive")
+    unassigned = BooleanFilter(field_name="assigned_to", lookup_expr="isnull")
 
     class Meta:
         fields = {
@@ -147,6 +149,12 @@ class GrievanceTicketFilter(FilterSet):
             return qs
         overdue = overdue_q()
         return qs.filter(overdue) if value else qs.exclude(overdue)
+
+    def filter_sensitive(self, qs: QuerySet, name: str, value: bool | None) -> QuerySet:
+        if value is None:
+            return qs
+        lookup = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
+        return qs.filter(**lookup) if value else qs.exclude(**lookup)
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
