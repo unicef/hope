@@ -22,6 +22,11 @@ from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentItem
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICY_OPTION,
+    NULL_DELIVERY_POLICY_RESET,
+    OVERRIDE_OPTION,
+)
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
@@ -645,8 +650,11 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                 import_payment_plan_group_delivery_from_xlsx_async_task(
                     group,
                     str(request.user.pk),
-                    override=import_options.get("override", False),
-                    null_delivery_policy=import_options.get("null_delivery_policy", "reset"),
+                    override=import_options.get(OVERRIDE_OPTION, False),
+                    null_delivery_policy=import_options.get(
+                        NULL_DELIVERY_POLICY_OPTION,
+                        NULL_DELIVERY_POLICY_RESET,
+                    ),
                     notification_user_id=str(original_uploader_id) if original_uploader_id else str(request.user.pk),
                 )
                 messages.success(request, "Successfully restarted reconciliation import.")

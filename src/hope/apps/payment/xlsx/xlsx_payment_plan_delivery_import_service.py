@@ -45,15 +45,22 @@ if TYPE_CHECKING:
     from hope.models import PaymentPlan
 
 
+OVERRIDE_OPTION = "override"
+NULL_DELIVERY_POLICY_OPTION = "null_delivery_policy"
+
+NULL_DELIVERY_POLICY_RESET = "reset"
+NULL_DELIVERY_POLICY_IGNORE = "ignore"
+NULL_DELIVERY_POLICIES = (NULL_DELIVERY_POLICY_RESET, NULL_DELIVERY_POLICY_IGNORE)
+
+
 class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
     KNOWN_COLUMNS: frozenset[str] = frozenset(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
-    NULL_DELIVERY_POLICIES = frozenset({"ignore", "reset"})
 
     ACTION_APPLY = "apply"
     ACTION_CONFLICT = "conflict"
-    ACTION_IGNORE = "ignore"
-    ACTION_RESET = "reset"
+    ACTION_IGNORE = NULL_DELIVERY_POLICY_IGNORE
+    ACTION_RESET = NULL_DELIVERY_POLICY_RESET
     ACTION_SKIP = "skip"
 
     OVERRIDE_ELIGIBLE_STATUSES = frozenset(
@@ -98,9 +105,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         file: io.BytesIO | IO[bytes],
         fsp_owned_headers: set[str] | None = None,
         override: bool = False,
-        null_delivery_policy: str = "reset",
+        null_delivery_policy: str = NULL_DELIVERY_POLICY_RESET,
     ) -> None:
-        if null_delivery_policy not in self.NULL_DELIVERY_POLICIES:
+        if null_delivery_policy not in NULL_DELIVERY_POLICIES:
             raise ValueError(f"Unsupported null delivery policy: {null_delivery_policy}")
 
         self.payment_plan = payment_plan
@@ -220,7 +227,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             if payment.status not in self.OVERRIDE_ELIGIBLE_STATUSES:
                 pass
             elif delivered_quantity is None:
-                action = self.ACTION_RESET if self.null_delivery_policy == "reset" else self.ACTION_IGNORE
+                action = (
+                    self.ACTION_RESET if self.null_delivery_policy == NULL_DELIVERY_POLICY_RESET else self.ACTION_IGNORE
+                )
             else:
                 action = self.ACTION_APPLY
         elif delivered_quantity is None:

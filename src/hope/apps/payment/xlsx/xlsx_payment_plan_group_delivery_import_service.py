@@ -12,7 +12,11 @@ from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import log_payment_plan_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICIES,
+    NULL_DELIVERY_POLICY_RESET,
+    XlsxPaymentPlanDeliveryImportService,
+)
 from hope.models import Payment, PaymentPlan
 
 if TYPE_CHECKING:
@@ -40,9 +44,9 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         payment_plan_group: "PaymentPlanGroup",
         file: IO[bytes],
         override: bool = False,
-        null_delivery_policy: str = "reset",
+        null_delivery_policy: str = NULL_DELIVERY_POLICY_RESET,
     ) -> None:
-        if null_delivery_policy not in XlsxPaymentPlanDeliveryImportService.NULL_DELIVERY_POLICIES:
+        if null_delivery_policy not in NULL_DELIVERY_POLICIES:
             raise ValueError(f"Unsupported null delivery policy: {null_delivery_policy}")
         self.payment_plan_group = payment_plan_group
         self.file = file

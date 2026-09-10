@@ -145,6 +145,10 @@ from hope.apps.payment.utils import (
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICY_OPTION,
+    OVERRIDE_OPTION,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service import (
     XlsxPaymentPlanFspExtraFieldsExportService,
 )
@@ -2883,8 +2887,8 @@ class PaymentPlanGroupViewSet(
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         file = serializer.validated_data["file"]
-        override = serializer.validated_data["override"]
-        null_delivery_policy = serializer.validated_data["null_delivery_policy"]
+        override = serializer.validated_data[OVERRIDE_OPTION]
+        null_delivery_policy = serializer.validated_data[NULL_DELIVERY_POLICY_OPTION]
 
         override_permission = Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE
         if override and not request.user.has_perm(override_permission.value, payment_plan_group.cycle.program):
@@ -2921,8 +2925,8 @@ class PaymentPlanGroupViewSet(
             created_by=request.user,
             file=file,
             extras={
-                "override": override,
-                "null_delivery_policy": null_delivery_policy,
+                OVERRIDE_OPTION: override,
+                NULL_DELIVERY_POLICY_OPTION: null_delivery_policy,
             },
         )
         old_payment_plan_group = copy_model_object(payment_plan_group)

@@ -36,6 +36,11 @@ from hope.apps.payment.utils import (
     normalize_score,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICY_OPTION,
+    NULL_DELIVERY_POLICY_RESET,
+    OVERRIDE_OPTION,
+)
 from hope.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
@@ -686,9 +691,10 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         service = XlsxPaymentPlanGroupDeliveryImportService(
             payment_plan_group,
             file_xlsx,
-            override=job.config.get("override", saved_options.get("override", False)),
+            override=job.config.get(OVERRIDE_OPTION, saved_options.get(OVERRIDE_OPTION, False)),
             null_delivery_policy=job.config.get(
-                "null_delivery_policy", saved_options.get("null_delivery_policy", "reset")
+                NULL_DELIVERY_POLICY_OPTION,
+                saved_options.get(NULL_DELIVERY_POLICY_OPTION, NULL_DELIVERY_POLICY_RESET),
             ),
         )
         service.open_workbook()
@@ -725,7 +731,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task(
     payment_plan_group: PaymentPlanGroup,
     user_id: str | None = None,
     override: bool = False,
-    null_delivery_policy: str = "reset",
+    null_delivery_policy: str = NULL_DELIVERY_POLICY_RESET,
     notification_user_id: str | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
@@ -733,8 +739,8 @@ def import_payment_plan_group_delivery_from_xlsx_async_task(
         "payment_plan_group_id": payment_plan_group_id,
         "user_id": user_id,
         "notification_user_id": notification_user_id or user_id,
-        "override": override,
-        "null_delivery_policy": null_delivery_policy,
+        OVERRIDE_OPTION: override,
+        NULL_DELIVERY_POLICY_OPTION: null_delivery_policy,
     }
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,

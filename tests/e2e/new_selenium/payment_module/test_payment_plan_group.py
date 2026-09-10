@@ -1,6 +1,7 @@
 from decimal import Decimal
 from unittest import mock
 
+from django.utils import timezone
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
@@ -163,7 +164,7 @@ def auth_code_template(business_area: BusinessArea) -> FinancialServiceProviderX
 
 @pytest.fixture
 def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Payment]) -> str:
-    group, _ = exportable_group
+    group, payment = exportable_group
     # Build the file from the real export service so its header matches exactly what the
     # import expects, then fill in a delivered_quantity for the single payment row.
     workbook = XlsxPaymentPlanGroupDeliveryExportService(
@@ -175,6 +176,9 @@ def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Paym
     worksheet.cell(row=2, column=delivered_col).value = 50
     file_path = tmp_path / "reconciliation.xlsx"
     workbook.save(str(file_path))
+    payment.status = Payment.STATUS_SENT_TO_FSP
+    payment.status_date = timezone.now()
+    payment.save(update_fields=["status", "status_date"])
     return str(file_path)
 
 
