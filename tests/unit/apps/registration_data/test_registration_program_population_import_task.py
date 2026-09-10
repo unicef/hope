@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Any
 from unittest.mock import patch
 
@@ -16,6 +17,7 @@ from extras.test_utils.factories.household import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.registration_data.celery_tasks import (
     registration_program_population_import_async_task,
@@ -298,23 +300,23 @@ def test_registration_program_population_import_with_deduplication(
     mock_dedupe_task.return_value.deduplicate_pending_individuals.assert_called_once()
 
 
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
-def test_registration_program_population_import_locked_cache(
-    mocked_locked_cache: Any,
+def test_registration_program_population_import_raises_when_lock_held(
     business_area: Any,
     programs: dict[str, Any],
     registration_data_import: Any,
+    hold_lock: Callable[..., None],
 ) -> None:
-    mocked_locked_cache.return_value.__enter__.return_value = False
+    hold_lock("registration_program_population_import", registration_data_import.id)
     registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
     registration_data_import.save()
 
-    run_registration_program_population_import_task(
-        str(registration_data_import.id),
-        str(business_area.id),
-        str(programs["from"].id),
-        str(programs["to"].id),
-    )
+    with pytest.raises(AlreadyRunningError):
+        run_registration_program_population_import_task(
+            str(registration_data_import.id),
+            str(business_area.id),
+            str(programs["from"].id),
+            str(programs["to"].id),
+        )
 
     registration_data_import.refresh_from_db()
     assert registration_data_import.status == RegistrationDataImport.IMPORT_SCHEDULED

@@ -2052,6 +2052,7 @@ dependencies = [
     { name = "pyjwt" },
     { name = "pypdf" },
     { name = "pytesseract" },
+    { name = "python-redis-lock", extra = ["django"] },
     { name = "pytz" },
     { name = "pyyaml" },
     { name = "pyzipper" },
@@ -2240,6 +2241,7 @@ requires-dist = [
     { name = "pyjwt", specifier = ">=2.4,<3" },
     { name = "pypdf", specifier = ">=6.10.2,<7" },
     { name = "pytesseract", specifier = ">=0.3.9,<1" },
+    { name = "python-redis-lock", extras = ["django"], specifier = ">=4,<5" },
     { name = "pytz", specifier = ">=2022.1,<2027" },
     { name = "pyyaml", specifier = ">=6,<7" },
     { name = "pyzipper", specifier = ">=0.4,<1" },
@@ -4105,6 +4107,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6a/53/ed9d74092561d4b01a2ef1349d52cdbc135e526c245f366b089cfca6de49/python_dotenv-1.2.3.tar.gz", hash = "sha256:a20a594dabeaa385725aa239d5244871c143ecb356add8a20fcf23773a6c3a35", size = 58945, upload-time = "2026-08-16T16:54:54.067Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/17/c5c6b53ddc18f297992099b3d9ec16c855c0ccc83263a21fe4d1c625ec6c/python_dotenv-1.2.3-py3-none-any.whl", hash = "sha256:904552145e8bfed22162c09dab1c2b9b54fefa7b23ba780f4f26ca0316b0f0d9", size = 22780, upload-time = "2026-08-16T16:54:52.473Z" },
+]
+
+[[package]]
+name = "python-redis-lock"
+version = "4.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "redis" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/a3/1c5872ce7dafef9b4f31fbbf54938d9be632e3b7d53146b0eac26150ec97/python_redis_lock-4.0.1.tar.gz", hash = "sha256:57995e13dce196301138d710d4f132d667c200cd814718e081bf299d6cf11d70", size = 164986, upload-time = "2026-04-08T15:41:18.551Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/b5/d2bb0d46b31620753ba2c976f97fb24d7e0f2fb1390a911f632d43fe1c1b/python_redis_lock-4.0.1-py3-none-any.whl", hash = "sha256:1d39f579ff3f96d7c14e523680951aa60eb4d397f4ad1bc72a3440b7460d18d5", size = 12358, upload-time = "2026-04-08T15:41:16.822Z" },
+]
+
+[package.optional-dependencies]
+django = [
+    { name = "django-redis" },
 ]
 
 [[package]]

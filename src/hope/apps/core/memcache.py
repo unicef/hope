@@ -4,28 +4,22 @@ from typing import Any
 
 from django.core.cache.backends.locmem import LocMemCache as DjangoLocMemCache
 
+from hope.apps.core.celery_lock import LOCK_PREFIX
 
-class SimpleCacheLock:
-    def __init__(self, cache: Any, key: str, blocking_timeout: float, timeout: float | None) -> None:
+
+class LocMemLock:
+    def __init__(self, cache: Any, key: str, expire: float | None) -> None:
         self.cache = cache
-        self.key = key
-        self.blocking_timeout = blocking_timeout
-        self.timeout = timeout
+        self.key = f"lock:{key}"
+        self.expire = expire
 
-    def __enter__(self) -> "SimpleCacheLock":
-        start = time.time()
-        while True:
-            if self.cache.add(self.key, "LOCKED", self.timeout):
-                return self
-            if time.time() - start > self.blocking_timeout:  # pragma: no cover
-                raise TimeoutError(f"Could not acquire lock {self.key}")  # pragma: no cover
-            time.sleep(0.1)  # pragma: no cover
-
-    def __exit__(self, exc_type: type | None, exc: BaseException | None, tb: Any | None) -> None:
-        self.cache.delete(self.key)
-
-    def acquire(self, blocking: bool) -> bool:
-        return self.cache.add(self.key, "LOCKED", self.timeout)
+    def acquire(self, blocking: bool = True, timeout: float | None = None) -> bool:
+        deadline = time.monotonic() + (timeout or 0)
+        while not self.cache.add(self.key, "LOCKED", self.expire):
+            if not blocking or time.monotonic() >= deadline:
+                return False
+            time.sleep(0.01)
+        return True
 
     def release(self) -> None:
         self.cache.delete(self.key)
@@ -43,5 +37,12 @@ class LocMemCache(DjangoLocMemCache):
         """Set expiration time on an existing key."""
         return self.touch(key, timeout)
 
-    def lock(self, key: str, blocking_timeout: float = 0, timeout: float | None = None) -> SimpleCacheLock:
-        return SimpleCacheLock(self, key, blocking_timeout, timeout)
+    def lock(self, key: str, expire: float | None = None, auto_renewal: bool = False) -> LocMemLock:
+        return LocMemLock(self, key, expire)
+
+    def celery_lock_keys(self) -> list[str]:
+        prefix = self.make_key(f"lock:{LOCK_PREFIX}")
+        return sorted(key.removeprefix(self.make_key("lock:")) for key in self._cache if key.startswith(prefix))
+
+    def delete_celery_lock(self, key: str) -> None:
+        self.delete(f"lock:{key}")

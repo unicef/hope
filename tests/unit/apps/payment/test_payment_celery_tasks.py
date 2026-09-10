@@ -1,13 +1,14 @@
+from collections.abc import Callable
 import datetime
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest.mock import Mock, PropertyMock, patch
+import uuid
 
 from celery.exceptions import Retry
 from constance.test import override_config
 from django.contrib.admin.options import get_content_type_for_model
-from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.utils import timezone
 from flags.models import FlagState
@@ -30,6 +31,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task,
@@ -43,10 +45,13 @@ from hope.apps.payment.celery_tasks import (
     get_sync_run_rapid_pro_async_task,
     get_sync_run_rapid_pro_async_task_action,
     import_payment_plan_delivery_from_xlsx_async_task,
+    import_payment_plan_delivery_from_xlsx_async_task_action,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_group_delivery_from_xlsx_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task_action,
     import_payment_plan_payment_list_from_xlsx_async_task,
+    import_payment_plan_payment_list_from_xlsx_async_task_action,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_custom_exchange_rate_async_task_action,
     payment_plan_apply_engine_rule_async_task,
@@ -54,9 +59,11 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection_async_task,
     payment_plan_apply_steficon_hh_selection_async_task_action,
     payment_plan_exclude_beneficiaries_async_task,
+    payment_plan_exclude_beneficiaries_async_task_action,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
+    payment_plan_set_entitlement_flat_amount_async_task_action,
     periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
     periodic_sync_payment_gateway_account_types_async_task,
     periodic_sync_payment_gateway_account_types_async_task_action,
@@ -86,7 +93,6 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments_async_task_action,
 )
 from hope.apps.payment.services import western_union_reports_service
-from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     AsyncJob,
     AsyncJobModel,
@@ -382,25 +388,18 @@ def test_prepare_payment_plan_task_wrong_pp_status(mock_logger: Mock) -> None:
     mock_logger.info.assert_called_with("The Payment Plan must have the status TP_OPEN.")
 
 
-@patch("hope.apps.payment.celery_tasks.logger")
-def test_prepare_payment_plan_task_already_running(mock_logger: Mock) -> None:
+def test_prepare_payment_plan_task_fails_without_retry_when_lock_held(hold_lock: Callable[..., None]) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.TP_OPEN,
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
     )
+    hold_lock("prepare_payment_plan", payment_plan.pk)
+
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_prepare_payment_plan:{payment_plan.pk}"):
+        queue_and_run_retry_task(prepare_payment_plan_async_task, payment_plan)
+
     payment_plan.refresh_from_db()
-    pp_id_str = str(payment_plan.pk)
-    cache_key = generate_cache_key(
-        {
-            "task_name": "prepare_payment_plan_async_task",
-            "payment_plan_id": str(payment_plan.id),
-        }
-    )
-    cache.set(cache_key, True, timeout=300)
-    queue_and_run_retry_task(prepare_payment_plan_async_task, payment_plan)
-    mock_logger.info.assert_called_with(
-        f"Task prepare_payment_plan_async_task with payment_plan_id {pp_id_str} already running."
-    )
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.create_payments")
@@ -850,6 +849,39 @@ def test_payment_plan_apply_engine_rule_action_updates_payments_and_entitlement_
     mock_get_quantity_in_usd.assert_called_once()
 
 
+@patch("hope.apps.payment.celery_tasks.log_payment_plan_change")
+@patch("hope.apps.payment.celery_tasks.bulk_log_payment_changes")
+@patch("hope.models.Payment.signature_manager.bulk_update_with_signature")
+@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd", return_value=Decimal(1))
+@patch("hope.apps.payment.celery_tasks.copy_model_object", side_effect=lambda obj: obj)
+@patch("hope.apps.payment.celery_tasks.get_object_or_404")
+def test_payment_plan_apply_engine_rule_action_bulk_updates_in_chunks(
+    mock_get_object_or_404: Mock,
+    mock_copy_model_object: Mock,
+    mock_get_quantity_in_usd: Mock,
+    mock_bulk_update: Mock,
+    mock_bulk_log: Mock,
+    mock_log_payment_plan_change: Mock,
+) -> None:
+    payments = [Mock(household=Mock()) for _ in range(1001)]
+    payment_plan = Mock(background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN)
+    payment_plan.business_area.name = "Test BA"
+    payment_plan.eligible_payments.select_related.return_value.iterator.return_value = payments
+    rule = Mock(id=1)
+    rule.execute.return_value = Mock(value=Decimal(500))
+    payment_plan.steficon_rule_id = 1
+    mock_get_object_or_404.side_effect = [payment_plan, Mock(latest=rule)]
+    chunk_sizes: list[int] = []
+    mock_bulk_update.side_effect = lambda objs, fields: chunk_sizes.append(len(objs))
+
+    payment_plan_apply_engine_rule_async_task_action(
+        Mock(config={"payment_plan_id": "payment-plan-id", "engine_rule_id": "engine-rule-id"})
+    )
+
+    assert chunk_sizes == [1000, 1]
+    assert mock_bulk_log.call_count == 2
+
+
 @patch("hope.apps.payment.celery_tasks.logger")
 @patch("hope.models.rule.RuleCommit.execute", side_effect=Exception("rule failure"))
 def test_payment_plan_apply_engine_rule_action_sets_error_status_on_exception(
@@ -1188,6 +1220,34 @@ def test_payment_plan_apply_steficon_hh_selection() -> None:
 
     payment.refresh_from_db(fields=["vulnerability_score"])
     assert payment.vulnerability_score == Decimal("500.333")
+
+
+@pytest.mark.parametrize(
+    ("score_min", "score_max", "removed"),
+    [
+        (Decimal(600), None, True),
+        (None, Decimal(400), True),
+        (Decimal(400), None, False),
+        (None, Decimal(600), False),
+    ],
+)
+def test_payment_plan_apply_steficon_hh_selection_filters_by_one_sided_score_range(
+    score_min: Decimal | None, score_max: Decimal | None, removed: bool
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_STEFICON_WAIT,
+        steficon_rule_targeting=RuleCommitFactory(version=33, is_release=True),
+        vulnerability_score_min=score_min,
+        vulnerability_score_max=score_max,
+    )
+    payment = PaymentFactory(parent=payment_plan)
+    engine_rule = RuleFactory(name="Rule-test", type=Rule.TYPE_TARGETING)
+    RuleCommitFactory(definition="result.value=Decimal('500')", rule=engine_rule, version=11, is_release=True)
+
+    queue_and_run_retry_task(payment_plan_apply_steficon_hh_selection_async_task, payment_plan, str(engine_rule.id))
+
+    payment = Payment.all_objects.get(pk=payment.pk)
+    assert payment.is_removed is removed
 
 
 @patch("hope.models.Payment.objects.bulk_update")
@@ -2272,3 +2332,28 @@ def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
     assert lower_bound <= called_since <= upper_bound
+
+
+@pytest.mark.parametrize(
+    ("action", "config_key"),
+    [
+        (send_to_payment_gateway_async_task_action, "payment_plan_id"),
+        (payment_plan_exclude_beneficiaries_async_task_action, "payment_plan_id"),
+        (payment_plan_apply_engine_rule_async_task_action, "payment_plan_id"),
+        (payment_plan_apply_steficon_hh_selection_async_task_action, "payment_plan_id"),
+        (payment_plan_set_entitlement_flat_amount_async_task_action, "payment_plan_id"),
+        (payment_plan_apply_custom_exchange_rate_async_task_action, "payment_plan_id"),
+        (import_payment_plan_payment_list_from_xlsx_async_task_action, "payment_plan_id"),
+        (import_payment_plan_delivery_from_xlsx_async_task_action, "payment_plan_id"),
+        (import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action, "payment_plan_id"),
+        (import_payment_plan_group_delivery_from_xlsx_async_task_action, "payment_plan_group_id"),
+    ],
+)
+def test_payment_action_fails_without_retry_when_lock_held(
+    action: Callable[[AsyncRetryJob], object], config_key: str, hold_lock: Callable[..., None]
+) -> None:
+    object_id = uuid.uuid4()
+    hold_lock(action.__name__.removesuffix("_async_task_action"), object_id)
+
+    with pytest.raises(AlreadyRunningError, match=f"{action.__name__.removesuffix('_async_task_action')}:{object_id}"):
+        action(AsyncRetryJob(config={config_key: str(object_id)}))

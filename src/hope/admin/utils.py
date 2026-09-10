@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -27,8 +27,11 @@ from django.urls import reverse
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
+from hope.apps.administration.celery_locks import celery_locks_for, remove_celery_lock
+from hope.apps.administration.forms import ConfirmDangerForm
 from hope.apps.administration.widgets import JsonWidget
-from hope.apps.payment.utils import generate_cache_key, get_link
+from hope.apps.core.celery_lock import lock_key
+from hope.apps.payment.utils import get_link
 from hope.apps.utils.security import is_root
 from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
@@ -182,6 +185,23 @@ class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONW
         self.message_user(request, f"Selection contains {count} records")
 
 
+class CeleryLocksAdminMixin(ExtraButtonsMixin):
+    celery_lock_field = "pk"
+
+    @button(permission=lambda request, obj, handler: is_root(request), label="Remove task locks")
+    def remove_task_locks(self, request: HttpRequest, pk: str) -> HttpResponse:
+        obj = cast("Model", self.get_object(request, pk))
+        locks = celery_locks_for(getattr(obj, self.celery_lock_field))
+        form = ConfirmDangerForm(request.POST or None)
+        if request.method == "POST" and form.is_valid():
+            for key in locks:
+                remove_celery_lock(request, key, obj)
+            self.message_user(request, f"Removed {len(locks)} lock(s)", messages.WARNING)
+            return redirect(f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change", pk)
+        context = self.get_common_context(request, pk, title="Remove task locks", form=form, locks=locks)
+        return TemplateResponse(request, "admin/celery_locks_confirm.html", context)
+
+
 class ViewOnUiMixin:
     """Add a "View on UI" button that links to the object page on the frontend.
 
@@ -328,13 +348,7 @@ class PaymentPlanCeleryTasksMixin:
             )
             return redirect(reverse(self.url, args=[pk]))
         # check if no task in a queue
-        cache_key = generate_cache_key(
-            {
-                "task_name": "prepare_payment_plan_async_task",
-                "payment_plan_id": pk,
-            }
-        )
-        if cache.get(cache_key):
+        if lock_key("prepare_payment_plan", pk) in cache.celery_lock_keys():
             messages.add_message(
                 request,
                 messages.ERROR,

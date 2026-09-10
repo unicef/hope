@@ -8,6 +8,7 @@ nav:
   - elasticsearch.md
   - child-payment-plans.md
   - population-recalculation.md
+  - celery-locks.md
   - contributing.md
 
 collapse: true

@@ -5,12 +5,12 @@ from django.contrib import admin
 from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
 
-from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
+from hope.admin.utils import CeleryLocksAdminMixin, HOPEModelAdminBase, ViewOnUiMixin
 from hope.models import FollowUpInstruction
 
 
 @admin.register(FollowUpInstruction)
-class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
+class FollowUpInstructionAdmin(CeleryLocksAdminMixin, ViewOnUiMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "business_area",
