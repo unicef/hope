@@ -98,14 +98,15 @@ def business_area_editor():
     ],
 )
 def test_business_area_admin_deduplication_thresholds_readonly_state(
-    ingest_source, expected_readonly_thresholds, business_area_editor
+    ingest_source, expected_readonly_thresholds, business_area_editor, django_assert_num_queries
 ):
     ba = BusinessAreaFactory(ingest_source=ingest_source)
     admin = BusinessAreaAdmin(model=BusinessArea, admin_site=AdminSite())
     request = RequestFactory().get("/")
     request.user = business_area_editor
 
-    readonly = admin.get_readonly_fields(request, ba)
+    with django_assert_num_queries(0):
+        readonly = admin.get_readonly_fields(request, ba)
 
     assert (
         set(readonly)
@@ -129,14 +130,17 @@ def test_business_area_admin_deduplication_thresholds_readonly_state(
     ],
 )
 def test_business_area_admin_deduplication_threshold_help_text_for_country_workspace_only(
-    field_name, business_area_editor
+    field_name, business_area_editor, django_assert_num_queries
 ):
     ba = BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
     admin = BusinessAreaAdmin(model=BusinessArea, admin_site=AdminSite())
     request = RequestFactory().get("/")
     request.user = business_area_editor
 
-    form = admin.get_form(request, ba, change=True)(instance=ba)
+    with django_assert_num_queries(4):
+        form_class = admin.get_form(request, ba, change=True)
+
+    form = form_class(instance=ba)
     readonly_field = AdminReadonlyField(form, field_name, is_first=False, model_admin=admin)
 
     assert readonly_field.field["help_text"] == (
@@ -155,13 +159,14 @@ def test_business_area_admin_deduplication_threshold_help_text_for_country_works
     ],
 )
 def test_business_area_admin_deduplication_threshold_help_text_for_legacy_ingest_source(
-    field_name, business_area_editor
+    field_name, business_area_editor, django_assert_num_queries
 ):
     ba = BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE)
     admin = BusinessAreaAdmin(model=BusinessArea, admin_site=AdminSite())
     request = RequestFactory().get("/")
     request.user = business_area_editor
 
-    form = admin.get_form(request, ba, change=True)
+    with django_assert_num_queries(4):
+        form = admin.get_form(request, ba, change=True)
 
     assert form.base_fields[field_name].help_text == BusinessArea._meta.get_field(field_name).help_text
