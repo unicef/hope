@@ -191,6 +191,7 @@ class HouseholdViewSet(
             200: PaymentListSerializer(many=True),
         },
     )
+
     @action(detail=True, methods=["get"], filter_backends=(OrderingFilter,))
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         hh = self.get_object()
@@ -341,6 +342,10 @@ class HouseholdGlobalViewSet(
             .order_by("created_at")
         )
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
+
 
 class IndividualViewSet(
     ProgramVisibilityMixin,
@@ -489,3 +494,7 @@ class IndividualGlobalViewSet(
                 )
             )
         )
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}, context={"business_area": self.business_area}).data)

@@ -177,6 +177,10 @@ class UserViewSet(
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
+
     @action(
         detail=False,
         methods=["get"],

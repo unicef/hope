@@ -404,6 +404,10 @@ class ProgramViewSet(
             new_object=instance,
         )
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
+
     @action(detail=True, methods=["get"])
     def deduplication_flags(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
