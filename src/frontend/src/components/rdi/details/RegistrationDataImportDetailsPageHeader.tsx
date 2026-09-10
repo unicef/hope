@@ -22,7 +22,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { RefuseRdi } from '@restgenerated/models/RefuseRdi';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import type { BusinessArea } from '@restgenerated/models/BusinessArea';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDataImportDetail;
