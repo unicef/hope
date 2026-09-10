@@ -1,0 +1,9 @@
+{% extends 'base_notification_email.txt' %}
+
+{% block content %}
+    {{ intro }}
+
+    {{ ticket_count }} ticket{{ ticket_count|pluralize }} for {{ digest_date }}.
+
+    Check the full list here: {{ tickets_url }}
+{% endblock content %}

@@ -1,0 +1,7 @@
+{% extends 'base_notification_email.html' %}
+
+{% block content %}
+    <p>{{ intro }}</p>
+    <p style="font-size: 15px;"><strong>{{ ticket_count }}</strong> ticket{{ ticket_count|pluralize }} for {{ digest_date }}.</p>
+    <p><a href="{{ tickets_url }}">Check the full list here</a></p>
+{% endblock content %}
