@@ -94,7 +94,6 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         "additional_document_number": "additional_document_number",
         "transaction_status_blockchain_link": "transaction_status_blockchain_link",
     }
-    MISSING = object()
 
     class XlsxPaymentPlanDeliveryImportServiceError(Exception):
         pass
@@ -445,10 +444,12 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         value = row[self.xlsx_headers.index(header_name)].value
         return None if value == "" else value
 
-    def _get_optional_cell_value_or_missing(self, row: tuple[Cell, ...], header_name: str) -> Any:
-        if header_name not in self.xlsx_headers:
-            return self.MISSING
-        return self._get_optional_cell_value(row, header_name)
+    def _get_optional_reconciliation_updates(self, row: tuple[Cell, ...]) -> dict[str, Any]:
+        return {
+            field_name: self._get_optional_cell_value(row, header)
+            for header, field_name in self.OPTIONAL_RECONCILIATION_FIELDS.items()
+            if header in self.xlsx_headers
+        }
 
     def _cleanup_payment_verifications(self) -> None:
         if not self.payment_ids_for_verification_cleanup:
@@ -593,16 +594,14 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         if old_status != status:
             payment.status_date = timezone.now()
 
-        delivery_date = self._get_optional_cell_value_or_missing(row, "delivery_date")
-        if delivery_date is not self.MISSING:
+        if "delivery_date" in self.xlsx_headers:
+            delivery_date = self._get_optional_cell_value(row, "delivery_date")
             payment.delivery_date = (
                 to_utc_midnight(self._parse_delivery_date(delivery_date)) if delivery_date is not None else None
             )
 
-        for header, field_name in self.OPTIONAL_RECONCILIATION_FIELDS.items():
-            value = self._get_optional_cell_value_or_missing(row, header)
-            if value is not self.MISSING:
-                setattr(payment, field_name, value)
+        for field_name, value in self._get_optional_reconciliation_updates(row).items():
+            setattr(payment, field_name, value)
         payment.set_extra_fields(self._get_extras_for_row(row, payment.extra_fields))
 
     def _get_values_for_update(self, row: tuple[Cell, ...]) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
