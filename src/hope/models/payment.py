@@ -282,7 +282,7 @@ class Payment(
         "household_id",
         "head_of_household_id",
         "delivery_type",
-        "currency.code",
+        "currency.vision_code",
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",

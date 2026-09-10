@@ -125,6 +125,7 @@ class PaymentPlan(
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
             "currency.code": "currency",
+            "currency.vision_code": "currency_vision_code",
         },
     )
 
