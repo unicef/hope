@@ -36,6 +36,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Read only by DeduplicateTask.deduplicate_pending_individuals, which the Country Workspace flow never calls.
+BIOGRAPHIC_DEDUPLICATION_THRESHOLD_FIELDS = (
+    "deduplication_batch_duplicates_percentage",
+    "deduplication_batch_duplicates_allowed",
+    "deduplication_golden_record_duplicates_percentage",
+    "deduplication_golden_record_duplicates_allowed",
+)
+BIOGRAPHIC_DEDUPLICATION_NOT_SUPPORTED_HELP_TEXT = (
+    "Not supported for Country Workspace only business areas - biographic duplicate thresholds "
+    "are not evaluated in this flow."
+)
+
 
 class XLSImportForm(forms.Form):
     xls_file = forms.FileField()
@@ -194,9 +206,16 @@ class BusinessAreaAdmin(
 
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
         read_only_fields = super().get_readonly_fields(request, obj)
-        if obj and obj.ingest_source == BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY:
-            return tuple(read_only_fields) + ("ingest_source",)
+        if obj and obj.is_rdi_ingest_source_country_workspace_only:
+            return tuple(read_only_fields) + ("ingest_source", *BIOGRAPHIC_DEDUPLICATION_THRESHOLD_FIELDS)
         return read_only_fields
+
+    def get_form(self, request: HttpRequest, obj: Any | None = None, change: bool = False, **kwargs: Any) -> Any:
+        if obj and obj.is_rdi_ingest_source_country_workspace_only:
+            kwargs["help_texts"] = dict.fromkeys(
+                BIOGRAPHIC_DEDUPLICATION_THRESHOLD_FIELDS, BIOGRAPHIC_DEDUPLICATION_NOT_SUPPORTED_HELP_TEXT
+            )
+        return super().get_form(request, obj, change=change, **kwargs)
 
     def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
