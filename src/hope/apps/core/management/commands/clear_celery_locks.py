@@ -37,6 +37,5 @@ class Command(BaseCommand):
     help = "Remove every celery task lock from the cache. Run only while no celery worker is running (deploy)."
 
     def handle(self, *args: Any, **options: Any) -> None:
-        lock_keys = [key for key in cache.keys("*") if key.startswith(LOCK_KEY_PREFIXES)]
-        cache.delete_many(lock_keys)
-        self.stdout.write(f"Removed {len(lock_keys)} celery task locks")
+        removed = sum(cache.delete_pattern(f"{prefix}*") for prefix in LOCK_KEY_PREFIXES)
+        self.stdout.write(f"Removed {removed} celery task locks")

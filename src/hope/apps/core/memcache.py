@@ -32,16 +32,14 @@ class SimpleCacheLock:
 
 
 class LocMemCache(DjangoLocMemCache):
-    def keys(self, pattern: str = "*") -> list[str]:
-        """All keys without the version prefix, like django-redis."""
-        return [key.split(":", 2)[2] for key in list(self._cache)]
-
-    def delete_pattern(self, pattern: str) -> None:
+    def delete_pattern(self, pattern: str) -> int:
         regex_pattern = re.escape(pattern).replace("\\*", "(.*)")
         key_pattern = self.make_key(regex_pattern)
-        for key in self._cache:
-            if re.match(key_pattern, key):
-                self.delete(key)
+        matching = [key for key in self._cache if re.match(key_pattern, key)]
+        with self._lock:
+            for key in matching:
+                self._delete(key)
+        return len(matching)
 
     def expire(self, key: str, timeout: float | None = None) -> bool:
         """Set expiration time on an existing key."""
