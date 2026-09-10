@@ -830,6 +830,7 @@ def group_with_closed_plan(program_cycle, business_area, fsp, delivery_mechanism
         entitlement_quantity=Decimal("100.00"),
         delivered_quantity=Decimal("100.00"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+        transaction_reference_id="CLOSED-REFERENCE",
         conflicted=True,
     )
     PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
@@ -1473,32 +1474,127 @@ def test_override_empty_optional_cell_clears_existing_value(group_two_plans_one_
 
 
 @pytest.mark.parametrize("override", [False, True])
-@pytest.mark.parametrize("quantity", [None, Decimal("50.00"), Decimal("100.00")])
-def test_closed_plan_row_rejects_file_regardless_of_quantity(
+@pytest.mark.parametrize("quantity", [None, Decimal("100.00")])
+def test_closed_plan_row_with_empty_or_matching_quantity_is_skipped(
     group_with_closed_plan, override, quantity, django_assert_num_queries
 ):
     ctx = group_with_closed_plan
-    original_quantity = ctx["payment"].delivered_quantity
     file = _make_workbook(
-        ["payment_id", "delivered_quantity"],
-        [[str(ctx["payment"].unicef_id), quantity]],
+        ["payment_id", "delivered_quantity", "reference_id"],
+        [[str(ctx["payment"].unicef_id), quantity, "MUST-NOT-CHANGE"]],
     )
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
     service.open_workbook()
 
     service.validate()
-    assert len(service.errors) == 1
-    assert service.errors[0].coordinates == "A2"
-    assert f"CLOSED Payment Plan {ctx['payment_plan'].unicef_id}" in service.errors[0].message
+    assert service.errors == []
+    service.import_payment_list()
+
+    assert service.skipped_rows == [
+        {
+            "row": 2,
+            "payment_id": str(ctx["payment"].unicef_id),
+            "reason": (
+                f"Payment belongs to CLOSED Payment Plan {ctx['payment_plan'].unicef_id}; existing data was preserved."
+            ),
+        }
+    ]
+    with django_assert_num_queries(3):
+        ctx["payment"].refresh_from_db()
+        ctx["payment_plan"].refresh_from_db()
+        ctx["file_temp"].refresh_from_db()
+    assert ctx["payment"].delivered_quantity == Decimal("100.00")
+    assert ctx["payment"].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+    assert ctx["payment"].transaction_reference_id == "CLOSED-REFERENCE"
+    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
+    assert ctx["file_temp"].extras == {}
+
+
+@pytest.mark.parametrize("override", [False, True])
+def test_closed_plan_row_with_different_quantity_rejects_file(
+    group_with_closed_plan, override, django_assert_num_queries
+):
+    ctx = group_with_closed_plan
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [[str(ctx["payment"].unicef_id), Decimal("50.00")]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
+    service.open_workbook()
+
     with pytest.raises(XlsxPaymentPlanGroupDeliveryImportError):
         service.import_payment_list()
 
     assert service.skipped_rows == []
+    assert len(service.errors) == 1
+    assert service.errors[0].coordinates == "A2"
+    assert f"CLOSED Payment Plan {ctx['payment_plan'].unicef_id}" in service.errors[0].message
     with django_assert_num_queries(2):
         ctx["payment"].refresh_from_db()
-        ctx["file_temp"].refresh_from_db()
-    assert ctx["payment"].delivered_quantity == original_quantity
-    assert ctx["file_temp"].extras == {}
+        ctx["payment_plan"].refresh_from_db()
+    assert ctx["payment"].delivered_quantity == Decimal("100.00")
+    assert ctx["payment"].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
+
+
+@pytest.mark.parametrize("override", [False, True])
+def test_closed_plan_row_with_invalid_quantity_rejects_file(
+    group_with_closed_plan, override, django_assert_num_queries
+):
+    ctx = group_with_closed_plan
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [[str(ctx["payment"].unicef_id), "not-a-number"]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
+    service.open_workbook()
+
+    with pytest.raises(XlsxPaymentPlanGroupDeliveryImportError):
+        service.import_payment_list()
+
+    assert service.skipped_rows == []
+    assert len(service.errors) == 1
+    assert service.errors[0].coordinates == "B2"
+    with django_assert_num_queries(2):
+        ctx["payment"].refresh_from_db()
+        ctx["payment_plan"].refresh_from_db()
+    assert ctx["payment"].delivered_quantity == Decimal("100.00")
+    assert ctx["payment"].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
+
+
+@pytest.fixture
+def group_with_closed_error_payment(group_with_closed_plan):
+    ctx = group_with_closed_plan
+    ctx["payment"].delivered_quantity = None
+    ctx["payment"].delivered_quantity_usd = None
+    ctx["payment"].status = Payment.STATUS_ERROR
+    ctx["payment"].save(update_fields=["delivered_quantity", "delivered_quantity_usd", "status"])
+    return ctx
+
+
+@pytest.mark.parametrize("override", [False, True])
+def test_closed_error_payment_treats_minus_one_as_matching_result(
+    group_with_closed_error_payment, override, django_assert_num_queries
+):
+    ctx = group_with_closed_error_payment
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity"],
+        [[str(ctx["payment"].unicef_id), Decimal(-1)]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
+    service.open_workbook()
+
+    service.import_payment_list()
+
+    assert service.errors == []
+    assert len(service.skipped_rows) == 1
+    with django_assert_num_queries(2):
+        ctx["payment"].refresh_from_db()
+        ctx["payment_plan"].refresh_from_db()
+    assert ctx["payment"].delivered_quantity is None
+    assert ctx["payment"].status == Payment.STATUS_ERROR
+    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
 
 
 @pytest.fixture
@@ -1506,6 +1602,16 @@ def mixed_group_with_closed_plan(group_two_plans_one_fsp):
     ctx = group_two_plans_one_fsp
     ctx["plan_two"].status = PaymentPlan.Status.CLOSED
     ctx["plan_two"].save(update_fields=["status"])
+    return ctx
+
+
+@pytest.fixture
+def mixed_group_with_reconciled_closed_plan(mixed_group_with_closed_plan):
+    ctx = mixed_group_with_closed_plan
+    ctx["payment_two"].delivered_quantity = Decimal("75.00")
+    ctx["payment_two"].status = Payment.STATUS_DISTRIBUTION_PARTIAL
+    ctx["payment_two"].transaction_reference_id = "CLOSED-REFERENCE"
+    ctx["payment_two"].save(update_fields=["delivered_quantity", "status", "transaction_reference_id"])
     return ctx
 
 
@@ -1535,6 +1641,37 @@ def test_mixed_group_rejects_file_containing_closed_plan_row(
     assert len(service.errors) == 1
     assert service.errors[0].coordinates == "A3"
     assert "CLOSED Payment Plan" in service.errors[0].message
+
+
+@pytest.mark.parametrize("override", [False, True])
+def test_mixed_group_imports_open_plan_when_closed_plan_row_matches(
+    mixed_group_with_reconciled_closed_plan, override, django_assert_num_queries
+):
+    ctx = mixed_group_with_reconciled_closed_plan
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "reference_id"],
+        [
+            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "OPEN-REFERENCE"],
+            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "MUST-NOT-CHANGE"],
+        ],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
+    service.open_workbook()
+
+    service.import_payment_list()
+
+    with django_assert_num_queries(3):
+        ctx["payment_one"].refresh_from_db()
+        ctx["payment_two"].refresh_from_db()
+        ctx["plan_two"].refresh_from_db()
+    assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
+    assert ctx["payment_one"].transaction_reference_id == "OPEN-REFERENCE"
+    assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
+    assert ctx["payment_two"].status == Payment.STATUS_DISTRIBUTION_PARTIAL
+    assert ctx["payment_two"].transaction_reference_id == "CLOSED-REFERENCE"
+    assert ctx["plan_two"].status == PaymentPlan.Status.CLOSED
+    assert service.errors == []
+    assert len(service.skipped_rows) == 1
 
 
 @pytest.mark.parametrize("override", [False, True])

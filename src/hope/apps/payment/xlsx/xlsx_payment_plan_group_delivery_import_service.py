@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from io import BytesIO
 import logging
 from typing import IO, TYPE_CHECKING, Any, cast
@@ -59,7 +60,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.eligible_plans: list[PaymentPlan] = []
         self.payment_to_plan: dict[str, PaymentPlan] = {}
         self.ineligible_payment_reasons: dict[str, str] = {}
-        self.closed_payment_plans: dict[str, str] = {}
+        self.closed_payments: dict[str, tuple[str, Decimal | None, str]] = {}
         self.payment_gateway_payment_ids: set[str] = set()
         self.fsp_owned_headers: set[str] = set()
         self.source_row_numbers: dict[str, int] = {}
@@ -93,7 +94,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
     def _build_payment_index(self, lock: bool = False) -> None:
         self.payment_to_plan = {}
         self.ineligible_payment_reasons = {}
-        self.closed_payment_plans = {}
+        self.closed_payments = {}
         self.payment_gateway_payment_ids = set()
         self.fsp_owned_headers = set()
 
@@ -108,14 +109,29 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             "conflicted",
             "excluded",
             "has_valid_wallet",
+            "delivered_quantity",
+            "status",
         )
         eligible_plan_ids = {payment_plan.id for payment_plan in self.eligible_plans}
-        for unicef_id, parent_id, extras, conflicted, excluded, has_valid_wallet in payments:
+        for (
+            unicef_id,
+            parent_id,
+            extras,
+            conflicted,
+            excluded,
+            has_valid_wallet,
+            delivered_quantity,
+            payment_status,
+        ) in payments:
             payment_id = str(unicef_id)
             payment_plan = payment_plan_by_id[parent_id]
             self.fsp_owned_headers.update(extras.get(Payment.FSP_EXTRA_FIELDS_KEY, {}))
             if payment_plan.status == PaymentPlan.Status.CLOSED:
-                self.closed_payment_plans[payment_id] = str(payment_plan.unicef_id)
+                self.closed_payments[payment_id] = (
+                    str(payment_plan.unicef_id),
+                    delivered_quantity,
+                    payment_status,
+                )
             elif payment_plan.is_payment_gateway:
                 self.payment_gateway_payment_ids.add(payment_id)
             elif payment_plan.id not in eligible_plan_ids:
@@ -160,6 +176,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             return
         seen_ids: set[str] = set()
         payment_id_idx = self.headers.index("payment_id")
+        delivered_quantity_idx = self.headers.index("delivered_quantity")
         for row in self.ws.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
@@ -178,15 +195,8 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             else:
                 seen_ids.add(payment_id)
 
-            if payment_id in self.closed_payment_plans:
-                self.errors.append(
-                    XlsxError(
-                        self.sheetname,
-                        id_cell.coordinate,
-                        f"Payment id {payment_id} belongs to CLOSED Payment Plan "
-                        f"{self.closed_payment_plans[payment_id]}. The entire file cannot be imported.",
-                    )
-                )
+            if payment_id in self.closed_payments:
+                self._validate_closed_payment_row(payment_id, id_cell, row[delivered_quantity_idx])
             elif payment_id in self.payment_gateway_payment_ids:
                 self.errors.append(
                     XlsxError(
@@ -206,6 +216,43 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                         f"Payment id {payment_id} does not belong to any payment plan in this group.",
                     )
                 )
+
+    def _validate_closed_payment_row(self, payment_id: str, id_cell: Any, quantity_cell: Any) -> None:
+        payment_plan_id, stored_quantity, stored_status = self.closed_payments[payment_id]
+        try:
+            file_quantity = XlsxPaymentPlanDeliveryImportService._parse_delivered_quantity(quantity_cell.value)
+        except ValueError:
+            self.errors.append(
+                XlsxError(
+                    self.sheetname,
+                    quantity_cell.coordinate,
+                    f"Payment {payment_id}: Delivered quantity {quantity_cell.value} must be a number greater than "
+                    "or equal to zero, exactly -1, or empty.",
+                )
+            )
+            return
+
+        matches_stored_result = file_quantity == stored_quantity or (
+            file_quantity == Decimal(-1) and stored_quantity is None and stored_status == Payment.STATUS_ERROR
+        )
+        if file_quantity is None or matches_stored_result:
+            self.skipped_rows.append(
+                {
+                    "row": id_cell.row,
+                    "payment_id": payment_id,
+                    "reason": f"Payment belongs to CLOSED Payment Plan {payment_plan_id}; existing data was preserved.",
+                }
+            )
+            return
+
+        self.errors.append(
+            XlsxError(
+                self.sheetname,
+                id_cell.coordinate,
+                f"Payment id {payment_id} belongs to CLOSED Payment Plan {payment_plan_id} and the XLSX delivered "
+                "quantity does not match its stored result. The entire file cannot be imported.",
+            )
+        )
 
     def _row_groups_by_plan(self) -> dict[str, list[tuple[Any, ...]]]:
         if self.ws is None:

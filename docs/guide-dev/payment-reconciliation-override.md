@@ -105,8 +105,9 @@ Override accepts `SENT_TO_FSP`, `DISTRIBUTION_SUCCESS`, `DISTRIBUTION_PARTIAL`, 
 skips `PENDING`, cancelled, force-failed, and unrelated statuses. Including `ERROR` lets an authorised user correct a
 previous XLSX `-1` result.
 
-A `FINISHED` Payment Plan is eligible only in override mode. A `CLOSED` plan is never eligible. If the XLSX contains
-even one Payment from a CLOSED plan, reject the whole file in either mode.
+A `FINISHED` Payment Plan is eligible only in override mode. A `CLOSED` plan is never eligible. In either mode, skip
+and report an empty CLOSED-plan row or one that represents the already stored result. Reject the whole file if a
+CLOSED-plan row attempts to add or change a result.
 
 | XLSX quantity | Empty-value policy | Result |
 | --- | --- | --- |
@@ -140,7 +141,8 @@ After plan and Payment eligibility checks, each row has exactly one action:
 | Override, valid non-empty quantity | Eligible | Apply XLSX values, even when the quantity is unchanged |
 
 `Preserve` means that no Payment field changes and no Payment change log is created. `Abort` means that no Payment in
-the file is changed. A CLOSED-plan row always aborts the file.
+the file is changed. A harmless CLOSED-plan row is preserved and reported; a row attempting to change CLOSED data
+aborts the file.
 
 For optional reconciliation columns, use this rule in both normal first-time reconciliation and non-null override:
 
@@ -241,8 +243,8 @@ Accepted delivered quantity values are:
 Reject text, dates, booleans, and negative numbers other than `-1`. Keep the existing check that delivered quantity
 cannot exceed entitlement.
 
-Duplicate `payment_id` rows, invalid values, quantity conflicts, and Payments belonging to CLOSED plans reject the
-whole file with `XlsxError` entries. Nothing is saved.
+Duplicate `payment_id` rows, invalid values, quantity conflicts, and attempts to change CLOSED-plan Payments reject
+the whole file with `XlsxError` entries. Nothing is saved.
 
 A valid file containing only ignored or ineligible rows succeeds with zero Payment updates.
 
@@ -327,6 +329,38 @@ records and must not be used to start or rerun reconciliation.
 
 ## Resolved business questions
 
+### CLOSED Payment Plan rows in a reused group file
+
+**Problem:** The ticket and the later business comment require different behavior. Story 3 says a CLOSED-plan row is
+skipped and reported as ineligible. Stefano's later comment says that any CLOSED-plan row must stop the whole group
+import.
+
+This can block a normal partial reconciliation:
+
+1. One group XLSX contains Payments from Plan A and Plan B.
+2. The first returned file contains delivered quantities for Plan A, while Plan B quantities are empty.
+3. HOPE reconciles Plan A and moves it to `FINISHED`; Plan B remains `ACCEPTED`.
+4. A user marks Plan A ready for closure and closes it. Individual plans can be closed while other plans in the group
+   are still open.
+5. The FSP later adds Plan B's quantities to the same XLSX. The unchanged Plan A rows are still present.
+6. Under Stefano's proposed rule, the closed Plan A rows reject the whole file, so Plan B cannot be reconciled.
+
+**Decision:** Keep CLOSED Payments immutable, but do not reject a harmless row that repeats their existing result:
+
+- Empty CLOSED-plan row: skip it and report it as ineligible.
+- CLOSED-plan row representing the already stored result: skip it and report it as ineligible. This includes `-1`
+  when the stored result is `ERROR` with an empty delivered quantity.
+- CLOSED-plan row attempting to add or change the result: reject the whole file.
+
+This allows later results from the same official group XLSX to be imported without changing a CLOSED Payment. It also
+avoids requiring users to delete rows from an exported file, while still stopping every attempt to modify closed data.
+
+_Source: revised ticket, Story 3 — “Given a row whose payment plan is CLOSED When imported in either normal or
+override mode Then the row is skipped and reported as ineligible.”_
+
+_Conflicting source: Stefano's follow-up comment — “If we are uploading a file for a group, and the file contains rows
+for a CLOSED PP, the process should stop.”_
+
 ### Payment Verifications
 
 An override reset or a change to delivered quantity deletes all linked verifications and their grievance tickets,
@@ -343,17 +377,6 @@ XLSX `-1` sets the Payment to `ERROR`. Allow authorised users to overwrite or re
 corrected through the supported override flow.
 
 _Source: revised ticket — Story 4 and Breaking Changes exclude error statuses from override._
-
-### CLOSED plans in a mixed group
-
-A group may contain both CLOSED and eligible Payment Plans. Load CLOSED-plan Payment IDs only to recognize them during
-validation; they are never import targets.
-
-- If the XLSX contains a Payment from a CLOSED plan, return an error for that row and reject the whole file.
-- If the XLSX contains only Payments from eligible plans, process it normally. A CLOSED plan merely belonging to the
-  group does not block the import.
-
-_Source: Stefano's follow-up comment — if a group file contains rows for a CLOSED Payment Plan, the process must stop._
 
 ### Errors found by the background task
 

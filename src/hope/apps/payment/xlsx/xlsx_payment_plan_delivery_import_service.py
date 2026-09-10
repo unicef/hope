@@ -203,8 +203,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     def _is_empty_quantity(value: Any) -> bool:
         return value is None or isinstance(value, str) and not value.strip()
 
-    def _parse_delivered_quantity(self, value: Any) -> Decimal | None:
-        if self._is_empty_quantity(value):
+    @classmethod
+    def _parse_delivered_quantity(cls, value: Any) -> Decimal | None:
+        if cls._is_empty_quantity(value):
             return None
         if isinstance(value, bool | datetime.date):
             raise ValueError
