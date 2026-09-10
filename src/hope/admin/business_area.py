@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Read only by DeduplicateTask.deduplicate_pending_individuals, which the Country Workspace flow never calls.
 BIOGRAPHIC_DEDUPLICATION_THRESHOLD_FIELDS = (
     "deduplication_batch_duplicates_percentage",
     "deduplication_batch_duplicates_allowed",
@@ -205,6 +204,18 @@ class BusinessAreaAdmin(
     filter_horizontal = ("countries", "payment_countries")
 
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
+        """Make the biographic deduplication thresholds read only for Country Workspace only business areas.
+
+        If some properties of RDI are above the values defined by one of
+        BIOGRAPHIC_DEDUPLICATION_THRESHOLD_FIELDS HOPE DROPS the RDI.
+
+        Intent:
+        In Country Workspace - Automerge flow we'd like to have AUTOMERGE
+        on the first place and HOPE MUST NOT take the initative in that process.
+        That's why those fields are NOT respected (and read only)
+        when Country Workspace flow is enabled.
+        For other RDI upload paths like XLSX, Kobo, Aurora tresholds ARE RESPECTED.
+        """
         read_only_fields = super().get_readonly_fields(request, obj)
         if obj and obj.is_rdi_ingest_source_country_workspace_only:
             return tuple(read_only_fields) + ("ingest_source", *BIOGRAPHIC_DEDUPLICATION_THRESHOLD_FIELDS)
