@@ -2085,7 +2085,7 @@ def test_import_delivery_group_task_emails_uploader_when_background_validation_f
     mock_email_user.assert_called_once()
     assert mock_email_user.call_args.args[0].pk == user.pk
     assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import failed for {group.name}"
-    assert "background processing" in mock_email_user.call_args.kwargs["text_body"]
+    assert "background validation failed" in mock_email_user.call_args.kwargs["text_body"]
 
 
 def test_import_delivery_group_task_sets_error_status_on_failure(
