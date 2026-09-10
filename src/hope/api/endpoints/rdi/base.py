@@ -1,6 +1,6 @@
 from dataclasses import asdict
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
 
 from django.core.validators import URLValidator
@@ -264,7 +264,7 @@ class CompleteRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView, Up
         ).count()
         self.selected_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
         self.selected_rdi.save()
-        rdi_dispatcher_task(cast("Program", self.selected_rdi.program))
+        rdi_dispatcher_task(self.selected_rdi.program)
 
         return Response(
             [
@@ -332,7 +332,7 @@ class ResetRDIView(BusinessAreaIngestCWOnlyMixin, HOPEAPIBusinessAreaView):
             rdi.save(update_fields=["status"])
             # The RDI just left the merge queue; we need to trigger the queue, so a newer RDI waiting
             # behind will start being processed.
-            rdi_dispatcher_task(cast("Program", rdi.program))
+            rdi_dispatcher_task(rdi.program)
             logger.info("RDI reset scheduled for %s: delete rdi job %s queued", rdi_id, job.pk)
 
         return Response({"id": str(rdi.id), "status": rdi.status}, status=status.HTTP_202_ACCEPTED)

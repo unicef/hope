@@ -10,7 +10,6 @@ from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_b
 from hope.models import (
     PendingHousehold,
     PendingIndividual,
-    Program,
     RegistrationDataImport,
 )
 
@@ -103,9 +102,7 @@ class FetchFindingsAndMergeRdi:
         if dedupe_service is not None and findings is not None:
             registration_data_import_id = str(rdi.id)
             similarity_pairs = dedupe_service.parse_findings(findings)
-            dedupe_service.store_similarity_pairs(
-                cast("Program", rdi.program), similarity_pairs, id_field_name="country_workspace_id"
-            )
+            dedupe_service.store_similarity_pairs(rdi.program, similarity_pairs, id_field_name="country_workspace_id")
             logger.info(
                 f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings"
             )
