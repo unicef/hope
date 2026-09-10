@@ -39,7 +39,7 @@ export function LockPaymentPlan({
 
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const { mutateAsync: lock, isPending: loadingLock } = useMutation({
+  const { mutate: lock, isPending: loadingLock } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

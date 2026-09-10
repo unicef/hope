@@ -27,6 +27,7 @@ import {
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
+import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -36,6 +37,7 @@ import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
 import type { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { IndividualRoleInHouseholdForHousehold } from '@restgenerated/models/IndividualRoleInHouseholdForHousehold';
 import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -328,10 +330,16 @@ const CreateGrievancePage = (): ReactElement => {
     roles: [],
   };
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
+  const {
+    data: choicesData,
+    isLoading: choicesLoading,
+    isError: choicesError,
+    error: choicesErrorData,
+  } = useQuery<GrievanceChoices>({
     queryKey: restQueryKey(RestService.restChoicesGrievanceTicketsRetrieve),
     queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
+  useApiErrorSnackbar(choicesError, choicesErrorData);
 
   const { mutateAsync, isPending: loading } = useMutation({
     mutationFn: (requestData: CreateGrievanceTicket) => {
@@ -434,6 +442,8 @@ const CreateGrievancePage = (): ReactElement => {
     (linkedTicketLoading && isLinkedFromUrl)
   )
     return <LoadingComponent />;
+  // The choices request failed — useApiErrorSnackbar has already told the user why.
+  if (!choicesData) return null;
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))

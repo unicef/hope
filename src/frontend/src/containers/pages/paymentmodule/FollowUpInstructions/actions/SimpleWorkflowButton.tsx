@@ -30,7 +30,7 @@ export function SimpleWorkflowButton({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isPending } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn,
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -55,7 +55,7 @@ export function SimpleWorkflowButton({
       loading={isPending}
       color={color}
       variant={variant}
-      onClick={() => mutateAsync()}
+      onClick={() => mutate()}
       data-cy={dataCy}
     >
       {t(label)}

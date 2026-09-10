@@ -97,7 +97,7 @@ const PeriodicDataUpdatePendingForMerge = () => {
     status: ['APPROVED' as const],
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  const { mutateAsync: bulkMerge } = useMutation({
+  const { mutate: bulkMerge } = useMutation({
     mutationFn: (ids: number[]) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
         {
@@ -122,9 +122,9 @@ const PeriodicDataUpdatePendingForMerge = () => {
     },
   });
 
-  const handleMerge = async () => {
+  const handleMerge = () => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
-    await bulkMerge(ids);
+    bulkMerge(ids);
   };
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({

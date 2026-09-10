@@ -32,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
 interface CreateProgramCycleProps {
-  program: ProgramDetail;
+  program: Partial<ProgramDetail>;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
@@ -49,7 +49,7 @@ const CreateProgramCycle = ({
   step,
 }: CreateProgramCycleProps) => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
 
@@ -65,6 +65,13 @@ const CreateProgramCycle = ({
           )
         : schema,
     );
+  let startDate = Yup.date().nullable().required(t('Start Date is required'));
+  if (program.startDate) {
+    startDate = startDate.min(
+      new Date(program.startDate),
+      t('Start Date cannot be before Programme Start Date'),
+    );
+  }
   if (program.endDate) {
     endDate = endDate.max(
       new Date(program.endDate),
@@ -76,13 +83,7 @@ const CreateProgramCycle = ({
       .required(t('Programme Cycle Title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    startDate: Yup.date()
-      .nullable()
-      .required(t('Start Date is required'))
-      .min(
-        new Date(program.startDate),
-        t('Start Date cannot be before Programme Start Date'),
-      ),
+    startDate,
     endDate: endDate.nullable(),
   });
 
@@ -102,7 +103,7 @@ const CreateProgramCycle = ({
     mutationFn: async (body) => {
       return RestService.restBusinessAreasProgramsCyclesCreate({
         businessAreaSlug: businessArea,
-        programCode: program.code,
+        programCode,
         requestBody: body,
       });
     },

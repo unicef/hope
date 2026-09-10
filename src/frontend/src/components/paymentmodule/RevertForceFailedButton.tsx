@@ -35,7 +35,7 @@ export function RevertForceFailedButton({
   const { paymentPlanId } = useParams();
   const { showMessage } = useSnackbar();
   const {
-    mutateAsync: revertMarkAsFailed,
+    mutate: revertMarkAsFailed,
     isPending: loadingRevertMarkAsFailed,
   } = useMutation({
     mutationFn: ({

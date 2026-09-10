@@ -69,7 +69,7 @@ function ExcludeSection({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
-  const { mutateAsync } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (requestBody: PaymentPlanExcludeBeneficiaries) => {
       return RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
         {
@@ -143,7 +143,7 @@ function ExcludeSection({
 
   const handleSave = (values): void => {
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
-    mutateAsync({
+    mutate({
       excludedHouseholdsIds: idsToSave,
       exclusionReason: values.exclusionReason,
     });

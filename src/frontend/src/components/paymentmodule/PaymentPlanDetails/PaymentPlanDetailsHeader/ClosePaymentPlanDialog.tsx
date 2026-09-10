@@ -62,7 +62,7 @@ export function ClosePaymentPlanDialog({
   const { deliveredFully, deliveredPartially, notDelivered, numberOfPayments } =
     paymentPlan.reconciliationSummary ?? {};
 
-  const { mutateAsync: closePaymentPlan, isPending } = useMutation({
+  const { mutate: closePaymentPlan, isPending } = useMutation({
     mutationFn: (closureComment: string | null) =>
       RestService.restBusinessAreasProgramsPaymentPlansCloseCreate({
         businessAreaSlug: businessArea,
