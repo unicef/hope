@@ -135,7 +135,7 @@ class ProgrammeDetails(BaseComponents):
     # MUI X v9 date fields have no typeable single input; fill via the visible
     # field wrapper (see BaseComponents.fill_date_picker).
     def fill_data_picker_filter(self, value: str) -> None:
-        self.fill_date_picker(self.get_elements(self.data_picker_filter)[0], value)
+        self.fill_date_picker(self.wait_for(self.data_picker_filter), value)
 
     def fill_start_date_cycle(self, value: str) -> None:
         self.fill_date_picker(self.get_start_date_cycle_div(), value)
