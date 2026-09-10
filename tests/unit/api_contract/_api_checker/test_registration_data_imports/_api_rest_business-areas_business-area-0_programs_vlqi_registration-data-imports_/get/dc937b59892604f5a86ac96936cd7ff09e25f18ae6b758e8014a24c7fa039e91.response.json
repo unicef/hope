@@ -27,7 +27,6 @@
                 "import_date": "2025-01-01T00:00:00Z",
                 "number_of_households": 1,
                 "number_of_individuals": 1,
-                "biometric_deduplicated": "NO",
                 "country_workspace_id": null
             }
         ]

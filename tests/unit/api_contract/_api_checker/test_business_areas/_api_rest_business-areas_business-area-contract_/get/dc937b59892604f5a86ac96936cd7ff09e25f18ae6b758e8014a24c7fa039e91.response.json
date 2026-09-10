@@ -8,7 +8,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "349"
+        "Content-Length": "376"
     },
     "data": {
         "id": "c7210972-7cea-4929-9055-14b5eb27d11e",
@@ -19,6 +19,7 @@
         "timezone": "UTC",
         "parent": null,
         "is_split": false,
+        "is_manual_ingest": true,
         "active": true,
         "is_accountability_applicable": false,
         "rdi_import_xlsx_disabled": false,

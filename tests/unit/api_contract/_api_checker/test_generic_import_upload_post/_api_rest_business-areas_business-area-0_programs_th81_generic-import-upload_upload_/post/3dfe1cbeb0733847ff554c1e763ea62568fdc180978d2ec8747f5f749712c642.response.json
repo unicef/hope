@@ -1,0 +1,25 @@
+{
+    "status_code": 201,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "POST, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "392"
+    },
+    "data": {
+        "import_data_id": "9f5c778b-558e-49fc-872f-156dd583581c",
+        "import_data_status": "PENDING",
+        "rdi_id": "c34000bd-a502-4679-8ca3-d4cb5c573583",
+        "rdi_name": "Generic Import API business-area-0 - Program 0 - 2025-01-01 00:00:00",
+        "rdi_status": "IMPORT_SCHEDULED",
+        "rdi_status_display": "Import Scheduled",
+        "created_at": "2025-01-01T00:00:00Z",
+        "business_area_slug": "business-area-0",
+        "program_name": "Program 0"
+    },
+    "content_type": "application/json"
+}

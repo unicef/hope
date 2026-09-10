@@ -202,7 +202,6 @@ def test_list_registration_data_imports(
             "import_date": "2022-01-01T00:00:00Z",
             "number_of_households": rdi1.number_of_households,
             "number_of_individuals": rdi1.number_of_individuals,
-            "biometric_deduplicated": rdi1.biometric_deduplicated,
             "country_workspace_id": rdi1.country_workspace_id,
         } in response_json
         assert {
@@ -216,7 +215,6 @@ def test_list_registration_data_imports(
             "import_date": "2022-01-01T00:00:00Z",
             "number_of_households": rdi2.number_of_households,
             "number_of_individuals": rdi2.number_of_individuals,
-            "biometric_deduplicated": rdi2.biometric_deduplicated,
             "country_workspace_id": rdi2.country_workspace_id,
         } in response_json
         assert {
@@ -230,7 +228,6 @@ def test_list_registration_data_imports(
             "import_date": "2022-01-01T00:00:00Z",
             "number_of_households": rdi3.number_of_households,
             "number_of_individuals": rdi3.number_of_individuals,
-            "biometric_deduplicated": rdi3.biometric_deduplicated,
             "country_workspace_id": rdi3.country_workspace_id,
         } in response_json
         assert {
@@ -244,7 +241,6 @@ def test_list_registration_data_imports(
             "import_date": "2022-01-01T00:00:00Z",
             "number_of_households": rdi1.number_of_households,
             "number_of_individuals": rdi1.number_of_individuals,
-            "biometric_deduplicated": rdi1.biometric_deduplicated,
             "country_workspace_id": rdi1.country_workspace_id,
         } not in response_json
 

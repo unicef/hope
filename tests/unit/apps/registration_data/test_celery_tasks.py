@@ -2,7 +2,6 @@ from unittest.mock import Mock, patch
 
 from celery.exceptions import Retry
 from django.db import Error
-from django.test.utils import override_settings
 from openpyxl.utils.exceptions import InvalidFileException
 import pytest
 
@@ -17,10 +16,10 @@ from extras.test_utils.factories import (
 )
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.registration_data.celery_tasks import (
+    _capture_exception,
     check_and_set_taxid,
     deduplicate_documents_for_rdi,
-    deduplication_engine_process_async_task,
-    fetch_biometric_deduplication_results_and_process_async_task,
+    handle_rdi_exception,
     merge_registration_data_import_async_task,
     pull_kobo_submissions_async_task,
     pull_kobo_submissions_async_task_action,
@@ -34,7 +33,13 @@ from hope.apps.registration_data.celery_tasks import (
     validate_xlsx_import_async_task_action,
 )
 from hope.apps.registration_data.tasks.pull_kobo_submissions import PullKoboSubmissions
-from hope.models import AsyncRetryJob, ImportData, KoboImportData, Program, RegistrationDataImport
+from hope.models import (
+    AsyncRetryJob,
+    ImportData,
+    KoboImportData,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -881,65 +886,39 @@ def test_pull_kobo_submissions_execute(
     assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
 
 
-@override_settings(
-    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
-    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".upload_and_process_deduplication_set"
-)
-def test_deduplication_engine_process_task(
-    mock_upload_and_process: Mock,
+@patch("sentry_sdk.capture_exception")
+def test_capture_exception_returns_sentry_event_id(mock_capture_exception: Mock) -> None:
+    mock_capture_exception.return_value = "sentry-event-id"
+    exc = RuntimeError("boom")
+
+    assert _capture_exception(exc) == "sentry-event-id"
+
+    mock_capture_exception.assert_called_once_with(exc)
+
+
+@patch("hope.apps.registration_data.celery_tasks.logger.exception")
+@patch("sentry_sdk.capture_exception")
+def test_capture_exception_falls_back_to_na_when_sentry_fails(
+    mock_capture_exception: Mock, mock_logger_exception: Mock
 ) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
+    sentry_error = RuntimeError("sentry is down")
+    mock_capture_exception.side_effect = sentry_error
 
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        deduplication_engine_process_async_task(str(program.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    assert _capture_exception(RuntimeError("boom")) == "N/A"
 
-    mock_upload_and_process.assert_called_once_with(program)
+    mock_logger_exception.assert_called_once_with(sentry_error)
 
 
-@override_settings(
-    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
-    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process"
-)
-def test_fetch_biometric_deduplication_results_and_process(
-    mock_fetch_biometric_deduplication_results_and_process: Mock,
+@patch("sentry_sdk.capture_exception")
+def test_handle_rdi_exception_stores_na_sentry_id_when_sentry_fails(
+    mock_capture_exception: Mock, registration_import_context: dict[str, object]
 ) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
+    mock_capture_exception.side_effect = RuntimeError("sentry is down")
+    registration_data_import = registration_import_context["registration_data_import"]
 
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+    handle_rdi_exception(str(registration_data_import.id), RuntimeError("import failed"))
 
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, None)
-
-
-@override_settings(
-    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
-    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
-)
-@patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService"
-    ".fetch_biometric_deduplication_results_and_process"
-)
-def test_fetch_biometric_deduplication_results_and_process_for_rdi(
-    mock_fetch_biometric_deduplication_results_and_process: Mock,
-) -> None:
-    program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True, code="code")
-    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
-
-    with patch("hope.apps.registration_data.celery_tasks.AsyncRetryJob.queue", autospec=True):
-        fetch_biometric_deduplication_results_and_process_async_task(str(program.id), str(rdi.id))
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
-
-    mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(program, rdi)
+    registration_data_import.refresh_from_db()
+    assert registration_data_import.sentry_id == "N/A"
+    assert registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
+    assert registration_data_import.error_message == "import failed"
