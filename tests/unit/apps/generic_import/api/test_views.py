@@ -1,10 +1,11 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 import pytest
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
@@ -16,6 +17,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.generic_import.api.serializers import GenericImportUploadSerializer
 from hope.models import BusinessArea, ImportData, Program, RegistrationDataImport, Role, RoleAssignment, User
 from hope.models.api_token import APIToken
 from hope.models.grant import Grant
@@ -153,6 +155,14 @@ def test_upload_pdf_file_returns_400_with_file_validation_error(authenticated_ap
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "file" in response.data
     assert "Excel files" in str(response.data["file"])
+
+
+@pytest.mark.django_db
+def test_validate_file_rejects_file_without_size():
+    serializer = GenericImportUploadSerializer()
+
+    with pytest.raises(serializers.ValidationError):
+        serializer.validate_file(SimpleNamespace(name="test.xlsx", size=None))
 
 
 @pytest.mark.django_db

@@ -10,6 +10,7 @@ from rest_framework_extensions.key_constructor.constructors import KeyConstructo
 if TYPE_CHECKING:
     from uuid import UUID
 
+    from rest_framework.request import Request
 _NS = "v2"  # if we change something, bump the version
 
 
@@ -54,13 +55,15 @@ profile_cache = ProfileVersioner()
 
 
 class ProfileEtagKey:
-    def __call__(self, view_instance: Any, view_method: Any, request: Any, args: Any, kwargs: Any) -> str:
-        return profile_cache.etag_for(request.user.id)
+    def __call__(self, view_instance: Any, view_method: Any, request: Request, args: Any, kwargs: Any) -> str:
+        return profile_cache.etag_for(cast("UUID", request.user.id))
 
 
 class ProfileVersionsKeyBit(KeyBitBase):
-    def get_data(self, params: Any, view_instance: Any, view_method: Any, request: Any, args: Any, kwargs: Any) -> str:  # noqa: PLR0913, PLR0917 – override of base method signature
-        return profile_cache.cache_key_for(request.user.id)
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
+        self, params: Any, view_instance: Any, view_method: Any, request: Request, args: Any, kwargs: Any
+    ) -> str:
+        return profile_cache.cache_key_for(cast("UUID", request.user.id))
 
 
 class ProfileKeyConstructor(KeyConstructor):

@@ -37,7 +37,7 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
     # the autocomplete widget bypasses that queryset, so it must be excluded.
     autocomplete_exclude_fields = ("parent",)
 
-    def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
+    def get_inline_instances(self, request: HttpRequest, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
