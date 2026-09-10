@@ -99,7 +99,7 @@ Override requires `override=true` and the new scoped permission
 
 Reset is available only in this mode. It applies when the Payment Plan Group XLSX row has an empty/null
 `delivered_quantity` and `null_delivery_policy="reset"`. It does not apply in normal mode or to a row with a non-null
-quantity. The dedicated Follow-Up Instruction importer remains outside this feature.
+quantity.
 
 Override accepts `SENT_TO_FSP`, `DISTRIBUTION_SUCCESS`, `DISTRIBUTION_PARTIAL`, `NOT_DISTRIBUTED`, and `ERROR`. It
 skips `PENDING`, cancelled, force-failed, and unrelated statuses. Including `ERROR` lets an authorised user correct a
@@ -140,8 +140,7 @@ After plan and Payment eligibility checks, each row has exactly one action:
 | Override, valid non-empty quantity | Eligible | Apply XLSX values, even when the quantity is unchanged |
 
 `Preserve` means that no Payment field changes and no Payment change log is created. `Abort` means that no Payment in
-the file is changed. A CLOSED-plan row always aborts the file. Payment Gateway plans and other ineligible rows are
-preserved according to their validation rules.
+the file is changed. A CLOSED-plan row always aborts the file.
 
 For optional reconciliation columns, use this rule in both normal first-time reconciliation and non-null override:
 
@@ -186,12 +185,9 @@ Apply these rules regardless of the verification record's or verification plan's
 - Override keeps the stored quantity, including changes to other fields only: preserve verifications and tickets.
 - An override with no actual changes: preserve verifications and tickets.
 
-Compare the old and new stored quantities, including `None` for the XLSX error marker. A reset still triggers cleanup
-when the Payment already has an empty quantity.
-
-Delete grievance tickets linked through either the current verification foreign key or the legacy many-to-many
-relation before deleting verifications. Do not delete unrelated grievance tickets or verifications for other Payments.
-A legacy ticket shared with a deleted verification is removed as a whole; its other verification records remain.
+Delete related Payment Verification data when override changes the stored delivered quantity. Also delete it for an
+explicit reset, even if the stored quantity is already `None`. The XLSX marker `-1` is compared as its stored value,
+`None`.
 
 For every affected verification plan:
 
@@ -248,8 +244,7 @@ cannot exceed entitlement.
 Duplicate `payment_id` rows, invalid values, quantity conflicts, and Payments belonging to CLOSED plans reject the
 whole file with `XlsxError` entries. Nothing is saved.
 
-A valid file containing only ignored or ineligible rows succeeds with zero Payment updates. Save skipped row numbers,
-Payment IDs, and reasons in `FileTemp.extras["skipped_rows"]`.
+A valid file containing only ignored or ineligible rows succeeds with zero Payment updates.
 
 ## Transactions and notifications
 
@@ -283,16 +278,6 @@ The user does not wait for the Celery worker. It must:
 Send reconciliation emails to the original uploader, including after an administrator restarts an import. Reuse the
 existing Mailjet infrastructure; do not add an in-app notification model.
 
-### Validation in both phases
-
-| Phase | Validation |
-| --- | --- |
-| Initial request | Validate the request options, XLSX structure and headers, Payment IDs, duplicate IDs, plan and Payment eligibility, delivered quantity, entitlement limit, delivery date, and quantity conflicts. |
-| Background import | Repeat the same workbook and row validation against the latest database state immediately before writing. The request serializer does not need to run again. |
-
-The Celery group importer repeats validation inside the group transaction and aborts before writing when it finds an
-error.
-
 ## Activity log
 
 - An ignored row creates no Payment change log because the Payment did not change. Group-level and job-level import
@@ -301,23 +286,15 @@ error.
   `bulk_log_payment_changes()` after persistence.
 - A non-null override is processed even when its quantity is unchanged. If another tracked field changes, log that
   field difference. If every final value is identical, the bulk logger skips the no-op Payment log.
-- Add these reconciliation-owned fields to `Payment.ACTIVITY_LOG_MAPPING` so every changed value is audited:
-  - `delivered_quantity_usd`
-  - `additional_collector_name`
-  - `additional_document_type`
-  - `additional_document_number`
-  - `transaction_status_blockchain_link`
-  - reconciliation `extra_fields`
+- Include every reconciliation-owned field in `Payment.ACTIVITY_LOG_MAPPING` so each changed value is audited.
 
 ## Override permission
 
 Implement the override permission using HOPE's existing scoped Role pattern:
 
 1. Add `PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE = auto()` to `Permissions`.
-2. Add the generated account `AlterField` migration for the updated `Role.permissions` choices. Do not add an
-   `auth_permission` seed migration.
-3. Keep `PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX` as the base action permission.
-4. When `override=true`, check the additional permission against `payment_plan_group.cycle.program`:
+2. Add the generated account `AlterField` migration for the updated `Role.permissions` choices.
+3. When `override=true`, check the additional permission against `payment_plan_group.cycle.program`:
 
    ```python
    override_permission = Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE
@@ -347,19 +324,6 @@ actor, but send import notifications to the original uploader.
 The legacy single-plan Celery task and Payment Plan admin restart action are removed. Payment Plan Group upload is the
 only supported entry point. The `PaymentPlan.reconciliation_import_file` database field remains only for historical
 records and must not be used to start or rerun reconciliation.
-
-## Ticket inaccuracies and contradictions
-
-The following problems remain in the revised ticket.
-
-1. **The existing bug is described inaccurately.** Normally reconciled Payments were already skipped, so equal
-   quantities were ignored and conflicts were not overwritten—they were also ignored. Overwriting occurred only for
-   inconsistent records with both a delivered quantity and a pending status.
-
-2. **The background-conflict explanation is incorrect.** A synchronous conflict stops the request before a background
-   task is created. Therefore, a conflict found by the worker is new and was not shown in the original upload response.
-   The implementation stores this error and emails the original uploader.
-   _Source: revised ticket — Story 7._
 
 ## Resolved business questions
 
@@ -393,8 +357,8 @@ _Source: Stefano's follow-up comment — if a group file contains rows for a CLO
 
 ### Errors found by the background task
 
-The worker validates the file again because Payment data may have changed since upload. If it finds a new validation
-error, save the error and email the original uploader so they know the accepted import failed.
+The worker validates the file again because Payment data may have changed since upload. If an accepted import then
+fails validation, store its row errors in `AsyncRetryJob.errors["xlsx_errors"]` and email the original uploader.
 
-_Source: revised ticket — Story 7 says not to email for a background conflict because the user already received the
-error from synchronous validation or the admin interface surfaces it._
+_Source: Stefano's follow-up confirmation that the proposed handling of new background errors describes the
+requirement. This supersedes Story 7's contradictory no-email rule._

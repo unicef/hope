@@ -2502,7 +2502,7 @@ def test_delivery_import_xlsx_with_only_closed_plan_starts_zero_update_import(
 
     assert response.status_code == status.HTTP_200_OK
     group.refresh_from_db()
-    assert group.delivery_import_file.extras["skipped_rows"] == []
+    assert group.delivery_import_file.extras == {"override": False, "null_delivery_policy": "reset"}
 
 
 def test_delivery_import_xlsx_queues_async_task_on_commit(
@@ -2583,7 +2583,6 @@ def test_delivery_import_xlsx_saves_override_options(
 
     with patch("hope.apps.payment.api.views.XlsxPaymentPlanGroupDeliveryImportService") as mock_cls:
         mock_cls.return_value.errors = []
-        mock_cls.return_value.skipped_rows = []
         response = client.post(
             _import_url(business_area.slug, program.code, group_with_accepted_plan.id),
             {"file": test_file, "override": True, "null_delivery_policy": "ignore"},
@@ -2595,7 +2594,6 @@ def test_delivery_import_xlsx_saves_override_options(
     assert group_with_accepted_plan.delivery_import_file.extras == {
         "override": True,
         "null_delivery_policy": "ignore",
-        "skipped_rows": [],
     }
 
 

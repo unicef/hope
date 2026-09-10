@@ -2923,7 +2923,6 @@ class PaymentPlanGroupViewSet(
             extras={
                 "override": override,
                 "null_delivery_policy": null_delivery_policy,
-                "skipped_rows": list(import_service.skipped_rows),
             },
         )
         old_payment_plan_group = copy_model_object(payment_plan_group)

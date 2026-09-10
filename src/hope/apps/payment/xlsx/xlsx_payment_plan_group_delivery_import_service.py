@@ -315,16 +315,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 log_payment_plan_change(payment_plan, old_payment_plan, user_id)
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
 
-            self._save_skipped_rows()
             if affected_plan_ids:
                 logger.info(f"Imported reconciliation for Payment Plans: {affected_plan_ids}")
                 self.payment_plan_group.cycle.save()
-
-    def _save_skipped_rows(self) -> None:
-        # TODO: Expose this report in the UI once the product-owned response format is agreed.
-        file_temp = self.payment_plan_group.delivery_import_file
-        if file_temp is None:
-            return
-        extras = {**file_temp.extras, "skipped_rows": self.skipped_rows}
-        file_temp.extras = extras
-        file_temp.save(update_fields=["extras", "modified"])
