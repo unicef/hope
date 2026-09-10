@@ -141,16 +141,26 @@ def test_deprecate_logs_the_swap_on_both_rows(
     }
 
 
-def test_deprecate_action_is_hidden_without_change_permission(admin_instance: CurrencyAdmin) -> None:
+@pytest.fixture
+def request_without_permissions():
     request = RequestFactory().get("/")
     request.user = UserFactory()
+    return request
 
-    assert "deprecate_currency" not in admin_instance.get_actions(request)
+
+@pytest.fixture
+def request_with_change_permission(request_without_permissions):
+    request_without_permissions.user.user_permissions.add(Permission.objects.get(codename="change_currency"))
+    return request_without_permissions
 
 
-def test_deprecate_action_is_offered_with_change_permission(admin_instance: CurrencyAdmin) -> None:
-    request = RequestFactory().get("/")
-    request.user = UserFactory()
-    request.user.user_permissions.add(Permission.objects.get(codename="change_currency"))
+def test_deprecate_action_is_hidden_without_change_permission(
+    admin_instance: CurrencyAdmin, request_without_permissions
+) -> None:
+    assert "deprecate_currency" not in admin_instance.get_actions(request_without_permissions)
 
-    assert "deprecate_currency" in admin_instance.get_actions(request)
+
+def test_deprecate_action_is_offered_with_change_permission(
+    admin_instance: CurrencyAdmin, request_with_change_permission
+) -> None:
+    assert "deprecate_currency" in admin_instance.get_actions(request_with_change_permission)

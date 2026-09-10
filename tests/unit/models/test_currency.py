@@ -6,6 +6,29 @@ from extras.test_utils.factories import CurrencyFactory
 from hope.models.currency import Currency
 
 
+@pytest.fixture
+def currency_tst(db) -> Currency:
+    return CurrencyFactory(code="TST", name="Test", vision_code="TST", active=True)
+
+
+@pytest.fixture
+def inactive_currency(db) -> Currency:
+    return CurrencyFactory(code="INA", name="Inactive", vision_code="INA", active=False)
+
+
+@pytest.fixture
+def syp_pair(db) -> tuple[Currency, Currency]:
+    """The post-redenomination layout: a deprecated and an active row sharing ``code``."""
+    deprecated = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    active = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    return deprecated, active
+
+
+@pytest.fixture
+def deprecated_syp(db) -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
 @pytest.mark.django_db
 def test_full_clean_backfills_vision_code_from_code():
     currency = Currency(code="TST", name="Test")
@@ -15,9 +38,7 @@ def test_full_clean_backfills_vision_code_from_code():
     assert currency.vision_code == "TST"
 
 
-@pytest.mark.django_db
-def test_full_clean_reports_duplicate_vision_code_as_validation_error():
-    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+def test_full_clean_reports_duplicate_vision_code_as_validation_error(deprecated_syp: Currency):
     duplicate = Currency(code="SYP", name="Syrian pound", active=True)
 
     with pytest.raises(ValidationError):
@@ -67,64 +88,25 @@ def test_str_with_same_vision_code():
     assert str(currency) == "TST - Test"
 
 
-@pytest.mark.django_db
-def test_duplicate_vision_code_raises():
-    Currency.objects.create(code="XYA", name="A", vision_code="SHRD")
-
+@pytest.mark.parametrize("vision_code", ["TST", "tst"])
+def test_duplicate_vision_code_raises(currency_tst: Currency, vision_code: str):
     with pytest.raises(IntegrityError):
-        Currency.objects.create(code="XYB", name="B", vision_code="SHRD")
+        Currency.objects.create(code="XYB", name="B", vision_code=vision_code)
 
 
-@pytest.mark.django_db
-def test_duplicate_vision_code_case_insensitive_raises():
-    Currency.objects.create(code="XYA", name="A", vision_code="shrd")
-
+@pytest.mark.parametrize("code", ["TST", "tst"])
+def test_two_active_rows_same_code_raises(currency_tst: Currency, code: str):
     with pytest.raises(IntegrityError):
-        Currency.objects.create(code="XYB", name="B", vision_code="SHRD")
+        Currency.objects.create(code=code, name="B", vision_code="TSTO", active=True)
 
 
-@pytest.mark.django_db
-def test_two_active_rows_same_code_raises():
-    Currency.objects.create(code="XYC", name="A", vision_code="XYC", active=True)
-
-    with pytest.raises(IntegrityError):
-        Currency.objects.create(code="XYC", name="B", vision_code="XYCO", active=True)
-
-
-@pytest.mark.django_db
-def test_two_active_rows_same_code_case_insensitive_raises():
-    Currency.objects.create(code="xyc", name="A", vision_code="xyc", active=True)
-
-    with pytest.raises(IntegrityError):
-        Currency.objects.create(code="XYC", name="B", vision_code="XYCO", active=True)
-
-
-@pytest.mark.django_db
-def test_old_inactive_and_new_active_share_code_allowed():
-    old = Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+def test_old_inactive_and_new_active_share_code_allowed(deprecated_syp: Currency):
     new = Currency.objects.create(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
 
-    assert Currency.objects.filter(code="SYP").count() == 2
-    assert old.active is False
-    assert new.active is True
-
-
-@pytest.fixture
-def currency_tst(db) -> Currency:
-    return CurrencyFactory(code="TST", name="Test", vision_code="TST", active=True)
-
-
-@pytest.fixture
-def syp_pair(db) -> tuple[Currency, Currency]:
-    """The post-redenomination layout: a deprecated and an active row sharing ``code``."""
-    deprecated = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-    active = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
-    return deprecated, active
-
-
-@pytest.fixture
-def deprecated_syp(db) -> Currency:
-    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    assert set(Currency.objects.filter(code="SYP").values_list("pk", "active")) == {
+        (deprecated_syp.pk, False),
+        (new.pk, True),
+    }
 
 
 def test_get_active_by_code_returns_active_row(currency_tst: Currency) -> None:
@@ -175,3 +157,27 @@ def test_get_active_by_code_or_none_prefers_active_over_deprecated_for_shared_co
 
 def test_active_code_lookup_is_not_reachable_from_a_queryset(db) -> None:
     assert not hasattr(Currency.objects.filter(active=False), "get_active_by_code")
+
+
+def test_active_excludes_inactive_currencies(
+    currency_tst: Currency, inactive_currency: Currency, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(1):
+        result = list(Currency.objects.active())
+
+    assert result == [currency_tst]
+
+
+def test_active_returns_only_active_row_for_shared_code(
+    syp_pair: tuple[Currency, Currency], django_assert_num_queries
+) -> None:
+    _deprecated, active = syp_pair
+
+    with django_assert_num_queries(1):
+        result = list(Currency.objects.active())
+
+    assert result == [active]
+
+
+def test_active_is_chainable(inactive_currency: Currency) -> None:
+    assert Currency.objects.active().filter(code="INA").exists() is False

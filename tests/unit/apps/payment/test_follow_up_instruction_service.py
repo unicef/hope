@@ -464,16 +464,8 @@ def test_create_raises_validation_error_for_mixed_currency(
         )
 
 
-def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
-    user,
-    program,
-    cycle,
-    business_area,
-    deprecated_syp,
-    active_syp,
-    delivery_mechanism,
-    fsp,
-):
+@pytest.fixture
+def group_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
     group = PaymentPlanGroupFactory(cycle=cycle)
     _create_source_payment_plan(
         cycle=cycle,
@@ -493,11 +485,19 @@ def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
         fsp=fsp,
         with_failed_payment=True,
     )
+    return group
 
+
+def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
+    user,
+    program,
+    cycle,
+    group_paid_in_both_syp_denominations,
+):
     with pytest.raises(ValidationError, match=re.escape("Found: SYP (SYP01) - Syrian Pound, SYP - Syrian Pound.")):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group.id)],
+            payment_plan_group_ids=[str(group_paid_in_both_syp_denominations.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )

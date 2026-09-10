@@ -20,6 +20,11 @@ def syp_pair() -> tuple[Currency, Currency]:
 
 
 @pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
 def currency_eur() -> Currency:
     return CurrencyFactory(code="EUR", name="Euro", vision_code="EUR", active=True)
 
@@ -30,9 +35,7 @@ def test_resolve_active_currency_returns_the_active_row(syp_pair: tuple[Currency
     assert resolve_active_currency("SYP") == active
 
 
-def test_resolve_active_currency_raises_when_only_a_deprecated_row_exists() -> None:
-    CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-
+def test_resolve_active_currency_raises_when_only_a_deprecated_row_exists(deprecated_syp: Currency) -> None:
     with pytest.raises(Currency.DoesNotExist):
         resolve_active_currency("SYP")
 
@@ -62,10 +65,8 @@ def test_resolve_currency_for_update_returns_active_row_when_there_is_no_current
 
 
 def test_resolve_currency_for_update_raises_for_a_changed_code_without_an_active_row(
-    currency_eur: Currency,
+    deprecated_syp: Currency, currency_eur: Currency
 ) -> None:
-    CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-
     with pytest.raises(Currency.DoesNotExist):
         resolve_currency_for_update("SYP", currency_eur)
 
@@ -91,8 +92,6 @@ def test_resolve_currency_for_update_or_none_returns_none_for_an_unknown_code(cu
 
 
 def test_resolve_currency_for_update_or_none_returns_none_when_only_a_deprecated_row_exists(
-    currency_eur: Currency,
+    deprecated_syp: Currency, currency_eur: Currency
 ) -> None:
-    CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-
     assert resolve_currency_for_update_or_none("SYP", currency_eur) is None

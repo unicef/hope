@@ -108,15 +108,19 @@ def test_get_quantity_in_usd_does_not_lookup_when_exchange_rate_provided(
         assert result == Decimal("5.00")
 
 
-def test_get_quantity_in_usd_keys_fx_feed_by_vision_code(django_assert_num_queries) -> None:
-    currency = CurrencyFactory(code="SYP", vision_code="SYP01")
+@pytest.fixture
+def redenominated_currency():
+    return CurrencyFactory(code="SYP", vision_code="SYP01")
+
+
+def test_get_quantity_in_usd_keys_fx_feed_by_vision_code(redenominated_currency, django_assert_num_queries) -> None:
     exchange_rates_client = Mock()
     exchange_rates_client.get_exchange_rate_for_currency_code.return_value = 2
 
     with django_assert_num_queries(0):
         get_quantity_in_usd(
             amount=Decimal(10),
-            currency=currency,
+            currency=redenominated_currency,
             exchange_rate=0,
             currency_exchange_date=timezone.now(),
             exchange_rates_client=exchange_rates_client,

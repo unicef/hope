@@ -14,12 +14,13 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
 )
+from hope.apps.household.api.serializers.household import DeliveredQuantitySerializer
 from hope.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
-from hope.models import DeliveryMechanism
+from hope.models import DeliveryMechanism, Household
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db
@@ -180,9 +181,10 @@ def syp_denominations(db) -> tuple[Currency, Currency]:
     return deprecated, active
 
 
-def test_delivered_quantity_service_keeps_two_denominations_of_one_code_apart(
+@pytest.fixture
+def household_paid_in_both_syp_denominations(
     currency_usd: Currency, syp_denominations: tuple[Currency, Currency]
-) -> None:
+) -> Household:
     deprecated_syp, active_syp = syp_denominations
     pp = PaymentPlanFactory()
     household = HouseholdFactory(
@@ -206,19 +208,11 @@ def test_delivered_quantity_service_keeps_two_denominations_of_one_code_apart(
         delivered_quantity=Decimal("1.00"),
         delivered_quantity_usd=Decimal("1.00"),
     )
-
-    results = delivered_quantity_service(household)
-
-    syp_entries = [entry for entry in results if entry["currency"] == "SYP"]
-    assert [(entry["currency_vision_code"], entry["total_delivered_quantity"]) for entry in syp_entries] == [
-        ("SYP", Decimal("100.00")),
-        ("SYP01", Decimal("1.00")),
-    ]
+    return household
 
 
-def test_delivered_quantity_service_reports_vision_code_for_a_single_denomination(
-    currency_usd: Currency, currency_pln: Currency
-) -> None:
+@pytest.fixture
+def household_paid_in_pln(currency_usd: Currency, currency_pln: Currency) -> Household:
     pp = PaymentPlanFactory()
     household = HouseholdFactory(
         currency=currency_usd,
@@ -232,8 +226,39 @@ def test_delivered_quantity_service_reports_vision_code_for_a_single_denominatio
         delivered_quantity=Decimal("200.00"),
         delivered_quantity_usd=Decimal("50.00"),
     )
+    return household
 
-    results = delivered_quantity_service(household)
+
+def test_delivered_quantity_service_keeps_two_denominations_of_one_code_apart(
+    household_paid_in_both_syp_denominations: Household,
+) -> None:
+    results = delivered_quantity_service(household_paid_in_both_syp_denominations)
+
+    assert results == [
+        {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": Decimal("2.00")},
+        {"currency": "SYP", "currency_vision_code": "SYP", "total_delivered_quantity": Decimal("100.00")},
+        {"currency": "SYP", "currency_vision_code": "SYP01", "total_delivered_quantity": Decimal("1.00")},
+    ]
+
+
+def test_delivered_quantity_serializer_publishes_the_denomination_of_each_entry(
+    household_paid_in_both_syp_denominations: Household,
+) -> None:
+    quantities = delivered_quantity_service(household_paid_in_both_syp_denominations)
+
+    data = DeliveredQuantitySerializer(quantities, many=True).data
+
+    assert data == [
+        {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "2.00"},
+        {"currency": "SYP", "currency_vision_code": "SYP", "total_delivered_quantity": "100.00"},
+        {"currency": "SYP", "currency_vision_code": "SYP01", "total_delivered_quantity": "1.00"},
+    ]
+
+
+def test_delivered_quantity_service_reports_vision_code_for_a_single_denomination(
+    household_paid_in_pln: Household,
+) -> None:
+    results = delivered_quantity_service(household_paid_in_pln)
 
     assert results[0] == {
         "currency": "USD",

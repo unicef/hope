@@ -21,7 +21,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
 from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import ROLE_ALTERNATE
-from hope.models import Currency, IndividualRoleInHousehold, Program, User
+from hope.models import Currency, Household, IndividualRoleInHousehold, Program, User
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -742,19 +742,33 @@ def current_syp() -> Currency:
     return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
 
 
-def test_close_resolves_active_currency_for_shared_code(deprecated_syp: Currency, current_syp: Currency) -> None:
-    household = HouseholdFactory(create_role=False, currency=None)
+@pytest.fixture
+def household_without_currency() -> Household:
+    return HouseholdFactory(create_role=False, currency=None)
+
+
+@pytest.fixture
+def ticket_setting_currency_to_syp(household_without_currency: Household) -> GrievanceTicket:
     ticket_details = TicketHouseholdDataUpdateDetailsFactory(
-        household=household,
+        household=household_without_currency,
         household_data={
             "currency": {"value": "SYP", "approve_status": True},
         },
     )
     ticket = ticket_details.ticket
     ticket.save()
+    return ticket
 
-    service = HouseholdDataUpdateService(ticket, {})
-    service.close(UserFactory())
-    household.refresh_from_db()
 
-    assert household.currency == current_syp
+def test_close_resolves_active_currency_for_shared_code(
+    ticket_setting_currency_to_syp: GrievanceTicket,
+    household_without_currency: Household,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    user: User,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_setting_currency_to_syp, {})
+    service.close(user)
+    household_without_currency.refresh_from_db()
+
+    assert household_without_currency.currency == current_syp

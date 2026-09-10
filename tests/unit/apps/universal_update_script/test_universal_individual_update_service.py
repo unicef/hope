@@ -874,6 +874,16 @@ def test_accounts_validation(
     assert errors == []
 
 
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def household_without_currency() -> Household:
+    return HouseholdFactory(currency=None)
+
+
 def test_validate_currency_valid_code(business_area: object, program: Program, all_currencies: None) -> None:
     assert validate_currency("USD", "currency", Household, business_area, program) is None
 
@@ -883,8 +893,16 @@ def test_validate_currency_unknown_code(business_area: object, program: Program,
     assert error == "Invalid currency code ZZZ"
 
 
-def test_validate_currency_empty_string(business_area: object, program: Program, all_currencies: None) -> None:
-    assert validate_currency("", "currency", Household, business_area, program) is None
+def test_validate_currency_rejects_a_code_with_only_a_deprecated_row(
+    business_area: object, program: Program, deprecated_syp: Currency
+) -> None:
+    error = validate_currency("SYP", "currency", Household, business_area, program)
+    assert error == "Invalid currency code SYP"
+
+
+@pytest.mark.parametrize("value", ["", None])
+def test_validate_currency_accepts_a_missing_value(business_area: object, program: Program, value: str | None) -> None:
+    assert validate_currency(value, "currency", Household, business_area, program) is None
 
 
 def test_handle_currency_field_valid_code(
@@ -894,10 +912,29 @@ def test_handle_currency_field_valid_code(
     assert result == Currency.objects.get(code="USD")
 
 
-def test_handle_currency_field_empty_string(
-    business_area: object, program: Program, household_with_eur: Household, all_currencies: None
+@pytest.mark.parametrize("value", ["", None])
+def test_handle_currency_field_returns_none_for_a_missing_value(
+    business_area: object, program: Program, household_with_eur: Household, value: str | None
 ) -> None:
-    assert handle_currency_field("", "currency", household_with_eur, business_area, program) is None
+    assert handle_currency_field(value, "currency", household_with_eur, business_area, program) is None
+
+
+def test_handle_currency_field_returns_none_for_unknown_code(household_without_currency: Household) -> None:
+    household = household_without_currency
+
+    result = handle_currency_field("MISSING", "currency", household, household.business_area, household.program)
+
+    assert result is None
+
+
+def test_handle_currency_field_returns_none_when_only_deprecated_row_exists(
+    household_without_currency: Household, deprecated_syp: Currency
+) -> None:
+    household = household_without_currency
+
+    result = handle_currency_field("SYP", "currency", household, household.business_area, household.program)
+
+    assert result is None
 
 
 def test_household_update_currency_eur_to_usd(
