@@ -183,7 +183,7 @@ def enroll_households_to_program_async_task_action(job: AsyncJob) -> None:
         "program_for_enroll_id": program_for_enroll_id,
     }
     task_params_str = json.dumps(task_params, sort_keys=True)
-    cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
+    cache_key = "enroll_households_to_program_async_task_" + hashlib.sha256(task_params_str.encode()).hexdigest()
     if cache.get(cache_key):
         logger.info("Task enroll_households_to_program_async_task with this data is already running.")
         return

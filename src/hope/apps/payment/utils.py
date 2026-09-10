@@ -348,7 +348,7 @@ def get_payment_delivered_quantity_status_and_value(
 
 def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
-    return hashlib.sha256(task_params_str.encode()).hexdigest()
+    return "prepare_payment_plan_async_task_" + hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
 def get_link(api_url: str) -> str:

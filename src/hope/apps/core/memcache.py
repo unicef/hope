@@ -32,6 +32,10 @@ class SimpleCacheLock:
 
 
 class LocMemCache(DjangoLocMemCache):
+    def keys(self, pattern: str = "*") -> list[str]:
+        """All keys without the version prefix, like django-redis."""
+        return [key.split(":", 2)[2] for key in list(self._cache)]
+
     def delete_pattern(self, pattern: str) -> None:
         regex_pattern = re.escape(pattern).replace("\\*", "(.*)")
         key_pattern = self.make_key(regex_pattern)
