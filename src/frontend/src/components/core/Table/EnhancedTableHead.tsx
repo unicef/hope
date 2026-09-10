@@ -6,7 +6,7 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { Checkbox } from '@mui/material';
 import { hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
-import { MouseEvent, ReactElement } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
 
 type Order = 'asc' | 'desc';
 
@@ -104,7 +104,11 @@ export function EnhancedTableHead<T>(
                 padding={headCell.disablePadding ? 'none' : 'normal'}
                 sortDirection={orderBy === headCell.id ? order : false}
                 data-cy={headCell.dataCy}
-                style={headCell.weight !== undefined ? { width: `${headCell.weight}%` } : undefined}
+                style={
+                  headCell.weight !== undefined
+                    ? { width: `${headCell.weight}%` }
+                    : undefined
+                }
               >
                 {allowSort && !headCell.disableSort ? (
                   <TableSortLabelStyled

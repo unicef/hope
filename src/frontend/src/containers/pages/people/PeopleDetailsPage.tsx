@@ -1,5 +1,5 @@
 import { AdminButton } from '@components/core/AdminButton';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -21,12 +21,13 @@ import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
-import { Theme, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -35,7 +36,7 @@ import {
   formatCurrencyWithSymbol,
   isPermissionDeniedError,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';

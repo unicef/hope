@@ -1,4 +1,5 @@
-import { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

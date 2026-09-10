@@ -4,16 +4,17 @@ import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Tooltip, Typography } from '@mui/material';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { GRIEVANCE_CATEGORIES, GrievanceStatuses } from '@utils/constants';
 import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { NaComparisonPanel } from './NaComparisonPanel';
@@ -21,7 +22,7 @@ import { NaTicketsFilters } from './NaTicketsFilters';
 import { NaTicketsList } from './NaTicketsList';
 import { buildExecutePayload } from './naPayload';
 import { isDecisionComplete, isDecisionResolved } from './naRoleUtils';
-import { NaTicketDecision } from './naTypes';
+import type { NaTicketDecision } from './naTypes';
 
 // Needs Adjudication category id (see GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION = '8')
 const NEEDS_ADJUDICATION_CATEGORY = Number(

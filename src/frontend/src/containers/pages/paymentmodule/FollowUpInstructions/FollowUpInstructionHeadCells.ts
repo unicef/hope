@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
 
 export const headCells: HeadCell<FollowUpInstructionList>[] = [
   {

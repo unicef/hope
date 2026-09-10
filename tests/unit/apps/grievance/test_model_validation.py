@@ -182,30 +182,30 @@ def test_admin_form_clean_inline_invalid_delivery_mechanisms(
         form.clean()
 
 
-def test_non_dict_input_raises_graphql_error() -> None:
+def test_non_dict_input_raises_validation_error() -> None:
     with pytest.raises(DRFValidationError, match="Fields must be a dictionary"):
         DataChangeValidator.verify_approve_data("not a dict")  # type: ignore[arg-type]
 
 
-def test_missing_individual_id_raises_graphql_error() -> None:
+def test_missing_individual_id_raises_validation_error() -> None:
     data = {"roles": [{"approve_status": True}]}
     with pytest.raises(DRFValidationError, match="individual_id in role"):
         DataChangeValidator.verify_approve_data(data)
 
 
-def test_missing_approve_status_raises_graphql_error() -> None:
+def test_missing_approve_status_raises_validation_error() -> None:
     data = {"roles": [{"individual_id": "123"}]}
     with pytest.raises(DRFValidationError, match="approve_status in role"):
         DataChangeValidator.verify_approve_data(data)
 
 
-def test_non_boolean_approve_status_raises_graphql_error() -> None:
+def test_non_boolean_approve_status_raises_validation_error() -> None:
     data = {"roles": [{"individual_id": "123", "approve_status": "yes"}]}
     with pytest.raises(DRFValidationError, match="approve_status must be boolean"):
         DataChangeValidator.verify_approve_data(data)
 
 
-def test_non_boolean_top_level_field_raises_graphql_error() -> None:
+def test_non_boolean_top_level_field_raises_validation_error() -> None:
     data = {
         "village": "yes",
         "roles": [{"individual_id": "123", "approve_status": True}],

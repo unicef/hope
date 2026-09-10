@@ -1,10 +1,11 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface RelatedFollowUpPaymentPlansProps {
   baseUrl: string;

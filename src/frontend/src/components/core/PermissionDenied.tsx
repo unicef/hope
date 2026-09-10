@@ -2,7 +2,7 @@ import { Box, Paper } from '@mui/material';
 import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;

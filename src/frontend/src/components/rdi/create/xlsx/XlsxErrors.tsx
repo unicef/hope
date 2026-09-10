@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { Collapse, IconButton } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
@@ -16,7 +17,7 @@ const ErrorsContainer = styled.div`
 export function XlsxErrors({
   errors,
 }: {
-  errors:  Record<string, any>[];
+  errors: Record<string, any>[];
 }): ReactElement {
   const [expanded, setExpanded] = useState(false);
   if (!errors || !errors.length) {

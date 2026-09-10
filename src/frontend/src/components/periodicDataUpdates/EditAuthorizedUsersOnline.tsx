@@ -1,10 +1,11 @@
 import { BaseSection } from '@components/core/BaseSection';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { AuthorizedUsersOnlineListEdit } from '@components/periodicDataUpdates/AuthorizedUsersOnlineListEdit';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { Formik } from 'formik';
 import Button from '@mui/material/Button';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -73,7 +74,7 @@ const EditAuthorizedUsersOnline = (): ReactElement => {
   return (
     <Formik
       initialValues={{ authorizedUsers: [] }}
-      onSubmit={async(values, { setSubmitting }) => {
+      onSubmit={async (values, { setSubmitting }) => {
         await updateAuthorizedUsers(values);
         setSubmitting(false);
       }}

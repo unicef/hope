@@ -4,7 +4,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, FormControl, Grid, IconButton } from '@mui/material';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FieldArray } from 'formik';

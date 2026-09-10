@@ -8,7 +8,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory
 from django.test.client import MULTIPART_CONTENT
 from django.urls import reverse
 from django_webtest import DjangoTestApp
@@ -117,7 +117,6 @@ def test_admin_changelist_view_accessible(
 
 @pytest.mark.parametrize("delay_mptt_updates", [True, False])
 @patch("hope.admin.geo.import_areas_from_csv_async_task")
-@override_settings(POWER_QUERY_DB_ALIAS="default")
 def test_upload_triggers_background_task(
     mock_task_delay: Mock,
     delay_mptt_updates: bool,
@@ -188,7 +187,6 @@ def test_upload_triggers_background_task(
         ),
     ],
 )
-@override_settings(POWER_QUERY_DB_ALIAS="default")
 def test_upload_validation_errors(
     csv_content: bytes,
     expected_message: str,

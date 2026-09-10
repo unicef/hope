@@ -5,13 +5,13 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useQuery } from '@tanstack/react-query';
-import { choicesToDict } from '@utils/utils';
+import { choicesToDict, displayNameWithLatin } from '@utils/utils';
 import { useSexChoices } from '@hooks/useSexChoices';
 
 interface IndividualQuestionnaireProps {
@@ -45,7 +45,7 @@ const IndividualQuestionnaire = ({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
             >
-              {selectedIndividualData.fullName}
+              {displayNameWithLatin(selectedIndividualData, 'fullName')}
             </ContentLink>
           ),
           size: 3,
@@ -119,7 +119,7 @@ const IndividualQuestionnaire = ({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
             >
-              {selectedIndividualData.fullName}
+              {displayNameWithLatin(selectedIndividualData, 'fullName')}
             </ContentLink>
           ),
           size: 3,

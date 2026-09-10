@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any, Callable, cast
 
+from django.core.exceptions import ValidationError
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
 
@@ -9,6 +10,7 @@ from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Area, BusinessArea, Facility, Household, Program
 from hope.models.currency import Currency
+from hope.models.individual import ascii_name_validator
 
 
 def handle_date_field(
@@ -202,6 +204,22 @@ def validate_choices(
     choices = _get_field_choices_values(model_class, name)
     if value not in choices:
         return f"Invalid value {value} for column {name} allowed values are {choices}"
+    return None
+
+
+def validate_latin_name(
+    value: Any,
+    name: str,
+    model_class: Any,
+    business_area: BusinessArea,
+    program: Program,
+) -> str | None:
+    if value is None or value == "":
+        return None
+    try:
+        ascii_name_validator(value)
+    except ValidationError as e:
+        return f"Invalid value {value} for column {name}: {e.message}"
     return None
 
 

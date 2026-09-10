@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from 'src/testUtils/testUtils';
@@ -7,8 +6,6 @@ import { IndividualsListTable } from './IndividualsListTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { SexEnum } from '@restgenerated/models/SexEnum';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { ResidenceStatusEnum } from '@restgenerated/models/ResidenceStatusEnum';
 import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)

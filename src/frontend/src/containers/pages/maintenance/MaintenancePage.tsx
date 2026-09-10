@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import MaintenanceGraphic from './maintenance_graphic_painter.png';
 import HopeLogo from './maintenance_hope_logo.png';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 const Container = styled.div`
   background-color: #ffffff;

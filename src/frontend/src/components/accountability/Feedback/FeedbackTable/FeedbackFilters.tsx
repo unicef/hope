@@ -6,7 +6,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid, MenuItem } from '@mui/material';
-import { Choice } from '@restgenerated/models/Choice';
+import type { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
@@ -14,7 +14,7 @@ import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAuto
 import { useQuery } from '@tanstack/react-query';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -148,8 +148,12 @@ const FeedbackFilters = ({
               disableClearable
               data-cy="filters-program-state"
             >
-              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>{t('Active Programmes')}</MenuItem>
-              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>{t('All Programmes')}</MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ACTIVE}>
+                {t('Active Programmes')}
+              </MenuItem>
+              <MenuItem value={PROGRAM_STATE_FILTER.ALL}>
+                {t('All Programmes')}
+              </MenuItem>
             </SelectFilter>
           </Grid>
         )}

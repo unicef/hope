@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -14,7 +15,7 @@ import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { showApiErrorMessages } from '@utils/utils';
 
 interface FinishProgramProps {
@@ -47,7 +48,7 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
       },
     });
 
-  const finishProgram = async(): Promise<void> => {
+  const finishProgram = async (): Promise<void> => {
     try {
       await finishProgramMutation();
       setSelectedProgram({

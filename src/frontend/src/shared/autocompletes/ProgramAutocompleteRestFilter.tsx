@@ -1,22 +1,23 @@
 import { InputAdornment } from '@mui/material';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { BaseAutocompleteFilterRest } from '@shared/autocompletes/BaseAutocompleteFilterRest';
-import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { AutocompleteOption } from '@shared/autocompletes/types';
+import type { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import type { AutocompleteOption } from '@shared/autocompletes/types';
 
 export function ProgramAutocompleteRestFilter({
   disabled,
@@ -61,7 +62,10 @@ export function ProgramAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsList, queryVariables),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsList,
+      queryVariables,
+    ),
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
   });
 
@@ -95,14 +99,17 @@ export function ProgramAutocompleteRestFilter({
     name: program.name,
   }));
 
+  // Both sides arrive as `AutocompleteOption | string`: MUI hands back the raw
+  // input text before an option is picked. Comparing without narrowing
+  // `option` reads `.id` off a string and silently never matches.
   const handleOptionSelected = (
-    option: AutocompleteOption,
+    option: AutocompleteOption | string,
     selectedValue: AutocompleteOption | string,
   ) => {
-    if (typeof selectedValue === 'string') {
-      return option?.id === selectedValue;
-    }
-    return option?.id === selectedValue?.id;
+    const optionKey = typeof option === 'string' ? option : option?.id;
+    const valueKey =
+      typeof selectedValue === 'string' ? selectedValue : selectedValue?.id;
+    return optionKey === valueKey;
   };
 
   const handleOptionLabel = (option: AutocompleteOption | string) => {

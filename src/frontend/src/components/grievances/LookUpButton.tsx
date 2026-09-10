@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import SearchIcon from '@mui/icons-material/Search';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const LookUp = styled.div`
   display: flex;

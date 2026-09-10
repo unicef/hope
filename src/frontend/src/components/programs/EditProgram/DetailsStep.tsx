@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { FC } from 'react';
+import type { FC } from 'react';
 import ProgramForm from '@containers/forms/ProgramForm';
 
 interface DetailsStepProps {

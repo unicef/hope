@@ -8,12 +8,11 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
@@ -22,7 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
@@ -59,21 +58,14 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       const visionProcessing =
         data?.visionManaged &&
         ['NOT_SENT', 'WAITING_FOR_CALLBACK'].includes(data.vision.status);
-      const errorStatuses = [
-        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-      ];
       if (visionProcessing) {
         return 60000;
       }
       if (
-        data?.status === PaymentPlanStatusEnum.PREPARING ||
-        (data?.backgroundActionStatus !== null &&
-          !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
-            data?.backgroundActionStatus,
-          ))
+        data?.backgroundActionStatus !== null &&
+        !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+          data?.backgroundActionStatus,
+        )
       ) {
         return 3000;
       }
@@ -123,42 +115,32 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <VisionStatusSection paymentPlan={paymentPlan} />
-      {status !== PaymentPlanStatusEnum.PREPARING && (
-        <>
-          <AcceptanceProcess paymentPlan={paymentPlan} />
-          {shouldDisplayVerificationSummary && (
-            <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
-          )}
-          {shouldDisplayFundsCommitment && (
-            <FundsCommitmentSection paymentPlan={paymentPlan} />
-          )}
-          {shouldDisplayEntitlement && (
-            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-          )}
-          {status === PaymentPlanStatusEnum.LOCKED_FSP &&
-            !paymentPlan.isInstructionManaged && (
-              <FspExtraFields
-                paymentPlan={paymentPlan}
-                permissions={permissions}
-              />
-            )}
-          <ExcludeSection paymentPlan={paymentPlan} />
-          <SupportingDocumentsSection paymentPlan={paymentPlan} />
-          <ConversionToUsd
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-          />
-          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-          <PaymentsTable
-            businessArea={businessArea}
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-            canViewDetails
-          />
-          {shouldDisplayReconciliationSummary && (
-            <ReconciliationSummary paymentPlan={paymentPlan} />
-          )}
-        </>
+      <AcceptanceProcess paymentPlan={paymentPlan} />
+      {shouldDisplayVerificationSummary && (
+        <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
+      )}
+      {shouldDisplayFundsCommitment && (
+        <FundsCommitmentSection paymentPlan={paymentPlan} />
+      )}
+      {shouldDisplayEntitlement && (
+        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+      )}
+      {status === PaymentPlanStatusEnum.LOCKED_FSP &&
+        !paymentPlan.isInstructionManaged && (
+          <FspExtraFields paymentPlan={paymentPlan} permissions={permissions} />
+        )}
+      <ExcludeSection paymentPlan={paymentPlan} />
+      <SupportingDocumentsSection paymentPlan={paymentPlan} />
+      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
+      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+      <PaymentsTable
+        businessArea={businessArea}
+        paymentPlan={paymentPlan}
+        permissions={permissions}
+        canViewDetails
+      />
+      {shouldDisplayReconciliationSummary && (
+        <ReconciliationSummary paymentPlan={paymentPlan} />
       )}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan?.id} />
