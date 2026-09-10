@@ -25,13 +25,7 @@ def beneficiary_ticket_client(business_area: BusinessArea) -> APIClient:
 
 @pytest.fixture
 def cw_only_business_area(user_business_area: BusinessArea) -> BusinessArea:
-    """The token's own BA switched to the Country Workspace ingest path.
-
-    `CreateRDIView` is gated behind `BusinessAreaIngestCWOnlyPermission`, so a
-    legacy BA is rejected with 403 before the serializer runs. Flipping the
-    token's existing BA (rather than building a new one) keeps it inside
-    `APIToken.valid_for`, which the 404 scoping check in `HOPEPermission` needs.
-    """
+    """The token's own BA switched to the Country Workspace ingest path."""
     user_business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
     user_business_area.save()
     return user_business_area
