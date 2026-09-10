@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any
 
-from django.db.models import Exists, F, OuterRef, Q, Value
+from django.db.models import Exists, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema_field
@@ -861,12 +861,12 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         return data
 
 
+# Served from /api/rest/choices/programs/ - keys must not depend on the business area.
 class ProgramChoicesSerializer(serializers.Serializer):
     status_choices = serializers.SerializerMethodField()
     frequency_of_payments_choices = serializers.SerializerMethodField()
     sector_choices = serializers.SerializerMethodField()
     scope_choices = serializers.SerializerMethodField()
-    data_collecting_type_choices = serializers.SerializerMethodField()
     partner_access_choices = serializers.SerializerMethodField()
     pdu_subtype_choices = serializers.SerializerMethodField()
     program_cycle_status_choices = serializers.SerializerMethodField()
@@ -882,27 +882,6 @@ class ProgramChoicesSerializer(serializers.Serializer):
 
     def get_scope_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SCOPE_CHOICE)
-
-    def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        request = self.context.get("request", {})
-        return [
-            dict(row)
-            for row in DataCollectingType.objects.filter(
-                Q(
-                    Q(
-                        limit_to__slug=request.parser_context["kwargs"]["business_area_slug"],
-                    )
-                    | Q(limit_to__isnull=True)
-                ),
-                active=True,
-                deprecated=False,
-            )
-            .exclude(code__iexact="unknown")
-            .annotate(name=F("label"))
-            .annotate(value=F("code"))
-            .values("name", "value", "description", "type")
-            .order_by("name")
-        ]
 
     def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.PARTNER_ACCESS_CHOICE)

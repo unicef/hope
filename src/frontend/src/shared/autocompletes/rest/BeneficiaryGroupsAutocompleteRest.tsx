@@ -1,6 +1,7 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { handleOptionSelected } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
 import { RestService } from '@restgenerated/services/RestService';

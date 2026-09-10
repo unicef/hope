@@ -8,8 +8,10 @@ from django.utils import timezone
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
+from timezone_field.rest_framework import TimeZoneSerializerField
 
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.timezones import resolve_timezone_name
 from hope.apps.core.utils import to_choice_object
 from hope.apps.geo.api.serializers import AreaLevelSerializer
 from hope.models import (
@@ -130,14 +132,18 @@ class ProfileSerializer(ProgramUsersSerializer):
     business_areas = serializers.SerializerMethodField()
     permissions_in_scope = serializers.SerializerMethodField()
     cross_area_filter_available = serializers.SerializerMethodField()
+    timezone = TimeZoneSerializerField(allow_null=True, read_only=True)
+    effective_timezone = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
         fields = ProgramUsersSerializer.Meta.fields + (
+            "timezone",
             "business_areas",
             "permissions_in_scope",
             "cross_area_filter_available",
             "job_title",
+            "effective_timezone",
         )
 
     @staticmethod
@@ -165,6 +171,9 @@ class ProfileSerializer(ProgramUsersSerializer):
 
         return user.permissions_in_business_area(business_area_slug)
 
+    def get_effective_timezone(self, user: User) -> str:
+        return resolve_timezone_name(user=user, business_area=self.context.get("business_area"))
+
     def get_cross_area_filter_available(self, user: User) -> bool:
         """Check if the cross area filter is available for the user.
 
@@ -182,7 +191,9 @@ class ProfileSerializer(ProgramUsersSerializer):
             )
             return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
 
-        business_area = BusinessArea.objects.get(slug=business_area_slug) if business_area_slug != "undefined" else None
+        business_area = self.context.get("business_area")
+        if business_area is None and business_area_slug != "undefined":
+            business_area = BusinessArea.objects.get(slug=business_area_slug)
         return user.has_perm(perm, business_area)
 
 
@@ -190,6 +201,18 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "first_name", "last_name", "email", "username")
+
+
+class UserTimezoneSerializer(serializers.ModelSerializer):
+    timezone = TimeZoneSerializerField(allow_null=True, required=True)
+    effective_timezone = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ("timezone", "effective_timezone")
+
+    def get_effective_timezone(self, user: User) -> str:
+        return resolve_timezone_name(user=user, business_area=self.context.get("business_area"))
 
 
 class PartnerForProgramSerializer(serializers.ModelSerializer):
@@ -220,8 +243,6 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
 class UserChoicesSerializer(serializers.Serializer):
     role_choices = serializers.SerializerMethodField()
     status_choices = serializers.SerializerMethodField()
-    partner_choices = serializers.SerializerMethodField()
-    partner_choices_temp = serializers.SerializerMethodField()
 
     def get_role_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": role.name, "value": role.id} for role in Role.objects.order_by("name")]
@@ -229,26 +250,27 @@ class UserChoicesSerializer(serializers.Serializer):
     def get_status_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
+
+class PartnerChoicesSerializer(serializers.Serializer):
+    partner_choices = serializers.SerializerMethodField()
+    partner_choices_temp = serializers.SerializerMethodField()
+
     def get_partner_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
-                .filter(allowed_business_areas__slug=business_area_slug)
+                .filter(allowed_business_areas=self.context["business_area"])
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
                 .values_list("id", "name")
             )
         )
 
     def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-        # TODO: can be removed after proper solution is applied; this is the temp solution to skip the user input in
-        #  program mutations and retrieve partners already with a role in BA
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
                 .filter(
-                    role_assignments__business_area__slug=business_area_slug,
+                    role_assignments__business_area=self.context["business_area"],
                     role_assignments__program=None,
                 )
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))

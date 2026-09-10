@@ -8,13 +8,13 @@ import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/Pay
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -22,7 +22,7 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -37,15 +37,19 @@ export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
+  const visionManaged = paymentPlan.visionManaged;
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsCyclesRetrieve, {
-      businessAreaSlug: businessArea,
-      id: programCycleId,
-      programCode: programId,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsCyclesRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: programCycleId,
+        programCode: programId,
+      },
+    ),
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
@@ -74,7 +78,8 @@ export const PaymentPlanDetailsHeader = ({
     });
   }
 
-  const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
+  const canRemove =
+    hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
@@ -90,15 +95,17 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
     permissions,
   );
-  const canMarkAsReleased = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
-  );
+  const canMarkAsReleased =
+    hasPermissions(
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+      permissions,
+    ) && !visionManaged;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
+    paymentPlan.canSendToPaymentGateway &&
+    !visionManaged;
 
   const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
   const canMarkReadyForClosure = hasPermissions(

@@ -1,20 +1,21 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { createApiParams } from '@utils/apiUtils';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
-import { ProgramList } from '@restgenerated/models/ProgramList';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
 
 interface ProgrammesTableProps {
   businessArea: string;

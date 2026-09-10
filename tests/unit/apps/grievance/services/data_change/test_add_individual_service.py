@@ -140,6 +140,15 @@ def kab_add_individual_context() -> dict[str, Any]:
     return {"household": household, "ticket": ticket}
 
 
+def test_update_without_extras_keeps_requested_data(kab_add_individual_context: dict[str, Any]) -> None:
+    ticket = kab_add_individual_context["ticket"]
+    requested_data = ticket.add_individual_ticket_details.individual_data
+
+    updated_ticket = AddIndividualService(ticket, {}).update()
+
+    assert updated_ticket.add_individual_ticket_details.individual_data == requested_data
+
+
 def test_add_individual_populates_kab_for_non_recalculating_dct(
     kab_add_individual_context: dict[str, Any],
 ) -> None:
@@ -285,6 +294,21 @@ def test_handle_add_identity(add_individual_context: dict[str, Any], program: Pr
     assert identity_obj.partner.name == "UNICEF"
     assert identity_obj.number == "A123456A"
     assert identity_obj.country == poland
+
+
+def test_close_stores_latin_names_as_provided(add_individual_context: dict[str, Any], user: User) -> None:
+    ticket = add_individual_context["ticket"]
+    ticket_details = add_individual_context["ticket_details"]
+    ticket_details.individual_data["full_name_latin"] = "Test Example"
+    ticket_details.save()
+
+    service = AddIndividualService(ticket, {})
+    service.close(user)
+
+    individual = Individual.objects.get(household=add_individual_context["household"], full_name="Test Example")
+    assert individual.full_name_latin == "Test Example"
+    assert individual.given_name_latin is None
+    assert individual.family_name_latin is None
 
 
 def test_close_without_approval_creates_no_individual(

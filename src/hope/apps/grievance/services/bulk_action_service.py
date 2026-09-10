@@ -1,6 +1,7 @@
 import copy
 from typing import Sequence
 
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
@@ -25,6 +26,10 @@ _ACTIVITY_LOG_SELECT_RELATED = (
     "assigned_to",
     "created_by",
     "admin2",
+)
+
+_ACTIVITY_LOG_PREFETCH_RELATED = (
+    "programs",
     "complaint_ticket_details__household",
     "complaint_ticket_details__individual",
     "complaint_ticket_details__payment",
@@ -42,7 +47,24 @@ _ACTIVITY_LOG_SELECT_RELATED = (
 )
 
 
+def _with_ticket_context(error: Exception, unicef_id: str) -> Exception:
+    """Name the ticket a per-ticket failure came from: the batch is atomic, so nothing else identifies it."""
+    detail = getattr(error, "detail", None)
+    message = " ".join(str(item) for item in detail) if isinstance(detail, list) else str(detail or error)
+    prefixed = f"Ticket {unicef_id}: {message}"
+    if isinstance(error, PermissionDenied | DjangoPermissionDenied):
+        return PermissionDenied(prefixed)
+    return ValidationError(prefixed)
+
+
 class BulkActionService:
+    def _open_tickets(self, tickets_ids: Sequence[str], business_area_slug: str) -> QuerySet[GrievanceTicket]:
+        return GrievanceTicket.objects.filter(
+            ~Q(status=GrievanceTicket.STATUS_CLOSED),
+            id__in=tickets_ids,
+            business_area__slug=business_area_slug,
+        )
+
     def _clear_cache(self, business_area_slug: str) -> None:
         cache_key = f"count_{business_area_slug}_GrievanceTicketNodeConnection_"
         clear_cache_for_key(cache_key)
@@ -56,7 +78,7 @@ class BulkActionService:
         action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
-        queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        queryset = self._open_tickets(tickets_ids, business_area_slug)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
         # Capture which tickets actually change assignee before the update; only those count as assigned.
@@ -83,7 +105,7 @@ class BulkActionService:
     ) -> QuerySet[GrievanceTicket]:
         if priority not in [x for x, y in PRIORITY_CHOICES]:
             raise ValidationError("Invalid priority")
-        queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        queryset = self._open_tickets(tickets_ids, business_area_slug)
         updated_count = queryset.update(priority=priority)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
@@ -97,7 +119,7 @@ class BulkActionService:
     ) -> QuerySet[GrievanceTicket]:
         if urgency not in [x for x, y in URGENCY_CHOICES]:
             raise ValidationError("Invalid priority")
-        queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        queryset = self._open_tickets(tickets_ids, business_area_slug)
         updated_count = queryset.update(urgency=urgency)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
@@ -123,7 +145,7 @@ class BulkActionService:
             .order_by("pk")
             .select_for_update(of=("self",))
             .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
-            .prefetch_related("programs")
+            .prefetch_related(*_ACTIVITY_LOG_PREFETCH_RELATED)
         )
         if len(tickets) != len(tickets_ids) or any(
             not ticket.can_change_status(GrievanceTicket.STATUS_CLOSED) for ticket in tickets
@@ -187,7 +209,7 @@ class BulkActionService:
             .order_by("pk")
             .select_for_update(of=("self",))
             .select_related(*_ACTIVITY_LOG_SELECT_RELATED)
-            .prefetch_related("programs")
+            .prefetch_related(*_ACTIVITY_LOG_PREFETCH_RELATED)
         )
         skipped_closed: list[GrievanceTicket] = []
         if len(tickets) != len(ticket_ids):
@@ -214,7 +236,10 @@ class BulkActionService:
 
         for ticket in tickets:
             old_ticket = copy.copy(ticket)
-            self._resolve_single_needs_adjudication(ticket, resolutions_by_id[str(ticket.id)], user)
+            try:
+                self._resolve_single_needs_adjudication(ticket, resolutions_by_id[str(ticket.id)], user)
+            except (ValidationError, PermissionDenied, DjangoPermissionDenied) as error:
+                raise _with_ticket_context(error, ticket.unicef_id) from error
             log_create(
                 GrievanceTicket.ACTIVITY_LOG_MAPPING,
                 "business_area",
@@ -242,7 +267,7 @@ class BulkActionService:
 
         unknown = (set(duplicate_ids) | set(distinct_ids)) - ticket_individuals.keys()
         if unknown:
-            raise ValidationError(f"Individuals {sorted(unknown)} do not belong to ticket {ticket.unicef_id}.")
+            raise ValidationError(f"Individuals {sorted(unknown)} do not belong to this ticket.")
 
         for individual_id in duplicate_ids + distinct_ids:
             validate_individual_for_need_adjudication(user.partner, ticket_individuals[individual_id], ticket_details)
@@ -266,7 +291,7 @@ class BulkActionService:
         comment: str,
         business_area_slug: str,
     ) -> QuerySet[GrievanceTicket]:
-        tickets = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        tickets = self._open_tickets(tickets_ids, business_area_slug)
         if len(tickets) != len(tickets_ids):
             raise ValidationError("Some tickets do not exist, or are closed")
         for ticket in tickets:

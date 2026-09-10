@@ -23,7 +23,7 @@ from hope.apps.grievance.models import (
 )
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     can_close_as_unique,
-    find_open_unique_identifiers_ticket_for_individual,
+    find_open_unique_identifiers_ticket_id_for_individual,
 )
 from hope.apps.household.api.serializers.household import HouseholdForTicketSerializer
 from hope.apps.household.api.serializers.individual import (
@@ -56,7 +56,6 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "individual_data",
-            "role_reassign_data",
             "linked_needs_adjudication_ticket_id",
         )
 
@@ -74,8 +73,8 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
         return data
 
     def get_linked_needs_adjudication_ticket_id(self, obj: TicketIndividualDataUpdateDetails) -> str | None:
-        linked = find_open_unique_identifiers_ticket_for_individual(obj.individual)
-        return str(linked.ticket_id) if linked else None
+        linked_ticket_id = find_open_unique_identifiers_ticket_id_for_individual(obj.individual)
+        return str(linked_ticket_id) if linked_ticket_id else None
 
 
 class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):
@@ -255,6 +254,7 @@ class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
             "unicef_id",
             "household",
             "full_name",
+            "full_name_latin",
             "birth_date",
             "last_registration_date",
             "sex",
@@ -283,6 +283,7 @@ class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
             "unicef_id",
             "household",
             "full_name",
+            "full_name_latin",
             "given_name",
             "family_name",
             "phone_no",

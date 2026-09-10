@@ -18,6 +18,14 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0), MaxValueValidator(100)],
         },
     ),
+    "hour_of_day": (
+        "django.forms.fields.IntegerField",
+        {
+            "min_value": 0,
+            "max_value": 23,
+            "widget": "django.forms.widgets.NumberInput",
+        },
+    ),
     "positive_integers": (
         "django.forms.fields.IntegerField",
         {
@@ -70,8 +78,10 @@ CONSTANCE_CONFIG = {
     ),
     "DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE": (
         6.0,
-        "Results equal or above this score are considered possible duplicates (needs adjudication) "
-        "must be lower than DEDUPLICATION_DUPLICATE_SCORE",
+        (
+            "Results equal or above this score are considered possible duplicates (needs adjudication) "
+            "must be lower than DEDUPLICATION_DUPLICATE_SCORE"
+        ),
         "positive_floats",
     ),
     "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE": (
@@ -146,6 +156,11 @@ CONSTANCE_CONFIG = {
         "Days after creation before a non-sensitive grievance ticket counts as overdue",
         "positive_integers",
     ),
+    "GRIEVANCE_NOTIFICATION_HOUR": (
+        6,
+        "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",
+        "hour_of_day",
+    ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,
         "Should send payment plans notification",
@@ -205,8 +220,10 @@ Clear Cache,clear-cache/
     ),
     "PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS": (
         False,
-        "The same user can have multiple approvals in acceptance process. "
-        "Intended to be used only for testing purposes",
+        (
+            "The same user can have multiple approvals in acceptance process. "
+            "Intended to be used only for testing purposes"
+        ),
         bool,
     ),
     "REMOVE_RDI_LINKS_TIMEDELTA": (

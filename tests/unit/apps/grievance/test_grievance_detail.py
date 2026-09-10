@@ -355,6 +355,7 @@ def assert_base_grievance_data(
             "head_of_household": {
                 "id": str(household.head_of_household.id),
                 "full_name": household.head_of_household.full_name,
+                "full_name_latin": None,
             },
             "active_individuals_count": household.active_individuals.count(),
         }
@@ -433,6 +434,7 @@ def assert_base_grievance_data(
             "id": str(individual.id),
             "unicef_id": individual.unicef_id,
             "full_name": individual.full_name,
+            "full_name_latin": None,
             "program_code": individual.program.code,
             "household": {
                 "id": str(individual.household.id),
@@ -448,8 +450,8 @@ def assert_base_grievance_data(
                 "program_code": individual.program.code,
                 "admin3": None,
                 "admin4": None,
-                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%d}",
+                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
                 "delivered_quantities": delivered_quantities
@@ -488,8 +490,8 @@ def assert_base_grievance_data(
                         "address": role.household.address,
                         "village": role.household.village,
                         "geopoint": role.household.geopoint,
-                        "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-                        "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                        "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%d}",
+                        "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%d}",
                         "total_cash_received": role.household.total_cash_received,
                         "total_cash_received_usd": role.household.total_cash_received_usd,
                         "delivered_quantities": delivered_quantities
@@ -991,7 +993,6 @@ def test_grievance_detail_individual_data_update(
     assert data["ticket_details"] == {
         "id": str(ticket_details.id),
         "individual_data": ticket_details.individual_data,
-        "role_reassign_data": ticket_details.role_reassign_data,
         "linked_needs_adjudication_ticket_id": None,
     }
 
@@ -1224,12 +1225,8 @@ def test_grievance_detail_delete_household(
             },
             "admin3": None,
             "admin4": None,
-            "first_registration_date": ticket_details.reason_household.first_registration_date.strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            ),
-            "last_registration_date": ticket_details.reason_household.last_registration_date.strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            ),
+            "first_registration_date": ticket_details.reason_household.first_registration_date.strftime("%Y-%m-%d"),
+            "last_registration_date": ticket_details.reason_household.last_registration_date.strftime("%Y-%m-%d"),
             "total_cash_received": None,
             "total_cash_received_usd": None,
             "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
@@ -1344,6 +1341,7 @@ def test_grievance_detail_system_flagging(
         "id": str(golden_records_individual.id),
         "unicef_id": golden_records_individual.unicef_id,
         "full_name": golden_records_individual.full_name,
+        "full_name_latin": None,
         "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
         "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
         "sex": golden_records_individual.sex,
@@ -1368,12 +1366,8 @@ def test_grievance_detail_system_flagging(
             "address": golden_records_individual.household.address,
             "village": golden_records_individual.household.village,
             "geopoint": golden_records_individual.household.geopoint,
-            "first_registration_date": (
-                f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-            ),
-            "last_registration_date": (
-                f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-            ),
+            "first_registration_date": (f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"),
+            "last_registration_date": (f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"),
             "total_cash_received": golden_records_individual.household.total_cash_received,
             "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
             "delivered_quantities": [
@@ -1698,6 +1692,7 @@ def test_grievance_detail_needs_adjudication(
         "id": str(golden_records_individual.id),
         "unicef_id": golden_records_individual.unicef_id,
         "full_name": golden_records_individual.full_name,
+        "full_name_latin": None,
         "given_name": golden_records_individual.given_name,
         "family_name": golden_records_individual.family_name,
         "phone_no": str(golden_records_individual.phone_no),
@@ -1727,12 +1722,8 @@ def test_grievance_detail_needs_adjudication(
             "address": golden_records_individual.household.address,
             "village": golden_records_individual.household.village,
             "geopoint": golden_records_individual.household.geopoint,
-            "first_registration_date": (
-                f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-            ),
-            "last_registration_date": (
-                f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
-            ),
+            "first_registration_date": (f"{golden_records_individual.household.first_registration_date:%Y-%m-%d}"),
+            "last_registration_date": (f"{golden_records_individual.household.last_registration_date:%Y-%m-%d}"),
             "total_cash_received": golden_records_individual.household.total_cash_received,
             "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
             "delivered_quantities": [
@@ -1810,6 +1801,7 @@ def test_grievance_detail_needs_adjudication(
         "id": str(individuals2[0].id),
         "unicef_id": individuals2[0].unicef_id,
         "full_name": individuals2[0].full_name,
+        "full_name_latin": None,
         "given_name": individuals2[0].given_name,
         "family_name": individuals2[0].family_name,
         "phone_no": str(individuals2[0].phone_no),
@@ -1839,8 +1831,8 @@ def test_grievance_detail_needs_adjudication(
             "address": individuals2[0].household.address,
             "village": individuals2[0].household.village,
             "geopoint": individuals2[0].household.geopoint,
-            "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
-            "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
+            "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%d}"),
+            "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%d}"),
             "total_cash_received": individuals2[0].household.total_cash_received,
             "total_cash_received_usd": individuals2[0].household.total_cash_received_usd,
             "delivered_quantities": [
@@ -1890,6 +1882,7 @@ def test_grievance_detail_needs_adjudication(
             "id": str(individuals2[0].id),
             "unicef_id": individuals2[0].unicef_id,
             "full_name": individuals2[0].full_name,
+            "full_name_latin": None,
             "given_name": individuals2[0].given_name,
             "family_name": individuals2[0].family_name,
             "phone_no": str(individuals2[0].phone_no),
@@ -1919,8 +1912,8 @@ def test_grievance_detail_needs_adjudication(
                 "address": individuals2[0].household.address,
                 "village": individuals2[0].household.village,
                 "geopoint": individuals2[0].household.geopoint,
-                "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
-                "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"),
+                "first_registration_date": (f"{individuals2[0].household.first_registration_date:%Y-%m-%d}"),
+                "last_registration_date": (f"{individuals2[0].household.last_registration_date:%Y-%m-%d}"),
                 "total_cash_received": individuals2[0].household.total_cash_received,
                 "total_cash_received_usd": individuals2[0].household.total_cash_received_usd,
                 "delivered_quantities": [
@@ -1986,6 +1979,7 @@ def test_grievance_detail_needs_adjudication(
         "head_of_household": {
             "id": str(duplicate.household.head_of_household.id),
             "full_name": duplicate.household.head_of_household.full_name,
+            "full_name_latin": duplicate.household.head_of_household.full_name_latin,
         },
         "residence_status": duplicate.household.get_residence_status_display(),
         "size": duplicate.household.size,
@@ -2011,8 +2005,8 @@ def test_grievance_detail_needs_adjudication(
         "address": duplicate.household.address,
         "village": duplicate.household.village,
         "geopoint": duplicate.household.geopoint,
-        "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
-        "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+        "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%d}",
+        "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%d}",
         "total_cash_received": duplicate.household.total_cash_received,
         "total_cash_received_usd": duplicate.household.total_cash_received_usd,
         "delivered_quantities": [
@@ -2035,6 +2029,7 @@ def test_grievance_detail_needs_adjudication(
             "id": str(duplicate.id),
             "unicef_id": duplicate.unicef_id,
             "full_name": duplicate.full_name,
+            "full_name_latin": None,
             "birth_date": f"{duplicate.birth_date:%Y-%m-%d}",
             "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
             "sex": duplicate.sex,
@@ -2976,6 +2971,8 @@ def test_needs_adjudication_comparison_query_count_for_three_duplicates(
         },
     )
 
+    # This count also pins that the global viewset prefetches linked_tickets for `list` only.
+    # If the number grew by one, look at GrievanceTicketGlobalViewSet.get_queryset before raising it.
     with django_assert_num_queries(93):
         response = authenticated_client.get(url)
 

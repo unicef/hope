@@ -20,6 +20,8 @@ systems and platforms, ensuring smooth workflows and easy expansion as your need
 
 - [Payment Gateway](pg.md)
 
+- [Vision](vision.md)
+
 - [Country Workspace](workspace.md)
 
 - [RapidPro](rapidpro/index.md)

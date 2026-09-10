@@ -2,8 +2,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Grid, Tooltip } from '@mui/material';
-import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -14,7 +14,8 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, useFormikContext } from 'formik';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -36,11 +37,19 @@ const ProgramForm = ({
   const isEditProgram = location.pathname.indexOf('edit') !== -1;
 
   const { data } = useQuery<ProgramChoices>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsChoicesRetrieve, {
-      businessAreaSlug: businessArea,
-    }),
+    queryKey: restQueryKey(RestService.restChoicesProgramsRetrieve),
+    queryFn: () => RestService.restChoicesProgramsRetrieve(),
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
+
+  const { data: dataCollectingTypeChoices } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasDataCollectingTypesChoicesList,
+      { businessAreaSlug: businessArea },
+    ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsChoicesRetrieve({
+      RestService.restBusinessAreasDataCollectingTypesChoicesList({
         businessAreaSlug: businessArea,
       }),
     staleTime: 1000 * 60 * 10,
@@ -60,9 +69,7 @@ const ProgramForm = ({
   // For copy program pages, filter DCTs based on Beneficiary Group (BG → DCT)
   // For normal create/edit, filter BGs based on DCT (DCT → BG)
   const filteredDataCollectionTypeChoicesData = useMemo(() => {
-    const allDCTs = data?.dataCollectingTypeChoices.filter(
-      (el) => el.name !== '',
-    );
+    const allDCTs = dataCollectingTypeChoices?.filter((el) => el.name !== '');
 
     if (
       !isCopyProgramPage ||
@@ -89,7 +96,7 @@ const ProgramForm = ({
       return true;
     });
   }, [
-    data?.dataCollectingTypeChoices,
+    dataCollectingTypeChoices,
     isCopyProgramPage,
     values.beneficiaryGroup,
     beneficiaryGroupsData,
@@ -146,7 +153,8 @@ const ProgramForm = ({
     isCopyProgramPage,
   ]);
 
-  if (!data || !beneficiaryGroupsData) return null;
+  if (!data || !beneficiaryGroupsData || !dataCollectingTypeChoices)
+    return null;
 
   return (
     <Form>

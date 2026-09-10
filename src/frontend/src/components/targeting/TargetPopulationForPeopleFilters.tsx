@@ -12,7 +12,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface TargetPopulationFiltersProps {
   filter;
@@ -55,7 +55,6 @@ export const TargetPopulationForPeopleFilters = ({
     'ASSIGNED',
     PaymentPlanStatusEnum.TP_OPEN,
     PaymentPlanStatusEnum.TP_LOCKED,
-    PaymentPlanStatusEnum.PROCESSING,
     PaymentPlanStatusEnum.STEFICON_RUN,
     PaymentPlanStatusEnum.STEFICON_WAIT,
     PaymentPlanStatusEnum.STEFICON_COMPLETED,

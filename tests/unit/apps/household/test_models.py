@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.db import IntegrityError
 from django.utils import timezone
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     AreaFactory,
@@ -301,7 +302,10 @@ def test_mark_as_distinct_raise_errors(program) -> None:
     doc_2.document_number = "123456ABC"
     doc_2.save()
 
-    with pytest.raises(Exception, match="IND-333: Valid Document already exists: 123456ABC."):
+    with pytest.raises(
+        ValidationError,
+        match="Individual IND-333 cannot be marked as distinct: document 123456ABC conflicts",
+    ):
         ind.mark_as_distinct()
 
 
@@ -426,3 +430,26 @@ def test_get_all_doc_types_choices_cache_cleared_on_delete(django_capture_on_com
         doc_type.delete()
     assert cache.get(DocumentType.CACHE_KEY_ALL_DOC_TYPES) is None
     assert ("key_to_delete", "To Delete") not in DocumentType.get_all_doc_types_choices()
+
+
+def test_individual_erase(business_area: BusinessArea) -> None:
+    individual = IndividualFactory(
+        business_area=business_area,
+        full_name="FullName",
+        given_name="G_Name",
+        middle_name="M_Name",
+        family_name="F_Name",
+        full_name_latin="LatinFull",
+        given_name_latin="LatinGiven",
+        middle_name_latin="MLatin",
+        family_name_latin="Family latin",
+    )
+    individual.erase()
+    assert individual.full_name == "GDPR REMOVED"
+    assert individual.given_name == "GDPR REMOVED"
+    assert individual.middle_name == "GDPR REMOVED"
+    assert individual.family_name == "GDPR REMOVED"
+    assert individual.full_name_latin == "GDPR REMOVED"
+    assert individual.given_name_latin == "GDPR REMOVED"
+    assert individual.middle_name_latin == "GDPR REMOVED"
+    assert individual.family_name_latin == "GDPR REMOVED"

@@ -1,0 +1,58 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "596"
+    },
+    "data": {
+        "status_choices": [
+            {
+                "name": "Distribution Successful",
+                "value": "Distribution Successful"
+            },
+            {
+                "name": "Not Distributed",
+                "value": "Not Distributed"
+            },
+            {
+                "name": "Transaction Successful",
+                "value": "Transaction Successful"
+            },
+            {
+                "name": "Transaction Erroneous",
+                "value": "Transaction Erroneous"
+            },
+            {
+                "name": "Force failed",
+                "value": "Force failed"
+            },
+            {
+                "name": "Partially Distributed",
+                "value": "Partially Distributed"
+            },
+            {
+                "name": "Pending",
+                "value": "Pending"
+            },
+            {
+                "name": "Sent to Payment Gateway",
+                "value": "Sent to Payment Gateway"
+            },
+            {
+                "name": "Sent to FSP",
+                "value": "Sent to FSP"
+            },
+            {
+                "name": "Manually Cancelled",
+                "value": "Manually Cancelled"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -347,13 +347,11 @@ def login(browser: Chrome) -> Chrome:
     from selenium.webdriver.support.wait import WebDriverWait
 
     WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.XPATH, login_button)))
-    browser.find_element(By.XPATH, login_button)
+    login_form = browser.find_element(By.ID, "login-form")
     browser.find_element(By.ID, login).send_keys("superuser")
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, login_button).click()
-    from time import sleep
-
-    sleep(0.2)  # TODO: added just for test in CI
+    WebDriverWait(browser, 10).until(expected_conditions.staleness_of(login_form))
     browser.get(f"{browser.live_server.url}/")
 
     from django.core.cache import cache
@@ -605,6 +603,7 @@ def business_area(create_unicef_partner: Any, create_role_with_all_permissions: 
         has_data_sharing_agreement=True,
         is_accountability_applicable=True,
         active=True,
+        defaults={"timezone": "UTC"},
     )
     FlagState.objects.get_or_create(
         name="ALLOW_ACCOUNTABILITY_MODULE",

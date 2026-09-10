@@ -11,6 +11,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentPlanFactory,
     PaymentPlanSupportingDocumentFactory,
+    ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
@@ -29,7 +30,7 @@ def business_area() -> Any:
 def payment_plan(business_area: Any) -> PaymentPlan:
     return PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
-        business_area=business_area,
+        program_cycle__program=ProgramFactory(business_area=business_area),
     )
 
 

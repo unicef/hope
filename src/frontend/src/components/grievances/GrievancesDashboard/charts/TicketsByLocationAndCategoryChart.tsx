@@ -1,10 +1,11 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { FC, useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
-import { DetailedChartData } from '@restgenerated/models/DetailedChartData';
+import type { DetailedChartData } from '@restgenerated/models/DetailedChartData';
 import { categoriesAndColors } from '@components/grievances/utils/createGrievanceUtils';
 
 interface TicketsByLocationAndCategoryChartProps {
@@ -46,6 +47,20 @@ export const TicketsByLocationAndCategoryChart: FC<
 
   const options: any = {
     indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      datalabels: {
+        anchor: 'start',
+        align: 'left',
+        offset: 4,
+        color: '#FFF',
+        font: {
+          weight: 'bold',
+        },
+        formatter: formatThousands,
+      },
+    },
     legend: {
       labels: {
         padding: 40,
@@ -55,8 +70,9 @@ export const TicketsByLocationAndCategoryChart: FC<
       x: {
         display: true,
         position: 'top',
-        beginAtZero: true,
         ticks: {
+          beginAtZero: true,
+          stepSize: 1,
           callback: formatThousands,
         },
       },
@@ -69,13 +85,16 @@ export const TicketsByLocationAndCategoryChart: FC<
     },
   };
 
+  const visibleRowCount = matchDataSize(data.labels).length;
+  const chartHeight = Math.max(400, visibleRowCount * 45 + 80);
+
   return (
     <Box
       sx={{
         flexDirection: 'column',
       }}
     >
-      <div style={{ height: '400px' }}>
+      <div style={{ height: `${chartHeight}px` }}>
         <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
       </div>
       {data.labels.length > lessDataCount ? (

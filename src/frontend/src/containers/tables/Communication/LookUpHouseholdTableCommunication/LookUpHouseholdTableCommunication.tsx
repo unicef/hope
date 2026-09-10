@@ -6,15 +6,16 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
-import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;

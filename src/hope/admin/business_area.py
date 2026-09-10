@@ -60,7 +60,7 @@ class BusinessOfficeForm(forms.ModelForm):
 
     class Meta:
         model = BusinessArea
-        fields = ("code", "name")
+        fields = ("code", "name", "timezone")
 
 
 class BusinessofficeFilter(SimpleListFilter):
@@ -162,6 +162,7 @@ class BusinessAreaAdmin(
         "name",
         "slug",
         "code",
+        "timezone",
         "region_name",
         "region_code",
         "active",
@@ -170,6 +171,7 @@ class BusinessAreaAdmin(
         "is_split",
         "parent",
         "enable_email_notification",
+        "vision_integration_active",
         "is_accountability_applicable",
     )
     search_fields = ("name", "slug")
@@ -182,6 +184,7 @@ class BusinessAreaAdmin(
         "postpone_deduplication",
         "is_split",
         "enable_email_notification",
+        "vision_integration_active",
         "is_accountability_applicable",
     )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
@@ -217,6 +220,8 @@ class BusinessAreaAdmin(
                         region_name=self.object.region_name,
                         long_name=f"Business Office: {name}",
                         slug=slugify(name),
+                        office_country=self.object.office_country,
+                        timezone=form.cleaned_data["timezone"],
                     )
                 preserved_filters = self.get_preserved_filters(request)
 

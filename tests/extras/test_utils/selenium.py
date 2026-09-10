@@ -100,12 +100,18 @@ class HopeTestBrowser(BaseCase):
         except Exception:  # noqa: BLE001
             return False
 
-    def select_option_by_name(self, option_name: str, selector: str | None = None):
+    def select_option_by_name(self, option_name: str, selector: str | None = None) -> None:
         if selector is None:
             selector = f'li[data-cy="select-option-{option_name}"]'
-        self.wait_for_element_clickable(selector)
-        self.click(selector)
+        self._click_menu_option(selector)
+        if not self._listbox_closed(selector):
+            self._click_menu_option(selector)
         self.wait_for_element_absent(selector)
+
+    def _click_menu_option(self, selector: str) -> None:
+        """Click the option matching `selector`, on the node so the click cannot miss mid-transform."""
+        option = self.wait_for_element_clickable(selector)
+        self.execute_script("arguments[0].click()", option)
 
     def select_dropdown_option(self, field_name: str, option_name: str) -> None:
         """Open a FormikSelectField by its Formik field name and pick an option by its visible name.

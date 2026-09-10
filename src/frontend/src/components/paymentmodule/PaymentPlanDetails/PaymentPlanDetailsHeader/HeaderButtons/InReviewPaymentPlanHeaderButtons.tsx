@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import { MarkAsReleasedPaymentPlan } from '../MarkAsReleasedPaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface InReviewPaymentPlanHeaderButtonsProps {
@@ -26,7 +26,7 @@ export function InReviewPaymentPlanHeaderButtons({
       }}
     >
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
-      {canMarkAsReleased && (
+      {canMarkAsReleased && !paymentPlan.visionManaged && (
         <MarkAsReleasedPaymentPlan paymentPlan={paymentPlan} />
       )}
       {canAbort && <AbortPaymentPlan paymentPlan={paymentPlan} />}

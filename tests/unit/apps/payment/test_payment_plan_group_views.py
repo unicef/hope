@@ -5,8 +5,10 @@ from unittest import mock
 from unittest.mock import patch
 from zipfile import BadZipFile
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
+from django.http import Http404
 from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
@@ -33,10 +35,11 @@ from extras.test_utils.factories.payment import (
     PaymentHouseholdSnapshotFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.payment.api.serializers import PaymentPlanGroupDetailSerializer
+from hope.apps.payment.celery_tasks import export_payment_plan_group_delivery_xlsx_async_task
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.models import AsyncRetryJob, PaymentPlan, PaymentPlanGroup
+from hope.models import AsyncRetryJob, LogEntry, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -1254,6 +1257,34 @@ def test_export_sets_background_action_status_to_exporting(
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
 
 
+@pytest.mark.enable_activity_log
+def test_export_logs_activity_entry(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+    group = group_with_accepted_plan_and_payment
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [program.pk]
+
+
 def test_export_when_already_exporting_returns_400(
     client: Any,
     user: Any,
@@ -1538,6 +1569,90 @@ def test_export_without_resolvable_template_returns_400(
     assert group.background_action_status is None
 
 
+@pytest.mark.enable_activity_log
+def test_export_task_error_logs_activity_entry(
+    user: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment_no_template: Any,
+) -> None:
+    group = group_with_accepted_plan_and_payment_no_template
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR)
+    job = AsyncRetryJob.objects.latest("pk")
+    with pytest.raises(NonRetriableTaskError):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+    }
+
+
+@pytest.mark.enable_activity_log
+def test_export_task_unexpected_error_logs_activity_entry(
+    user: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+) -> None:
+    group = group_with_accepted_plan_and_payment
+    template = FinancialServiceProviderXlsxTemplateFactory()
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(
+            group, str(user.pk), str(template.pk), plan_type=PaymentPlan.PlanType.REGULAR
+        )
+    # the template disappears before the worker picks the job up
+    template.delete()
+    job = AsyncRetryJob.objects.latest("pk")
+    with pytest.raises(Http404):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+    }
+
+
+@pytest.mark.enable_activity_log
+def test_export_task_success_logs_activity_entry(
+    user: Any,
+    program: Any,
+    group_with_accepted_plan_and_payment: Any,
+) -> None:
+    group = group_with_accepted_plan_and_payment
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
+    group.save(update_fields=["background_action_status"])
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        export_payment_plan_group_delivery_xlsx_async_task(group, str(user.pk), plan_type=PaymentPlan.PlanType.REGULAR)
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    group.refresh_from_db()
+    assert group.background_action_status is None
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING,
+        "to": None,
+    }
+    assert list(log.programs.values_list("pk", flat=True)) == [program.pk]
+
+
 def test_export_queues_async_task_on_commit(
     client: Any,
     user: Any,
@@ -1716,11 +1831,45 @@ def test_send_group_to_payment_gateway_dispatches_each_plan(
 
     assert response.status_code == status.HTTP_200_OK
     assert mock_execute_update_status_action.call_count == 2
-    dispatched_actions = {call.kwargs["input_data"]["action"] for call in mock_execute_update_status_action.mock_calls}
+    dispatched_actions = {
+        call.kwargs["input_data"]["action"] for call in mock_execute_update_status_action.call_args_list
+    }
     assert dispatched_actions == {PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY}
 
     init_targets = {call.args[0].pk for call in mock_service_init.mock_calls}
     assert init_targets == {plan_a.pk, plan_b.pk}
+
+
+@pytest.mark.enable_activity_log
+def test_send_group_to_payment_gateway_logs_activity_entry_per_plan(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+    create_sendable_payment_plan: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+    group = cycle.payment_plan_groups.first()
+    plan_a = create_sendable_payment_plan(cycle, group)
+    plan_b = create_sendable_payment_plan(cycle, group)
+
+    response = client.post(_send_group_to_payment_gateway_url(business_area.slug, program.code, group.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    logs = LogEntry.objects.filter(content_type=ContentType.objects.get_for_model(PaymentPlan))
+    assert set(logs.values_list("object_id", flat=True)) == {plan_a.pk, plan_b.pk}
+    log_a = logs.get(object_id=plan_a.pk)
+    assert log_a.action == LogEntry.UPDATE
+    assert log_a.user == user
+    assert log_a.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+    }
+    assert list(log_a.programs.values_list("pk", flat=True)) == [program.pk]
 
 
 def test_send_group_to_payment_gateway_with_no_plans_fails(
@@ -2383,6 +2532,154 @@ def test_delivery_import_xlsx_end_to_end_updates_payment_data(
     assert payment_one.delivered_quantity == Decimal("75.00")
     assert payment_two.delivered_quantity == Decimal("125.00")
     assert group.background_action_status is None
+
+
+@pytest.mark.enable_activity_log
+def test_delivery_import_xlsx_logs_activity_entry(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    e2e_import_setup: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = e2e_import_setup["group"]
+    workbook = openpyxl.Workbook()
+    ws = workbook.active
+    ws.append(["payment_id", "delivered_quantity"])
+    ws.append([str(e2e_import_setup["payment_one"].unicef_id), Decimal("75.00")])
+    ws.append([str(e2e_import_setup["payment_two"].unicef_id), Decimal("125.00")])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    upload = SimpleUploadedFile(
+        "import.xlsx",
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    response = client.post(
+        _import_url(business_area.slug, program.code, group.id),
+        {"file": upload},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    log = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": None,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+    }
+    assert log.changes["delivery_import_file"]["from"] is None
+    assert list(log.programs.values_list("pk", flat=True)) == [program.pk]
+
+
+@pytest.mark.enable_activity_log
+def test_delivery_import_xlsx_task_logs_completion_entry(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    e2e_import_setup: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = e2e_import_setup["group"]
+    workbook = openpyxl.Workbook()
+    ws = workbook.active
+    ws.append(["payment_id", "delivered_quantity"])
+    ws.append([str(e2e_import_setup["payment_one"].unicef_id), Decimal("75.00")])
+    ws.append([str(e2e_import_setup["payment_two"].unicef_id), Decimal("125.00")])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    upload = SimpleUploadedFile(
+        "import.xlsx",
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    with (
+        patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": upload},
+            format="multipart",
+        )
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    log = LogEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk
+    ).latest("timestamp")
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        "to": None,
+    }
+
+
+@pytest.mark.enable_activity_log
+def test_delivery_import_xlsx_task_error_logs_activity_entry(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    e2e_import_setup: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX], business_area, program=program
+    )
+    group = e2e_import_setup["group"]
+    workbook = openpyxl.Workbook()
+    ws = workbook.active
+    ws.append(["payment_id", "delivered_quantity"])
+    ws.append([str(e2e_import_setup["payment_one"].unicef_id), Decimal("75.00")])
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    upload = SimpleUploadedFile(
+        "import.xlsx",
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    with (
+        patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
+        TestCase.captureOnCommitCallbacks(execute=True),
+    ):
+        client.post(
+            _import_url(business_area.slug, program.code, group.id),
+            {"file": upload},
+            format="multipart",
+        )
+    # the uploaded file disappears from storage before the worker picks the job up
+    group.refresh_from_db()
+    group.delivery_import_file.delete()
+    job = AsyncRetryJob.objects.latest("pk")
+    with pytest.raises(AttributeError):
+        async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+
+    group.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    log = LogEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(PaymentPlanGroup), object_id=group.pk
+    ).latest("timestamp")
+    assert log.user == user
+    assert log.changes["background_action_status"] == {
+        "from": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        "to": PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+    }
 
 
 # --- delivery_export_xlsx with fsp_xlsx_template_id ---

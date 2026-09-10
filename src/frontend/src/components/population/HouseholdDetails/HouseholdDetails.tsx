@@ -2,11 +2,12 @@ import { Overview } from '@components/payments/Overview';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import { Box, Grid, Theme, Typography } from '@mui/material';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { formatCurrencyWithSymbol } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { Theme } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { displayNameWithLatin, formatCurrencyWithSymbol } from '@utils/utils';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
@@ -59,7 +60,7 @@ export function HouseholdDetails({
         <Grid container spacing={3}>
           <Grid size={3}>
             <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
-              {household?.size}
+              {household?.kabSize ?? '-'}
             </LabelizedField>
           </Grid>
           <Grid size={3}>
@@ -72,7 +73,7 @@ export function HouseholdDetails({
               <ContentLink
                 href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
               >
-                {household?.headOfHousehold?.fullName}
+                {displayNameWithLatin(household?.headOfHousehold, 'fullName')}
               </ContentLink>
             </LabelizedField>
           </Grid>

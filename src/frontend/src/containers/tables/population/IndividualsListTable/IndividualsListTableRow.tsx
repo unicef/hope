@@ -4,10 +4,10 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { choicesToDict, sexToCapitalize } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import { choicesToDict, displayNameWithLatin, sexToCapitalize } from '@utils/utils';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface IndividualsListTableRowProps {
@@ -47,12 +47,12 @@ export function IndividualsListTableRow({
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{individual.fullName}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(individual, 'fullName')}</AnonTableCell>
       <TableCell align="left">
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>
       <TableCell align="left">
-        {relationshipChoicesDict[individual.relationship]}
+        {relationshipChoicesDict[individual.relationship ?? '']}
       </TableCell>
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>

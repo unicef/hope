@@ -10,8 +10,8 @@ import {
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { ReactElement } from 'react';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentsHouseholdTableRowProps {
@@ -58,6 +58,11 @@ export function PaymentsHouseholdTableRow({
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
+      <TableCell align="left">
+        {payment.paymentPlanPurposes?.join(', ')}
+      </TableCell>
+      <TableCell align="left">{payment.paymentPlanGroup}</TableCell>
+      <TableCell align="left">{payment.paymentPlanCycle}</TableCell>
       {!isSocialDctType && (
         <TableCell align="left">{payment.hohFullName}</TableCell>
       )}

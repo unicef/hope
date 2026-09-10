@@ -7,10 +7,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -22,7 +25,7 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { showApiErrorMessages } from '@utils/utils';
@@ -79,7 +82,9 @@ function ExcludeSection({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
     },
     onError: (error) => {
@@ -91,6 +96,12 @@ function ExcludeSection({
     PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
     permissions,
   );
+  // mirrors flows.py: an exclusion can only start when no background action is set,
+  // or when the previous exclusion failed.
+  const canRunExclusion =
+    !backgroundActionStatus ||
+    backgroundActionStatus ===
+      PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR;
   const hasOpenOrLockedStatus =
     status === PaymentPlanStatusEnum.LOCKED ||
     status === PaymentPlanStatusEnum.OPEN;
@@ -101,6 +112,15 @@ function ExcludeSection({
     }
     if (!hasExcludePermission) {
       return t('Permission denied');
+    }
+    if (!canRunExclusion) {
+      return PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+        backgroundActionStatus,
+      )
+        ? t(
+            'Another background action on this Payment Plan failed and must be resolved first',
+          )
+        : t('Another background action is currently running on this Payment Plan');
     }
     return '';
   };
@@ -200,7 +220,7 @@ function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      Boolean(backgroundActionStatus);
+      !canRunExclusion;
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -321,7 +341,7 @@ function ExcludeSection({
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      Boolean(backgroundActionStatus);
+      !canRunExclusion;
 
     if (isEdit || numberOfExcluded === 0) {
       return (
@@ -477,27 +497,26 @@ function ExcludeSection({
                           </Box>
                           <Typography>{exclusionReason}</Typography>
                         </Box>
-                        {excludeHouseholdError && (
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              mt: 2,
-                            }}
-                          >
-                            {formatErrorToArray(excludeHouseholdError).map(
-                              (el) => (
-                                <FormHelperText key={el} error>
-                                  {el}
-                                </FormHelperText>
-                              ),
-                            )}
-                          </Box>
-                        )}
                       </Box>
                     </Grid>
                   </Grid>
                 ) : null}
+                {excludeHouseholdError && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      mt: 2,
+                    }}
+                    data-cy="exclude-household-error"
+                  >
+                    {formatErrorToArray(excludeHouseholdError).map((el) => (
+                      <FormHelperText key={el} error>
+                        {el}
+                      </FormHelperText>
+                    ))}
+                  </Box>
+                )}
                 {renderInputAndApply()}
                 <Grid container size={{ xs: 6 }}>
                   {errors?.map((formError) => (

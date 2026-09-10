@@ -1,10 +1,11 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from 'src/restgenerated';
 import { restQueryKey } from '@utils/queryKeys';
-import { ActivityLogEntry } from '@components/core/ActivityLogTable/types';
+import type { ActivityLogEntry } from '@components/core/ActivityLogTable/types';
 import { useQuery } from '@tanstack/react-query';
 
 const TableWrapper = styled.div`
@@ -42,7 +43,7 @@ export function UniversalActivityLogTable({
     enabled: !!(businessAreaSlug && objectId),
   });
 
-  const activityLogsCountParams = { businessAreaSlug };
+  const activityLogsCountParams = { businessAreaSlug, objectId };
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
       RestService.restBusinessAreasActivityLogsCountRetrieve,
@@ -52,7 +53,7 @@ export function UniversalActivityLogTable({
       RestService.restBusinessAreasActivityLogsCountRetrieve(
         activityLogsCountParams,
       ),
-    enabled: !!businessAreaSlug,
+    enabled: !!(businessAreaSlug && objectId),
   });
 
   if (!logsData) {

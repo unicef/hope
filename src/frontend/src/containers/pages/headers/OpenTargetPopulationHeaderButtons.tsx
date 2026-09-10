@@ -7,12 +7,13 @@ import {
   RefreshRounded,
 } from '@mui/icons-material';
 import { Box, Button, IconButton } from '@mui/material';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';

@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import IntegrityError, models
 from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
 from django.utils import timezone
@@ -13,6 +13,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
+from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
@@ -62,6 +63,16 @@ from hope.models.utils import (
     UnicefIdentifiedModel,
 )
 
+ascii_name_validator = RegexValidator(
+    regex=r"^[A-Za-z]+(?:[ '-][A-Za-z]+)*$",
+    message="Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
+    code="invalid_name",
+)
+
+
+def sanction_list_last_check_key(program_id: Any) -> str:
+    return f"sanction_list_last_check:{program_id}"
+
 
 class IndividualCollection(UnicefIdentifiedModel):
     """Collection of individual representations."""
@@ -99,6 +110,10 @@ class Individual(
             "given_name",
             "middle_name",
             "family_name",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
             "sex",
             "birth_date",
             "estimated_birth_date",
@@ -199,6 +214,42 @@ class Individual(
     )
     family_name = models.CharField(
         max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
+    )
+    full_name_latin = models.CharField(
+        max_length=500,
+        validators=[MinLengthValidator(2), ascii_name_validator],
+        db_index=True,
+        help_text="Full name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        blank=True,
+        null=True,
+    )
+    given_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="First name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
+        validators=[ascii_name_validator],
+    )
+    middle_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="Middle name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
+        validators=[ascii_name_validator],
+    )
+    family_name_latin = models.CharField(
+        max_length=150,
+        blank=True,
+        db_index=True,
+        help_text="Last name of the Beneficiary Latin",
+        db_collation="und-ci-det",
+        null=True,
+        validators=[ascii_name_validator],
     )
     sex = models.CharField(
         max_length=255,
@@ -472,9 +523,8 @@ class Individual(
 
     @property
     def sanction_list_last_check(self) -> datetime | None:
-        # TODO: SANCTION LIST CHECK PER LIST
         if self.program.sanction_lists.exists():
-            return cache.get("sanction_list_last_check")
+            return cache.get(sanction_list_last_check_key(self.program_id))
         return None
 
     def withdraw(self, notify: bool = True) -> None:
@@ -510,8 +560,10 @@ class Individual(
                 doc.save()
             # AB#244721
             except IntegrityError:
-                error_message = f"{self.unicef_id}: Valid Document already exists: {doc.document_number}."
-                raise Exception(error_message)
+                raise ValidationError(
+                    f"Individual {self.unicef_id} cannot be marked as distinct: document "
+                    f"{doc.document_number} conflicts with an existing valid document."
+                )
         self.accounts.update(active=True)
         self.duplicate = False
         self.duplicate_date = timezone.now()
@@ -668,6 +720,10 @@ class Individual(
         self.given_name = "GDPR REMOVED"
         self.middle_name = "GDPR REMOVED"
         self.family_name = "GDPR REMOVED"
+        self.full_name_latin = "GDPR REMOVED"
+        self.given_name_latin = "GDPR REMOVED"
+        self.middle_name_latin = "GDPR REMOVED"
+        self.family_name_latin = "GDPR REMOVED"
         self.photo = ""
         self.disability_certificate_picture = ""
         self.phone_no = ""

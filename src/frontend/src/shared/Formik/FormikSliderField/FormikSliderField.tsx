@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from '@mui/material';
 import Slider from '@mui/material/Slider';
 import { styled } from '@mui/system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StyledBox = styled(Box)({
   width: 400,

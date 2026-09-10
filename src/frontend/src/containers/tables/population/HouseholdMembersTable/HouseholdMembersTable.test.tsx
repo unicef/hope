@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from 'src/testUtils/testUtils';
@@ -207,10 +206,6 @@ describe('HouseholdMembersTable', () => {
   };
 
   const mockChoicesData = {
-    documentTypeChoices: [
-      { value: 'PASSPORT', label: 'Passport' },
-      { value: 'NATIONAL_ID', label: 'National ID' },
-    ],
     sexChoices: [
       { value: SexEnum.MALE, label: 'Male' },
       { value: SexEnum.FEMALE, label: 'Female' },

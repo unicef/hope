@@ -8,25 +8,26 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
 import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
@@ -38,7 +39,14 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaymentPlanDetail>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -47,16 +55,17 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
-      const errorStatuses = [
-        PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-        PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-      ];
+      const visionProcessing =
+        data?.visionManaged &&
+        ['NOT_SENT', 'WAITING_FOR_CALLBACK'].includes(data.vision.status);
+      if (visionProcessing) {
+        return 60000;
+      }
       if (
-        data?.status === PaymentPlanStatusEnum.PREPARING ||
-        (data?.backgroundActionStatus !== null &&
-          !errorStatuses.includes(data?.backgroundActionStatus))
+        data?.backgroundActionStatus !== null &&
+        !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+          data?.backgroundActionStatus,
+        )
       ) {
         return 3000;
       }
@@ -105,42 +114,33 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      {status !== PaymentPlanStatusEnum.PREPARING && (
-        <>
-          <AcceptanceProcess paymentPlan={paymentPlan} />
-          {shouldDisplayVerificationSummary && (
-            <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
-          )}
-          {shouldDisplayFundsCommitment && (
-            <FundsCommitmentSection paymentPlan={paymentPlan} />
-          )}
-          {shouldDisplayEntitlement && (
-            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-          )}
-          {status === PaymentPlanStatusEnum.LOCKED_FSP &&
-            !paymentPlan.isInstructionManaged && (
-              <FspExtraFields
-                paymentPlan={paymentPlan}
-                permissions={permissions}
-              />
-            )}
-          <ExcludeSection paymentPlan={paymentPlan} />
-          <SupportingDocumentsSection paymentPlan={paymentPlan} />
-          <ConversionToUsd
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-          />
-          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-          <PaymentsTable
-            businessArea={businessArea}
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-            canViewDetails
-          />
-          {shouldDisplayReconciliationSummary && (
-            <ReconciliationSummary paymentPlan={paymentPlan} />
-          )}
-        </>
+      <VisionStatusSection paymentPlan={paymentPlan} />
+      <AcceptanceProcess paymentPlan={paymentPlan} />
+      {shouldDisplayVerificationSummary && (
+        <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
+      )}
+      {shouldDisplayFundsCommitment && (
+        <FundsCommitmentSection paymentPlan={paymentPlan} />
+      )}
+      {shouldDisplayEntitlement && (
+        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+      )}
+      {status === PaymentPlanStatusEnum.LOCKED_FSP &&
+        !paymentPlan.isInstructionManaged && (
+          <FspExtraFields paymentPlan={paymentPlan} permissions={permissions} />
+        )}
+      <ExcludeSection paymentPlan={paymentPlan} />
+      <SupportingDocumentsSection paymentPlan={paymentPlan} />
+      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
+      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+      <PaymentsTable
+        businessArea={businessArea}
+        paymentPlan={paymentPlan}
+        permissions={permissions}
+        canViewDetails
+      />
+      {shouldDisplayReconciliationSummary && (
+        <ReconciliationSummary paymentPlan={paymentPlan} />
       )}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan?.id} />

@@ -6,10 +6,10 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { paymentVerificationStatusToColor } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface PaymentVerificationSummarySectionProps {
   paymentPlan: PaymentPlanDetail;

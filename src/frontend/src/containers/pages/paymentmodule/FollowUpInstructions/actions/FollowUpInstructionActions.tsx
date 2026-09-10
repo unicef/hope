@@ -1,8 +1,8 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { ConfirmWorkflowButton } from './ConfirmWorkflowButton';
 import { SimpleWorkflowButton } from './SimpleWorkflowButton';
 import { ReconciliationImportButton } from './ReconciliationImportButton';

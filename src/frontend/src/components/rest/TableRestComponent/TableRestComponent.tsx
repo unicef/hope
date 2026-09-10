@@ -1,7 +1,5 @@
-import {
-  EnhancedTableHead,
-  HeadCell,
-} from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { EnhancedTableHead } from '@components/core/Table/EnhancedTableHead';
 import { EnhancedTableToolbar } from '@components/core/Table/EnhancedTableToolbar';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 import {
@@ -74,7 +72,7 @@ function TablePaginationActions(props) {
     </MuiBox>
   );
 }
-import { ReactElement, ChangeEvent, MouseEvent } from 'react';
+import type { ReactElement, ChangeEvent, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -161,7 +159,10 @@ interface TableRestComponentProps<T extends { [key: string]: any }> {
   itemsCount: number;
   handleChangePage: (event: unknown, newPage: number) => void;
   handleChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
-  handleRequestSort: (event: MouseEvent<unknown>, property: string) => void;
+  handleRequestSort: (
+    event: MouseEvent<unknown>,
+    property: keyof T | string,
+  ) => void;
   orderBy: string;
   order: Order;
   title?: string;

@@ -1,5 +1,6 @@
 import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,7 +11,7 @@ import { LookUpRegistrationFiltersCommunication } from './LookUpRegistrationFilt
 import { LookUpSelectionTablesCommunication } from './LookUpSelectionTablesCommunication';
 import { LookUpTargetPopulationFiltersCommunication } from './LookUpTargetPopulationFiltersCommunication';
 import { useProgramContext } from 'src/programContext';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -80,14 +81,8 @@ export function LookUpSelectionCommunication({
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesHouseholdsRetrieve),
+      queryFn: () => RestService.restChoicesHouseholdsRetrieve(),
     });
 
   const initialFilterHH = {
