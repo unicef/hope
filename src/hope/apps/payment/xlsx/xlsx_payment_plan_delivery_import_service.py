@@ -135,7 +135,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
 
     def open_workbook(self) -> openpyxl.Workbook:
         self.logger.info(f"Opening workbook for payment plan: {self.payment_plan.id}")
-        wb = openpyxl.load_workbook(cast("Any", self.file), data_only=True)
+        wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws_payments = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]

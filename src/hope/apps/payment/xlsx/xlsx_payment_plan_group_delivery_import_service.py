@@ -35,7 +35,11 @@ class XlsxPaymentPlanGroupDeliveryImportError(Exception):
 
 
 class XlsxPaymentPlanGroupDeliveryImportService:
-    """Validate and atomically import manual reconciliation rows for a Payment Plan Group."""
+    """Import and validate a single-sheet reconciliation XLSX for a single-FSP Payment Plan Group.
+
+    The file can contain rows from multiple Payment Plans in the group. Rows are matched to their
+    owning plan by Payment.unicef_id and processed atomically through per-plan import services.
+    """
 
     REQUIRED_COLUMNS = ("payment_id", "delivered_quantity")
     PLAN_STATUSES = (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.CLOSED)
@@ -99,16 +103,13 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self.fsp_owned_headers = set()
 
         payment_plan_by_id = {payment_plan.id: payment_plan for payment_plan in self.payment_plans}
-        queryset = Payment.objects.filter(parent__in=self.payment_plans)
+        queryset = Payment.objects.filter(parent__in=self.payment_plans).eligible()
         if lock:
             queryset = queryset.select_for_update()
         payments = queryset.values_list(
             "unicef_id",
             "parent_id",
             "extras",
-            "conflicted",
-            "excluded",
-            "has_valid_wallet",
             "delivered_quantity",
             "status",
         )
@@ -117,9 +118,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             unicef_id,
             parent_id,
             extras,
-            conflicted,
-            excluded,
-            has_valid_wallet,
             delivered_quantity,
             payment_status,
         ) in payments:
@@ -138,8 +136,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 self.ineligible_payment_reasons[payment_id] = (
                     f"Payment Plan status {payment_plan.status} is not eligible for this import mode."
                 )
-            elif conflicted or excluded or has_valid_wallet is False:
-                continue
             else:
                 self.payment_to_plan[payment_id] = payment_plan
 
@@ -149,7 +145,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
         self._build_payment_index(lock=lock)
 
     def open_workbook(self) -> openpyxl.Workbook:
-        wb = openpyxl.load_workbook(cast("Any", self.file), data_only=True)
+        wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]
@@ -368,4 +364,5 @@ class XlsxPaymentPlanGroupDeliveryImportService:
 
             if affected_plan_ids:
                 logger.info(f"Imported reconciliation for Payment Plans: {affected_plan_ids}")
+                # All plans in the group share one cycle: invalidate the cycle-list cache once.
                 self.payment_plan_group.cycle.save()

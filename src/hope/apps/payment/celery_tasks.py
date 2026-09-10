@@ -681,7 +681,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
             PaymentPlanGroupReconciliationImportNotification(
                 payment_plan_group,
                 notification_user,
-                delivery_import_file.file.name or "reconciliation.xlsx",
+                delivery_import_file.file.name,
             )
             if notification_user
             else None

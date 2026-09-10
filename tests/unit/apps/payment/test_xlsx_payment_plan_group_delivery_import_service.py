@@ -831,7 +831,6 @@ def group_with_closed_plan(program_cycle, business_area, fsp, delivery_mechanism
         delivered_quantity=Decimal("100.00"),
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
         transaction_reference_id="CLOSED-REFERENCE",
-        conflicted=True,
     )
     PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
     file_temp = FileTemp.objects.create(

@@ -28,13 +28,11 @@ class PaymentPlanGroupReconciliationImportNotification:
         self.file_name = Path(file_name).name
 
     def send_conflict(self, conflict_count: int) -> None:
-        count_label = "conflict" if conflict_count == 1 else "conflicts"
-        verb = "was" if conflict_count == 1 else "were"
         self._send(
             title=f"Reconciliation import failed for {self.payment_plan_group.name}",
             message=(
-                f'Reconciliation file "{self.file_name}" was not imported because {conflict_count} delivered '
-                f"quantity {count_label} {verb} found. No Payments were changed."
+                f'Reconciliation file "{self.file_name}" was not imported because delivered quantities conflict '
+                f"with existing Payment data. Number of conflicts: {conflict_count}. No Payments were changed."
             ),
         )
 
@@ -45,13 +43,11 @@ class PaymentPlanGroupReconciliationImportNotification:
         )
 
     def send_background_failure(self, error_count: int) -> None:
-        count_label = "error" if error_count == 1 else "errors"
-        verb = "was" if error_count == 1 else "were"
         self._send(
             title=f"Reconciliation import failed for {self.payment_plan_group.name}",
             message=(
-                f'Reconciliation file "{self.file_name}" was not imported because {error_count} validation '
-                f"{count_label} {verb} found during background processing. No Payments were changed."
+                f'Reconciliation file "{self.file_name}" was not imported because background validation failed. '
+                f"Number of errors: {error_count}. No Payments were changed."
             ),
         )
 
