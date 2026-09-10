@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from rest_framework.pagination import (
     LimitOffsetPagination,
@@ -10,6 +10,9 @@ from rest_framework.pagination import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.urls import remove_query_param, replace_query_param
+
+if TYPE_CHECKING:
+    from rest_framework.pagination import HtmlContextWithPageLinks
 
 
 class NoCountLimitOffsetPagination(LimitOffsetPagination):
@@ -48,7 +51,7 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         offset = self.offset + self.limit  # type: ignore
         return replace_query_param(url, self.offset_query_param, offset)
 
-    def get_html_context(self) -> Any:
+    def get_html_context(self) -> "HtmlContextWithPageLinks":
         base_url = self.request.build_absolute_uri()
 
         if self.limit:
@@ -71,8 +74,8 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         page_links = _get_page_links(page_numbers, current, page_number_to_url)
 
         return {
-            "previous_url": self.get_previous_link(),
-            "next_url": self.get_next_link(),
+            "previous_url": cast("str", self.get_previous_link()),
+            "next_url": cast("str", self.get_next_link()),
             "page_links": page_links,
         }
 
