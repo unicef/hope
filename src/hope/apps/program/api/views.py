@@ -400,6 +400,48 @@ class ProgramViewSet(
     def _eligible_payments(program: Program) -> QuerySet[Payment]:
         return Payment.objects.filter(parent__program_cycle__program=program).eligible()
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
+
+    @action(detail=True, methods=["get"])
+    def deduplication_flags(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program = self.get_object()
+
+        # deduplication engine in progress
+        is_still_processing = RegistrationDataImport.objects.filter(
+            program=program,
+            deduplication_engine_status__in=[
+                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            ],
+        ).exists()
+        # all RDIs are deduplicated
+        all_rdis_deduplicated = (
+            RegistrationDataImport.objects.filter(program=program).all().count()
+            == RegistrationDataImport.objects.filter(
+                deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+                program=program,
+            ).count()
+        )
+        # RDI merge in progress
+        rdi_merging = RegistrationDataImport.objects.filter(
+            program=program,
+            status__in=[
+                RegistrationDataImport.MERGE_SCHEDULED,
+                RegistrationDataImport.MERGING,
+                RegistrationDataImport.MERGE_ERROR,
+            ],
+        ).exists()
+        is_deduplication_disabled = is_still_processing or all_rdis_deduplicated or rdi_merging
+
+        return Response(
+            {
+                "can_run_deduplication": program.biometric_deduplication_enabled,
+                "is_deduplication_disabled": is_deduplication_disabled,
+            }
+        )
+>>>>>>> 8bd8e666c4 (fix: merge type-tightening work from comparison branch)
+
     @extend_schema(
         parameters=filterset_to_openapi_params(PaymentSearchFilter),
         responses={

@@ -2766,6 +2766,10 @@ class PaymentGlobalViewSet(
         queryset = super().get_queryset().eligible()
         return with_payment_related_data(queryset).order_by("-created_at")
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
+
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})
 @api_view(["GET"])

@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
     from admin_extra_buttons.buttons import StandardButton
     from django.contrib.admin.options import ActionLocation
+    from django.db.models.fields import Field
+    from django.forms.fields import Field as FormField
     from django.http import HttpRequest, HttpResponse
 
 from admin_extra_buttons.decorators import button, link
@@ -32,6 +34,9 @@ from hope.apps.payment.utils import generate_cache_key, get_link
 from hope.apps.utils.security import is_root
 from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
+if TYPE_CHECKING:
+    from django.contrib.admin.options import _FieldGroups
+
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -53,7 +58,7 @@ class RdiMergeStatusAdminMixin(admin.ModelAdmin):
 class JSONWidgetMixin:
     json_enabled = False
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: Field, request: HttpRequest, **kwargs: Any) -> FormField | None:
         if db_field.get_internal_type() == "JSONField":
             if is_root(request) or settings.DEBUG or self.json_enabled:
                 kwargs = {"widget": JSONEditor}
@@ -166,7 +171,7 @@ class AutocompleteForeignKeyMixin:
 class HOPEModelAdminBase(AutocompleteForeignKeyMixin, HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin[_ModelT]):
     list_per_page = 50
 
-    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> "_FieldGroups":
         return super().get_fields(request, obj)
 
     def get_actions(self, request: HttpRequest, action_location: ActionLocation | None = None) -> dict:
