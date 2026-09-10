@@ -9,17 +9,24 @@ class CurrencyQuerySet(models.QuerySet):
     def active(self) -> "CurrencyQuerySet":
         return self.filter(active=True)
 
-    def resolve_code(self, code: str) -> "Currency":
+
+class CurrencyManager(models.Manager.from_queryset(CurrencyQuerySet)):
+    def get_active_by_code(self, code: str) -> "Currency":
         return self.get(code=code, active=True)
 
-    def resolve_code_or_none(self, code: str) -> "Currency | None":
+    def get_active_by_code_or_none(self, code: str) -> "Currency | None":
         return self.filter(code=code, active=True).first()
 
 
-CurrencyManager = models.Manager.from_queryset(CurrencyQuerySet)
-
-
 class Currency(models.Model):
+    """A currency, in one denomination.
+
+    ``code`` is unique only among ``active=True`` rows: a redenomination keeps the old row as
+    ``active=False`` under the same ``code``, so ``vision_code`` is what identifies a row.
+    Resolve user-supplied codes through ``hope.apps.core.currency_resolution``, never a bare
+    ``code=`` lookup.
+    """
+
     code = models.CharField(
         max_length=5,
         db_index=True,

@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 import pytest
 
+from extras.test_utils.factories import CurrencyFactory
 from hope.models.currency import Currency
 
 
@@ -108,59 +109,69 @@ def test_old_inactive_and_new_active_share_code_allowed():
     assert new.active is True
 
 
-@pytest.mark.django_db
-def test_resolve_code_returns_active_row():
-    currency = Currency.objects.create(code="TST", name="Test", active=True)
-
-    assert Currency.objects.resolve_code("TST") == currency
+@pytest.fixture
+def currency_tst(db) -> Currency:
+    return CurrencyFactory(code="TST", name="Test", vision_code="TST", active=True)
 
 
-@pytest.mark.django_db
-def test_resolve_code_raises_when_no_active_match():
+@pytest.fixture
+def syp_pair(db) -> tuple[Currency, Currency]:
+    """The post-redenomination layout: a deprecated and an active row sharing ``code``."""
+    deprecated = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    active = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    return deprecated, active
+
+
+@pytest.fixture
+def deprecated_syp(db) -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+def test_get_active_by_code_returns_active_row(currency_tst: Currency) -> None:
+    assert Currency.objects.get_active_by_code("TST") == currency_tst
+
+
+def test_get_active_by_code_raises_when_no_active_match(db) -> None:
     with pytest.raises(Currency.DoesNotExist):
-        Currency.objects.resolve_code("MISSING")
+        Currency.objects.get_active_by_code("MISSING")
 
 
-@pytest.mark.django_db
-def test_resolve_code_prefers_active_over_deprecated_for_shared_code():
+def test_get_active_by_code_prefers_active_over_deprecated_for_shared_code(
+    syp_pair: tuple[Currency, Currency],
+) -> None:
     # Business scenario: old (SYP, SYP) deprecated + new (SYP, SYP01) active.
     # Ambiguous "SYP" input must resolve to the NEW (active) row, never the deprecated one.
-    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-    new = Currency.objects.create(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    _deprecated, active = syp_pair
 
-    assert Currency.objects.resolve_code("SYP") == new
+    assert Currency.objects.get_active_by_code("SYP") == active
 
 
-@pytest.mark.django_db
-def test_resolve_code_raises_when_only_deprecated_row_exists():
-    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-
+def test_get_active_by_code_raises_when_only_deprecated_row_exists(deprecated_syp: Currency) -> None:
     with pytest.raises(Currency.DoesNotExist):
-        Currency.objects.resolve_code("SYP")
+        Currency.objects.get_active_by_code("SYP")
 
 
-@pytest.mark.django_db
-def test_resolve_code_or_none_returns_active_row():
-    currency = Currency.objects.create(code="TST", name="Test", active=True)
-
-    assert Currency.objects.resolve_code_or_none("TST") == currency
+def test_get_active_by_code_or_none_returns_active_row(currency_tst: Currency) -> None:
+    assert Currency.objects.get_active_by_code_or_none("TST") == currency_tst
 
 
-@pytest.mark.django_db
-def test_resolve_code_or_none_returns_none_for_unknown_code():
-    assert Currency.objects.resolve_code_or_none("MISSING") is None
+def test_get_active_by_code_or_none_returns_none_for_unknown_code(db) -> None:
+    assert Currency.objects.get_active_by_code_or_none("MISSING") is None
 
 
-@pytest.mark.django_db
-def test_resolve_code_or_none_returns_none_when_only_deprecated_row_exists():
-    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+def test_get_active_by_code_or_none_returns_none_when_only_deprecated_row_exists(
+    deprecated_syp: Currency,
+) -> None:
+    assert Currency.objects.get_active_by_code_or_none("SYP") is None
 
-    assert Currency.objects.resolve_code_or_none("SYP") is None
+
+def test_get_active_by_code_or_none_prefers_active_over_deprecated_for_shared_code(
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    _deprecated, active = syp_pair
+
+    assert Currency.objects.get_active_by_code_or_none("SYP") == active
 
 
-@pytest.mark.django_db
-def test_resolve_code_or_none_prefers_active_over_deprecated_for_shared_code():
-    Currency.objects.create(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
-    new = Currency.objects.create(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
-
-    assert Currency.objects.resolve_code_or_none("SYP") == new
+def test_active_code_lookup_is_not_reachable_from_a_queryset(db) -> None:
+    assert not hasattr(Currency.objects.filter(active=False), "get_active_by_code")

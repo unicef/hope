@@ -4,9 +4,10 @@ from typing import Any, Callable, cast
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
 
+from hope.apps.core.currency_resolution import resolve_currency_for_update_or_none
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models import Area, BusinessArea, Facility, Program
+from hope.models import Area, BusinessArea, Facility, Household, Program
 from hope.models.currency import Currency
 
 
@@ -106,11 +107,11 @@ def validate_facility(  # noqa: PLR0913, PLR0917
 
 
 def handle_currency_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Household, business_area: BusinessArea, program: Program
 ) -> Currency | None:
     if value is None or value == "":
         return None
-    return Currency.objects.resolve_code_or_none(value)
+    return resolve_currency_for_update_or_none(value, household.currency)
 
 
 def validate_currency(
@@ -118,7 +119,9 @@ def validate_currency(
 ) -> str | None:
     if value is None or value == "":
         return None
-    if not Currency.objects.active().filter(code=value).exists():
+    # No household here, so the update-aware rule the handler uses cannot apply: a household
+    # sitting on a deprecated code is rejected.
+    if Currency.objects.get_active_by_code_or_none(value) is None:
         return f"Invalid currency code {value}"
     return None
 

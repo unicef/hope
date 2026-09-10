@@ -39,6 +39,7 @@ from hope.models import (
 
 class DeliveredQuantitySerializer(serializers.Serializer):
     currency = serializers.CharField()
+    currency_vision_code = serializers.CharField()
     total_delivered_quantity = serializers.DecimalField(max_digits=64, decimal_places=2)
 
 

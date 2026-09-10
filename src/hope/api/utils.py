@@ -1,19 +1,82 @@
+from enum import Enum
 from typing import Any
 
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.db import models
 from django.utils.encoding import smart_str
 from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication
 
+from hope.apps.core.currency_resolution import resolve_currency_for_update
+from hope.models.currency import Currency
+
+
+class OnUnchangedCode(Enum):
+    """What a submitted code that matches the record's current currency means."""
+
+    #: Keep the currency already on the record. For serializers that update.
+    KEEP_CURRENT_ROW = "keep_current_row"
+    #: Always resolve to the active row. For serializers that only ever create.
+    ALWAYS_ACTIVE = "always_active"
+
 
 class CurrencySlugRelatedField(serializers.SlugRelatedField):
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(slug_field="code", **kwargs)
+    """Accepts an ISO ``code`` and resolves it to a ``Currency``.
+
+    ``slug_field`` and ``queryset`` are fixed; ``on_unchanged_code`` has no default on
+    purpose -- see :class:`OnUnchangedCode`.
+    """
+
+    def __init__(self, *, on_unchanged_code: OnUnchangedCode, **kwargs: Any) -> None:
+        for fixed in ("slug_field", "queryset"):
+            if fixed in kwargs:
+                raise TypeError(
+                    f"CurrencySlugRelatedField resolves by active `code`; `{fixed}` is fixed and "
+                    "passing it would imply it affects validation."
+                )
+        self.on_unchanged_code = on_unchanged_code
+        super().__init__(slug_field="code", queryset=Currency.objects.active(), **kwargs)
+
+    def bind(self, field_name: str, parent: serializers.BaseSerializer) -> None:
+        super().bind(field_name, parent)
+        if self.on_unchanged_code is OnUnchangedCode.KEEP_CURRENT_ROW and len(self.source_attrs) != 1:
+            # Empty for ``source="*"``, multi-valued for a dotted source: either way the field
+            # cannot tell which object it is updating.
+            raise ImproperlyConfigured(
+                f"{parent.__class__.__name__}.{field_name}: OnUnchangedCode.KEEP_CURRENT_ROW needs a "
+                f"plain source, got source={self.source!r}. Resolve the currency explicitly with "
+                "hope.apps.core.currency_resolution instead."
+            )
+
+    def _current_currency(self) -> Currency | None:
+        """Return the currency already attached to the object being updated.
+
+        ``KEEP_CURRENT_ROW`` cannot tell a create from a caller that forgot the instance, so it
+        requires one; a create-only serializer declares ``ALWAYS_ACTIVE`` instead.
+        """
+        if self.on_unchanged_code is OnUnchangedCode.ALWAYS_ACTIVE:
+            return None
+        instance = getattr(self.parent, "instance", None)
+        if instance is None:
+            raise ImproperlyConfigured(
+                f"{self.parent.__class__.__name__}.{self.field_name}: OnUnchangedCode.KEEP_CURRENT_ROW "
+                "needs the object being updated. Pass it as `get_serializer(instance, data=...)`, or "
+                "declare OnUnchangedCode.ALWAYS_ACTIVE if this serializer only ever creates."
+            )
+        if isinstance(instance, (list, models.QuerySet)):
+            # With ``many=True`` DRF passes the whole list down to the child serializer, so
+            # there is no single object to compare against.
+            raise ImproperlyConfigured(
+                f"{self.parent.__class__.__name__}.{self.field_name}: OnUnchangedCode.KEEP_CURRENT_ROW "
+                "cannot be used with many=True; there is no single instance to compare against."
+            )
+        current = getattr(instance, self.source_attrs[0], None)
+        return current if isinstance(current, self.get_queryset().model) else None
 
     def to_internal_value(self, data: Any) -> Any:
-        queryset = self.get_queryset()
         try:
-            return queryset.resolve_code(data)
-        except queryset.model.DoesNotExist:
+            return resolve_currency_for_update(data, self._current_currency())
+        except ObjectDoesNotExist:
             self.fail("does_not_exist", slug_name=self.slug_field, value=smart_str(data))
         except (TypeError, ValueError):
             self.fail("invalid")

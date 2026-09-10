@@ -803,7 +803,9 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
         "last_registration_date": f"{hh.last_registration_date:%Y-%m-%d}",
         "total_cash_received": None,
         "total_cash_received_usd": None,
-        "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+        "delivered_quantities": [
+            {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+        ],
         "start": hh.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "zip_code": None,
         "residence_status": hh.get_residence_status_display(),
@@ -850,7 +852,9 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "last_registration_date": f"{hh.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "delivered_quantities": [
+                    {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+                ],
                 "start": hh.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
                 "residence_status": hh.get_residence_status_display(),
@@ -877,7 +881,9 @@ def test_individual_detail(detail_context: dict, create_user_role_with_permissio
                 "last_registration_date": f"{hh2.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "delivered_quantities": [
+                    {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+                ],
                 "start": hh2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
                 "residence_status": hh2.get_residence_status_display(),

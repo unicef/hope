@@ -190,10 +190,12 @@
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00"
                 },
                 {
                     "currency": "PLN",
+                    "currency_vision_code": "PLN",
                     "total_delivered_quantity": "0.00"
                 }
             ],
@@ -243,10 +245,12 @@
                 "delivered_quantities": [
                     {
                         "currency": "USD",
+                        "currency_vision_code": "USD",
                         "total_delivered_quantity": "0.00"
                     },
                     {
                         "currency": "PLN",
+                        "currency_vision_code": "PLN",
                         "total_delivered_quantity": "0.00"
                     }
                 ],
@@ -299,10 +303,12 @@
                         "delivered_quantities": [
                             {
                                 "currency": "USD",
+                                "currency_vision_code": "USD",
                                 "total_delivered_quantity": "0.00"
                             },
                             {
                                 "currency": "PLN",
+                                "currency_vision_code": "PLN",
                                 "total_delivered_quantity": "0.00"
                             }
                         ],

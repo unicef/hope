@@ -20,6 +20,8 @@ class DashboardBaseSerializer(serializers.Serializer):
     month = serializers.CharField(required=False)
     admin1 = serializers.CharField(required=False)
     currency = serializers.CharField(required=False)
+    # Tells apart two denominations sharing one ISO `currency`
+    currency_vision_code = serializers.CharField(required=False)
     total_delivered_quantity = serializers.DecimalField(max_digits=15, decimal_places=2, required=False)
     country = serializers.CharField(required=False)
     region = serializers.CharField(required=False)

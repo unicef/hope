@@ -8,6 +8,7 @@ import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
+    CurrencyFactory,
     DeliveryMechanismFactory,
     HouseholdFactory,
     PaymentFactory,
@@ -169,3 +170,78 @@ def test_validate_transfer_to_digital_wallet_accepts_usdc_with_digital(
     service = PaymentPlanService(pp)
     with django_assert_num_queries(0):
         service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
+
+
+@pytest.fixture
+def syp_denominations(db) -> tuple[Currency, Currency]:
+    """The two rows a redenomination leaves behind, sharing one ISO `code`."""
+    deprecated = CurrencyFactory(code="SYP", vision_code="SYP", name="Syrian Pound", active=False)
+    active = CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound", active=True)
+    return deprecated, active
+
+
+def test_delivered_quantity_service_keeps_two_denominations_of_one_code_apart(
+    currency_usd: Currency, syp_denominations: tuple[Currency, Currency]
+) -> None:
+    deprecated_syp, active_syp = syp_denominations
+    pp = PaymentPlanFactory()
+    household = HouseholdFactory(
+        currency=currency_usd,
+        business_area=pp.business_area,
+        program=pp.program_cycle.program,
+    )
+    PaymentFactory(
+        parent=pp,
+        household=household,
+        currency=deprecated_syp,
+        delivered_quantity=Decimal("100.00"),
+        delivered_quantity_usd=Decimal("1.00"),
+    )
+    # One Payment per (plan, household), so the second denomination needs its own plan.
+    pp2 = PaymentPlanFactory(program_cycle=pp.program_cycle, business_area=pp.business_area)
+    PaymentFactory(
+        parent=pp2,
+        household=household,
+        currency=active_syp,
+        delivered_quantity=Decimal("1.00"),
+        delivered_quantity_usd=Decimal("1.00"),
+    )
+
+    results = delivered_quantity_service(household)
+
+    syp_entries = [entry for entry in results if entry["currency"] == "SYP"]
+    assert [(entry["currency_vision_code"], entry["total_delivered_quantity"]) for entry in syp_entries] == [
+        ("SYP", Decimal("100.00")),
+        ("SYP01", Decimal("1.00")),
+    ]
+
+
+def test_delivered_quantity_service_reports_vision_code_for_a_single_denomination(
+    currency_usd: Currency, currency_pln: Currency
+) -> None:
+    pp = PaymentPlanFactory()
+    household = HouseholdFactory(
+        currency=currency_usd,
+        business_area=pp.business_area,
+        program=pp.program_cycle.program,
+    )
+    PaymentFactory(
+        parent=pp,
+        household=household,
+        currency=currency_pln,
+        delivered_quantity=Decimal("200.00"),
+        delivered_quantity_usd=Decimal("50.00"),
+    )
+
+    results = delivered_quantity_service(household)
+
+    assert results[0] == {
+        "currency": "USD",
+        "currency_vision_code": "USD",
+        "total_delivered_quantity": Decimal("50.00"),
+    }
+    assert results[1] == {
+        "currency": "PLN",
+        "currency_vision_code": "PLN",
+        "total_delivered_quantity": Decimal("200.00"),
+    }

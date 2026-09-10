@@ -211,9 +211,7 @@ const PeopleDetailsPage = (): ReactElement => {
                       <Grid size={{ xs: 6 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                           {household?.deliveredQuantities?.map((item) => (
-                            <Box
-                              key={`${item.currency}-${item.totalDeliveredQuantity}`}
-                            >
+                            <Box key={item.currencyVisionCode}>
                               {item.currency === 'USD'
                                 ? formatCurrencyWithSymbol(
                                     item.totalDeliveredQuantity,
@@ -222,6 +220,7 @@ const PeopleDetailsPage = (): ReactElement => {
                                 : `(${formatCurrencyWithSymbol(
                                     item.totalDeliveredQuantity,
                                     item.currency,
+                                    item.currencyVisionCode,
                                   )})`}
                             </Box>
                           ))}

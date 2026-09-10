@@ -765,10 +765,12 @@ def test_household_detail_with_permissions(
     assert data["delivered_quantities"] == [
         {
             "currency": "USD",
+            "currency_vision_code": "USD",
             "total_delivered_quantity": "83.00",
         },
         {
             "currency": "AFN",
+            "currency_vision_code": "AFN",
             "total_delivered_quantity": "233.00",
         },
     ]

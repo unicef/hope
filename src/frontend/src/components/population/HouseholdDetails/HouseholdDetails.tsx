@@ -210,9 +210,7 @@ export function HouseholdDetails({
                         }}
                       >
                         {household?.deliveredQuantities?.map((item) => (
-                          <Box
-                            key={`${item.currency}-${item.totalDeliveredQuantity}`}
-                          >
+                          <Box key={item.currencyVisionCode}>
                             {item.currency === 'USD'
                               ? formatCurrencyWithSymbol(
                                   item.totalDeliveredQuantity,
@@ -221,6 +219,7 @@ export function HouseholdDetails({
                               : `(${formatCurrencyWithSymbol(
                                   item.totalDeliveredQuantity,
                                   item.currency,
+                                  item.currencyVisionCode,
                                 )})`}
                           </Box>
                         ))}

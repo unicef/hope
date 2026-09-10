@@ -9,6 +9,7 @@ import pytest
 from extras.test_utils.factories import (
     AreaFactory,
     BusinessAreaFactory,
+    CurrencyFactory,
     FacilityFactory,
     HouseholdFactory,
     ProgramFactory,
@@ -885,13 +886,17 @@ def test_validate_currency_empty_string(business_area: object, program: Program,
     assert validate_currency("", "currency", Household, business_area, program) is None
 
 
-def test_handle_currency_field_valid_code(business_area: object, program: Program, all_currencies: None) -> None:
-    result = handle_currency_field("USD", "currency", None, business_area, program)
+def test_handle_currency_field_valid_code(
+    business_area: object, program: Program, household_with_eur: Household, all_currencies: None
+) -> None:
+    result = handle_currency_field("USD", "currency", household_with_eur, business_area, program)
     assert result == Currency.objects.get(code="USD")
 
 
-def test_handle_currency_field_empty_string(business_area: object, program: Program, all_currencies: None) -> None:
-    assert handle_currency_field("", "currency", None, business_area, program) is None
+def test_handle_currency_field_empty_string(
+    business_area: object, program: Program, household_with_eur: Household, all_currencies: None
+) -> None:
+    assert handle_currency_field("", "currency", household_with_eur, business_area, program) is None
 
 
 def test_household_update_currency_eur_to_usd(
@@ -941,6 +946,52 @@ def test_household_update_currency_unknown_blocked_at_validation(
     assert errors == ["Row: 2 - Invalid currency code ZZZ"]
     household_with_eur.refresh_from_db()
     assert household_with_eur.currency == Currency.objects.get(code="EUR")
+
+
+@pytest.fixture
+def syp_pair(db) -> tuple[Currency, Currency]:
+    """The post-redenomination layout, built the way the activation migration builds it.
+
+    Deprecating the old row before renaming the new one's code keeps the unique constraints
+    satisfied throughout.
+    """
+    Currency.objects.filter(code="SYP").update(active=False)
+    deprecated = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    Currency.objects.filter(vision_code="SYP01").update(code="SYP", active=True)
+    active = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    return deprecated, active
+
+
+def test_household_update_currency_keeps_deprecated_row_when_code_is_unchanged(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    deprecated_syp, _active_syp = syp_pair
+    household_with_eur.currency = deprecated_syp
+    household_with_eur.save(update_fields=["currency"])
+    service = UniversalIndividualUpdateService(universal_update_for_currency)
+
+    service.handle_household_update(("SYP",), ["currency"], household_with_eur)
+    household_with_eur.save()
+
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency == deprecated_syp
+
+
+def test_household_update_currency_resolves_active_row_when_code_actually_changes(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    _deprecated_syp, active_syp = syp_pair
+    service = UniversalIndividualUpdateService(universal_update_for_currency)
+
+    service.handle_household_update(("SYP",), ["currency"], household_with_eur)
+    household_with_eur.save()
+
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency == active_syp
 
 
 def test_get_generator_handler_renders_currency_code(all_currencies: None) -> None:
@@ -1083,3 +1134,20 @@ def test_schedule_population_recalculation_skips_without_recalc_fields(
     assert not AsyncJob.objects.filter(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
     ).exists()
+
+
+def test_handle_update_rejects_an_individual_without_a_household(
+    universal_update_minimal: UniversalUpdate, individual: Individual
+) -> None:
+    # `execute()` never reaches this -- `validate()` aborts first. Called on its own, the guard
+    # names the problem instead of letting a None reach bulk_update.
+    individual.household = None
+    individual.save(update_fields=["household"])
+    service = UniversalIndividualUpdateService(universal_update_minimal, batch_size=1)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["unicef_id"])
+    ws.append([individual.unicef_id])
+
+    with pytest.raises(ValueError, match=f"Household not found for individual with unicef_id {individual.unicef_id}"):
+        service.handle_update(ws, ["unicef_id"])

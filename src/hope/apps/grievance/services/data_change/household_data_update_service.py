@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django_countries.fields import Country
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.currency_resolution import resolve_currency_for_update_or_none
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
@@ -183,8 +184,8 @@ class HouseholdDataUpdateService(DataChangeService):
             ).first()
         currency = household_data.get("currency", {})
         if currency.get("value") is not None:
-            household_data["currency"]["value"] = Currency.objects.resolve_code_or_none(  # type: ignore[index]
-                currency.get("value")
+            household_data["currency"]["value"] = resolve_currency_for_update_or_none(  # type: ignore[index]
+                currency.get("value"), household.currency
             )
         only_approved_data = {
             field: value_and_approve_status.get("value")
