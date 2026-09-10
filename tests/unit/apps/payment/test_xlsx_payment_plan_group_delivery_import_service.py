@@ -311,6 +311,12 @@ def test_validate_succeeds_for_correct_header_and_rows(group_two_plans_one_fsp):
     service.validate()
 
     assert service.errors == []
+    assert service.get_result_counts() == {
+        "total_rows": 2,
+        "updated_rows": 2,
+        "reset_rows": 0,
+        "ignored_rows": 0,
+    }
 
 
 def test_group_reconciliation_uses_group_wide_fsp_header_ownership(
@@ -984,6 +990,8 @@ def test_import_requires_open_workbook(group_two_plans_one_fsp, django_assert_nu
 
     with django_assert_num_queries(0), pytest.raises(RuntimeError, match=r"open_workbook\(\) must be called"):
         service.import_payment_list()
+    with django_assert_num_queries(0), pytest.raises(RuntimeError, match="before reading import results"):
+        service.get_result_counts()
 
 
 def test_normal_import_reports_finished_plan_row_as_ineligible(group_with_finished_plan, django_assert_num_queries):
@@ -1188,6 +1196,12 @@ def test_override_reset_clears_reconciliation_fields_but_preserves_fsp_extras(gr
     assert payment.extra_fields == {}
     assert payment.fsp_extra_fields == {"fsp_reference": "keep"}
     assert payment.extras["unrelated"] == {"keep": True}
+    assert service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 0,
+        "reset_rows": 1,
+        "ignored_rows": 0,
+    }
     payment_log = LogEntry.objects.get(
         content_type=ContentType.objects.get_for_model(Payment),
         object_id=payment.pk,
@@ -1388,6 +1402,12 @@ def test_override_ignore_policy_preserves_empty_quantity_row(group_two_plans_one
     payment.refresh_from_db()
     assert payment.delivered_quantity == Decimal("100.00")
     assert payment.transaction_reference_id == "KEEP-ME"
+    assert service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 0,
+        "reset_rows": 0,
+        "ignored_rows": 1,
+    }
     assert not LogEntry.objects.filter(
         content_type=ContentType.objects.get_for_model(Payment),
         object_id=payment.pk,

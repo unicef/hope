@@ -2913,7 +2913,7 @@ class PaymentPlanGroupViewSet(
                     payment_plan_group,
                     cast("User", request.user),
                     file.name,
-                ).send_conflict(len(import_service.conflict_errors))
+                ).send_conflict(import_service.errors, len(import_service.conflict_errors))
             return Response(
                 data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
                 status=status.HTTP_400_BAD_REQUEST,

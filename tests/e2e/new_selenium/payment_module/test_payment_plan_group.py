@@ -626,6 +626,8 @@ def test_import_payment_plan_group_reconciliation(
         browser.click('[data-cy="button-delivery-import-xlsx-group"]')
 
         browser.wait_for_element_visible('[data-cy="dialog-delivery-import-xlsx-group"]')
+        browser.assert_element_absent('[data-cy="dialog-delivery-import-xlsx-group"] input[type="checkbox"]')
+        browser.assert_element_absent('[data-cy="dialog-delivery-import-xlsx-group"] [role="combobox"]')
         browser.choose_file('[data-cy="dialog-delivery-import-xlsx-group"] input[type="file"]', reconciliation_file)
 
         browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group-submit"]')

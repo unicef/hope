@@ -129,6 +129,13 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         self.old_payments: dict[Any, Payment] = {}
         self.payment_ids_for_verification_cleanup: set[Any] = set()
         self.skipped_rows: list[dict[str, Any]] = []
+        self.action_counts: dict[str, int] = {
+            self.ACTION_APPLY: 0,
+            self.ACTION_CONFLICT: 0,
+            self.ACTION_IGNORE: 0,
+            self.ACTION_RESET: 0,
+            self.ACTION_SKIP: 0,
+        }
         self.required_columns: list[str] = ["payment_id", "delivered_quantity"]
         self.xlsx_headers: list[str] = []
         self.is_updated = False
@@ -327,6 +334,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         self.payment_ids_from_xlsx = []
         self.skipped_rows = []
         self.conflict_errors = []
+        self.action_counts = dict.fromkeys(self.action_counts, 0)
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
@@ -336,6 +344,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             if len(self.errors) != error_count:
                 continue
             action, _ = self._validate_delivered_quantity(row)
+            self.action_counts[action] += 1
             if action == self.ACTION_APPLY:
                 self._validate_delivery_date(row)
             if action in {self.ACTION_APPLY, self.ACTION_RESET}:

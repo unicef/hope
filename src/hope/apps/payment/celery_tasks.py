@@ -703,7 +703,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
         log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
         if notification:
-            transaction.on_commit(notification.send_success)
+            transaction.on_commit(partial(notification.send_success, **service.get_result_counts()))
     except XlsxPaymentPlanGroupDeliveryImportError as exc:
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
         payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
@@ -717,7 +717,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         }
         job.save(update_fields=["errors"])
         if notification:
-            transaction.on_commit(partial(notification.send_background_failure, len(exc.errors)))
+            transaction.on_commit(partial(notification.send_background_failure, exc.errors))
         raise NonRetriableTaskError(str(exc)) from exc
     except Exception:
         logger.exception("Import Payment Plan Group Delivery XLSX Error")
@@ -725,6 +725,21 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
         log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
         raise
+
+
+def notify_payment_plan_group_reconciliation_import_failure(job: AsyncRetryJob, _exception: Exception) -> None:
+    payment_plan_group = PaymentPlanGroup.objects.select_related(
+        "delivery_import_file__created_by", "cycle__program__business_area"
+    ).get(id=job.config["payment_plan_group_id"])
+    delivery_import_file = payment_plan_group.delivery_import_file
+    notification_user_id = job.config.get("notification_user_id") or delivery_import_file.created_by_id
+    notification_user = User.objects.filter(pk=notification_user_id).first()
+    if notification_user:
+        PaymentPlanGroupReconciliationImportNotification(
+            payment_plan_group,
+            notification_user,
+            delivery_import_file.file.name or "reconciliation.xlsx",
+        ).send_processing_failure()
 
 
 def import_payment_plan_group_delivery_from_xlsx_async_task(
@@ -741,6 +756,7 @@ def import_payment_plan_group_delivery_from_xlsx_async_task(
         "notification_user_id": notification_user_id or user_id,
         OVERRIDE_OPTION: override,
         NULL_DELIVERY_POLICY_OPTION: null_delivery_policy,
+        "on_failure_action": ("hope.apps.payment.celery_tasks.notify_payment_plan_group_reconciliation_import_failure"),
     }
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,

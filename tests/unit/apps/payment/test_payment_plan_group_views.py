@@ -2642,6 +2642,10 @@ def test_delivery_import_xlsx_conflict_emails_uploader(
     assert mock_email_user.call_args.args[0].pk == user.pk
     assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import failed for {group.name}"
     assert "conflict.xlsx" in mock_email_user.call_args.kwargs["text_body"]
+    assert (
+        f"Payment {payment.unicef_id}: Delivered quantity 90.00 conflicts"
+        in mock_email_user.call_args.kwargs["text_body"]
+    )
 
 
 @pytest.mark.parametrize(

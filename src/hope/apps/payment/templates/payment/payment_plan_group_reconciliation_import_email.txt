@@ -1,6 +1,12 @@
 {% extends "core/base_greeting_email.txt" %}
 
-{% block content %}{{ message }}
+{% block content %}{{ message }}{% if statistics %}
+Rows in file: {{ statistics.total_rows }}
+Rows updated: {{ statistics.updated_rows }}
+Rows reset: {{ statistics.reset_rows }}
+Rows ignored: {{ statistics.ignored_rows }}{% endif %}{% if errors %}
+Errors:{% for error in errors %}
+- {{ error.location }}: {{ error.message }}{% endfor %}{% endif %}
 Payment Plan Group: {{ payment_plan_group }}
 File: {{ file_name }}{% if link %}
 {{ link }}{% endif %}{% endblock content %}

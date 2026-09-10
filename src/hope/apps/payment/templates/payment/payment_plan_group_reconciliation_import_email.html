@@ -2,6 +2,20 @@
 
 {% block content %}
     <p>{{ message }}</p>
+    {% if statistics %}
+        <ul>
+            <li>Rows in file: {{ statistics.total_rows }}</li>
+            <li>Rows updated: {{ statistics.updated_rows }}</li>
+            <li>Rows reset: {{ statistics.reset_rows }}</li>
+            <li>Rows ignored: {{ statistics.ignored_rows }}</li>
+        </ul>
+    {% endif %}
+    {% if errors %}
+        <p>Errors:</p>
+        <ul>
+            {% for error in errors %}<li>{{ error.location }}: {{ error.message }}</li>{% endfor %}
+        </ul>
+    {% endif %}
     <p>Payment Plan Group: {{ payment_plan_group }}</p>
     <p>File: {{ file_name }}</p>
     {% if link %}{% include "core/_email_button.html" with label="View Payment Plan Group" %}{% endif %}

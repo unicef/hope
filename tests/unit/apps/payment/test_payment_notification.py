@@ -14,6 +14,7 @@ from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import format_human_datetime
 from hope.apps.payment.notifications import PaymentNotification, PaymentPlanGroupReconciliationImportNotification
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import PaymentPlan, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
@@ -37,6 +38,58 @@ def reconciliation_notification_without_email():
         UserFactory(username="uploader-without-email", email=""),
         "reconciliation.xlsx",
     )
+
+
+@pytest.fixture
+def reconciliation_errors():
+    return [
+        XlsxError("Payments", "B2", "Delivered quantity conflicts with the existing value"),
+        XlsxError("Payments", None, "The workbook has another validation error"),
+    ]
+
+
+def test_reconciliation_conflict_notification_includes_every_error(
+    reconciliation_notification,
+    reconciliation_errors,
+    mocker: Any,
+) -> None:
+    mock_email_user = mocker.patch.object(reconciliation_notification.user, "email_user")
+
+    reconciliation_notification.send_conflict(reconciliation_errors, conflict_count=1)
+
+    text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "Number of conflicts: 1" in text_body
+    assert "Number of validation errors: 2" in text_body
+    assert "Payments!B2: Delivered quantity conflicts with the existing value" in text_body
+    assert "Payments: The workbook has another validation error" in text_body
+
+
+def test_reconciliation_success_notification_includes_row_counts(
+    reconciliation_notification,
+    mocker: Any,
+) -> None:
+    mock_email_user = mocker.patch.object(reconciliation_notification.user, "email_user")
+
+    reconciliation_notification.send_success(total_rows=5, updated_rows=2, reset_rows=1, ignored_rows=2)
+
+    text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "Rows in file: 5" in text_body
+    assert "Rows updated: 2" in text_body
+    assert "Rows reset: 1" in text_body
+    assert "Rows ignored: 2" in text_body
+
+
+def test_reconciliation_processing_failure_notification_does_not_expose_exception(
+    reconciliation_notification,
+    mocker: Any,
+) -> None:
+    mock_email_user = mocker.patch.object(reconciliation_notification.user, "email_user")
+
+    reconciliation_notification.send_processing_failure()
+
+    text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "background processing failed" in text_body
+    assert "traceback" not in text_body.lower()
 
 
 def test_reconciliation_notification_skips_user_without_email(

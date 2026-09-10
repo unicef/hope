@@ -46,6 +46,7 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
+    notify_payment_plan_group_reconciliation_import_failure,
     payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_custom_exchange_rate_async_task_action,
     payment_plan_apply_engine_rule_async_task,
@@ -2041,6 +2042,12 @@ def test_import_delivery_group_task_clears_status_and_emails_uploader_on_success
     ):
         mock_cls.return_value.open_workbook.return_value = None
         mock_cls.return_value.import_payment_list.return_value = None
+        mock_cls.return_value.get_result_counts.return_value = {
+            "total_rows": 4,
+            "updated_rows": 2,
+            "reset_rows": 1,
+            "ignored_rows": 1,
+        }
         queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
 
     with django_assert_num_queries(1):
@@ -2049,6 +2056,10 @@ def test_import_delivery_group_task_clears_status_and_emails_uploader_on_success
     mock_email_user.assert_called_once()
     assert mock_email_user.call_args.args[0].pk == user.pk
     assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import completed for {group.name}"
+    assert "Rows in file: 4" in mock_email_user.call_args.kwargs["text_body"]
+    assert "Rows updated: 2" in mock_email_user.call_args.kwargs["text_body"]
+    assert "Rows reset: 1" in mock_email_user.call_args.kwargs["text_body"]
+    assert "Rows ignored: 1" in mock_email_user.call_args.kwargs["text_body"]
 
 
 def test_import_delivery_group_task_emails_uploader_when_background_validation_fails(
@@ -2086,23 +2097,39 @@ def test_import_delivery_group_task_emails_uploader_when_background_validation_f
     assert mock_email_user.call_args.args[0].pk == user.pk
     assert mock_email_user.call_args.kwargs["subject"] == f"Reconciliation import failed for {group.name}"
     assert "background validation failed" in mock_email_user.call_args.kwargs["text_body"]
+    assert (
+        "Sheet!B2: Delivered quantity conflicts with the existing value"
+        in mock_email_user.call_args.kwargs["text_body"]
+    )
 
 
-def test_import_delivery_group_task_sets_error_status_on_failure(
+def test_import_delivery_group_task_sets_error_status_and_final_failure_notifies_uploader(
     group_with_accepted_plan_and_import_file, user
 ) -> None:
     group = group_with_accepted_plan_and_import_file
 
-    with patch(
-        "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service.XlsxPaymentPlanGroupDeliveryImportService"
-    ) as mock_cls:
+    with (
+        patch(
+            "hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service."
+            "XlsxPaymentPlanGroupDeliveryImportService"
+        ) as mock_cls,
+        patch.object(User, "email_user", autospec=True) as mock_email_user,
+    ):
         mock_cls.return_value.open_workbook.return_value = None
         mock_cls.return_value.import_payment_list.side_effect = Exception("Import has failed")
         with pytest.raises(Exception, match="Import has failed"):
             queue_and_run_retry_task(import_payment_plan_group_delivery_from_xlsx_async_task, group)
+        job = AsyncRetryJob.objects.latest("pk")
+        notify_payment_plan_group_reconciliation_import_failure(job, Exception("internal database details"))
 
     group.refresh_from_db()
     assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+    assert job.config["on_failure_action"] == (
+        "hope.apps.payment.celery_tasks.notify_payment_plan_group_reconciliation_import_failure"
+    )
+    mock_email_user.assert_called_once()
+    assert "background processing failed" in mock_email_user.call_args.kwargs["text_body"]
+    assert "internal database details" not in mock_email_user.call_args.kwargs["text_body"]
 
 
 def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: Any, user: Any) -> None:
