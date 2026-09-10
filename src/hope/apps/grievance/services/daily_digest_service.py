@@ -9,22 +9,24 @@ One run covers one (business area, recipient timezone, day): the day boundaries 
 local midnights, and each run only mails the recipients sitting in that timezone bucket.
 """
 
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from zoneinfo import ZoneInfo
 
 from constance import config
 from django.db.models import Count, Exists, F, OuterRef, Q
 from django.template.loader import render_to_string
 
+from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import resolve_timezone_name
-from hope.apps.grievance.constants import PRESET_MINE, PRESET_MINE_SENSITIVE
+from hope.apps.grievance.constants import PRESET_MINE, PRESET_MINE_SENSITIVE, PRESET_NEEDS_ASSIGNMENT
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.utils import my_tasks_url, overdue_q
 from hope.apps.utils.mailjet import MailjetClient
+from hope.apps.utils.recipients import users_with_permissions
 from hope.models import User
 
 if TYPE_CHECKING:
@@ -45,6 +47,11 @@ class EmailSpec:
     overdue: bool = False
 
 
+NEEDS_ASSIGNMENT = EmailSpec(
+    subject="New Tickets Needing Assignment",
+    intro="Grievance tickets are waiting to be assigned.",
+    preset=PRESET_NEEDS_ASSIGNMENT,
+)
 ASSIGNED_SENSITIVE = EmailSpec(
     subject="Pending Assigned Sensitive Tickets",
     intro="Sensitive grievance tickets were assigned to you.",
@@ -156,6 +163,7 @@ class DailyDigestService:
         assigned = self._assigned_tickets()
         sensitive = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
         return [
+            (NEEDS_ASSIGNMENT, self._needs_assignment_counts()),
             (ASSIGNED_SENSITIVE, self._counts_by_assignee(assigned.filter(**sensitive))),
             (ASSIGNED, self._counts_by_assignee(assigned.exclude(**sensitive))),
             (OVERDUE, self._counts_by_assignee(self._overdue_tickets())),
@@ -210,6 +218,45 @@ class DailyDigestService:
 
         users = User.objects.in_bulk(totals)
         return {user: totals[user_id] for user_id, user in users.items()}
+
+    def _needs_assignment_counts(self) -> dict[User, int]:
+        """Count unassigned tickets per user who can assign them, scoped to the programmes they hold.
+
+        A ticket in several of a user's programmes still counts once, hence the id sets.
+        """
+        ticket_ids = set(self._unassigned_tickets().values_list("id", flat=True))
+        if not ticket_ids:
+            return {}
+
+        through_model = GrievanceTicket.programs.through
+        tickets_by_program: dict[Any, set[Any]] = defaultdict(set)
+        for program_id, ticket_id in through_model.objects.filter(grievanceticket_id__in=ticket_ids).values_list(
+            "program_id", "grievanceticket_id"
+        ):
+            tickets_by_program[program_id].add(ticket_id)
+
+        visible: dict[User, set[Any]] = defaultdict(set)
+        for program_id, program_ticket_ids in tickets_by_program.items():
+            for user in users_with_permissions(
+                self.business_area, [Permissions.GRIEVANCE_ASSIGN], programs=[program_id]
+            ):
+                visible[user].update(program_ticket_ids)
+
+        # a ticket belonging to no programme is visible to anyone who can assign in the business area,
+        # matching how the list endpoint scopes them (api/mixins.py:195-204)
+        ticket_ids_without_program = ticket_ids.difference(*tickets_by_program.values())
+        if ticket_ids_without_program:
+            for user in users_with_permissions(self.business_area, [Permissions.GRIEVANCE_ASSIGN]):
+                visible[user].update(ticket_ids_without_program)
+
+        return {
+            user: len(user_ticket_ids)
+            for user, user_ticket_ids in visible.items()
+            if self._in_timezone_bucket(user.timezone)
+        }
+
+    def _unassigned_tickets(self) -> "QuerySet[GrievanceTicket]":
+        return self._for_business_area().filter(assigned_to__isnull=True).exclude(status=GrievanceTicket.STATUS_CLOSED)
 
     def _in_timezone_bucket(self, timezone_name: str | None) -> bool:
         if timezone_name:
