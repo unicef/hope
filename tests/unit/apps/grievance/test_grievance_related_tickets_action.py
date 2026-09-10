@@ -105,6 +105,23 @@ def main_ticket(afghanistan: BusinessArea, area1: Area, user: User, household: H
 
 
 @pytest.fixture
+def ticket_without_household(afghanistan: BusinessArea, area1: Area, user: User, program: Program) -> GrievanceTicket:
+    return GrievanceTicketFactory(
+        business_area=afghanistan,
+        admin2=area1,
+        language="Polish",
+        consent=True,
+        description="No household",
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_OTHER_COMPLAINT,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+        household_unicef_id=None,
+    )
+
+
+@pytest.fixture
 def linked_ticket_a(afghanistan: BusinessArea, area1: Area, user: User) -> GrievanceTicket:
     t = GrievanceTicketFactory(
         business_area=afghanistan,
@@ -119,6 +136,25 @@ def linked_ticket_a(afghanistan: BusinessArea, area1: Area, user: User) -> Griev
         assigned_to=user,
     )
     t.created_at = timezone.make_aware(datetime(year=2024, month=1, day=10))
+    t.save()
+    return t
+
+
+@pytest.fixture
+def linked_ticket_c(afghanistan: BusinessArea, area1: Area, user: User) -> GrievanceTicket:
+    t = GrievanceTicketFactory(
+        business_area=afghanistan,
+        admin2=area1,
+        language="Polish",
+        consent=True,
+        description="Linked C",
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_OTHER_COMPLAINT,
+        status=GrievanceTicket.STATUS_NEW,
+        created_by=user,
+        assigned_to=user,
+    )
+    t.created_at = timezone.make_aware(datetime(year=2024, month=2, day=1))
     t.save()
     return t
 
@@ -232,3 +268,54 @@ def test_related_tickets_requires_detail_permission(
     response = authenticated_client.get(_url(related_tickets_url_name, afghanistan, main_ticket))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_related_tickets_without_household_returns_linked_tickets(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    ticket_without_household: GrievanceTicket,
+    linked_ticket_a: GrievanceTicket,
+    related_tickets_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    ticket_without_household.linked_tickets.add(linked_ticket_a)
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(_url(related_tickets_url_name, afghanistan, ticket_without_household))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [row["id"] for row in response.data] == [str(linked_ticket_a.id)]
+
+
+def test_detail_related_tickets_ordered_by_created_at_desc(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    main_ticket: GrievanceTicket,
+    linked_ticket_a: GrievanceTicket,
+    linked_ticket_c: GrievanceTicket,
+    existing_ticket_b: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    main_ticket.linked_tickets.add(linked_ticket_a, linked_ticket_c)
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(_url("api:grievance:grievance-tickets-global-detail", afghanistan, main_ticket))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [row["id"] for row in response.data["related_tickets"]] == [
+        str(existing_ticket_b.id),
+        str(linked_ticket_c.id),
+        str(linked_ticket_a.id),
+    ]
