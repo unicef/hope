@@ -57,6 +57,7 @@ class CurrencyAPIView(HOPEAPIView, ListAPIView):
     filter_backends = (OrderingFilter, SearchFilter)
     search_fields = (
         "code",
+        "vision_code",
         "name",
     )
 
