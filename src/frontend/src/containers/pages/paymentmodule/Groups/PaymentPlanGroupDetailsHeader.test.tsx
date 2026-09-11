@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from 'src/testUtils/testProviders';
 import { PaymentPlanGroupDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanGroupDetailBackgroundActionStatusEnum';
+import { PERMISSIONS } from '../../../../config/permissions';
 import { PaymentPlanGroupDetailsHeader } from './PaymentPlanGroupDetailsHeader';
 import type { PaymentPlanGroupDetail } from './types';
 
@@ -18,9 +19,10 @@ vi.mock('@hooks/useBaseUrl', () => ({
   }),
 }));
 
-// No permissions -> the action buttons render nothing, leaving the title area under test.
+const mockUsePermissions = vi.hoisted(() => vi.fn((): string[] => []));
+
 vi.mock('@hooks/usePermissions', () => ({
-  usePermissions: () => [],
+  usePermissions: mockUsePermissions,
 }));
 
 const renderHeader = (
@@ -43,6 +45,10 @@ const renderHeader = (
   );
 
 describe('PaymentPlanGroupDetailsHeader', () => {
+  beforeEach(() => {
+    mockUsePermissions.mockReturnValue([]);
+  });
+
   it('shows the background action status while an export is running', () => {
     renderHeader(
       PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_EXPORTING,
@@ -67,5 +73,40 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     renderHeader(null);
 
     expect(screen.queryByTestId('group-background-action-status')).toBeNull();
+  });
+
+  it('shows override controls only to users with the override permission', () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
+      PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
+    ]);
+    renderHeader(null);
+
+    fireEvent.click(screen.getByText('Upload Reconciliation'));
+    fireEvent.click(
+      screen.getByLabelText('This upload will overwrite existing matches'),
+    );
+
+    expect(
+      screen.getByRole('combobox', {
+        name: 'When delivered_quantity is empty',
+      }),
+    ).not.toBeNull();
+    expect(
+      screen.getByText('Reset rows with empty/null delivered_quantity'),
+    ).not.toBeNull();
+  });
+
+  it('hides override controls without the override permission', () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
+    ]);
+    renderHeader(null);
+
+    fireEvent.click(screen.getByText('Upload Reconciliation'));
+
+    expect(
+      screen.queryByLabelText('This upload will overwrite existing matches'),
+    ).toBeNull();
   });
 });

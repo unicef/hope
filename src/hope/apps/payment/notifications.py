@@ -1,18 +1,123 @@
 from collections import defaultdict
+from collections.abc import Sequence
 from datetime import datetime
 import logging
+from pathlib import Path
 
 from constance import config
 from django.conf import settings
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import format_human_datetime, resolve_timezone_name
+from hope.apps.payment.utils import get_link
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
-from hope.models import PaymentPlan, User
+from hope.models import PaymentPlan, PaymentPlanGroup, User
 
 logger = logging.getLogger(__name__)
+
+
+class PaymentPlanGroupReconciliationImportNotification:
+    html_template = "payment/payment_plan_group_reconciliation_import_email.html"
+    text_template = "payment/payment_plan_group_reconciliation_import_email.txt"
+
+    def __init__(self, payment_plan_group: PaymentPlanGroup, user: User, file_name: str) -> None:
+        self.payment_plan_group = payment_plan_group
+        self.user = user
+        self.file_name = Path(file_name).name
+
+    def send_conflict(self, errors: Sequence[XlsxError], conflict_count: int) -> None:
+        self._send(
+            title=f"Reconciliation import failed for {self.payment_plan_group.name}",
+            message=(
+                f'Reconciliation file "{self.file_name}" was not imported because delivered quantities conflict '
+                f"with existing Payment data. Number of conflicts: {conflict_count}. "
+                f"Number of validation errors: {len(errors)}. No Payments were changed."
+            ),
+            errors=errors,
+        )
+
+    def send_success(
+        self,
+        total_rows: int | None = None,
+        updated_rows: int | None = None,
+        reset_rows: int | None = None,
+        ignored_rows: int | None = None,
+    ) -> None:
+        statistics = None
+        if None not in {total_rows, updated_rows, reset_rows, ignored_rows}:
+            statistics = {
+                "total_rows": total_rows,
+                "updated_rows": updated_rows,
+                "reset_rows": reset_rows,
+                "ignored_rows": ignored_rows,
+            }
+        self._send(
+            title=f"Reconciliation import completed for {self.payment_plan_group.name}",
+            message=f'Reconciliation file "{self.file_name}" was imported successfully.',
+            statistics=statistics,
+        )
+
+    def send_background_failure(self, errors: Sequence[XlsxError]) -> None:
+        self._send(
+            title=f"Reconciliation import failed for {self.payment_plan_group.name}",
+            message=(
+                f'Reconciliation file "{self.file_name}" was not imported because background validation failed. '
+                f"Number of errors: {len(errors)}. No Payments were changed."
+            ),
+            errors=errors,
+        )
+
+    def send_processing_failure(self) -> None:
+        file_description = f'Reconciliation file "{self.file_name}"'
+        self._send(
+            title=f"Reconciliation import failed for {self.payment_plan_group.name}",
+            message=f"{file_description} could not be imported because background processing failed.",
+        )
+
+    def _send(
+        self,
+        title: str,
+        message: str,
+        errors: Sequence[XlsxError] = (),
+        statistics: dict[str, int | None] | None = None,
+    ) -> None:
+        if not self.user.email:
+            logger.warning("Reconciliation import notification skipped because user %s has no email", self.user.pk)
+            return
+
+        program = self.payment_plan_group.cycle.program
+        context = {
+            "first_name": self.user.first_name or self.user.username,
+            "last_name": self.user.last_name,
+            "title": title,
+            "message": message,
+            "payment_plan_group": self.payment_plan_group.name,
+            "file_name": self.file_name,
+            "errors": [
+                {
+                    "location": f"{error.sheet}!{error.coordinates}" if error.coordinates else error.sheet,
+                    "message": error.message,
+                }
+                for error in errors
+            ],
+            "statistics": statistics,
+            "link": get_link(
+                f"/{program.business_area.slug}/programs/{program.code}/payment-module/groups/"
+                f"{self.payment_plan_group.pk}"
+            ),
+        }
+        try:
+            self.user.email_user(
+                subject=title,
+                html_body=render_to_string(self.html_template, context=context),
+                text_body=render_to_string(self.text_template, context=context),
+            )
+        except Exception:
+            logger.exception("Failed to send reconciliation import notification")
 
 
 class PaymentNotification:

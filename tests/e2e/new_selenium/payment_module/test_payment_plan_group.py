@@ -1,6 +1,8 @@
 from decimal import Decimal
 from unittest import mock
 
+from django.utils import timezone
+import openpyxl
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
@@ -18,6 +20,7 @@ from extras.test_utils.factories import (
 )
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
     XlsxPaymentPlanGroupDeliveryExportService,
 )
@@ -163,7 +166,7 @@ def auth_code_template(business_area: BusinessArea) -> FinancialServiceProviderX
 
 @pytest.fixture
 def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Payment]) -> str:
-    group, _ = exportable_group
+    group, payment = exportable_group
     # Build the file from the real export service so its header matches exactly what the
     # import expects, then fill in a delivered_quantity for the single payment row.
     workbook = XlsxPaymentPlanGroupDeliveryExportService(
@@ -175,6 +178,131 @@ def reconciliation_file(tmp_path, exportable_group: tuple[PaymentPlanGroup, Paym
     worksheet.cell(row=2, column=delivered_col).value = 50
     file_path = tmp_path / "reconciliation.xlsx"
     workbook.save(str(file_path))
+    payment.status = Payment.STATUS_SENT_TO_FSP
+    payment.status_date = timezone.now()
+    payment.save(update_fields=["status", "status_date"])
+    return str(file_path)
+
+
+def _set_delivered_quantities(file_path: str, quantities: dict[str, int | None]) -> None:
+    workbook = openpyxl.load_workbook(file_path)
+    worksheet = workbook.active
+    headers = [cell.value for cell in worksheet[1]]
+    payment_id_column = headers.index("payment_id")
+    delivered_quantity_column = headers.index("delivered_quantity")
+    updated_payment_ids: set[str] = set()
+    for row in worksheet.iter_rows(min_row=2):
+        payment_id = str(row[payment_id_column].value)
+        if payment_id in quantities:
+            row[delivered_quantity_column].value = quantities[payment_id]
+            updated_payment_ids.add(payment_id)
+    missing_payment_ids = set(quantities) - updated_payment_ids
+    if missing_payment_ids:
+        raise AssertionError(f"Payments not found in reconciliation XLSX: {sorted(missing_payment_ids)}")
+    workbook.save(file_path)
+
+
+@pytest.fixture
+def finished_group_with_empty_reconciliation_file(
+    tmp_path,
+    exportable_group: tuple[PaymentPlanGroup, Payment],
+) -> tuple[PaymentPlanGroup, Payment, str]:
+    group, payment = exportable_group
+    payment_plan = payment.parent
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(
+        group, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
+    file_path = tmp_path / "empty_reconciliation.xlsx"
+    workbook.save(file_path)
+
+    payment.delivered_quantity = Decimal("50.00")
+    payment.delivered_quantity_usd = Decimal("5.00")
+    payment.delivery_date = timezone.now()
+    payment.status = Payment.STATUS_DISTRIBUTION_PARTIAL
+    payment.status_date = timezone.now()
+    payment.transaction_reference_id = "ORIGINAL-REFERENCE"
+    payment.reason_for_unsuccessful_payment = "Original reason"
+    payment.additional_collector_name = "Original collector"
+    payment.additional_document_type = "National ID"
+    payment.additional_document_number = "ORIGINAL-DOCUMENT"
+    payment.transaction_status_blockchain_link = "https://example.com/original-transaction"
+    payment.set_extra_fields({"reconciliation_note": "original"})
+    payment.set_fsp_extra_fields({"fsp_reference": "keep"})
+    payment.save(
+        update_fields=[
+            "delivered_quantity",
+            "delivered_quantity_usd",
+            "delivery_date",
+            "status",
+            "status_date",
+            "transaction_reference_id",
+            "reason_for_unsuccessful_payment",
+            "additional_collector_name",
+            "additional_document_type",
+            "additional_document_number",
+            "transaction_status_blockchain_link",
+            "extras",
+        ]
+    )
+    PaymentPlanFlow(payment_plan).status_finished()
+    payment_plan.update_money_fields()
+    payment_plan.save()
+    return group, payment, str(file_path)
+
+
+@pytest.fixture
+def mixed_reconciliation_group(
+    program_cycle: ProgramCycle,
+    group_fsp: FinancialServiceProvider,
+    group_delivery_mechanism: DeliveryMechanism,
+    group_fsp_template: FinancialServiceProviderXlsxTemplate,
+) -> tuple[PaymentPlanGroup, PaymentPlan, PaymentPlan, Payment, Payment]:
+    group = PaymentPlanGroupFactory(cycle=program_cycle, name="Mixed Reconciliation Group")
+    payment_plans = [
+        PaymentPlanFactory(
+            program_cycle=program_cycle,
+            payment_plan_group=group,
+            business_area=program_cycle.program.business_area,
+            financial_service_provider=group_fsp,
+            delivery_mechanism=group_delivery_mechanism,
+            status=PaymentPlan.Status.ACCEPTED,
+            plan_type=PaymentPlan.PlanType.REGULAR,
+        )
+        for _ in range(2)
+    ]
+    payments = [
+        PaymentFactory(
+            parent=payment_plan,
+            financial_service_provider=group_fsp,
+            delivery_type=group_delivery_mechanism,
+            program=payment_plan.program,
+            entitlement_quantity=Decimal("100.00"),
+            entitlement_quantity_usd=Decimal("10.00"),
+        )
+        for payment_plan in payment_plans
+    ]
+    for payment in payments:
+        PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group, payment_plans[0], payment_plans[1], payments[0], payments[1]
+
+
+@pytest.fixture
+def mixed_reconciliation_file(
+    tmp_path,
+    mixed_reconciliation_group: tuple[PaymentPlanGroup, PaymentPlan, PaymentPlan, Payment, Payment],
+) -> str:
+    group, _, _, first_payment, second_payment = mixed_reconciliation_group
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(
+        group, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
+    file_path = tmp_path / "mixed_reconciliation.xlsx"
+    workbook.save(file_path)
+    _set_delivered_quantities(str(file_path), {str(first_payment.unicef_id): 50})
+
+    for payment in (first_payment, second_payment):
+        payment.status = Payment.STATUS_SENT_TO_FSP
+        payment.status_date = timezone.now()
+        payment.save(update_fields=["status", "status_date"])
     return str(file_path)
 
 
@@ -480,6 +608,7 @@ def test_import_payment_plan_group_reconciliation(
     reconciliation_file: str,
 ) -> None:
     group, payment = exportable_group
+    payment_plan = payment.parent
     program = group.cycle.program
 
     with grant_permission(
@@ -497,6 +626,8 @@ def test_import_payment_plan_group_reconciliation(
         browser.click('[data-cy="button-delivery-import-xlsx-group"]')
 
         browser.wait_for_element_visible('[data-cy="dialog-delivery-import-xlsx-group"]')
+        browser.assert_element_absent('[data-cy="dialog-delivery-import-xlsx-group"] input[type="checkbox"]')
+        browser.assert_element_absent('[data-cy="dialog-delivery-import-xlsx-group"] [role="combobox"]')
         browser.choose_file('[data-cy="dialog-delivery-import-xlsx-group"] input[type="file"]', reconciliation_file)
 
         browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group-submit"]')
@@ -505,7 +636,200 @@ def test_import_payment_plan_group_reconciliation(
         browser.wait_for_text("Delivery reconciliation import started")
 
         payment.refresh_from_db()
+        payment_plan.refresh_from_db()
         assert payment.delivered_quantity == Decimal("50.00")
+        assert payment.status == Payment.STATUS_DISTRIBUTION_PARTIAL
+        assert payment_plan.status == PaymentPlan.Status.FINISHED
+
+
+def _open_group_reconciliation_dialog(browser: HopeTestBrowser, file_path: str) -> None:
+    browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group"]')
+    browser.click('[data-cy="button-delivery-import-xlsx-group"]')
+    browser.wait_for_element_visible('[data-cy="dialog-delivery-import-xlsx-group"]')
+    browser.choose_file('[data-cy="dialog-delivery-import-xlsx-group"] input[type="file"]', file_path)
+
+
+def _enable_reconciliation_override(browser: HopeTestBrowser) -> None:
+    dialog_selector = '[data-cy="dialog-delivery-import-xlsx-group"]'
+    browser.wait_for_element_clickable(f"{dialog_selector} label")
+    browser.click(f"{dialog_selector} label")
+    browser.wait_for_element_visible(f'{dialog_selector} [role="combobox"]')
+
+
+def _submit_group_reconciliation(browser: HopeTestBrowser) -> None:
+    browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group-submit"]')
+    browser.click('[data-cy="button-delivery-import-xlsx-group-submit"]')
+    browser.wait_for_text("Delivery reconciliation import started")
+
+
+def test_override_reconciliation_resets_payment_for_empty_quantity(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    finished_group_with_empty_reconciliation_file: tuple[PaymentPlanGroup, Payment, str],
+) -> None:
+    group, payment, reconciliation_file_path = finished_group_with_empty_reconciliation_file
+    payment_plan = payment.parent
+    program = group.cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
+        Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
+
+        _open_group_reconciliation_dialog(browser, reconciliation_file_path)
+        _enable_reconciliation_override(browser)
+        browser.wait_for_text(
+            "Reset rows with empty/null delivered_quantity",
+            '[data-cy="dialog-delivery-import-xlsx-group"] [role="combobox"]',
+        )
+        _submit_group_reconciliation(browser)
+
+        payment.refresh_from_db()
+        payment_plan.refresh_from_db()
+        assert payment.delivered_quantity is None
+        assert payment.delivered_quantity_usd is None
+        assert payment.delivery_date is None
+        assert payment.status == Payment.STATUS_SENT_TO_FSP
+        assert payment.transaction_reference_id is None
+        assert payment.reason_for_unsuccessful_payment is None
+        assert payment.additional_collector_name is None
+        assert payment.additional_document_type is None
+        assert payment.additional_document_number is None
+        assert payment.transaction_status_blockchain_link is None
+        assert payment.extra_fields == {}
+        assert payment.fsp_extra_fields == {"fsp_reference": "keep"}
+        assert payment_plan.status == PaymentPlan.Status.ACCEPTED
+        assert payment_plan.total_delivered_quantity == Decimal(0)
+
+
+def test_override_reconciliation_ignores_payment_for_empty_quantity(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    finished_group_with_empty_reconciliation_file: tuple[PaymentPlanGroup, Payment, str],
+) -> None:
+    group, payment, reconciliation_file_path = finished_group_with_empty_reconciliation_file
+    payment_plan = payment.parent
+    program = group.cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
+        Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
+
+        _open_group_reconciliation_dialog(browser, reconciliation_file_path)
+        _enable_reconciliation_override(browser)
+        browser.click('[data-cy="dialog-delivery-import-xlsx-group"] [role="combobox"]')
+        browser.select_listbox_element("Ignore rows with empty/null delivered_quantity")
+        _submit_group_reconciliation(browser)
+
+        payment.refresh_from_db()
+        payment_plan.refresh_from_db()
+        assert payment.delivered_quantity == Decimal("50.00")
+        assert payment.delivered_quantity_usd == Decimal("5.00")
+        assert payment.status == Payment.STATUS_DISTRIBUTION_PARTIAL
+        assert payment.transaction_reference_id == "ORIGINAL-REFERENCE"
+        assert payment.reason_for_unsuccessful_payment == "Original reason"
+        assert payment.additional_collector_name == "Original collector"
+        assert payment.additional_document_type == "National ID"
+        assert payment.additional_document_number == "ORIGINAL-DOCUMENT"
+        assert payment.transaction_status_blockchain_link == "https://example.com/original-transaction"
+        assert payment.extra_fields == {"reconciliation_note": "original"}
+        assert payment.fsp_extra_fields == {"fsp_reference": "keep"}
+        assert payment_plan.status == PaymentPlan.Status.FINISHED
+
+
+def test_group_reconciliation_preserves_closed_plan_and_aborts_when_closed_quantity_changes(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    mixed_reconciliation_group: tuple[PaymentPlanGroup, PaymentPlan, PaymentPlan, Payment, Payment],
+    mixed_reconciliation_file: str,
+) -> None:
+    group, first_plan, second_plan, first_payment, second_payment = mixed_reconciliation_group
+    program = group.cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
+        Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
+    ):
+        browser.login(username="noperm_user", password="testtest2")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
+
+        _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
+        _submit_group_reconciliation(browser)
+
+        first_payment.refresh_from_db()
+        second_payment.refresh_from_db()
+        first_plan.refresh_from_db()
+        second_plan.refresh_from_db()
+        assert first_payment.delivered_quantity == Decimal("50.00")
+        assert second_payment.delivered_quantity is None
+        assert first_plan.status == PaymentPlan.Status.FINISHED
+        assert second_plan.status == PaymentPlan.Status.ACCEPTED
+
+        first_plan_flow = PaymentPlanFlow(first_plan)
+        first_plan_flow.status_ready_for_closure()
+        first_plan_flow.status_close()
+        first_plan.save()
+        _set_delivered_quantities(mixed_reconciliation_file, {str(second_payment.unicef_id): 75})
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
+
+        _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
+        _submit_group_reconciliation(browser)
+
+        first_payment.refresh_from_db()
+        second_payment.refresh_from_db()
+        first_plan.refresh_from_db()
+        second_plan.refresh_from_db()
+        assert first_payment.delivered_quantity == Decimal("50.00")
+        assert second_payment.delivered_quantity == Decimal("75.00")
+        assert first_plan.status == PaymentPlan.Status.CLOSED
+        assert second_plan.status == PaymentPlan.Status.FINISHED
+
+        _set_delivered_quantities(
+            mixed_reconciliation_file,
+            {
+                str(first_payment.unicef_id): 60,
+                str(second_payment.unicef_id): 80,
+            },
+        )
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
+
+        _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
+        _enable_reconciliation_override(browser)
+        browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group-submit"]')
+        browser.click('[data-cy="button-delivery-import-xlsx-group-submit"]')
+        browser.wait_for_text("The entire file cannot be imported.")
+
+        first_payment.refresh_from_db()
+        second_payment.refresh_from_db()
+        first_plan.refresh_from_db()
+        second_plan.refresh_from_db()
+        assert first_payment.delivered_quantity == Decimal("50.00")
+        assert second_payment.delivered_quantity == Decimal("75.00")
+        assert first_plan.status == PaymentPlan.Status.CLOSED
+        assert second_plan.status == PaymentPlan.Status.FINISHED
 
 
 def test_send_payment_plan_group_to_payment_gateway(

@@ -1,6 +1,10 @@
 import { PermissionsEnum } from '@restgenerated/models/PermissionsEnum';
 
-export const PERMISSIONS = PermissionsEnum;
+export const PERMISSIONS = {
+  ...PermissionsEnum,
+  PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE:
+    'PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE',
+} as const;
 
 // Module prefixes matched as substrings by hasPermissionInModule (drawer menu)
 export const PERMISSION_MODULES = {

@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+import logging
 from typing import Any
 
 from constance.test import override_config
@@ -8,16 +9,116 @@ import pytest
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory, PaymentPlanGroupFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import format_human_datetime
-from hope.apps.payment.notifications import PaymentNotification
+from hope.apps.payment.notifications import PaymentNotification, PaymentPlanGroupReconciliationImportNotification
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import PaymentPlan, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
 
 ACTION_DATETIME = datetime(2026, 8, 21, 12, 30, tzinfo=UTC)
+
+
+@pytest.fixture
+def reconciliation_notification():
+    return PaymentPlanGroupReconciliationImportNotification(
+        PaymentPlanGroupFactory(),
+        UserFactory(username="uploader", email="uploader@example.com"),
+        "reconciliation.xlsx",
+    )
+
+
+@pytest.fixture
+def reconciliation_notification_without_email():
+    return PaymentPlanGroupReconciliationImportNotification(
+        PaymentPlanGroupFactory(),
+        UserFactory(username="uploader-without-email", email=""),
+        "reconciliation.xlsx",
+    )
+
+
+@pytest.fixture
+def reconciliation_errors():
+    return [
+        XlsxError("Payments", "B2", "Delivered quantity conflicts with the existing value"),
+        XlsxError("Payments", None, "The workbook has another validation error"),
+    ]
+
+
+def test_reconciliation_conflict_notification_includes_every_error(
+    reconciliation_notification,
+    reconciliation_errors,
+    mocker: Any,
+) -> None:
+    mock_email_user = mocker.patch.object(reconciliation_notification.user, "email_user")
+
+    reconciliation_notification.send_conflict(reconciliation_errors, conflict_count=1)
+
+    text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "Number of conflicts: 1" in text_body
+    assert "Number of validation errors: 2" in text_body
+    assert "Payments!B2: Delivered quantity conflicts with the existing value" in text_body
+    assert "Payments: The workbook has another validation error" in text_body
+
+
+def test_reconciliation_success_notification_includes_row_counts(
+    reconciliation_notification,
+    mocker: Any,
+) -> None:
+    mock_email_user = mocker.patch.object(reconciliation_notification.user, "email_user")
+
+    reconciliation_notification.send_success(total_rows=5, updated_rows=2, reset_rows=1, ignored_rows=2)
+
+    text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "Rows in file: 5" in text_body
+    assert "Rows updated: 2" in text_body
+    assert "Rows reset: 1" in text_body
+    assert "Rows ignored: 2" in text_body
+
+
+def test_reconciliation_processing_failure_notification_does_not_expose_exception(
+    reconciliation_notification,
+    mocker: Any,
+) -> None:
+    mock_email_user = mocker.patch.object(reconciliation_notification.user, "email_user")
+
+    reconciliation_notification.send_processing_failure()
+
+    text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "background processing failed" in text_body
+    assert "traceback" not in text_body.lower()
+
+
+def test_reconciliation_notification_skips_user_without_email(
+    reconciliation_notification_without_email,
+    django_assert_num_queries,
+    caplog,
+) -> None:
+    with caplog.at_level(logging.WARNING), django_assert_num_queries(0):
+        reconciliation_notification_without_email.send_success()
+
+    assert "notification skipped" in caplog.text
+
+
+def test_reconciliation_notification_logs_email_failure(
+    reconciliation_notification,
+    django_assert_num_queries,
+    caplog,
+    mocker: Any,
+) -> None:
+    mocker.patch.object(
+        reconciliation_notification.user,
+        "email_user",
+        side_effect=RuntimeError("Email service unavailable"),
+    )
+
+    with caplog.at_level(logging.ERROR), django_assert_num_queries(0):
+        reconciliation_notification.send_success()
+
+    assert "Failed to send reconciliation import notification" in caplog.text
 
 
 @pytest.fixture

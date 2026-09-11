@@ -13,8 +13,9 @@ from django.utils.crypto import get_random_string
 import openpyxl
 import pyzipper
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.api.caches import invalidate_payment_plan_list_cache
-from hope.apps.payment.utils import get_link
+from hope.apps.payment.utils import bulk_log_payment_changes, get_link
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.models import (
@@ -84,6 +85,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         # in a batch all payment plans are of the same type
         self.plan_type: str | None = self.payment_plans[0].plan_type if self.payment_plans else plan_type
         self.exported_plan_ids: list = []
+        self.payments_to_mark_sent: list[Payment] = []
         self.skipped_reasons: list[str] = []
         self.fsp_xlsx_template: FinancialServiceProviderXlsxTemplate | None = (
             get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
@@ -206,6 +208,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         header: list[str] = []
         prepared_services: list[XlsxPaymentPlanDeliveryExportService] = []
         self.exported_plan_ids = []
+        self.payments_to_mark_sent = []
         self.skipped_reasons = []
 
         shared_lookups = XlsxPaymentPlanDeliveryExportService.build_shared_lookups()
@@ -247,6 +250,12 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     )
                 )
                 self.ws_export_list.append([payment_row.get(column, "") for column in header])
+                if (
+                    not per_fsp_service.payment_plan.is_payment_gateway
+                    and payment.status == Payment.STATUS_PENDING
+                    and payment.delivered_quantity is None
+                ):
+                    self.payments_to_mark_sent.append(payment)
 
         self._adjust_column_width_from_col(ws=self.ws_export_list)
         return self.wb
@@ -266,6 +275,25 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             self._save_xlsx_file_with_auth_code(group, tag, user)
         else:
             self._save_plain_xlsx_file(group, tag, user)
+
+    def _mark_exported_payments_as_sent(self, user: "User") -> None:
+        if not self.payments_to_mark_sent:
+            return
+
+        status_date = timezone.now()
+        old_new_pairs: list[tuple[Payment | None, Payment]] = []
+        for payment in self.payments_to_mark_sent:
+            old_payment = cast("Payment", copy_model_object(payment))
+            payment.status = Payment.STATUS_SENT_TO_FSP
+            payment.status_date = status_date
+            old_new_pairs.append((old_payment, payment))
+
+        Payment.signature_manager.bulk_update_with_signature(
+            self.payments_to_mark_sent,
+            ("status", "status_date"),
+            batch_size=self.batch_size,
+        )
+        bulk_log_payment_changes(old_new_pairs, user)
 
     def _save_plain_xlsx_file(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
         filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.xlsx"
@@ -287,6 +315,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
                         export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
                     )
+                self._mark_exported_payments_as_sent(user)
                 # .update() bypasses post_save, so the list caches are invalidated explicitly
                 self._invalidate_list_cache()
 
@@ -321,5 +350,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                     PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
                         export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
                     )
+                self._mark_exported_payments_as_sent(user)
                 # .update() bypasses post_save, so the list caches are invalidated explicitly
                 self._invalidate_list_cache()

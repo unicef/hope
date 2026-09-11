@@ -36,6 +36,10 @@ from hope.apps.household.const import (
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICIES,
+    NULL_DELIVERY_POLICY_RESET,
+)
 from hope.apps.program.api.serializers import (
     PaymentPlanPurposeSerializer,
     ProgramCycleSmallSerializer,
@@ -159,6 +163,14 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
         if extension not in allowed_extensions:
             raise serializers.ValidationError(f"Unsupported file type ({extension}).")
         return file
+
+
+class PaymentPlanGroupReconciliationImportSerializer(PaymentPlanImportFileSerializer):
+    override = serializers.BooleanField(default=False)
+    null_delivery_policy = serializers.ChoiceField(
+        choices=NULL_DELIVERY_POLICIES,
+        default=NULL_DELIVERY_POLICY_RESET,
+    )
 
 
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):

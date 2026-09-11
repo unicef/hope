@@ -83,6 +83,7 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanGroupDeliveryExportSerializer,
     PaymentPlanGroupDetailSerializer,
     PaymentPlanGroupListSerializer,
+    PaymentPlanGroupReconciliationImportSerializer,
     PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
@@ -119,6 +120,7 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_group_delivery_xlsx_password_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
@@ -142,6 +144,10 @@ from hope.apps.payment.utils import (
 )
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
+)
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICY_OPTION,
+    OVERRIDE_OPTION,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service import (
     XlsxPaymentPlanFspExtraFieldsExportService,
@@ -2692,7 +2698,7 @@ class PaymentPlanGroupViewSet(
         "update": PaymentPlanGroupUpdateSerializer,
         "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
         "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
-        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
+        "delivery_import_xlsx": PaymentPlanGroupReconciliationImportSerializer,
     }
 
     permissions_by_action = {
@@ -2856,6 +2862,10 @@ class PaymentPlanGroupViewSet(
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=PaymentPlanGroupReconciliationImportSerializer,
+        responses={200: PaymentPlanGroupDetailSerializer, 400: XlsxErrorSerializer},
+    )
     @action(
         detail=True,
         methods=["post"],
@@ -2868,17 +2878,28 @@ class PaymentPlanGroupViewSet(
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
         importable_plans = payment_plan_group.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.CLOSED],
         )
         if not importable_plans.exists():
-            raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")
+            raise ValidationError("Import requires at least one payment plan in ACCEPTED, FINISHED, or CLOSED status.")
 
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         file = serializer.validated_data["file"]
+        override = serializer.validated_data[OVERRIDE_OPTION]
+        null_delivery_policy = serializer.validated_data[NULL_DELIVERY_POLICY_OPTION]
 
-        import_service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file)
+        override_permission = Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE
+        if override and not request.user.has_perm(override_permission.value, payment_plan_group.cycle.program):
+            raise PermissionDenied(detail={"required_permissions": [override_permission.value]})
+
+        import_service = XlsxPaymentPlanGroupDeliveryImportService(
+            payment_plan_group,
+            file,
+            override=override,
+            null_delivery_policy=null_delivery_policy,
+        )
         try:
             import_service.open_workbook()
         except BadZipFile:
@@ -2887,6 +2908,12 @@ class PaymentPlanGroupViewSet(
             )
         import_service.validate()
         if import_service.errors:
+            if import_service.conflict_errors:
+                PaymentPlanGroupReconciliationImportNotification(
+                    payment_plan_group,
+                    cast("User", request.user),
+                    file.name,
+                ).send_conflict(import_service.errors, len(import_service.conflict_errors))
             return Response(
                 data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
                 status=status.HTTP_400_BAD_REQUEST,
@@ -2897,6 +2924,10 @@ class PaymentPlanGroupViewSet(
             content_type=get_content_type_for_model(payment_plan_group),
             created_by=request.user,
             file=file,
+            extras={
+                OVERRIDE_OPTION: override,
+                NULL_DELIVERY_POLICY_OPTION: null_delivery_policy,
+            },
         )
         old_payment_plan_group = copy_model_object(payment_plan_group)
         payment_plan_group.delivery_import_file = file_temp
@@ -2914,7 +2945,12 @@ class PaymentPlanGroupViewSet(
         )
         user_id = str(request.user.pk)
         transaction.on_commit(
-            lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group, user_id)
+            lambda: import_payment_plan_group_delivery_from_xlsx_async_task(
+                payment_plan_group,
+                user_id,
+                override=override,
+                null_delivery_policy=null_delivery_policy,
+            )
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
