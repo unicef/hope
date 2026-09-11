@@ -58,14 +58,14 @@ profile_cache = ProfileVersioner()
 
 class ProfileEtagKey:
     def __call__(self, view_instance: Any, view_method: Any, request: Request, args: Any, kwargs: Any) -> str:
-        return profile_cache.etag_for(request.user.id)
+        return profile_cache.etag_for(cast("UUID", request.user.id))
 
 
 class ProfileVersionsKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self, params: Any, view_instance: Any, view_method: Any, request: Request, args: Any, kwargs: Any
     ) -> str:
-        return profile_cache.cache_key_for(request.user.id)
+        return profile_cache.cache_key_for(cast("UUID", request.user.id))
 
 
 class ProfileKeyConstructor(KeyConstructor):
