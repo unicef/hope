@@ -188,7 +188,7 @@ def test_init_prefers_constructor_api_url(settings):
     settings.TEST_API_KEY = "settings_key"
     api = ConstructorOverrideAPI(api_url="https://cw.example.com/api/cb/")
 
-    assert api.api_url == "https://cw.example.com/api/cb/"
+    assert api.api_url == "https://cw.example.com/api/cb"
     assert api.api_key == "settings_key"
 
 

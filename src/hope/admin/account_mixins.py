@@ -10,6 +10,7 @@ from django.http import HttpRequest
 import requests
 from requests import Response
 
+from hope.apps.utils.external_urls import build_url
 from hope.models import User
 
 logger = logging.getLogger(__name__)
@@ -40,8 +41,8 @@ class DjAdminManager:
 
     def __init__(self, kf_host: str = settings.KOBO_URL) -> None:
         self.admin_path = "/admin/"
-        self.admin_url = f"{kf_host}{self.admin_path}"
-        self.login_url = f"{self.admin_url}login/"
+        self.admin_url = build_url(kf_host, self.admin_path)
+        self.login_url = build_url(self.admin_url, "login/")
 
         self._logged = False
         self._last_error: Response | None = None
@@ -134,7 +135,7 @@ class DjAdminManager:
         page = 1
         last_match = None
         while True:
-            url = f"{self.admin_url}auth/user/?q={q}&p={page}"
+            url = build_url(self.admin_url, f"auth/user/?q={q}&p={page}")
             res = self._get(url)
             self.assert_response(200)
             matches = regex.findall(res.content.decode())
@@ -155,7 +156,7 @@ class DjAdminManager:
 
     def delete_user(self, username: str, pk: UUID) -> None:
         self.login()
-        url = f"{self.admin_url}auth/user/{pk}/delete/"
+        url = build_url(self.admin_url, f"auth/user/{pk}/delete/")
         self._get(url)
         self.assert_response([200, 404, 302], custom_error=url)
         if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
