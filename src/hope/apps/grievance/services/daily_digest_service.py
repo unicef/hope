@@ -38,40 +38,56 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class EmailSpec:
-    """One notification type: its subject, its copy, and the list it links to."""
+class Section:
+    """One count in an email and the list it links to, so the count always matches that page."""
 
-    subject: str
-    intro: str
+    label: str
     preset: str
     overdue: bool = False
 
 
+@dataclass(frozen=True)
+class EmailSpec:
+    """One notification type. An email carries one section per category the recipient has tickets in."""
+
+    subject: str
+    intro: str
+    sections: tuple[Section, ...]
+
+
+SENSITIVE_LABEL = "Sensitive"
+OTHER_LABEL = "Other"
+
 NEEDS_ASSIGNMENT = EmailSpec(
     subject="New Tickets Needing Assignment",
     intro="Grievance tickets are waiting to be assigned.",
-    preset=PRESET_NEEDS_ASSIGNMENT,
+    sections=(Section(label="", preset=PRESET_NEEDS_ASSIGNMENT),),
 )
 ASSIGNED_SENSITIVE = EmailSpec(
     subject="Pending Assigned Sensitive Tickets",
     intro="Sensitive grievance tickets were assigned to you.",
-    preset=PRESET_MINE_SENSITIVE,
+    sections=(Section(label="", preset=PRESET_MINE_SENSITIVE),),
 )
 ASSIGNED = EmailSpec(
     subject="Pending Assigned Tickets",
     intro="Grievance tickets were assigned to you.",
-    preset=PRESET_MINE,
+    sections=(Section(label="", preset=PRESET_MINE),),
 )
 OVERDUE = EmailSpec(
     subject="Overdue Tickets",
     intro="Grievance tickets assigned to you are past their due date.",
-    preset=PRESET_MINE,
-    overdue=True,
+    sections=(
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE, overdue=True),
+        Section(label=OTHER_LABEL, preset=PRESET_MINE, overdue=True),
+    ),
 )
 UPDATED = EmailSpec(
     subject="Updated Tickets",
     intro="Grievance tickets you are responsible for were changed by someone else.",
-    preset=PRESET_MINE,
+    sections=(
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE),
+        Section(label=OTHER_LABEL, preset=PRESET_MINE),
+    ),
 )
 
 
@@ -140,9 +156,9 @@ class DailyDigestService:
             if user_id in skip_user_ids:
                 continue
             user_failed = 0
-            for spec, ticket_count in specs:
+            for spec, sections in specs:
                 try:
-                    self._build_email(spec, user, ticket_count).send_email()
+                    self._build_email(spec, user, sections).send_email()
                 except Exception:
                     logger.exception(
                         f"Failed to send the {self.digest_date.isoformat()} {spec.subject} "
@@ -159,22 +175,46 @@ class DailyDigestService:
         )
         return successful_user_ids, failed
 
-    def build_emails(self) -> list[tuple[EmailSpec, dict[User, int]]]:
-        assigned = self._assigned_tickets()
+    def build_emails(self) -> list[tuple[EmailSpec, dict[User, list[tuple[Section, int]]]]]:
         sensitive = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
+        assigned = self._assigned_tickets()
+        overdue = self._overdue_tickets()
+        updated_sensitive, updated_other = self._updated_counts()
         return [
-            (NEEDS_ASSIGNMENT, self._needs_assignment_counts()),
-            (ASSIGNED_SENSITIVE, self._counts_by_assignee(assigned.filter(**sensitive))),
-            (ASSIGNED, self._counts_by_assignee(assigned.exclude(**sensitive))),
-            (OVERDUE, self._counts_by_assignee(self._overdue_tickets())),
-            (UPDATED, self._updated_counts()),
+            (NEEDS_ASSIGNMENT, self._sections(NEEDS_ASSIGNMENT, [self._needs_assignment_counts()])),
+            (
+                ASSIGNED_SENSITIVE,
+                self._sections(ASSIGNED_SENSITIVE, [self._counts_by_assignee(assigned.filter(**sensitive))]),
+            ),
+            (ASSIGNED, self._sections(ASSIGNED, [self._counts_by_assignee(assigned.exclude(**sensitive))])),
+            (
+                OVERDUE,
+                self._sections(
+                    OVERDUE,
+                    [
+                        self._counts_by_assignee(overdue.filter(**sensitive)),
+                        self._counts_by_assignee(overdue.exclude(**sensitive)),
+                    ],
+                ),
+            ),
+            (UPDATED, self._sections(UPDATED, [updated_sensitive, updated_other])),
         ]
 
-    def _emails_by_recipient(self) -> dict[User, list[tuple[EmailSpec, int]]]:
-        by_recipient: dict[User, list[tuple[EmailSpec, int]]] = {}
-        for spec, counts in self.build_emails():
-            for user, ticket_count in counts.items():
-                by_recipient.setdefault(user, []).append((spec, ticket_count))
+    @staticmethod
+    def _sections(spec: EmailSpec, counts_per_section: list[dict[User, int]]) -> dict[User, list[tuple[Section, int]]]:
+        """Pair each section with its count, dropping the ones a recipient has no tickets in."""
+        by_recipient: dict[User, list[tuple[Section, int]]] = defaultdict(list)
+        for section, counts in zip(spec.sections, counts_per_section, strict=True):
+            for user, total in counts.items():
+                if total:
+                    by_recipient[user].append((section, total))
+        return dict(by_recipient)
+
+    def _emails_by_recipient(self) -> dict[User, list[tuple[EmailSpec, list[tuple[Section, int]]]]]:
+        by_recipient: dict[User, list[tuple[EmailSpec, list[tuple[Section, int]]]]] = {}
+        for spec, per_recipient in self.build_emails():
+            for user, sections in per_recipient.items():
+                by_recipient.setdefault(user, []).append((spec, sections))
         return by_recipient
 
     @staticmethod
@@ -183,14 +223,19 @@ class DailyDigestService:
         users = User.objects.in_bulk(totals)
         return {users[user_id]: total for user_id, total in totals.items()}
 
-    def _updated_counts(self) -> dict[User, int]:
-        """Count updated tickets per recipient, skipping their own edits and their own new assignments."""
+    def _updated_counts(self) -> tuple[dict[User, int], dict[User, int]]:
+        """Count updated tickets per recipient, sensitive and other separately.
+
+        Skips a recipient's own edits and tickets newly assigned to them the same day.
+        """
         assigned_pairs = set(self._assigned_tickets().values_list("assigned_to_id", "id"))
         counted: set[tuple] = set()
-        totals: Counter = Counter()
+        sensitive_totals: Counter = Counter()
+        other_totals: Counter = Counter()
 
         rows = self._updated_tickets().values_list(
             "id",
+            "category",
             "user_modified_by_id",
             "assigned_to_id",
             "assigned_to__is_active",
@@ -201,7 +246,8 @@ class DailyDigestService:
             "created_by__email",
             "created_by__timezone",
         )
-        for ticket_id, modified_by_id, *candidate_fields in rows:
+        for ticket_id, category, modified_by_id, *candidate_fields in rows:
+            totals = sensitive_totals if category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE else other_totals
             assignee = candidate_fields[:4]
             creator = candidate_fields[4:]
             for candidate_id, is_active, email, timezone_name in (assignee, creator):
@@ -216,8 +262,11 @@ class DailyDigestService:
                 counted.add(pair)
                 totals[candidate_id] += 1
 
-        users = User.objects.in_bulk(totals)
-        return {user: totals[user_id] for user_id, user in users.items()}
+        users = User.objects.in_bulk(set(sensitive_totals) | set(other_totals))
+        return (
+            {user: sensitive_totals[user_id] for user_id, user in users.items() if sensitive_totals[user_id]},
+            {user: other_totals[user_id] for user_id, user in users.items() if other_totals[user_id]},
+        )
 
     def _needs_assignment_counts(self) -> dict[User, int]:
         """Count unassigned tickets per user who can assign them, scoped to the programmes they hold.
@@ -308,15 +357,22 @@ class DailyDigestService:
             business_area__enable_email_notification=True,
         )
 
-    def _build_email(self, spec: EmailSpec, user: User, ticket_count: int) -> MailjetClient:
+    def _build_email(self, spec: EmailSpec, user: User, sections: list[tuple[Section, int]]) -> MailjetClient:
         context = {
             "first_name": user.first_name or getattr(user, "username", ""),
             "last_name": user.last_name,
             "title": spec.subject,
             "intro": spec.intro,
             "digest_date": self.digest_date.isoformat(),
-            "ticket_count": ticket_count,
-            "tickets_url": my_tasks_url(self.business_area, spec.preset, overdue=spec.overdue),
+            "total_count": sum(total for _, total in sections),
+            "sections": [
+                {
+                    "label": section.label,
+                    "ticket_count": total,
+                    "tickets_url": my_tasks_url(self.business_area, section.preset, overdue=section.overdue),
+                }
+                for section, total in sections
+            ],
         }
         return MailjetClient(
             subject=f"HOPE {self.business_area.name}: {spec.subject}",

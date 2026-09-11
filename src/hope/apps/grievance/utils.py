@@ -44,7 +44,7 @@ def grievance_tickets_page_url(
 ) -> str:
     """Link to a grievance ticket list page. Not ticket-specific, so no sensitive restriction."""
     protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-    url = f"{protocol}://{settings.FRONTEND_HOST}/{business_area.slug}/programs/all/grievance/tickets/{page}"
+    url = f"{protocol}://{settings.FRONTEND_HOST}/{business_area.slug}/programs/all/grievance/{page}"
     return f"{url}?{urlencode(params)}" if params else url
 
 

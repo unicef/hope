@@ -2,8 +2,7 @@
 
 {% block content %}
     {{ intro }}
-
-    {{ ticket_count }} ticket{{ ticket_count|pluralize }} for {{ digest_date }}.
-
-    Check the full list here: {{ tickets_url }}
+    {% for section in sections %}
+    {% if section.label %}{{ section.label }}: {% endif %}{{ section.ticket_count }} ticket{{ section.ticket_count|pluralize }} - {{ section.tickets_url|safe }}
+    {% endfor %}
 {% endblock content %}

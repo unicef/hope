@@ -178,7 +178,7 @@ def test_assigned_ticket_is_counted_for_its_assignee(
 ) -> None:
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
     assert emails[daily_digest_service.ASSIGNED_SENSITIVE] == {}
 
 
@@ -196,7 +196,9 @@ def test_assigned_sensitive_ticket_is_counted_in_its_own_email(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.ASSIGNED_SENSITIVE] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED_SENSITIVE] == {
+        assignee: [(daily_digest_service.ASSIGNED_SENSITIVE.sections[0], 1)]
+    }
     assert emails[daily_digest_service.ASSIGNED] == {}
 
 
@@ -205,7 +207,10 @@ def test_updated_ticket_is_counted_for_creator_and_assignee(
 ) -> None:
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.UPDATED] == {assignee: 1, creator: 1}
+    assert emails[daily_digest_service.UPDATED] == {
+        assignee: [(daily_digest_service.UPDATED.sections[1], 1)],
+        creator: [(daily_digest_service.UPDATED.sections[1], 1)],
+    }
 
 
 def test_updated_ticket_is_not_counted_for_its_own_editor(
@@ -221,7 +226,7 @@ def test_updated_ticket_is_not_counted_for_its_own_editor(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.UPDATED] == {creator: 1}
+    assert emails[daily_digest_service.UPDATED] == {creator: [(daily_digest_service.UPDATED.sections[1], 1)]}
 
 
 def test_ticket_created_during_the_window_is_not_counted_as_updated(
@@ -253,7 +258,7 @@ def test_a_user_who_is_both_creator_and_assignee_is_counted_once(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.UPDATED] == {assignee: 1}
+    assert emails[daily_digest_service.UPDATED] == {assignee: [(daily_digest_service.UPDATED.sections[1], 1)]}
 
 
 def test_self_assignment_is_not_counted_for_the_self_assigner(business_area: BusinessArea, assignee: User) -> None:
@@ -282,7 +287,7 @@ def test_assignment_by_a_deleted_user_is_still_counted(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
 
 
 def test_unassignment_is_counted_for_nobody(business_area: BusinessArea, actor: User) -> None:
@@ -312,7 +317,7 @@ def test_ticket_assigned_and_edited_today_is_counted_as_assigned_only(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
     assert emails[daily_digest_service.UPDATED] == {}
 
 
@@ -329,7 +334,7 @@ def test_ticket_closed_after_the_window_is_still_counted_as_assigned(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
 
 
 def test_assignment_outside_the_window_is_not_counted(business_area: BusinessArea, assignee: User, actor: User) -> None:
@@ -361,7 +366,7 @@ def test_tickets_from_another_business_area_are_not_counted(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
 
 
 def test_business_area_with_email_notification_disabled_counts_nothing(
@@ -387,7 +392,7 @@ def test_emails_use_only_recipients_in_the_requested_timezone(
     warsaw = dict(DailyDigestService(business_area, DIGEST_DATE, "Europe/Warsaw").build_emails())
     utc = dict(DailyDigestService(business_area, DIGEST_DATE, "UTC").build_emails())
 
-    assert warsaw[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert warsaw[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
     assert utc[daily_digest_service.ASSIGNED] == {}
 
 
@@ -448,7 +453,7 @@ def test_updated_recipient_without_an_email_is_not_counted(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.UPDATED] == {assignee: 1}
+    assert emails[daily_digest_service.UPDATED] == {assignee: [(daily_digest_service.UPDATED.sections[1], 1)]}
 
 
 @freeze_time(NEXT_DAY)
@@ -458,7 +463,7 @@ def test_overdue_ticket_is_counted_for_its_assignee(business_area: BusinessArea,
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.OVERDUE] == {assignee: 1}
+    assert emails[daily_digest_service.OVERDUE] == {assignee: [(daily_digest_service.OVERDUE.sections[1], 1)]}
 
 
 @freeze_time(NEXT_DAY)
@@ -535,7 +540,7 @@ def test_payload_carries_a_count_and_a_link_instead_of_tickets(
     message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
     assert message["To"] == [{"Email": assignee.email}]
     assert assigned_ticket.unicef_id not in message["HTMLPart"]
-    assert "grievance/tickets/my-tasks?tab=mine" in message["HTMLPart"]
+    assert "grievance/my-tasks?tab=mine" in message["HTMLPart"]
     assert "Afghanistan" in message["Subject"]
     assert "Pending Assigned Tickets" in message["Subject"]
 
@@ -560,7 +565,7 @@ def test_sensitive_payload_names_no_ticket(
     message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
     assert ticket.unicef_id not in message["HTMLPart"]
     assert ticket.unicef_id not in message["TextPart"]
-    assert "grievance/tickets/my-tasks?tab=mine-sensitive" in message["HTMLPart"]
+    assert "grievance/my-tasks?tab=mine-sensitive" in message["HTMLPart"]
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
@@ -829,7 +834,7 @@ def test_bulk_assign_endpoint_feeds_the_digest(
     ticket.refresh_from_db()
     assert ticket.assigned_at == DURING_THE_DAY
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
-    assert emails[daily_digest_service.ASSIGNED] == {assignee: 1}
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[0], 1)]}
 
 
 def test_bulk_assign_of_already_assigned_tickets_feeds_nothing(
@@ -877,7 +882,9 @@ def test_unassigned_ticket_is_counted_for_a_user_who_can_assign_in_its_programme
 ) -> None:
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {assigner: 1}
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[0], 1)]
+    }
 
 
 def test_unassigned_ticket_is_not_counted_for_a_user_without_the_permission(
@@ -943,7 +950,9 @@ def test_ticket_in_two_of_a_users_programmes_is_counted_once(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {assigner: 1}
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[0], 1)]
+    }
 
 
 def test_ticket_without_a_programme_is_counted_for_anyone_who_can_assign(
@@ -953,7 +962,9 @@ def test_ticket_without_a_programme_is_counted_for_anyone_who_can_assign(
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
-    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {assigner: 1}
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[0], 1)]
+    }
 
 
 def test_needs_assignment_is_not_counted_for_an_assigner_in_another_timezone(
@@ -978,5 +989,47 @@ def test_needs_assignment_payload_links_to_the_needs_assignment_preset(
 
     message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
     assert message["To"] == [{"Email": assigner.email}]
-    assert "grievance/tickets/my-tasks?tab=needs-assignment" in message["HTMLPart"]
+    assert "grievance/my-tasks?tab=needs-assignment" in message["HTMLPart"]
     assert unassigned_ticket.unicef_id not in message["HTMLPart"]
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
+@patch("hope.apps.utils.celery_tasks.requests.post")
+@freeze_time(NEXT_DAY)
+def test_overdue_payload_links_a_sensitive_count_to_the_sensitive_list(
+    mocked_requests_post: Any, business_area: BusinessArea, assignee: User
+) -> None:
+    mocked_requests_post.return_value.status_code = 200
+    with freeze_time(LONG_AGO):
+        GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=assignee,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+
+    DailyDigestService(business_area, DIGEST_DATE).send()
+
+    message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
+    assert "grievance/my-tasks?tab=mine-sensitive&overdue=true" in message["TextPart"]
+
+
+@freeze_time(NEXT_DAY)
+def test_overdue_counts_sensitive_and_non_sensitive_together(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=assignee,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+        GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.OVERDUE] == {
+        assignee: [
+            (daily_digest_service.OVERDUE.sections[0], 1),
+            (daily_digest_service.OVERDUE.sections[1], 1),
+        ]
+    }
