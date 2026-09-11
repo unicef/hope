@@ -18,7 +18,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { adjustHeadCells, choicesToDict } from '@utils/utils';
+import { choicesToDict } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,10 +28,11 @@ import {
   hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
+import type { GrievanceColumnId } from './GrievancesTableColumns';
 import {
-  headCellsSocialProgram,
-  headCellsStandardProgram,
-} from './GrievancesTableHeadCells';
+  DEFAULT_GRIEVANCE_COLUMNS,
+  GRIEVANCE_COLUMNS,
+} from './GrievancesTableColumns';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
@@ -43,11 +44,21 @@ import { usePersistedCount } from '@hooks/usePersistedCount';
 
 interface GrievancesTableProps {
   filter;
-  selectedTab;
+  selectedTab?;
+  /** Columns to show, in order; the header and the rows are both derived from this. */
+  columns?: GrievanceColumnId[];
+  /** Query params the page pins itself, applied on top of the filter bar's. */
+  extraQueryParams?: { [key: string]: any };
+  defaultOrderBy?: string;
+  title?: string;
 }
 
 export const GrievancesTable = ({
   filter,
+  columns = DEFAULT_GRIEVANCE_COLUMNS,
+  extraQueryParams,
+  defaultOrderBy = 'created_at',
+  title,
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
@@ -56,15 +67,24 @@ export const GrievancesTable = ({
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
-  const replacements = {
-    household_unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
-  };
+  // Across every programme the list gains a Programmes column, whatever the page asked for.
+  const visibleColumns = useMemo<GrievanceColumnId[]>(
+    () =>
+      isAllPrograms && !columns.includes('programs')
+        ? [...columns, 'programs']
+        : columns,
+    [columns, isAllPrograms],
+  );
 
-  const adjustedHeadCells = adjustHeadCells(
-    headCellsStandardProgram,
-    beneficiaryGroup,
-    replacements,
+  const headCells = useMemo(
+    () =>
+      visibleColumns.map((id) => {
+        const { head } = GRIEVANCE_COLUMNS[id];
+        return typeof head === 'function'
+          ? head({ isSocialDctType, isAllPrograms, beneficiaryGroup })
+          : head;
+      }),
+    [visibleColumns, isSocialDctType, isAllPrograms, beneficiaryGroup],
   );
 
   const initialQueryVariables = useMemo(
@@ -97,6 +117,9 @@ export const GrievancesTable = ({
       programCode: isAllPrograms ? undefined : programCode,
       isActiveProgram: isAllPrograms ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
+      overdue: filter.overdue,
+      // Last, so a page's pinned params win over anything the filter bar set.
+      ...extraQueryParams,
     }),
     [
       businessArea,
@@ -125,6 +148,8 @@ export const GrievancesTable = ({
       filter.preferredLanguage,
       filter.program,
       filter.areaScope,
+      filter.overdue,
+      extraQueryParams,
       isAllPrograms,
       programCode,
     ],
@@ -377,34 +402,10 @@ export const GrievancesTable = ({
     setSelectedTickets([]);
   };
 
-  const getHeadCells = () => {
-    const baseCells =
-      isSocialDctType || isAllPrograms
-        ? headCellsSocialProgram
-        : adjustedHeadCells;
-
-    if (isAllPrograms) {
-      return [
-        ...baseCells,
-        {
-          disablePadding: false,
-          label: 'Programmes',
-          id: 'programs',
-          numeric: false,
-          dataCy: 'programs',
-        },
-      ];
-    }
-
-    return baseCells;
-  };
-
-  const headCells = getHeadCells();
-
   return (
     <TableWrapper>
       <Paper>
-        <EnhancedTableToolbar title={t('Grievance Tickets List')} />
+        <EnhancedTableToolbar title={title ?? t('Grievance Tickets List')} />
         <Box
           component="div"
           sx={{
@@ -453,7 +454,7 @@ export const GrievancesTable = ({
           isFetching={isAllPrograms ? isFetchingAll : isFetchingSelected}
           queryVariables={queryVariables}
           setQueryVariables={setQueryVariables}
-          defaultOrderBy="created_at"
+          defaultOrderBy={defaultOrderBy}
           defaultOrderDirection="desc"
           itemsCount={persistedCount}
           renderRow={(row: GrievanceTicketList) => (
@@ -472,6 +473,7 @@ export const GrievancesTable = ({
               )}
               optionsData={optionsData}
               setInputValue={setInputValue}
+              columns={visibleColumns}
             />
           )}
           page={page}

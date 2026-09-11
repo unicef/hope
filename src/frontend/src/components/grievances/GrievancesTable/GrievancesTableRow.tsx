@@ -9,25 +9,17 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import type { ApiErrorShape } from '@utils/utils';
-import {
-  grievanceTicketBadgeColors,
-  grievanceTicketStatusToColor,
-  renderUserName,
-  showApiErrorMessages,
-} from '@utils/utils';
-import { BlackLink } from '@core/BlackLink';
-import { StatusBox } from '@core/StatusBox';
+import { showApiErrorMessages } from '@utils/utils';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { UniversalMoment } from '@core/UniversalMoment';
-import LinkedTicketsModal from '../LinkedTicketsModal/LinkedTicketsModal';
-import { AssignedToDropdown } from './AssignedToDropdown';
-import {
-  getGrievanceDetailsPath,
-  getIssueTypeToDisplay,
-} from '../utils/createGrievanceUtils';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 import type { ReactElement } from 'react';
 import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type {
+  GrievanceCellContext,
+  GrievanceColumnId,
+} from './GrievancesTableColumns';
+import { GRIEVANCE_COLUMNS } from './GrievancesTableColumns';
 
 interface GrievancesTableRowProps {
   ticket: GrievanceTicketList;
@@ -41,6 +33,8 @@ interface GrievancesTableRowProps {
   isSelected: boolean;
   optionsData;
   setInputValue;
+  /** Columns to render, in order. The header is built from the same list. */
+  columns: GrievanceColumnId[];
 }
 
 export function GrievancesTableRow({
@@ -55,6 +49,7 @@ export function GrievancesTableRow({
   isSelected,
   optionsData,
   setInputValue,
+  columns,
 }: GrievancesTableRowProps): ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
@@ -66,7 +61,6 @@ export function GrievancesTableRow({
     baseUrl,
     ticket.issueType,
   );
-  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
   const queryClient = useQueryClient();
 
@@ -107,31 +101,23 @@ export function GrievancesTableRow({
     return null;
   };
 
-  const getMappedPrograms = (): ReactElement => {
-    if (ticket.programs?.length) {
-      return (
-        <div>
-          {ticket.programs.map((program) => (
-            <BlackLink
-              key={program.id}
-              to={`/${businessArea}/programs/${program.code}/details/${program.code}`}
-            >
-              {program.name}
-            </BlackLink>
-          ))}
-        </div>
-      );
-    }
-    return <div>-</div>;
+  const cellContext: GrievanceCellContext = {
+    ticket,
+    statusChoices,
+    categoryChoices,
+    issueTypeChoicesData,
+    priorityChoicesData,
+    urgencyChoicesData,
+    canViewDetails,
+    detailsPath,
+    baseUrl,
+    businessArea,
+    isAllPrograms,
+    isSocialDctType,
+    optionsData,
+    setInputValue,
+    onFilterChange,
   };
-
-  const mappedPrograms = getMappedPrograms();
-  const getTargetUnicefId = (_ticket) => {
-    return isSocialDctType || isAllPrograms
-      ? _ticket?.targetId
-      : _ticket?.householdUnicefId;
-  };
-  const targetId = getTargetUnicefId(ticket);
 
   return (
     <ClickableTableRow
@@ -152,78 +138,11 @@ export function GrievancesTableRow({
           slotProps={{ input: { 'aria-labelledby': ticket.unicefId } }}
         />
       </TableCell>
-      <TableCell align="left">
-        {canViewDetails ? (
-          <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
-        ) : (
-          ticket.unicefId
-        )}
-      </TableCell>
-      <TableCell align="left">
-        <StatusBox
-          status={statusChoices[ticket.status ?? '']}
-          statusToColor={grievanceTicketStatusToColor}
-        />
-      </TableCell>
-      <TableCell align="left">
-        {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED ? (
-          renderUserName(ticket.assignedTo)
-        ) : (
-          <AssignedToDropdown
-            optionsData={optionsData}
-            onFilterChange={onFilterChange}
-            value={ticket.assignedTo}
-            ids={[ticket.id]}
-            setInputValue={setInputValue}
-            disableClearable
-          />
-        )}
-      </TableCell>
-      <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
-      <TableCell align="left">{issueTypeToDisplay}</TableCell>
-      <TableCell align="left">{targetId || '-'}</TableCell>
-      <TableCell align="left">
-        <StatusBox
-          status={
-            priorityChoicesData[
-              priorityChoicesData.findIndex(
-                (obj) => obj.value === ticket.priority,
-              )
-            ]?.name || '-'
-          }
-          statusToColor={grievanceTicketBadgeColors}
-        />
-      </TableCell>
-      <TableCell align="left">
-        <StatusBox
-          status={
-            urgencyChoicesData[
-              urgencyChoicesData.findIndex(
-                (obj) => obj.value === ticket.urgency,
-              )
-            ]?.name || '-'
-          }
-          statusToColor={grievanceTicketBadgeColors}
-        />
-      </TableCell>
-      <TableCell align="left">
-        <LinkedTicketsModal
-          ticket={ticket}
-          categoryChoices={categoryChoices}
-          statusChoices={statusChoices}
-          issueTypeChoicesData={issueTypeChoicesData}
-          canViewDetails={canViewDetails}
-          baseUrl={baseUrl}
-        />
-      </TableCell>
-      <TableCell align="left">
-        <UniversalMoment>{ticket.createdAt}</UniversalMoment>
-      </TableCell>
-      <TableCell align="left">
-        <UniversalMoment>{ticket.userModified}</UniversalMoment>
-      </TableCell>
-      <TableCell align="left">{ticket.totalDays}</TableCell>
-      {isAllPrograms && <TableCell align="left">{mappedPrograms}</TableCell>}
+      {columns.map((id) => (
+        <TableCell key={id} align="left">
+          {GRIEVANCE_COLUMNS[id].render(cellContext)}
+        </TableCell>
+      ))}
     </ClickableTableRow>
   );
 }
