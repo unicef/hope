@@ -1000,12 +1000,12 @@ def syp_pair(db) -> tuple[Currency, Currency]:
     return deprecated, active
 
 
-def test_household_update_currency_keeps_deprecated_row_when_code_is_unchanged(
+def test_household_update_currency_moves_household_off_deprecated_row_for_same_code(
     universal_update_for_currency: UniversalUpdate,
     household_with_eur: Household,
     syp_pair: tuple[Currency, Currency],
 ) -> None:
-    deprecated_syp, _active_syp = syp_pair
+    deprecated_syp, active_syp = syp_pair
     household_with_eur.currency = deprecated_syp
     household_with_eur.save(update_fields=["currency"])
     service = UniversalIndividualUpdateService(universal_update_for_currency)
@@ -1014,7 +1014,7 @@ def test_household_update_currency_keeps_deprecated_row_when_code_is_unchanged(
     household_with_eur.save()
 
     household_with_eur.refresh_from_db()
-    assert household_with_eur.currency == deprecated_syp
+    assert household_with_eur.currency == active_syp
 
 
 def test_household_update_currency_resolves_active_row_when_code_actually_changes(

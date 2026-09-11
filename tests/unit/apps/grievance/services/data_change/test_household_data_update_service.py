@@ -772,3 +772,34 @@ def test_close_resolves_active_currency_for_shared_code(
     household_without_currency.refresh_from_db()
 
     assert household_without_currency.currency == current_syp
+
+
+@pytest.fixture
+def household_on_deprecated_syp(deprecated_syp: Currency) -> Household:
+    return HouseholdFactory(create_role=False, currency=deprecated_syp)
+
+
+@pytest.fixture
+def ticket_resubmitting_syp(household_on_deprecated_syp: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_on_deprecated_syp,
+        household_data={
+            "currency": {"value": "SYP", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_moves_household_off_deprecated_currency_for_same_code(
+    ticket_resubmitting_syp: GrievanceTicket,
+    household_on_deprecated_syp: Household,
+    current_syp: Currency,
+    user: User,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_resubmitting_syp, {})
+    service.close(user)
+    household_on_deprecated_syp.refresh_from_db()
+
+    assert household_on_deprecated_syp.currency == current_syp

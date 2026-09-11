@@ -603,7 +603,7 @@ def test_update_people_individual_hh_country_fields(
 def test_update_people_individual_hh_currency_field(
     update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(31):
+    with django_assert_num_queries(30):
         fields = ["currency"]
         new_values = {"currency": "PLN"}
         hh = update_context["household"]
@@ -636,7 +636,7 @@ def test_update_people_individual_hh_currency_field_resolves_active_row_for_shar
     assert hh.currency == current_syp
 
 
-def test_update_people_individual_hh_currency_field_keeps_deprecated_row_when_code_is_unchanged(
+def test_update_people_individual_hh_currency_field_moves_household_off_deprecated_row_for_same_code(
     update_context: dict[str, Any],
     hh_field_reference_data: None,
     deprecated_syp: Currency,
@@ -649,7 +649,7 @@ def test_update_people_individual_hh_currency_field_keeps_deprecated_row_when_co
 
     _close_ticket_and_refresh(update_context, ind_data, hh)
 
-    assert hh.currency == deprecated_syp
+    assert hh.currency == current_syp
 
 
 def test_update_people_individual_hh_admin_area(

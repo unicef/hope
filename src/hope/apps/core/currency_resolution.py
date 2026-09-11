@@ -8,8 +8,17 @@ from hope.models.currency import Currency
 
 
 def resolve_active_currency(code: str) -> Currency:
-    """Return the active row for ``code``, for input that creates a record rather than updating it."""
+    """Return the active row for ``code``, for input where the code is a choice, not an echo of a stored value."""
     return Currency.objects.get_active_by_code(code)
+
+
+def resolve_active_currency_or_none(code: str) -> Currency | None:
+    """:func:`resolve_active_currency`, returning ``None`` instead of raising.
+
+    Household edits (grievance, universal update) use it: the currency there is an edited field,
+    so resubmitting the code of a deprecated row moves the household onto the active one.
+    """
+    return Currency.objects.get_active_by_code_or_none(code)
 
 
 def resolve_currency_for_update(code: str, current: Currency | None) -> Currency:
@@ -21,13 +30,3 @@ def resolve_currency_for_update(code: str, current: Currency | None) -> Currency
     if current is not None and current.code == code:
         return current
     return Currency.objects.get_active_by_code(code)
-
-
-def resolve_currency_for_update_or_none(code: str, current: Currency | None) -> Currency | None:
-    """:func:`resolve_currency_for_update`, returning ``None`` instead of raising.
-
-    Only for call sites that validate the code at their own input boundary.
-    """
-    if current is not None and current.code == code:
-        return current
-    return Currency.objects.get_active_by_code_or_none(code)

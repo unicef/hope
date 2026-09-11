@@ -8,7 +8,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.currency_resolution import resolve_currency_for_update_or_none
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
@@ -302,7 +302,7 @@ class IndividualDataUpdateService(DataChangeService):
             if hh_country := hh_approved_data.get("country"):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
             if hh_currency := hh_approved_data.get("currency"):
-                hh_approved_data["currency"] = resolve_currency_for_update_or_none(hh_currency, household.currency)
+                hh_approved_data["currency"] = resolve_active_currency_or_none(hh_currency)
             admin_area_title = hh_approved_data.pop("admin_area_title", None)
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
 

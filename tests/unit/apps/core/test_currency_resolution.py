@@ -3,8 +3,8 @@ import pytest
 from extras.test_utils.factories import CurrencyFactory
 from hope.apps.core.currency_resolution import (
     resolve_active_currency,
+    resolve_active_currency_or_none,
     resolve_currency_for_update,
-    resolve_currency_for_update_or_none,
 )
 from hope.models.currency import Currency
 
@@ -71,27 +71,17 @@ def test_resolve_currency_for_update_raises_for_a_changed_code_without_an_active
         resolve_currency_for_update("SYP", currency_eur)
 
 
-def test_resolve_currency_for_update_or_none_keeps_current_row_when_code_is_unchanged(
-    syp_pair: tuple[Currency, Currency],
-) -> None:
-    deprecated, _active = syp_pair
-
-    assert resolve_currency_for_update_or_none("SYP", deprecated) == deprecated
-
-
-def test_resolve_currency_for_update_or_none_returns_active_row_when_code_actually_changes(
-    syp_pair: tuple[Currency, Currency], currency_eur: Currency
-) -> None:
+def test_resolve_active_currency_or_none_returns_the_active_row(syp_pair: tuple[Currency, Currency]) -> None:
     _deprecated, active = syp_pair
 
-    assert resolve_currency_for_update_or_none("SYP", currency_eur) == active
+    assert resolve_active_currency_or_none("SYP") == active
 
 
-def test_resolve_currency_for_update_or_none_returns_none_for_an_unknown_code(currency_eur: Currency) -> None:
-    assert resolve_currency_for_update_or_none("MISSING", currency_eur) is None
+def test_resolve_active_currency_or_none_returns_none_for_an_unknown_code(currency_eur: Currency) -> None:
+    assert resolve_active_currency_or_none("MISSING") is None
 
 
-def test_resolve_currency_for_update_or_none_returns_none_when_only_a_deprecated_row_exists(
-    deprecated_syp: Currency, currency_eur: Currency
+def test_resolve_active_currency_or_none_returns_none_when_only_a_deprecated_row_exists(
+    deprecated_syp: Currency,
 ) -> None:
-    assert resolve_currency_for_update_or_none("SYP", currency_eur) is None
+    assert resolve_active_currency_or_none("SYP") is None

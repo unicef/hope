@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
 
-from hope.apps.core.currency_resolution import resolve_currency_for_update_or_none
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Area, BusinessArea, Facility, Household, Program
@@ -113,7 +113,7 @@ def handle_currency_field(
 ) -> Currency | None:
     if value is None or value == "":
         return None
-    return resolve_currency_for_update_or_none(value, household.currency)
+    return resolve_active_currency_or_none(value)
 
 
 def validate_currency(
@@ -121,9 +121,7 @@ def validate_currency(
 ) -> str | None:
     if value is None or value == "":
         return None
-    # No household here, so the update-aware rule the handler uses cannot apply: a household
-    # sitting on a deprecated code is rejected.
-    if Currency.objects.get_active_by_code_or_none(value) is None:
+    if resolve_active_currency_or_none(value) is None:
         return f"Invalid currency code {value}"
     return None
 
