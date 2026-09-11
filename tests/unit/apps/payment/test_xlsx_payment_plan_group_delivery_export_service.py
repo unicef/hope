@@ -315,6 +315,56 @@ def group_with_payment_and_full_snapshot(program_cycle, business_area, fsp, deli
 
 
 @pytest.fixture
+def group_with_plan_in_inactive_currency(
+    program_cycle, business_area, fsp, delivery_mechanism, fsp_template, currency_syp_deprecated
+):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency_syp_deprecated,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plan.program,
+        currency=currency_syp_deprecated,
+    )
+    return group
+
+
+@pytest.fixture
+def group_with_payment_in_redenominated_currency(
+    program_cycle, business_area, fsp, delivery_mechanism, fsp_template, currency_syp
+):
+    """A plan in the active SYP, whose vision_code (SYP01) differs from the ISO code FSPs understand."""
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency_syp,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    payment = PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plan.program,
+        currency=currency_syp,
+    )
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={"primary_collector": {}})
+    return group
+
+
+@pytest.fixture
 def group_with_account_snapshot_and_template_without_account_data(
     program_cycle,
     business_area,
@@ -856,6 +906,28 @@ def test_save_xlsx_file_all_plans_skipped_reports_reasons(group_with_plan_withou
     assert str(exc_info.value) == EmptyDeliveryExportError.MESSAGE
     assert len(exc_info.value.skipped_reasons) == 1
     assert "no FSP XLSX Template" in exc_info.value.skipped_reasons[0]
+
+
+def test_save_xlsx_file_skips_plan_in_inactive_currency(group_with_plan_in_inactive_currency, user):
+    service = XlsxPaymentPlanGroupDeliveryExportService(
+        group_with_plan_in_inactive_currency, plan_type=PaymentPlan.PlanType.REGULAR
+    )
+
+    with pytest.raises(EmptyDeliveryExportError) as exc_info:
+        service.save_xlsx_file(user)
+
+    assert len(exc_info.value.skipped_reasons) == 1
+    assert "currency SYP - Syrian Pound (old) is inactive" in exc_info.value.skipped_reasons[0]
+
+
+def test_currency_column_carries_iso_code_of_redenominated_currency(group_with_payment_in_redenominated_currency):
+    wb = XlsxPaymentPlanGroupDeliveryExportService(
+        group_with_payment_in_redenominated_currency, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+
+    assert ws.cell(row=2, column=headers.index("currency") + 1).value == "SYP"
 
 
 def test_save_xlsx_file_exports_mapped_plan_and_leaves_skipped_untouched(group_one_exportable_two_skipped, user):

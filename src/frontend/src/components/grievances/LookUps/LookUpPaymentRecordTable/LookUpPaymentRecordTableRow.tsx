@@ -70,12 +70,17 @@ export function LookUpPaymentRecordTableRow({
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,
           paymentRecord.currency,
+          paymentRecord.currencyVisionCode,
         )}
       </TableCell>
       <TableCell align="right">
         {received === null || received === undefined
           ? '-'
-          : formatCurrencyWithSymbol(received, paymentRecord.currency)}
+          : formatCurrencyWithSymbol(
+              received,
+              paymentRecord.currency,
+              paymentRecord.currencyVisionCode,
+            )}
       </TableCell>
     </ClickableTableRow>
   );

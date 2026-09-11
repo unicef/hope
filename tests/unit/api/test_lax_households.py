@@ -724,6 +724,66 @@ def test_create_household_without_currency_is_null(
     assert household.currency is None
 
 
+@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 15), ("SYP01", 17)])
+def test_create_household_resolves_the_currency_code_to_the_active_row(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+    currency_syp: Currency,
+    code: str,
+    expected_queries: int,
+    django_assert_num_queries,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id, primary_collector.unicef_id],
+        "currency": code,
+    }
+
+    with django_assert_num_queries(expected_queries):
+        response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+    assert household.currency == currency_syp
+
+
+def test_create_household_with_a_retired_currency_is_rejected(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+    currency_retired: Currency,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id, primary_collector.unicef_id],
+        "currency": "VEF",
+    }
+
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["results"] == [{"currency": ["Object with code=VEF does not exist."]}]
+    assert not PendingHousehold.objects.exists()
+
+
 def test_household_create_facility(
     api_client: APIClient,
     lax_households_url: str,

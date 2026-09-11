@@ -257,6 +257,7 @@ def test_details(
         assert "id" in resp_data
         assert resp_data["delivered_quantity"] == "999.00"
         assert resp_data["status"] == "Transaction Successful"
+        assert resp_data["currency_vision_code"] == payment_context["payment"].currency.vision_code
         assert set(resp_data["parent"]) == {
             "id",
             "unicef_id",

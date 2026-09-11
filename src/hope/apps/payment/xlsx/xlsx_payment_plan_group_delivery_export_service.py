@@ -14,7 +14,7 @@ import openpyxl
 import pyzipper
 
 from hope.apps.payment.api.caches import invalidate_payment_plan_list_cache
-from hope.apps.payment.utils import get_link
+from hope.apps.payment.utils import get_link, inactive_currency_reason
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.models import (
@@ -79,7 +79,7 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 export_tag__isnull=True,
             )
         self.payment_plans = list(
-            plan_qs.select_related("financial_service_provider", "delivery_mechanism").order_by("unicef_id")
+            plan_qs.select_related("financial_service_provider", "delivery_mechanism", "currency").order_by("unicef_id")
         )
         # in a batch all payment plans are of the same type
         self.plan_type: str | None = self.payment_plans[0].plan_type if self.payment_plans else plan_type
@@ -140,6 +140,8 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         self, payment_plan: PaymentPlan, template: FinancialServiceProviderXlsxTemplate | None
     ) -> str | None:
         """Return why `payment_plan` would be left out of the export, or None if it would be included."""
+        if reason := inactive_currency_reason(payment_plan):
+            return reason
         if template is None:
             return f"Payment Plan {payment_plan.unicef_id}: no FSP XLSX Template for its FSP and delivery mechanism."
         if (

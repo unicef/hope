@@ -488,3 +488,52 @@ def test_dashboard_pwd_count_from_individuals(afghanistan, area_kabul, fsp_commo
     assert len(result) == 1
     # Expected PWD count is 1 (only the first active individual should be counted)
     assert result[0]["pwd_counts"] == 1
+
+
+@pytest.fixture
+def two_syp_denominations_data(afghanistan, populate_dashboard_cache, fsp_common, delivery_mechanism_common):
+    """One household paid in both denominations of one redenominated ``code``."""
+    cache.delete(f"dashboard_data_{afghanistan.slug}")
+    household = populate_dashboard_cache(afghanistan)
+    deprecated_syp = CurrencyFactory(code="SYP", vision_code="SYP", name="Syrian Pound", active=False)
+    active_syp = CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound", active=True)
+
+    payments = Payment.objects.filter(household=household).order_by("pk")
+    payments.update(
+        delivery_date=TEST_DATE,
+        financial_service_provider=fsp_common,
+        delivery_type=delivery_mechanism_common,
+        status=Payment.STATUS_SUCCESS,
+        program=household.program,
+        currency=deprecated_syp,
+        delivered_quantity=Decimal("100.00"),
+    )
+    Payment.objects.filter(pk__in=payments.values_list("pk", flat=True)[:2]).update(
+        currency=active_syp,
+        delivered_quantity=Decimal("1.00"),
+    )
+    return {"deprecated": deprecated_syp, "active": active_syp}
+
+
+@pytest.mark.django_db
+def test_country_dashboard_never_merges_two_denominations_of_one_currency_code(two_syp_denominations_data) -> None:
+    result = DashboardDataCache.refresh_data(TEST_COUNTRY_SLUG)
+
+    buckets = sorted(
+        ((item["currency"], item["currency_vision_code"], item["total_delivered_quantity"]) for item in result),
+        key=lambda bucket: bucket[1],
+    )
+    assert buckets == [
+        ("SYP", "SYP", "300.00"),
+        ("SYP", "SYP01", "2.00"),
+    ]
+
+
+@pytest.mark.django_db
+def test_country_dashboard_counts_payment_plans_per_denomination(two_syp_denominations_data) -> None:
+    # `plan_group_fields` must stay positionally aligned with CountrySummaryKey, or plan counts
+    # land on the wrong bucket -- silently, since the lookup falls back to 0.
+    result = DashboardDataCache.refresh_data(TEST_COUNTRY_SLUG)
+
+    plan_counts = {item["currency_vision_code"]: item["total_payment_plans"] for item in result}
+    assert plan_counts == {"SYP": 3, "SYP01": 2}

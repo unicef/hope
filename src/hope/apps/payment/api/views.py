@@ -877,7 +877,10 @@ class PaymentPlanViewSet(
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
         payment_plan = self.scoped_payment_plan(request.data.get("target_population_id"))
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        # Despite the name this updates an existing plan, so the serializer gets the instance:
+        # that is what lets the currency field keep a plan on its deprecated row when the client
+        # echoes back the code a GET handed out. The view still saves via PaymentPlanService.
+        serializer = self.get_serializer(payment_plan, data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
 

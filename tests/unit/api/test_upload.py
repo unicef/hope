@@ -12,7 +12,7 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
 )
-from hope.models import DocumentType, PendingHousehold, PendingIndividual, Program, RegistrationDataImport
+from hope.models import Currency, DocumentType, PendingHousehold, PendingIndividual, Program, RegistrationDataImport
 
 pytestmark = pytest.mark.django_db
 
@@ -691,3 +691,120 @@ def test_upload_error_empty_households(
     response = token_api_client.post(upload_url, payload, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"households": ["This field is required."]}
+
+
+def test_upload_household_with_nul_byte_currency_is_rejected(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "currency": "AF\x00N",
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                    }
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
+    assert RegistrationDataImport.objects.count() == 0
+
+
+@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 21), ("SYP01", 23)])
+def test_upload_household_resolves_the_currency_code_to_the_active_row(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+    currency_syp: Currency,
+    code: str,
+    expected_queries: int,
+    django_assert_num_queries,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "currency": code,
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                    }
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    with django_assert_num_queries(expected_queries):
+        response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+    household = PendingHousehold.objects.get(registration_data_import_id=response.json()["id"])
+    assert household.currency == currency_syp
+
+
+def test_upload_household_with_a_retired_currency_is_rejected(
+    token_api_client: APIClient,
+    upload_url: str,
+    program: Program,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+    currency_retired: Currency,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "village1",
+                "country": "AF",
+                "currency": "VEF",
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                    }
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"households": {"Household #1": [{"currency": ["Object with code=VEF does not exist."]}]}}
+    assert RegistrationDataImport.objects.count() == 0

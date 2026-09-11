@@ -252,6 +252,58 @@ def test_choice_validator(
     assert validator.choice_validator(value, header) is expected
 
 
+@pytest.fixture
+def program_with_redenominated_currency(business_area: Any, currency_syp: Any, currency_retired: Any) -> Any:
+    return ProgramFactory(business_area=business_area)
+
+
+@pytest.mark.parametrize(("value", "expected"), [("SYP", True), ("VEF", False)])
+def test_choice_validator_accepts_only_currency_codes_with_an_active_row(
+    program_with_redenominated_currency: Any, value: str, expected: bool, django_assert_num_queries
+) -> None:
+    validator = UploadXLSXInstanceValidator(program_with_redenominated_currency)
+
+    with django_assert_num_queries(0):
+        is_valid = validator.choice_validator(value, "currency_h_c")
+
+    assert is_valid is expected
+
+
+@pytest.fixture
+def social_worker_program_with_redenominated_currency(
+    business_area: Any, currency_syp: Any, currency_retired: Any
+) -> Any:
+    return ProgramFactory(
+        business_area=business_area,
+        data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL),
+        beneficiary_group=BeneficiaryGroupFactory(master_detail=False),
+    )
+
+
+@pytest.mark.parametrize(("value", "expected"), [("SYP", True), ("VEF", False)])
+def test_choice_validator_for_people_accepts_only_currency_codes_with_an_active_row(
+    social_worker_program_with_redenominated_currency: Any, value: str, expected: bool, django_assert_num_queries
+) -> None:
+    validator = UploadXLSXInstanceValidator(social_worker_program_with_redenominated_currency)
+
+    with django_assert_num_queries(0):
+        is_valid = validator.choice_validator(value, "pp_currency_i_c")
+
+    assert is_valid is expected
+
+
+@pytest.mark.parametrize(("value", "expected"), [("SYP", None), ("VEF", "Invalid choice VEF for field currency_h_c")])
+def test_import_choice_validator_accepts_only_currency_codes_with_an_active_row(
+    program_with_redenominated_currency: Any, value: str, expected: str | None, django_assert_num_queries
+) -> None:
+    validator = KoboProjectImportDataInstanceValidator(program_with_redenominated_currency)
+
+    with django_assert_num_queries(0):
+        error = validator.choice_validator(value, "currency_h_c")
+
+    assert error == expected
+
+
 def test_import_choice_validator_empty_value_returns_message(program: Any) -> None:
     validator = KoboProjectImportDataInstanceValidator(program)
     validator.all_fields = {"field_one": {"type": TYPE_SELECT_ONE, "choices": ["A"]}}

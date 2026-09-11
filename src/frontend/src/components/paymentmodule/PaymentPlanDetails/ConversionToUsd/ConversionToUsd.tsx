@@ -19,7 +19,7 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { showApiErrorMessages } from '@utils/utils';
+import { formatCurrencyCode, showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -139,7 +139,10 @@ function ConversionToUsd({
     exchangeRate
       ? t('1 USD = {{rate}} {{currency}}', {
           rate: exchangeRate,
-          currency: paymentPlan.currency,
+          currency: formatCurrencyCode(
+            paymentPlan.currency,
+            paymentPlan.currencyVisionCode,
+          ),
         })
       : t('Exchange rate is unavailable');
 

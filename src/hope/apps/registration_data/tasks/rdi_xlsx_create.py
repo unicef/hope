@@ -15,6 +15,7 @@ import openpyxl
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
+from hope.apps.core.currency_resolution import resolve_active_currency
 from hope.apps.core.utils import SheetImageLoader, timezone_datetime
 from hope.apps.household.const import (
     HEAD,
@@ -651,9 +652,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if isinstance(obj_to_create, PendingHousehold):
                 obj_to_create.facility = facility
         elif header == "currency_h_c":
-            from hope.models.currency import Currency
-
-            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Currency.objects.get(code=value))
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], resolve_active_currency(value))
         else:
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], value)
         return True

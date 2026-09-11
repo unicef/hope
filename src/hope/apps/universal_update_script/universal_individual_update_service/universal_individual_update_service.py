@@ -371,7 +371,7 @@ class UniversalIndividualUpdateService:
                 )
             unicef_id = row[headers.index("unicef_id")]
             individual = (
-                Individual.objects.select_related("household")
+                Individual.objects.select_related("household__currency")
                 .prefetch_related("documents", "accounts")
                 .get(
                     unicef_id=unicef_id,
@@ -381,6 +381,8 @@ class UniversalIndividualUpdateService:
             )
             individual_ids.append(str(individual.id))
             household = individual.household
+            if household is None:
+                raise ValueError(f"Household not found for individual with unicef_id {unicef_id}")
             self.handle_household_update(row, headers, household)
             self.handle_individual_update(row, headers, individual)
             self.handle_individual_flex_update(row, headers, individual)

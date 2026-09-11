@@ -28,7 +28,7 @@ from extras.test_utils.factories import (
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import IndividualDataUpdateService
 from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
-from hope.models import Document
+from hope.models import Currency, Document
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -610,6 +610,75 @@ def test_update_people_individual_hh_currency_field(
         ind_data = _build_ind_data(hh, fields, new_values, extract=lambda v: v.code)
         _close_ticket_and_refresh(update_context, ind_data, hh)
         _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.code)
+
+
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+
+def test_update_people_individual_hh_currency_field_resolves_active_row_for_shared_code(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_moves_household_off_deprecated_row_for_same_code(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+) -> None:
+    hh = update_context["household"]
+    hh.currency = deprecated_syp
+    hh.save(update_fields=["currency"])
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_resolves_the_vision_code_alias_to_the_active_row(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    django_assert_num_queries,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP01"}, extract=lambda v: v.code)
+
+    with django_assert_num_queries(31):
+        _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_clears_a_code_without_an_active_row(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    currency_retired: Currency,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "VEF"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency is None
 
 
 def test_update_people_individual_hh_admin_area(

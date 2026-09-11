@@ -32,10 +32,11 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
         *,
         unicef_id: str = "PP001",
         currency_code: str = "USD",
+        currency_vision_code: str | None = None,
         created_at: datetime = datetime(2025, 1, 1),
     ) -> PaymentPlan:
         business_area = BusinessAreaFactory(code="FI01")
-        currency = CurrencyFactory(code=currency_code)
+        currency = CurrencyFactory(code=currency_code, vision_code=currency_vision_code or currency_code)
         financial_service_provider = FinancialServiceProviderFactory(
             name="Head Vendor Name",
             vision_vendor_number="V100004",
@@ -139,6 +140,7 @@ def _make_mock_payment_plan(**overrides) -> MagicMock:
         setattr(pp, k, v)
     pp.business_area.code = fields.get("_business_area_code", "FI01")
     pp.currency.code = fields.get("_currency_code", "USD")
+    pp.currency.vision_code = fields.get("_currency_vision_code", pp.currency.code)
     pp.financial_service_provider.name = fields.get("_fsp_name", "Head Vendor Name")
     pp.financial_service_provider.vision_vendor_number = fields.get("_vision_vendor_number", "V100004")
     pp.internal_data = {}
@@ -235,6 +237,25 @@ def test_send_payment_plan_with_different_currency(
             "creationDate": "20250301",
         },
     )
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_send_payment_plan_sends_vision_code_not_code(
+    mock_post, mock_acquire_token, vision_api_payment_plan_factory
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    api = VisionAPI()
+    pp = vision_api_payment_plan_factory(
+        unicef_id="PP004",
+        currency_code="SYP",
+        currency_vision_code="SYP01",
+        created_at=datetime(2025, 3, 1),
+    )
+    result = api.send_payment_plan(pp)
+    assert result == {"status": "ok"}
+    sent_payload = mock_post.call_args[0][1]
+    assert sent_payload["currency"] == "SYP01"
 
 
 def test_vision_api_error_is_raised(vision_api_payment_plan_factory) -> None:

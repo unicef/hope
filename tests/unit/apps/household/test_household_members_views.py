@@ -184,7 +184,9 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
                 "last_registration_date": f"{household1.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "delivered_quantities": [
+                    {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+                ],
                 "start": household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
                 "residence_status": household1.get_residence_status_display(),
@@ -218,7 +220,9 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
                 "last_registration_date": f"{household1.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "delivered_quantities": [
+                    {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+                ],
                 "start": household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
                 "residence_status": household1.get_residence_status_display(),
@@ -252,7 +256,9 @@ def test_household_members(create_user_role_with_permissions: Any, household_mem
                 "last_registration_date": f"{household2.last_registration_date:%Y-%m-%d}",
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
-                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "delivered_quantities": [
+                    {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+                ],
                 "start": household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "zip_code": None,
                 "residence_status": household2.get_residence_status_display(),

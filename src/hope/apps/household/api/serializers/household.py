@@ -39,6 +39,7 @@ from hope.models import (
 
 class DeliveredQuantitySerializer(serializers.Serializer):
     currency = serializers.CharField()
+    currency_vision_code = serializers.CharField()
     total_delivered_quantity = serializers.DecimalField(max_digits=64, decimal_places=2)
 
 
@@ -58,6 +59,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     program_code = serializers.CharField(source="program.code")
     facility_name = serializers.CharField(source="facility.name", read_only=True)
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
 
     class Meta:
         model = Household
@@ -75,6 +77,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "last_registration_date",
             "first_registration_date",
             "currency",
+            "currency_vision_code",
             "has_duplicates",
             "sanction_list_possible_match",
             "sanction_list_confirmed_match",
@@ -238,6 +241,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
@@ -283,6 +287,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "female_children_count",
             "children_disabled_count",
             "currency",
+            "currency_vision_code",
             "first_registration_date",
             "last_registration_date",
             "unhcr_id",
