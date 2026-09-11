@@ -1032,6 +1032,32 @@ def test_household_update_currency_resolves_active_row_when_code_actually_change
     assert household_with_eur.currency == active_syp
 
 
+def test_validate_currency_accepts_the_vision_code_alias(
+    business_area: object, program: Program, syp_pair: tuple[Currency, Currency], django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(3):
+        error = validate_currency("SYP01", "currency", Household, business_area, program)
+
+    assert error is None
+
+
+def test_household_update_currency_resolves_the_vision_code_alias_to_the_active_row(
+    universal_update_for_currency: UniversalUpdate,
+    household_with_eur: Household,
+    syp_pair: tuple[Currency, Currency],
+    django_assert_num_queries,
+) -> None:
+    _deprecated_syp, active_syp = syp_pair
+    service = UniversalIndividualUpdateService(universal_update_for_currency)
+
+    with django_assert_num_queries(3):
+        service.handle_household_update(("SYP01",), ["currency"], household_with_eur)
+    household_with_eur.save()
+
+    household_with_eur.refresh_from_db()
+    assert household_with_eur.currency == active_syp
+
+
 def test_get_generator_handler_renders_currency_code(all_currencies: None) -> None:
     usd = Currency.objects.get(code="USD")
     handler = get_generator_handler(usd)

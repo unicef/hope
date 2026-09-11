@@ -803,3 +803,60 @@ def test_close_moves_household_off_deprecated_currency_for_same_code(
     household_on_deprecated_syp.refresh_from_db()
 
     assert household_on_deprecated_syp.currency == current_syp
+
+
+@pytest.fixture
+def ticket_setting_currency_to_the_syp_alias(household_without_currency: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_without_currency,
+        household_data={
+            "currency": {"value": "SYP01", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_resolves_the_vision_code_alias_to_the_active_row(
+    ticket_setting_currency_to_the_syp_alias: GrievanceTicket,
+    household_without_currency: Household,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    user: User,
+    django_assert_num_queries,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_setting_currency_to_the_syp_alias, {})
+    with django_assert_num_queries(21):
+        service.close(user)
+    household_without_currency.refresh_from_db()
+
+    assert household_without_currency.currency == current_syp
+
+
+@pytest.fixture
+def ticket_setting_a_retired_currency(household_on_deprecated_syp: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_on_deprecated_syp,
+        household_data={
+            "currency": {"value": "VEF", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_clears_the_currency_for_a_code_without_an_active_row(
+    ticket_setting_a_retired_currency: GrievanceTicket,
+    household_on_deprecated_syp: Household,
+    currency_retired: Currency,
+    user: User,
+) -> None:
+    # The ticket does not validate FK codes on entry, so close stores NULL for an unresolvable
+    # code, as it does for country.
+    service = HouseholdDataUpdateService(ticket_setting_a_retired_currency, {})
+    service.close(user)
+    household_on_deprecated_syp.refresh_from_db()
+
+    assert household_on_deprecated_syp.currency is None

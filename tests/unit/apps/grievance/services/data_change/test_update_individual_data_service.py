@@ -652,6 +652,35 @@ def test_update_people_individual_hh_currency_field_moves_household_off_deprecat
     assert hh.currency == current_syp
 
 
+def test_update_people_individual_hh_currency_field_resolves_the_vision_code_alias_to_the_active_row(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    django_assert_num_queries,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP01"}, extract=lambda v: v.code)
+
+    with django_assert_num_queries(31):
+        _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_clears_a_code_without_an_active_row(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    currency_retired: Currency,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "VEF"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency is None
+
+
 def test_update_people_individual_hh_admin_area(
     update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:

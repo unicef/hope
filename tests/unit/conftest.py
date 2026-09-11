@@ -74,6 +74,28 @@ def currency_usdc(db: Any) -> Currency:
 
 
 @pytest.fixture
+def currency_syp_deprecated(db: Any) -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian Pound (old)", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def currency_syp(currency_syp_deprecated: Currency) -> Currency:
+    """The active SYP after the redenomination, always beside the deprecated row sharing its ``code``.
+
+    ``Meta.ordering`` sorts the deprecated row first, so a lookup relying on ``.first()`` picks it.
+    ``SYP01`` is its ``vision_code``, which inputs accept as a transitional alias. Do not combine
+    with ``all_currencies``: it seeds the pre-redenomination rows, which collide with these.
+    """
+    return CurrencyFactory(code="SYP", name="Syrian Pound", vision_code="SYP01", active=True)
+
+
+@pytest.fixture
+def currency_retired(db: Any) -> Currency:
+    """A currency withdrawn without a successor: its code has only an inactive row."""
+    return CurrencyFactory(code="VEF", name="Venezuelan Bolivar", vision_code="VEF", active=False)
+
+
+@pytest.fixture
 def all_currencies(db: Any) -> None:
     import importlib
 

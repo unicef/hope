@@ -18,6 +18,7 @@ from hope.models import (
     Area,
     AreaType,
     Country,
+    Currency,
     Document,
     DocumentType,
     Household,
@@ -388,6 +389,42 @@ def test_update_household_with_fixture_households(
 
     # Verify head of household relationship was maintained
     assert destination_household_obj.head_of_household == head_of_household
+
+
+@pytest.fixture
+def source_household_on_active_syp(source_household: tuple[Household, Individual], currency_syp: Currency) -> Household:
+    household = source_household[0]
+    household.currency = currency_syp
+    household.save(update_fields=["currency"])
+    return household
+
+
+@pytest.fixture
+def destination_household_on_deprecated_syp(
+    destination_household: tuple[Household, Individual], currency_syp_deprecated: Currency
+) -> Household:
+    household = destination_household[0]
+    household.currency = currency_syp_deprecated
+    household.save(update_fields=["currency"])
+    return household
+
+
+def test_update_household_moves_the_merged_household_onto_the_active_currency(
+    source_household_on_active_syp: Household,
+    destination_household_on_deprecated_syp: Household,
+    currency_syp: Currency,
+    program: Program,
+    django_assert_num_queries,
+) -> None:
+    # An import is authoritative for the whole household, so unlike a Payment Plan update the
+    # merge does not keep the deprecated row when the imported code is the same.
+    detector = IdentificationKeyCollisionDetector(program)
+
+    with django_assert_num_queries(90):
+        detector.update_household(source_household_on_active_syp)
+
+    destination_household_on_deprecated_syp.refresh_from_db()
+    assert destination_household_on_deprecated_syp.currency == currency_syp
 
 
 def test_update_household_collision(

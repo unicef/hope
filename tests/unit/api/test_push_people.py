@@ -383,6 +383,66 @@ def test_push_single_person_with_currency(
     assert ind.household.currency.code == "USD"
 
 
+@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 25), ("SYP01", 27)])
+def test_push_single_person_resolves_the_currency_code_to_the_active_row(
+    token_api_client,
+    push_people_url,
+    program,
+    rdi,
+    afghanistan_country,
+    currency_syp,
+    code,
+    expected_queries,
+    django_assert_num_queries,
+) -> None:
+    data = [
+        {
+            "residence_status": "IDP",
+            "village": "village1",
+            "country": "AF",
+            "full_name": "John Doe",
+            "birth_date": "2000-01-01",
+            "sex": "MALE",
+            "type": "",
+            "currency": code,
+            "program": str(program.id),
+            "country_workspace_id": "cw-currency-1",
+        }
+    ]
+
+    with django_assert_num_queries(expected_queries):
+        response = token_api_client.post(push_people_url, data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    household = PendingHousehold.objects.get(registration_data_import_id=response.json()["id"])
+    assert household.currency == currency_syp
+
+
+def test_push_single_person_with_a_retired_currency_is_rejected(
+    token_api_client, push_people_url, program, rdi, afghanistan_country, currency_retired
+) -> None:
+    data = [
+        {
+            "residence_status": "IDP",
+            "village": "village1",
+            "country": "AF",
+            "full_name": "John Doe",
+            "birth_date": "2000-01-01",
+            "sex": "MALE",
+            "type": "",
+            "currency": "VEF",
+            "program": str(program.id),
+            "country_workspace_id": "cw-currency-1",
+        }
+    ]
+
+    response = token_api_client.post(push_people_url, data, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"0": {"currency": ["Object with code=VEF does not exist."]}}
+    assert not PendingHousehold.objects.exists()
+
+
 @pytest.fixture
 def base64_photo() -> tuple[str, str]:
     prefix = "data:image/png;base64,"
