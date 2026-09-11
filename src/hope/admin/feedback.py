@@ -20,7 +20,5 @@ class FeedbackAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     readonly_fields = ("unicef_id",)
     search_fields = ("unicef_id",)
 
-    def frontend_url(self, obj: Feedback) -> str | None:
-        if not obj.program:
-            return None
+    def frontend_url(self, obj: Feedback) -> str:
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/grievance/feedback/{obj.id}"
