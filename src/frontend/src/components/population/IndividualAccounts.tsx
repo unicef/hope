@@ -2,6 +2,7 @@ import { DividerLine } from '@components/core/DividerLine';
 import { LoadingComponent } from '@core/LoadingComponent';
 import type { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
 import type { Theme } from '@mui/material';
@@ -14,10 +15,35 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import type { Account } from '@restgenerated/models/Account';
+import type { AccountAttachment } from '@restgenerated/models/AccountAttachment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
+
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
+
+const isImage = (file: string): boolean =>
+  IMAGE_EXTENSIONS.includes(file.split('.').pop()?.toLowerCase() ?? '');
+
+const AttachmentField: FC<{ attachment: AccountAttachment }> = ({
+  attachment,
+}) => {
+  const label = attachment.title || t('Attachment');
+  return (
+    <Grid size={3}>
+      <LabelizedField label={label}>
+        {isImage(attachment.file) ? (
+          <PhotoModal src={attachment.file} title={label} />
+        ) : (
+          <a href={attachment.file} target="_blank" rel="noopener noreferrer">
+            {t('Download')}
+          </a>
+        )}
+      </LabelizedField>
+    </Grid>
+  );
+};
 
 interface IndividualAccountsProps {
   individual: IndividualDetail;
@@ -72,6 +98,9 @@ const AccountItem: FC<AccountItemProps> = ({
             </Grid>
           );
         })}
+        {account.attachments?.map((attachment) => (
+          <AttachmentField key={attachment.id} attachment={attachment} />
+        ))}
       </Grid>
       {!lastItem && <DividerLine />}
     </Grid>

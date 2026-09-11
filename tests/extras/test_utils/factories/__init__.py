@@ -73,6 +73,7 @@ from .household import (
     XlsxUpdateFileFactory,
 )
 from .payment import (
+    AccountAttachmentFactory,
     AccountFactory,
     AccountTypeFactory,
     ApprovalFactory,
@@ -133,6 +134,7 @@ from .vision import DownPaymentFactory, FundsCommitmentFactory, FundsCommitmentG
 
 __all__ = [
     "AdminAreaLimitedToFactory",
+    "AccountAttachmentFactory",
     "AccountFactory",
     "AccountTypeFactory",
     "APITokenFactory",

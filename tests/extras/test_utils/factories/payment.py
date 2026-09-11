@@ -9,6 +9,7 @@ from factory.django import DjangoModelFactory
 
 from hope.models import (
     Account,
+    AccountAttachment,
     AccountType,
     Approval,
     ApprovalProcess,
@@ -135,6 +136,15 @@ class AccountFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     account_type = factory.SubFactory(AccountTypeFactory)
     rdi_merge_status = MergeStatusModel.MERGED
+
+
+class AccountAttachmentFactory(DjangoModelFactory):
+    class Meta:
+        model = AccountAttachment
+
+    account = factory.SubFactory(AccountFactory)
+    title = factory.Sequence(lambda n: f"Attachment {n}")
+    file = factory.Sequence(lambda n: SimpleUploadedFile(f"attachment_{n}.jpg", b"abc", content_type="image/jpeg"))
 
 
 class PaymentFactory(DjangoModelFactory):

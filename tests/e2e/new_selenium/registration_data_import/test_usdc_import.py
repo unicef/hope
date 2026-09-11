@@ -61,7 +61,6 @@ def usdc_import(business_area: BusinessArea, create_super_user: User) -> Registr
         type=FinancialInstitution.FinancialInstitutionType.OTHER,
         country=None,
     )
-    FlexibleAttributeFactory(name="wallet_num_image_i_f", type=FlexibleAttribute.IMAGE)
     FlexibleAttributeFactory(name="id_wallet_image_i_f", type=FlexibleAttribute.IMAGE)
 
     program = ProgramFactory(
