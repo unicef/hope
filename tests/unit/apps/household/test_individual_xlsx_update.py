@@ -13,11 +13,12 @@ from extras.test_utils.factories import (
     IndividualFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
+    UserFactory,
     XlsxUpdateFileFactory,
 )
 from hope.apps.household.const import FEMALE, HEAD, MALE, OTHER, SON_DAUGHTER, WIFE_HUSBAND
 from hope.apps.household.services.individual_xlsx_update import IndividualXlsxUpdate, InvalidColumnsError
-from hope.models import AsyncJob
+from hope.models import AsyncJob, LogEntry
 
 pytestmark = pytest.mark.django_db
 
@@ -150,6 +151,21 @@ def xlsx_update_file(business_area, valid_file):
 
 
 @pytest.fixture
+def uploader():
+    return UserFactory(username="xlsx_uploader")
+
+
+@pytest.fixture
+def xlsx_update_file_with_uploader(business_area, valid_file, uploader):
+    return XlsxUpdateFileFactory(
+        file=valid_file,
+        business_area=business_area,
+        xlsx_match_columns=["individual__given_name"],
+        uploaded_by=uploader,
+    )
+
+
+@pytest.fixture
 def xlsx_update_invalid_file(business_area, invalid_file):
     return XlsxUpdateFileFactory(
         file=invalid_file,
@@ -184,6 +200,19 @@ def test_generate_report(xlsx_update_file, individuals) -> None:
     assert len(report[IndividualXlsxUpdate.STATUS_UNIQUE]) == 2
     assert len(report[IndividualXlsxUpdate.STATUS_NO_MATCH]) == 1
     assert len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH]) == 1
+
+
+def test_generate_report_rows_carry_row_number_and_matched_individuals(xlsx_update_file, individuals) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_file)
+
+    report = updater.get_matching_report()
+
+    assert report[IndividualXlsxUpdate.STATUS_NO_MATCH][0].row_number == 5
+    assert report[IndividualXlsxUpdate.STATUS_NO_MATCH][0].individuals == []
+    assert report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH][0].row_number == 4
+    assert len(report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH][0].individuals) == 2
+    assert report[IndividualXlsxUpdate.STATUS_UNIQUE][0].row_number == 2
+    assert len(report[IndividualXlsxUpdate.STATUS_UNIQUE][0].individuals) == 1
 
 
 def test_update_individuals(xlsx_update_file, individuals) -> None:
@@ -257,6 +286,19 @@ def test_update_individuals_schedules_recalculation_for_recalc_fields(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
     )
     assert job.config["household_ids"] == [str(individuals[0].household_id)]
+
+
+@pytest.mark.enable_activity_log
+def test_update_individuals_logs_activity_against_uploader_and_program(
+    xlsx_update_file_with_uploader, individuals, uploader, program
+) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_file_with_uploader)
+
+    updater.update_individuals()
+
+    log = LogEntry.objects.get(object_id=individuals[0].pk)
+    assert log.user == uploader
+    assert list(log.programs.all()) == [program]
 
 
 def test_update_individuals_skips_recalculation_without_recalc_fields(xlsx_update_file, individuals) -> None:

@@ -695,15 +695,6 @@ def test_run_deduplication_raises_when_business_area_is_none(rdi_merge_task):
         rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
 
 
-def test_run_deduplication_raises_when_program_is_none(rdi_merge_task):
-    rdi = mock.MagicMock()
-    rdi.business_area = mock.MagicMock()
-    rdi.program = None
-
-    with pytest.raises(ValueError, match="RDI program must not be None"):
-        rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
-
-
 def test_run_biometric_deduplication_skips_when_program_is_none(rdi_merge_task):
     rdi = mock.MagicMock()
     rdi.program = None

@@ -56,7 +56,6 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "individual_data",
-            "role_reassign_data",
             "linked_needs_adjudication_ticket_id",
         )
 
@@ -255,6 +254,7 @@ class IndividualForNeedsAdjudicationSerializer(IndividualForTicketSerializer):
             "unicef_id",
             "household",
             "full_name",
+            "full_name_latin",
             "birth_date",
             "last_registration_date",
             "sex",
@@ -283,6 +283,7 @@ class IndividualForNaComparisonSerializer(IndividualForTicketSerializer):
             "unicef_id",
             "household",
             "full_name",
+            "full_name_latin",
             "given_name",
             "family_name",
             "phone_no",

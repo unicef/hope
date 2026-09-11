@@ -24,6 +24,8 @@
         "hoh_phone_no_alternative": "None",
         "snapshot_collector_full_name": null,
         "snapshot_alternate_collector_full_name": null,
+        "snapshot_collector_full_name_latin": null,
+        "snapshot_alternate_collector_full_name_latin": null,
         "snapshot_alternate_collector_id": null,
         "fsp_name": "",
         "entitlement_quantity": null,
@@ -111,7 +113,8 @@
             "unicef_id": "HH-25-0000.0001",
             "head_of_household": {
                 "id": "93818285-317e-4789-adbe-2aed85095f26",
-                "full_name": "Person 0"
+                "full_name": "Person 0",
+                "full_name_latin": null
             },
             "admin1": null,
             "admin2": null,
@@ -254,6 +257,10 @@
             "given_name": "",
             "middle_name": "",
             "family_name": "",
+            "full_name_latin": null,
+            "given_name_latin": null,
+            "middle_name_latin": null,
+            "family_name_latin": null,
             "sex": "MALE",
             "age": 35,
             "birth_date": "1990-01-01",
