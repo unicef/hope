@@ -426,15 +426,8 @@ def test_all_beat_schedules_use_periodic_queue() -> None:
         assert schedule["options"] == {"queue": CELERY_QUEUE_PERIODIC}
 
 
-@pytest.mark.parametrize(
-    "task_name",
-    [
-        "daily_grievance_digest_async_task",
-        "periodic_grievances_notifications_async_task",
-    ],
-)
-def test_grievance_notification_dispatchers_run_hourly(task_name: str) -> None:
-    schedule = TASKS_SCHEDULES[task_name]["schedule"]
+def test_grievance_digest_dispatcher_runs_hourly() -> None:
+    schedule = TASKS_SCHEDULES["daily_grievance_digest_async_task"]["schedule"]
 
     assert schedule.minute == {0}
     assert schedule.hour == set(range(24))

@@ -1,4 +1,4 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 import json
 from typing import Any, Callable, cast
 from unittest.mock import patch
@@ -747,7 +747,7 @@ def test_failed_send_leaves_the_day_unmarked(
     )
 
     with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=Exception("boom")):
-        with pytest.raises(RuntimeError, match="1 recipient"):
+        with pytest.raises(RuntimeError, match="1 grievance email"):
             daily_grievance_digest_async_task_action(job)
 
     job.refresh_from_db()
@@ -1033,3 +1033,66 @@ def test_overdue_counts_sensitive_and_non_sensitive_together(business_area: Busi
             (daily_digest_service.OVERDUE.sections[1], 1),
         ]
     }
+
+
+@freeze_time(NEXT_DAY)
+def test_overdue_is_not_repeated_before_the_repeat_interval(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+    ticket.last_notification_sent = NEXT_DAY - timedelta(days=2)
+    ticket.save(update_fields=["last_notification_sent"])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.OVERDUE] == {}
+
+
+@freeze_time(NEXT_DAY)
+def test_overdue_is_repeated_once_the_repeat_interval_has_passed(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+    ticket.last_notification_sent = NEXT_DAY - timedelta(days=40)
+    ticket.save(update_fields=["last_notification_sent"])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.OVERDUE] == {assignee: [(daily_digest_service.OVERDUE.sections[1], 1)]}
+
+
+@freeze_time(NEXT_DAY)
+def test_a_throttled_ticket_is_still_counted_when_another_is_due(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        throttled = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+        GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+    throttled.last_notification_sent = NEXT_DAY - timedelta(days=2)
+    throttled.save(update_fields=["last_notification_sent"])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.OVERDUE] == {assignee: [(daily_digest_service.OVERDUE.sections[1], 2)]}
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+@freeze_time(NEXT_DAY)
+def test_sending_the_overdue_email_resets_the_repeat_clock(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+
+    with patch.object(daily_digest_service.MailjetClient, "send_email"):
+        DailyDigestService(business_area, DIGEST_DATE).send()
+
+    ticket.refresh_from_db()
+    assert ticket.last_notification_sent == NEXT_DAY
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+@freeze_time(NEXT_DAY)
+def test_a_failed_overdue_send_leaves_the_repeat_clock_untouched(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+
+    with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=Exception("boom")):
+        DailyDigestService(business_area, DIGEST_DATE).send()
+
+    ticket.refresh_from_db()
+    assert ticket.last_notification_sent is None

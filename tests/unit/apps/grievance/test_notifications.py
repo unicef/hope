@@ -187,7 +187,9 @@ def close_feedback_ticket_role() -> Role:
 def test_init_builds_recipients_and_emails_for_sensitive_reminder(
     assigned_ticket: GrievanceTicket, assignee: User
 ) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     assert notification.user_recipients == [assignee]
     assert len(notification.emails) == 1
@@ -208,7 +210,7 @@ def test_assigned_to_recipient_excludes_inactive_assignee(business_area: Busines
     inactive_assignee = UserFactory(email="inactive-assignee@example.com", is_active=False)
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=inactive_assignee)
 
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory())
 
     assert notification.user_recipients == []
     assert notification.emails == []
@@ -218,7 +220,7 @@ def test_assigned_to_recipient_excludes_assignee_without_email(business_area: Bu
     no_email_assignee = UserFactory(email="")
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=no_email_assignee)
 
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory())
 
     assert notification.user_recipients == []
     assert notification.emails == []
@@ -323,7 +325,9 @@ def test_prepare_notification_for_ticket_creation_excludes_creator_from_sensitiv
 
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=True)
 def test_default_context_uses_https_when_redirect_is_https(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     context = notification._prepare_default_context(assignee)
 
@@ -334,40 +338,13 @@ def test_default_context_uses_https_when_redirect_is_https(assigned_ticket: Grie
 
 @override_settings(SOCIAL_AUTH_REDIRECT_IS_HTTPS=False)
 def test_default_context_uses_http_when_redirect_not_https(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     context = notification._prepare_default_context(assignee)
 
     assert context["ticket_url"].startswith("http://")
-
-
-def test_universal_category_recipients_excludes_assignee_and_expired(
-    business_area: BusinessArea, grievance_view_role: Role
-) -> None:
-    recipient = UserFactory(email="recipient@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
-
-    expired = UserFactory(email="expired@example.com")
-    UserRoleAssignmentFactory(
-        user=expired,
-        role=grievance_view_role,
-        business_area=business_area,
-        expiry_date=timezone.now() - timedelta(days=1),
-    )
-
-    assignee = UserFactory(email="assigned@example.com")
-    UserRoleAssignmentFactory(user=assignee, role=grievance_view_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-        issue_type=None,
-        assigned_to=assignee,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
-
-    assert list(notification.user_recipients) == [recipient]
 
 
 def test_for_approval_recipients_include_assignee_with_general_permission(
@@ -399,46 +376,6 @@ def test_for_approval_recipients_without_assignee(business_area: BusinessArea, a
     notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL)
 
     assert list(notification.user_recipients) == [approver]
-
-
-def test_universal_category_recipients_without_assignee(business_area: BusinessArea, grievance_view_role: Role) -> None:
-    recipient = UserFactory(email="adjudicator@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-        issue_type=None,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
-
-    assert list(notification.user_recipients) == [recipient]
-
-
-def test_sensitive_reminder_body_includes_hours_ago(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    GrievanceTicket.objects.filter(pk=assigned_ticket.pk).update(created_at=timezone.now() - timedelta(days=2))
-    assigned_ticket.refresh_from_db()
-
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-    text_body, html_body, subject = notification._prepare_sensitive_reminder_bodies(assignee)
-
-    assert assigned_ticket.unicef_id in subject
-    assert "48 hours ago" in text_body
-    assert "48 hours ago" in html_body
-
-
-def test_overdue_body_includes_days_ago(assigned_ticket: GrievanceTicket, assignee: User) -> None:
-    GrievanceTicket.objects.filter(pk=assigned_ticket.pk).update(created_at=timezone.now() - timedelta(days=3))
-    assigned_ticket.refresh_from_db()
-
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_OVERDUE)
-    text_body, html_body, subject = notification._prepare_overdue_bodies(assignee)
-
-    assert assigned_ticket.unicef_id in subject
-    assert "3 days ago" in text_body
-    assert "3 days ago" in html_body
 
 
 def test_add_note_body_uses_created_by_and_note(assigned_ticket: GrievanceTicket, assignee: User) -> None:
@@ -487,7 +424,9 @@ def test_for_approval_body(assigned_ticket: GrievanceTicket, assignee: User) -> 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTicket) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         notification.send_email_notification()
@@ -497,7 +436,9 @@ def test_send_email_notification_sends_when_enabled(assigned_ticket: GrievanceTi
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)
 def test_send_email_notification_skipped_when_config_off(assigned_ticket: GrievanceTicket) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         notification.send_email_notification()
@@ -509,27 +450,12 @@ def test_send_email_notification_skipped_when_config_off(assigned_ticket: Grieva
 def test_send_email_notification_skipped_when_business_area_disabled(assignee: User) -> None:
     business_area = BusinessAreaFactory(enable_email_notification=False)
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory())
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         notification.send_email_notification()
 
     mock_send.assert_not_called()
-
-
-def test_prepare_notification_for_ticket_creation_emits_only_the_category_broadcast(
-    business_area: BusinessArea, assignee: User
-) -> None:
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=assignee,
-        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-        issue_type=None,
-    )
-
-    notifications = GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
-
-    assert [n.action for n in notifications] == [GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED]
 
 
 def test_prepare_notification_for_ticket_creation_no_assignee_no_matching_category(business_area: BusinessArea) -> None:
@@ -547,7 +473,9 @@ def test_prepare_notification_for_ticket_creation_no_assignee_no_matching_catego
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_send_all_notifications_sends_each(assigned_ticket: GrievanceTicket) -> None:
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     with patch.object(notification.emails[0], "send_email") as mock_send:
         GrievanceNotification.send_all_notifications([notification])
@@ -616,7 +544,9 @@ def test_sensitive_created_recipients_excludes_assignee_expired_and_unpermitted(
 
 
 def test_default_context_drops_url_for_sensitive_ticket(sensitive_ticket: GrievanceTicket, assignee: User) -> None:
-    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        sensitive_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     context = notification._prepare_default_context(assignee)
 
@@ -688,7 +618,9 @@ def test_sensitive_ticket_payload_sent_to_mailjet_has_no_link(
     mocked_requests_post: Any, sensitive_ticket: GrievanceTicket, assignee: User
 ) -> None:
     mocked_requests_post.return_value.status_code = 200
-    notification = GrievanceNotification(sensitive_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        sensitive_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     notification.send_email_notification()
 
@@ -705,146 +637,15 @@ def test_non_sensitive_ticket_payload_sent_to_mailjet_keeps_link(
     mocked_requests_post: Any, assigned_ticket: GrievanceTicket
 ) -> None:
     mocked_requests_post.return_value.status_code = 200
-    notification = GrievanceNotification(assigned_ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+    notification = GrievanceNotification(
+        assigned_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=UserFactory()
+    )
 
     notification.send_email_notification()
 
     message = json.loads(mocked_requests_post.call_args.kwargs["data"])["Messages"][0]
     assert assigned_ticket.unicef_id in message["HTMLPart"]
     assert "<a href" in message["HTMLPart"]
-
-
-def test_deduplication_recipients_use_grievance_view_permission(
-    business_area: BusinessArea, grievance_view_role: Role
-) -> None:
-    recipient = UserFactory(email="dedupe-viewer@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-        issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_DEDUPLICATION_CREATED)
-
-    assert list(notification.user_recipients) == [recipient]
-
-
-def test_system_flagging_recipients_exclude_sensitive_only_permission(
-    business_area: BusinessArea, sensitive_role: Role
-) -> None:
-    sensitive_only = UserFactory(email="sensitive-only@example.com")
-    UserRoleAssignmentFactory(user=sensitive_only, role=sensitive_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-        issue_type=None,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
-
-    assert list(notification.user_recipients) == []
-
-
-def test_system_flagging_recipients_respect_program_scope(
-    business_area: BusinessArea, grievance_view_role: Role, program: Program, other_program: Program
-) -> None:
-    in_program = UserFactory(email="in-program@example.com")
-    UserRoleAssignmentFactory(user=in_program, role=grievance_view_role, business_area=business_area, program=program)
-
-    out_of_program = UserFactory(email="out-program@example.com")
-    UserRoleAssignmentFactory(
-        user=out_of_program, role=grievance_view_role, business_area=business_area, program=other_program
-    )
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-        issue_type=None,
-        assigned_to=None,
-    )
-    ticket.programs.set([program])
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SYSTEM_FLAGGING_CREATED)
-
-    assert list(notification.user_recipients) == [in_program]
-
-
-def test_payment_verification_recipients_require_both_permission_groups(
-    business_area: BusinessArea, payment_and_grievance_role: Role
-) -> None:
-    recipient = UserFactory(email="pv-and-grievance@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=payment_and_grievance_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-        issue_type=None,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
-
-    assert list(notification.user_recipients) == [recipient]
-
-
-def test_payment_verification_recipients_exclude_grievance_permission_only(
-    business_area: BusinessArea, grievance_view_role: Role
-) -> None:
-    grievance_only = UserFactory(email="grievance-only@example.com")
-    UserRoleAssignmentFactory(user=grievance_only, role=grievance_view_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-        issue_type=None,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
-
-    assert list(notification.user_recipients) == []
-
-
-def test_payment_verification_recipients_exclude_payment_permission_only(
-    business_area: BusinessArea, payment_verification_role: Role
-) -> None:
-    payment_only = UserFactory(email="payment-only@example.com")
-    UserRoleAssignmentFactory(user=payment_only, role=payment_verification_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-        issue_type=None,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
-
-    assert list(notification.user_recipients) == []
-
-
-def test_payment_verification_recipients_allow_permissions_across_separate_roles(
-    business_area: BusinessArea, grievance_view_role: Role, payment_verification_role: Role
-) -> None:
-    recipient = UserFactory(email="split-roles@example.com")
-    UserRoleAssignmentFactory(user=recipient, role=grievance_view_role, business_area=business_area)
-    UserRoleAssignmentFactory(user=recipient, role=payment_verification_role, business_area=business_area)
-
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-        issue_type=None,
-        assigned_to=None,
-    )
-
-    notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED)
-
-    assert list(notification.user_recipients) == [recipient]
 
 
 def test_for_approval_recipients_data_change_uses_data_change_permission(

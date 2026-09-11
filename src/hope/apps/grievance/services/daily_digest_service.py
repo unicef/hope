@@ -19,11 +19,13 @@ from zoneinfo import ZoneInfo
 from constance import config
 from django.db.models import Count, Exists, F, OuterRef, Q
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.timezones import resolve_timezone_name
+from hope.apps.core.timezones import latest_local_schedule_time, resolve_timezone_name
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_MINE_SENSITIVE, PRESET_NEEDS_ASSIGNMENT
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.grievance.utils import my_tasks_url, overdue_q
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
@@ -44,6 +46,7 @@ class Section:
     label: str
     preset: str
     overdue: bool = False
+    sensitive: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -53,6 +56,8 @@ class EmailSpec:
     subject: str
     intro: str
     sections: tuple[Section, ...]
+    # repeat-limited by GrievanceTicket.last_notification_sent, so a stale backlog does not mail daily
+    throttled: bool = False
 
 
 SENSITIVE_LABEL = "Sensitive"
@@ -77,16 +82,17 @@ OVERDUE = EmailSpec(
     subject="Overdue Tickets",
     intro="Grievance tickets assigned to you are past their due date.",
     sections=(
-        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE, overdue=True),
-        Section(label=OTHER_LABEL, preset=PRESET_MINE, overdue=True),
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE, overdue=True, sensitive=True),
+        Section(label=OTHER_LABEL, preset=PRESET_MINE, overdue=True, sensitive=False),
     ),
+    throttled=True,
 )
 UPDATED = EmailSpec(
     subject="Updated Tickets",
     intro="Grievance tickets you are responsible for were changed by someone else.",
     sections=(
-        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE),
-        Section(label=OTHER_LABEL, preset=PRESET_MINE),
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE, sensitive=True),
+        Section(label=OTHER_LABEL, preset=PRESET_MINE, sensitive=False),
     ),
 )
 
@@ -159,6 +165,8 @@ class DailyDigestService:
             for spec, sections in specs:
                 try:
                     self._build_email(spec, user, sections).send_email()
+                    if spec.throttled:
+                        self._stamp_reminder(user, sections)
                 except Exception:
                     logger.exception(
                         f"Failed to send the {self.digest_date.isoformat()} {spec.subject} "
@@ -175,10 +183,17 @@ class DailyDigestService:
         )
         return successful_user_ids, failed
 
+    def _stamp_reminder(self, user: User, sections: list[tuple[Section, int]]) -> None:
+        """Reset the repeat clock on every ticket the email just reported, not only the due ones."""
+        now = timezone.now()
+        for section, _ in sections:
+            self._overdue_tickets(sensitive=section.sensitive).filter(assigned_to=user).update(
+                last_notification_sent=now
+            )
+
     def build_emails(self) -> list[tuple[EmailSpec, dict[User, list[tuple[Section, int]]]]]:
         sensitive = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
         assigned = self._assigned_tickets()
-        overdue = self._overdue_tickets()
         updated_sensitive, updated_other = self._updated_counts()
         return [
             (NEEDS_ASSIGNMENT, self._sections(NEEDS_ASSIGNMENT, [self._needs_assignment_counts()])),
@@ -191,10 +206,7 @@ class DailyDigestService:
                 OVERDUE,
                 self._sections(
                     OVERDUE,
-                    [
-                        self._counts_by_assignee(overdue.filter(**sensitive)),
-                        self._counts_by_assignee(overdue.exclude(**sensitive)),
-                    ],
+                    [self._overdue_counts(sensitive=True), self._overdue_counts(sensitive=False)],
                 ),
             ),
             (UPDATED, self._sections(UPDATED, [updated_sensitive, updated_other])),
@@ -322,8 +334,38 @@ class DailyDigestService:
             assigned_to__isnull=False,
         )
 
-    def _overdue_tickets(self) -> "QuerySet[GrievanceTicket]":
-        return (
+    def _overdue_counts(self, *, sensitive: bool) -> dict[User, int]:
+        """Count a recipient's overdue tickets, but only mail them when one is due a reminder.
+
+        Counting the whole set keeps the number honest against the page the email links to; gating on
+        `last_notification_sent` keeps the existing repeat spacing, so a stale backlog does not mail
+        every morning.
+        """
+        tickets = self._overdue_tickets(sensitive=sensitive)
+        due_assignee_ids = set(
+            tickets.filter(self._reminder_due_q(sensitive=sensitive)).values_list("assigned_to_id", flat=True)
+        )
+        return {user: total for user, total in self._counts_by_assignee(tickets).items() if user.pk in due_assignee_ids}
+
+    def _reminder_due_q(self, *, sensitive: bool) -> Q:
+        """Tickets whose reminder is due at the recipient's local notification hour."""
+        now = timezone.now()
+        interval = timedelta(days=self._overdue_threshold(sensitive=sensitive))
+        _, notification_time = latest_local_schedule_time(self.timezone_name, now, get_grievance_notification_hour())
+        return Q(last_notification_sent__isnull=True, created_at__lte=notification_time - interval) | Q(
+            last_notification_sent__lt=notification_time, last_notification_sent__lte=now - interval
+        )
+
+    @staticmethod
+    def _overdue_threshold(*, sensitive: bool) -> int:
+        return int(
+            config.GRIEVANCE_OVERDUE_THRESHOLD_SENSITIVE
+            if sensitive
+            else config.GRIEVANCE_OVERDUE_THRESHOLD_NON_SENSITIVE
+        )
+
+    def _overdue_tickets(self, *, sensitive: bool | None = None) -> "QuerySet[GrievanceTicket]":
+        tickets = (
             self._for_business_area()
             .filter(
                 self._recipient_timezone_filter("assigned_to"),
@@ -333,6 +375,10 @@ class DailyDigestService:
             )
             .exclude(status=GrievanceTicket.STATUS_CLOSED)
         )
+        if sensitive is None:
+            return tickets
+        category = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
+        return tickets.filter(**category) if sensitive else tickets.exclude(**category)
 
     def _updated_tickets(self) -> "QuerySet[GrievanceTicket]":
         return self._for_business_area().filter(
