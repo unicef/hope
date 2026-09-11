@@ -40,6 +40,7 @@ from hope.apps.payment.api.serializers import PaymentPlanGroupDetailSerializer
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_delivery_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
+    notify_payment_plan_group_reconciliation_import_failure,
 )
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import AsyncRetryJob, LogEntry, Payment, PaymentPlan, PaymentPlanGroup, User
@@ -2764,6 +2765,18 @@ def test_delivery_import_task_succeeds_without_notification_recipient(
         ctx["group"].refresh_from_db()
     assert ctx["payment_one"].delivered_quantity == Decimal("75.00")
     assert ctx["group"].background_action_status is None
+
+
+@pytest.mark.parametrize("queued_reconciliation", [False], indirect=True)
+def test_delivery_import_final_failure_skips_notification_without_recipient(
+    queued_reconciliation: dict[str, Any],
+) -> None:
+    with patch.object(User, "email_user", autospec=True) as mock_email_user:
+        notify_payment_plan_group_reconciliation_import_failure(
+            queued_reconciliation["job"], Exception("Import has failed")
+        )
+
+    mock_email_user.assert_not_called()
 
 
 @pytest.mark.parametrize("queued_reconciliation", [False], indirect=True)
