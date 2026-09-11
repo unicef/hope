@@ -273,6 +273,12 @@ def test_validate_delivery_date_appends_error_for_future_date(service_with_payme
     assert "cannot be greater than today's date" in service_with_payment.errors[0].message
 
 
+def test_parse_delivery_date_converts_date_to_utc_midnight(service_with_payment):
+    result = service_with_payment._parse_delivery_date(datetime.date(2024, 6, 15))
+
+    assert result == datetime.datetime(2024, 6, 15, tzinfo=UTC)
+
+
 def test_validate_delivery_date_ignores_empty_cell(
     service_with_payment, sent_to_fsp_payment, django_assert_num_queries
 ):
