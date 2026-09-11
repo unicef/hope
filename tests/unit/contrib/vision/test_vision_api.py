@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,6 +12,7 @@ from extras.test_utils.factories import (
     PaymentPlanFactory,
 )
 from hope.apps.core.api.mixins import BaseAPI
+from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
@@ -33,6 +35,7 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
         unicef_id: str = "PP001",
         currency_code: str = "USD",
         created_at: datetime = datetime(2025, 1, 1),
+        exchange_rate: Decimal | None = Decimal("1.25000000"),
     ) -> PaymentPlan:
         business_area = BusinessAreaFactory(code="FI01")
         currency = CurrencyFactory(code=currency_code)
@@ -50,12 +53,18 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
             financial_service_provider=financial_service_provider,
             total_entitled_quantity="10000.00",
             total_entitled_quantity_usd="10000.00",
+            exchange_rate=exchange_rate,
         )
         PaymentPlan.objects.filter(pk=payment_plan.pk).update(created_at=created_at)
         payment_plan.created_at = created_at
         return payment_plan
 
     return create_payment_plan
+
+
+@pytest.fixture
+def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> PaymentPlan:
+    return vision_api_payment_plan_factory(exchange_rate=None)
 
 
 def test_missing_vision_url_raises_error(settings) -> None:
@@ -165,43 +174,20 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
             "currency": "USD",
             "authAmt": "10000.00",
             "authAmtUsd": "10000.00",
-            "status": PaymentPlan.Status.IN_REVIEW,
+            "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
-            "creationDate": "20250101",
         },
     )
 
 
-@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
-@patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_plan_with_creation_date(
-    mock_post,
-    mock_acquire_token,
-    vision_api_payment_plan_factory,
+def test_payment_plan_payload_includes_null_exchange_rate(
+    payment_plan_without_exchange_rate,
+    django_assert_num_queries,
 ) -> None:
-    mock_post.return_value = ({"status": "ok"}, 200)
-    api = VisionAPI()
-    pp = vision_api_payment_plan_factory(
-        unicef_id="PP002",
-        created_at=datetime(2025, 6, 15, 10, 30, 0),
-    )
-    result = api.send_payment_plan(pp)
-    assert result == {"status": "ok"}
-    mock_post.assert_called_once_with(
-        "https://test.example.com/ps/ezcash/PaymentPlan",
-        {
-            "businessArea": "FI01",
-            "vendorNumber": "V100004",
-            "payplanSno": "PP002",
-            "payplanDesc": "Monthly payment plan testing the content length",
-            "currency": "USD",
-            "authAmt": "10000.00",
-            "authAmtUsd": "10000.00",
-            "status": PaymentPlan.Status.IN_REVIEW,
-            "headVendor": "Head Vendor Name",
-            "creationDate": "20250615",
-        },
-    )
+    with django_assert_num_queries(0):
+        payload = PaymentPlanPayloadSerializer(payment_plan_without_exchange_rate).data
+
+    assert payload["exchangeRate"] is None
 
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
@@ -216,7 +202,6 @@ def test_send_payment_plan_with_different_currency(
     pp = vision_api_payment_plan_factory(
         unicef_id="PP003",
         currency_code="EUR",
-        created_at=datetime(2025, 3, 1),
     )
     result = api.send_payment_plan(pp)
     assert result == {"status": "ok"}
@@ -230,9 +215,8 @@ def test_send_payment_plan_with_different_currency(
             "currency": "EUR",
             "authAmt": "10000.00",
             "authAmtUsd": "10000.00",
-            "status": PaymentPlan.Status.IN_REVIEW,
+            "exchangeRate": "1.25000000",
             "headVendor": "Head Vendor Name",
-            "creationDate": "20250301",
         },
     )
 
