@@ -1,11 +1,11 @@
 import EditIcon from '@mui/icons-material/Edit';
 import { Box, Grid } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@components/core/ContentLink';
 import { useProgramContext } from 'src/programContext';
 import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,

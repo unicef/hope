@@ -1,7 +1,12 @@
 import Tooltip from '@mui/material/Tooltip';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTimezone } from 'src/timezoneContext';
-import { formatInstant, formatTooltip, isDateOnly, parseInstant } from '@utils/timezone';
+import {
+  formatInstant,
+  formatTooltip,
+  isDateOnly,
+  parseInstant,
+} from '@utils/timezone';
 
 export interface Props {
   children: string;

@@ -1,7 +1,8 @@
-import { Dispatch, FC, SetStateAction, useState } from 'react';
+import type { Dispatch, FC, SetStateAction } from 'react';
+import { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
-import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
-import {
+import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type {
   BulkActionMutation,
   SelectAllHandler,
   SelectHandler,
@@ -143,7 +144,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
       <ReleasePaymentPlansModal
         selectedPlansIds={selectedInReview}
         selectedPlansUnicefIds={selectedPlansUnicefIds}
-        onRelease={async(_, comment) => {
+        onRelease={async (_, comment) => {
           try {
             await bulkAction.mutateAsync({
               ids: selectedInReview,

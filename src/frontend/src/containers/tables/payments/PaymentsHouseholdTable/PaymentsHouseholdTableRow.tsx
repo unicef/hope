@@ -10,8 +10,8 @@ import {
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { ReactElement } from 'react';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentsHouseholdTableRowProps {

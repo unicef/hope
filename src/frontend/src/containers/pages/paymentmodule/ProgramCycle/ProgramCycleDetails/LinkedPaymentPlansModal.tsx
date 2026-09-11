@@ -1,4 +1,5 @@
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -22,7 +23,7 @@ import { StyledTable } from '@components/grievances/GrievancesApproveSection/App
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 
 interface LinkedPaymentPlansModalProps {

@@ -1,5 +1,5 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 interface AdminButtonProps {
   adminUrl: string;

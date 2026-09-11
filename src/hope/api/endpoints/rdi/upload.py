@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from hope.api.endpoints.base import HOPEAPIBusinessAreaView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.utils import humanize_errors
-from hope.apps.core.api.fields import UTCDateField
+from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
@@ -271,9 +271,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
 class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     households = HouseholdSerializer(many=True, required=True)
-    program = serializers.SlugRelatedField(
-        slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
-    )
+    program = ScopedSlugRelatedField(slug_field="id", required=True, queryset=Program.objects.all(), write_only=True)
 
     class Meta:
         model = RegistrationDataImport
@@ -281,6 +279,8 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area = kwargs.pop("business_area", None)
+        # built by hand in the view, so the scope has to be set here
+        kwargs.setdefault("context", {})["business_area"] = self.business_area
         super().__init__(*args, **kwargs)
 
     def validate_households(self, value: Any) -> Any:

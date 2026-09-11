@@ -37,6 +37,7 @@ from hope.models import (
     Program,
     User,
 )
+from hope.models.individual import ascii_name_validator
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -269,7 +270,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         return PaymentSmallSerializer(payment_record).data if payment_record else None
 
     def get_related_tickets(self, obj: GrievanceTicket) -> dict:
-        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._related_tickets.order_by("-created_at"), many=True).data
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("-created_at"), many=True).data
@@ -428,6 +429,10 @@ class AddIndividualDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
+    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
+    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
     sex = serializers.CharField()
     birth_date = serializers.DateField()
     estimated_birth_date = serializers.BooleanField()
@@ -465,6 +470,10 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
+    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
+    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
     sex = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
     estimated_birth_date = serializers.BooleanField(required=False)
@@ -537,10 +546,6 @@ class GrievanceComplaintTicketExtras(serializers.Serializer):
         required=False,
         child=ScopedRelatedField(queryset=Payment.objects.all()),
     )
-
-
-class PaymentVerificationTicketExtras(serializers.Serializer):
-    pass
 
 
 class ReferralTicketExtras(serializers.Serializer):

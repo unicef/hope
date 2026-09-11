@@ -5,14 +5,14 @@ from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
 
 from hope.api.caches import (
-    BusinessAreaAndProgramLastUpdatedKeyBit,
+    BusinessAreaAndProgramKeyBitMixin,
     BusinessAreaVersionKeyBit,
     KeyConstructorMixin,
     get_or_create_cache_key,
 )
 
 
-class ProgramCycleListVersionsKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+class ProgramCycleListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "program_cycle_list"
 
 

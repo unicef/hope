@@ -467,3 +467,17 @@ def test_account_upload_serializer_rejects_oversized_attachment(bank_account_typ
 
     assert not serializer.is_valid()
     assert serializer.errors["attachments"][0]["file"][0] == "File size must be ≤ 10MB."
+
+
+def test_push_invalid_list_returns_400_not_500(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    rdi_loading: RegistrationDataImport,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    response = token_api_client.post(url, [{"village": "x"}], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert "households" in body
+    assert isinstance(body["households"], dict)

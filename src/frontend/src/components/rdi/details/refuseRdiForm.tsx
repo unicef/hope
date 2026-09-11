@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { showApiErrorMessages } from '@utils/utils';
 
 const RefuseRdiForm = ({
@@ -38,7 +38,7 @@ const RefuseRdiForm = ({
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async(values) => {
+      onSubmit={async (values) => {
         try {
           await refuseMutate({
             reason: values.refuseReason,

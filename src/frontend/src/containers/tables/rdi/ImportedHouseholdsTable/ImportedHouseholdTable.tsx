@@ -2,14 +2,15 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -54,7 +55,8 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
       RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
         householdsCountParams,
       ),
-    enabled: page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
+    enabled:
+      page === 0 && !notAllowedRdiShowPreviewStatuses.includes(rdi.status),
   });
 
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

@@ -16,7 +16,7 @@ from rest_framework.settings import api_settings
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.api.fields import UTCDateField
+from hope.apps.core.api.fields import ScopedRelatedField, UTCDateField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
@@ -69,6 +69,7 @@ from hope.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     Program,
+    ProgramCycle,
     log_create,
 )
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
@@ -137,8 +138,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_pk"]
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        payment_plan = self.context["payment_plan"]
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
 
@@ -1408,6 +1408,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
     snapshot_alternate_collector_full_name = serializers.SerializerMethodField(
         help_text="Get from Snapshot Alternate Collector Full Name"
     )
+    snapshot_collector_full_name_latin = serializers.SerializerMethodField(
+        help_text="Get from Household Snapshot Latin Name"
+    )
+    snapshot_alternate_collector_full_name_latin = serializers.SerializerMethodField(
+        help_text="Get from Snapshot Alternate Collector Full Name Latin"
+    )
     snapshot_alternate_collector_id = serializers.SerializerMethodField(
         help_text="Get from Snapshot Alternate Collector ID"
     )
@@ -1451,6 +1457,8 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "hoh_phone_no_alternative",
             "snapshot_collector_full_name",
             "snapshot_alternate_collector_full_name",
+            "snapshot_collector_full_name_latin",
+            "snapshot_alternate_collector_full_name_latin",
             "snapshot_alternate_collector_id",
             "fsp_name",
             "entitlement_quantity",
@@ -1515,6 +1523,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     def get_snapshot_alternate_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name", ROLE_ALTERNATE)
+
+    def get_snapshot_collector_full_name_latin(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "full_name_latin")
+
+    def get_snapshot_alternate_collector_full_name_latin(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "full_name_latin", ROLE_ALTERNATE)
 
     def get_snapshot_alternate_collector_id(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "id", ROLE_ALTERNATE)
@@ -1880,11 +1894,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         program = self.get_program()
         data["program"] = program
         data["created_by"] = request.user
-        business_area = program.business_area
 
-        payment_plan = PaymentPlanService.create(
-            input_data=data, user=request.user, business_area_slug=business_area.slug
-        )
+        payment_plan = PaymentPlanService.create(input_data=data, user=request.user, program=program)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1894,6 +1905,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
         )
         return payment_plan
 
+    @transaction.atomic
     def update(self, payment_plan: PaymentPlan, validated_data: dict) -> PaymentPlan:
         request = self.context["request"]
         check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
@@ -2014,6 +2026,8 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+    cycle = ScopedRelatedField(queryset=ProgramCycle.objects.all(), scope="program")
+
     class Meta:
         model = PaymentPlanGroup
         fields = ["id", "unicef_id", "name", "cycle"]

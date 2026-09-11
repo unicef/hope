@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Tooltip, Box } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const ContentWrapper = styled(Box)`

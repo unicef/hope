@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 import pytest
@@ -471,7 +472,7 @@ def test_target_population_caching(
 
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 15
+        assert len(ctx.captured_queries) == 13
 
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])
@@ -479,18 +480,19 @@ def test_target_population_caching(
 
         etag_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
         assert etag_second_call == etag
 
-    target_population_list_context["tp"].status = PaymentPlan.Status.TP_PROCESSING
-    target_population_list_context["tp"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        target_population_list_context["tp"].status = PaymentPlan.Status.TP_LOCKED
+        target_population_list_context["tp"].save()
     with CaptureQueriesContext(connection) as ctx:
         response = target_population_list_context["client"].get(target_population_list_context["tp_list_url"])
         assert response.status_code == status.HTTP_200_OK
 
         etag_call_after_update = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 9
+        assert len(ctx.captured_queries) == 7
 
         assert etag_call_after_update != etag
 
@@ -500,7 +502,7 @@ def test_target_population_caching(
 
         etag_call_after_update_second_call = response.headers["etag"]
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
         assert etag_call_after_update_second_call == etag_call_after_update
 
 
@@ -963,6 +965,7 @@ def test_create_tp_rejects_fsp_conflicting_with_group(
         status=PaymentPlan.Status.TP_OPEN,
     )
     different_fsp = FinancialServiceProviderFactory()
+    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
 
     response = target_population_create_update_context["client"].post(
         target_population_create_update_context["create_url"],
@@ -1007,6 +1010,7 @@ def test_update_tp_rejects_fsp_conflicting_with_group(
         status=PaymentPlan.Status.TP_OPEN,
     )
     different_fsp = FinancialServiceProviderFactory()
+    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
 
     response = target_population_create_update_context["client"].patch(
         target_population_create_update_context["update_url"],
@@ -1038,6 +1042,7 @@ def test_update_tp_rejects_group_change_with_fsp_conflict(
     tp.save()
     new_group = PaymentPlanGroupFactory(cycle=cycle)
     different_fsp = FinancialServiceProviderFactory()
+    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
     PaymentPlanFactory(
         business_area=target_population_create_update_context["business_area"],
         program_cycle=cycle,
@@ -1381,6 +1386,7 @@ def test_apply_engine_formula_tp(
         version=11,
         is_release=True,
     ).rule
+    rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
     data = {
@@ -1412,6 +1418,7 @@ def test_apply_engine_formula_tp_validation_errors(
         target_population_actions_context["program_active"],
     )
     rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=False, version=22).rule
+    rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_STEFICON_ERROR
     target_population_actions_context["target_population"].save()
 
@@ -1545,6 +1552,7 @@ def test_vulnerability_score_filter_applies_correctly(
     steficon_rule_commit = RuleCommitFactory(
         rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
     )
+    steficon_rule_commit.rule.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].save()
     target_population_actions_context["target_population"].refresh_from_db()
 
@@ -1680,6 +1688,7 @@ def test_vulnerability_score_filter_set_before_engine_formula(
     steficon_rule_commit = RuleCommitFactory(
         rule__type=Rule.TYPE_TARGETING, rule__enabled=True, enabled=True, is_release=True
     )
+    steficon_rule_commit.rule.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].save()
     target_population_actions_context["target_population"].refresh_from_db()
 
@@ -1873,6 +1882,7 @@ def test_apply_engine_formula_tp_without_version_skips_concurrency_check(
         version=33,
         is_release=True,
     ).rule
+    rule_for_tp.allowed_business_areas.add(target_population_actions_context["business_area"])
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()
 

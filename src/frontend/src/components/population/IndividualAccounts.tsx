@@ -1,12 +1,13 @@
 import { DividerLine } from '@components/core/DividerLine';
 import { LoadingComponent } from '@core/LoadingComponent';
-import React, { FC } from 'react';
+import type { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
-import { Grid, Paper, Theme, Typography } from '@mui/material';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { Theme } from '@mui/material';
+import { Grid, Paper, Typography } from '@mui/material';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { renderSomethingOrDash, splitCamelCase } from '@utils/utils';
 import { t } from 'i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -78,7 +79,7 @@ const AccountItem: FC<AccountItemProps> = ({
         <Grid size={3}>
           <LabelizedField label={t('Financial Institution')}>
             {renderSomethingOrDash(
-              accountFinancialInstitutionsDict[account.financialInstitution],
+              accountFinancialInstitutionsDict[account.financialInstitution ?? ''],
             )}
           </LabelizedField>
         </Grid>

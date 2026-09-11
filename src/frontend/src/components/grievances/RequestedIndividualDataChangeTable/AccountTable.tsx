@@ -14,8 +14,8 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { safeStringify } from '@utils/utils';
 
 const GreenIcon = styled.div`

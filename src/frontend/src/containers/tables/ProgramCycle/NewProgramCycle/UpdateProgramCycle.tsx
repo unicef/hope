@@ -11,13 +11,14 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { RestService } from '@restgenerated/index';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
-import { ProgramCycleUpdate } from '@restgenerated/models/ProgramCycleUpdate';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramCycleUpdate } from '@restgenerated/models/ProgramCycleUpdate';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages, today } from '@utils/utils';
-import { Field, Form, Formik, FormikValues } from 'formik';
+import type { FormikValues } from 'formik';
+import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
@@ -68,10 +69,10 @@ const UpdateProgramCycle = ({
   const initialValues: {
     [key: string]: string | boolean | number | null;
   } = {
-    id: programCycle.id,
-    title: programCycle.title,
-    startDate: programCycle.startDate,
-    endDate: programCycle.endDate,
+    id: programCycle?.id ?? null,
+    title: programCycle?.title ?? null,
+    startDate: programCycle?.startDate ?? null,
+    endDate: programCycle?.endDate ?? null,
   };
 
   const { mutateAsync, isPending } = useMutation({
@@ -101,7 +102,7 @@ const UpdateProgramCycle = ({
     try {
       await mutateAsync({
         businessAreaSlug: businessArea,
-        id: programCycle.id,
+        id: programCycle?.id ?? '',
         programCode: program.code ?? program.id,
         requestBody: {
           title: values.title,

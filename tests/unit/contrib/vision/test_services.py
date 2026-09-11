@@ -1061,7 +1061,7 @@ def test_send_payment_plan_to_vision_task_does_not_duplicate_persisted_failure_l
     mock_vision_api.return_value.send_payment_plan.side_effect = persist_failure_then_raise
     job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
 
-    with django_assert_num_queries(24), pytest.raises(VisionAPIError):
+    with django_assert_num_queries(26), pytest.raises(VisionAPIError):
         send_payment_plan_to_vision_async_task_action(job)
 
     vision_enabled_payment_plan.refresh_from_db()

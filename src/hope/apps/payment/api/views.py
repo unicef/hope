@@ -1,4 +1,5 @@
 from decimal import Decimal
+from functools import cached_property
 from io import BytesIO
 import logging
 import mimetypes
@@ -44,6 +45,7 @@ from hope.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
     PaymentPlanPurposeListKeyConstructor,
+    PaymentVerificationListKeyConstructor,
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
@@ -197,6 +199,17 @@ logger = logging.getLogger(__name__)
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
+class ScopedPaymentPlanMixin:
+    payment_plan_url_kwarg = "payment_plan_pk"
+
+    def scoped_payment_plan(self, pk: Any) -> PaymentPlan:
+        return get_object_or_404(PaymentPlan, pk=pk, program_cycle__program=self.program)
+
+    @cached_property
+    def payment_plan(self) -> PaymentPlan:
+        return self.scoped_payment_plan(self.kwargs.get(self.payment_plan_url_kwarg))
+
+
 class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
     filter_backends = (
@@ -217,11 +230,13 @@ class PaymentVerificationViewSet(
     ProgramMixin,
     SerializerActionMixin,
     PaymentPlanMixin,
+    ScopedPaymentPlanMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
+    payment_plan_url_kwarg = "pk"
     queryset = (
         PaymentPlan.objects.filter(status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED))
         .select_related("currency")
@@ -258,15 +273,17 @@ class PaymentVerificationViewSet(
     }
 
     def get_object(self) -> PaymentPlan:
-        return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+        return self.payment_plan
 
     def get_verification_plan_object(self) -> PaymentVerificationPlan:
-        return get_object_or_404(PaymentVerificationPlan, id=self.kwargs.get("verification_plan_id"))
+        return get_object_or_404(
+            PaymentVerificationPlan,
+            id=self.kwargs.get("verification_plan_id"),
+            payment_plan=self.payment_plan,
+        )
 
-    # @etag_decorator(PaymentVerificationListKeyConstructor)
-    # @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
-    # TODO: Enable cache on verification list, it is not working due to the fact that when summary is invalidated
-    # payment plan cache is not invalidated (key is stored as hash) updated_at in payment plan is not updated
+    @etag_decorator(PaymentVerificationListKeyConstructor)
+    @cached_response(key_func=PaymentVerificationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -378,7 +395,7 @@ class PaymentVerificationViewSet(
         payment_plan = self.get_object()
         try:
             payment_verification_plan = PaymentVerificationPlan.objects.select_for_update(nowait=True).get(
-                pk=verification_plan_id
+                pk=verification_plan_id, payment_plan=payment_plan
             )
         except PaymentVerificationPlan.DoesNotExist:
             raise Http404
@@ -620,9 +637,12 @@ class PaymentVerificationViewSet(
         )
 
 
-class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, SerializerActionMixin, BaseViewSet):
+class PaymentVerificationRecordViewSet(
+    CountActionMixin, ProgramMixin, SerializerActionMixin, ScopedPaymentPlanMixin, BaseViewSet
+):
     queryset = Payment.objects.all()
     program_model_field = "program_cycle__program"
+    payment_plan_url_kwarg = "payment_verification_pk"
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -638,15 +658,18 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
     filterset_class = PaymentVerificationRecordFilter
 
     def get_object(self) -> PaymentPlan:
-        return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
+        return self.payment_plan
 
     def get_verification_record(self) -> Payment:
-        return get_object_or_404(Payment, id=self.kwargs.get("pk"))
+        return get_object_or_404(
+            with_payment_related_data(Payment.objects.all()),
+            id=self.kwargs.get("pk"),
+            parent=self.payment_plan,
+        )
 
     def get_queryset(self) -> QuerySet:
-        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
         return with_payment_related_data(
-            payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
+            self.payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
         )
 
     @extend_schema(
@@ -666,10 +689,7 @@ class PaymentVerificationRecordViewSet(CountActionMixin, ProgramMixin, Serialize
         return Response(serializer.data)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment = get_object_or_404(
-            with_payment_related_data(Payment.objects.all()),
-            id=self.kwargs.get("pk"),
-        )
+        payment = self.get_verification_record()
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -739,6 +759,7 @@ class PaymentPlanViewSet(
     ProgramMixin,
     SerializerActionMixin,
     PaymentPlanMixin,
+    ScopedPaymentPlanMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -846,7 +867,7 @@ class PaymentPlanViewSet(
     }
 
     def get_object(self) -> PaymentPlan:
-        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+        payment_plan = self.scoped_payment_plan(self.kwargs.get("pk"))
         if payment_plan.is_instruction_managed and self.action in self.BLOCKED_ACTIONS_FOR_INSTRUCTION_MANAGED:
             raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         return payment_plan
@@ -860,7 +881,7 @@ class PaymentPlanViewSet(
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
-        payment_plan = get_object_or_404(PaymentPlan, id=request.data.get("target_population_id"))
+        payment_plan = self.scoped_payment_plan(request.data.get("target_population_id"))
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
@@ -1118,7 +1139,7 @@ class PaymentPlanViewSet(
             engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
             if version := serializer.validated_data.get("version"):
                 check_concurrency_version_in_mutation(version, payment_plan)
-            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id, allowed_business_areas=self.business_area)
             if payment_plan.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
                 raise ValidationError(f"Not allowed to run engine formula within status {payment_plan.status}.")
             if not engine_rule.enabled or engine_rule.deprecated:
@@ -2036,6 +2057,7 @@ class TargetPopulationViewSet(
     ProgramMixin,
     SerializerActionMixin,
     PaymentPlanMixin,
+    ScopedPaymentPlanMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -2075,7 +2097,7 @@ class TargetPopulationViewSet(
     filterset_class = TargetPopulationFilter
 
     def get_object(self) -> PaymentPlan:
-        return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+        return self.scoped_payment_plan(self.kwargs.get("pk"))
 
     @etag_decorator(TargetPopulationListKeyConstructor)
     @cached_response(key_func=TargetPopulationListKeyConstructor())
@@ -2240,8 +2262,8 @@ class TargetPopulationViewSet(
             program_cycle_id = serializer.validated_data["program_cycle_id"]
             payment_plan_group_id = serializer.validated_data["payment_plan_group_id"]
             purposes = serializer.validated_data["payment_plan_purposes"]
-            payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
-            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            payment_plan = self.scoped_payment_plan(payment_plan_id)
+            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id, program=self.program)
             program = program_cycle.program
 
             if program_cycle.status == ProgramCycle.FINISHED:
@@ -2312,7 +2334,7 @@ class TargetPopulationViewSet(
         engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
         if version := serializer.validated_data.get("version"):
             check_concurrency_version_in_mutation(version, tp)
-        engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+        engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id, allowed_business_areas=self.business_area)
         # tp vulnerability_score
         if tp.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
             raise ValidationError(f"Not allowed to run engine formula within status {tp.status}.")
@@ -2366,7 +2388,6 @@ class PaymentPlanManagerialViewSet(
             .select_related("program_cycle__program")
         )
 
-    # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
     @cached_response(key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -2542,7 +2563,9 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         return response
 
 
-class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+class PaymentPlanSupportingDocumentViewSet(
+    ProgramMixin, ScopedPaymentPlanMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
+):
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
 
@@ -2554,16 +2577,15 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
     }
 
     def get_queryset(self) -> QuerySet:
-        payment_plan_id = self.kwargs.get("payment_plan_pk")
-        return PaymentPlanSupportingDocument.objects.filter(payment_plan_id=payment_plan_id)
+        return PaymentPlanSupportingDocument.objects.filter(payment_plan=self.payment_plan)
 
     def get_object(self) -> PaymentPlanSupportingDocument:
-        payment_plan = get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_plan_pk"))
-        return get_object_or_404(
-            PaymentPlanSupportingDocument,
-            id=self.kwargs.get("file_id"),
-            payment_plan=payment_plan,
-        )
+        return get_object_or_404(self.get_queryset(), id=self.kwargs.get("file_id"))
+
+    def get_serializer_context(self) -> dict:
+        context = super().get_serializer_context()
+        context["payment_plan"] = self.payment_plan
+        return context
 
     @transaction.atomic
     def perform_create(self, serializer: Any) -> None:
@@ -2596,7 +2618,9 @@ class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.Destr
 
 class PaymentViewSet(
     CountActionMixin,
+    ProgramMixin,
     SerializerActionMixin,
+    ScopedPaymentPlanMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
@@ -2624,11 +2648,15 @@ class PaymentViewSet(
     filterset_class = PaymentSearchFilter
 
     def get_object(self) -> Payment:
-        payment_id = self.kwargs["payment_id"]
-        return get_object_or_404(with_payment_related_data(Payment.objects.all()), id=payment_id)
+        # the details page is reached by a plain link with no plan id, so scope to the program instead
+        return get_object_or_404(
+            with_payment_related_data(Payment.objects.all()),
+            id=self.kwargs["payment_id"],
+            parent__program_cycle__program=self.program,
+        )
 
     def get_queryset(self) -> QuerySet:
-        parent = PaymentPlan.objects.get(pk=self.kwargs["payment_plan_pk"])
+        parent = self.payment_plan
         if parent.status == PaymentPlan.Status.OPEN:
             queryset = parent.eligible_payments_with_conflicts
         else:
