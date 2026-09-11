@@ -23,7 +23,7 @@ def increment_country_areas_version(country_id: str) -> int:
 
 
 class CountryAreasKeyBit(KeyBitBase):
-    def get_data(  # type: ignore[override]  # noqa: PLR0913, PLR0917 – override of base method signature
+    def get_data(  # type: ignore[override]  # noqa: PLR0913 – override of base method signature
         self, params: Any, view_instance: Any, view_method: Any, request: Request, args: tuple, kwargs: dict
     ) -> dict:
         ba = view_instance.business_area
