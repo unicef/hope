@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from hope.apps.core.utils import to_camel_case
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models import PaymentPlan
 
 VISION_CALLBACK_FIELD_OVERRIDES = {
     "vision_payplanSno": "vision_payplan_sno",
@@ -115,12 +114,7 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     auth_amt = serializers.CharField(source="total_entitled_quantity")
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
     exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
-    status = serializers.CharField()
     head_vendor = serializers.CharField(source="financial_service_provider.name")
-    creation_date = serializers.SerializerMethodField()
-
-    def get_creation_date(self, obj: PaymentPlan) -> str:
-        return obj.created_at.strftime("%Y%m%d")
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)

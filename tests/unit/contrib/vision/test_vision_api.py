@@ -175,9 +175,7 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
             "authAmt": "10000.00",
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
-            "status": PaymentPlan.Status.IN_REVIEW,
             "headVendor": "Head Vendor Name",
-            "creationDate": "20250101",
         },
     )
 
@@ -194,39 +192,6 @@ def test_payment_plan_payload_includes_null_exchange_rate(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_plan_with_creation_date(
-    mock_post,
-    mock_acquire_token,
-    vision_api_payment_plan_factory,
-) -> None:
-    mock_post.return_value = ({"status": "ok"}, 200)
-    api = VisionAPI()
-    pp = vision_api_payment_plan_factory(
-        unicef_id="PP002",
-        created_at=datetime(2025, 6, 15, 10, 30, 0),
-    )
-    result = api.send_payment_plan(pp)
-    assert result == {"status": "ok"}
-    mock_post.assert_called_once_with(
-        "https://test.example.com/ps/ezcash/PaymentPlan",
-        {
-            "businessArea": "FI01",
-            "vendorNumber": "V100004",
-            "payplanSno": "PP002",
-            "payplanDesc": "Monthly payment plan testing the content length",
-            "currency": "USD",
-            "authAmt": "10000.00",
-            "authAmtUsd": "10000.00",
-            "exchangeRate": "1.25000000",
-            "status": PaymentPlan.Status.IN_REVIEW,
-            "headVendor": "Head Vendor Name",
-            "creationDate": "20250615",
-        },
-    )
-
-
-@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
-@patch("hope.contrib.vision.api.VisionAPI._post")
 def test_send_payment_plan_with_different_currency(
     mock_post,
     mock_acquire_token,
@@ -237,7 +202,6 @@ def test_send_payment_plan_with_different_currency(
     pp = vision_api_payment_plan_factory(
         unicef_id="PP003",
         currency_code="EUR",
-        created_at=datetime(2025, 3, 1),
     )
     result = api.send_payment_plan(pp)
     assert result == {"status": "ok"}
@@ -252,9 +216,7 @@ def test_send_payment_plan_with_different_currency(
             "authAmt": "10000.00",
             "authAmtUsd": "10000.00",
             "exchangeRate": "1.25000000",
-            "status": PaymentPlan.Status.IN_REVIEW,
             "headVendor": "Head Vendor Name",
-            "creationDate": "20250301",
         },
     )
 
