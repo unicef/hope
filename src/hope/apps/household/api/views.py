@@ -191,7 +191,6 @@ class HouseholdViewSet(
             200: PaymentListSerializer(many=True),
         },
     )
-
     @action(detail=True, methods=["get"], filter_backends=(OrderingFilter,))
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         hh = self.get_object()
