@@ -1,13 +1,19 @@
+from collections.abc import Mapping
+from datetime import datetime, timedelta
 import logging
 import os
+from urllib.parse import urlencode
 
+from constance import config
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.grievance.constants import MY_TASKS_PAGE
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -19,9 +25,35 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hope.apps.grievance.validators import validate_file
-from hope.models import Individual, Partner
+from hope.models import BusinessArea, Individual, Partner
 
 logger = logging.getLogger(__name__)
+
+
+def overdue_q(now: "datetime | None" = None) -> Q:
+    """Tickets past their overdue threshold, which differs by category."""
+    now = now or timezone.now()
+    sensitive_cutoff = now - timedelta(days=config.GRIEVANCE_OVERDUE_THRESHOLD_SENSITIVE)
+    other_cutoff = now - timedelta(days=config.GRIEVANCE_OVERDUE_THRESHOLD_NON_SENSITIVE)
+    is_sensitive = Q(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
+    return (is_sensitive & Q(created_at__lte=sensitive_cutoff)) | (~is_sensitive & Q(created_at__lte=other_cutoff))
+
+
+def grievance_tickets_page_url(
+    business_area: "BusinessArea", page: str, params: Mapping[str, str] | None = None
+) -> str:
+    """Link to a grievance ticket list page. Not ticket-specific, so no sensitive restriction."""
+    protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+    url = f"{protocol}://{settings.FRONTEND_HOST}/{business_area.slug}/programs/all/grievance/{page}"
+    return f"{url}?{urlencode(params)}" if params else url
+
+
+def my_tasks_url(business_area: "BusinessArea", preset: str, *, overdue: bool = False) -> str:
+    """Deep link to one My Tasks preset, optionally narrowed to overdue tickets."""
+    params = {"tab": preset}
+    if overdue:
+        params["overdue"] = "true"
+    return grievance_tickets_page_url(business_area, MY_TASKS_PAGE, params)
 
 
 def grievance_ticket_url(grievance_ticket: GrievanceTicket) -> str | None:

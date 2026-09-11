@@ -557,6 +557,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 name="idx_gt_ba_updated_not_ign",
             ),
             models.Index(fields=["assigned_at"], name="idx_gt_assigned_at"),
+            models.Index(fields=["assigned_to", "status"], name="idx_gt_assigned_to_status"),
+            models.Index(fields=["assigned_to", "category", "status"], name="idx_gt_assigned_cat_status"),
+            models.Index(fields=["assigned_to", "created_at", "status"], name="idx_gt_assigned_created_status"),
         ]
 
     def clean(self) -> None:

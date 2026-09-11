@@ -1,0 +1,12 @@
+{% extends 'base_notification_email.html' %}
+
+{% block content %}
+    <p>{{ intro }}</p>
+    {% for section in sections %}
+        <p style="font-size: 15px;">
+            {% if section.label %}{{ section.label }}: {% endif %}
+            <strong>{{ section.ticket_count }}</strong> ticket{{ section.ticket_count|pluralize }} &mdash;
+            <a href="{{ section.tickets_url }}">check the list</a>
+        </p>
+    {% endfor %}
+{% endblock content %}

@@ -9,15 +9,10 @@ from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionE
 
 from hope.apps.core.celery import app
 from hope.apps.core.timezones import latest_local_schedule_time
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.daily_digest_service import DailyDigestService
-from hope.apps.grievance.services.notification_schedule import (
-    get_grievance_notification_hour,
-    is_grievance_reminder_due,
-)
+from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, BusinessArea, Individual, PeriodicAsyncJob
+from hope.models import AsyncRetryJob, BusinessArea, Individual, PeriodicAsyncJob
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +133,7 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
     if failed:
         job.save(update_fields=["config"])
         raise RuntimeError(
-            f"{failed} recipient(s) missed the {digest_date} grievance digest for "
+            f"{failed} grievance email(s) failed for the {digest_date} digest for "
             f"{business_area.slug} in {timezone_name}"
         )
 
@@ -171,65 +166,3 @@ def daily_grievance_digest_async_task() -> None:
                 group_key="grievance",
                 description=f"Send the {digest_date} grievance digest for {business_area.name} in {timezone_name}",
             )
-
-
-def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
-    now = timezone.now()
-    notification_hour = get_grievance_notification_hour()
-    sensitive_tickets_one_day_date = now - timedelta(days=1)
-    sensitive_tickets_to_notify = (
-        GrievanceTicket.objects.select_related("business_area", "assigned_to")
-        .exclude(status=GrievanceTicket.STATUS_CLOSED)
-        .filter(
-            Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=sensitive_tickets_one_day_date))
-            | Q(last_notification_sent__lte=sensitive_tickets_one_day_date)
-        )
-        .filter(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
-    )
-
-    other_tickets_30_days_date = now - timedelta(days=30)
-    other_tickets_to_notify = (
-        GrievanceTicket.objects.select_related("business_area", "assigned_to")
-        .exclude(status=GrievanceTicket.STATUS_CLOSED)
-        .filter(
-            Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=other_tickets_30_days_date))
-            | Q(last_notification_sent__lte=other_tickets_30_days_date)
-        )
-        .exclude(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
-    )
-    for ticket in sensitive_tickets_to_notify:
-        set_sentry_business_area_tag(ticket.business_area.name)
-        if ticket.business_area.enable_email_notification and is_grievance_reminder_due(
-            ticket,
-            now,
-            timedelta(days=1),
-            notification_hour,
-        ):
-            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-            notification.send_email_notification()
-            ticket.last_notification_sent = now
-            ticket.save(update_fields=["last_notification_sent"])
-
-    for ticket in other_tickets_to_notify:
-        set_sentry_business_area_tag(ticket.business_area.name)
-        if ticket.business_area.enable_email_notification and is_grievance_reminder_due(
-            ticket,
-            now,
-            timedelta(days=30),
-            notification_hour,
-        ):
-            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
-            notification.send_email_notification()
-            ticket.last_notification_sent = now
-            ticket.save(update_fields=["last_notification_sent"])
-
-
-@app.task()
-def periodic_grievances_notifications_async_task() -> None:
-    PeriodicAsyncJob.queue_task(
-        job_name=periodic_grievances_notifications_async_task.__name__,
-        action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action",
-        config={},
-        group_key="grievance",
-        description="Send periodic grievance notifications",
-    )

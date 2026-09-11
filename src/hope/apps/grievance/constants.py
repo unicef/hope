@@ -50,3 +50,11 @@ def get_urgency_choices() -> tuple:
 
 def get_submission_channel_choices() -> tuple:
     return SUBMISSION_CHANNEL_CHOICES
+
+
+# My Tasks page and its filter presets. The preset travels in the URL as ``?tab=`` so that the
+# daily emails can deep-link into the list the recipient is being told about.
+MY_TASKS_PAGE = "my-tasks"
+PRESET_NEEDS_ASSIGNMENT = "needs-assignment"
+PRESET_MINE_SENSITIVE = "mine-sensitive"
+PRESET_MINE = "mine"
