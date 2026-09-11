@@ -690,6 +690,58 @@ def test_follow_up_instruction_delivery_export_xlsx(
     assert instruction.background_action_status == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING
 
 
+@pytest.fixture
+def instruction_in_inactive_currency(
+    follow_up_context: dict[str, Any],
+    delivery_mechanism: Any,
+    fsp: Any,
+    delivery_template: Any,
+    currency_syp_deprecated: Any,
+) -> FollowUpInstruction:
+    ctx = follow_up_context
+    PaymentFactory(
+        parent=PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            follow_up_instruction=ctx["instruction"],
+            program_cycle=ctx["cycle"],
+            currency=currency_syp_deprecated,
+            delivery_mechanism=delivery_mechanism,
+            financial_service_provider=fsp,
+            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        ),
+        program=ctx["program"],
+        currency=currency_syp_deprecated,
+        delivery_type=delivery_mechanism,
+        financial_service_provider=fsp,
+        status=Payment.STATUS_PENDING,
+    )
+    return ctx["instruction"]
+
+
+def test_follow_up_instruction_delivery_export_xlsx_rejects_inactive_currency(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    instruction_in_inactive_currency: FollowUpInstruction,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_LIST], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-delivery-export-xlsx",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": instruction_in_inactive_currency.pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "currency SYP - Syrian Pound (old) is inactive" in str(response.json())
+    instruction_in_inactive_currency.refresh_from_db()
+    assert instruction_in_inactive_currency.background_action_status is None
+
+
 def test_follow_up_instruction_delivery_import_xlsx(
     follow_up_context: dict[str, Any],
     create_user_role_with_permissions: Any,

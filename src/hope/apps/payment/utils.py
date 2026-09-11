@@ -310,6 +310,21 @@ def get_quantity_in_usd(
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
 
 
+def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:
+    """Why the plan's amounts must not be sent to a Financial Service Provider, or None when they may.
+
+    FSPs receive only the ISO code, which after a redenomination names the active variant, so amounts
+    in an inactive variant would be paid out in the wrong denomination.
+    """
+    currency = payment_plan.currency
+    if currency is None or currency.active:
+        return None
+    return (
+        f"Payment Plan {payment_plan.unicef_id}: currency {currency} is inactive; "
+        f"its amounts cannot be sent to the Financial Service Provider."
+    )
+
+
 def normalize_score(value: float | str | Decimal | None) -> Decimal | None:
     if value is None:
         return None
