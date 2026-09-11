@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 import pytest
@@ -27,6 +29,28 @@ def syp_pair(db) -> tuple[Currency, Currency]:
 @pytest.fixture
 def deprecated_syp(db) -> Currency:
     return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def retired_with_vision_code(db) -> Currency:
+    """An inactive row whose ``vision_code`` differs from its ``code``, so it would be an alias if active."""
+    return CurrencyFactory(code="VEF", name="Venezuelan bolivar", vision_code="VEF01", active=False)
+
+
+@pytest.fixture
+def deactivated_code_reused_as_alias(db) -> tuple[Currency, Currency]:
+    """A withdrawn currency whose ISO code is the ``vision_code`` of a different, active currency."""
+    withdrawn = CurrencyFactory(code="ZWL", name="Zimbabwean dollar", vision_code="ZWL00", active=False)
+    successor = CurrencyFactory(code="ZWG", name="Zimbabwe Gold", vision_code="ZWL", active=True)
+    return withdrawn, successor
+
+
+@pytest.fixture
+def code_shadowing_an_alias(db) -> tuple[Currency, Currency]:
+    """Two active rows where one's ``code`` is the other's ``vision_code``."""
+    by_code = CurrencyFactory(code="ABC", name="By code", vision_code="ABC01", active=True)
+    by_alias = CurrencyFactory(code="XYZ", name="By alias", vision_code="ABC", active=True)
+    return by_code, by_alias
 
 
 @pytest.mark.django_db
@@ -153,6 +177,84 @@ def test_get_active_by_code_or_none_prefers_active_over_deprecated_for_shared_co
     _deprecated, active = syp_pair
 
     assert Currency.objects.get_active_by_code_or_none("SYP") == active
+
+
+def test_get_active_by_code_resolves_the_vision_code_alias_of_the_active_row(
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    _deprecated, active = syp_pair
+
+    assert Currency.objects.get_active_by_code("SYP01") == active
+
+
+def test_get_active_by_code_or_none_resolves_the_vision_code_alias_of_the_active_row(
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    _deprecated, active = syp_pair
+
+    assert Currency.objects.get_active_by_code_or_none("SYP01") == active
+
+
+def test_get_active_by_code_resolves_a_code_in_one_query(
+    syp_pair: tuple[Currency, Currency], django_assert_num_queries
+) -> None:
+    # The alias lookups are paid only when no active row matches by code.
+    with django_assert_num_queries(1):
+        Currency.objects.get_active_by_code("SYP")
+
+
+def test_get_active_by_code_logs_a_resolution_through_the_alias(
+    syp_pair: tuple[Currency, Currency], caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.WARNING, logger="hope.models.currency"):
+        Currency.objects.get_active_by_code("SYP01")
+
+    assert [record.getMessage() for record in caplog.records] == [
+        "Currency 'SYP01' resolved through the vision_code alias of 'SYP'."
+    ]
+
+
+def test_get_active_by_code_does_not_log_a_resolution_by_code(
+    syp_pair: tuple[Currency, Currency], caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.WARNING, logger="hope.models.currency"):
+        Currency.objects.get_active_by_code("SYP")
+
+    assert caplog.records == []
+
+
+def test_get_active_by_code_prefers_a_code_over_another_rows_vision_code(
+    code_shadowing_an_alias: tuple[Currency, Currency],
+) -> None:
+    by_code, _by_alias = code_shadowing_an_alias
+
+    assert Currency.objects.get_active_by_code("ABC") == by_code
+
+
+def test_get_active_by_code_raises_for_the_vision_code_of_an_inactive_row(
+    retired_with_vision_code: Currency,
+) -> None:
+    with pytest.raises(Currency.DoesNotExist):
+        Currency.objects.get_active_by_code("VEF01")
+
+
+def test_get_active_by_code_or_none_returns_none_for_the_vision_code_of_an_inactive_row(
+    retired_with_vision_code: Currency,
+) -> None:
+    assert Currency.objects.get_active_by_code_or_none("VEF01") is None
+
+
+def test_get_active_by_code_raises_for_a_deactivated_code_reused_as_an_alias(
+    deactivated_code_reused_as_alias: tuple[Currency, Currency],
+) -> None:
+    with pytest.raises(Currency.DoesNotExist):
+        Currency.objects.get_active_by_code("ZWL")
+
+
+def test_get_active_by_code_or_none_returns_none_for_a_deactivated_code_reused_as_an_alias(
+    deactivated_code_reused_as_alias: tuple[Currency, Currency],
+) -> None:
+    assert Currency.objects.get_active_by_code_or_none("ZWL") is None
 
 
 def test_active_code_lookup_is_not_reachable_from_a_queryset(db) -> None:

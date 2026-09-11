@@ -1,8 +1,11 @@
+import logging
 from typing import Any
 
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 
 class CurrencyQuerySet(models.QuerySet):
@@ -12,10 +15,30 @@ class CurrencyQuerySet(models.QuerySet):
 
 class CurrencyManager(models.Manager.from_queryset(CurrencyQuerySet)):
     def get_active_by_code(self, code: str) -> "Currency":
-        return self.get(code=code, active=True)
+        currency = self.get_active_by_code_or_none(code)
+        if currency is None:
+            raise self.model.DoesNotExist(f"No active currency with code {code!r}.")
+        return currency
 
     def get_active_by_code_or_none(self, code: str) -> "Currency | None":
-        return self.filter(code=code, active=True).first()
+        """Return the active row whose ``code`` is ``code``, else the active row whose ``vision_code`` is.
+
+        The ``vision_code`` fallback is a transitional alias: after a redenomination moves the new
+        row's ``code`` onto the ISO code, clients may still send its former code, which is kept as
+        ``vision_code``. ``code`` goes first, so an ISO code never resolves through another row's alias,
+        and a deactivated ``code`` stays rejected even when an active row carries it as ``vision_code``.
+        """
+        currency = self.filter(code=code, active=True).first()
+        if currency is not None:
+            return currency
+        # TODO(<ticket>): everything below is the vision_code alias; when the transition period ends,
+        # replace it with `return None`.
+        if self.filter(code=code).exists():
+            return None
+        alias = self.filter(vision_code=code, active=True).first()
+        if alias is not None:
+            logger.warning("Currency %r resolved through the vision_code alias of %r.", code, alias.code)
+        return alias
 
 
 class Currency(models.Model):

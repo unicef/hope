@@ -32,6 +32,11 @@ def current_syp() -> Currency:
     return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
 
 
+@pytest.fixture
+def retired_with_vision_code() -> Currency:
+    return CurrencyFactory(code="VEF", name="Venezuelan bolivar", vision_code="VEF01", active=False)
+
+
 def test_field_resolves_active_currency(active_currency: Currency, django_assert_num_queries) -> None:
     serializer = _CreateCarrierSerializer(data={"currency": "TST"})
 
@@ -70,7 +75,7 @@ def test_field_costs_one_query_per_row(
 def test_field_unknown_code_is_validation_error(django_assert_num_queries) -> None:
     serializer = _CreateCarrierSerializer(data={"currency": "MISSING"})
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(3):
         is_valid = serializer.is_valid()
 
     assert not is_valid
@@ -80,11 +85,50 @@ def test_field_unknown_code_is_validation_error(django_assert_num_queries) -> No
 def test_field_inactive_only_code_is_validation_error(deprecated_syp: Currency, django_assert_num_queries) -> None:
     serializer = _CreateCarrierSerializer(data={"currency": "SYP"})
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         is_valid = serializer.is_valid()
 
     assert not is_valid
     assert "currency" in serializer.errors
+
+
+def test_field_resolves_the_vision_code_alias_to_the_active_row(
+    deprecated_syp: Currency, current_syp: Currency, django_assert_num_queries
+) -> None:
+    serializer = _CreateCarrierSerializer(data={"currency": "SYP01"})
+
+    with django_assert_num_queries(3):
+        is_valid = serializer.is_valid()
+
+    assert is_valid, serializer.errors
+    assert serializer.validated_data["currency"] == current_syp
+
+
+def test_field_inactive_only_alias_is_validation_error(retired_with_vision_code: Currency) -> None:
+    serializer = _CreateCarrierSerializer(data={"currency": "VEF01"})
+
+    assert not serializer.is_valid()
+    assert serializer.errors["currency"][0].code == "does_not_exist"
+
+
+def test_field_represents_a_currency_by_code_after_resolving_the_alias(
+    deprecated_syp: Currency, current_syp: Currency
+) -> None:
+    serializer = _CreateCarrierSerializer(data={"currency": "SYP01"})
+    serializer.is_valid()
+
+    assert serializer.data == {"currency": "SYP"}
+
+
+def test_field_moves_an_update_that_sends_the_alias_onto_the_active_row(
+    deprecated_syp: Currency, current_syp: Currency
+) -> None:
+    # The alias is a different code from the deprecated row's, so it is a deliberate change.
+    instance = type("_Carrier", (), {"currency": deprecated_syp})()
+    serializer = _UpdateCarrierSerializer(instance, data={"currency": "SYP01"})
+
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["currency"] == current_syp
 
 
 def test_field_keeps_the_deprecated_row_an_update_echoes_back(
