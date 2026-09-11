@@ -31,8 +31,8 @@ class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "status",
     )
 
-    def frontend_url(self, obj: FollowUpInstruction) -> str:
-        return f"/{obj.business_area.slug}/payment-module/follow-up-instructions/{obj.id}"
+    def frontend_url(self, obj: FollowUpInstruction) -> str | None:
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/follow-up-instructions/{obj.id}"
 
     @button(permission="payment.view_followupinstruction")
     def payment_plans(self, request: HttpRequest, pk: str) -> HttpResponseRedirect:

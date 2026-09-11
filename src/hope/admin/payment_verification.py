@@ -43,12 +43,13 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
     readonly_fields = ("payment", "payment_verification_plan", "status_date", "received_amount", "sent_to_rapid_pro")
     search_fields = ("payment__unicef_id",)
 
-    def frontend_url(self, obj: PaymentVerification) -> str:
+    def frontend_url(self, obj: PaymentVerification) -> str | None:
         plan = obj.payment_verification_plan
-        program = plan.payment_plan.program_cycle.program
+        program = plan.get_program
         return (
-            f"/{plan.payment_plan.business_area.slug}/programs/{program.code}"
-            f"/payment-verification/payment-plan/{plan.id}/verification/payment/{obj.id}"
+            f"/{plan.business_area.slug}/programs/{program.code}"
+            f"/payment-verification/payment-plan/{plan.payment_plan.id}"
+            f"/verification/payment/{obj.payment.id}"
         )
 
     def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
