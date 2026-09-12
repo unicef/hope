@@ -294,12 +294,13 @@ def test_filter_by_is_survey_creator_false(
 
 def test_filter_by_is_message_creator(
     afghanistan: BusinessArea,
+    program1: Program,
     authenticated_client: Any,
     list_url: str,
     all_users: dict,
 ) -> None:
     user1 = all_users["user1"]
-    Message.objects.create(created_by=user1, title="Test Message", business_area=afghanistan)
+    Message.objects.create(created_by=user1, title="Test Message", business_area=afghanistan, program=program1)
 
     response = authenticated_client.get(list_url, {"is_message_creator": True})
     assert response.status_code == status.HTTP_200_OK
