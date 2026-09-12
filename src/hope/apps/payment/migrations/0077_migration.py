@@ -16,4 +16,16 @@ class Migration(migrations.Migration):
             name="program",
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="program.program"),
         ),
+        migrations.CreateModel(
+            name="TargetPopulation",
+            fields=[],
+            options={
+                "verbose_name": "Target Population",
+                "verbose_name_plural": "Target Populations",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
+            },
+            bases=("payment.paymentplan",),
+        ),
     ]
