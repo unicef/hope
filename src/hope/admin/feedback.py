@@ -10,6 +10,7 @@ class FeedbackAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "issue_type",
+        "program",
         "business_area",
         "area",
         "consent",
@@ -21,6 +22,5 @@ class FeedbackAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
 
     def frontend_url(self, obj: Feedback) -> str | None:
-        if not obj.program:
-            return None
-        return f"/{obj.business_area.slug}/programs/{obj.program.code}/grievance/feedback/{obj.id}"
+        program_code = obj.program.code if obj.program else "all"
+        return f"/{obj.business_area.slug}/programs/{program_code}/grievance/feedback/{obj.id}"

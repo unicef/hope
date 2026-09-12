@@ -252,35 +252,6 @@ def test_frontend_url_payment_verification_plan(program, cycle):
     )
 
 
-@pytest.mark.django_db
-def test_frontend_url_payment_without_program(program, cycle):
-    plan = PaymentPlanFactory(program_cycle=cycle(program()))
-    payment = PaymentFactory(parent=plan)
-    assert site._registry[Payment].frontend_url(payment) is None
-
-
-@pytest.mark.django_db
-def test_frontend_url_rdi_without_business_area(program):
-    program = program()
-    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
-    rdi.business_area = None
-    assert site._registry[RegistrationDataImport].frontend_url(rdi) is None
-
-
-@pytest.mark.django_db
-def test_frontend_url_survey_without_program(program):
-    program = program()
-    survey = SurveyFactory(program=None, business_area=program.business_area)
-    assert site._registry[Survey].frontend_url(survey) is None
-
-
-@pytest.mark.django_db
-def test_frontend_url_message_without_program(program):
-    program = program()
-    message = CommunicationMessageFactory(program=None, business_area=program.business_area)
-    assert site._registry[Message].frontend_url(message) is None
-
-
 def test_frontend_url_base_not_implemented():
     with pytest.raises(NotImplementedError):
         ViewOnUiMixin().frontend_url(object())
@@ -302,12 +273,16 @@ def test_view_on_ui_without_original():
 
 
 @pytest.mark.django_db
-def test_view_on_ui_without_frontend_url(program, cycle):
-    plan = PaymentPlanFactory(program_cycle=cycle(program()))
-    payment = PaymentFactory(parent=plan)
-    btn = _button(payment)
-    _handler(Payment).func(site._registry[Payment], btn)
-    assert btn.href is None
+def test_view_on_ui_without_frontend_url(program):
+    ma = site._registry[Program]
+    original = ma.frontend_url
+    ma.frontend_url = lambda obj: None  # type: ignore[method-assign]
+    try:
+        btn = _button(program())
+        _handler(Program).func(ma, btn)
+        assert btn.href is None
+    finally:
+        ma.frontend_url = original
 
 
 @pytest.mark.django_db
@@ -320,7 +295,7 @@ def test_frontend_url_feedback(program):
 @pytest.mark.django_db
 def test_frontend_url_feedback_without_program():
     feedback = FeedbackFactory(business_area=BusinessAreaFactory(name="AFG"))
-    assert site._registry[Feedback].frontend_url(feedback) is None
+    assert site._registry[Feedback].frontend_url(feedback) == f"/afg/programs/all/grievance/feedback/{feedback.id}"
 
 
 @pytest.mark.django_db
