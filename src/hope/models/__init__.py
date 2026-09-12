@@ -78,6 +78,7 @@ from hope.models.sanction_list_individual_document import *  # noqa: F403
 from hope.models.sanction_list_individual_nationalities import *  # noqa: F403
 from hope.models.storage_file import *  # noqa: F403
 from hope.models.survey import *  # noqa: F403
+from hope.models.target_population import *  # noqa: F403
 from hope.models.targeting_criteria_rule import *  # noqa: F403
 from hope.models.targeting_criteria_rule_filter import *  # noqa: F403
 from hope.models.targeting_individual_block_rule_filter import *  # noqa: F403
