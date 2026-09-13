@@ -5,7 +5,6 @@ from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from django.contrib import admin
 from django.http import HttpRequest
 
-from hope.admin.payment_plan import FundsCommitmentItemInline, PaymentInstructionInline
 from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.utils.security import is_root
@@ -20,10 +19,8 @@ class TargetPopulationAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "business_area",
         "program_cycle",
         "status",
-        "use_payment_gateway",
         "background_action_status",
         "build_status",
-        "plan_type",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -31,16 +28,12 @@ class TargetPopulationAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         ("program_cycle__program__id", ValueFilter),
         ("currency__code", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
-        "use_payment_gateway",
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
-    filter_horizontal = ("payment_plan_purposes",)
-    inlines = [FundsCommitmentItemInline, PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
@@ -97,7 +90,6 @@ class TargetPopulationAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "total_undelivered_quantity_usd",
         "steficon_targeting_applied_date",
         "steficon_applied_date",
-        "plan_type",
         "export_tag",
         "exclude_household_error",
         "status_date",
@@ -124,13 +116,6 @@ class TargetPopulationAdmin(ViewOnUiMixin, HOPEModelAdminBase):
             old_object=old_payment_plan,
             new_object=obj,
         )
-
-    def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
-        if db_field.name == "payment_plan_purposes":
-            obj = getattr(request, "_payment_plan_obj", None)
-            if obj is not None:
-                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
