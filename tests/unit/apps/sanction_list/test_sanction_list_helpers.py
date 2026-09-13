@@ -7,7 +7,7 @@ import pytest
 
 from hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     _resolve_individual_hit,
-    _save_tickets_and_notify,
+    _save_tickets,
 )
 
 
@@ -129,103 +129,40 @@ def test_empty_individuals_ids_skips_membership_check(mock_individual_cls, make_
 
 
 # ---------------------------------------------------------------------------
-# _save_tickets_and_notify
+# _save_tickets
 # ---------------------------------------------------------------------------
 
 
 @patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.TicketSystemFlaggingDetails")
-@patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.GrievanceNotification")
 @patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.GrievanceTicket")
-def test_bulk_creates_and_notifies(
+def test_bulk_creates_tickets_programs_and_details(
     mock_grievance_ticket_cls,
-    mock_notification_cls,
     mock_details_cls,
 ):
-    ticket_1 = MagicMock(name="ticket_1")
-    ticket_2 = MagicMock(name="ticket_2")
-    tickets_to_create = [ticket_1, ticket_2]
-
-    program_through_1 = MagicMock(name="through_1")
-    program_through_2 = MagicMock(name="through_2")
-    tickets_programs = [program_through_1, program_through_2]
-
-    detail_1 = MagicMock(name="detail_1")
-    detail_2 = MagicMock(name="detail_2")
-    ticket_details_to_create = [detail_1, detail_2]
-
-    # Set up the through model mock
     mock_through = MagicMock()
     mock_grievance_ticket_cls.programs.through = mock_through
+    tickets_to_create = [MagicMock(name="ticket_1"), MagicMock(name="ticket_2")]
+    tickets_programs = [MagicMock(name="program_through_1")]
+    ticket_details_to_create = [MagicMock(name="detail_1")]
 
-    # Set up notification mocks - each call returns a list of notifications
-    notif_1 = MagicMock(name="notif_1")
-    notif_2 = MagicMock(name="notif_2")
-    mock_notification_cls.prepare_notification_for_ticket_creation.side_effect = [
-        [notif_1],
-        [notif_2],
-    ]
+    _save_tickets(tickets_to_create, tickets_programs, ticket_details_to_create)
 
-    _save_tickets_and_notify(tickets_to_create, tickets_programs, ticket_details_to_create)
-
-    # Verify GrievanceTicket bulk_create
     mock_grievance_ticket_cls.objects.bulk_create.assert_called_once_with(tickets_to_create)
-
-    # Verify through model bulk_create for program associations
     mock_through.objects.bulk_create.assert_called_once_with(tickets_programs)
-
-    # Verify TicketSystemFlaggingDetails bulk_create
     mock_details_cls.objects.bulk_create.assert_called_once_with(ticket_details_to_create)
-
-    # Verify notifications prepared and sent for each ticket
-    assert mock_notification_cls.prepare_notification_for_ticket_creation.call_count == 2
-    mock_notification_cls.prepare_notification_for_ticket_creation.assert_any_call(ticket_1)
-    mock_notification_cls.prepare_notification_for_ticket_creation.assert_any_call(ticket_2)
-
-    assert mock_notification_cls.send_all_notifications.call_count == 2
-    mock_notification_cls.send_all_notifications.assert_any_call([notif_1])
-    mock_notification_cls.send_all_notifications.assert_any_call([notif_2])
 
 
 @patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.TicketSystemFlaggingDetails")
-@patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.GrievanceNotification")
 @patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.GrievanceTicket")
-def test_empty_lists(
+def test_empty_lists_still_bulk_create(
     mock_grievance_ticket_cls,
-    mock_notification_cls,
     mock_details_cls,
 ):
-    """When called with empty lists, bulk_create is still called but no notifications are sent."""
     mock_through = MagicMock()
     mock_grievance_ticket_cls.programs.through = mock_through
 
-    _save_tickets_and_notify([], [], [])
+    _save_tickets([], [], [])
 
     mock_grievance_ticket_cls.objects.bulk_create.assert_called_once_with([])
     mock_through.objects.bulk_create.assert_called_once_with([])
     mock_details_cls.objects.bulk_create.assert_called_once_with([])
-    mock_notification_cls.prepare_notification_for_ticket_creation.assert_not_called()
-    mock_notification_cls.send_all_notifications.assert_not_called()
-
-
-@patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.TicketSystemFlaggingDetails")
-@patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.GrievanceNotification")
-@patch("hope.apps.sanction_list.tasks.check_against_sanction_list_pre_merge.GrievanceTicket")
-def test_notification_order(
-    mock_grievance_ticket_cls,
-    mock_notification_cls,
-    mock_details_cls,
-):
-    """Notifications are sent in the order of tickets_to_create, and details bulk_create happens after."""
-    mock_through = MagicMock()
-    mock_grievance_ticket_cls.programs.through = mock_through
-
-    call_order = []
-    mock_notification_cls.prepare_notification_for_ticket_creation.return_value = []
-    mock_notification_cls.send_all_notifications.side_effect = lambda x: call_order.append("notify")
-    mock_details_cls.objects.bulk_create.side_effect = lambda x: call_order.append("details_bulk")
-
-    ticket = MagicMock(name="ticket")
-    _save_tickets_and_notify([ticket], [MagicMock()], [MagicMock()])
-
-    # Notifications should be sent before details are bulk-created
-    assert call_order == ["notify", "details_bulk"]

@@ -52,9 +52,8 @@ def get_submission_channel_choices() -> tuple:
     return SUBMISSION_CHANNEL_CHOICES
 
 
-# My Tasks page and its filter presets. The preset travels in the URL as ``?tab=`` so that the
-# daily emails can deep-link into the list the recipient is being told about.
+# The two tabs on the My Tasks page. The daily emails link into them with ?tab=. Each email counts
+# sensitive and other tickets separately, so every count links with ?sensitive= to match.
 MY_TASKS_PAGE = "my-tasks"
 PRESET_NEEDS_ASSIGNMENT = "needs-assignment"
-PRESET_MINE_SENSITIVE = "mine-sensitive"
 PRESET_MINE = "mine"

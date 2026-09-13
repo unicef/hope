@@ -23,7 +23,7 @@ from django.utils import timezone
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import latest_local_schedule_time, resolve_timezone_name
-from hope.apps.grievance.constants import PRESET_MINE, PRESET_MINE_SENSITIVE, PRESET_NEEDS_ASSIGNMENT
+from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.grievance.utils import my_tasks_url, overdue_q
@@ -66,23 +66,25 @@ OTHER_LABEL = "Other"
 NEEDS_ASSIGNMENT = EmailSpec(
     subject="New Tickets Needing Assignment",
     intro="Grievance tickets are waiting to be assigned.",
-    sections=(Section(label="", preset=PRESET_NEEDS_ASSIGNMENT),),
-)
-ASSIGNED_SENSITIVE = EmailSpec(
-    subject="Pending Assigned Sensitive Tickets",
-    intro="Sensitive grievance tickets were assigned to you.",
-    sections=(Section(label="", preset=PRESET_MINE_SENSITIVE),),
+    sections=(
+        Section(label=SENSITIVE_LABEL, preset=PRESET_NEEDS_ASSIGNMENT, sensitive=True),
+        Section(label=OTHER_LABEL, preset=PRESET_NEEDS_ASSIGNMENT, sensitive=False),
+    ),
 )
 ASSIGNED = EmailSpec(
-    subject="Pending Assigned Tickets",
+    # any assignment made that day, a reassignment of an old ticket included
+    subject="Tickets Assigned to You",
     intro="Grievance tickets were assigned to you.",
-    sections=(Section(label="", preset=PRESET_MINE),),
+    sections=(
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE, sensitive=True),
+        Section(label=OTHER_LABEL, preset=PRESET_MINE, sensitive=False),
+    ),
 )
 OVERDUE = EmailSpec(
     subject="Overdue Tickets",
     intro="Grievance tickets assigned to you are past their due date.",
     sections=(
-        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE, overdue=True, sensitive=True),
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE, overdue=True, sensitive=True),
         Section(label=OTHER_LABEL, preset=PRESET_MINE, overdue=True, sensitive=False),
     ),
     throttled=True,
@@ -91,7 +93,7 @@ UPDATED = EmailSpec(
     subject="Updated Tickets",
     intro="Grievance tickets you are responsible for were changed by someone else.",
     sections=(
-        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE_SENSITIVE, sensitive=True),
+        Section(label=SENSITIVE_LABEL, preset=PRESET_MINE, sensitive=True),
         Section(label=OTHER_LABEL, preset=PRESET_MINE, sensitive=False),
     ),
 )
@@ -196,12 +198,17 @@ class DailyDigestService:
         assigned = self._assigned_tickets()
         updated_sensitive, updated_other = self._updated_counts()
         return [
-            (NEEDS_ASSIGNMENT, self._sections(NEEDS_ASSIGNMENT, [self._needs_assignment_counts()])),
+            (NEEDS_ASSIGNMENT, self._sections(NEEDS_ASSIGNMENT, list(self._needs_assignment_counts()))),
             (
-                ASSIGNED_SENSITIVE,
-                self._sections(ASSIGNED_SENSITIVE, [self._counts_by_assignee(assigned.filter(**sensitive))]),
+                ASSIGNED,
+                self._sections(
+                    ASSIGNED,
+                    [
+                        self._counts_by_assignee(assigned.filter(**sensitive)),
+                        self._counts_by_assignee(assigned.exclude(**sensitive)),
+                    ],
+                ),
             ),
-            (ASSIGNED, self._sections(ASSIGNED, [self._counts_by_assignee(assigned.exclude(**sensitive))])),
             (
                 OVERDUE,
                 self._sections(
@@ -280,14 +287,17 @@ class DailyDigestService:
             {user: other_totals[user_id] for user_id, user in users.items() if other_totals[user_id]},
         )
 
-    def _needs_assignment_counts(self) -> dict[User, int]:
-        """Count unassigned tickets per user who can assign them, scoped to the programmes they hold.
+    def _needs_assignment_counts(self) -> tuple[dict[User, int], dict[User, int]]:
+        """Count unassigned tickets per user who can assign them, sensitive and other separately.
 
-        A ticket in several of a user's programmes still counts once, hence the id sets.
+        Scoped to the programmes each user holds. A ticket in several of a user's programmes still
+        counts once, hence the id sets. Visibility is resolved once and split by category after, so
+        the per-programme permission lookup is not repeated per category.
         """
-        ticket_ids = set(self._unassigned_tickets().values_list("id", flat=True))
-        if not ticket_ids:
-            return {}
+        category_by_ticket_id = dict(self._unassigned_tickets().values_list("id", "category"))
+        if not category_by_ticket_id:
+            return {}, {}
+        ticket_ids = set(category_by_ticket_id)
 
         through_model = GrievanceTicket.programs.through
         tickets_by_program: dict[Any, set[Any]] = defaultdict(set)
@@ -310,11 +320,23 @@ class DailyDigestService:
             for user in users_with_permissions(self.business_area, [Permissions.GRIEVANCE_ASSIGN]):
                 visible[user].update(ticket_ids_without_program)
 
-        return {
-            user: len(user_ticket_ids)
-            for user, user_ticket_ids in visible.items()
-            if self._in_timezone_bucket(user.timezone)
+        sensitive_ids = {
+            ticket_id
+            for ticket_id, category in category_by_ticket_id.items()
+            if category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE
         }
+        sensitive_counts: dict[User, int] = {}
+        other_counts: dict[User, int] = {}
+        for user, user_ticket_ids in visible.items():
+            if not self._in_timezone_bucket(user.timezone):
+                continue
+            sensitive_total = len(user_ticket_ids & sensitive_ids)
+            if sensitive_total:
+                sensitive_counts[user] = sensitive_total
+            other_total = len(user_ticket_ids) - sensitive_total
+            if other_total:
+                other_counts[user] = other_total
+        return sensitive_counts, other_counts
 
     def _unassigned_tickets(self) -> "QuerySet[GrievanceTicket]":
         return self._for_business_area().filter(assigned_to__isnull=True).exclude(status=GrievanceTicket.STATUS_CLOSED)
@@ -415,7 +437,12 @@ class DailyDigestService:
                 {
                     "label": section.label,
                     "ticket_count": total,
-                    "tickets_url": my_tasks_url(self.business_area, section.preset, overdue=section.overdue),
+                    "tickets_url": my_tasks_url(
+                        self.business_area,
+                        section.preset,
+                        overdue=section.overdue,
+                        sensitive=section.sensitive,
+                    ),
                 }
                 for section, total in sections
             ],

@@ -23,15 +23,7 @@ logger = logging.getLogger(__name__)
 class GrievanceNotification:
     ACTION_NOTES_ADDED = auto()
     ACTION_SEND_BACK_TO_IN_PROGRESS = auto()
-    ACTION_SENSITIVE_CREATED = auto()
     ACTION_SEND_TO_APPROVAL = auto()
-
-    ACTION_VIEW_PERMISSIONS = {
-        ACTION_SENSITIVE_CREATED: [
-            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
-        ],
-    }
 
     # Which permission lets a user act on a ticket waiting for approval, per category.
     CATEGORY_APPROVE_PERMISSIONS = {
@@ -128,15 +120,6 @@ class GrievanceNotification:
             render_to_string(f"{template_base}_notification_email.html", context=context),
         )
 
-    def _prepare_universal_category_created_bodies(self, user_recipient: "User") -> tuple[str, str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body, html_body = self._render_bodies("universal_category_created", context)
-        return (
-            text_body,
-            html_body,
-            f"A Grievance & Feedback ticket for {self.grievance_ticket.get_category_display()}",
-        )
-
     @staticmethod
     def _exclude_users(queryset: "QuerySet[User]", *users: "User | None") -> "QuerySet[User]":
         ids = [user.id for user in users if user is not None]
@@ -158,12 +141,6 @@ class GrievanceNotification:
             self._program_ids,
             exclude_staff=True,
         )
-
-    def _prepare_permission_based_recipients(self) -> "QuerySet[User]":
-        queryset = self._users_with_permissions(GrievanceNotification.ACTION_VIEW_PERMISSIONS[self.action])
-        # Assignee is notified about the ticket in the daily digest; the editor is the user performing
-        # the creation.
-        return self._exclude_users(queryset, self.grievance_ticket.assigned_to, self._editor).all()
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
         permissions = GrievanceNotification.CATEGORY_APPROVE_PERMISSIONS.get(self.grievance_ticket.category)
@@ -228,34 +205,16 @@ class GrievanceNotification:
         return [assigned_to]
 
     ACTION_PREPARE_BODIES_DICT = {
-        ACTION_SENSITIVE_CREATED: _prepare_universal_category_created_bodies,
         ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_send_back_to_in_progress_bodies,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_bodies,
         ACTION_NOTES_ADDED: _prepare_add_note_bodies,
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT: dict[Any, Callable[..., Any]] = {
-        ACTION_SENSITIVE_CREATED: _prepare_permission_based_recipients,
         ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_assigned_to_recipient,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_recipients,
         ACTION_NOTES_ADDED: _prepare_assigned_to_recipient,
     }
-
-    @classmethod
-    def prepare_notification_for_ticket_creation(
-        cls: "GrievanceNotification", grievance_ticket: GrievanceTicket
-    ) -> list["GrievanceNotification"]:
-        notifications = []
-        category_action_dict = {
-            # only sensitive tickets still mail on creation; the rest are covered by the daily
-            # needs-assignment email
-            GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: GrievanceNotification.ACTION_SENSITIVE_CREATED,
-        }
-        action = category_action_dict.get(grievance_ticket.category)
-        if action:
-            notifications.append(GrievanceNotification(grievance_ticket, action, editor=grievance_ticket.created_by))
-
-        return notifications
 
     @classmethod
     def send_all_notifications(cls, notifications: list) -> None:
