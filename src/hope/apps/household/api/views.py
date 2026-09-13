@@ -207,12 +207,19 @@ class HouseholdViewSet(
         )
 
         payments = self.filter_queryset(payments)
+        context = {
+            **self.get_serializer_context(),
+            "can_view_fsp_auth_code": request.user.has_perm(
+                Permissions.PM_VIEW_FSP_AUTH_CODE.value,
+                hh.program or hh.business_area,
+            ),
+        }
         page = self.paginate_queryset(payments)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, many=True, context=context)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(payments, many=True)
+        serializer = self.get_serializer(payments, many=True, context=context)
         return Response(serializer.data)
 
     @extend_schema(

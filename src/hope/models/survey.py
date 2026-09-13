@@ -83,9 +83,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     program = models.ForeignKey(
         "program.Program",
         related_name="surveys",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     flow_id = models.CharField(max_length=255, blank=True, null=True)

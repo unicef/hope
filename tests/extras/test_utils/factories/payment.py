@@ -30,6 +30,7 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    TargetPopulation,
     WesternUnionData,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
@@ -38,7 +39,7 @@ from hope.models import (
 from . import HouseholdFactory, IndividualFactory
 from .account import UserFactory
 from .core import CurrencyFactory, PaymentPlanPurposeFactory
-from .program import ProgramCycleFactory
+from .program import ProgramCycleFactory, ProgramFactory
 
 
 class PaymentPlanGroupFactory(DjangoModelFactory):
@@ -100,6 +101,13 @@ class PaymentPlanFactory(DjangoModelFactory):
             self.payment_plan_purposes.add(purpose)
 
 
+class TargetPopulationFactory(PaymentPlanFactory):
+    class Meta:
+        model = TargetPopulation
+
+    status = PaymentPlan.Status.TP_OPEN
+
+
 class ApprovalProcessFactory(DjangoModelFactory):
     class Meta:
         model = ApprovalProcess
@@ -145,6 +153,7 @@ class PaymentFactory(DjangoModelFactory):
     status_date = factory.LazyFunction(timezone.now)
     currency = factory.SubFactory(CurrencyFactory)
     business_area = factory.SelfAttribute("parent.business_area")
+    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
     household = factory.SubFactory(
         HouseholdFactory,
         business_area=factory.SelfAttribute("..business_area"),

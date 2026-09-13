@@ -323,6 +323,15 @@ def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, A
     assert data["fsp_auth_code"] == "AUTH_123"
 
 
+def test_payment_list_serializer_get_auth_code_without_request_context(payment_list_context: dict[str, Any]) -> None:
+    payment = payment_list_context["payment"]
+
+    serializer = PaymentListSerializer(instance=payment)
+    data = serializer.data
+
+    assert data["fsp_auth_code"] == ""
+
+
 def test_payment_list_serializer_snapshot_collector_full_name(payment_list_context: dict[str, Any]) -> None:
     payment = payment_list_context["payment"]
     household_data = {

@@ -122,7 +122,7 @@ class Payment(
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.PROTECT)
     # use program_id in UniqueConstraint order_number and token_number per Program
-    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
+    program = models.ForeignKey("program.Program", on_delete=models.PROTECT)
     household = models.ForeignKey("household.Household", on_delete=models.PROTECT)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.PROTECT, null=True, blank=True)
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True, blank=True)
