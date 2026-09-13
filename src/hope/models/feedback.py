@@ -85,3 +85,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Feedback")
+
+    def __str__(self) -> str:
+        return f"{self.description} ({self.business_area.name})"
