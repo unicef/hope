@@ -2,6 +2,7 @@ from typing import Any
 from uuid import UUID
 
 from django.db import transaction
+from rest_framework.request import Request
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
@@ -15,19 +16,19 @@ HOUSEHOLD_LIST_PROGRAM_KEY = "{program_id}:households_list:version"
 INDIVIDUAL_LIST_PROGRAM_KEY = "{program_id}:individuals_list:version"
 
 
-def get_household_list_program_key(program_id: Any) -> Any:
+def get_household_list_program_key(program_id: UUID) -> int:
     return get_or_create_cache_key(HOUSEHOLD_LIST_PROGRAM_KEY.format(program_id=program_id), 0)
 
 
-def increment_household_list_program_key(program_id: Any) -> int:
+def increment_household_list_program_key(program_id: UUID) -> int:
     return increment_cache_key(HOUSEHOLD_LIST_PROGRAM_KEY.format(program_id=program_id))
 
 
-def get_individual_list_program_key(program_id: Any) -> Any:
+def get_individual_list_program_key(program_id: UUID) -> int:
     return get_or_create_cache_key(INDIVIDUAL_LIST_PROGRAM_KEY.format(program_id=program_id), 0)
 
 
-def increment_individual_list_program_key(program_id: Any) -> int:
+def increment_individual_list_program_key(program_id: UUID) -> int:
     return increment_cache_key(INDIVIDUAL_LIST_PROGRAM_KEY.format(program_id=program_id))
 
 
@@ -57,14 +58,14 @@ def invalidate_household_and_individual_list_cache(program_id: UUID) -> None:
 
 class HouseholdListKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self, params: Any, view_instance: Any, view_method: Any, request: Request, args: tuple, kwargs: dict
     ) -> str:
         return str(get_household_list_program_key(view_instance.program.id))
 
 
 class IndividualListKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self, params: Any, view_instance: Any, view_method: Any, request: Request, args: tuple, kwargs: dict
     ) -> str:
         return str(get_individual_list_program_key(view_instance.program.id))
 

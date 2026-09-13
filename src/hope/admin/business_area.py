@@ -12,7 +12,9 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models.fields import Field
 from django.forms import inlineformset_factory
+from django.forms.fields import Field as FormField
 from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
@@ -193,7 +195,7 @@ class BusinessAreaAdmin(
     def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: Field, request: HttpRequest, **kwargs: Any) -> FormField | None:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

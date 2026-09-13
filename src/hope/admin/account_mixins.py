@@ -117,12 +117,12 @@ class DjAdminManager:
             logger.warning(e)
             raise
 
-    def _get(self, url: str) -> Any:
+    def _get(self, url: str) -> Response:
         self._last_response = self.client.get(url, allow_redirects=False)
         self.client.headers["Referer"] = url
         return self._last_response
 
-    def _post(self, url: str, data: dict) -> Any:
+    def _post(self, url: str, data: dict) -> Response:
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
@@ -145,7 +145,7 @@ class DjAdminManager:
 
             page += 1
 
-    def get_csrfmiddlewaretoken(self) -> Any:
+    def get_csrfmiddlewaretoken(self) -> str:
         regex = re.compile("""csrfmiddlewaretoken["'] +value=["'](.*)["']""")
         try:
             m = regex.search(self._last_response.content.decode("utf8"))

@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Any, cast
 
+from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
@@ -81,7 +82,9 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: UploadedFile) -> UploadedFile:
+        if file.size is None:
+            raise serializers.ValidationError("File size is not available.")
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
             raise serializers.ValidationError("File size must be ≤ 10MB.")
 
@@ -153,7 +156,7 @@ class SplitPaymentPlanSerializer(serializers.Serializer):
 class PaymentPlanImportFileSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False)
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: UploadedFile) -> UploadedFile:
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:
@@ -903,8 +906,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.BooleanField()
-    can_create_top_up_amendment = serializers.BooleanField()
+    can_create_top_up = serializers.SerializerMethodField()
+    can_create_top_up_amendment = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
@@ -1111,6 +1114,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
             qs.values_list("id", flat=True)
         )
+
+    def get_can_create_top_up(self, obj: PaymentPlan) -> bool:
+        return obj.can_create_top_up
+
+    def get_can_create_top_up_amendment(self, obj: PaymentPlan) -> bool:
+        return obj.can_create_top_up_amendment
 
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(
@@ -1741,7 +1750,7 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False)
     version = serializers.IntegerField(required=False)
 
-    def validate_file(self, file: Any) -> Any:
+    def validate_file(self, file: UploadedFile) -> UploadedFile:
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:

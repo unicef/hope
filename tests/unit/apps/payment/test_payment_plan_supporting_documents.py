@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import FileResponse
 from django.urls import reverse
 import pytest
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.test import APIClient, APIRequestFactory
 
 from extras.test_utils.factories import (
@@ -152,6 +152,16 @@ def test_validate_file_size_failure(serializer_context: dict[str, Any], upload_f
     assert not serializer.is_valid()
     assert "file" in serializer.errors
     assert serializer.errors["file"][0] == "File size must be ≤ 10MB."
+
+
+def test_validate_file_missing_size_failure(
+    serializer_context: dict[str, Any], upload_file: SimpleUploadedFile
+) -> None:
+    upload_file.size = None
+    serializer = PaymentPlanSupportingDocumentSerializer(data={}, context=serializer_context)
+    with pytest.raises(serializers.ValidationError) as exc_info:
+        serializer.validate_file(upload_file)
+    assert exc_info.value.detail[0] == "File size is not available."
 
 
 def test_validate_file_extension_success(serializer_context: dict[str, Any]) -> None:

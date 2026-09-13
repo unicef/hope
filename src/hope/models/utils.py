@@ -10,6 +10,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
+from django.forms.fields import Field as FormField
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -335,10 +336,10 @@ class InternalDataFieldModel(models.Model):
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
+        form_class: type[forms.Field] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,

@@ -30,7 +30,7 @@ class TargetingCriteriaQueryingBase:
     def get_individual_queryset(self) -> QuerySet:
         return Individual.objects.all()
 
-    def get_rules(self) -> Any:
+    def get_rules(self) -> QuerySet:
         return self.rules.all()
 
     def get_criteria_string(self) -> str:

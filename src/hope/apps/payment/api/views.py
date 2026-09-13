@@ -1464,16 +1464,20 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        def _get_reject_permission(status: str) -> Any:
+        def _get_reject_permission(status: str) -> Permissions | None:
             status_to_perm_map = {
                 PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
                 PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
                 PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             }
-            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
+            return status_to_perm_map.get(status)
 
         reject_permission = _get_reject_permission(payment_plan.status)
-        request.user.has_perm(reject_permission)
+        if reject_permission and not request.user.has_perm(
+            reject_permission.value,
+            payment_plan.program_cycle.program or payment_plan.business_area,
+        ):
+            raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         data = dict(request.data)
         data["action"] = PaymentPlan.Action.REJECT
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
@@ -2211,7 +2215,7 @@ class TargetPopulationViewSet(
         url_path="pending-payments/count",
         filter_backends=[],
     )
-    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def pending_payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
         pending_payments_count = tp.payment_items.count()
         return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)
@@ -2246,10 +2250,11 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
+        data = dict(request.data)
+        data["target_population_id"] = kwargs.get("pk")
 
         serializer = self.get_serializer(
-            data=request.data,
+            data=data,
         )
         if serializer.is_valid():
             name = serializer.validated_data["name"].strip()
@@ -2621,6 +2626,10 @@ class PaymentGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return with_payment_related_data(super().get_queryset()).order_by("-created_at")
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})

@@ -114,7 +114,7 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     value = serializers.SerializerMethodField()
     list_name = serializers.CharField(default=None)
 
-    def get_labels(self, obj: Any) -> Any:
+    def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
     def get_value(self, obj: Any) -> str | Any | None:
