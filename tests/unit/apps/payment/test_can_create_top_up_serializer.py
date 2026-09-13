@@ -47,7 +47,7 @@ def test_can_create_top_up_arrange_regular_without_eligible_payment_act_get_asse
         plan_type=PaymentPlan.PlanType.REGULAR,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS, excluded=True)
+    PaymentFactory(parent=regular_pp, household__withdrawn=True)
 
     assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is False
 
@@ -74,6 +74,20 @@ def test_can_create_top_up_arrange_non_regular_plan_act_get_assert_false(
     assert PaymentPlanDetailSerializer().get_can_create_top_up(plan) is False
 
 
+def test_can_create_top_up_arrange_regular_with_unaccepted_status_act_get_assert_false(
+    business_area: object, cycle: ProgramCycle
+) -> None:
+    regular_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.OPEN,
+    )
+    PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up(regular_pp) is False
+
+
 def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_get_assert_true(
     business_area: object, cycle: ProgramCycle
 ) -> None:
@@ -86,6 +100,34 @@ def test_can_create_top_up_amendment_arrange_top_up_with_delivered_payment_act_g
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
     assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is True
+
+
+def test_can_create_top_up_amendment_arrange_top_up_with_unaccepted_status_act_get_assert_false(
+    business_area: object, cycle: ProgramCycle
+) -> None:
+    top_up_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.OPEN,
+    )
+    PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is False
+
+
+def test_can_create_top_up_amendment_arrange_top_up_without_eligible_payment_act_get_assert_false(
+    business_area: object, cycle: ProgramCycle
+) -> None:
+    top_up_pp = PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(parent=top_up_pp, household__withdrawn=True)
+
+    assert PaymentPlanDetailSerializer().get_can_create_top_up_amendment(top_up_pp) is False
 
 
 def test_can_create_top_up_amendment_arrange_top_up_with_only_pending_act_get_assert_true(
