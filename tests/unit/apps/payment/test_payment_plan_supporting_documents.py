@@ -161,7 +161,7 @@ def test_validate_file_missing_size_failure(
     serializer = PaymentPlanSupportingDocumentSerializer(data={}, context=serializer_context)
     with pytest.raises(serializers.ValidationError) as exc_info:
         serializer.validate_file(upload_file)
-    assert exc_info.value.detail[0] == "File size must be ≤ 10MB."
+    assert exc_info.value.detail[0] == "File size is not available."
 
 
 def test_validate_file_extension_success(serializer_context: dict[str, Any]) -> None:
