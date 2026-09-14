@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Any, Optional, overload
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.indexes import GinIndex
@@ -68,6 +68,20 @@ ascii_name_validator = RegexValidator(
     message="Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
     code="invalid_name",
 )
+
+
+LATIN_NAME_FIELDS = ("given_name_latin", "middle_name_latin", "family_name_latin", "full_name_latin")
+
+
+@overload
+def normalize_latin_name(value: str) -> str: ...
+@overload
+def normalize_latin_name(value: None) -> None: ...
+def normalize_latin_name(value: str | None) -> str | None:
+    """Strip and collapse any whitespace run to a single space so the value can be validated and stored cleanly."""
+    if not value:
+        return value
+    return " ".join(value.split())
 
 
 class IndividualCollection(UnicefIdentifiedModel):

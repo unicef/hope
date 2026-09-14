@@ -361,6 +361,14 @@ def test_handle_geopoint_field(business_area: object, registration_data_import: 
     assert result == expected
 
 
+def test_cast_latin_name_value_normalizes_whitespace(business_area: object, registration_data_import: object) -> None:
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+
+    result = task._cast_value("  Anna \t\xa0 Kovalska ", "given_name_latin_i_c")
+
+    assert result == "Anna Kovalska"
+
+
 def test_cast_boolean_value(business_area: object, registration_data_import: object) -> None:
     task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
 

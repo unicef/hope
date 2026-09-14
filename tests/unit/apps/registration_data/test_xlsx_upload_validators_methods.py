@@ -124,6 +124,39 @@ def pdu_attribute_factory(program: Any):
     return _create
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        "Anna Kovalska",
+        "Anna O'Neil-Kovalska",
+        "  Anna Kovalska  ",
+        "Anna   Kovalska",
+        "Anna\nKovalska",
+        "Anna\tKovalska",
+        "Anna\xa0Kovalska",
+    ],
+)
+def test_latin_name_error_accepts_whitespace_variants(program: Any, value: str) -> None:
+    validator = UploadXLSXInstanceValidator(program)
+
+    assert validator._latin_name_error("full_name_latin_i_c", value) is None
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["Anna--Kovalska", "Anna'''Kovalska", "Anna - ' - Kovalska", "Anna1", "Анна"],
+)
+def test_latin_name_error_rejects_invalid_value(program: Any, value: str) -> None:
+    validator = UploadXLSXInstanceValidator(program)
+
+    assert validator._latin_name_error("full_name_latin_i_c", value) == {
+        "header": "full_name_latin_i_c",
+        "message": (
+            f"invalid_name, Only ASCII letters, spaces, hyphens, and apostrophes are allowed., Value provided: {value}"
+        ),
+    }
+
+
 def test_string_validator(program: Any, countries: dict[str, Any], afghanistan_admin_areas: list[Any]) -> None:
     validator = UploadXLSXInstanceValidator(program)
     assert validator.string_validator("Marek", "full_name_i_c")

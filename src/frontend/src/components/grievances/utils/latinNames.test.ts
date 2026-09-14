@@ -55,6 +55,38 @@ describe('validate - latin name format', () => {
 
     expect(errors.individualDataUpdateFields).toBeUndefined();
   });
+
+  it.each([
+    ' Anna',
+    'Anna ',
+    'Anna   Kovalska',
+    'Anna\nKovalska',
+    'Anna\tKovalska',
+    'Anna\u00a0Kovalska',
+  ])('accepts unintended spacing in %j', (value) => {
+    const errors = runEditValidation({
+      individualDataUpdateFields: [
+        { fieldName: 'given_name_latin', fieldValue: value },
+      ],
+    });
+
+    expect(errors.individualDataUpdateFields).toBeUndefined();
+  });
+
+  it.each([
+    'Anna--Kovalska',
+    "Anna'''Kovalska",
+    "Anna - ' - Kovalska",
+    "Anna O' Brien",
+  ])('rejects repeated separators in %j', (value) => {
+    const errors = runEditValidation({
+      individualDataUpdateFields: [
+        { fieldName: 'given_name_latin', fieldValue: value },
+      ],
+    });
+
+    expect(errors.individualDataUpdateFields).toBe(FORMAT_ERROR);
+  });
 });
 
 describe('validateUsingSteps - latin name format for add individual', () => {
