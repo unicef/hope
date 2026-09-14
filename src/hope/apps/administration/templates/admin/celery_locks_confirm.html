@@ -1,0 +1,14 @@
+{% extends "admin_extra_buttons/confirm.html" %}{% load i18n %}
+{% block content %}
+{% include "admin/celery_locks_warning.html" %}
+<p>Locks held for <b>{{ original }}</b>:</p>
+<ul>
+{% for key in locks %}<li><code>{{ key }}</code></li>{% empty %}<li><i>none</i></li>{% endfor %}
+</ul>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" class="btn btn-large btn-danger" value="Remove locks">
+  <input type="button" class="btn btn-large btn-success" onclick="javascript:history.back()" value="{% translate 'Go Back' %}">
+</form>
+{% endblock content %}

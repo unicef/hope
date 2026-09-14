@@ -1,5 +1,19 @@
 from django import forms
 
+CONFIRMATION_PHRASE = "I confirm"
+
+
+class ConfirmDangerForm(forms.Form):
+    confirmation = forms.RegexField(
+        regex=f"^{CONFIRMATION_PHRASE}$",
+        label=f'Type "{CONFIRMATION_PHRASE}" to proceed',
+        error_messages={"invalid": f'You must type "{CONFIRMATION_PHRASE}" exactly.'},
+    )
+
+
+class CeleryLockDeleteForm(ConfirmDangerForm):
+    key = forms.RegexField(regex="^celery_lock_", widget=forms.HiddenInput)
+
 
 class ClearCacheForm(forms.Form):
     # Report

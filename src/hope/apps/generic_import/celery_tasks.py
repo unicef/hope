@@ -5,12 +5,11 @@ from typing import TYPE_CHECKING
 
 from sentry_sdk import capture_exception
 
+from hope.apps.core.celery_lock import AlreadyRunningError, celery_lock
 from hope.apps.generic_import.generic_upload_service.importer import Importer
 from hope.apps.generic_import.generic_upload_service.parsers.xlsx_somalia_parser import (
     XlsxSomaliaParser,
 )
-from hope.apps.registration_data.celery_tasks import locked_cache
-from hope.apps.registration_data.exceptions import AlreadyRunningError
 from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import AsyncRetryJob, ImportData, RegistrationDataImport
 
@@ -64,12 +63,7 @@ def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport,
 def _process_generic_import(registration_data_import_id: str, import_data_id: str) -> None:
     from hope.models import ImportData, RegistrationDataImport
 
-    with locked_cache(key=f"process_generic_import_async_task-{registration_data_import_id}") as locked:
-        if not locked:
-            raise AlreadyRunningError(
-                f"Task with key process_generic_import_async_task-{registration_data_import_id} is already running"
-            )
-
+    with celery_lock("process_generic_import", registration_data_import_id):
         import_data = ImportData.objects.get(id=import_data_id)
         rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
 
@@ -143,8 +137,7 @@ def process_generic_import_async_task_action(job: AsyncRetryJob) -> None:
         _process_generic_import(registration_data_import_id, import_data_id)
 
     except AlreadyRunningError:
-        logger.info("Generic import task already running")
-        return
+        raise
 
     except Exception as e:
         logger.exception(f"Error processing generic import {registration_data_import_id}")

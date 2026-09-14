@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import logging
 from pathlib import Path
 import sys
@@ -17,6 +18,7 @@ import pytest
 
 from extras.test_utils.factories import CurrencyFactory, FlagStateFactory
 from extras.test_utils.fixtures import *  # noqa: F403, F401
+from hope.apps.core.celery_lock import lock_key
 from hope.apps.household.services.index_management import create_program_indexes, delete_program_indexes
 from hope.models.currency import Currency
 
@@ -24,6 +26,16 @@ from hope.models.currency import Currency
 @pytest.fixture
 def enable_is_root() -> None:
     FlagStateFactory.create(name="IS_ROOT", condition="boolean", value="True", required=False)
+
+
+@pytest.fixture
+def hold_lock(monkeypatch: pytest.MonkeyPatch) -> Callable[..., None]:
+    monkeypatch.setattr("hope.apps.core.celery_lock.LOCK_WAIT", 0)
+
+    def _hold(task: str, *parts: object) -> None:
+        cache.lock(lock_key(task, *parts)).acquire()
+
+    return _hold
 
 
 @pytest.fixture(autouse=True)

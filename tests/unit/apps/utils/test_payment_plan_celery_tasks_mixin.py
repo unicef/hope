@@ -17,7 +17,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.admin.utils import PaymentPlanCeleryTasksMixin
-from hope.apps.payment.utils import generate_cache_key
+from hope.apps.core.celery_lock import lock_key
 from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -166,13 +166,7 @@ def test_restart_prepare_payment_plan_task_already_running(
         business_area=business_area,
     )
     payment_plan.refresh_from_db()
-    cache_key = generate_cache_key(
-        {
-            "task_name": "prepare_payment_plan_async_task",
-            "payment_plan_id": str(payment_plan.id),
-        }
-    )
-    cache.set(cache_key, True, timeout=600)
+    cache.lock(lock_key("prepare_payment_plan", payment_plan.id)).acquire()
 
     response = admin_client.post(
         reverse(
@@ -186,7 +180,6 @@ def test_restart_prepare_payment_plan_task_already_running(
         list(messages.get_messages(response.wsgi_request))[0].message
         == f"Task is already running for Payment Plan {payment_plan.unicef_id}."
     )
-    cache.delete(cache_key)
 
 
 def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, program_cycle, business_area) -> None:

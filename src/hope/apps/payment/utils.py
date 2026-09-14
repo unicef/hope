@@ -1,7 +1,5 @@
 import datetime
 from decimal import ROUND_HALF_UP, Decimal
-import hashlib
-import json
 from math import ceil
 from typing import TYPE_CHECKING, Any, no_type_check
 
@@ -344,11 +342,6 @@ def get_payment_delivered_quantity_status_and_value(
         return Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity_decimal
 
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
-
-
-def generate_cache_key(data: dict[str, Any]) -> str:
-    task_params_str = json.dumps(data)
-    return hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
 def get_link(api_url: str) -> str:

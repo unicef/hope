@@ -10,7 +10,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
+from hope.admin.utils import CeleryLocksAdminMixin, HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.periodic_data_update.celery_tasks import export_periodic_data_update_export_template_service_async_task
 from hope.models import PDUOnlineEdit, PDUXlsxTemplate, PDUXlsxUpload
 
@@ -118,7 +118,7 @@ class PDUXlsxUploadAdmin(HOPEModelAdminBase):
 
 
 @admin.register(PDUOnlineEdit)
-class PDUOnlineEditAdmin(ViewOnUiMixin, HOPEModelAdminBase):
+class PDUOnlineEditAdmin(CeleryLocksAdminMixin, ViewOnUiMixin, HOPEModelAdminBase):
     list_display = ("id", "status", "business_area", "program", "created_by", "created_at")
     filter_horizontal = ("authorized_users",)
     list_filter = (

@@ -102,6 +102,7 @@ dependencies = [
   "pyjwt>=2.4,<3",
   "pypdf>=6.10.2,<7",
   "pytesseract>=0.3.9,<1",
+  "python-redis-lock[django]>=4,<5",
   "pytz>=2022.1,<2027",
   "pyyaml>=6,<7",
   "pyzipper>=0.4,<1",

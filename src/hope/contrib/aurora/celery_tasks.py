@@ -6,10 +6,9 @@ from constance import config
 from django.utils import timezone
 
 from hope.apps.core.celery import app
-from hope.apps.core.celery_tasks import NonRetriableTaskError
+from hope.apps.core.celery_lock import NonRetriableTaskError, celery_lock
 from hope.apps.registration_data.celery_tasks import (
     check_and_set_taxid,
-    locked_cache,
     merge_registration_data_import_async_task,
 )
 from hope.contrib.aurora.models import Record, Registration
@@ -97,11 +96,7 @@ def automate_rdi_creation_async_task_action(job: AsyncRetryJob) -> list[Any]:
     fix_tax_id = bool(job.config["fix_tax_id"])
     filters = dict(job.config.get("filters", {}))
 
-    with locked_cache(key=f"automate_rdi_creation_async_task-{registration_id}") as locked:
-        if not locked:
-            logger.info(f"Automatic creation of RDI {registration_id} already running")
-            return []
-
+    with celery_lock("automate_rdi_creation", registration_id):
         try:
             registration = Registration.objects.get(source_id=registration_id)
         except Registration.DoesNotExist as exc:

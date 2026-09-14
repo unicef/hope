@@ -1,3 +1,4 @@
+from hope.apps.core.celery_lock import celery_lock
 from hope.apps.periodic_data_update.utils import (
     populate_pdu_new_rounds_with_null_values,
 )
@@ -8,10 +9,11 @@ from hope.models import AsyncJob, Program
 
 
 def copy_program_async_task_action(job: AsyncJob) -> None:
-    program = Program.objects.get(id=job.config["new_program_id"])
-    set_sentry_business_area_tag(program.business_area.name)
-    copy_program_related_data(job.config["copy_from_program_id"], program, job.config["user_id"])
-    program_copied.send(sender=Program, instance=program)
+    with celery_lock("copy_program", job.config["new_program_id"]):
+        program = Program.objects.get(id=job.config["new_program_id"])
+        set_sentry_business_area_tag(program.business_area.name)
+        copy_program_related_data(job.config["copy_from_program_id"], program, job.config["user_id"])
+        program_copied.send(sender=Program, instance=program)
 
 
 def copy_program_async_task(copy_from_program_id: str, new_program_id: str, user_id: str) -> None:

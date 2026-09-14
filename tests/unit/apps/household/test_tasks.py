@@ -1,4 +1,7 @@
+from collections.abc import Callable
 from datetime import timedelta
+import hashlib
+import json
 from unittest.mock import ANY, Mock, patch
 import uuid
 
@@ -18,6 +21,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.household.celery_tasks import (
     cleanup_indexes_in_inactive_programs_async_task,
     cleanup_indexes_in_inactive_programs_async_task_action,
@@ -534,11 +538,12 @@ def test_interval_recalculate_population_fields_task_action_collects_household_i
     mock_recalculate_task.assert_called_once_with(household_ids=[str(i) for i in range(10)])
 
 
-@patch("hope.apps.household.celery_tasks.cache.get", return_value=True)
 @patch("hope.apps.household.celery_tasks.enroll_households_to_program")
-def test_enroll_households_to_program_task_action_returns_early_when_already_running(
-    mock_enroll, mock_cache_get, program_source
+def test_enroll_households_to_program_task_action_raises_when_lock_held(
+    mock_enroll, program_source, hold_lock: Callable[..., None]
 ):
+    digest = hashlib.sha256(json.dumps(["hh-1"]).encode()).hexdigest()
+    hold_lock("enroll_households_to_program", program_source.id, digest)
     job = create_async_job(
         "hope.apps.household.celery_tasks.enroll_households_to_program_async_task_action",
         {
@@ -549,9 +554,9 @@ def test_enroll_households_to_program_task_action_returns_early_when_already_run
         program_source,
     )
 
-    enroll_households_to_program_async_task_action(job)
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_enroll_households_to_program:{program_source.id}:"):
+        enroll_households_to_program_async_task_action(job)
 
-    mock_cache_get.assert_called_once()
     mock_enroll.assert_not_called()
 
 

@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}{% load i18n %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+  &rsaquo; Celery locks
+</div>
+{% endblock breadcrumbs %}
+
+{% block content %}
+{% include "admin/celery_locks_warning.html" %}
+{{ form.non_field_errors }}{{ form.confirmation.errors }}{{ form.key.errors }}
+{% for task, keys in groups.items %}
+  <h2>{{ task }}</h2>
+  <ul>
+  {% for key in keys %}
+    <li>
+      <form method="post" style="display:inline">
+        {% csrf_token %}
+        <code>{{ key }}</code>
+        <input type="hidden" name="key" value="{{ key }}">
+        <input type="text" name="confirmation" placeholder="{{ form.confirmation.label }}" autocomplete="off">
+        <input type="submit" class="btn btn-danger" value="Remove lock">
+      </form>
+    </li>
+  {% endfor %}
+  </ul>
+{% empty %}
+  <p><i>No celery locks are currently held.</i></p>
+{% endfor %}
+{% endblock content %}

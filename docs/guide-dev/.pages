@@ -9,6 +9,7 @@ nav:
   - child-payment-plans.md
   - account-attachments.md
   - population-recalculation.md
+  - celery-locks.md
   - contributing.md
 
 collapse: true

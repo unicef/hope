@@ -1,12 +1,16 @@
-from unittest.mock import MagicMock, patch
+from collections.abc import Callable
+from unittest.mock import patch
 
+from celery.exceptions import SoftTimeLimitExceeded
 from constance.test import override_config
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.household.const import MALE
 from hope.apps.universal_update_script.celery_tasks import (
+    RESULT_FAILED,
     generate_universal_individual_update_template_async_task,
     generate_universal_individual_update_template_async_task_action,
     run_universal_individual_update_async_task,
@@ -207,11 +211,8 @@ def test_run_universal_individual_update_creates_related_async_job(
 def test_run_universal_individual_update_action_reraises_unexpected_error(program: Program) -> None:
     universal_update = UniversalUpdate.objects.create(program=program)
     job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
-    lock = MagicMock()
-    lock.acquire.return_value = True
 
     with (
-        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
         patch("hope.apps.universal_update_script.celery_tasks.create_and_save_snapshot_chunked"),
         patch(
             "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.execute",
@@ -223,17 +224,13 @@ def test_run_universal_individual_update_action_reraises_unexpected_error(progra
 
     universal_update.refresh_from_db()
     assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
-    lock.release.assert_called_once_with()
 
 
 def test_generate_universal_individual_update_template_action_reraises_unexpected_error(program: Program) -> None:
     universal_update = UniversalUpdate.objects.create(program=program)
     job = AsyncJob(config={"universal_update_id": str(universal_update.pk)})
-    lock = MagicMock()
-    lock.acquire.return_value = True
 
     with (
-        patch("hope.apps.universal_update_script.celery_tasks.cache.lock", return_value=lock),
         patch(
             "hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.generate_xlsx_template",
             side_effect=RuntimeError("boom"),
@@ -244,4 +241,52 @@ def test_generate_universal_individual_update_template_action_reraises_unexpecte
 
     universal_update.refresh_from_db()
     assert "Unexpected error occurred in run_universal_update" in universal_update.saved_logs
-    lock.release.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    ("task", "action"),
+    [
+        ("run_universal_individual_update", run_universal_individual_update_async_task_action),
+        (
+            "generate_universal_individual_update_template",
+            generate_universal_individual_update_template_async_task_action,
+        ),
+    ],
+)
+def test_universal_update_action_raises_when_lock_held(
+    task: str, action: Callable[[AsyncJob], str], program: Program, hold_lock: Callable[..., None]
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+    hold_lock(task, universal_update.pk)
+
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_{task}:{universal_update.pk}"):
+        action(AsyncJob(config={"universal_update_id": str(universal_update.pk)}))
+
+    universal_update.refresh_from_db()
+    assert not universal_update.saved_logs
+
+
+@pytest.mark.parametrize(
+    ("action", "service_method"),
+    [
+        (run_universal_individual_update_async_task_action, "execute"),
+        (generate_universal_individual_update_template_async_task_action, "generate_xlsx_template"),
+    ],
+)
+def test_universal_update_action_logs_and_returns_failed_on_soft_time_limit(
+    action: Callable[[AsyncJob], str], service_method: str, program: Program
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program)
+
+    with (
+        patch("hope.apps.universal_update_script.celery_tasks.create_and_save_snapshot_chunked"),
+        patch(
+            f"hope.apps.universal_update_script.celery_tasks.UniversalIndividualUpdateService.{service_method}",
+            side_effect=SoftTimeLimitExceeded,
+        ),
+    ):
+        result = action(AsyncJob(config={"universal_update_id": str(universal_update.pk)}))
+
+    universal_update.refresh_from_db()
+    assert result == RESULT_FAILED
+    assert "Task time limit exceeded" in universal_update.saved_logs

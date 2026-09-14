@@ -2,7 +2,6 @@ import csv
 from typing import Any
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
@@ -12,13 +11,14 @@ from django.shortcuts import redirect
 from jsoneditor.forms import JSONEditor
 from smart_admin.decorators import smart_register
 
-from hope.admin.utils import AutocompleteForeignKeyMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, CeleryLocksAdminMixin
 from hope.contrib.aurora import models
 from hope.contrib.aurora.services.nigeria_people_registration_service import NigeriaPeopleRegistrationService
 
 
 @smart_register(models.Registration)
-class RegistrationAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
+class RegistrationAdmin(CeleryLocksAdminMixin, AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
+    celery_lock_field = "source_id"
     list_display = ("name", "slug", "project", "rdi_policy")
     readonly_fields = ("name", "project", "slug", "extra", "metadata")
     list_filter = ("rdi_policy", ("project", AutoCompleteFilter))

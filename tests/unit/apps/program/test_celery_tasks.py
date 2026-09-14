@@ -1,12 +1,16 @@
+from collections.abc import Callable
 from unittest.mock import Mock, patch
+import uuid
 
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, ProgramFactory
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_job_task
 from hope.apps.program.celery_tasks import (
     adjust_program_size_async_task,
     copy_program_async_task,
+    copy_program_async_task_action,
     populate_pdu_new_rounds_with_null_values_async_task,
 )
 from hope.models import AsyncJob, Program
@@ -52,3 +56,11 @@ def test_populate_pdu_new_rounds_with_null_values_task_queues_and_runs_async_job
     async_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     mock_populate.assert_called_once_with(program)
+
+
+def test_copy_program_action_fails_without_retry_when_lock_held(hold_lock: Callable[..., None]) -> None:
+    new_program_id = uuid.uuid4()
+    hold_lock("copy_program", new_program_id)
+
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_copy_program:{new_program_id}"):
+        copy_program_async_task_action(AsyncJob(config={"new_program_id": str(new_program_id)}))

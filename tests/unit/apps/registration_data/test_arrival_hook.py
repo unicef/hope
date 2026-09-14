@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from decimal import Decimal
 from unittest import mock
 from unittest.mock import Mock, patch
@@ -13,6 +14,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from hope.apps.core.celery_lock import AlreadyRunningError
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.household.const import DUPLICATE, DUPLICATE_IN_BATCH, UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
@@ -763,15 +765,18 @@ def test_arrival_hook_skips_merge_when_status_changed_under_lock(
 
 
 @patch("hope.apps.registration_data.tasks.cw_arrival_hook.CwArrivalHookTask.execute")
-@patch("hope.apps.registration_data.celery_tasks.locked_cache")
-def test_arrival_hook_returns_true_when_lock_not_acquired(
-    mock_locked_cache: Mock,
+def test_arrival_hook_fails_without_retry_when_lock_held(
     mock_execute: Mock,
     cw_rdi: RegistrationDataImport,
+    hold_lock: Callable[..., None],
 ) -> None:
-    mock_locked_cache.return_value.__enter__.return_value = False
+    hold_lock("classify_findings_and_schedule_merge", cw_rdi.id)
+    status_before = cw_rdi.status
 
-    result = queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
+    with pytest.raises(AlreadyRunningError, match=f"celery_lock_classify_findings_and_schedule_merge:{cw_rdi.id}"):
+        queue_and_run_retry_task(classify_findings_and_schedule_merge_async_task, registration_data_import=cw_rdi)
 
-    assert result is True
+    cw_rdi.refresh_from_db()
+    assert cw_rdi.status == status_before
+    assert AsyncRetryJob.objects.latest("pk").errors["exception"].startswith("Lock celery_lock_")
     mock_execute.assert_not_called()

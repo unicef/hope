@@ -1,16 +1,11 @@
-from contextlib import contextmanager
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from django.core.cache import cache
 from django.db import transaction
-from django.utils import timezone
 
 from hope.apps.core.celery import app
-from hope.apps.registration_data.exceptions import (
-    AlreadyRunningError,
-    WrongStatusError,
-)
+from hope.apps.core.celery_lock import LOCK_QUEUE_WAIT, AlreadyRunningError, celery_lock
+from hope.apps.registration_data.exceptions import WrongStatusError
 from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.registration_data.tasks.rdi_program_population_create import (
     RdiProgramPopulationCreateTask,
@@ -44,25 +39,6 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
     rdi.save(update_fields=["status", "sentry_id", "error_message"])
 
 
-@contextmanager
-def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> Any:
-    now = timezone.now()
-    acquired = False
-    try:
-        acquired = cache.get_or_set(key, now, timeout=timeout) == now
-
-        if acquired:
-            logger.info(f"Task with key {key} started")
-            yield True
-        else:
-            logger.info(f"Task with key {key} is already running")
-            yield False
-    finally:
-        if acquired:
-            cache.delete(key)
-            logger.info(f"Task with key {key} finished")
-
-
 def registration_xlsx_import_async_task_action(job: AsyncRetryJob) -> bool:
     try:
         from hope.apps.registration_data.tasks.rdi_xlsx_create import (
@@ -78,12 +54,7 @@ def registration_xlsx_import_async_task_action(job: AsyncRetryJob) -> bool:
         business_area_id = job.config["business_area_id"]
         program_id = job.config["program_id"]
 
-        with locked_cache(key=f"registration_xlsx_import_async_task-{registration_data_import_id}") as locked:
-            if not locked:
-                raise AlreadyRunningError(
-                    f"Task with key registration_xlsx_import_async_task"
-                    f" {registration_data_import_id} is already running"
-                )
+        with celery_lock("registration_xlsx_import", registration_data_import_id):
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
             if rdi.status not in (
@@ -112,9 +83,11 @@ def registration_xlsx_import_async_task_action(job: AsyncRetryJob) -> bool:
                     program_id=str(program_id),
                 )
             return True
-    except (WrongStatusError, AlreadyRunningError) as exc:
+    except WrongStatusError as exc:
         logger.info(str(exc))
         return True
+    except AlreadyRunningError:
+        raise
     except Exception as exc:  # noqa
         handle_rdi_exception(job.config["registration_data_import_id"], exc)
         raise
@@ -149,11 +122,7 @@ def registration_xlsx_import_async_task(
 def registration_program_population_import_async_task_action(job: AsyncRetryJob) -> bool:
     try:
         registration_data_import_id = job.config["registration_data_import_id"]
-        cache_key = f"registration_program_population_import_async_task-{registration_data_import_id}"
-        with locked_cache(key=cache_key) as locked:
-            if not locked:
-                raise AlreadyRunningError(f"Task with key {cache_key} is already running")
-
+        with celery_lock("registration_program_population_import", registration_data_import_id):
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
             if rdi.status not in (
@@ -171,9 +140,11 @@ def registration_program_population_import_async_task_action(job: AsyncRetryJob)
                 import_to_program_id=job.config["import_to_program_id"],
             )
             return True
-    except (WrongStatusError, AlreadyRunningError) as exc:
+    except WrongStatusError as exc:
         logger.info(str(exc))
         return True
+    except AlreadyRunningError:
+        raise
     except RegistrationDataImport.DoesNotExist:
         raise
     except Exception as exc:  # noqa
@@ -217,12 +188,7 @@ def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> bool:
         business_area_id = job.config["business_area_id"]
         program_id = job.config["program_id"]
 
-        with locked_cache(key=f"registration_kobo_import_async_task-{registration_data_import_id}") as locked:
-            if not locked:
-                raise AlreadyRunningError(
-                    f"Task with key registration_kobo_import_async_task"
-                    f" {registration_data_import_id} is already running"
-                )
+        with celery_lock("registration_kobo_import", registration_data_import_id):
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             if rdi.status not in (
                 RegistrationDataImport.IMPORT_SCHEDULED,
@@ -241,9 +207,11 @@ def registration_kobo_import_async_task_action(job: AsyncRetryJob) -> bool:
                 program_id=program_id,
             )
             return True
-    except (WrongStatusError, AlreadyRunningError) as exc:
+    except WrongStatusError as exc:
         logger.info(str(exc))
         return True
+    except AlreadyRunningError:
+        raise
     except Exception as exc:  # noqa
         logger.warning(exc)
         handle_rdi_exception(job.config["registration_data_import_id"], exc)
@@ -318,9 +286,7 @@ def merge_registration_data_import_async_task_action(job: AsyncRetryJob) -> bool
         f"merge_registration_data_import_async_task started for"
         f" registration_data_import_id: {registration_data_import_id}"
     )
-    with locked_cache(key=f"merge_registration_data_import_async_task-{registration_data_import_id}") as locked:
-        if not locked:
-            return True
+    with celery_lock("merge_registration_data_import", registration_data_import_id):
         from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
         from hope.models import RegistrationDataImport
 
@@ -475,9 +441,7 @@ def check_and_set_taxid(queryset: "QuerySet") -> dict:
 
 
 def deduplicate_documents_for_rdi(rdi_id: str) -> bool:
-    with locked_cache(key="deduplicate_documents") as locked:
-        if not locked:
-            return True
+    with celery_lock("deduplicate_documents", wait=LOCK_QUEUE_WAIT):
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         with transaction.atomic():
             documents_query = Document.objects.filter(
@@ -550,17 +514,12 @@ def classify_findings_and_schedule_merge_async_task_action(job: AsyncRetryJob) -
     registration_data_import_id = job.config["registration_data_import_id"]
     logger.info(f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge action received")
     try:
-        with locked_cache(
-            key=f"classify_findings_and_schedule_merge_async_task-{registration_data_import_id}"
-        ) as locked:
-            if not locked:
-                logger.info(
-                    f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge skipped (lock held)"
-                )
-                return True
+        with celery_lock("classify_findings_and_schedule_merge", registration_data_import_id):
             CwArrivalHookTask().execute(registration_data_import_id)
         logger.info(f"RDI:{registration_data_import_id} classify_findings_and_schedule_merge action completed")
         return True
+    except AlreadyRunningError:
+        raise
     except Exception as exc:  # noqa
         handle_rdi_exception(registration_data_import_id, exc)
         raise

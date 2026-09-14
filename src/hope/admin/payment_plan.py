@@ -15,7 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
+from hope.admin.utils import CeleryLocksAdminMixin, HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentItemAssignmentForm
@@ -153,7 +153,7 @@ def has_payment_instruction_download_permission(request: Any) -> bool:
 
 
 @admin.register(PaymentPlan)
-class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
+class PaymentPlanAdmin(CeleryLocksAdminMixin, ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     list_display = (
         "unicef_id",
         "name",
@@ -485,7 +485,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
 
 
 @admin.register(PaymentPlanGroup)
-class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
+class PaymentPlanGroupAdmin(CeleryLocksAdminMixin, ViewOnUiMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "name", "cycle")
     search_fields = ("name", "unicef_id")
     list_filter = (("cycle__program__business_area", AutoCompleteFilter),)

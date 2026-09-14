@@ -6,12 +6,14 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import AutocompleteForeignKeyMixin
+from hope.admin.utils import AutocompleteForeignKeyMixin, CeleryLocksAdminMixin
 from hope.models import WesternUnionPaymentPlanReport
 
 
 @admin.register(WesternUnionPaymentPlanReport)
-class WesternUnionPaymentPlanReportAdmin(AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin):
+class WesternUnionPaymentPlanReportAdmin(
+    CeleryLocksAdminMixin, AutocompleteForeignKeyMixin, AdminFiltersMixin, admin.ModelAdmin
+):
     list_display = ["id", "invoice", "payment_plan_admin_link", "sent"]
     list_filter = [("payment_plan", AutoCompleteFilter)]
     search_fields = ["invoice__name", "payment_plan__unicef_id", "payment_plan__name"]
