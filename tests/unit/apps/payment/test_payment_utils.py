@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
@@ -5,6 +6,8 @@ from django.utils import timezone
 import pytest
 from test_utils.factories.core import CurrencyFactory
 
+from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy
+from hope.apps.core.exchange_rates.models import ExchangeRates
 from hope.apps.payment.utils import get_number_of_samples, get_quantity_in_usd
 
 pytestmark = pytest.mark.django_db
@@ -109,25 +112,37 @@ def test_get_quantity_in_usd_does_not_lookup_when_exchange_rate_provided(
 
 
 @pytest.fixture
-def redenominated_currency():
-    return CurrencyFactory(code="SYP", vision_code="SYP01")
+def dummy_exchange_rates() -> ExchangeRates:
+    # The committed feed behind USE_DUMMY_EXCHANGE_RATES: 2800 per USD for SYP, 28 for SYP01.
+    return ExchangeRates(api_client=ExchangeRateClientDummy())
 
 
-def test_get_quantity_in_usd_keys_fx_feed_by_vision_code(redenominated_currency, django_assert_num_queries) -> None:
-    exchange_rates_client = Mock()
-    exchange_rates_client.get_exchange_rate_for_currency_code.return_value = 2
+def test_get_quantity_in_usd_converts_the_active_syp_at_the_new_denomination_rate(
+    currency_syp, dummy_exchange_rates
+) -> None:
+    result = get_quantity_in_usd(
+        amount=Decimal(2800),
+        currency=currency_syp,
+        exchange_rate=None,
+        currency_exchange_date=datetime(2026, 9, 1),
+        exchange_rates_client=dummy_exchange_rates,
+    )
 
-    with django_assert_num_queries(0):
-        get_quantity_in_usd(
-            amount=Decimal(10),
-            currency=redenominated_currency,
-            exchange_rate=0,
-            currency_exchange_date=timezone.now(),
-            exchange_rates_client=exchange_rates_client,
-        )
+    assert result == Decimal("100.00")
 
-    passed_code = exchange_rates_client.get_exchange_rate_for_currency_code.call_args.args[0]
-    assert passed_code == "SYP01"
+
+def test_get_quantity_in_usd_converts_the_deprecated_syp_at_the_old_denomination_rate(
+    currency_syp_deprecated, dummy_exchange_rates
+) -> None:
+    result = get_quantity_in_usd(
+        amount=Decimal(2800),
+        currency=currency_syp_deprecated,
+        exchange_rate=None,
+        currency_exchange_date=datetime(2026, 9, 1),
+        exchange_rates_client=dummy_exchange_rates,
+    )
+
+    assert result == Decimal("1.00")
 
 
 @pytest.mark.parametrize(
