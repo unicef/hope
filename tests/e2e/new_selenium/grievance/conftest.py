@@ -1,9 +1,11 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import NamedTuple
 
 from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 import pytest
 
+from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import BeneficiaryGroupFactory
 from extras.test_utils.factories.grievance import (
     GrievanceTicketFactory,
@@ -24,6 +26,7 @@ from hope.models import (
     Household,
     Individual,
     Program,
+    User,
 )
 
 
@@ -433,4 +436,163 @@ def individual_in_other_program(business_area: BusinessArea) -> Individual:
         family_name="Sarwar",
         sex="FEMALE",
         birth_date=date(1988, 2, 6),
+    )
+
+
+# --- My Tasks ------------------------------------------------------------------------
+#
+# The My Tasks page has two tabs: Needs Assignment (unassigned, active) and Assigned To Me. The
+# daily digest emails deep-link into them with ?tab=, ?sensitive= and ?overdue=. Every fixture
+# below is one ticket placed on exactly one side of one of those axes, so each test can list a
+# handful and state which of them must show.
+
+
+def _ticket(
+    program: Program,
+    *,
+    category: int,
+    issue_type: int,
+    assigned_to: User | None = None,
+    status: int = GrievanceTicket.STATUS_NEW,
+    age: timedelta | None = None,
+) -> GrievanceTicket:
+    """One ticket in ``program``, optionally backdated by ``age`` so it counts as overdue.
+
+    ``created_at`` is ``auto_now_add`` and the live server runs in its own thread, so the
+    backdate is a queryset update rather than freezegun. ``unicef_id`` comes from a DB trigger.
+    """
+    ticket = GrievanceTicketFactory(
+        business_area=program.business_area,
+        category=category,
+        issue_type=issue_type,
+        assigned_to=assigned_to,
+        status=status,
+    )
+    ticket.programs.set([program])
+    if age is not None:
+        GrievanceTicket.objects.filter(pk=ticket.pk).update(created_at=timezone.now() - age)
+    ticket.refresh_from_db()
+    return ticket
+
+
+def _complaint(program: Program, **kwargs: object) -> GrievanceTicket:
+    return _ticket(
+        program,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
+        **kwargs,
+    )
+
+
+def _sensitive(program: Program, **kwargs: object) -> GrievanceTicket:
+    return _ticket(
+        program,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        **kwargs,
+    )
+
+
+@pytest.fixture
+def my_tasks_program(business_area: BusinessArea) -> Program:
+    """Active, so the all-programmes list (``is_active_program=true``) includes its tickets."""
+    beneficiary_group = BeneficiaryGroupFactory(
+        name="My Tasks Household Group",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=True,
+    )
+    return ProgramFactory(
+        name="My Tasks Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        beneficiary_group=beneficiary_group,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+
+
+@pytest.fixture
+def me(create_super_user: User) -> User:
+    """The user the ``login`` fixture signs in as."""
+    return create_super_user
+
+
+@pytest.fixture
+def other_user() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def unassigned_complaint(my_tasks_program: Program) -> GrievanceTicket:
+    return _complaint(my_tasks_program)
+
+
+@pytest.fixture
+def unassigned_sensitive(my_tasks_program: Program) -> GrievanceTicket:
+    return _sensitive(my_tasks_program)
+
+
+@pytest.fixture
+def unassigned_closed(my_tasks_program: Program) -> GrievanceTicket:
+    """Closed without ever being assigned - Needs Assignment must never offer it."""
+    return _complaint(my_tasks_program, status=GrievanceTicket.STATUS_CLOSED)
+
+
+@pytest.fixture
+def my_complaint(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    return _complaint(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def my_sensitive(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    return _sensitive(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def my_closed(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    """Hidden by the default "Active Tickets" status filter."""
+    return _complaint(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_CLOSED)
+
+
+@pytest.fixture
+def my_overdue_complaint(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    """Past the 30-day default threshold for non-sensitive tickets."""
+    return _complaint(
+        my_tasks_program,
+        assigned_to=me,
+        status=GrievanceTicket.STATUS_ASSIGNED,
+        age=timedelta(days=40),
+    )
+
+
+@pytest.fixture
+def my_recent_sensitive_overdue(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    """Past the 1-day sensitive threshold but well inside the 30-day one.
+
+    Only listed as overdue if the filter applies the threshold of the ticket's own category.
+    """
+    return _sensitive(
+        my_tasks_program,
+        assigned_to=me,
+        status=GrievanceTicket.STATUS_ASSIGNED,
+        age=timedelta(days=2),
+    )
+
+
+@pytest.fixture
+def someone_elses_complaint(my_tasks_program: Program, other_user: User) -> GrievanceTicket:
+    return _complaint(my_tasks_program, assigned_to=other_user, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def restricted_user_tickets(
+    my_tasks_program: Program, user_with_no_permissions: User
+) -> tuple[GrievanceTicket, GrievanceTicket]:
+    """A complaint and a sensitive ticket, both assigned to the user who holds only one grant."""
+    return (
+        _complaint(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED),
+        _sensitive(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED),
     )
