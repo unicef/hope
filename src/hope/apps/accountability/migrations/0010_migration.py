@@ -8,10 +8,22 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
+            model_name="feedback",
+            name="program",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=models.deletion.SET_NULL,
+                to="program.Program",
+            ),
+        ),
+        migrations.AlterField(
             model_name="message",
             name="program",
             field=models.ForeignKey(
-                on_delete=models.deletion.PROTECT,
+                blank=True,
+                null=True,
+                on_delete=models.deletion.SET_NULL,
                 related_name="messages",
                 to="program.Program",
             ),
@@ -20,7 +32,9 @@ class Migration(migrations.Migration):
             model_name="survey",
             name="program",
             field=models.ForeignKey(
-                on_delete=models.deletion.PROTECT,
+                blank=True,
+                null=True,
+                on_delete=models.deletion.SET_NULL,
                 related_name="surveys",
                 to="program.Program",
             ),
