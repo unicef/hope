@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 
@@ -11,6 +12,13 @@ pytestmark = pytest.mark.django_db
 def kobo_settings(settings: Any) -> None:
     settings.KOBO_MASTER_API_TOKEN = "test-token"
     settings.KOBO_URL = "https://kf.hope.unicef.org"
+    settings.KOBO_PROJECT_VIEWS_ID = "pvEsUUfAgYyyV7jpR6i3FvM"
+
+
+@pytest.fixture
+def kobo_settings_with_trailing_slash(settings: Any) -> None:
+    settings.KOBO_MASTER_API_TOKEN = "test-token"
+    settings.KOBO_URL = "https://kf.hope.unicef.org/"
     settings.KOBO_PROJECT_VIEWS_ID = "pvEsUUfAgYyyV7jpR6i3FvM"
 
 
@@ -60,3 +68,43 @@ def test_get_project_submissions_returns_empty_for_active_only(
     service.LIMIT = 10
     submissions = service.get_project_submissions("aWnA2d5YBBDgQ5WZXpbaRe", only_active_submissions=True)
     assert len(submissions) == 0
+
+
+def test_get_single_project_data_requests_url_without_double_slash(
+    kobo_settings_with_trailing_slash: None,
+) -> None:
+    service = KoboAPI()
+
+    with patch.object(service, "_get_request") as get_request:
+        service.get_single_project_data("aWnA2d5YBBDgQ5WZXpbaRe")
+
+    get_request.assert_called_once_with(
+        "https://kf.hope.unicef.org/api/v2/assets/aWnA2d5YBBDgQ5WZXpbaRe/?format=json&limit=30000"
+    )
+
+
+def test_get_all_projects_data_requests_url_without_double_slash(
+    kobo_settings_with_trailing_slash: None,
+) -> None:
+    service = KoboAPI()
+
+    with patch.object(service, "_get_paginated_request") as get_paginated_request:
+        service.get_all_projects_data("AFG")
+
+    get_paginated_request.assert_called_once_with(
+        "https://kf.hope.unicef.org/api/v2/project-views/pvEsUUfAgYyyV7jpR6i3FvM/assets/"
+        "?format=json&limit=30000&q=settings__country_codes__icontains:AFG"
+    )
+
+
+def test_get_project_submissions_requests_url_without_double_slash(
+    kobo_settings_with_trailing_slash: None,
+) -> None:
+    service = KoboAPI()
+
+    with patch.object(service, "_get_paginated_request") as get_paginated_request:
+        service.get_project_submissions("aWnA2d5YBBDgQ5WZXpbaRe", only_active_submissions=False)
+
+    get_paginated_request.assert_called_once_with(
+        "https://kf.hope.unicef.org/api/v2/assets/aWnA2d5YBBDgQ5WZXpbaRe/data/?format=json&limit=30000"
+    )
