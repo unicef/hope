@@ -131,13 +131,33 @@ def historical_exports_across_business_areas_and_programs():
     return first_payment, another_first_program_payment, second_payment, third_payment
 
 
+@pytest.fixture
+def historical_export_without_attached_file():
+    group = PaymentPlanGroupFactory()
+    payment_plan = PaymentPlanFactory(
+        program_cycle=group.cycle,
+        payment_plan_group=group,
+        financial_service_provider=FinancialServiceProviderFactory(),
+        status=PaymentPlan.Status.ACCEPTED,
+        use_payment_gateway=False,
+        export_tag=1,
+        export_file_delivery=None,
+    )
+    return PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_PENDING,
+        delivered_quantity=None,
+    )
+
+
 def test_backfill_dry_run_does_not_change_payments(
     historical_group_export,
     django_assert_num_queries,
 ) -> None:
     payment, _api_payment, _payment_without_fsp, _export_file, original_status_date = historical_group_export
 
-    summary = backfill()
+    with django_assert_num_queries(3):
+        summary = backfill()
 
     with django_assert_num_queries(1):
         payment.refresh_from_db()
@@ -168,7 +188,8 @@ def test_backfill_updates_only_historical_manual_group_payments(
     payment, api_payment, payment_without_fsp, export_file, original_status_date = historical_group_export
     old_signature = payment.signature_hash
 
-    summary = backfill(dry_run=False, batch_size=1)
+    with django_assert_num_queries(9):
+        summary = backfill(dry_run=False, batch_size=1)
 
     with django_assert_num_queries(3):
         payment.refresh_from_db()
@@ -193,9 +214,11 @@ def test_backfill_updates_only_historical_manual_group_payments(
     }
     assert payment.status == Payment.STATUS_SENT_TO_FSP
     assert payment.status_date == export_file.created
+    assert payment.sent_to_fsp_date == export_file.created
     assert payment.internal_data["existing"] == "value"
     backfill_entry = payment.internal_data[INTERNAL_DATA_KEY][-1]
     assert backfill_entry["export_file_id"] == str(export_file.pk)
+    assert backfill_entry["status_date_source"] == "export_file"
     assert backfill_entry["previous_status"] == Payment.STATUS_PENDING
     assert backfill_entry["previous_status_date"] == original_status_date.isoformat()
     assert stored_signature != old_signature
@@ -206,9 +229,9 @@ def test_backfill_updates_only_historical_manual_group_payments(
 
 def test_backfill_is_safe_to_run_again(historical_group_export, django_assert_num_queries) -> None:
     payment, _api_payment, _payment_without_fsp, _export_file, _original_status_date = historical_group_export
-    first_summary = backfill(dry_run=False)
-
-    second_summary = backfill(dry_run=False)
+    with django_assert_num_queries(14):
+        first_summary = backfill(dry_run=False)
+        second_summary = backfill(dry_run=False)
 
     with django_assert_num_queries(1):
         payment.refresh_from_db()
@@ -231,7 +254,8 @@ def test_backfill_processes_business_areas_and_programs_in_separate_batches(
         historical_exports_across_business_areas_and_programs
     )
 
-    summary = backfill(dry_run=False, batch_size=1)
+    with django_assert_num_queries(29):
+        summary = backfill(dry_run=False, batch_size=1)
 
     with django_assert_num_queries(4):
         first_payment.refresh_from_db()
@@ -266,17 +290,30 @@ def test_backfill_processes_business_areas_and_programs_in_separate_batches(
     assert third_payment.status == Payment.STATUS_SENT_TO_FSP
 
 
+def test_backfill_updates_historical_payment_after_export_file_was_removed(
+    historical_export_without_attached_file,
+    django_assert_num_queries,
+) -> None:
+    payment = historical_export_without_attached_file
+    backfill_started_at = timezone.now()
+
+    with django_assert_num_queries(9):
+        summary = backfill(dry_run=False)
+
+    payment.refresh_from_db()
+    backfill_entry = payment.internal_data[INTERNAL_DATA_KEY][-1]
+    assert summary["updated_payments"] == 1
+    assert payment.status == Payment.STATUS_SENT_TO_FSP
+    assert payment.status_date >= backfill_started_at
+    assert payment.sent_to_fsp_date is None
+    assert backfill_entry["export_file_id"] is None
+    assert backfill_entry["exported_at"] is None
+    assert backfill_entry["status_date_source"] == "backfill"
+
+
 def test_set_backfill_values_rejects_invalid_history(historical_group_export, django_assert_num_queries) -> None:
     payment, _api_payment, _payment_without_fsp, _export_file, _original_status_date = historical_group_export
     payment.internal_data = {INTERNAL_DATA_KEY: {}}
 
     with django_assert_num_queries(0), pytest.raises(ValueError, match="to be a list"):
-        _set_backfill_values(payment, payment.parent, timezone.now())
-
-
-def test_set_backfill_values_requires_export_file(historical_group_export, django_assert_num_queries) -> None:
-    payment, _api_payment, _payment_without_fsp, _export_file, _original_status_date = historical_group_export
-    payment.parent.export_file_delivery = None
-
-    with django_assert_num_queries(0), pytest.raises(ValueError, match="has no delivery export file"):
         _set_backfill_values(payment, payment.parent, timezone.now())

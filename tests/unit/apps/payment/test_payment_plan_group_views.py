@@ -2957,7 +2957,7 @@ def test_delivery_import_xlsx_task_error_logs_activity_entry(
     group.refresh_from_db()
     group.delivery_import_file.delete()
     job = AsyncRetryJob.objects.latest("pk")
-    with pytest.raises(AttributeError):
+    with pytest.raises(NonRetriableTaskError, match="no longer exists"):
         async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     group.refresh_from_db()

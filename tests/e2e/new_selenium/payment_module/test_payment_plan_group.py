@@ -197,8 +197,7 @@ def _set_delivered_quantities(file_path: str, quantities: dict[str, int | None])
             row[delivered_quantity_column].value = quantities[payment_id]
             updated_payment_ids.add(payment_id)
     missing_payment_ids = set(quantities) - updated_payment_ids
-    if missing_payment_ids:
-        raise AssertionError(f"Payments not found in reconciliation XLSX: {sorted(missing_payment_ids)}")
+    assert not missing_payment_ids, f"Payments not found in reconciliation XLSX: {sorted(missing_payment_ids)}"
     workbook.save(file_path)
 
 

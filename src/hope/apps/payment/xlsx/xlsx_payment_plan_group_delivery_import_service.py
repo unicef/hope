@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from decimal import Decimal
 from io import BytesIO
 import logging
 from typing import IO, TYPE_CHECKING, Any, cast
@@ -14,6 +13,7 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import log_payment_plan_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    DELIVERY_ATTEMPTED_BUT_FAILED_VALUE,
     NULL_DELIVERY_POLICIES,
     NULL_DELIVERY_POLICY_RESET,
     XlsxPaymentPlanDeliveryImportService,
@@ -21,6 +21,8 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
 from hope.models import Payment, PaymentPlan
 
 if TYPE_CHECKING:
+    from decimal import Decimal
+
     from openpyxl.worksheet.worksheet import Worksheet
 
     from hope.models import PaymentPlanGroup
@@ -229,7 +231,9 @@ class XlsxPaymentPlanGroupDeliveryImportService:
             return
 
         matches_stored_result = file_quantity == stored_quantity or (
-            file_quantity == Decimal(-1) and stored_quantity is None and stored_status == Payment.STATUS_ERROR
+            file_quantity == DELIVERY_ATTEMPTED_BUT_FAILED_VALUE
+            and stored_quantity is None
+            and stored_status == Payment.STATUS_ERROR
         )
         if file_quantity is None or matches_stored_result:
             self.skipped_rows.append(

@@ -47,6 +47,7 @@ if TYPE_CHECKING:
 
 OVERRIDE_OPTION = "override"
 NULL_DELIVERY_POLICY_OPTION = "null_delivery_policy"
+DELIVERY_ATTEMPTED_BUT_FAILED_VALUE = Decimal(-1)
 
 NULL_DELIVERY_POLICY_RESET = "reset"
 NULL_DELIVERY_POLICY_IGNORE = "ignore"
@@ -219,7 +220,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             quantity = Decimal(str(value).strip())
         except (InvalidOperation, TypeError, ValueError):
             raise ValueError from None
-        if not quantity.is_finite() or quantity < 0 and quantity != Decimal(-1):
+        if not quantity.is_finite() or quantity < 0 and quantity != DELIVERY_ATTEMPTED_BUT_FAILED_VALUE:
             raise ValueError
         try:
             return quantity.quantize(Decimal("0.01"))

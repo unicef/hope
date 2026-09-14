@@ -51,7 +51,6 @@ def _eligible_payment_plans() -> QuerySet[PaymentPlan]:
             is_removed=False,
             payment_plan_group__isnull=False,
             export_tag__isnull=False,
-            export_file_delivery__isnull=False,
             use_payment_gateway=False,
             financial_service_provider__isnull=False,
         )
@@ -85,21 +84,22 @@ def _eligible_payments(payment_plan: PaymentPlan) -> QuerySet[Payment]:
 
 def _set_backfill_values(payment: Payment, payment_plan: PaymentPlan, changed_at: datetime) -> None:
     export_file = payment_plan.export_file_delivery
-    if export_file is None:
-        raise ValueError(f"Payment {payment.pk} has no delivery export file.")
+    exported_at = export_file.created if export_file else None
     previous_status_date = payment.status_date
     internal_data = {**(payment.internal_data or {})}
     history = internal_data.get(INTERNAL_DATA_KEY, [])
     if not isinstance(history, list):
         raise ValueError(f"Expected {INTERNAL_DATA_KEY} to be a list for Payment {payment.pk}.")
     payment.status = Payment.STATUS_SENT_TO_FSP
-    payment.status_date = export_file.created
+    payment.status_date = exported_at or changed_at
+    payment.sent_to_fsp_date = exported_at
     internal_data[INTERNAL_DATA_KEY] = [
         *history,
         {
             "changed_at": changed_at.isoformat(),
-            "export_file_id": str(export_file.pk),
-            "exported_at": export_file.created.isoformat(),
+            "export_file_id": str(export_file.pk) if export_file else None,
+            "exported_at": exported_at.isoformat() if exported_at else None,
+            "status_date_source": "export_file" if exported_at else "backfill",
             "previous_status": Payment.STATUS_PENDING,
             "previous_status_date": previous_status_date.isoformat() if previous_status_date else None,
         },
@@ -160,7 +160,7 @@ def backfill(*, dry_run: bool = True, batch_size: int = BATCH_SIZE) -> BackfillS
 
                             Payment.signature_manager.bulk_update_with_signature(
                                 payments,
-                                ("status", "status_date", "internal_data"),
+                                ("status", "status_date", "sent_to_fsp_date", "internal_data"),
                                 batch_size=batch_size,
                             )
                             last_pk = payments[-1].pk

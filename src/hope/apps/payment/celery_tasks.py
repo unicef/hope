@@ -49,6 +49,7 @@ from hope.apps.utils.sentry import set_sentry_business_area_tag
 from hope.models import (
     AsyncJob,
     AsyncRetryJob,
+    FileTemp,
     FollowUpInstruction,
     PaymentPlan,
     PaymentPlanGroup,
@@ -667,14 +668,28 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
         XlsxPaymentPlanGroupDeliveryImportService,
     )
 
-    payment_plan_group = PaymentPlanGroup.objects.select_related(
-        "delivery_import_file__created_by", "cycle__program__business_area"
-    ).get(id=job.config["payment_plan_group_id"])
+    payment_plan_group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(
+        id=job.config["payment_plan_group_id"]
+    )
     old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
+    delivery_import_file_id = job.config.get("delivery_import_file_id") or (payment_plan_group.delivery_import_file_id)
+    delivery_import_file = (
+        FileTemp.objects.select_related("created_by").filter(pk=delivery_import_file_id).first()
+        if delivery_import_file_id
+        else None
+    )
+    if delivery_import_file is None:
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+        payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config.get("user_id"))
+        raise NonRetriableTaskError("The reconciliation import file no longer exists.")
+    if str(delivery_import_file.object_id) != str(payment_plan_group.pk):
+        raise NonRetriableTaskError("The reconciliation import file does not belong to this Payment Plan Group.")
+    if payment_plan_group.delivery_import_file_id != delivery_import_file.pk:
+        raise NonRetriableTaskError("The reconciliation import was superseded by a newer upload.")
     notification = None
 
     try:
-        delivery_import_file = payment_plan_group.delivery_import_file
         notification_user_id = job.config.get("notification_user_id") or delivery_import_file.created_by_id
         notification_user = User.objects.filter(pk=notification_user_id).first()
         notification = (
@@ -728,17 +743,25 @@ def import_payment_plan_group_delivery_from_xlsx_async_task_action(job: AsyncRet
 
 
 def notify_payment_plan_group_reconciliation_import_failure(job: AsyncRetryJob, _exception: Exception) -> None:
-    payment_plan_group = PaymentPlanGroup.objects.select_related(
-        "delivery_import_file__created_by", "cycle__program__business_area"
-    ).get(id=job.config["payment_plan_group_id"])
-    delivery_import_file = payment_plan_group.delivery_import_file
-    notification_user_id = job.config.get("notification_user_id") or delivery_import_file.created_by_id
+    payment_plan_group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(
+        id=job.config["payment_plan_group_id"]
+    )
+    delivery_import_file_id = job.config.get("delivery_import_file_id") or (payment_plan_group.delivery_import_file_id)
+    delivery_import_file = (
+        FileTemp.objects.select_related("created_by").filter(pk=delivery_import_file_id).first()
+        if delivery_import_file_id
+        else None
+    )
+    notification_user_id = job.config.get("notification_user_id")
+    if notification_user_id is None:
+        notification_user_id = delivery_import_file.created_by_id if delivery_import_file else job.owner_id
     notification_user = User.objects.filter(pk=notification_user_id).first()
     if notification_user:
+        file_name = delivery_import_file.file.name if delivery_import_file else None
         PaymentPlanGroupReconciliationImportNotification(
             payment_plan_group,
             notification_user,
-            delivery_import_file.file.name or "reconciliation.xlsx",
+            file_name or "reconciliation.xlsx",
         ).send_processing_failure()
 
 
@@ -750,8 +773,11 @@ def import_payment_plan_group_delivery_from_xlsx_async_task(
     notification_user_id: str | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
+    if payment_plan_group.delivery_import_file_id is None:
+        raise ValueError("Payment Plan Group reconciliation import file is required.")
     config = {
         "payment_plan_group_id": payment_plan_group_id,
+        "delivery_import_file_id": str(payment_plan_group.delivery_import_file_id),
         "user_id": user_id,
         "notification_user_id": notification_user_id or user_id,
         OVERRIDE_OPTION: override,

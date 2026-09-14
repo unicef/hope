@@ -927,6 +927,7 @@ def test_save_xlsx_file_marks_exported_manual_payments_as_sent_to_fsp(
     )
     assert exported_payment.status == Payment.STATUS_SENT_TO_FSP
     assert exported_payment.status_date > old_status_date
+    assert exported_payment.sent_to_fsp_date == exported_payment.status_date
     assert stored_signature != old_signature
     assert exported_payment.signature_hash == stored_signature
     assert payment_log.user == user
@@ -957,6 +958,7 @@ def test_reexport_keeps_sent_to_fsp_payment_unchanged(group_one_exportable_two_s
     XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
     payment.refresh_from_db()
     first_status_date = payment.status_date
+    first_sent_to_fsp_date = payment.sent_to_fsp_date
     first_signature = payment.signature_hash
     first_log_count = LogEntry.objects.filter(content_type=content_type, object_id=payment.pk).count()
 
@@ -965,6 +967,7 @@ def test_reexport_keeps_sent_to_fsp_payment_unchanged(group_one_exportable_two_s
     payment.refresh_from_db()
     assert payment.status == Payment.STATUS_SENT_TO_FSP
     assert payment.status_date == first_status_date
+    assert payment.sent_to_fsp_date == first_sent_to_fsp_date
     assert payment.signature_hash == first_signature
     assert LogEntry.objects.filter(content_type=content_type, object_id=payment.pk).count() == first_log_count
 

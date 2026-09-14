@@ -45,6 +45,7 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_group_delivery_from_xlsx_async_task,
+    import_payment_plan_group_delivery_from_xlsx_async_task_action,
     import_payment_plan_payment_list_from_xlsx_async_task,
     notify_payment_plan_group_reconciliation_import_failure,
     payment_plan_apply_custom_exchange_rate_async_task,
@@ -2127,9 +2128,144 @@ def test_import_delivery_group_task_sets_error_status_and_final_failure_notifies
     assert job.config["on_failure_action"] == (
         "hope.apps.payment.celery_tasks.notify_payment_plan_group_reconciliation_import_failure"
     )
+    assert job.config["delivery_import_file_id"] == str(group.delivery_import_file_id)
     mock_email_user.assert_called_once()
     assert "background processing failed" in mock_email_user.call_args.kwargs["text_body"]
     assert "internal database details" not in mock_email_user.call_args.kwargs["text_body"]
+
+
+@pytest.fixture
+def superseded_reconciliation_job(group_with_accepted_plan_and_import_file, user):
+    group = group_with_accepted_plan_and_import_file
+    original_file_id = group.delivery_import_file_id
+    job = AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task_action",
+        config={
+            "payment_plan_group_id": str(group.pk),
+            "delivery_import_file_id": str(original_file_id),
+        },
+    )
+    replacement_file = FileTempFactory(
+        object_id=str(group.pk),
+        content_type=get_content_type_for_model(group),
+        created_by=user,
+    )
+    group.delivery_import_file = replacement_file
+    group.save(update_fields=["delivery_import_file"])
+    return group, job, replacement_file
+
+
+@pytest.fixture
+def reconciliation_job_without_file(payment_plan_group_with_accepted_plan):
+    group = payment_plan_group_with_accepted_plan
+    job = AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task_action",
+        config={"payment_plan_group_id": str(group.pk)},
+    )
+    return group, job
+
+
+@pytest.fixture
+def reconciliation_job_without_file_for_user(payment_plan_group_with_accepted_plan, user):
+    group = payment_plan_group_with_accepted_plan
+    return AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        owner_id=user.pk,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task_action",
+        config={
+            "payment_plan_group_id": str(group.pk),
+            "notification_user_id": str(user.pk),
+        },
+    )
+
+
+@pytest.fixture
+def reconciliation_job_with_file_from_another_group(group_with_accepted_plan_and_import_file, user):
+    group = group_with_accepted_plan_and_import_file
+    another_group = PaymentPlanGroupFactory(cycle=group.cycle)
+    another_group_file = FileTempFactory(
+        object_id=str(another_group.pk),
+        content_type=get_content_type_for_model(another_group),
+        created_by=user,
+    )
+    return AsyncRetryJob.create_for_instance(
+        group,
+        type=AsyncJobModel.JobType.JOB_TASK,
+        repeatable=True,
+        action="hope.apps.payment.celery_tasks.import_payment_plan_group_delivery_from_xlsx_async_task_action",
+        config={
+            "payment_plan_group_id": str(group.pk),
+            "delivery_import_file_id": str(another_group_file.pk),
+        },
+    )
+
+
+def test_import_delivery_group_task_rejects_superseded_file(superseded_reconciliation_job) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+
+    group, job, replacement_file = superseded_reconciliation_job
+
+    with pytest.raises(NonRetriableTaskError, match="superseded by a newer upload"):
+        import_payment_plan_group_delivery_from_xlsx_async_task_action(job)
+
+    group.refresh_from_db()
+    assert group.delivery_import_file_id == replacement_file.pk
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+
+
+def test_import_delivery_group_task_rejects_missing_file(reconciliation_job_without_file) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+
+    _group, job = reconciliation_job_without_file
+
+    with pytest.raises(NonRetriableTaskError, match="no longer exists"):
+        import_payment_plan_group_delivery_from_xlsx_async_task_action(job)
+
+
+def test_import_delivery_group_task_rejects_file_from_another_group(
+    reconciliation_job_with_file_from_another_group,
+) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+
+    with pytest.raises(NonRetriableTaskError, match="does not belong"):
+        import_payment_plan_group_delivery_from_xlsx_async_task_action(reconciliation_job_with_file_from_another_group)
+
+
+def test_import_delivery_group_task_requires_file_before_queueing(payment_plan_group_with_accepted_plan) -> None:
+    with pytest.raises(ValueError, match="import file is required"):
+        import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group_with_accepted_plan)
+
+
+def test_import_delivery_group_failure_notification_skips_when_recipient_is_unavailable(
+    reconciliation_job_without_file,
+) -> None:
+    _group, job = reconciliation_job_without_file
+
+    with patch.object(User, "email_user", autospec=True) as mock_email_user:
+        notify_payment_plan_group_reconciliation_import_failure(job, Exception("Import failed"))
+
+    mock_email_user.assert_not_called()
+
+
+def test_import_delivery_group_failure_notification_uses_saved_recipient_when_file_is_missing(
+    reconciliation_job_without_file_for_user,
+) -> None:
+    with patch.object(User, "email_user", autospec=True) as mock_email_user:
+        notify_payment_plan_group_reconciliation_import_failure(
+            reconciliation_job_without_file_for_user,
+            Exception("Import failed"),
+        )
+
+    mock_email_user.assert_called_once()
+    assert "reconciliation.xlsx" in mock_email_user.call_args.kwargs["text_body"]
 
 
 def test_send_to_payment_gateway_action_returns_early_when_wrong_status(payment_plan: Any, user: Any) -> None:

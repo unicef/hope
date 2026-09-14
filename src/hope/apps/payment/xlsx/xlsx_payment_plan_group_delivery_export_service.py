@@ -286,11 +286,12 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             old_payment = cast("Payment", copy_model_object(payment))
             payment.status = Payment.STATUS_SENT_TO_FSP
             payment.status_date = status_date
+            payment.sent_to_fsp_date = status_date
             old_new_pairs.append((old_payment, payment))
 
         Payment.signature_manager.bulk_update_with_signature(
             self.payments_to_mark_sent,
-            ("status", "status_date"),
+            ("status", "status_date", "sent_to_fsp_date"),
             batch_size=self.batch_size,
         )
         bulk_log_payment_changes(old_new_pairs, user)
