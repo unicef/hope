@@ -21,6 +21,7 @@ from hope.apps.account.api.serializers import (
     PartnerChoicesSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
+    UserChoicesSerializer,
     UserSerializer,
     UserTimezoneSerializer,
 )
@@ -68,6 +69,10 @@ class UserViewSet(
             Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
             Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
         ],
+        "choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
         "partner_for_grievance_choices": [
             Permissions.USER_MANAGEMENT_VIEW_LIST,
             *ALL_GRIEVANCES_CREATE_MODIFY,
@@ -79,6 +84,7 @@ class UserViewSet(
         "profile": ProfileSerializer,
         "profile_timezone": UserTimezoneSerializer,
         "list": UserSerializer,
+        "choices": UserChoicesSerializer,
     }
     serializer_classes = {
         "program_users": ProgramUsersSerializer,

@@ -48,6 +48,7 @@ from hope.apps.program.api.caches import (
 from hope.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
 from hope.apps.program.api.serializers import (
     BeneficiaryGroupSerializer,
+    ProgramChoicesSerializer,
     ProgramCopySerializer,
     ProgramCreateSerializer,
     ProgramCycleCreateSerializer,
@@ -104,6 +105,7 @@ class ProgramViewSet(
         "finish": [Permissions.PROGRAMME_FINISH],
         "update_partner_access": [Permissions.PROGRAMME_UPDATE],
         "copy": [Permissions.PROGRAMME_DUPLICATE],
+        "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "destroy": [Permissions.PROGRAMME_REMOVE],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
         "payments_count": [Permissions.PM_VIEW_PAYMENT_LIST],
@@ -116,6 +118,7 @@ class ProgramViewSet(
         "update": ProgramUpdateSerializer,
         "update_partner_access": ProgramUpdatePartnerAccessSerializer,
         "copy": ProgramCopySerializer,
+        "choices": ProgramChoicesSerializer,
         "payments": PaymentListSerializer,
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)

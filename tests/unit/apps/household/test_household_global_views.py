@@ -920,3 +920,28 @@ def test_get_choices_denies_anonymous_access() -> None:
     response = APIClient().get(reverse("api:choices-households"))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_household_viewset_choices_returns_choices_for_user_with_role(
+    api_client: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    afghanistan = BusinessAreaFactory(slug="afghanistan")
+    partner = PartnerFactory(name="TestPartner")
+    user = UserFactory(partner=partner)
+    client = api_client(user)
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+        business_area=afghanistan,
+    )
+    response = client.get(
+        reverse("api:households:households-global-choices", kwargs={"business_area_slug": afghanistan.slug})
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {
+        "residence_status_choices": sorted(
+            [{"name": name, "value": value} for value, name in RESIDENCE_STATUS_CHOICE],
+            key=lambda choice: choice["name"],
+        ),
+    }
