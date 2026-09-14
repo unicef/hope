@@ -118,6 +118,7 @@ export const GrievancesTable = ({
       isActiveProgram: isAllPrograms ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
       overdue: filter.overdue,
+      sensitive: filter.sensitive,
       // Last, so a page's pinned params win over anything the filter bar set.
       ...extraQueryParams,
     }),
@@ -149,6 +150,7 @@ export const GrievancesTable = ({
       filter.program,
       filter.areaScope,
       filter.overdue,
+      filter.sensitive,
       extraQueryParams,
       isAllPrograms,
       programCode,
@@ -156,13 +158,22 @@ export const GrievancesTable = ({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [page, setPage] = useState<number>(0);
+  const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
+    [key: number]: GrievanceTicketList[];
+  }>({ 0: [] });
+
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+    // A different query lists different rows, so anything still ticked is now invisible - and
+    // would silently take part in the next bulk action. Only the filter and the page's pinned
+    // params are in here; paging and ordering go through setQueryVariables, so selecting across
+    // pages still works.
+    setSelectedTicketsPerPage({ 0: [] });
+    setPage(0);
+  }, [initialQueryVariables]);
 
   const { data: usersListData } = useQuery<PaginatedUserList>({
     queryKey: restQueryKey(RestService.restBusinessAreasUsersList, {
@@ -279,10 +290,6 @@ export const GrievancesTable = ({
     : persistedCountSelected;
 
   const optionsData = usersData;
-
-  const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
-    [key: number]: GrievanceTicketList[];
-  }>({ 0: [] });
 
   const selectedTickets: GrievanceTicketList[] = [];
   const currentSelectedTickets = selectedTicketsPerPage[page];

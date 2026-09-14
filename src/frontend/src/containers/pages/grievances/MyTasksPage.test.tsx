@@ -78,6 +78,7 @@ const renderPage = (search: string) =>
   );
 
 const lastTableProps = () => tableProps.mock.calls.at(-1)?.[0];
+const lastFiltersProps = () => filtersProps.mock.calls.at(-1)?.[0];
 
 describe('MyTasksPage', () => {
   beforeEach(() => {
@@ -95,43 +96,57 @@ describe('MyTasksPage', () => {
     ).mockResolvedValue({ id: CURRENT_USER_ID });
   });
 
-  it('turns ?tab=mine-sensitive into an assigned-to-me sensitive query', async () => {
-    renderPage('?tab=mine-sensitive');
+  it('pins the needs-assignment tab to unassigned active tickets', async () => {
+    renderPage('?tab=needs-assignment&sensitive=true');
+
+    await screen.findByTestId('grievances-table');
+    await waitFor(() =>
+      // Active is pinned rather than merely defaulted: a closed unassigned ticket can never be
+      // acted on from this tab, and the email's count leaves it out too.
+      expect(lastTableProps().extraQueryParams).toEqual({
+        unassigned: true,
+        grievanceStatus: 'active',
+      }),
+    );
+    expect(lastTableProps().filter.sensitive).toBe(true);
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    expect(screen.getByRole('tab', { selected: true }).textContent).toBe(
+      'NEEDS ASSIGNMENT',
+    );
+  });
+
+  it('reads ?sensitive=false from the URL into the filter', async () => {
+    renderPage('?tab=mine&sensitive=false');
 
     await screen.findByTestId('grievances-table');
     await waitFor(() =>
       expect(lastTableProps().extraQueryParams).toEqual({
         assignedTo: CURRENT_USER_ID,
-        sensitive: 'true',
       }),
     );
-    expect(screen.getByRole('tab', { selected: true }).textContent).toBe(
-      'ASSIGNED TO ME - SENSITIVE',
-    );
+    // Asserted explicitly: were this dropped, the list would silently widen to every ticket
+    // assigned to the user, sensitive ones included.
+    expect(lastTableProps().filter.sensitive).toBe(false);
   });
 
-  it('sends sensitive=false on the "other" preset', async () => {
+  it('leaves sensitivity unset when the email did not narrow it', async () => {
     renderPage('?tab=mine');
 
     await screen.findByTestId('grievances-table');
     await waitFor(() =>
-      // Asserted explicitly: were this dropped, the tab would silently widen to every ticket
-      // assigned to the user, sensitive ones included.
       expect(lastTableProps().extraQueryParams).toEqual({
         assignedTo: CURRENT_USER_ID,
-        sensitive: 'false',
       }),
     );
+    expect(lastTableProps().filter.sensitive).toBe('');
   });
 
-  it('composes ?overdue=true with the needs-assignment preset', async () => {
-    renderPage('?tab=needs-assignment&overdue=true');
+  it('composes ?sensitive= with ?overdue=', async () => {
+    renderPage('?tab=mine&sensitive=true&overdue=true');
 
     await screen.findByTestId('grievances-table');
-    await waitFor(() =>
-      expect(lastTableProps().extraQueryParams).toEqual({ unassigned: true }),
-    );
-    expect(lastTableProps().filter.overdue).toBe(true);
+    await waitFor(() => expect(lastTableProps().filter.overdue).toBe(true));
+    expect(lastTableProps().filter.sensitive).toBe(true);
   });
 
   it('falls back to the first permitted tab and states it in the URL', async () => {
@@ -151,12 +166,38 @@ describe('MyTasksPage', () => {
 
     await screen.findByTestId('grievances-table');
     expect(screen.getAllByRole('tab')).toHaveLength(1);
+  });
+
+  it('pins sensitivity and hides its filter when only one half is granted', async () => {
+    mockPermissions = [PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE];
+    renderPage('?tab=mine&sensitive=false');
+
+    await screen.findByTestId('grievances-table');
     await waitFor(() =>
+      // The pinned param is spread last by the table, so it beats the ?sensitive=false the URL
+      // asked for rather than showing tickets the user may not see.
       expect(lastTableProps().extraQueryParams).toEqual({
         assignedTo: CURRENT_USER_ID,
-        sensitive: 'false',
+        sensitive: 'true',
       }),
     );
+    expect(lastFiltersProps().showSensitiveFilter).toBe(false);
+    // Folded into the filter as well, so the category list narrows the same way it would for a
+    // value the user picked themselves.
+    expect(lastFiltersProps().filter.sensitive).toBe('true');
+    expect(lastTableProps().filter.sensitive).toBe('true');
+  });
+
+  it('hides the ticket-status filter on the needs-assignment tab only', async () => {
+    renderPage('?tab=needs-assignment');
+
+    await screen.findByTestId('grievances-table');
+    await waitFor(() =>
+      expect(lastFiltersProps().showStatusFilter).toBe(false),
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'ASSIGNED TO ME' }));
+    await waitFor(() => expect(lastFiltersProps().showStatusFilter).toBe(true));
   });
 
   it('denies access to a user with none of the preset permissions', async () => {
@@ -167,23 +208,23 @@ describe('MyTasksPage', () => {
     expect(screen.queryByTestId('grievances-table')).toBeNull();
   });
 
-  it('keeps overdue in the URL and clears the category when switching tab', async () => {
-    renderPage('?tab=needs-assignment&overdue=true&category=3');
+  it('clears the category from state and URL on a tab switch, keeping overdue', async () => {
+    renderPage('?tab=mine&overdue=true&category=3');
 
     await screen.findByTestId('grievances-table');
-    fireEvent.click(
-      screen.getByRole('tab', { name: 'ASSIGNED TO ME - OTHER' }),
-    );
+    fireEvent.click(screen.getByRole('tab', { name: 'NEEDS ASSIGNMENT' }));
 
     await waitFor(() =>
       expect(screen.getByTestId('location-search').textContent).toContain(
-        'overdue=true',
+        'tab=needs-assignment',
       ),
     );
-    expect(screen.getByTestId('location-search').textContent).toContain(
-      'tab=mine',
-    );
+    const search = screen.getByTestId('location-search').textContent;
+    expect(search).toContain('overdue=true');
+    // Left in the URL it would come back on the next reload, contradicting the cleared state.
+    expect(search).not.toContain('category=3');
     await waitFor(() => expect(lastTableProps().filter.category).toBe(''));
+    expect(lastTableProps().filter.grievanceStatus).toBe('active');
   });
 
   it('orders by total days and uses the narrow My Tasks column set', async () => {

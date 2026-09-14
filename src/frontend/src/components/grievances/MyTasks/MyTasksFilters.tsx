@@ -9,7 +9,7 @@ import { MenuItem } from '@mui/material';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { GrievanceStatuses } from '@utils/constants';
+import { GRIEVANCE_CATEGORIES, GrievanceStatuses } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
@@ -21,6 +21,10 @@ interface MyTasksFiltersProps {
   choicesData: GrievanceChoices;
   setFilter: (filter) => void;
   initialFilter;
+  /** Hidden when the user's permissions already decide it for them. */
+  showSensitiveFilter?: boolean;
+  /** Hidden on the tab that only ever lists active tickets. */
+  showStatusFilter?: boolean;
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
@@ -30,6 +34,8 @@ export const MyTasksFilters = ({
   choicesData,
   setFilter,
   initialFilter,
+  showSensitiveFilter = true,
+  showStatusFilter = true,
   appliedFilter,
   setAppliedFilter,
 }: MyTasksFiltersProps): ReactElement => {
@@ -55,19 +61,50 @@ export const MyTasksFilters = ({
     '*',
   );
 
-  // My Tasks is not split into user- and system-generated, so it offers every category.
-  const categoryChoices = choicesData.grievanceTicketCategoryChoices;
+  // getFilterFromQueryParams turns ?sensitive=true into a boolean, so normalise to the string the
+  // menu items carry - '' (no choice) and false (other categories) are both falsy and must not
+  // collapse into each other.
+  const sensitiveValue =
+    filter.sensitive === '' || filter.sensitive == null
+      ? ''
+      : String(filter.sensitive);
+  const sensitiveOnly = sensitiveValue === 'true';
 
-  const showIssueType = isShowIssueType(filter.category);
+  // My Tasks is not split into user- and system-generated, so it offers every category the
+  // sensitivity choice still allows.
+  const categoryChoices = useMemo(() => {
+    if (sensitiveValue !== 'false')
+      return choicesData.grievanceTicketCategoryChoices;
+    return choicesData.grievanceTicketCategoryChoices.filter(
+      (item) =>
+        item.value?.toString() !== GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE,
+    );
+  }, [choicesData.grievanceTicketCategoryChoices, sensitiveValue]);
+
+  // On a sensitive-only list the category is already settled, so the select is dropped and the
+  // issue types are the sensitive ones from the start.
+  const effectiveCategory = sensitiveOnly
+    ? GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
+    : filter.category;
+
+  const showIssueType = isShowIssueType(effectiveCategory);
 
   const subcategories = useMemo(() => {
     const subCategoriesObj =
-      issueTypeDict[filter.category]?.subCategories || {};
+      issueTypeDict[effectiveCategory]?.subCategories || {};
     return Object.entries(subCategoriesObj).map(([value, name]) => ({
       name,
       value,
     }));
-  }, [issueTypeDict, filter.category]);
+  }, [issueTypeDict, effectiveCategory]);
+
+  // Both of these invalidate the narrower selection below them, so they clear it in one write
+  // rather than leaving a stale value in the draft filter for Apply to pick up.
+  const handleSensitiveChange = (value: string): void =>
+    setFilter({ ...filter, sensitive: value, category: '', issueType: '' });
+
+  const handleCategoryChange = (value: string): void =>
+    setFilter({ ...filter, category: value, issueType: '' });
 
   const updatedPriorityChoices = useMemo(
     () =>
@@ -121,21 +158,41 @@ export const MyTasksFilters = ({
             />
           </Grid>
         )}
-        <Grid size={{ xs: 3 }}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('category', e.target.value)}
-            label={t('Category')}
-            value={filter.category?.toString() ?? ''}
-            fullWidth
-            data-cy="filters-category"
-          >
-            {categoryChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value?.toString()}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
+        {showSensitiveFilter && (
+          <Grid size={{ xs: 2 }}>
+            <SelectFilter
+              onChange={(e) => handleSensitiveChange(e.target.value)}
+              label={undefined}
+              value={sensitiveValue}
+              fullWidth
+              disableClearable
+              // Without this MUI renders an empty box rather than the default option's label.
+              displayEmpty
+              data-cy="filters-sensitive"
+            >
+              <MenuItem value="">{t('All Categories')}</MenuItem>
+              <MenuItem value="true">{t('Sensitive')}</MenuItem>
+              <MenuItem value="false">{t('Other')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
+        {!sensitiveOnly && (
+          <Grid size={{ xs: 3 }}>
+            <SelectFilter
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              label={t('Category')}
+              value={filter.category?.toString() ?? ''}
+              fullWidth
+              data-cy="filters-category"
+            >
+              {categoryChoices.map((item) => (
+                <MenuItem key={item.value} value={item.value?.toString()}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
+        )}
         {showIssueType && (
           <Grid size={{ xs: 3 }}>
             <SelectFilter
@@ -183,25 +240,27 @@ export const MyTasksFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 2 }}>
-          <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('grievanceStatus', e.target.value)
-            }
-            label={undefined}
-            value={filter.grievanceStatus}
-            fullWidth
-            disableClearable
-            data-cy="filters-active-tickets"
-          >
-            <MenuItem value={GrievanceStatuses.Active}>
-              {t('Active Tickets')}
-            </MenuItem>
-            <MenuItem value={GrievanceStatuses.All}>
-              {t('All Tickets')}
-            </MenuItem>
-          </SelectFilter>
-        </Grid>
+        {showStatusFilter && (
+          <Grid size={{ xs: 2 }}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('grievanceStatus', e.target.value)
+              }
+              label={undefined}
+              value={filter.grievanceStatus}
+              fullWidth
+              disableClearable
+              data-cy="filters-active-tickets"
+            >
+              <MenuItem value={GrievanceStatuses.Active}>
+                {t('Active Tickets')}
+              </MenuItem>
+              <MenuItem value={GrievanceStatuses.All}>
+                {t('All Tickets')}
+              </MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
         {/* The overdue emails deep-link with ?overdue=true; showing it here is what tells the
             recipient why the list is short, and lets them switch it off. */}
         <Grid size={{ xs: 2 }}>
@@ -219,6 +278,8 @@ export const MyTasksFilters = ({
             value={filter.overdue ? 'true' : ''}
             fullWidth
             disableClearable
+            // Without this MUI renders an empty box rather than the default option's label.
+            displayEmpty
             data-cy="filters-overdue"
           >
             <MenuItem value="">{t('All Tickets')}</MenuItem>

@@ -17,10 +17,18 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { GrievanceStatuses } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import {
+  GRIEVANCES_VIEW_LIST_NON_SENSITIVE_PERMISSIONS,
+  GRIEVANCES_VIEW_LIST_PERMISSIONS,
+  GRIEVANCES_VIEW_LIST_SENSITIVE_PERMISSIONS,
+  PERMISSIONS,
+  hasPermissions,
+} from '../../../config/permissions';
 
 // The tab values travel in the URL as ?tab= and are what the daily digest emails deep-link to;
-// they must stay in step with hope.apps.grievance.constants (PRESET_*).
+// they must stay in step with hope.apps.grievance.constants (PRESET_*). Sensitivity is not a tab:
+// every email counts sensitive and other tickets separately and links each count with ?sensitive=,
+// which lands on the filter below.
 export const MY_TASKS_TABS = [
   {
     value: 'needs-assignment',
@@ -28,22 +36,9 @@ export const MY_TASKS_TABS = [
     permissions: [PERMISSIONS.GRIEVANCE_ASSIGN],
   },
   {
-    value: 'mine-sensitive',
-    label: 'ASSIGNED TO ME - SENSITIVE',
-    permissions: [
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-    ],
-  },
-  {
     value: 'mine',
-    label: 'ASSIGNED TO ME - OTHER',
-    permissions: [
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-    ],
+    label: 'ASSIGNED TO ME',
+    permissions: GRIEVANCES_VIEW_LIST_PERMISSIONS,
   },
 ];
 
@@ -128,6 +123,7 @@ export const MyTasksPage = (): ReactElement => {
     program: '',
     areaScope: 'all',
     overdue: '',
+    sensitive: '',
   };
 
   const [filter, setFilter] = useState(
@@ -144,27 +140,53 @@ export const MyTasksPage = (): ReactElement => {
 
   const currentUserId = currentUserData?.id;
 
-  // The preset axes are derived from the tab, never from the filter bar, so they stay out of the
-  // URL: ?tab= is the single thing an email has to carry.
-  const extraQueryParams = useMemo(() => {
-    switch (activeTab) {
-      case 'needs-assignment':
-        return { unassigned: true };
-      case 'mine-sensitive':
-        return { assignedTo: currentUserId, sensitive: 'true' };
-      case 'mine':
-        return { assignedTo: currentUserId, sensitive: 'false' };
-      default:
-        return {};
-    }
-  }, [activeTab, currentUserId]);
+  // Sensitive and other grievances are separate grants. A user holding only one of them has no
+  // choice to make, so the filter is decided for them here and its control is hidden.
+  const canSeeSensitive = hasPermissions(
+    GRIEVANCES_VIEW_LIST_SENSITIVE_PERMISSIONS,
+    permissions,
+  );
+  const canSeeOther = hasPermissions(
+    GRIEVANCES_VIEW_LIST_NON_SENSITIVE_PERMISSIONS,
+    permissions,
+  );
+  const pinnedSensitive =
+    canSeeSensitive === canSeeOther ? null : canSeeSensitive ? 'true' : 'false';
+  // Folded into the filter, not just into the query, so the category list below reacts to a
+  // pinned value exactly as it does to a chosen one.
+  const pin = pinnedSensitive ? { sensitive: pinnedSensitive } : {};
+
+  // The tab's own axis is derived from the tab, never from the filter bar, so it stays out of the
+  // URL. Sensitivity is the exception: it is a filter, so it travels in appliedFilter, and only a
+  // permission-pinned value is forced here.
+  const extraQueryParams = useMemo(
+    () => ({
+      ...(activeTab === 'needs-assignment'
+        ? // Every unassigned closed ticket is unassigned for good, so the tab that exists to get
+          // tickets assigned never shows them - matching the count the email was built from.
+          { unassigned: true, grievanceStatus: GrievanceStatuses.Active }
+        : { assignedTo: currentUserId }),
+      ...(pinnedSensitive ? { sensitive: pinnedSensitive } : {}),
+    }),
+    [activeTab, currentUserId, pinnedSensitive],
+  );
 
   const handleTabChange = (newTab: string): void => {
+    // A preset change makes the previous category selection meaningless, as on the ticket list,
+    // and the needs-assignment tab has no ticket-status choice to carry over.
+    const reset = {
+      category: '',
+      issueType: '',
+      program: '',
+      ...(newTab === 'needs-assignment'
+        ? { grievanceStatus: GrievanceStatuses.Active }
+        : {}),
+    };
     const params = new URLSearchParams(location.search);
     params.set('tab', newTab);
+    // Clear the reset keys from the URL too, or a reload brings the stale selection back.
+    Object.keys(reset).forEach((key) => params.delete(key));
     navigate({ search: params.toString() });
-    // A preset change makes the previous category selection meaningless, as on the ticket list.
-    const reset = { category: '', issueType: '', program: '' };
     setFilter({ ...filter, ...reset });
     setAppliedFilter({ ...appliedFilter, ...reset });
   };
@@ -199,9 +221,11 @@ export const MyTasksPage = (): ReactElement => {
       <PageHeader tabs={tabs} title="My Tasks" />
       <MyTasksFilters
         choicesData={choicesData}
-        filter={filter}
+        filter={{ ...filter, ...pin }}
         setFilter={setFilter}
         initialFilter={initialFilter}
+        showSensitiveFilter={pinnedSensitive === null}
+        showStatusFilter={activeTab !== 'needs-assignment'}
         appliedFilter={appliedFilter}
         setAppliedFilter={(f) => {
           setAppliedFilter(f);
@@ -210,7 +234,7 @@ export const MyTasksPage = (): ReactElement => {
       />
       <div ref={tableRef}>
         <GrievancesTable
-          filter={appliedFilter}
+          filter={{ ...appliedFilter, ...pin }}
           columns={MY_TASKS_COLUMNS}
           extraQueryParams={extraQueryParams}
           defaultOrderBy="total_days"
