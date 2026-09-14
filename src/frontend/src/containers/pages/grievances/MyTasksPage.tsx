@@ -239,6 +239,9 @@ export const MyTasksPage = (): ReactElement => {
           extraQueryParams={extraQueryParams}
           defaultOrderBy="total_days"
           title="My Tasks"
+          // Needs Assignment only ever lists unassigned active tickets, none of which are
+          // closable, so the bulk-close action has nothing to do there.
+          showBulkClose={activeTab !== 'needs-assignment'}
         />
       </div>
     </>

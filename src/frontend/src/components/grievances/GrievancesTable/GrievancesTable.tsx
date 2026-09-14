@@ -51,6 +51,8 @@ interface GrievancesTableProps {
   extraQueryParams?: { [key: string]: any };
   defaultOrderBy?: string;
   title?: string;
+  /** Hidden on lists that can never contain a closable ticket, e.g. Needs Assignment. */
+  showBulkClose?: boolean;
 }
 
 export const GrievancesTable = ({
@@ -59,6 +61,7 @@ export const GrievancesTable = ({
   extraQueryParams,
   defaultOrderBy = 'created_at',
   title,
+  showBulkClose = true,
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
@@ -438,7 +441,7 @@ export const GrievancesTable = ({
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}
           />
-          {canBulkClose && (
+          {canBulkClose && showBulkClose && (
             <BulkCloseModal
               selectedTickets={selectedTickets}
               setSelected={setSelectedTickets}
