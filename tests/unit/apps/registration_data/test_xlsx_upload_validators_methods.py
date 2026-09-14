@@ -257,16 +257,40 @@ def program_with_redenominated_currency(business_area: Any, currency_syp: Any, c
     return ProgramFactory(business_area=business_area)
 
 
-@pytest.mark.parametrize(("value", "expected"), [("SYP", True), ("VEF", False)])
+@pytest.mark.parametrize(("value", "expected"), [("SYP", True), ("SYP01", True), ("VEF", False)])
 def test_choice_validator_accepts_only_currency_codes_with_an_active_row(
-    program_with_redenominated_currency: Any, value: str, expected: bool, django_assert_num_queries
+    program_with_redenominated_currency: Any, value: str, expected: bool
 ) -> None:
     validator = UploadXLSXInstanceValidator(program_with_redenominated_currency)
 
-    with django_assert_num_queries(0):
-        is_valid = validator.choice_validator(value, "currency_h_c")
+    is_valid = validator.choice_validator(value, "currency_h_c")
 
     assert is_valid is expected
+
+
+def test_choice_validator_looks_a_currency_code_up_once_per_import(
+    program_with_redenominated_currency: Any, django_assert_num_queries
+) -> None:
+    validator = UploadXLSXInstanceValidator(program_with_redenominated_currency)
+    validator.choice_validator("SYP01", "currency_h_c")
+
+    with django_assert_num_queries(0):
+        is_valid = validator.choice_validator("SYP01", "currency_h_c")
+
+    assert is_valid is True
+
+
+def test_choice_validator_does_not_reuse_currency_lookups_from_an_earlier_import(
+    program_with_redenominated_currency: Any, currency_syp: Any
+) -> None:
+    UploadXLSXInstanceValidator(program_with_redenominated_currency).choice_validator("SYP01", "currency_h_c")
+    currency_syp.active = False
+    currency_syp.save()
+    validator = UploadXLSXInstanceValidator(program_with_redenominated_currency)
+
+    is_valid = validator.choice_validator("SYP01", "currency_h_c")
+
+    assert is_valid is False
 
 
 @pytest.fixture
@@ -280,26 +304,27 @@ def social_worker_program_with_redenominated_currency(
     )
 
 
-@pytest.mark.parametrize(("value", "expected"), [("SYP", True), ("VEF", False)])
+@pytest.mark.parametrize(("value", "expected"), [("SYP", True), ("SYP01", True), ("VEF", False)])
 def test_choice_validator_for_people_accepts_only_currency_codes_with_an_active_row(
-    social_worker_program_with_redenominated_currency: Any, value: str, expected: bool, django_assert_num_queries
+    social_worker_program_with_redenominated_currency: Any, value: str, expected: bool
 ) -> None:
     validator = UploadXLSXInstanceValidator(social_worker_program_with_redenominated_currency)
 
-    with django_assert_num_queries(0):
-        is_valid = validator.choice_validator(value, "pp_currency_i_c")
+    is_valid = validator.choice_validator(value, "pp_currency_i_c")
 
     assert is_valid is expected
 
 
-@pytest.mark.parametrize(("value", "expected"), [("SYP", None), ("VEF", "Invalid choice VEF for field currency_h_c")])
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("SYP", None), ("SYP01", None), ("VEF", "Invalid choice VEF for field currency_h_c")],
+)
 def test_import_choice_validator_accepts_only_currency_codes_with_an_active_row(
-    program_with_redenominated_currency: Any, value: str, expected: str | None, django_assert_num_queries
+    program_with_redenominated_currency: Any, value: str, expected: str | None
 ) -> None:
     validator = KoboProjectImportDataInstanceValidator(program_with_redenominated_currency)
 
-    with django_assert_num_queries(0):
-        error = validator.choice_validator(value, "currency_h_c")
+    error = validator.choice_validator(value, "currency_h_c")
 
     assert error == expected
 
