@@ -153,7 +153,7 @@ def partially_sent_daily_digest_job(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={**daily_digest_job_config, "sent_user_ids": [str(assignee.pk)]},
+        config={**daily_digest_job_config, "sent_email_keys": [f"{assignee.pk}:updated"]},
         errors={"exception": "Mail delivery failed"},
     )
     retry_job = PeriodicAsyncJob.objects.create(
@@ -516,10 +516,10 @@ def test_closed_ticket_is_not_counted_as_overdue(business_area: BusinessArea, as
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_no_email_is_sent_when_nothing_qualifies(business_area: BusinessArea) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
-        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_email_keys, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
     mock_send.assert_not_called()
-    assert (len(sent_user_ids), failed) == (0, 0)
+    assert (len(sent_email_keys), failed) == (0, 0)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)
@@ -527,19 +527,19 @@ def test_no_email_is_sent_when_the_global_flag_is_off(
     business_area: BusinessArea, assigned_ticket: GrievanceTicket
 ) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
-        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_email_keys, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
     mock_send.assert_not_called()
-    assert (len(sent_user_ids), failed) == (0, 0)
+    assert (len(sent_email_keys), failed) == (0, 0)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_one_email_per_recipient_is_sent(business_area: BusinessArea, edited_ticket: GrievanceTicket) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
-        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_email_keys, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
     assert mock_send.call_count == 2
-    assert (len(sent_user_ids), failed) == (2, 0)
+    assert (len(sent_email_keys), failed) == (2, 0)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
@@ -547,9 +547,54 @@ def test_a_failing_recipient_does_not_stop_the_others(
     business_area: BusinessArea, edited_ticket: GrievanceTicket
 ) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=[Exception("boom"), None]):
-        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_email_keys, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
-    assert (len(sent_user_ids), failed) == (1, 1)
+    assert (len(sent_email_keys), failed) == (1, 1)
+
+
+@pytest.fixture
+def two_emails_for_one_recipient(business_area: BusinessArea, assignee: User, actor: User) -> User:
+    GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        assigned_at=DURING_THE_DAY,
+        assigned_by=actor,
+    )
+    GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        user_modified=DURING_THE_DAY,
+        user_modified_by=actor,
+    )
+    return assignee
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_a_failed_email_still_records_the_recipients_delivered_one(
+    business_area: BusinessArea, two_emails_for_one_recipient: User
+) -> None:
+    with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=[None, Exception("boom")]):
+        sent_email_keys, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+
+    assert sent_email_keys == {f"{two_emails_for_one_recipient.pk}:assigned"}
+    assert failed == 1
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_a_re_run_sends_only_the_email_that_failed(
+    business_area: BusinessArea, two_emails_for_one_recipient: User
+) -> None:
+    with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=[None, Exception("boom")]):
+        sent_email_keys, _ = DailyDigestService(business_area, DIGEST_DATE).send()
+
+    with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
+        retried_email_keys, retried_failed = DailyDigestService(business_area, DIGEST_DATE).send(
+            skip_email_keys=sent_email_keys
+        )
+
+    assert mock_send.call_count == 1
+    assert retried_email_keys == {f"{two_emails_for_one_recipient.pk}:updated"}
+    assert retried_failed == 0
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
@@ -708,7 +753,7 @@ def test_action_sends_the_digest_for_the_pinned_business_area_and_day(
 
     mock_send.assert_called_once()
     job.refresh_from_db()
-    assert job.config["sent_user_ids"] == [str(assigned_ticket.assigned_to_id)]
+    assert job.config["sent_email_keys"] == [f"{assigned_ticket.assigned_to_id}:assigned"]
     assert job.config["completed"] is True
 
 
@@ -802,7 +847,7 @@ def test_failed_day_is_delivered_by_later_run(
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
-def test_retry_skips_recipients_recorded_by_a_failed_job(
+def test_retry_skips_the_emails_recorded_by_a_failed_job(
     partially_sent_daily_digest_job: tuple[PeriodicAsyncJob, User, User],
 ) -> None:
     retry_job, assignee, creator = partially_sent_daily_digest_job
@@ -812,7 +857,7 @@ def test_retry_skips_recipients_recorded_by_a_failed_job(
 
     mock_send.assert_called_once()
     retry_job.refresh_from_db()
-    assert retry_job.config["sent_user_ids"] == sorted([str(assignee.pk), str(creator.pk)])
+    assert retry_job.config["sent_email_keys"] == sorted([f"{assignee.pk}:updated", f"{creator.pk}:updated"])
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
@@ -977,6 +1022,78 @@ def test_closed_unassigned_ticket_is_not_counted_as_needing_assignment(
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
     assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {}
+
+
+def test_unassigned_ticket_is_counted_for_an_assigner_with_business_area_wide_access(
+    business_area: BusinessArea,
+    unassigned_ticket: GrievanceTicket,
+    creator: User,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        creator, [Permissions.GRIEVANCE_ASSIGN], business_area, whole_business_area_access=True
+    )
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        creator: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
+    }
+
+
+def test_unassigned_ticket_is_counted_for_a_user_whose_partner_can_assign(
+    business_area: BusinessArea,
+    program: Program,
+    unassigned_ticket: GrievanceTicket,
+    partner: Partner,
+    actor: User,
+    create_partner_role_with_permissions: Callable,
+) -> None:
+    create_partner_role_with_permissions(partner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=program)
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        actor: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
+    }
+
+
+def test_needs_assignment_does_not_query_per_programme(
+    business_area: BusinessArea,
+    assigner: User,
+    program: Program,
+    create_user_role_with_permissions: Callable,
+    django_assert_num_queries: Any,
+) -> None:
+    for_second = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="second programme")
+    for_third = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="third programme")
+    create_user_role_with_permissions(assigner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=for_second)
+    create_user_role_with_permissions(assigner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=for_third)
+    first_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    first_ticket.programs.set([program])
+    second_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    second_ticket.programs.set([for_second])
+    third_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    third_ticket.programs.set([for_third])
+
+    with django_assert_num_queries(12):
+        emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 3)]
+    }
+
+
+def test_needs_assignment_reports_the_standing_backlog_again_on_a_later_day(
+    business_area: BusinessArea, unassigned_ticket: GrievanceTicket, assigner: User
+) -> None:
+    later_day = DIGEST_DATE + timedelta(days=30)
+
+    emails = dict(DailyDigestService(business_area, later_day).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
+    }
 
 
 def test_ticket_in_two_of_a_users_programmes_is_counted_once(

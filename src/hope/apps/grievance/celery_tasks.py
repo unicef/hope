@@ -32,14 +32,15 @@ def _daily_digest_dispatch_exists(delivery_key: str) -> bool:
     )
 
 
-def _sent_digest_user_ids(delivery_key: str) -> set[str]:
-    sent_user_ids: set[str] = set()
+def _sent_digest_email_keys(delivery_key: str) -> set[str]:
+    """Every (recipient, email) already delivered for this day, so a re-run only sends what failed."""
+    sent_email_keys: set[str] = set()
     for job_config in PeriodicAsyncJob.objects.filter(
         job_name=daily_grievance_digest_async_task.__name__,
         config__delivery_key=delivery_key,
     ).values_list("config", flat=True):
-        sent_user_ids.update(job_config.get("sent_user_ids", []))
-    return sent_user_ids
+        sent_email_keys.update(job_config.get("sent_email_keys", []))
+    return sent_email_keys
 
 
 def deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job: AsyncRetryJob) -> None:
@@ -118,17 +119,17 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
         return
 
     set_sentry_business_area_tag(business_area.name)
-    sent_user_ids = _sent_digest_user_ids(delivery_key)
+    sent_email_keys = _sent_digest_email_keys(delivery_key)
 
-    newly_sent_user_ids, failed = DailyDigestService(
+    newly_sent_email_keys, failed = DailyDigestService(
         business_area,
         date.fromisoformat(digest_date),
         timezone_name,
     ).send(
-        skip_user_ids=sent_user_ids,
+        skip_email_keys=sent_email_keys,
     )
-    sent_user_ids.update(newly_sent_user_ids)
-    job.config["sent_user_ids"] = sorted(sent_user_ids)
+    sent_email_keys.update(newly_sent_email_keys)
+    job.config["sent_email_keys"] = sorted(sent_email_keys)
 
     if failed:
         job.save(update_fields=["config"])

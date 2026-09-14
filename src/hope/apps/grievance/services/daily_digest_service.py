@@ -28,7 +28,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.grievance.utils import my_tasks_url, overdue_q
 from hope.apps.utils.mailjet import MailjetClient
-from hope.apps.utils.recipients import users_with_permissions
+from hope.apps.utils.recipients import users_with_permissions, users_with_permissions_by_program
 from hope.models import User
 
 if TYPE_CHECKING:
@@ -41,7 +41,11 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class Section:
-    """One count in an email and the list it links to, so the count always matches that page."""
+    """One count in an email and the list it links to.
+
+    The count matches the list for NEEDS_ASSIGNMENT and OVERDUE. ASSIGNED and UPDATED count only
+    today's tickets but link to the whole list, so their count is smaller than what the page shows.
+    """
 
     label: str
     preset: str
@@ -53,6 +57,8 @@ class Section:
 class EmailSpec:
     """One notification type. An email carries one section per category the recipient has tickets in."""
 
+    # which notification this is, e.g. "overdue"; once sent it is stored as "<user id>:<key>"
+    key: str
     subject: str
     intro: str
     sections: tuple[Section, ...]
@@ -64,7 +70,9 @@ SENSITIVE_LABEL = "Sensitive"
 OTHER_LABEL = "Other"
 
 NEEDS_ASSIGNMENT = EmailSpec(
-    subject="New Tickets Needing Assignment",
+    key="needs-assignment",
+    # counts every open unassigned ticket, not just today's, so it is sent daily until they are assigned
+    subject="Tickets Needing Assignment",
     intro="Grievance tickets are waiting to be assigned.",
     sections=(
         Section(label=SENSITIVE_LABEL, preset=PRESET_NEEDS_ASSIGNMENT, sensitive=True),
@@ -72,6 +80,7 @@ NEEDS_ASSIGNMENT = EmailSpec(
     ),
 )
 ASSIGNED = EmailSpec(
+    key="assigned",
     # any assignment made that day, a reassignment of an old ticket included
     subject="Tickets Assigned to You",
     intro="Grievance tickets were assigned to you.",
@@ -81,6 +90,7 @@ ASSIGNED = EmailSpec(
     ),
 )
 OVERDUE = EmailSpec(
+    key="overdue",
     subject="Overdue Tickets",
     intro="Grievance tickets assigned to you are past their due date.",
     sections=(
@@ -90,6 +100,7 @@ OVERDUE = EmailSpec(
     throttled=True,
 )
 UPDATED = EmailSpec(
+    key="updated",
     subject="Updated Tickets",
     intro="Grievance tickets you are responsible for were changed by someone else.",
     sections=(
@@ -147,24 +158,29 @@ class DailyDigestService:
             tzinfo=recipient_timezone,
         ).astimezone(UTC)
 
-    def send(self, *, skip_user_ids: set[str] | None = None) -> tuple[set[str], int]:
-        """Send every email for the day and return successful user IDs and the failure count."""
-        successful_user_ids: set[str] = set()
+    @staticmethod
+    def delivery_key(user_id: Any, spec: EmailSpec) -> str:
+        return f"{user_id}:{spec.key}"
+
+    def send(self, *, skip_email_keys: set[str] | None = None) -> tuple[set[str], int]:
+        """Send every email for the day and return the delivered keys and the failure count.
+
+        Delivery is tracked per (recipient, email), not per recipient: when one of a recipient's four
+        emails fails the caller re-runs the day, and only the failed one is sent again.
+        """
+        sent_email_keys: set[str] = set()
         failed = 0
-        if skip_user_ids is None:
-            skip_user_ids = set()
+        if skip_email_keys is None:
+            skip_email_keys = set()
 
         if not config.SEND_GRIEVANCES_NOTIFICATION:
-            return successful_user_ids, failed
+            return sent_email_keys, failed
 
-        # A recipient is only recorded as done once every email of theirs has gone out, so a retry
-        # re-sends the whole set rather than silently dropping the one that failed.
         for user, specs in self._emails_by_recipient().items():
-            user_id = str(user.pk)
-            if user_id in skip_user_ids:
-                continue
-            user_failed = 0
             for spec, sections in specs:
+                email_key = self.delivery_key(user.pk, spec)
+                if email_key in skip_email_keys:
+                    continue
                 try:
                     self._build_email(spec, user, sections).send_email()
                     if spec.throttled:
@@ -174,16 +190,14 @@ class DailyDigestService:
                         f"Failed to send the {self.digest_date.isoformat()} {spec.subject} "
                         f"grievance email to user {user.pk}"
                     )
-                    user_failed += 1
-            if user_failed:
-                failed += user_failed
-            else:
-                successful_user_ids.add(user_id)
+                    failed += 1
+                else:
+                    sent_email_keys.add(email_key)
         logger.info(
             f"Grievance emails for {self.business_area.slug} in {self.timezone_name} on "
-            f"{self.digest_date.isoformat()}: {len(successful_user_ids)} recipients sent, {failed} failed"
+            f"{self.digest_date.isoformat()}: {len(sent_email_keys)} sent, {failed} failed"
         )
-        return successful_user_ids, failed
+        return sent_email_keys, failed
 
     def _stamp_reminder(self, user: User, sections: list[tuple[Section, int]]) -> None:
         """Reset the repeat clock on every ticket the email just reported, not only the due ones."""
@@ -292,7 +306,7 @@ class DailyDigestService:
 
         Scoped to the programmes each user holds. A ticket in several of a user's programmes still
         counts once, hence the id sets. Visibility is resolved once and split by category after, so
-        the per-programme permission lookup is not repeated per category.
+        the permission lookup is repeated neither per programme nor per category.
         """
         category_by_ticket_id = dict(self._unassigned_tickets().values_list("id", "category"))
         if not category_by_ticket_id:
@@ -307,11 +321,11 @@ class DailyDigestService:
             tickets_by_program[program_id].add(ticket_id)
 
         visible: dict[User, set[Any]] = defaultdict(set)
-        for program_id, program_ticket_ids in tickets_by_program.items():
-            for user in users_with_permissions(
-                self.business_area, [Permissions.GRIEVANCE_ASSIGN], programs=[program_id]
-            ):
-                visible[user].update(program_ticket_ids)
+        for user, program_ids in users_with_permissions_by_program(
+            self.business_area, [Permissions.GRIEVANCE_ASSIGN], list(tickets_by_program)
+        ).items():
+            for program_id in program_ids:
+                visible[user].update(tickets_by_program[program_id])
 
         # a ticket belonging to no programme is visible to anyone who can assign in the business area,
         # matching how the list endpoint scopes them (api/mixins.py:195-204)
