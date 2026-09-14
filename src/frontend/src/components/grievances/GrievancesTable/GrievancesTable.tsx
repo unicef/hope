@@ -18,7 +18,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { choicesToDict } from '@utils/utils';
+import { choicesToDict, columnToOrderBy } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -122,11 +122,16 @@ export const GrievancesTable = ({
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
       overdue: filter.overdue,
       sensitive: filter.sensitive,
+      // Stated here, not left to the table: the reset effect below writes these variables back
+      // over the table's own first write, and as the object is the one the state started from
+      // React skips the re-render that would have let the table add the ordering again.
+      ordering: columnToOrderBy(defaultOrderBy, 'desc'),
       // Last, so a page's pinned params win over anything the filter bar set.
       ...extraQueryParams,
     }),
     [
       businessArea,
+      defaultOrderBy,
       filter.search,
       filter.documentType,
       filter.documentNumber,
