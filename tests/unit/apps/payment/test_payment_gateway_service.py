@@ -1657,7 +1657,7 @@ def test_api_get_records_for_payment_instruction(get_mock: Any) -> None:
     api = PaymentGatewayAPI()
     response_data = api.get_records_for_payment_instruction("pi-remote-id")
 
-    get_mock.assert_called_once_with(f"{api.api_url}{api.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id=pi-remote-id")
+    get_mock.assert_called_once_with("TEST/payment_records/?parent__remote_id=pi-remote-id")
     assert isinstance(response_data[0], PaymentRecordData)
 
 

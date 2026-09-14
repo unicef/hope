@@ -22,6 +22,13 @@ def test_init_builds_admin_and_login_urls() -> None:
     assert manager.form_errors == []
 
 
+def test_init_builds_admin_and_login_urls_from_host_with_trailing_slash() -> None:
+    manager = DjAdminManager(kf_host="https://kobo.example.org/")
+
+    assert manager.admin_url == "https://kobo.example.org/admin/"
+    assert manager.login_url == "https://kobo.example.org/admin/login/"
+
+
 def test_extract_errors_collects_errorlist_items() -> None:
     manager = DjAdminManager(kf_host="https://kobo.example.org")
     response = Mock(content=b'<ul class="errorlist"><li>Bad value</li></ul>')
