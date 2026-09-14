@@ -38,7 +38,7 @@ export function BulkSetUrgencyModal({
   const [value, setValue] = useState<number>(0);
   const queryClient = useQueryClient();
 
-  const { mutateAsync } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (params: BulkUpdateGrievanceTicketsUrgency) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdateUrgencyCreate(
         {
@@ -72,8 +72,8 @@ export function BulkSetUrgencyModal({
     queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
   const urgencyChoices = choices.grievanceTicketUrgencyChoices;
-  const onSave = async (): Promise<void> => {
-    await mutateAsync({
+  const onSave = (): void => {
+    mutate({
       urgency: value,
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
     });

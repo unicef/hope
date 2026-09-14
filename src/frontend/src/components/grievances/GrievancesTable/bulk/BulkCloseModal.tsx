@@ -39,7 +39,7 @@ export function BulkCloseModal({
   ).length;
   const allClosable = selectedTickets.length > 0 && notClosableCount === 0;
 
-  const { mutateAsync } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (params: BulkCloseGrievanceTickets) =>
       RestService.restBusinessAreasGrievanceTicketsBulkCloseCreate({
         businessAreaSlug,
@@ -69,8 +69,8 @@ export function BulkCloseModal({
     },
   });
 
-  const onSave = async (): Promise<void> => {
-    await mutateAsync({
+  const onSave = (): void => {
+    mutate({
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
     });
   };

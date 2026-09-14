@@ -24,8 +24,8 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
 interface UpdateProgramCycleProps {
-  program: ProgramDetail;
-  programCycle?: ProgramCycleList;
+  program: Partial<ProgramDetail>;
+  programCycle: ProgramCycleList;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
@@ -39,7 +39,7 @@ const UpdateProgramCycle = ({
   step,
 }: UpdateProgramCycleProps) => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programCode } = useBaseUrl();
   const { showMessage } = useSnackbar();
 
   let endDate = Yup.date()
@@ -69,10 +69,10 @@ const UpdateProgramCycle = ({
   const initialValues: {
     [key: string]: string | boolean | number | null;
   } = {
-    id: programCycle?.id ?? null,
-    title: programCycle?.title ?? null,
-    startDate: programCycle?.startDate ?? null,
-    endDate: programCycle?.endDate ?? null,
+    id: programCycle.id,
+    title: programCycle.title ?? null,
+    startDate: programCycle.startDate,
+    endDate: programCycle.endDate ?? null,
   };
 
   const { mutateAsync, isPending } = useMutation({
@@ -102,8 +102,8 @@ const UpdateProgramCycle = ({
     try {
       await mutateAsync({
         businessAreaSlug: businessArea,
-        id: programCycle?.id ?? '',
-        programCode: program.code ?? program.id,
+        id: programCycle.id,
+        programCode,
         requestBody: {
           title: values.title,
           startDate: values.startDate,
