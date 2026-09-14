@@ -55,6 +55,19 @@ describe('validate - latin name format', () => {
 
     expect(errors.individualDataUpdateFields).toBeUndefined();
   });
+
+  it.each([' Anna', 'Anna ', 'Anna   Kovalska', "Anna O' Brien"])(
+    'accepts unintended spacing in %j',
+    (value) => {
+      const errors = runEditValidation({
+        individualDataUpdateFields: [
+          { fieldName: 'given_name_latin', fieldValue: value },
+        ],
+      });
+
+      expect(errors.individualDataUpdateFields).toBeUndefined();
+    },
+  );
 });
 
 describe('validateUsingSteps - latin name format for add individual', () => {
