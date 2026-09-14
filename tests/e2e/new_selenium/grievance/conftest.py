@@ -596,3 +596,19 @@ def restricted_user_tickets(
         _complaint(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED),
         _sensitive(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED),
     )
+
+
+@pytest.fixture
+def unassigned_in_other_program(business_area: BusinessArea) -> GrievanceTicket:
+    """An unassigned ticket in a second active programme.
+
+    The all-programmes page lists it; the programme-scoped page must not.
+    """
+    other_program = ProgramFactory(
+        name="Other My Tasks Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+    return _complaint(other_program)

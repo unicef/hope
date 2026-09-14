@@ -125,6 +125,7 @@ export function GrievancesTableRow({
       hover
       role="checkbox"
       key={ticket.id}
+      data-cy={`ticket-row-${ticket.unicefId}`}
     >
       <TableCell align="left" padding="checkbox">
         <Checkbox

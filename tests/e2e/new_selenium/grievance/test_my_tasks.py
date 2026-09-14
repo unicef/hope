@@ -1,4 +1,3 @@
-
 from urllib.parse import urlsplit
 
 import pytest
@@ -9,7 +8,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.utils import my_tasks_url
-from hope.models import BusinessArea, User
+from hope.models import BusinessArea, Program, User
 
 pytestmark = pytest.mark.django_db()
 
@@ -23,6 +22,8 @@ FILTER_STATUS = 'div[data-cy="filters-active-tickets"]'
 FILTER_OVERDUE = 'div[data-cy="filters-overdue"]'
 BUTTON_APPLY = 'button[data-cy="button-filters-apply"]'
 BUTTON_BULK_CLOSE = 'button[data-cy="button-close tickets"]'
+BUTTON_BULK_ASSIGN = 'button[data-cy="button-Assign"]'
+BUTTON_CLEAR = 'button[data-cy="button-filters-clear"]'
 PAGINATION = '[data-cy="table-pagination"]'
 DATA_ROWS = 'tbody tr[role="checkbox"]'
 
@@ -58,6 +59,11 @@ def _pick_filter(browser: HopeTestBrowser, selector: str, option: str) -> None:
 
 def _apply(browser: HopeTestBrowser) -> None:
     browser.click(BUTTON_APPLY)
+
+
+def _tick(browser: HopeTestBrowser, ticket: GrievanceTicket) -> None:
+    """Select a row. MUI renders the native checkbox with opacity 0, hence js_click."""
+    browser.js_click(f'[data-cy="ticket-row-{ticket.unicef_id}"] input[type="checkbox"]')
 
 
 # --- Navigation ----------------------------------------------------------------------
@@ -224,6 +230,21 @@ def test_my_tasks_uses_the_narrow_column_set(login: HopeTestBrowser, business_ar
     login.assert_element_absent('th[data-cy="assignedTo"]')
 
 
+@pytest.mark.usefixtures("unassigned_in_other_program")
+def test_program_scoped_page_lists_only_that_programs_tickets(
+    login: HopeTestBrowser,
+    my_tasks_program: Program,
+    unassigned_complaint: GrievanceTicket,
+) -> None:
+    # Where the ticket list's My Tasks button lands while a programme is selected: a different
+    # endpoint from the all-programmes page, with the tab's pinned params on top of the programme.
+    login.open(f"/{my_tasks_program.business_area.slug}/programs/{my_tasks_program.code}/grievance/my-tasks")
+    login.wait_for_text("My Tasks", PAGE_TITLE, timeout=60)
+
+    _wait_for_rows(login, unassigned_complaint)
+    login.assert_element_absent('th[data-cy="programs"]')
+
+
 # --- Email deep links ----------------------------------------------------------------
 
 
@@ -282,6 +303,78 @@ def test_tab_switch_clears_category_but_keeps_overdue(
     login.assert_true("category=" not in url)
     login.assert_text("Overdue Only", FILTER_OVERDUE)
     login.assert_text_not_visible("Grievance Complaint", FILTER_CATEGORY)
+
+
+@pytest.mark.usefixtures("unassigned_complaint")
+def test_clear_filters_drops_overdue_and_sensitive(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    my_complaint: GrievanceTicket,
+    my_recent_sensitive_overdue: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=mine&overdue=true&sensitive=true")
+    _wait_for_rows(login, my_recent_sensitive_overdue)
+
+    login.click(BUTTON_CLEAR)
+
+    # Overdue has to clear to "unset", not to false - `overdue=false` would be its own filter.
+    _wait_for_rows(login, my_complaint, my_recent_sensitive_overdue)
+    login.assert_text("All Tickets", FILTER_OVERDUE)
+    login.assert_text("All Categories", FILTER_SENSITIVE)
+    url = login.get_current_url()
+    login.assert_true("tab=mine" in url)
+    login.assert_true("overdue=" not in url)
+    login.assert_true("sensitive=" not in url)
+
+
+# --- Bulk actions --------------------------------------------------------------------
+
+
+@pytest.mark.usefixtures("unassigned_sensitive")
+def test_bulk_assign_moves_the_ticket_to_assigned_to_me(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    me: User,
+    unassigned_complaint: GrievanceTicket,
+    unassigned_sensitive: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=needs-assignment")
+    _wait_for_rows(login, unassigned_complaint, unassigned_sensitive)
+
+    _tick(login, unassigned_complaint)
+    login.wait_for_element_clickable(BUTTON_BULK_ASSIGN).click()
+    login.wait_for_text(unassigned_complaint.unicef_id, '[data-cy="selected-tickets"]')
+    login.click('[data-cy="dropdown"] [data-cy="assigned-to-dropdown"] input')
+    login.select_listbox_element(me.email)
+    login.click('button[data-cy="button-save"]')
+
+    # The tab lists unassigned tickets only, so the assigned one leaves it...
+    _wait_for_rows(login, unassigned_sensitive)
+    # ...and turns up on the other tab, now carrying the assignee.
+    login.click(TAB_MINE)
+    _wait_for_rows(login, unassigned_complaint)
+    unassigned_complaint.refresh_from_db()
+    assert str(unassigned_complaint.assigned_to_id) == str(me.id)
+
+
+@pytest.mark.usefixtures("unassigned_complaint")
+def test_selection_is_dropped_when_the_query_changes(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    my_complaint: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=mine")
+    _wait_for_rows(login, my_complaint)
+
+    _tick(login, my_complaint)
+    login.wait_for_element_clickable(BUTTON_BULK_ASSIGN)
+
+    login.click(TAB_NEEDS_ASSIGNMENT)
+
+    # A ticket ticked on the previous list is no longer on screen and must not ride along into
+    # the next bulk action, so the action goes back to having nothing to act on.
+    login.wait_for_element_visible(f"{TAB_NEEDS_ASSIGNMENT}.Mui-selected")
+    login.wait_for_element_present(f"{BUTTON_BULK_ASSIGN}[disabled]")
 
 
 # --- Permissions ---------------------------------------------------------------------
