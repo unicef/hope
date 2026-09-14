@@ -25,9 +25,11 @@ from hope.apps.household.api.caches import (
     IndividualListKeyConstructor,
 )
 from hope.apps.household.api.serializers.household import (
+    HouseholdChoicesSerializer,
     HouseholdDetailSerializer,
     HouseholdListSerializer,
     HouseholdMemberSerializer,
+    IndividualChoicesSerializer,
     RecipientSerializer,
 )
 from hope.apps.household.api.serializers.individual import (
@@ -290,6 +292,7 @@ class HouseholdGlobalViewSet(
     queryset = Household.all_merge_status_objects.exclude(program__status=Program.DRAFT).all()
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
+        "choices": HouseholdChoicesSerializer,
     }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
@@ -462,6 +465,7 @@ class IndividualGlobalViewSet(
     queryset = Individual.all_merge_status_objects.exclude(program__status=Program.DRAFT).all()
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
+        "choices": IndividualChoicesSerializer,
     }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,

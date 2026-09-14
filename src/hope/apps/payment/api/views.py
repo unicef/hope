@@ -72,6 +72,7 @@ from hope.apps.payment.api.serializers import (
     FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
+    PaymentChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
@@ -2718,6 +2719,7 @@ class PaymentGlobalViewSet(
     queryset = Payment.objects.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).all()
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
+        "choices": PaymentChoicesSerializer,
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
     filter_backends = (DjangoFilterBackend, OrderingFilter)
