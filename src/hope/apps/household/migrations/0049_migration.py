@@ -12,11 +12,30 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        AddIndexConcurrently(
-            model_name="individual",
-            index=models.Index(
-                fields=["program_registration_id"],
-                name="idx_individual_program_reg_id",
-            ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                AddIndexConcurrently(
+                    model_name="individual",
+                    index=models.Index(
+                        fields=["program_registration_id"],
+                        name="idx_individual_program_reg_id",
+                    ),
+                ),
+            ],
+            state_operations=[
+                migrations.AlterField(
+                    model_name="individual",
+                    name="program_registration_id",
+                    field=models.CharField(
+                        blank=True,
+                        db_collation="und-ci-det",
+                        db_index=True,
+                        help_text="Beneficiary Program Registration ID [sys]",
+                        max_length=100,
+                        null=True,
+                        verbose_name="Beneficiary Program Registration Id",
+                    ),
+                ),
+            ],
         ),
     ]

@@ -450,6 +450,7 @@ class Individual(
         max_length=100,
         blank=True,
         null=True,
+        db_index=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration ID [sys]",
         db_collation="und-ci-det",
@@ -629,10 +630,6 @@ class Individual(
                 name="idx_hi_prog_rdi_status",
                 fields=["program", "rdi_merge_status"],
                 condition=Q(is_removed=False),
-            ),
-            models.Index(
-                name="idx_individual_program_reg_id",
-                fields=["program_registration_id"],
             ),
         )
         constraints = [
