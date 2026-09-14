@@ -151,6 +151,26 @@ def test_global_choices_denies_anonymous_access() -> None:
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+def test_payments_viewset_choices_returns_choices_for_user_with_role(
+    api_client_user,
+    create_user_role_with_permissions: Any,
+    user,
+    business_area,
+) -> None:
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PM_VIEW_DETAILS],
+        business_area=business_area,
+    )
+    response = api_client_user.get(
+        reverse("api:payments:payments-global-choices", kwargs={"business_area_slug": business_area.slug})
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "status_choices": [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
+    }
+
+
 def test_count_endpoint(
     create_user_role_with_permissions: Any,
     user,

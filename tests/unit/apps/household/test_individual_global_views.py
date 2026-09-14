@@ -797,3 +797,41 @@ def test_search_with_active_programs_filter(
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 1
     assert response.data["results"][0]["id"] == str(ctx["individuals1"][0].id)
+
+
+def test_individual_viewset_choices_returns_choices_for_user_with_role(
+    api_client: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    afghanistan = BusinessAreaFactory(slug="afghanistan")
+    partner = PartnerFactory(name="TestPartner")
+    user = UserFactory(partner=partner)
+    client = api_client(user)
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+        business_area=afghanistan,
+    )
+    response = client.get(
+        reverse("api:households:individuals-global-choices", kwargs={"business_area_slug": afghanistan.slug})
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {
+        "flag_choices": to_choice_object(INDIVIDUAL_FLAGS_CHOICES),
+        "status_choices": to_choice_object(INDIVIDUAL_STATUS_CHOICES),
+        "deduplication_batch_status_choices": to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE),
+        "deduplication_golden_record_status_choices": to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE),
+        "relationship_choices": to_choice_object(RELATIONSHIP_CHOICE),
+        "role_choices": to_choice_object(ROLE_CHOICE),
+        "role_choices_for_grievance": [
+            {"name": "Alternate collector", "value": "ALTERNATE"},
+            {"name": "Primary collector", "value": "PRIMARY"},
+            {"name": "No role", "value": "NO_ROLE"},
+        ],
+        "marital_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
+        "identity_type_choices": to_choice_object(AGENCY_TYPE_CHOICES),
+        "observed_disability_choices": to_choice_object(OBSERVED_DISABILITY_CHOICE),
+        "severity_of_disability_choices": to_choice_object(SEVERITY_OF_DISABILITY_CHOICES),
+        "work_status_choices": to_choice_object(WORK_STATUS_CHOICE),
+        "account_type_choices": [{"name": x.label, "value": x.key} for x in AccountType.objects.all()],
+    }
