@@ -630,6 +630,10 @@ class Individual(
                 fields=["program", "rdi_merge_status"],
                 condition=Q(is_removed=False),
             ),
+            models.Index(
+                name="idx_individual_program_reg_id",
+                fields=["program_registration_id"],
+            ),
         )
         constraints = [
             UniqueConstraint(
