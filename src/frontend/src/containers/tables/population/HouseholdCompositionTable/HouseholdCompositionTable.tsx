@@ -16,6 +16,7 @@ import {
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 
 const GreyTableCell = styled(TableCell)`
@@ -40,6 +41,11 @@ export function HouseholdCompositionTable({
   household,
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const title = t(
+    `${beneficiaryGroup?.memberLabelPlural} Reported by Data Subjects`,
+  );
   const rows: {
     ageGroup: string;
     female: Count;
@@ -104,19 +110,13 @@ export function HouseholdCompositionTable({
     <OverviewPaper data-cy="known-affected-beneficiaries">
       <Title>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h6">
-            {t('Individuals Reported by Data Subjects')}
-          </Typography>
+          <Typography variant="h6">{title}</Typography>
           <Tooltip
             title={t(
-              'Figures represent individuals reported by data subjects counted from individual records, not declared household size.',
+              `Figures represent ${beneficiaryGroup?.memberLabelPlural} reported by data subjects counted from ${beneficiaryGroup?.memberLabel} records, not declared ${beneficiaryGroup?.groupLabel} size.`,
             )}
           >
-            <IconButton
-              color="primary"
-              aria-label={t('Individuals Reported by Data Subjects')}
-              data-cy="kab-info"
-            >
+            <IconButton color="primary" aria-label={title} data-cy="kab-info">
               <Info />
             </IconButton>
           </Tooltip>

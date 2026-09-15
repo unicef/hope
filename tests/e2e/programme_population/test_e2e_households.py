@@ -136,9 +136,8 @@ class TestSmokeHouseholds:
             in page_households_details.get_label_user_name().text
         )
 
-        assert (
-            "Individuals Reported by Data Subjects" in page_households_details.get_known_affected_beneficiaries().text
-        )
+        # the "Main Menu" beneficiary group labels members as "Items"
+        assert "Items Reported by Data Subjects" in page_households_details.get_known_affected_beneficiaries().text
         # age group, females, with disability, pregnant, (spacer), males, with disability;
         # both the unset male disabled counter and the zero male counter render as "-"
         assert page_households_details.get_row05().text.split() == ["0", "-", "5", "2", "1", "-", "-", "-"]
