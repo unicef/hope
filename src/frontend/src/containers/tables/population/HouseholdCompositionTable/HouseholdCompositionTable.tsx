@@ -32,9 +32,9 @@ export interface HouseholdCompositionTableProps {
 
 type Count = number | null | undefined;
 
-// null means "not collected", 0 is a real zero - never collapse the two
-const format = (value: Count): string =>
-  value === null || value === undefined ? '-' : String(value);
+// counts come from individual records, so null (not collected) and 0
+// both mean "nothing to show" and render as a dash
+const format = (value: Count): string => (value ? String(value) : '-');
 
 export function HouseholdCompositionTable({
   household,
@@ -105,16 +105,16 @@ export function HouseholdCompositionTable({
       <Title>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h6">
-            {t('Known Affected Beneficiaries')}
+            {t('Individuals Reported by Data Subjects')}
           </Typography>
           <Tooltip
             title={t(
-              'Figures represent known affected beneficiaries counted from individual records, not declared household size.',
+              'Figures represent individuals reported by data subjects counted from individual records, not declared household size.',
             )}
           >
             <IconButton
               color="primary"
-              aria-label={t('Known Affected Beneficiaries')}
+              aria-label={t('Individuals Reported by Data Subjects')}
               data-cy="kab-info"
             >
               <Info />
