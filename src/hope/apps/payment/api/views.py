@@ -34,10 +34,12 @@ from hope.apps.core.api.mixins import (
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
+    ProgramVisibilityMixin,
     SerializerActionMixin,
 )
 from hope.apps.core.api.parsers import DictDrfNestedParser
 from hope.apps.core.utils import check_concurrency_version_in_mutation
+from hope.apps.household.api.serializers.individual import AccountSerializer
 from hope.apps.payment.api.caches import (
     PaymentPlanGroupListKeyConstructor,
     PaymentPlanKeyConstructor,
@@ -60,6 +62,7 @@ from hope.apps.payment.api.filters import (
 from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
+    AccountAttachmentUploadSerializer,
     ApplyCustomExchangeRateSerializer,
     ApplyEngineFormulaSerializer,
     ApplyFlatAmountEntitlementSerializer,
@@ -85,6 +88,7 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanGroupDeliveryExportSerializer,
     PaymentPlanGroupDetailSerializer,
     PaymentPlanGroupListSerializer,
+    PaymentPlanGroupReconciliationImportSerializer,
     PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
@@ -121,6 +125,7 @@ from hope.apps.payment.celery_tasks import (
     send_payment_plan_group_delivery_xlsx_password_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
 from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
@@ -145,6 +150,10 @@ from hope.apps.payment.utils import (
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
     XlsxFollowUpInstructionReconciliationImportService,
 )
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICY_OPTION,
+    OVERRIDE_OPTION,
+)
 from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_export_service import (
     XlsxPaymentPlanFspExtraFieldsExportService,
 )
@@ -168,6 +177,8 @@ from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
+    Account,
+    AccountAttachment,
     BusinessArea,
     DeliveryMechanism,
     FileTemp,
@@ -2471,6 +2482,95 @@ class PaymentPlanManagerialViewSet(
         return action_to_permissions_map.get(action_name)
 
 
+class AccountViewSet(
+    ProgramVisibilityMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Account.all_objects.select_related("account_type").prefetch_related("attachments")
+    serializer_class = AccountSerializer
+    program_model_field = "individual__program"
+    admin_area_model_fields = [
+        "individual__household__admin1",
+        "individual__household__admin2",
+        "individual__household__admin3",
+    ]
+    PERMISSIONS = [Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION]
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(individual_id=self.kwargs["individual_pk"], individual__is_removed=False)
+
+
+class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+    queryset = AccountAttachment.objects.all()
+    serializer_class = AccountAttachmentUploadSerializer
+    lookup_field = "file_id"
+    program_model_field = "account__individual__program"
+    admin_area_model_fields = [
+        "account__individual__household__admin1",
+        "account__individual__household__admin2",
+        "account__individual__household__admin3",
+    ]
+
+    PERMISSIONS = [Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION]
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                account_id=self.kwargs["account_pk"],
+                account__individual_id=self.kwargs["individual_pk"],
+                account__individual__is_removed=False,
+            )
+        )
+
+    def get_object(self) -> AccountAttachment:
+        return get_object_or_404(self.get_queryset(), id=self.kwargs["file_id"])
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        # The account is resolved here, not in the serializer: CreateModelMixin.create() never calls
+        # get_queryset(), so without this the upload would skip the program and area-limit filtering
+        # that destroy and download get from ProgramVisibilityMixin.
+        context = super().get_serializer_context()
+        context["account"] = get_object_or_404(self._visible_accounts(), id=self.kwargs["account_pk"])
+        return context
+
+    def _visible_accounts(self) -> QuerySet:
+        accounts = Account.all_objects.filter(
+            individual__program=self.program,
+            individual_id=self.kwargs["individual_pk"],
+            individual__is_removed=False,
+        )
+        if area_limits := self.request.user.partner.get_area_limits_for_program(self.program.id):
+            areas_null = Q(
+                individual__household__admin1__isnull=True,
+                individual__household__admin2__isnull=True,
+                individual__household__admin3__isnull=True,
+            )
+            areas_query = (
+                Q(individual__household__admin1__in=area_limits)
+                | Q(individual__household__admin2__in=area_limits)
+                | Q(individual__household__admin3__in=area_limits)
+            )
+            accounts = accounts.filter(areas_null | areas_query)
+        return accounts
+
+    @action(detail=True, methods=["get"])
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
+        attachment = self.get_object()
+        file = attachment.file
+        file_mimetype, _ = mimetypes.guess_type(file.url)
+        response = FileResponse(
+            file.open(),
+            as_attachment=True,
+            content_type=file_mimetype or "application/octet-stream",
+        )
+        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
+        return response
+
+
 class PaymentPlanSupportingDocumentViewSet(
     ProgramMixin, ScopedPaymentPlanMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
 ):
@@ -2737,7 +2837,7 @@ class PaymentPlanGroupViewSet(
         "update": PaymentPlanGroupUpdateSerializer,
         "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
         "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
-        "delivery_import_xlsx": PaymentPlanImportFileSerializer,
+        "delivery_import_xlsx": PaymentPlanGroupReconciliationImportSerializer,
     }
 
     permissions_by_action = {
@@ -2901,6 +3001,10 @@ class PaymentPlanGroupViewSet(
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(
+        request=PaymentPlanGroupReconciliationImportSerializer,
+        responses={200: PaymentPlanGroupDetailSerializer, 400: XlsxErrorSerializer},
+    )
     @action(
         detail=True,
         methods=["post"],
@@ -2913,17 +3017,28 @@ class PaymentPlanGroupViewSet(
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
         importable_plans = payment_plan_group.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.CLOSED],
         )
         if not importable_plans.exists():
-            raise ValidationError("Import requires at least one payment plan in ACCEPTED or FINISHED status.")
+            raise ValidationError("Import requires at least one payment plan in ACCEPTED, FINISHED, or CLOSED status.")
 
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         file = serializer.validated_data["file"]
+        override = serializer.validated_data[OVERRIDE_OPTION]
+        null_delivery_policy = serializer.validated_data[NULL_DELIVERY_POLICY_OPTION]
 
-        import_service = XlsxPaymentPlanGroupDeliveryImportService(payment_plan_group, file)
+        override_permission = Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE
+        if override and not request.user.has_perm(override_permission.value, payment_plan_group.cycle.program):
+            raise PermissionDenied(detail={"required_permissions": [override_permission.value]})
+
+        import_service = XlsxPaymentPlanGroupDeliveryImportService(
+            payment_plan_group,
+            file,
+            override=override,
+            null_delivery_policy=null_delivery_policy,
+        )
         try:
             import_service.open_workbook()
         except BadZipFile:
@@ -2932,6 +3047,12 @@ class PaymentPlanGroupViewSet(
             )
         import_service.validate()
         if import_service.errors:
+            if import_service.conflict_errors:
+                PaymentPlanGroupReconciliationImportNotification(
+                    payment_plan_group,
+                    cast("User", request.user),
+                    file.name,
+                ).send_conflict(import_service.errors, len(import_service.conflict_errors))
             return Response(
                 data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
                 status=status.HTTP_400_BAD_REQUEST,
@@ -2942,6 +3063,10 @@ class PaymentPlanGroupViewSet(
             content_type=get_content_type_for_model(payment_plan_group),
             created_by=request.user,
             file=file,
+            extras={
+                OVERRIDE_OPTION: override,
+                NULL_DELIVERY_POLICY_OPTION: null_delivery_policy,
+            },
         )
         old_payment_plan_group = copy_model_object(payment_plan_group)
         payment_plan_group.delivery_import_file = file_temp
@@ -2959,7 +3084,12 @@ class PaymentPlanGroupViewSet(
         )
         user_id = str(request.user.pk)
         transaction.on_commit(
-            lambda: import_payment_plan_group_delivery_from_xlsx_async_task(payment_plan_group, user_id)
+            lambda: import_payment_plan_group_delivery_from_xlsx_async_task(
+                payment_plan_group,
+                user_id,
+                override=override,
+                null_delivery_policy=null_delivery_policy,
+            )
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,

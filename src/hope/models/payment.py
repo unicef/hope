@@ -100,12 +100,18 @@ class Payment(
             "status_date",
             "entitlement_quantity",
             "delivered_quantity",
+            "delivered_quantity_usd",
             "delivery_date",
             "fsp_auth_code",
             "reason_for_unsuccessful_payment",
             "transaction_reference_id",
+            "additional_collector_name",
+            "additional_document_type",
+            "additional_document_number",
+            "transaction_status_blockchain_link",
             "excluded",
             "conflicted",
+            "extra_fields",
             "fsp_extra_fields",
         ]
     )
@@ -347,6 +353,9 @@ class Payment(
         status = "-"
         if self.status == Payment.STATUS_PENDING:
             status = "Pending"
+
+        elif self.status == Payment.STATUS_SENT_TO_FSP:
+            status = "Sent to FSP"
 
         elif self.status == Payment.STATUS_NOT_ELIGIBLE:
             status = "Not Eligible"

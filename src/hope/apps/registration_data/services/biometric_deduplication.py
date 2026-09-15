@@ -21,6 +21,7 @@ from hope.apps.registration_data.api.deduplication_engine import (
     SimilarityPair,
 )
 from hope.apps.registration_data.signals import invalidate_rdi_cache
+from hope.apps.utils.external_urls import build_url
 from hope.models import (
     DeduplicationEngineSimilarityPair,
     Individual,
@@ -54,7 +55,7 @@ class BiometricDeduplicationService:
         )
         deduplication_set = DeduplicationSet(
             reference_pk=str(program.unicef_id),
-            notification_url=f"https://{settings.DOMAIN_NAME}{notification_url}",
+            notification_url=build_url(f"https://{settings.DOMAIN_NAME}", notification_url),
         )
         self.api.create_deduplication_set(deduplication_set)
 
