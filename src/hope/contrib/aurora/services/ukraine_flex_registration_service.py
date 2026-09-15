@@ -1,11 +1,12 @@
 from functools import cached_property
-from typing import Any
+from typing import TYPE_CHECKING, Any
 import uuid
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
@@ -43,6 +44,9 @@ from hope.models import (
     PendingIndividualRoleInHousehold,
     RegistrationDataImport,
 )
+
+if TYPE_CHECKING:
+    from django.db.models import Model
 
 
 class UkraineBaseRegistrationService(BaseRegistrationService):
@@ -395,7 +399,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             )
             individual.phone_no = phone_no
             individual.detail_id = record.source_id
-            if image_flex_fields := self._prepare_wallet_image_flex_fields(individual_dict):
+            if image_flex_fields := self._prepare_wallet_image_flex_fields(individual_dict, registration_data_import):
                 individual.flex_fields = image_flex_fields
             individual.save()
         except ValidationError as e:
@@ -416,14 +420,17 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
         individual_data["estimated_birth_date"] = False
         return individual_data
 
-    def _prepare_wallet_image_flex_fields(self, individual_dict: dict) -> dict:
+    def _prepare_wallet_image_flex_fields(self, individual_dict: dict, owner: "Model | None" = None) -> dict:
         # Decode every blob before writing any to storage, and only after the individual has
         # validated, so a validation failure or a malformed second image leaves no orphan files.
         images = {}
         for field_name in self.INDIVIDUAL_IMAGE_FLEX_FIELDS:
             if image_base64 := individual_dict.get(field_name):
                 images[field_name] = self._prepare_picture_from_base64(image_base64, str(uuid.uuid4()))
-        return {field_name: default_storage.save(image.name, image) for field_name, image in images.items()}
+        return {
+            field_name: default_storage.save(upload_path(owner, image.name), image)
+            for field_name, image in images.items()
+        }
 
     def _prepare_accounts(self, individual_dict: dict, individual: PendingIndividual) -> list[PendingAccount]:
         wallet_address = (individual_dict.get("wallet_address_i_c") or "").strip()

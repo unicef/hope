@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from hope.apps.core.upload_paths import upload_path
 from hope.models.utils import TimeStampedUUIDModel
 
 
@@ -37,7 +38,7 @@ class ImportData(TimeStampedUUIDModel):
     status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=get_status_choices)
     business_area_slug = models.CharField(max_length=200, blank=True)
     data_type = models.CharField(max_length=4, choices=get_data_type_choices, default=XLSX)
-    file = models.FileField(null=True, blank=True)
+    file = models.FileField(upload_to=upload_path, max_length=255, null=True, blank=True)
     number_of_households = models.PositiveIntegerField(null=True, blank=True)
     number_of_individuals = models.PositiveIntegerField(null=True, blank=True)
     error = models.TextField(blank=True)

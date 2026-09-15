@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any
 
 from django import forms
@@ -52,7 +53,8 @@ class UploadFile(UploadFilePermissionMixin, View):
                 business_area_id=request.POST["business_area"],
             )
             new_file.save()
-            messages.success(request, f"File {new_file.file.name} has been successfully uploaded.")
+            uploaded_name = os.path.basename(new_file.file.name)
+            messages.success(request, f"File {uploaded_name} has been successfully uploaded.")
             return HttpResponseRedirect(reverse("upload-file"))
         messages.error(request, self.format_form_error(form))
         return render(request, self.template_name, {"form": StorageFileForm(user=user)})

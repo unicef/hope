@@ -431,7 +431,14 @@ def test_rdi_not_in_loading_status(lax_api_client, lax_push_url, lax_rdi):
     assert response.status_code == status.HTTP_404_NOT_FOUND, str(response.json())
 
 
-def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program, base64_image):
+@pytest.mark.parametrize(
+    "image_field",
+    [
+        pytest.param("photo", id="photo"),
+        pytest.param("disability_certificate_picture", id="disability-certificate-picture"),
+    ],
+)
+def test_create_individual_with_image_field(lax_api_client, lax_push_url, lax_program, base64_image, image_field):
     individual_data = {
         "individual_id": "IND001",
         "full_name": "John Doe",
@@ -441,7 +448,7 @@ def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program,
         "sex": "MALE",
         "observed_disability": ["NONE"],
         "marital_status": "SINGLE",
-        "photo": base64_image,
+        image_field: base64_image,
     }
 
     response = lax_api_client.post(lax_push_url, [individual_data], format="json")
@@ -452,35 +459,12 @@ def test_create_individual_with_photo(lax_api_client, lax_push_url, lax_program,
     assert response.data["errors"] == 0
 
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-    assert individual.photo is not None
-    assert individual.photo.name.startswith(lax_program.code)
-    assert individual.photo.name.endswith(".png")
-
-
-def test_create_individual_with_disability_certificate_picture(lax_api_client, lax_push_url, lax_program, base64_image):
-    individual_data = {
-        "individual_id": "IND001",
-        "full_name": "John Doe",
-        "given_name": "John",
-        "family_name": "Doe",
-        "birth_date": "1990-01-01",
-        "sex": "MALE",
-        "observed_disability": ["NONE"],
-        "marital_status": "SINGLE",
-        "disability_certificate_picture": base64_image,
-    }
-
-    response = lax_api_client.post(lax_push_url, [individual_data], format="json")
-
-    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-    assert response.data["processed"] == 1
-    assert response.data["accepted"] == 1
-    assert response.data["errors"] == 0
-
-    individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
-    assert individual.disability_certificate_picture is not None
-    assert individual.disability_certificate_picture.name.startswith(lax_program.code)
-    assert individual.disability_certificate_picture.name.endswith(".png")
+    image = getattr(individual, image_field)
+    assert image is not None
+    assert image.name.startswith(
+        f"{lax_program.start_date.year}/{lax_program.business_area.slug}/{lax_program.code}/{lax_program.code}"
+    )
+    assert image.name.endswith(".png")
 
 
 def test_create_individual_with_document_image(
@@ -516,7 +500,9 @@ def test_create_individual_with_document_image(
     individual = PendingIndividual.objects.get(unicef_id=list(response.data["individual_id_mapping"].values())[0])
     document = PendingDocument.objects.get(individual=individual)
     assert document.photo is not None
-    assert document.photo.name.startswith(lax_program.code)
+    assert document.photo.name.startswith(
+        f"{lax_program.start_date.year}/{lax_program.business_area.slug}/{lax_program.code}/{lax_program.code}"
+    )
     assert document.photo.name.endswith(".png")
 
 
@@ -821,7 +807,9 @@ def individual_image_flex_attribute(db: Any) -> FlexibleAttribute:
     )
 
 
-def test_individual_with_image_flex_field(lax_api_client, lax_push_url, base64_image, individual_image_flex_attribute):
+def test_individual_with_image_flex_field(
+    lax_api_client, lax_push_url, lax_program, base64_image, individual_image_flex_attribute
+):
     individual_data = {
         "individual_id": "IND_FLEX_IMG",
         "full_name": "Flex Image Test",
@@ -841,6 +829,9 @@ def test_individual_with_image_flex_field(lax_api_client, lax_push_url, base64_i
     assert "individual_photo" in individual.flex_fields
     assert not individual.flex_fields["individual_photo"].startswith(base64_image[:20])
     assert default_storage.exists(individual.flex_fields["individual_photo"])
+    assert individual.flex_fields["individual_photo"].startswith(
+        f"{lax_program.start_date.year}/{lax_program.business_area.slug}/{lax_program.code}/"
+    )
 
 
 def test_image_flex_field_cleanup_on_failure(

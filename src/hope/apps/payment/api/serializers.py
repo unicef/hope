@@ -1,6 +1,7 @@
 from decimal import Decimal
 import json
 import logging
+import os
 from typing import Any, cast
 
 from django.db import transaction
@@ -80,6 +81,12 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
+
+    def to_representation(self, instance: PaymentPlanSupportingDocument) -> dict:
+        data = super().to_representation(instance)
+        if data.get("file"):
+            data["file"] = os.path.basename(data["file"])
+        return data
 
     def validate_file(self, file: Any) -> Any:
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:

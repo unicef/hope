@@ -228,6 +228,7 @@ def test_wallet_stored_on_account(
 def test_wallet_images_stored_as_saved_files(
     registration: Any,
     user: Any,
+    program: Program,
     ukraine_country: Any,
     tax_id_document_type: Any,
     digital_wallet_delivery_mechanism: DeliveryMechanism,
@@ -241,9 +242,12 @@ def test_wallet_images_stored_as_saved_files(
     individual = PendingIndividual.objects.get(registration_data_import=rdi)
     num_image_path = individual.flex_fields["wallet_num_image_i_f"]
     id_image_path = individual.flex_fields["id_wallet_image_i_f"]
+    directory = f"{program.start_date.year}/{program.business_area.slug}/{program.code}/"
     assert num_image_path.endswith(".jpg")
     assert default_storage.exists(num_image_path)
     assert default_storage.exists(id_image_path)
+    assert num_image_path.startswith(directory)
+    assert id_image_path.startswith(directory)
 
 
 def test_individual_detail_flex_image_resolves_to_url(

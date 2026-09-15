@@ -416,11 +416,38 @@ def test_create_individual_with_photo_remove_prefix(rdi, base64_photo) -> None:
         rdi=rdi,
     )
 
-    assert individual.photo.name.startswith(rdi.program.code)
+    assert individual.photo.name.startswith(
+        f"{rdi.program.start_date.year}/{rdi.program.business_area.slug}/{rdi.program.code}/{rdi.program.code}"
+    )
     assert individual.photo.name.endswith(".png")
     photo_saved = base64.b64encode(individual.photo.read()).decode("utf-8")
     assert photo_saved.startswith(prefix) is False
     assert photo_saved == photo_data
+
+
+def test_create_individual_resolves_the_programme_without_refetching_it(rdi, base64_photo, django_assert_num_queries):
+    base64_photo_with_prefix, _ = base64_photo
+    person_data = {
+        "type": "NON_BENEFICIARY",
+        "photo": base64_photo_with_prefix,
+        "first_name": "WithPhoto",
+        "birth_date": "2000-01-01",
+        "first_registration_date": "2000-01-01",
+        "last_registration_date": "2000-01-01",
+    }
+    people_upload_mixin = PeopleUploadMixin()
+    people_upload_mixin.selected_rdi = rdi
+
+    with django_assert_num_queries(6):
+        individual = people_upload_mixin._create_individual(
+            documents=[],
+            accounts=[],
+            hh=None,
+            person_data=person_data,
+            rdi=rdi,
+        )
+
+    assert individual.program == rdi.program
 
 
 @pytest.fixture
