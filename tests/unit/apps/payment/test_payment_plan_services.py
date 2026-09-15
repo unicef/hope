@@ -1731,9 +1731,12 @@ def test_create_payments_integrity_error_handling(
     assert hh_qs.first().unicef_id == household.unicef_id
 
     with transaction.atomic():
-        with pytest.raises(IntegrityError) as error:
+        with pytest.raises(ValidationError, match="Duplicated Households in provided Targeting List") as error:
             PaymentPlanService.create_payments(payment_plan)
-        assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(error.value)
+        assert isinstance(error.value.__cause__, IntegrityError)
+        assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(
+            error.value.__cause__
+        )
 
     with transaction.atomic():
         IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
