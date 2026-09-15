@@ -8,7 +8,7 @@ from django.utils import timezone
 from hope.models import RoleAssignment, User
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Collection, Sequence
 
     from django.db.models import QuerySet
 
@@ -23,7 +23,7 @@ def is_mailable(user: User | None) -> TypeIs[User]:
 def _role_assignments(
     business_area: "BusinessArea",
     permissions: "Sequence[Permissions | str]",
-    programs: "Sequence[Any]" = (),
+    programs: "Collection[Any]" = (),
 ) -> "QuerySet[RoleAssignment]":
     permission_values = [getattr(permission, "value", permission) for permission in permissions]
     program_ids = [getattr(program, "pk", program) for program in programs]
@@ -42,7 +42,7 @@ def _role_assignments(
 def users_with_permissions(
     business_area: "BusinessArea",
     permissions: "Sequence[Permissions | str]",
-    programs: "Sequence[Any]" = (),
+    programs: "Collection[Any]" = (),
     *,
     exclude_staff: bool = False,
 ) -> "QuerySet[User]":
@@ -73,7 +73,7 @@ def users_with_permissions(
 def users_with_permissions_by_program(
     business_area: "BusinessArea",
     permissions: "Sequence[Permissions | str]",
-    programs: "Sequence[Any]",
+    programs: "Collection[Any]",
     *,
     exclude_staff: bool = False,
 ) -> dict[User, set[Any]]:
