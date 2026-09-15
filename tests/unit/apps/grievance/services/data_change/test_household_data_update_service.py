@@ -9,6 +9,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     CountryFactory,
+    FlexibleAttributeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -20,7 +21,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
 from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import ROLE_ALTERNATE
-from hope.models import Currency, IndividualRoleInHousehold, Program, User
+from hope.models import Currency, FlexibleAttribute, IndividualRoleInHousehold, Program, User
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -567,6 +568,50 @@ def test_close_household_update_invalidates_cache(program: Program, user: User) 
         service.close(user)
 
     assert get_household_list_program_key(program.id) > hh_cache_before
+
+
+def test_close_household_update_applies_only_approved_flex_fields(program: Program, user: User) -> None:
+    FlexibleAttributeFactory(
+        name="hh_total_eligible_ind_h_f",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    FlexibleAttributeFactory(
+        name="total_dwellers_h_f",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    household = HouseholdFactory(
+        program=program,
+        business_area=program.business_area,
+        create_role=False,
+        flex_fields={"hh_total_eligible_ind_h_f": 1, "total_dwellers_h_f": 3, "living_situation_h_f": "renter"},
+    )
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={
+            "flex_fields": {
+                # the value is stored as a string when it comes from the API form
+                "hh_total_eligible_ind_h_f": {"value": "2", "previous_value": 1, "approve_status": True},
+                "total_dwellers_h_f": {"value": 5, "previous_value": 3, "approve_status": False},
+            },
+        },
+    )
+
+    service = HouseholdDataUpdateService(grievance_ticket=ticket_details.ticket, extras=ticket_details.household_data)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(user)
+
+    household.refresh_from_db()
+    assert household.flex_fields == {
+        "hh_total_eligible_ind_h_f": 2,
+        "total_dwellers_h_f": 3,
+        "living_situation_h_f": "renter",
+    }
 
 
 def test_save_currency_change_records_previous_value_as_code(all_currencies: None) -> None:

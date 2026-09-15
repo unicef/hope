@@ -146,7 +146,8 @@ export const GrievanceDetailsToolbar = ({
       const allData = {
         ...householdData,
         ...individualData,
-        ...householdData?.flexFields,
+        // householdData is not camelized by the REST client
+        ...householdData?.flex_fields,
         ...individualData?.flexFields,
       };
       const filterData = (data: any) => {
