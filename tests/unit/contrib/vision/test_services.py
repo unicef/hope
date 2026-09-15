@@ -1,4 +1,5 @@
-from unittest.mock import ANY, MagicMock, PropertyMock, patch
+from datetime import datetime
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from flags.models import FlagState
 import pytest
@@ -731,12 +732,13 @@ def test_release_from_vision_uses_payment_plan_creator(
     assert vision_payment_plan.status == PaymentPlan.Status.ACCEPTED
     assert release.created_by == vision_payment_plan.created_by
     assert release.comment is None
-    mock_notification.assert_called_once_with(
+    assert mock_notification.call_count == 1
+    assert mock_notification.call_args.args[:3] == (
         vision_payment_plan,
         PaymentPlan.Action.REVIEW.value,
         str(vision_payment_plan.created_by_id),
-        ANY,
     )
+    assert datetime.fromisoformat(mock_notification.call_args.args[3]).tzinfo is not None
 
 
 def test_release_from_vision_rejects_non_review_plan(
