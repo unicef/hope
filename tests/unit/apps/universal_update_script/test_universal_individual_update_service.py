@@ -1146,6 +1146,10 @@ def test_update_individual_latin_name_rejects_non_latin_value(
         ("", None),
         (None, None),
         ("Anna O'Neil-Kovalska", None),
+        ("  Anna Kovalska", None),
+        ("Anna Kovalska  ", None),
+        ("Anna   Kovalska", None),
+        ("Anna O' Brien", None),
         (
             "Anna1",
             (

@@ -6,7 +6,7 @@ export const LATIN_NAME_FIELDS = [
 ];
 
 // Mirrors ascii_name_validator in src/hope/models/individual.py
-export const LATIN_NAME_REGEX = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
+export const LATIN_NAME_REGEX = /^\s*[A-Za-z]+(?:[\s'-]+[A-Za-z]+)*'?\s*$/;
 
 export const LATIN_NAME_FORMAT_ERROR =
   'Only ASCII letters, spaces, hyphens and apostrophes are allowed';

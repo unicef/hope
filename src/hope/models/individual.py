@@ -64,7 +64,7 @@ from hope.models.utils import (
 )
 
 ascii_name_validator = RegexValidator(
-    regex=r"^[A-Za-z]+(?:[ '-][A-Za-z]+)*$",
+    regex=r"^\s*[A-Za-z]+(?:[\s'-]+[A-Za-z]+)*'?\s*$",
     message="Only ASCII letters, spaces, hyphens, and apostrophes are allowed.",
     code="invalid_name",
 )
