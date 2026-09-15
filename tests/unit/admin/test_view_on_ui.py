@@ -274,15 +274,15 @@ def test_view_on_ui_without_original():
 
 @pytest.mark.django_db
 def test_view_on_ui_without_frontend_url(program):
-    ma = site._registry[Program]
-    original = ma.frontend_url
-    ma.frontend_url = lambda obj: None  # type: ignore[method-assign]
+    programme_admin = site._registry[Program]
+    original = programme_admin.frontend_url
+    programme_admin.frontend_url = lambda obj: None  # type: ignore[method-assign]
     try:
         btn = _button(program())
-        _handler(Program).func(ma, btn)
+        _handler(Program).func(programme_admin, btn)
         assert btn.href is None
     finally:
-        ma.frontend_url = original
+        programme_admin.frontend_url = original
 
 
 @pytest.mark.django_db
