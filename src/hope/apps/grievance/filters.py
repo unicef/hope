@@ -160,16 +160,12 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
-    def filter_overdue(self, qs: QuerySet, name: str, value: bool | None) -> QuerySet:
+    def filter_overdue(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         # the threshold differs per category, so this cannot be expressed as a plain lookup
-        if value is None:
-            return qs
         overdue = overdue_q()
         return qs.filter(overdue) if value else qs.exclude(overdue)
 
-    def filter_sensitive(self, qs: QuerySet, name: str, value: bool | None) -> QuerySet:
-        if value is None:
-            return qs
+    def filter_sensitive(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         lookup = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
         return qs.filter(**lookup) if value else qs.exclude(**lookup)
 
