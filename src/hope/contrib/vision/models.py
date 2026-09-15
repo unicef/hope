@@ -5,12 +5,7 @@ from hope.models import BusinessArea, PaymentPlan
 
 class FundsCommitmentGroup(models.Model):
     funds_commitment_number = models.CharField(max_length=10)
-
-    def __str__(self) -> str:
-        return self.funds_commitment_number
-
-
-class FundsCommitmentItem(models.Model):
+    business_area = models.CharField(max_length=4, blank=True, null=True)
     payment_plan = models.ForeignKey(
         PaymentPlan,
         null=True,
@@ -18,26 +13,40 @@ class FundsCommitmentItem(models.Model):
         on_delete=models.SET_NULL,
         related_name="funds_commitments",
     )
+    vendor_id = models.CharField(max_length=10, blank=True, null=True)
+    currency_code = models.CharField(max_length=5, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.funds_commitment_number
+
+
+class FundsCommitmentItem(models.Model):
+    vision_approval = models.CharField(max_length=1, blank=True, null=True)
+    document_reference = models.CharField(max_length=16, null=True)
+    fc_status = models.CharField(max_length=1, blank=True, null=True)
+    wbs_element = models.CharField(max_length=24, null=True, blank=True, default="")
+    grant_number = models.CharField(max_length=20, null=True, blank=True, default="")
+
+    rec_serial_number = models.IntegerField(primary_key=True)
     funds_commitment_group = models.ForeignKey(
         FundsCommitmentGroup,
         on_delete=models.CASCADE,
         related_name="funds_commitment_items",
     )
     funds_commitment_item = models.CharField(max_length=3, db_index=True)
-
-    rec_serial_number = models.IntegerField(primary_key=True)
-    vendor_id = models.CharField(max_length=10, blank=True, null=True)
-    business_area = models.CharField(max_length=4, blank=True, null=True)
     posting_date = models.DateField(blank=True, null=True)
-    vision_approval = models.CharField(max_length=1, blank=True, null=True)
-    document_reference = models.CharField(max_length=16, null=True)
-    fc_status = models.CharField(max_length=1, blank=True, null=True)
-    wbs_element = models.CharField(max_length=24, null=True, blank=True, default="")
-    grant_number = models.CharField(max_length=20, null=True, blank=True, default="")
-    document_type = models.CharField(max_length=2, blank=True, null=True)
+
+    document_type = models.CharField(max_length=2, blank=True, null=True)  # ZA
     document_text = models.CharField(max_length=50, blank=True, null=True)
-    currency_code = models.CharField(max_length=5, blank=True, null=True)
-    gl_account = models.CharField(max_length=10, null=True, blank=True)
+
+    gl_account = models.CharField(max_length=10, null=True, blank=True, help_text="General Ledger Account")
+
+    sponsor = models.CharField(max_length=10, null=True, blank=True, default="")
+    sponsor_name = models.CharField(max_length=100, null=True, blank=True, default="")
+    fund = models.CharField(max_length=10, null=True, blank=True, default="", help_text="")  # SC
+    funds_center = models.CharField(max_length=16, null=True, blank=True, default="", help_text="Cost center")
+    percentage = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
+
     commitment_amount_local = models.DecimalField(
         decimal_places=2,
         max_digits=15,
@@ -62,12 +71,6 @@ class FundsCommitmentItem(models.Model):
         blank=True,
         null=True,
     )
-
-    sponsor = models.CharField(max_length=10, null=True, blank=True, default="")
-    sponsor_name = models.CharField(max_length=100, null=True, blank=True, default="")
-    fund = models.CharField(max_length=10, null=True, blank=True, default="")
-    funds_center = models.CharField(max_length=16, null=True, blank=True, default="")
-    percentage = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
 
     create_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     created_by = models.CharField(max_length=20, null=True, blank=True, default="")
