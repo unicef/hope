@@ -22,6 +22,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.household.const import ROLE_ALTERNATE
+from hope.apps.payment.api.views import PaymentViewSet
 from hope.models import DataCollectingType, Payment, PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
@@ -508,10 +509,12 @@ def test_not_eligible_status_is_rejected_by_eligible_payment_filter(
 
 def test_superuser_can_list_not_eligible_payments_and_filter_causes_with_or_logic(
     not_eligible_payment_context: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(PaymentViewSet, "pagination_class", None)
     url = (
         not_eligible_payment_context["url_not_eligible"]
-        + "?ineligibility_cause=conflicted&ineligibility_cause=invalid_wallet"
+        + "?ineligibility_cause=conflicted&ineligibility_cause=excluded&ineligibility_cause=invalid_wallet"
     )
 
     with CaptureQueriesContext(connection) as captured_queries:
@@ -519,10 +522,11 @@ def test_superuser_can_list_not_eligible_payments_and_filter_causes_with_or_logi
 
     assert response.status_code == status.HTTP_200_OK
     assert len(captured_queries) <= 30
-    results = response.json()["results"]
-    assert sorted([results[0]["id"], results[1]["id"]]) == sorted(
+    results = response.json()
+    assert sorted([results[0]["id"], results[1]["id"], results[2]["id"]]) == sorted(
         [
             str(not_eligible_payment_context["payment"].id),
+            str(not_eligible_payment_context["excluded_payment"].id),
             str(not_eligible_payment_context["invalid_wallet_payment"].id),
         ]
     )
