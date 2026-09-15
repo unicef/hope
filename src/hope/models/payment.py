@@ -54,6 +54,7 @@ class Payment(
     STATUS_FORCE_FAILED = "Force failed"
     STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
     STATUS_PENDING = "Pending"
+    STATUS_NOT_ELIGIBLE = "Not Eligible"
     # Payment Gateway statuses
     STATUS_SENT_TO_PG = "Sent to Payment Gateway"
     STATUS_SENT_TO_FSP = "Sent to FSP"
@@ -70,6 +71,7 @@ class Payment(
             _("Partially Distributed"),
         ),  # Delivered Partially
         (STATUS_PENDING, _("Pending")),  # Pending
+        (STATUS_NOT_ELIGIBLE, _("Not Eligible")),
         (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
         (STATUS_SENT_TO_FSP, _("Sent to FSP")),
         (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
@@ -345,6 +347,9 @@ class Payment(
         status = "-"
         if self.status == Payment.STATUS_PENDING:
             status = "Pending"
+
+        elif self.status == Payment.STATUS_NOT_ELIGIBLE:
+            status = "Not Eligible"
 
         elif self.status in (
             Payment.STATUS_DISTRIBUTION_SUCCESS,

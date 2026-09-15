@@ -9,7 +9,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
@@ -1048,7 +1048,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                     "id",
                     filter=Q(status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)),
                 ),
-                pending_count=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
+                pending_count=Count("id", filter=Q(status=Payment.STATUS_PENDING)),
+                sent_to_payment_gateway_count=Count("id", filter=Q(status=Payment.STATUS_SENT_TO_PG)),
+                sent_to_fsp_count=Count("id", filter=Q(status=Payment.STATUS_SENT_TO_FSP)),
                 error_count=Count("id", filter=Q(status=Payment.STATUS_ERROR)),
                 total_count=Count("id"),
                 valid_phone_count=Count(
@@ -1070,15 +1072,44 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
         return self._payments_summary(payment_plan)["available_count"]
 
-    def get_reconciliation_summary(self, obj: PaymentPlan) -> dict[str, int]:
+    @extend_schema_field(
+        inline_serializer(
+            name="PaymentPlanReconciliationSummary",
+            fields={
+                "delivered_fully": serializers.IntegerField(),
+                "delivered_partially": serializers.IntegerField(),
+                "not_delivered": serializers.IntegerField(),
+                "unsuccessful": serializers.IntegerField(),
+                "pending": serializers.IntegerField(),
+                "pending_breakdown": inline_serializer(
+                    name="PaymentPlanPendingBreakdown",
+                    fields={
+                        "pending": serializers.IntegerField(),
+                        "sent_to_payment_gateway": serializers.IntegerField(),
+                        "sent_to_fsp": serializers.IntegerField(),
+                    },
+                ),
+                "reconciled": serializers.IntegerField(),
+                "number_of_payments": serializers.IntegerField(),
+            },
+        )
+    )
+    def get_reconciliation_summary(self, obj: PaymentPlan) -> dict[str, Any]:
         summary = self._payments_summary(obj)
+        pending_breakdown = {
+            "pending": summary["pending_count"],
+            "sent_to_payment_gateway": summary["sent_to_payment_gateway_count"],
+            "sent_to_fsp": summary["sent_to_fsp_count"],
+        }
+        pending_count = sum(pending_breakdown.values())
         return {
             "delivered_fully": summary["delivered_fully_count"],
             "delivered_partially": summary["delivered_partially_count"],
             "not_delivered": summary["not_delivered_count"],
             "unsuccessful": summary["unsuccessful_non_not_delivered_count"],
-            "pending": summary["pending_count"],
-            "reconciled": summary["total_count"] - summary["pending_count"],
+            "pending": pending_count,
+            "pending_breakdown": pending_breakdown,
+            "reconciled": summary["total_count"] - pending_count,
             "number_of_payments": summary["total_count"],
         }
 
@@ -1560,6 +1591,15 @@ class PaymentListSerializer(serializers.ModelSerializer):
     def get_payment_plan_purposes(self, obj: Payment) -> list[str]:
         # Sorted in Python so the parent__payment_plan_purposes prefetch is not discarded.
         return sorted(purpose.name for purpose in obj.parent.payment_plan_purposes.all())
+
+
+class NotEligiblePaymentListSerializer(PaymentListSerializer):
+    class Meta(PaymentListSerializer.Meta):
+        fields = PaymentListSerializer.Meta.fields + (
+            "conflicted",
+            "excluded",
+            "has_valid_wallet",
+        )
 
 
 class PaymentDetailParentSerializer(serializers.ModelSerializer):

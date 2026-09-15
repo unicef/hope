@@ -192,6 +192,8 @@ export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentStatusEnum.PENDING:
       return 'PENDING';
+    case PaymentStatusEnum.NOT_ELIGIBLE:
+      return 'NOT ELIGIBLE';
     case PaymentStatusEnum.DISTRIBUTION_SUCCESSFUL:
     case PaymentStatusEnum.TRANSACTION_SUCCESSFUL:
       return 'DELIVERED FULLY';

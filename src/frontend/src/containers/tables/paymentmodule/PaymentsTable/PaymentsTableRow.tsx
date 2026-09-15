@@ -5,8 +5,9 @@ import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
-import TableCell from '@mui/material/TableCell';
+import { Box, Chip, TableCell } from '@mui/material';
 import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { NotEligiblePaymentList } from '@restgenerated/models/NotEligiblePaymentList';
 import {
   displayNameWithLatin,
   formatCurrencyWithSymbol,
@@ -50,10 +51,11 @@ const RoutedBox = styled.div`
 `;
 
 interface PaymentsTableRowProps {
-  payment: PaymentList;
+  payment: PaymentList | NotEligiblePaymentList;
   canViewDetails: boolean;
   onWarningClick?: (payment: PaymentList) => void;
   permissions;
+  showIneligibilityCauses?: boolean;
 }
 
 export function PaymentsTableRow({
@@ -61,6 +63,7 @@ export function PaymentsTableRow({
   canViewDetails,
   onWarningClick,
   permissions,
+  showIneligibilityCauses = false,
 }: PaymentsTableRowProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -217,6 +220,38 @@ export function PaymentsTableRow({
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
+      {showIneligibilityCauses && (
+        <TableCell>
+          {'conflicted' in payment && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {payment.conflicted && (
+                <Chip
+                  color="error"
+                  label={t('Hard Conflict')}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+              {payment.excluded && (
+                <Chip
+                  color="error"
+                  label={t('Manual Exclusion')}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+              {!payment.hasValidWallet && (
+                <Chip
+                  color="error"
+                  label={t('Invalid Wallet')}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          )}
+        </TableCell>
+      )}
       {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
         <TableCell data-cy="fsp-auth-code-cell" align="left">
           {payment.fspAuthCode || '-'}
