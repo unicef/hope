@@ -69,6 +69,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     BulkUpdateGrievanceTicketsPrioritySerializer,
     BulkUpdateGrievanceTicketsUrgencySerializer,
     CreateGrievanceTicketSerializer,
+    GrievanceChoicesSerializer,
     GrievanceCloseAsUniqueSerializer,
     GrievanceCreateNoteSerializer,
     GrievanceDeleteHouseholdApproveStatusSerializer,
@@ -209,7 +210,7 @@ class GrievanceTicketViewSet(
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
     @cached_response(key_func=GrievanceTicketListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(responses={200: GrievanceDashboardSerializer})
@@ -241,6 +242,7 @@ class GrievanceTicketGlobalViewSet(
         "list": GrievanceTicketListSerializer,
         "retrieve": GrievanceTicketDetailSerializer,
         "related_tickets": GrievanceTicketRelatedSerializer,
+        "choices": GrievanceChoicesSerializer,
         "create": CreateGrievanceTicketSerializer,
         "partial_update": UpdateGrievanceTicketSerializer,
         "status_change": GrievanceStatusChangeSerializer,
@@ -276,6 +278,14 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
+        "choices": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "related_tickets": [
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
@@ -465,6 +475,10 @@ class GrievanceTicketGlobalViewSet(
             .annotate(total_days=F("total__day"))
             .order_by("-created_at")
         )
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
 
     @extend_schema(
         responses={200: GrievanceTicketRelatedSerializer(many=True)},

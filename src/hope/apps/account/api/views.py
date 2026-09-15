@@ -21,6 +21,7 @@ from hope.apps.account.api.serializers import (
     PartnerChoicesSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
+    UserChoicesSerializer,
     UserSerializer,
     UserTimezoneSerializer,
 )
@@ -68,6 +69,10 @@ class UserViewSet(
             Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
             Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
         ],
+        "choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
         "partner_for_grievance_choices": [
             Permissions.USER_MANAGEMENT_VIEW_LIST,
             *ALL_GRIEVANCES_CREATE_MODIFY,
@@ -79,6 +84,7 @@ class UserViewSet(
         "profile": ProfileSerializer,
         "profile_timezone": UserTimezoneSerializer,
         "list": UserSerializer,
+        "choices": UserChoicesSerializer,
     }
     serializer_classes = {
         "program_users": ProgramUsersSerializer,
@@ -176,6 +182,10 @@ class UserViewSet(
     @cached_response(key_func=UserListKeyConstructor())
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
+        return Response(data=self.get_serializer(instance={}).data)
 
     @action(
         detail=False,

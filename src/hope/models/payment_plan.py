@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Optional
@@ -1129,7 +1129,7 @@ class PaymentPlan(
         )
 
     @property
-    def currency_exchange_date(self) -> Any:
+    def currency_exchange_date(self) -> date:
         if (
             self.status
             in [

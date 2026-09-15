@@ -4,7 +4,9 @@ from typing import Any, Callable, ParamSpec
 from constance import config
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import Count, Max, QuerySet
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import CacheResponse
 from rest_framework_extensions.key_constructor import bits
@@ -138,7 +140,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -155,7 +157,7 @@ class RendererKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -182,7 +184,7 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -202,7 +204,7 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -213,13 +215,58 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
         return str(version)
 
 
+class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
+    """KeyBit that validates the cache based on the latest `updated_at` and the number of objects in the queryset.
+
+    It eliminates the need to create and maintain cache versions at the cost of an additional query to fetch
+    the latest `updated_at` value and object count.
+    The cache is based also on the business area, program and their version.
+    """
+
+    # TODO This is a bad approach. On large tables this will cause performance issues. Count and Max are very expensive.
+
+    specific_view_cache_key = ""
+
+    def _get_queryset(
+        self,
+        business_area_slug: Any | None,
+        program_code: Any | None,
+        view_instance: Any | None,
+    ) -> QuerySet:
+        return view_instance.get_queryset()
+
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Request,
+        args: tuple,
+        kwargs: dict,
+    ) -> str:
+        business_area_slug = kwargs.get("business_area_slug")
+        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+        program_code = kwargs.get("program_code")
+
+        queryset = self._get_queryset(business_area_slug, program_code, view_instance).aggregate(
+            latest_updated_at=Max("updated_at"), obj_count=Count("id")
+        )
+        latest_updated_at = queryset["latest_updated_at"]
+        obj_count = queryset["obj_count"]
+
+        return (
+            f"{business_area_slug}:{business_area_version}:{program_code}:{self.specific_view_cache_key}"
+            f":{latest_updated_at}:{obj_count}"
+        )
+
+
 class AreaLimitKeyBit(KeyBitBase):
     def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:

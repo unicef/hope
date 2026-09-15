@@ -21,7 +21,7 @@ class Command(BaseCommand):
         else:
             pass
 
-    def handle(self, *args: Any, **options: Any) -> Any:
+    def handle(self, *args: Any, **options: Any) -> None:
         actions = ("view", "add", "change", "delete")
         app_model_map = {
             "account": ["incompatibleroles", "partner", "role", "userrole", "user"],
