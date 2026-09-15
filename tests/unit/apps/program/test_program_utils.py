@@ -405,7 +405,7 @@ def test_enroll_households_to_program_task_already_running(
         "program_for_enroll_id": str(enrollment_test_data["program2"].pk),
     }
     task_params_str = json.dumps(task_params, sort_keys=True)
-    cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
+    cache_key = "enroll_households_to_program_async_task_" + hashlib.sha256(task_params_str.encode()).hexdigest()
     cache.set(cache_key, True, timeout=24 * 60 * 60)
 
     with django_capture_on_commit_callbacks(execute=True):
