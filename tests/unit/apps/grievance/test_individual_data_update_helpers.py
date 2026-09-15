@@ -1,86 +1,61 @@
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import pytest
 
-
-def test_handle_photo_field_no_photo_key_dict_unchanged():
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    data = {"name": "John", "age": 30}
-    _handle_photo_field(data)
-    assert data == {"name": "John", "age": 30}
+from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
 
 
-def test_handle_photo_field_no_photo_key_empty_dict():
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    data = {}
-    _handle_photo_field(data)
-    assert data == {}
-
-
-def test_handle_photo_field_photo_is_none_sets_empty_string():
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    data = {"photo": None, "name": "John"}
-    _handle_photo_field(data)
-    assert data["photo"] == ""
-    assert data["name"] == "John"
-
-
+@pytest.mark.parametrize(
+    ("data", "handle_photo_result", "expected_data", "expected_calls"),
+    [
+        pytest.param({"name": "John", "age": 30}, None, {"name": "John", "age": 30}, [], id="no-photo-key"),
+        pytest.param({}, None, {}, [], id="empty-dict"),
+        pytest.param({"photo": None, "name": "John"}, None, {"photo": "", "name": "John"}, [], id="photo-is-none"),
+        pytest.param(
+            {"photo": "some_photo_data", "name": "John"},
+            "saved/photo/path.jpg",
+            {"photo": "saved/photo/path.jpg", "name": "John"},
+            [call("some_photo_data", None, None)],
+            id="photo-saved",
+        ),
+        pytest.param(
+            {"photo": "some_photo_data", "name": "John"},
+            None,
+            {"name": "John"},
+            [call("some_photo_data", None, None)],
+            id="photo-not-saved",
+        ),
+        pytest.param(
+            {"photo": "some_photo_data"},
+            "",
+            {},
+            [call("some_photo_data", None, None)],
+            id="photo-saved-as-an-empty-string",
+        ),
+        pytest.param(
+            {"photo": {"some": "complex_data"}, "other_field": 42},
+            "path/to/photo.png",
+            {"photo": "path/to/photo.png", "other_field": 42},
+            [call({"some": "complex_data"}, None, None)],
+            id="photo-is-a-dict",
+        ),
+        pytest.param(
+            {"name": "Jane", "age": 25, "address": "123 St"},
+            None,
+            {"name": "Jane", "age": 25, "address": "123 St"},
+            [],
+            id="other-keys-preserved",
+        ),
+    ],
+)
 @patch("hope.apps.grievance.services.data_change.individual_data_update_service.handle_photo")
-def test_handle_photo_field_with_value_handle_photo_returns_result(mock_handle_photo):
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
+def test_handle_photo_field(mock_handle_photo, data, handle_photo_result, expected_data, expected_calls):
+    mock_handle_photo.return_value = handle_photo_result
 
-    mock_handle_photo.return_value = "saved/photo/path.jpg"
-    data = {"photo": "some_photo_data", "name": "John"}
     _handle_photo_field(data)
-    assert data["photo"] == "saved/photo/path.jpg"
-    mock_handle_photo.assert_called_once_with("some_photo_data", None)
 
-
-@patch("hope.apps.grievance.services.data_change.individual_data_update_service.handle_photo")
-def test_handle_photo_field_with_value_handle_photo_returns_none(mock_handle_photo):
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    mock_handle_photo.return_value = None
-    data = {"photo": "some_photo_data", "name": "John"}
-    _handle_photo_field(data)
-    # photo was popped and handle_photo returned None, so "photo" should not be in dict
-    assert "photo" not in data
-    assert data["name"] == "John"
-    mock_handle_photo.assert_called_once_with("some_photo_data", None)
-
-
-@patch("hope.apps.grievance.services.data_change.individual_data_update_service.handle_photo")
-def test_handle_photo_field_with_value_handle_photo_returns_empty_string(mock_handle_photo):
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    mock_handle_photo.return_value = ""
-    data = {"photo": "some_photo_data"}
-    _handle_photo_field(data)
-    # empty string is falsy, so "photo" should not be in dict
-    assert "photo" not in data
-
-
-@patch("hope.apps.grievance.services.data_change.individual_data_update_service.handle_photo")
-def test_handle_photo_field_with_truthy_value_sets_photo(mock_handle_photo):
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    mock_handle_photo.return_value = "path/to/photo.png"
-    data = {"photo": {"some": "complex_data"}, "other_field": 42}
-    _handle_photo_field(data)
-    assert data["photo"] == "path/to/photo.png"
-    assert data["other_field"] == 42
-    mock_handle_photo.assert_called_once_with({"some": "complex_data"}, None)
-
-
-def test_handle_photo_field_preserves_other_keys():
-    from hope.apps.grievance.services.data_change.individual_data_update_service import _handle_photo_field
-
-    data = {"name": "Jane", "age": 25, "address": "123 St"}
-    _handle_photo_field(data)
-    assert data == {"name": "Jane", "age": 25, "address": "123 St"}
+    assert data == expected_data
+    assert mock_handle_photo.call_args_list == expected_calls
 
 
 # --- _update_household_fields ---

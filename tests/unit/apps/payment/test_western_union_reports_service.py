@@ -9,6 +9,7 @@ import zipfile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
+from freezegun import freeze_time
 import pytest
 
 from extras.test_utils.factories import (
@@ -1088,6 +1089,7 @@ def test_pick_best_data_match_returns_single_candidate(
     assert service.pick_best_data_match(invoice, [candidate]) == candidate
 
 
+@freeze_time("2026-09-09 12:00:00")
 def test_attach_file_sets_file_on_record(
     service: QCFReportsService,
     one_day: timedelta,
@@ -1101,7 +1103,7 @@ def test_attach_file_sets_file_on_record(
 
     invoice.refresh_from_db()
     assert invoice.file is not None
-    assert invoice.file.file.name.startswith("AD-attach")
+    assert invoice.file.file.name.startswith("2026/_global/AD-attach")
     assert invoice.file.file.name.endswith(".zip")
 
 

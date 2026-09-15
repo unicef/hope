@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.utils import timezone
 
+from hope.apps.core.upload_paths import get_program
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
@@ -44,18 +45,19 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_date_string(individual_data, "birth_date")
+        owner = get_program(self.grievance_ticket) or self.grievance_ticket
         # Handle photo field
         photo = individual_data.pop("photo", None)
         if photo is not None:
-            saved_photo = handle_photo(photo, None)
+            saved_photo = handle_photo(photo, None, owner)
             if saved_photo:
                 individual_data["photo"] = saved_photo
         individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals")
+        save_images(flex_fields, "individuals", owner)
         individual_data["flex_fields"] = flex_fields
-        individual_data["documents"] = handle_documents(documents)
+        individual_data["documents"] = handle_documents(documents, owner)
         ticket_add_individual_details = TicketAddIndividualDetails(
             individual_data=individual_data,
             household=household,
@@ -76,10 +78,11 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no")
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_date_string(new_individual_data, "birth_date")
+        owner = get_program(self.grievance_ticket) or self.grievance_ticket
         # Handle photo field
         photo = new_individual_data.pop("photo", None)
         if photo is not None:
-            saved_photo = handle_photo(photo, None)
+            saved_photo = handle_photo(photo, None, owner)
             if saved_photo:
                 new_individual_data["photo"] = saved_photo
         new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
@@ -87,9 +90,9 @@ class AddIndividualService(DataChangeService):
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
         }
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals")
+        save_images(flex_fields, "individuals", owner)
         new_individual_data["flex_fields"] = flex_fields
-        new_individual_data["documents"] = handle_documents(documents)
+        new_individual_data["documents"] = handle_documents(documents, owner)
         ticket_details.individual_data = new_individual_data
         ticket_details.approve_status = False
         ticket_details.save()

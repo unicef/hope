@@ -135,6 +135,7 @@ def supporting_documents_download_url(business_area: Any, payment_plan: PaymentP
 def document(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
     return PaymentPlanSupportingDocumentFactory(
         payment_plan=payment_plan,
+        file=SimpleUploadedFile("evidence.pdf", b"abc", content_type="application/pdf"),
     )
 
 
@@ -201,7 +202,8 @@ def test_post_successful_upload(
     assert PaymentPlanSupportingDocument.objects.count() == 1
     assert "id" in response.data
     assert "uploaded_at" in response.data
-    assert "test_file" in response.data["file"]
+    assert response.data["file"].startswith("test_file")
+    assert "/" not in response.data["file"]
     assert response.data["title"] == "Test"
     assert response.data["created_by"] == upload_user.pk
 
@@ -240,4 +242,4 @@ def test_get_document_success(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f"attachment; filename={document.file.name}"
+    assert response["Content-Disposition"] == "attachment; filename=evidence.pdf"

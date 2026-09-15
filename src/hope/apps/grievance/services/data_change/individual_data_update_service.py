@@ -1,6 +1,6 @@
 import dataclasses
 from datetime import date, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.upload_paths import get_program
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
@@ -53,6 +54,9 @@ from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.currency import Currency
 
+if TYPE_CHECKING:
+    from django.db.models import Model
+
 
 @dataclasses.dataclass
 class AccountPayloadField:
@@ -69,14 +73,14 @@ class AccountPayload:
     data_fields: list[AccountPayloadField]
 
 
-def _handle_photo_field(new_individual_data: dict) -> None:
+def _handle_photo_field(new_individual_data: dict, owner: "Model | None" = None) -> None:
     _not_provided = object()
     photo = new_individual_data.pop("photo", _not_provided)
     if photo is not _not_provided:
         if photo is None:
             new_individual_data["photo"] = ""
         else:
-            saved_photo = handle_photo(photo, None)
+            saved_photo = handle_photo(photo, None, owner)
             if saved_photo:
                 new_individual_data["photo"] = saved_photo
 
@@ -99,10 +103,11 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
-        _handle_photo_field(individual_data)
+        owner = get_program(self.grievance_ticket) or self.grievance_ticket
+        _handle_photo_field(individual_data, owner)
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals")
+        save_images(flex_fields, "individuals", owner)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
@@ -120,7 +125,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document), "approve_status": False} for document in documents
+            {"value": handle_document(document, owner), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove
@@ -184,9 +189,10 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
-        _handle_photo_field(new_individual_data)
+        owner = get_program(self.grievance_ticket) or self.grievance_ticket
+        _handle_photo_field(new_individual_data, owner)
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals")
+        save_images(flex_fields, "individuals", owner)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
@@ -205,7 +211,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document), "approve_status": False} for document in documents
+            {"value": handle_document(document, owner), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove

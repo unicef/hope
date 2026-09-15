@@ -150,6 +150,32 @@ def area_limits_url(program: Program) -> str:
     return reverse("admin:program_program_area_limits", args=[program.pk])
 
 
+@pytest.fixture
+def two_photo_archive() -> SimpleUploadedFile:
+    archive = BytesIO()
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("IND-1.jpg", b"first-image")
+        zf.writestr("IND-2.jpg", b"second-image")
+    return SimpleUploadedFile("photos.zip", archive.getvalue(), content_type="application/zip")
+
+
+@pytest.fixture
+def two_photo_upload_job(program: Program, business_area: BusinessArea, two_photo_archive: SimpleUploadedFile) -> Any:
+    IndividualFactory(program=program, unicef_id="IND-1", business_area=business_area)
+    IndividualFactory(program=program, unicef_id="IND-2", business_area=business_area)
+    file_temp = FileTemp.objects.create(
+        object_id=str(program.pk),
+        content_type=get_content_type_for_model(program),
+        file=two_photo_archive,
+    )
+    job = MagicMock()
+    job.config = {"file_id": str(file_temp.pk)}
+    job.program = program
+    job.errors = {}
+    job.save = MagicMock()
+    return job
+
+
 def test_area_limits_get_request(
     django_app: Any,
     user: User,
@@ -333,10 +359,22 @@ def test_bulk_upload_individuals_photos_action_updates_photos(
 
     individual.refresh_from_db()
     assert updated == 1
-    assert individual.photo.name.startswith("IND-123")
+    assert individual.photo.name.startswith(
+        f"{program.start_date.year}/{program.business_area.slug}/{program.code}/IND-123"
+    )
     assert individual.photo.name.lower().endswith(".jpg")
     assert job.errors.get("missing_individuals") == ["IND-999.jpg"]
     job.save.assert_called_with(update_fields=["errors"])
+
+
+def test_bulk_upload_individuals_photos_action_does_not_refetch_the_programme_per_photo(
+    two_photo_upload_job: Any,
+    django_assert_num_queries: Any,
+) -> None:
+    with django_assert_num_queries(14):
+        updated = bulk_upload_individuals_photos_action(two_photo_upload_job)
+
+    assert updated == 2
 
 
 def test_check_index_button(django_app: Any, program: Program) -> None:

@@ -33,6 +33,7 @@ from hope.api.endpoints.rdi.cw_ids import (
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin, PhotoMixin
 from hope.api.endpoints.rdi.upload import BirthDateValidator
 from hope.apps.core.api.fields import ScopedSlugRelatedField, UTCDateField
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.household.const import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICES,
@@ -67,6 +68,7 @@ from hope.models.currency import Currency
 if TYPE_CHECKING:
     from uuid import UUID
 
+    from django.db.models import Model
     from rest_framework.request import Request
 
     from hope.models import BusinessArea, Program
@@ -264,7 +266,11 @@ class HandleFlexFieldsMixin:
         )
 
     def process_image_flex_fields(
-        self, flex_fields: dict | None, associated_with: int, file_prefix: str = ""
+        self,
+        flex_fields: dict | None,
+        associated_with: int,
+        file_prefix: str = "",
+        owner: "Model | None" = None,
     ) -> list[str]:
         """Process IMAGE type flex fields: convert base64 to storage path.
 
@@ -288,7 +294,7 @@ class HandleFlexFieldsMixin:
             if not photo_file:
                 continue
 
-            saved_path = default_storage.save(photo_file.name, photo_file)
+            saved_path = default_storage.save(upload_path(owner, photo_file.name), photo_file)
             flex_fields[field_name] = saved_path
             saved_paths.append(saved_path)
 
@@ -377,6 +383,7 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             validated_data.get("flex_fields"),
             FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             self._programme_code,
+            self._rdi_program,
         )
         self.staging.saved_image_paths.extend(saved_image_paths)
 
@@ -723,12 +730,13 @@ class CreateLaxHouseholds(CreateLaxBaseView, HouseholdUploadMixin):
                         data.get("flex_fields"),
                         FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
                         self._programme_code,
+                        self._rdi_program,
                     )
                 )
 
                 household_instance = PendingHousehold(
                     registration_data_import=self.selected_rdi,
-                    program_id=self._rdi_program.id,
+                    program=self._rdi_program,
                     business_area=self.selected_business_area,
                     **data,
                 )

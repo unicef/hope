@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django_celery_boost.models import AsyncJobModel
 
+from hope.apps.core.upload_paths import upload_path
 from hope.models.async_job import AsyncJob
 from hope.models.pdu_xlsx_template import PDUXlsxTemplate
 from hope.models.utils import TimeStampedModel
@@ -53,7 +54,7 @@ class PDUXlsxUpload(TimeStampedModel):
         null=True,
         blank=True,
     )
-    file = models.FileField()
+    file = models.FileField(upload_to=upload_path, max_length=255)
     error_message = models.TextField(null=True, blank=True)
 
     ordering = ["-created_at"]

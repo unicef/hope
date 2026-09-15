@@ -644,7 +644,8 @@ def test_create_documents(countries: dict[str, object]) -> None:
 
     document = PendingDocument.objects.first()
     photo = document.photo.name
-    assert photo.startswith("image")
+    program = individual.program
+    assert photo.startswith(f"{program.start_date.year}/{program.business_area.slug}/{program.code}/image")
     assert photo.endswith(".png")
 
 
