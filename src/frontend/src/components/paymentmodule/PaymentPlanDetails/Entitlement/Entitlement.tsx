@@ -29,7 +29,11 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { formatFigure, showApiErrorMessages } from '@utils/utils';
+import {
+  formatCurrencyCode,
+  formatFigure,
+  showApiErrorMessages,
+} from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -588,7 +592,7 @@ function Entitlement({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${paymentPlan.currency} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
+                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${formatCurrencyCode(paymentPlan.currency, paymentPlan.currencyVisionCode)} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
               </BigValue>
             </LabelizedField>
           </>

@@ -506,6 +506,8 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
     with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
+    assert data["currency"] is None
+    assert data["currency_vision_code"] is None
     assert data["unore_exchange_rate"] is None
     assert data["unore_exchange_rate_unavailable"] is False
 

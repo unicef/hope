@@ -498,6 +498,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if value is None:
                 return True
 
+            if custom_validate := field.get("custom_validate_choices"):
+                return custom_validate(str(value).strip())
+
             choices = field["choices"]
             handlers: dict[str, Callable[[Any, set], bool]] = {
                 TYPE_SELECT_ONE: self._validate_select_one_choice,

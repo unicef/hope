@@ -2,7 +2,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from extras.test_utils.factories import CurrencyFactory
 from hope.apps.payment.services.payment_gateway import PaymentInstructionFromSplitSerializer
 
 
@@ -23,13 +22,12 @@ def build_split_mock():
 
 
 @pytest.mark.django_db
-def test_instruction_payload_destination_currency_uses_vision_code(build_split_mock):
-    currency = CurrencyFactory(code="XYC", name="Test Currency", vision_code="XYCO")
-    split = build_split_mock(currency)
+def test_instruction_payload_destination_currency_is_the_iso_code(build_split_mock, currency_syp):
+    split = build_split_mock(currency_syp)
 
     payload = PaymentInstructionFromSplitSerializer(split, context={"user_email": "test@example.com"}).data["payload"]
 
-    assert payload["destination_currency"] == "XYC"
+    assert payload["destination_currency"] == "SYP"
 
 
 @pytest.mark.django_db

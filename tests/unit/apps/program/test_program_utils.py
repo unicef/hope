@@ -36,6 +36,7 @@ from hope.apps.program.utils import (
 )
 from hope.models import (
     BusinessArea,
+    Currency,
     Document,
     Household,
     Individual,
@@ -570,6 +571,44 @@ def test_copy_program_population_creates_collections_when_missing(
     copied_individual = Individual.objects.filter(program=program2, copied_from=individual_hoh).first()
     assert copied_individual is not None
     assert copied_individual.individual_collection == individual_hoh.individual_collection
+
+
+@pytest.fixture
+def household_on_deprecated_syp(program1: Program, currency_syp_deprecated: Currency) -> Household:
+    return HouseholdFactory(
+        program=program1,
+        head_of_household=IndividualFactory(household=None, program=program1),
+        currency=currency_syp_deprecated,
+    )
+
+
+@pytest.fixture
+def program2_rdi(program2: Program) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(business_area=program2.business_area, program=program2)
+
+
+@pytest.mark.usefixtures("mock_elasticsearch", "currency_syp")
+def test_copy_program_population_keeps_the_currency_row_of_the_copied_household(
+    program2: Program,
+    program2_rdi: RegistrationDataImport,
+    household_on_deprecated_syp: Household,
+    currency_syp_deprecated: Currency,
+    django_assert_num_queries,
+) -> None:
+    # A copy between programmes carries the FK over, never the code, so it cannot land on the
+    # active row that shares the deprecated one's code.
+    copier = CopyProgramPopulation(
+        copy_from_individuals=Individual.objects.filter(pk=household_on_deprecated_syp.head_of_household_id),
+        copy_from_households=Household.objects.filter(pk=household_on_deprecated_syp.pk),
+        program=program2,
+        rdi=program2_rdi,
+    )
+
+    with django_assert_num_queries(31):
+        copier.copy_program_population()
+
+    copied_household = Household.objects.get(program=program2, copied_from=household_on_deprecated_syp)
+    assert copied_household.currency == currency_syp_deprecated
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

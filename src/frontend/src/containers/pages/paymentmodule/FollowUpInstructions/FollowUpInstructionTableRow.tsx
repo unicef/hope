@@ -19,11 +19,12 @@ function formatInstructionAmount(
   amount: number,
   amountUsd: number,
   currency?: string | null,
+  visionCode?: string | null,
 ): string {
   if (!currency) {
     return formatCurrencyWithSymbol(amountUsd, 'USD');
   }
-  return `${formatCurrencyWithSymbol(amount, currency)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
+  return `${formatCurrencyWithSymbol(amount, currency, visionCode)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
 }
 
 export const FollowUpInstructionTableRow = ({
@@ -53,6 +54,7 @@ export const FollowUpInstructionTableRow = ({
           instruction.totalEntitledQuantity,
           instruction.totalEntitledQuantityUsd,
           instruction.currency,
+          instruction.currencyVisionCode,
         )}
       </TableCell>
       <TableCell align="right">
@@ -60,6 +62,7 @@ export const FollowUpInstructionTableRow = ({
           instruction.totalDeliveredQuantity,
           instruction.totalDeliveredQuantityUsd,
           instruction.currency,
+          instruction.currencyVisionCode,
         )}
       </TableCell>
       <TableCell align="right">
@@ -67,6 +70,7 @@ export const FollowUpInstructionTableRow = ({
           instruction.totalUndeliveredQuantity,
           instruction.totalUndeliveredQuantityUsd,
           instruction.currency,
+          instruction.currencyVisionCode,
         )}
       </TableCell>
       <TableCell align="left">

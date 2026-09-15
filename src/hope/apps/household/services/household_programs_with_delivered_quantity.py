@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Any
 
-from django.db.models import DecimalField, F, Sum
+from django.db.models import DecimalField, Sum
 from django.db.models.functions import Coalesce
 
 from hope.models import Household, Payment
@@ -15,16 +15,20 @@ def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:
     quantities_per_currency = (
         payment_items.exclude(status=Payment.STATUS_FORCE_FAILED)
         .exclude(currency__code="USD")
-        .values(currency_code=F("currency__code"))
+        # Grouped by the FK, not by `code`: a redenomination leaves two rows sharing one
+        # `code`, so grouping by `code` would sum amounts that are not the same unit.
+        .values("currency_id", "currency__code", "currency__vision_code")
         .annotate(
             total_delivered_quantity=Coalesce(Sum("delivered_quantity", output_field=DecimalField()), Decimal(0.0))
         )
+        .order_by("currency__code", "currency__vision_code")
     )
 
     results = [
         {
             "total_delivered_quantity": quantity["total_delivered_quantity"],
-            "currency": quantity["currency_code"],
+            "currency": quantity["currency__code"],
+            "currency_vision_code": quantity["currency__vision_code"],
         }
         for quantity in quantities_per_currency
     ]
@@ -33,5 +37,6 @@ def delivered_quantity_service(household: Household) -> list[dict[str, Any]]:
         {
             "total_delivered_quantity": quantity_in_usd["total_delivered_quantity_usd"],
             "currency": "USD",
+            "currency_vision_code": "USD",
         }
     ] + results

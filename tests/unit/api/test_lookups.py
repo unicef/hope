@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.payment import FinancialInstitutionFactory
-from hope.models import APIToken, Area, AreaType, Country, FinancialInstitution, Program
+from hope.models import APIToken, Area, AreaType, Country, Currency, FinancialInstitution, Program
 from hope.models.grant import Grant
 
 pytestmark = pytest.mark.django_db
@@ -87,12 +87,13 @@ def _fi_response(fi: FinancialInstitution) -> dict:
     }
 
 
-def _currency_response(code: str, name: str, is_crypto: bool, currency_id: int) -> dict:
+def _currency_response(currency: Currency) -> dict:
     return {
-        "id": currency_id,
-        "code": code,
-        "name": name,
-        "is_crypto": is_crypto,
+        "id": currency.id,
+        "code": currency.code,
+        "vision_code": currency.vision_code,
+        "name": currency.name,
+        "is_crypto": currency.is_crypto,
     }
 
 
@@ -299,10 +300,30 @@ def test_get_currencies(api_client_read: APIClient) -> None:
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["results"] == [
-        _currency_response("AFN", "Afghani", False, afn.id),
-        _currency_response("USD", "United States Dollar", False, usd.id),
+        _currency_response(afn),
+        _currency_response(usd),
     ]
     assert "next" in response.json()
+
+
+@pytest.fixture
+def syp_denominations() -> tuple[Currency, Currency]:
+    """The post-redenomination layout: a deprecated and an active row sharing ``code``."""
+    deprecated = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    active = CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+    return deprecated, active
+
+
+def test_get_currencies_lists_only_the_active_row_for_a_deprecated_code(
+    api_client_read: APIClient, syp_denominations: tuple[Currency, Currency]
+) -> None:
+    _deprecated_syp, new_syp = syp_denominations
+
+    url = reverse("api:currency-list")
+    response = api_client_read.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == [_currency_response(new_syp)]
 
 
 def test_get_currencies_search(api_client_read: APIClient) -> None:

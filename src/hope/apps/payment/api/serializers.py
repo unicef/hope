@@ -14,6 +14,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
+from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.fields import ScopedRelatedField, UTCDateField
@@ -397,6 +398,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     verification_status = serializers.CharField(source="payment_verification_summary.status")
     program_cycle_title = serializers.CharField(source="program_cycle.title")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlan
@@ -404,6 +406,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "currency",
+            "currency_vision_code",
             "total_delivered_quantity",
             "program_cycle_start_date",
             "program_cycle_end_date",
@@ -427,6 +430,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlan
@@ -438,6 +442,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "status_display",
             "total_households_count",
             "currency",
+            "currency_vision_code",
             "total_entitled_quantity",
             "total_entitled_quantity_usd",
             "total_delivered_quantity",
@@ -485,6 +490,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
     payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
 
     class Meta:
@@ -497,6 +503,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "total_households_count",
             "total_individuals_count",
             "currency",
+            "currency_vision_code",
             "excluded_ids",
             "total_entitled_quantity",
             "total_delivered_quantity",
@@ -684,7 +691,10 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
-    currency = serializers.SlugRelatedField(slug_field="code", queryset=Currency.objects.all(), allow_null=True)
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.KEEP_CURRENT_ROW,
+        allow_null=True,
+    )
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
@@ -757,6 +767,7 @@ class FollowUpInstructionCreateSerializer(serializers.Serializer):
 
 class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSerializer):
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
     source_payment_plan_id = serializers.UUIDField(source="source_payment_plan.id", read_only=True)
     source_payment_plan_unicef_id = serializers.CharField(source="source_payment_plan.unicef_id", read_only=True)
     source_payment_plan_name = serializers.CharField(source="source_payment_plan.name", read_only=True)
@@ -776,6 +787,7 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
             "name",
             "status",
             "currency",
+            "currency_vision_code",
             "source_payment_plan_id",
             "source_payment_plan_unicef_id",
             "source_payment_plan_name",
@@ -855,6 +867,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     background_action_status = serializers.CharField(read_only=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     currency = serializers.SerializerMethodField()
+    currency_vision_code = serializers.SerializerMethodField()
     child_payment_plans_count = serializers.SerializerMethodField()
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
@@ -875,6 +888,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
             "background_action_status",
             "background_action_status_display",
             "currency",
+            "currency_vision_code",
             "child_payment_plans_count",
             "households_count",
             "total_entitled_quantity",
@@ -899,9 +913,20 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     def get_child_payment_plans_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["child_payment_plans_count"]
 
+    @staticmethod
+    def _currency(obj: FollowUpInstruction) -> Currency | None:
+        if not hasattr(obj, "_currency_cache"):
+            payment_plan = obj.payment_plans.first()
+            obj._currency_cache = payment_plan.currency if payment_plan else None
+        return obj._currency_cache
+
     def get_currency(self, obj: FollowUpInstruction) -> str | None:
-        payment_plan = obj.payment_plans.first()
-        return payment_plan.currency.code if payment_plan else None
+        currency = self._currency(obj)
+        return currency.code if currency else None
+
+    def get_currency_vision_code(self, obj: FollowUpInstruction) -> str | None:
+        currency = self._currency(obj)
+        return currency.vision_code if currency else None
 
     def get_households_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["households_count"]
@@ -1404,6 +1429,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     parent_id = serializers.UUIDField(read_only=True)
     parent_unicef_id = serializers.CharField(source="parent.unicef_id")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
     household_id = serializers.UUIDField(read_only=True)
     collector_id = serializers.UUIDField(read_only=True)
     household_unicef_id = serializers.CharField(source="household.unicef_id")
@@ -1482,6 +1508,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "status",
             "status_display",
             "currency",
+            "currency_vision_code",
             "fsp_auth_code",
             "hoh_id",
             "hoh_unicef_id",

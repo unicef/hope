@@ -104,7 +104,7 @@ class Importer:
         self._countries = {c.iso_code3: c.id for c in Country.objects.all()}
 
         # Cache Currency lookups (code -> id mapping)
-        self._currencies = {c.code: c.id for c in Currency.objects.all()}
+        self._currencies = {c.code: c.id for c in Currency.objects.active()}
 
         # Dictionary to store household instances by their parser ID (for FK linking)
         self._household_instances = {}

@@ -5,6 +5,7 @@ import pytest
 from unit.api_contract._helpers import HopeRecorder, UserChoicesRecorder
 
 from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.factories.geo import AreaFactory, CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.payment import DeliveryMechanismFactory, FinancialInstitutionFactory
@@ -79,6 +80,17 @@ def document_type(request, db):
     return DocumentTypeFactory(key="passport", label="Passport")
 
 
+@frozenfixture()
+def redenominated_currency(request, db):
+    """Both rows a redenomination leaves behind: one code, two denominations.
+
+    The lookup lists active rows only, so the deprecated row must not reach the response and
+    the one that does has to carry the `vision_code` that tells it apart.
+    """
+    CurrencyFactory(code="SYP", vision_code="SYP", name="Syrian pound Old", active=False)
+    return CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian pound", active=True)
+
+
 # ---------------------------------------------------------------------------
 # HOPEAuthentication endpoints (need api_token)
 # ---------------------------------------------------------------------------
@@ -97,6 +109,11 @@ def test_lookups_document(superuser, api_token):
 def test_lookups_country(superuser, api_token, country):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser, api_token=api_token)
     recorder.assertGET("/api/rest/lookups/country/")
+
+
+def test_lookups_currency(superuser, api_token, redenominated_currency):
+    recorder = HopeRecorder(DATA_DIR, as_user=superuser, api_token=api_token)
+    recorder.assertGET("/api/rest/lookups/currency/")
 
 
 def test_lookups_financial_institution(superuser, api_token, financial_institution):

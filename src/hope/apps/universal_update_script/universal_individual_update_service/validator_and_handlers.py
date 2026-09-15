@@ -5,9 +5,10 @@ from django.core.exceptions import ValidationError
 from django.db.models import Model
 from phonenumber_field.phonenumber import PhoneNumber
 
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
-from hope.models import Area, BusinessArea, Facility, Program
+from hope.models import Area, BusinessArea, Facility, Household, Program
 from hope.models.currency import Currency
 from hope.models.individual import ascii_name_validator
 
@@ -108,11 +109,11 @@ def validate_facility(  # noqa: PLR0913, PLR0917
 
 
 def handle_currency_field(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Household, business_area: BusinessArea, program: Program
 ) -> Currency | None:
     if value is None or value == "":
         return None
-    return Currency.objects.get(code=value)
+    return resolve_active_currency_or_none(value)
 
 
 def validate_currency(
@@ -120,7 +121,7 @@ def validate_currency(
 ) -> str | None:
     if value is None or value == "":
         return None
-    if not Currency.objects.filter(code=value).exists():
+    if resolve_active_currency_or_none(value) is None:
         return f"Invalid currency code {value}"
     return None
 
