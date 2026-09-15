@@ -18,6 +18,7 @@ class VisionService:
         {
             VisionStatus.SEND_FAILED.value,
             VisionStatus.WAITING_FOR_CALLBACK.value,
+            VisionStatus.PP_CREATED.value,
             VisionStatus.CALLBACK_FAILED.value,
             VisionStatus.FC_MISSING.value,
             VisionStatus.FC_NOT_FOUND.value,
@@ -166,33 +167,46 @@ class VisionService:
         if payment_plan.vision_status not in cls.RECOVERABLE_STATUSES:
             return False
 
-        vision_data["vision_id"] = vision_payment_plan_id
-        if fc_num:
-            vision_data["fc_num"] = fc_num
+        is_payment_plan_created_acknowledgement = not vision_result and not fc_num
+        acknowledgement_can_update_status = payment_plan.vision_status in {
+            VisionStatus.SEND_FAILED.value,
+            VisionStatus.WAITING_FOR_CALLBACK.value,
+            VisionStatus.PP_CREATED.value,
+        }
+        fc_assignment_failed = False
+        if is_payment_plan_created_acknowledgement:
+            # A repeated creation acknowledgement must not replace a later FC result or failure.
+            if acknowledgement_can_update_status:
+                vision_data["vision_id"] = vision_payment_plan_id
+                vision_data.pop("fc_num", None)
+                cls.set_status(payment_plan, VisionStatus.PP_CREATED)
         else:
-            # Do not display an FC number from an earlier callback when the latest callback did not provide one.
-            vision_data.pop("fc_num", None)
-        if vision_result != "SUCCESS":
-            cls.set_status(
-                payment_plan,
-                VisionStatus.CALLBACK_FAILED,
-                error_code=VisionErrorCode.VISION_STATUS_FAILED,
-            )
-            return False
+            vision_data["vision_id"] = vision_payment_plan_id
+            if fc_num:
+                vision_data["fc_num"] = fc_num
+            else:
+                # Do not display an FC number from an earlier callback when the latest callback did not provide one.
+                vision_data.pop("fc_num", None)
+            if vision_result != "SUCCESS":
+                cls.set_status(
+                    payment_plan,
+                    VisionStatus.CALLBACK_FAILED,
+                    error_code=VisionErrorCode.VISION_STATUS_FAILED,
+                )
+            elif not fc_num:
+                cls.set_status(payment_plan, VisionStatus.FC_MISSING)
+                fc_assignment_failed = True
+            else:
+                try:
+                    cls.assign_funds_commitment_from_callback(payment_plan, fc_num)
+                except FundsCommitmentAssignmentError as error:
+                    cls.set_status(payment_plan, error.status, error_code=error.error_code)
+                    fc_assignment_failed = True
+                else:
+                    # Successful assignment completes release and continues to PG or XLSX delivery.
+                    cls.complete_funds_commitment_assignment(payment_plan)
 
-        if not fc_num:
-            cls.set_status(payment_plan, VisionStatus.FC_MISSING)
-            return True
-
-        try:
-            cls.assign_funds_commitment_from_callback(payment_plan, fc_num)
-        except FundsCommitmentAssignmentError as error:
-            cls.set_status(payment_plan, error.status, error_code=error.error_code)
-            return True
-
-        # Successful assignment completes finance release, sends PG plans, and enables XLSX delivery for other plans.
-        cls.complete_funds_commitment_assignment(payment_plan)
-        return False
+        return fc_assignment_failed
 
     @classmethod
     def complete_funds_commitment_assignment(cls, payment_plan: PaymentPlan) -> None:
