@@ -246,7 +246,7 @@ class PaymentPlanService:
             self.payment_plan,
             PaymentPlan.Action.REVIEW.value,
             release_user_id,
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
         return self.payment_plan
 

@@ -476,7 +476,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     @cached_property
     def _related_tickets(self) -> QuerySet["GrievanceTicket"]:
         """Distinct linked + existing tickets."""
-        return self._linked_tickets.union(self._existing_tickets)
+        return self._linked_tickets.order_by().union(self._existing_tickets.order_by())
 
     @property
     def existing_tickets(
