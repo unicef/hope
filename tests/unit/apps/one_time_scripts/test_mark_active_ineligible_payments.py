@@ -12,10 +12,10 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def historical_payment_statuses() -> dict[str, Payment]:
-    first_business_area = BusinessAreaFactory(slug="ineligible-backfill-first")
+    first_business_area = BusinessAreaFactory(name="Ineligible Backfill First", slug="ineligible-backfill-first")
     first_program = ProgramFactory(name="Ineligible Backfill First", business_area=first_business_area)
     first_payment_plan = PaymentPlanFactory(business_area=first_business_area, program_cycle__program=first_program)
-    second_business_area = BusinessAreaFactory(slug="ineligible-backfill-second")
+    second_business_area = BusinessAreaFactory(name="Ineligible Backfill Second", slug="ineligible-backfill-second")
     second_program = ProgramFactory(name="Ineligible Backfill Second", business_area=second_business_area)
     second_payment_plan = PaymentPlanFactory(business_area=second_business_area, program_cycle__program=second_program)
     eligible_pending = PaymentFactory(
