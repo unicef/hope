@@ -14,10 +14,10 @@ pytestmark = pytest.mark.django_db
 def historical_payment_statuses() -> dict[str, Payment]:
     first_business_area = BusinessAreaFactory(slug="ineligible-backfill-first")
     first_program = ProgramFactory(name="Ineligible Backfill First", business_area=first_business_area)
-    first_payment_plan = PaymentPlanFactory(program_cycle__program=first_program)
+    first_payment_plan = PaymentPlanFactory(business_area=first_business_area, program_cycle__program=first_program)
     second_business_area = BusinessAreaFactory(slug="ineligible-backfill-second")
     second_program = ProgramFactory(name="Ineligible Backfill Second", business_area=second_business_area)
-    second_payment_plan = PaymentPlanFactory(program_cycle__program=second_program)
+    second_payment_plan = PaymentPlanFactory(business_area=second_business_area, program_cycle__program=second_program)
     eligible_pending = PaymentFactory(
         parent=first_payment_plan,
         program=first_program,
@@ -141,7 +141,7 @@ def test_script_dry_run_reports_grouped_counts_without_updating(
     assert "Starting dry run: scanning for active ineligible Pending payments..." in output
     assert "Found 5 candidate payments across 3 business area/program groups." in output
     assert "[1/3] ineligible-backfill-first / Ineligible Backfill First: 2 candidates (dry run)." in output
-    assert "[2/3] ineligible-backfill-first / [no program]: 1 candidates (dry run)." in output
+    assert "[2/3] ineligible-backfill-first / [no program]: 1 candidate (dry run)." in output
     assert "[3/3] ineligible-backfill-second / Ineligible Backfill Second: 2 candidates (dry run)." in output
     assert "Dry run complete: 5 payments would be marked across 3 business area/program groups." in output
 

@@ -62,11 +62,12 @@ def mark_active_ineligible_payments(*, dry_run: bool = True) -> dict[str, object
         business_area = business_areas[business_area_id].slug
         program = programs[program_id].name if program_id is not None else None
         group_label = f"[{group_number:,}/{total_groups:,}] {business_area} / {program or '[no program]'}"
+        candidate_label = "candidate" if candidate_count == 1 else "candidates"
         updated_count = 0
         if dry_run:
-            print(f"{group_label}: {candidate_count:,} candidates (dry run).", flush=True)
+            print(f"{group_label}: {candidate_count:,} {candidate_label} (dry run).", flush=True)
         else:
-            print(f"{group_label}: updating {candidate_count:,} candidates...", flush=True)
+            print(f"{group_label}: updating {candidate_count:,} {candidate_label}...", flush=True)
             with transaction.atomic():
                 updated_count = _candidate_payments().filter(**group_filter).update(status=Payment.STATUS_NOT_ELIGIBLE)
             print(f"{group_label}: committed {updated_count:,} updates.", flush=True)
