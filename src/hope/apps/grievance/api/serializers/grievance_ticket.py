@@ -391,6 +391,8 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     male_age_group_12_17_count = serializers.IntegerField(required=False)
     male_age_group_18_59_count = serializers.IntegerField(required=False)
     male_age_group_60_count = serializers.IntegerField(required=False)
+    other_sex_group_count = serializers.IntegerField(required=False)
+    unknown_sex_group_count = serializers.IntegerField(required=False)
     female_age_group_0_5_disabled_count = serializers.IntegerField(required=False)
     female_age_group_6_11_disabled_count = serializers.IntegerField(required=False)
     female_age_group_12_17_disabled_count = serializers.IntegerField(required=False)

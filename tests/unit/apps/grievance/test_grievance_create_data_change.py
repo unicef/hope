@@ -18,6 +18,7 @@ from extras.test_utils.factories import (
     CountryFactory,
     DocumentFactory,
     FinancialInstitutionFactory,
+    FlexibleAttributeFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
@@ -41,6 +42,7 @@ from hope.models import (
     AccountType,
     BusinessArea,
     DocumentType,
+    FlexibleAttribute,
     Program,
     User,
 )
@@ -405,6 +407,55 @@ def test_grievance_update_household_data_change(
     response = authenticated_client.post(list_url, input_data, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response.data[0]
+
+
+def test_grievance_household_data_change_keeps_sex_group_counts_with_flex_fields(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    grievance_context: dict[str, Any],
+    list_url: str,
+) -> None:
+    FlexibleAttributeFactory(
+        name="hh_total_eligible_ind_h_f",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    household = grievance_context["household"]
+    household.unknown_sex_group_count = 1
+    household.other_sex_group_count = 0
+    household.flex_fields = {"hh_total_eligible_ind_h_f": 1}
+    household.save(update_fields=["unknown_sex_group_count", "other_sex_group_count", "flex_fields"])
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": str(household.id),
+                    "household_data": {
+                        "unknown_sex_group_count": 3,
+                        "other_sex_group_count": 2,
+                        "flex_fields": {"hh_total_eligible_ind_h_f": 4},
+                    },
+                }
+            }
+        },
+    }
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    household_data = ticket.household_data_update_ticket_details.household_data
+    assert household_data["unknown_sex_group_count"] == {"value": 3, "previous_value": 1, "approve_status": False}
+    assert household_data["other_sex_group_count"] == {"value": 2, "previous_value": 0, "approve_status": False}
+    assert household_data["flex_fields"] == {
+        "hh_total_eligible_ind_h_f": {"value": 4, "previous_value": 1, "approve_status": False}
+    }
 
 
 def test_grievance_delete_household_data_change(
