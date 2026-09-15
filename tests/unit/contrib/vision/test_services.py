@@ -332,6 +332,34 @@ def test_process_callback_records_payment_plan_created_acknowledgement(
     }
 
 
+def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    vision_payment_plan.internal_data = {
+        "vision": {
+            "vision_id": "VISION-1",
+            "fc_num": "UNKNOWN",
+            "status": VisionStatus.FC_NOT_FOUND.value,
+        }
+    }
+
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="",
+            fc_num="",
+        )
+
+    assert fc_assignment_failed is False
+    assert vision_payment_plan.vision_data == {
+        "vision_id": "VISION-1",
+        "fc_num": "UNKNOWN",
+        "status": VisionStatus.FC_NOT_FOUND.value,
+    }
+
+
 def test_process_callback_records_fc_assignment_failure(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
