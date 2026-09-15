@@ -7,7 +7,6 @@ from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
@@ -290,8 +289,6 @@ def create_grievance_ticket_with_details(
     if possible_duplicates:
         ticket_details.possible_duplicates.add(*possible_duplicates)
     ticket_details.populate_cross_area_flag()
-
-    GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
     return ticket, ticket_details
 
