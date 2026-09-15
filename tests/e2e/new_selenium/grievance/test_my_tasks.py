@@ -1,8 +1,15 @@
+from datetime import datetime, timedelta
 from urllib.parse import urlsplit
 
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
+from extras.test_utils.factories.account import UserFactory
+from extras.test_utils.factories.core import BeneficiaryGroupFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT
@@ -11,6 +18,160 @@ from hope.apps.grievance.utils import my_tasks_url
 from hope.models import BusinessArea, Program, User
 
 pytestmark = pytest.mark.django_db()
+
+# --- My Tasks ------------------------------------------------------------------------
+#
+# The My Tasks page has two tabs: Needs Assignment (unassigned, active) and Assigned To Me. The
+# daily digest emails deep-link into them with ?tab=, ?sensitive= and ?overdue=. Every fixture
+# below is one ticket placed on exactly one side of one of those axes, so each test can list a
+# handful and state which of them must show.
+
+
+def _ticket(
+    program: Program,
+    *,
+    category: int,
+    issue_type: int,
+    assigned_to: User | None = None,
+    status: int = GrievanceTicket.STATUS_NEW,
+    age: timedelta | None = None,
+) -> GrievanceTicket:
+    """One ticket in ``program``, optionally backdated by ``age`` so it counts as overdue.
+
+    ``created_at`` is ``auto_now_add`` and the live server runs in its own thread, so the
+    backdate is a queryset update rather than freezegun. ``unicef_id`` comes from a DB trigger.
+    """
+    ticket = GrievanceTicketFactory(
+        business_area=program.business_area,
+        category=category,
+        issue_type=issue_type,
+        assigned_to=assigned_to,
+        status=status,
+    )
+    ticket.programs.set([program])
+    if age is not None:
+        GrievanceTicket.objects.filter(pk=ticket.pk).update(created_at=timezone.now() - age)
+    ticket.refresh_from_db()
+    return ticket
+
+
+def _complaint(program: Program, **kwargs: object) -> GrievanceTicket:
+    return _ticket(
+        program,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
+        **kwargs,
+    )
+
+
+def _sensitive(program: Program, **kwargs: object) -> GrievanceTicket:
+    return _ticket(
+        program,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        **kwargs,
+    )
+
+
+@pytest.fixture
+def my_tasks_program(business_area: BusinessArea) -> Program:
+    """Active, so the all-programmes list (``is_active_program=true``) includes its tickets."""
+    beneficiary_group = BeneficiaryGroupFactory(
+        name="My Tasks Household Group",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=True,
+    )
+    return ProgramFactory(
+        name="My Tasks Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        beneficiary_group=beneficiary_group,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+
+
+@pytest.fixture
+def other_user() -> User:
+    return UserFactory()
+
+
+@pytest.fixture
+def unassigned_complaint(my_tasks_program: Program) -> GrievanceTicket:
+    return _complaint(my_tasks_program)
+
+
+@pytest.fixture
+def unassigned_sensitive(my_tasks_program: Program) -> GrievanceTicket:
+    return _sensitive(my_tasks_program)
+
+
+@pytest.fixture
+def unassigned_closed(my_tasks_program: Program) -> GrievanceTicket:
+    """Closed without ever being assigned - Needs Assignment must never offer it."""
+    return _complaint(my_tasks_program, status=GrievanceTicket.STATUS_CLOSED)
+
+
+@pytest.fixture
+def my_complaint(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    return _complaint(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def my_sensitive(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    return _sensitive(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def my_closed(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    """Hidden by the default "Active Tickets" status filter."""
+    return _complaint(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_CLOSED)
+
+
+@pytest.fixture
+def my_overdue_complaint(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    """Past the 30-day default threshold for non-sensitive tickets."""
+    return _complaint(
+        my_tasks_program,
+        assigned_to=me,
+        status=GrievanceTicket.STATUS_ASSIGNED,
+        age=timedelta(days=40),
+    )
+
+
+@pytest.fixture
+def my_recent_sensitive_overdue(my_tasks_program: Program, me: User) -> GrievanceTicket:
+    """Past the 1-day sensitive threshold but well inside the 30-day one.
+
+    Only listed as overdue if the filter applies the threshold of the ticket's own category.
+    """
+    return _sensitive(
+        my_tasks_program,
+        assigned_to=me,
+        status=GrievanceTicket.STATUS_ASSIGNED,
+        age=timedelta(days=2),
+    )
+
+
+@pytest.fixture
+def someone_elses_complaint(my_tasks_program: Program, other_user: User) -> GrievanceTicket:
+    return _complaint(my_tasks_program, assigned_to=other_user, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def restricted_user_complaint(my_tasks_program: Program, user_with_no_permissions: User) -> GrievanceTicket:
+    """Assigned to the user who holds only the non-sensitive grant."""
+    return _complaint(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def restricted_user_sensitive(my_tasks_program: Program, user_with_no_permissions: User) -> GrievanceTicket:
+    """Assigned to the same user, who must never see it."""
+    return _sensitive(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED)
+
 
 PAGE_TITLE = 'h5[data-cy="page-header-title"]'
 TAB_NEEDS_ASSIGNMENT = '[data-cy="tab-needs-assignment"]'
@@ -82,7 +243,7 @@ def test_my_tasks_button_opens_the_page_from_the_ticket_list(
     login.wait_for_text("My Tasks", '[data-cy="table-title"]')
     # A bare /my-tasks gets its tab written into the URL, so the page is shareable as opened.
     login.assert_true("tab=needs-assignment" in login.get_current_url())
-    login.assert_element(f"{TAB_NEEDS_ASSIGNMENT}.Mui-selected")
+    login.assert_element(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
 
 
 # --- Needs Assignment ----------------------------------------------------------------
@@ -256,7 +417,7 @@ def test_email_deep_link_lands_on_mine_overdue_sensitive(
 ) -> None:
     _open_email_link(login, my_tasks_url(business_area, PRESET_MINE, overdue=True, sensitive=True))
 
-    login.assert_element(f"{TAB_MINE}.Mui-selected")
+    login.assert_element(f'{TAB_MINE}[aria-selected="true"]')
     login.assert_text("Overdue Only", FILTER_OVERDUE)
     login.assert_text("Sensitive", FILTER_SENSITIVE)
     login.assert_element_absent(FILTER_CATEGORY)
@@ -271,7 +432,7 @@ def test_needs_assignment_deep_link_selects_the_tab(
 ) -> None:
     _open_email_link(login, my_tasks_url(business_area, PRESET_NEEDS_ASSIGNMENT, sensitive=False))
 
-    login.assert_element(f"{TAB_NEEDS_ASSIGNMENT}.Mui-selected")
+    login.assert_element(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
     login.assert_text("Other", FILTER_SENSITIVE)
     _wait_for_rows(login, unassigned_complaint)
 
@@ -294,7 +455,7 @@ def test_tab_switch_clears_category_but_keeps_overdue(
     login.assert_true("category=" in login.get_current_url())
 
     login.click(TAB_NEEDS_ASSIGNMENT)
-    login.wait_for_element_visible(f"{TAB_NEEDS_ASSIGNMENT}.Mui-selected")
+    login.wait_for_element_visible(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
 
     # The category belonged to the previous tab's list; the overdue narrowing is the reader's own.
     url = login.get_current_url()
@@ -373,20 +534,20 @@ def test_selection_is_dropped_when_the_query_changes(
 
     # A ticket ticked on the previous list is no longer on screen and must not ride along into
     # the next bulk action, so the action goes back to having nothing to act on.
-    login.wait_for_element_visible(f"{TAB_NEEDS_ASSIGNMENT}.Mui-selected")
+    login.wait_for_element_visible(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
     login.wait_for_element_present(f"{BUTTON_BULK_ASSIGN}[disabled]")
 
 
 # --- Permissions ---------------------------------------------------------------------
 
 
+@pytest.mark.usefixtures("restricted_user_sensitive")
 def test_user_without_assign_permission_only_gets_assigned_to_me(
     browser: HopeTestBrowser,
     business_area: BusinessArea,
     user_with_no_permissions: User,
-    restricted_user_tickets: tuple[GrievanceTicket, GrievanceTicket],
+    restricted_user_complaint: GrievanceTicket,
 ) -> None:
-    complaint, _sensitive = restricted_user_tickets
     # The programme grant is what the app shell needs to list programmes at all; without it the
     # global 403 handler replaces every page.
     with grant_permission(
@@ -403,7 +564,7 @@ def test_user_without_assign_permission_only_gets_assigned_to_me(
         # Holding only the non-sensitive grant leaves nothing to choose, so the filter is gone
         # and the sensitive ticket with it.
         browser.assert_element_absent(FILTER_SENSITIVE)
-        _wait_for_rows(browser, complaint)
+        _wait_for_rows(browser, restricted_user_complaint)
 
 
 def test_user_with_no_my_tasks_permissions_is_denied(
