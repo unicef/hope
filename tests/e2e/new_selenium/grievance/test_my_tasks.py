@@ -116,6 +116,22 @@ def unassigned_closed(my_tasks_program: Program) -> GrievanceTicket:
 
 
 @pytest.fixture
+def unassigned_in_other_program(business_area: BusinessArea) -> GrievanceTicket:
+    """An unassigned ticket in a second active programme.
+
+    The all-programmes page lists it; the programme-scoped page must not.
+    """
+    other_program = ProgramFactory(
+        name="Other My Tasks Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+    return _complaint(other_program)
+
+
+@pytest.fixture
 def my_complaint(my_tasks_program: Program, me: User) -> GrievanceTicket:
     return _complaint(my_tasks_program, assigned_to=me, status=GrievanceTicket.STATUS_ASSIGNED)
 
