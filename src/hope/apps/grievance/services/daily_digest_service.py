@@ -49,8 +49,8 @@ class Section:
 
     label: str
     preset: str
+    sensitive: bool
     overdue: bool = False
-    sensitive: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -235,12 +235,15 @@ class DailyDigestService:
 
     @staticmethod
     def _sections(spec: EmailSpec, counts_per_section: list[dict[User, int]]) -> dict[User, list[tuple[Section, int]]]:
-        """Pair each section with its count, dropping the ones a recipient has no tickets in."""
+        """Pair each section with its count.
+
+        Every count here is above zero already: they come from `Count()` aggregates, which produce
+        no row for an empty group, or from dicts that dropped their zeros when they were built.
+        """
         by_recipient: dict[User, list[tuple[Section, int]]] = defaultdict(list)
         for section, counts in zip(spec.sections, counts_per_section, strict=True):
             for user, total in counts.items():
-                if total:
-                    by_recipient[user].append((section, total))
+                by_recipient[user].append((section, total))
         return dict(by_recipient)
 
     def _emails_by_recipient(self) -> dict[User, list[tuple[EmailSpec, list[tuple[Section, int]]]]]:
@@ -400,7 +403,7 @@ class DailyDigestService:
             else config.GRIEVANCE_OVERDUE_THRESHOLD_NON_SENSITIVE
         )
 
-    def _overdue_tickets(self, *, sensitive: bool | None = None) -> "QuerySet[GrievanceTicket]":
+    def _overdue_tickets(self, *, sensitive: bool) -> "QuerySet[GrievanceTicket]":
         tickets = (
             self._for_business_area()
             .filter(
@@ -411,8 +414,6 @@ class DailyDigestService:
             )
             .exclude(status=GrievanceTicket.STATUS_CLOSED)
         )
-        if sensitive is None:
-            return tickets
         category = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
         return tickets.filter(**category) if sensitive else tickets.exclude(**category)
 

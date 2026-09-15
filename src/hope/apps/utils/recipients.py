@@ -80,8 +80,9 @@ def users_with_permissions_by_program(
     """Map each user from `users_with_permissions` to which of `programs` they cover.
 
     Two queries regardless of how many programs are asked about, rather than one lookup per program.
-    A business-area-wide role assignment covers every program in `programs`; a user holding no
-    assignment over any of them is left out.
+    A business-area-wide role assignment covers every program in `programs`. Every user returned by
+    `users_with_permissions` matched at least one of the same role assignments, so each one covers
+    at least one program.
     """
     program_ids = {getattr(program, "pk", program) for program in programs}
     if not program_ids:
@@ -98,9 +99,7 @@ def users_with_permissions_by_program(
         if partner_id is not None:
             programs_by_partner_id[partner_id].update(covered)
 
-    scope_by_user = {}
-    for user in users_with_permissions(business_area, permissions, program_ids, exclude_staff=exclude_staff):
-        covered_by_user = programs_by_user_id.get(user.pk, set()) | programs_by_partner_id.get(user.partner_id, set())
-        if covered_by_user:
-            scope_by_user[user] = covered_by_user
-    return scope_by_user
+    return {
+        user: programs_by_user_id.get(user.pk, set()) | programs_by_partner_id.get(user.partner_id, set())
+        for user in users_with_permissions(business_area, permissions, program_ids, exclude_staff=exclude_staff)
+    }
