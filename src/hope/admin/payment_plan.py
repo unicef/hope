@@ -22,6 +22,11 @@ from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentItem
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICY_OPTION,
+    NULL_DELIVERY_POLICY_RESET,
+    OVERRIDE_OPTION,
+)
 from hope.apps.utils.security import is_root
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
@@ -605,7 +610,10 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     @button(
         visible=lambda btn: (
             btn.original.background_action_status
-            == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+            in {
+                PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+                PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+            }
         ),
         permission="payment.restart_importing_reconciliation_xlsx_file",
     )
@@ -629,10 +637,26 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                 if job.task_status in job.ACTIVE_STATUSES
             ]
 
-            if active_jobs:
+            can_restart_failed_import = (
+                group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORT_ERROR
+            )
+            if active_jobs or can_restart_failed_import:
                 for job in active_jobs:
                     job.terminate()
-                import_payment_plan_group_delivery_from_xlsx_async_task(group, str(request.user.pk))
+                import_options = group.delivery_import_file.extras
+                group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+                group.save(update_fields=["background_action_status", "updated_at"])
+                original_uploader_id = group.delivery_import_file.created_by_id
+                import_payment_plan_group_delivery_from_xlsx_async_task(
+                    group,
+                    str(request.user.pk),
+                    override=import_options.get(OVERRIDE_OPTION, False),
+                    null_delivery_policy=import_options.get(
+                        NULL_DELIVERY_POLICY_OPTION,
+                        NULL_DELIVERY_POLICY_RESET,
+                    ),
+                    notification_user_id=str(original_uploader_id) if original_uploader_id else str(request.user.pk),
+                )
                 messages.success(request, "Successfully restarted reconciliation import.")
             else:
                 messages.error(request, f"There is no current {task_name} for this payment plan group.")
