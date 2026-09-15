@@ -1486,7 +1486,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = (
+        fields: tuple[str, ...] = (
             "id",
             "unicef_id",
             "parent_id",
@@ -1689,7 +1689,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     fsp_extra_fields = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
-        fields = PaymentListSerializer.Meta.fields + (  # type: ignore
+        fields = PaymentListSerializer.Meta.fields + (
             "parent",
             "admin_url",
             "source_payment",
