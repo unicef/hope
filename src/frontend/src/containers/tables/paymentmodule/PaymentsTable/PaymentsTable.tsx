@@ -1,33 +1,71 @@
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Paper, Typography } from '@mui/material';
-import { createApiParams } from '@utils/apiUtils';
-import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import type { CountResponse } from '@restgenerated/models/CountResponse';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { RestService } from '@restgenerated/services/RestService';
-import { restQueryKey } from '@utils/queryKeys';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { Box, Paper, Typography } from '@mui/material';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { NotEligiblePaymentList } from '@restgenerated/models/NotEligiblePaymentList';
+import type { PaginatedNotEligiblePaymentListList } from '@restgenerated/models/PaginatedNotEligiblePaymentListList';
+import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { Profile } from '@restgenerated/models/Profile';
+import { RestService } from '@restgenerated/services/RestService';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { headCells, headCellsPeople } from './PaymentsTableHeadCells';
-import { PaymentsTableRow } from './PaymentsTableRow';
-import { WarningTooltipTable } from './WarningTooltipTable';
+import type { PaymentFilterKeys } from './PaymentsFilters';
 import { PaymentsFilters } from './PaymentsFilters';
-import type { PaymentList } from '@restgenerated/models/PaymentList';
-import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
-import { useLocation } from 'react-router-dom';
+import { PaymentsTableRow } from './PaymentsTableRow';
+import { headCells, headCellsPeople } from './PaymentsTableHeadCells';
+import { WarningTooltipTable } from './WarningTooltipTable';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
 `;
+
+const eligibleFilterKeys: PaymentFilterKeys = {
+  paymentUnicefId: 'paymentUnicefId',
+  individualUnicefId: 'individualUnicefId',
+  householdUnicefId: 'householdUnicefId',
+  collectorFullName: 'collectorFullName',
+  status: 'status',
+};
+
+const notEligibleFilterKeys: PaymentFilterKeys = {
+  paymentUnicefId: 'notEligiblePaymentUnicefId',
+  individualUnicefId: 'notEligibleIndividualUnicefId',
+  householdUnicefId: 'notEligibleHouseholdUnicefId',
+  collectorFullName: 'notEligibleCollectorFullName',
+  ineligibilityCause: 'notEligibleIneligibilityCause',
+};
+
+const eligibleInitialFilter = {
+  paymentUnicefId: '',
+  individualUnicefId: '',
+  householdUnicefId: '',
+  collectorFullName: '',
+  status: '',
+};
+
+const notEligibleInitialFilter = {
+  notEligiblePaymentUnicefId: '',
+  notEligibleIndividualUnicefId: '',
+  notEligibleHouseholdUnicefId: '',
+  notEligibleCollectorFullName: '',
+  notEligibleIneligibilityCause: [],
+};
+
 interface PaymentsTableProps {
   businessArea: string;
   paymentPlan: PaymentPlanDetail;
@@ -35,27 +73,37 @@ interface PaymentsTableProps {
   canViewDetails?: boolean;
 }
 
-const PaymentsTable = ({
+interface PaymentsTableSectionProps extends PaymentsTableProps {
+  notEligible?: boolean;
+}
+
+const ineligibilityCauseHeadCell: HeadCell<PaymentList> = {
+  disablePadding: false,
+  label: 'Ineligibility Cause',
+  id: 'ineligibility_cause',
+  numeric: false,
+  disableSort: true,
+};
+
+const PaymentsTableSection = ({
   businessArea,
   paymentPlan,
   permissions,
   canViewDetails = false,
-}: PaymentsTableProps): ReactElement => {
+  notEligible = false,
+}: PaymentsTableSectionProps): ReactElement => {
   const { baseUrl, programId } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const initialFilter = {
-    householdUnicefId: '',
-    individualUnicefId: '',
-    collectorFullName: '',
-    paymentUnicefId: '',
-  };
+  const location = useLocation();
+  const filterKeys = notEligible ? notEligibleFilterKeys : eligibleFilterKeys;
+  const initialFilter = notEligible
+    ? notEligibleInitialFilter
+    : eligibleInitialFilter;
 
   const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
-  const location = useLocation();
   const [page, setPage] = useState(0);
-
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -72,19 +120,20 @@ const PaymentsTable = ({
     () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
-      householdUnicefId: appliedFilter.householdUnicefId || null,
-      individualUnicefId: appliedFilter.individualUnicefId || null,
-      collectorFullName: appliedFilter.collectorFullName || null,
-      paymentUnicefId: appliedFilter.paymentUnicefId || null,
+      householdUnicefId: appliedFilter[filterKeys.householdUnicefId] || null,
+      individualUnicefId: appliedFilter[filterKeys.individualUnicefId] || null,
+      collectorFullName: appliedFilter[filterKeys.collectorFullName] || null,
+      paymentUnicefId: appliedFilter[filterKeys.paymentUnicefId] || null,
+      status:
+        !notEligible && filterKeys.status
+          ? appliedFilter[filterKeys.status] || null
+          : null,
+      ineligibilityCause:
+        notEligible && filterKeys.ineligibilityCause
+          ? appliedFilter[filterKeys.ineligibilityCause] || null
+          : null,
     }),
-    [
-      businessArea,
-      programId,
-      appliedFilter.householdUnicefId,
-      appliedFilter.individualUnicefId,
-      appliedFilter.collectorFullName,
-      appliedFilter.paymentUnicefId,
-    ],
+    [appliedFilter, businessArea, filterKeys, notEligible, programId],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -92,57 +141,39 @@ const PaymentsTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const paymentsListParams = createApiParams(
-    {
-      businessAreaSlug: businessArea,
-      programCode: programId,
-      paymentPlanPk: paymentPlan.id,
-    },
-    queryVariables,
-    { withPagination: true },
-  );
+  const primaryParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    paymentPlanPk: paymentPlan.id,
+  };
+  const paymentsListParams = createApiParams(primaryParams, queryVariables, {
+    withPagination: true,
+  });
+  const listService = notEligible
+    ? RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleList
+    : RestService.restBusinessAreasProgramsPaymentPlansPaymentsList;
   const {
     data: paymentsData,
     isLoading,
     isFetching,
     error,
-  } = useQuery<PaginatedPaymentListList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsList,
-      paymentsListParams,
-    ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
-        paymentsListParams,
-      );
-    },
+  } = useQuery<PaginatedPaymentListList | PaginatedNotEligiblePaymentListList>({
+    queryKey: restQueryKey(listService, paymentsListParams),
+    queryFn: () => listService(paymentsListParams),
     placeholderData: keepPreviousData,
   });
 
-  // Payments count
-  const paymentsCountParams = createApiParams(
-    {
-      businessAreaSlug: businessArea,
-      programCode: programId,
-      paymentPlanPk: paymentPlan.id,
-    },
-    queryVariables,
-  );
+  const paymentsCountParams = createApiParams(primaryParams, queryVariables);
+  const countService = notEligible
+    ? RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve
+    : RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve;
   const { data: paymentsCount } = useQuery<CountResponse>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve,
-      paymentsCountParams,
-    ),
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve(
-        paymentsCountParams,
-      ),
-    // fetch count only on the first page and persist it across pages
+    queryKey: restQueryKey(countService, paymentsCountParams),
+    queryFn: () => countService(paymentsCountParams),
     enabled: !!businessArea && !!paymentPlan?.id && page === 0,
   });
 
   const itemsCount = usePersistedCount(page, paymentsCount);
-
   const replacements = isSocialDctType
     ? {
         individual__unicef_id: (_beneficiaryGroup) =>
@@ -162,8 +193,15 @@ const PaymentsTable = ({
     beneficiaryGroup,
     replacements,
   );
+  const tableHeadCells = notEligible
+    ? adjustedHeadCells.flatMap((headCell) =>
+        headCell.id === 'status'
+          ? [headCell, ineligibilityCauseHeadCell]
+          : [headCell],
+      )
+    : adjustedHeadCells;
 
-  const handleAppliedFilterChange = (newFilter) => {
+  const handleAppliedFilterChange = (newFilter): void => {
     setAppliedFilter(newFilter);
     setShouldScroll(true);
     setPage(0);
@@ -171,17 +209,16 @@ const PaymentsTable = ({
 
   return (
     <>
-      <Box
-        sx={{
-          p: 4,
-        }}
-      >
+      <Box sx={{ p: 4 }}>
         <PaymentsFilters
           filter={filter}
           setFilter={setFilter}
           initialFilter={initialFilter}
           appliedFilter={appliedFilter}
           setAppliedFilter={handleAppliedFilterChange}
+          filterKeys={filterKeys}
+          showStatus={!notEligible}
+          showIneligibilityCause={notEligible}
         />
       </Box>
       <div ref={tableRef}>
@@ -195,12 +232,12 @@ const PaymentsTable = ({
               }}
             >
               <Typography data-cy="table-title" variant="h6">
-                {t('Payee List')}
+                {t(notEligible ? 'Not Eligible Payee List' : 'Payee List')}
               </Typography>
             </StyledBox>
             <UniversalRestTable
               isOnPaper={false}
-              headCells={adjustedHeadCells}
+              headCells={tableHeadCells}
               rowsPerPageOptions={[10, 25, 50]}
               defaultOrderBy="createdAt"
               defaultOrderDirection="desc"
@@ -213,15 +250,14 @@ const PaymentsTable = ({
               itemsCount={itemsCount}
               page={page}
               setPage={setPage}
-              renderRow={(row: PaymentList) => (
+              renderRow={(row: PaymentList | NotEligiblePaymentList) => (
                 <PaymentsTableRow
                   key={row.id}
                   payment={row}
                   canViewDetails={canViewDetails}
-                  onWarningClick={(payment) => {
-                    setDialogPayment(payment);
-                  }}
+                  onWarningClick={(payment) => setDialogPayment(payment)}
                   permissions={permissions}
+                  showIneligibilityCauses={notEligible}
                 />
               )}
             />
@@ -235,6 +271,50 @@ const PaymentsTable = ({
         canViewDetails={canViewDetails}
         baseUrl={baseUrl}
       />
+    </>
+  );
+};
+
+const PaymentsTable = (props: PaymentsTableProps): ReactElement => {
+  const { programId } = useBaseUrl();
+  const profileParams = {
+    businessAreaSlug: props.businessArea,
+    program: programId === 'all' ? undefined : programId,
+  };
+  const { data: profile } = useQuery<Profile>({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersProfileRetrieve,
+      profileParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasUsersProfileRetrieve(profileParams),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+  const notEligibleCountParams = {
+    businessAreaSlug: props.businessArea,
+    programCode: programId,
+    paymentPlanPk: props.paymentPlan.id,
+  };
+  const { data: notEligibleCount } = useQuery<CountResponse>({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve,
+      notEligibleCountParams,
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve(
+        notEligibleCountParams,
+      ),
+    enabled: profile?.isSuperuser === true,
+  });
+
+  return (
+    <>
+      <PaymentsTableSection {...props} />
+      {profile?.isSuperuser === true && (notEligibleCount?.count || 0) > 0 && (
+        <PaymentsTableSection {...props} notEligible />
+      )}
     </>
   );
 };

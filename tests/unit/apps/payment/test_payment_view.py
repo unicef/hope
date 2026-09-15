@@ -112,6 +112,65 @@ def payment_context(
 
 
 @pytest.fixture
+def not_eligible_payment_context(
+    payment_context: dict[str, Any],
+) -> dict[str, Any]:
+    user = payment_context["user"]
+    user.is_superuser = True
+    user.save(update_fields=["is_superuser"])
+    payment = payment_context["payment"]
+    payment.status = Payment.STATUS_NOT_ELIGIBLE
+    payment.conflicted = True
+    payment.save(update_fields=["status", "conflicted"])
+    excluded_payment = PaymentFactory(
+        parent=payment_context["payment_plan"],
+        program=payment_context["program_active"],
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        excluded=True,
+    )
+    invalid_wallet_payment = PaymentFactory(
+        parent=payment_context["payment_plan"],
+        program=payment_context["program_active"],
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        has_valid_wallet=False,
+    )
+    url_kwargs = {
+        "business_area_slug": payment_context["business_area"].slug,
+        "program_code": payment_context["program_active"].code,
+        "payment_plan_pk": payment_context["payment_plan"].pk,
+    }
+    return {
+        **payment_context,
+        "excluded_payment": excluded_payment,
+        "invalid_wallet_payment": invalid_wallet_payment,
+        "url_not_eligible": reverse("api:payments:payments-not-eligible", kwargs=url_kwargs),
+        "url_not_eligible_count": reverse("api:payments:payments-not-eligible-count", kwargs=url_kwargs),
+    }
+
+
+@pytest.fixture
+def authorized_payment_context(
+    payment_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    create_user_role_with_permissions(
+        payment_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_context["business_area"],
+        payment_context["program_active"],
+    )
+    return payment_context
+
+
+@pytest.fixture
+def non_super_not_eligible_payment_context(
+    authorized_payment_context: dict[str, Any],
+) -> dict[str, Any]:
+    Payment.objects.filter(pk=authorized_payment_context["payment"].pk).update(status=Payment.STATUS_NOT_ELIGIBLE)
+    return authorized_payment_context
+
+
+@pytest.fixture
 def payment_people_context(
     api_client: Any,
     business_area: Any,
@@ -421,6 +480,105 @@ def test_filter_by_payment_unicef_id(
     assert len(resp_data["results"]) == 1
     payment = resp_data["results"][0]
     assert payment["unicef_id"] == payment_context["payment"].unicef_id
+
+
+def test_filter_by_raw_payment_status(
+    authorized_payment_context: dict[str, Any],
+) -> None:
+    response = authorized_payment_context["client"].get(
+        authorized_payment_context["url_list"],
+        {"status": Payment.STATUS_SUCCESS},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["id"] == str(authorized_payment_context["payment"].id)
+    assert len(response.json()["results"]) == 1
+
+
+def test_not_eligible_status_is_rejected_by_eligible_payment_filter(
+    authorized_payment_context: dict[str, Any],
+) -> None:
+    response = authorized_payment_context["client"].get(
+        authorized_payment_context["url_list"],
+        {"status": Payment.STATUS_NOT_ELIGIBLE},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_superuser_can_list_not_eligible_payments_and_filter_causes_with_or_logic(
+    not_eligible_payment_context: dict[str, Any],
+) -> None:
+    url = (
+        not_eligible_payment_context["url_not_eligible"]
+        + "?ineligibility_cause=conflicted&ineligibility_cause=invalid_wallet"
+    )
+
+    with CaptureQueriesContext(connection) as captured_queries:
+        response = not_eligible_payment_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(captured_queries) <= 30
+    results = response.json()["results"]
+    assert sorted([results[0]["id"], results[1]["id"]]) == sorted(
+        [
+            str(not_eligible_payment_context["payment"].id),
+            str(not_eligible_payment_context["invalid_wallet_payment"].id),
+        ]
+    )
+
+
+def test_not_eligible_payment_response_exposes_eligibility_flags(
+    not_eligible_payment_context: dict[str, Any],
+) -> None:
+    response = not_eligible_payment_context["client"].get(
+        not_eligible_payment_context["url_not_eligible"] + "?ineligibility_cause=invalid_wallet"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    result = response.json()["results"][0]
+    assert result["id"] == str(not_eligible_payment_context["invalid_wallet_payment"].id)
+    assert result["conflicted"] is False
+    assert result["excluded"] is False
+    assert result["has_valid_wallet"] is False
+
+
+def test_superuser_can_count_not_eligible_payments(
+    not_eligible_payment_context: dict[str, Any],
+) -> None:
+    response = not_eligible_payment_context["client"].get(not_eligible_payment_context["url_not_eligible_count"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"count": 3}
+
+
+@pytest.mark.parametrize("url_name", ["payments-not-eligible", "payments-not-eligible-count"])
+def test_non_superuser_cannot_access_not_eligible_payment_collections(
+    authorized_payment_context: dict[str, Any],
+    url_name: str,
+) -> None:
+    url = reverse(
+        f"api:payments:{url_name}",
+        kwargs={
+            "business_area_slug": authorized_payment_context["business_area"].slug,
+            "program_code": authorized_payment_context["program_active"].code,
+            "payment_plan_pk": authorized_payment_context["payment_plan"].pk,
+        },
+    )
+
+    response = authorized_payment_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_non_superuser_cannot_retrieve_not_eligible_payment(
+    non_super_not_eligible_payment_context: dict[str, Any],
+) -> None:
+    response = non_super_not_eligible_payment_context["client"].get(
+        non_super_not_eligible_payment_context["url_details"]
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_filter_by_individual_unicef_id(

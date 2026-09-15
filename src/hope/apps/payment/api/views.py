@@ -49,6 +49,7 @@ from hope.apps.payment.api.caches import (
     TargetPopulationListKeyConstructor,
 )
 from hope.apps.payment.api.filters import (
+    NotEligiblePaymentSearchFilter,
     PaymentOfficeSearchFilter,
     PaymentPlanFilter,
     PaymentPlanGroupFilter,
@@ -72,6 +73,7 @@ from hope.apps.payment.api.serializers import (
     FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
+    NotEligiblePaymentListSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
@@ -2635,6 +2637,7 @@ class PaymentViewSet(
     lookup_field = "payment_id"
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
+        "not_eligible": NotEligiblePaymentListSerializer,
         "retrieve": PaymentDetailSerializer,
         "revert_mark_as_failed": RevertMarkPaymentAsFailedSerializer,
     }
@@ -2647,6 +2650,14 @@ class PaymentViewSet(
             Permissions.PM_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
         ],
+        "not_eligible": [
+            Permissions.PM_VIEW_DETAILS,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+        ],
+        "not_eligible_count": [
+            Permissions.PM_VIEW_DETAILS,
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+        ],
         "mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
         "revert_mark_as_failed": [Permissions.PM_MARK_PAYMENT_AS_FAILED],
     }
@@ -2655,19 +2666,53 @@ class PaymentViewSet(
 
     def get_object(self) -> Payment:
         # the details page is reached by a plain link with no plan id, so scope to the program instead
+        queryset = Payment.objects.all()
+        if not self.request.user.is_superuser:
+            queryset = queryset.exclude(status=Payment.STATUS_NOT_ELIGIBLE)
         return get_object_or_404(
-            with_payment_related_data(Payment.objects.all()),
+            with_payment_related_data(queryset),
             id=self.kwargs["payment_id"],
             parent__program_cycle__program=self.program,
         )
 
     def get_queryset(self) -> QuerySet:
         parent = self.payment_plan
+        if self.action in ("not_eligible", "not_eligible_count"):
+            if not self.request.user.is_superuser:
+                raise PermissionDenied("Only superusers can view Not Eligible payments.")
+            return with_payment_related_data(parent.payment_items.filter(status=Payment.STATUS_NOT_ELIGIBLE))
         if parent.status == PaymentPlan.Status.OPEN:
             queryset = parent.eligible_payments_with_conflicts
         else:
             queryset = parent.eligible_payments
         return with_payment_related_data(queryset)
+
+    @extend_schema(responses={200: NotEligiblePaymentListSerializer(many=True)})
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="not-eligible",
+        filterset_class=NotEligiblePaymentSearchFilter,
+    )
+    def not_eligible(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            return self.get_paginated_response(self.get_serializer(page, many=True).data)
+        return Response(self.get_serializer(queryset, many=True).data)
+
+    @extend_schema(
+        responses={status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})}
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="not-eligible/count",
+        filterset_class=NotEligiblePaymentSearchFilter,
+    )
+    def not_eligible_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        queryset = self.filter_queryset(self.get_queryset()).order_by()
+        return Response({"count": queryset.count()})
 
     @action(
         detail=True,
