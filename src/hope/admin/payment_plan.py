@@ -157,18 +157,15 @@ def has_payment_instruction_download_permission(request: Any) -> bool:
     return request.user.has_perm(permission)
 
 
-@admin.register(PaymentPlan)
-class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
+class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "name",
         "business_area",
         "program_cycle",
         "status",
-        "use_payment_gateway",
         "background_action_status",
         "build_status",
-        "plan_type",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -176,16 +173,12 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
         ("program_cycle__program__id", ValueFilter),
         ("currency__code", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
-        "use_payment_gateway",
         ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
-    filter_horizontal = ("payment_plan_purposes",)
-    inlines = [FundsCommitmentItemInline, PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
@@ -242,26 +235,10 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
         "total_undelivered_quantity_usd",
         "steficon_targeting_applied_date",
         "steficon_applied_date",
-        "plan_type",
         "export_tag",
         "exclude_household_error",
         "status_date",
     )
-
-    @button(permission="payment.view_paymentplan")
-    def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
-        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
-
-    def frontend_url(self, obj: PaymentPlan) -> str | None:
-        base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
-        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
-            return f"{base}/target-population/{obj.id}"
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
-            return f"{base}/payment-module/followup-payment-plans/{obj.id}"
-        if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
-            return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
-        return f"{base}/payment-module/payment-plans/{obj.id}"
 
     def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> Any:
         request._payment_plan_obj = obj
@@ -282,15 +259,45 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             new_object=obj,
         )
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
+        return is_root(request)
+
+
+@admin.register(PaymentPlan)
+class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
+    list_display = BasePaymentPlanAdmin.list_display + ("use_payment_gateway",)
+    list_filter = BasePaymentPlanAdmin.list_filter + (
+        "use_payment_gateway",
+        ("plan_type", ChoicesFieldComboFilter),
+    )
+    filter_horizontal = ("payment_plan_purposes",)
+    inlines = [FundsCommitmentItemInline, PaymentInstructionInline]
+    exclude = ("plan_type",)
+
+    @button(permission="payment.view_paymentplan")
+    def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def frontend_url(self, obj: PaymentPlan) -> str | None:
+        base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
+        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+            return f"{base}/target-population/{obj.id}"
+        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return f"{base}/payment-module/followup-payment-plans/{obj.id}"
+        if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
+            return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
+        return f"{base}/payment-module/payment-plans/{obj.id}"
+
     def formfield_for_manytomany(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "payment_plan_purposes":
             obj = getattr(request, "_payment_plan_obj", None)
             if obj is not None:
                 kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
-
-    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return is_root(request)
 
     @button(
         visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
