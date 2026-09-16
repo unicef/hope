@@ -6,7 +6,6 @@ from factory.django import DjangoModelFactory
 from hope.models import Feedback, FeedbackMessage, Message, Survey
 
 from .core import BusinessAreaFactory
-from .program import ProgramFactory
 
 
 class FeedbackFactory(DjangoModelFactory):
@@ -35,7 +34,7 @@ class CommunicationMessageFactory(DjangoModelFactory):
     sampling_type = Message.SamplingChoices.FULL_LIST
     full_list_arguments = {"excluded_admin_areas": []}
     business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+    program = factory.SelfAttribute("parent.program")
 
 
 class SurveyFactory(DjangoModelFactory):
@@ -45,4 +44,4 @@ class SurveyFactory(DjangoModelFactory):
     title = factory.Sequence(lambda n: f"Survey {n}")
     category = Survey.CATEGORY_MANUAL
     business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+    program = factory.SelfAttribute("parent.program")

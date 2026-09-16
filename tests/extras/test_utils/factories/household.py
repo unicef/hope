@@ -73,7 +73,7 @@ class HouseholdFactory(DjangoModelFactory):
     last_registration_date = factory.LazyFunction(timezone.now)
     rdi_merge_status = MergeStatusModel.MERGED
     business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+    program = factory.SelfAttribute("parent.program")
 
     @factory.post_generation
     def head_of_household(self, create, extracted, **kwargs):
