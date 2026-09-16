@@ -327,3 +327,32 @@ def test_unwithdraw_calls_adjust_program_size() -> None:
         )
 
     mock_adjust.assert_called_once_with(household.program)
+
+
+def test_withdraw_schedules_population_recalculation(
+    household_with_documents, django_capture_on_commit_callbacks
+) -> None:
+    household = household_with_documents
+
+    with patch(
+        "hope.apps.household.services.bulk_withdraw.recalculate_population_fields_async_task"
+    ) as mock_recalculate:
+        with django_capture_on_commit_callbacks(execute=True):
+            HouseholdBulkWithdrawService(household.program).withdraw(Household.objects.filter(pk=household.pk))
+
+    mock_recalculate.assert_called_once_with(household_ids=[household.pk], program_id=str(household.program.id))
+
+
+def test_unwithdraw_schedules_population_recalculation(
+    household_with_documents, django_capture_on_commit_callbacks
+) -> None:
+    household = household_with_documents
+    HouseholdBulkWithdrawService(household.program).withdraw(Household.objects.filter(pk=household.pk))
+
+    with patch(
+        "hope.apps.household.services.bulk_withdraw.recalculate_population_fields_async_task"
+    ) as mock_recalculate:
+        with django_capture_on_commit_callbacks(execute=True):
+            HouseholdBulkWithdrawService(household.program).unwithdraw(Household.objects.filter(pk=household.pk))
+
+    mock_recalculate.assert_called_once_with(household_ids=[household.pk], program_id=str(household.program.id))
