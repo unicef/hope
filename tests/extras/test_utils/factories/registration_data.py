@@ -53,7 +53,7 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     number_of_households = 1
     imported_by = factory.SubFactory(UserFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
-    program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
+    program = factory.SelfAttribute("parent.program")
 
 
 class BiometricDeduplicationEngineSimilarityPairFactory(DjangoModelFactory):

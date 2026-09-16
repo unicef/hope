@@ -211,7 +211,7 @@ class HouseholdViewSet(
             **self.get_serializer_context(),
             "can_view_fsp_auth_code": request.user.has_perm(
                 Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-                hh.program or hh.business_area,
+                hh.program,
             ),
         }
         page = self.paginate_queryset(payments)
