@@ -139,7 +139,6 @@ class GrievanceNotification:
             self.grievance_ticket.business_area,
             permissions,
             self._program_ids,
-            exclude_staff=True,
         )
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":

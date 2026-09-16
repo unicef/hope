@@ -5,8 +5,8 @@ Reads the timestamp/actor fields on the ticket, so there is no event stream to k
 carries a count and a link to the matching My Tasks preset — never a list of tickets, which also
 means a sensitive ticket's id never reaches an inbox.
 
-One run covers one (business area, recipient timezone, day): the day boundaries are the recipient's
-local midnights, and each run only mails the recipients sitting in that timezone bucket.
+One run covers one (business area, recipient timezone, day), and mails only the recipients in that
+timezone.
 """
 
 from collections import Counter, defaultdict
@@ -24,12 +24,13 @@ from django.utils import timezone
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import latest_local_schedule_time, resolve_timezone_name
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT
+from hope.apps.grievance.filters import program_with_status_exists, without_program_q
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.grievance.utils import my_tasks_url, overdue_q
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions, users_with_permissions_by_program
-from hope.models import User
+from hope.models import Program, User
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -68,6 +69,9 @@ class EmailSpec:
 
 SENSITIVE_LABEL = "Sensitive"
 OTHER_LABEL = "Other"
+
+SENSITIVE_VIEW_PERMISSIONS = [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE]
+OTHER_VIEW_PERMISSIONS = [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]
 
 NEEDS_ASSIGNMENT = EmailSpec(
     key="needs-assignment",
@@ -136,9 +140,19 @@ class DailyDigestService:
             .values_list("timezone", flat=True)
             .distinct()
         )
+        # needs-assignment recipients hold a permission rather than a ticket
+        assigner_timezones = (
+            users_with_permissions(business_area, [Permissions.GRIEVANCE_ASSIGN])
+            .exclude(timezone__isnull=True)
+            .exclude(timezone="")
+            .order_by()
+            .values_list("timezone", flat=True)
+            .distinct()
+        )
         return {
             resolve_timezone_name(business_area=business_area),
             *(str(timezone_name) for timezone_name in user_timezones),
+            *(str(timezone_name) for timezone_name in assigner_timezones),
         }
 
     def __init__(
@@ -183,8 +197,6 @@ class DailyDigestService:
                     continue
                 try:
                     self._build_email(spec, user, sections).send_email()
-                    if spec.throttled:
-                        self._stamp_reminder(user, sections)
                 except Exception:
                     logger.exception(
                         f"Failed to send the {self.digest_date.isoformat()} {spec.subject} "
@@ -193,6 +205,14 @@ class DailyDigestService:
                     failed += 1
                 else:
                     sent_email_keys.add(email_key)
+                    if spec.throttled:
+                        try:
+                            self._stamp_reminder(user, sections)
+                        except Exception:
+                            logger.exception(
+                                f"Failed to stamp the overdue reminder clock for user {user.pk} "
+                                f"after the {self.digest_date.isoformat()} email went out"
+                            )
         logger.info(
             f"Grievance emails for {self.business_area.slug} in {self.timezone_name} on "
             f"{self.digest_date.isoformat()}: {len(sent_email_keys)} sent, {failed} failed"
@@ -200,7 +220,6 @@ class DailyDigestService:
         return sent_email_keys, failed
 
     def _stamp_reminder(self, user: User, sections: list[tuple[Section, int]]) -> None:
-        """Reset the repeat clock on every ticket the email just reported, not only the due ones."""
         now = timezone.now()
         for section, _ in sections:
             self._overdue_tickets(sensitive=section.sensitive).filter(assigned_to=user).update(
@@ -305,17 +324,35 @@ class DailyDigestService:
         )
 
     def _needs_assignment_counts(self) -> tuple[dict[User, int], dict[User, int]]:
-        """Count unassigned tickets per user who can assign them, sensitive and other separately.
-
-        Scoped to the programmes each user holds. A ticket in several of a user's programmes still
-        counts once, hence the id sets. Visibility is resolved once and split by category after, so
-        the permission lookup is repeated neither per programme nor per category.
-        """
+        """Count unassigned tickets per user who can assign them, sensitive and other separately."""
         category_by_ticket_id = dict(self._unassigned_tickets().values_list("id", "category"))
         if not category_by_ticket_id:
             return {}, {}
-        ticket_ids = set(category_by_ticket_id)
+        sensitive_ids = {
+            ticket_id
+            for ticket_id, category in category_by_ticket_id.items()
+            if category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE
+        }
+        visible, visible_sensitive = self._unassigned_visibility(set(category_by_ticket_id), sensitive_ids)
 
+        sensitive_counts: dict[User, int] = {}
+        other_counts: dict[User, int] = {}
+        for user in set(visible) | set(visible_sensitive):
+            sensitive_total = len(visible_sensitive.get(user, ()))
+            if sensitive_total:
+                sensitive_counts[user] = sensitive_total
+            other_total = len(visible.get(user, ()))
+            if other_total:
+                other_counts[user] = other_total
+        return sensitive_counts, other_counts
+
+    def _unassigned_visibility(
+        self, ticket_ids: set[Any], sensitive_ids: set[Any]
+    ) -> tuple[dict[User, set[Any]], dict[User, set[Any]]]:
+        """Which of `ticket_ids` each recipient may see, as two sets: other tickets and sensitive.
+
+        A user is given the tickets of each category only in the programmes where they hold that category's grant.
+        """
         through_model = GrievanceTicket.programs.through
         tickets_by_program: dict[Any, set[Any]] = defaultdict(set)
         for program_id, ticket_id in through_model.objects.filter(grievanceticket_id__in=ticket_ids).values_list(
@@ -323,37 +360,54 @@ class DailyDigestService:
         ):
             tickets_by_program[program_id].add(ticket_id)
 
+        program_ids = list(tickets_by_program)
+        sensitive_viewer_programs = users_with_permissions_by_program(
+            self.business_area, SENSITIVE_VIEW_PERMISSIONS, program_ids
+        )
+        other_viewer_programs = users_with_permissions_by_program(
+            self.business_area, OTHER_VIEW_PERMISSIONS, program_ids
+        )
         visible: dict[User, set[Any]] = defaultdict(set)
-        for user, program_ids in users_with_permissions_by_program(
-            self.business_area, [Permissions.GRIEVANCE_ASSIGN], list(tickets_by_program)
+        visible_sensitive: dict[User, set[Any]] = defaultdict(set)
+        for user, assigned_program_ids in users_with_permissions_by_program(
+            self.business_area, [Permissions.GRIEVANCE_ASSIGN], program_ids
         ).items():
-            for program_id in program_ids:
-                visible[user].update(tickets_by_program[program_id])
-
-        # a ticket belonging to no programme is visible to anyone who can assign in the business area,
-        # matching how the list endpoint scopes them (api/mixins.py:195-204)
-        ticket_ids_without_program = ticket_ids.difference(*tickets_by_program.values())
-        if ticket_ids_without_program:
-            for user in users_with_permissions(self.business_area, [Permissions.GRIEVANCE_ASSIGN]):
-                visible[user].update(ticket_ids_without_program)
-
-        sensitive_ids = {
-            ticket_id
-            for ticket_id, category in category_by_ticket_id.items()
-            if category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE
-        }
-        sensitive_counts: dict[User, int] = {}
-        other_counts: dict[User, int] = {}
-        for user, user_ticket_ids in visible.items():
+            # a run builds id sets for its own timezone bucket only
             if not self._in_timezone_bucket(user.timezone):
                 continue
-            sensitive_total = len(user_ticket_ids & sensitive_ids)
-            if sensitive_total:
-                sensitive_counts[user] = sensitive_total
-            other_total = len(user_ticket_ids) - sensitive_total
-            if other_total:
-                other_counts[user] = other_total
-        return sensitive_counts, other_counts
+            may_view_sensitive_in = sensitive_viewer_programs.get(user, set())
+            may_view_other_in = other_viewer_programs.get(user, set())
+            for program_id in assigned_program_ids:
+                program_ticket_ids = tickets_by_program[program_id]
+                if program_id in may_view_other_in:
+                    visible[user].update(program_ticket_ids - sensitive_ids)
+                if program_id in may_view_sensitive_in:
+                    visible_sensitive[user].update(program_ticket_ids & sensitive_ids)
+
+        self._add_tickets_without_programme(
+            ticket_ids.difference(*tickets_by_program.values()), sensitive_ids, visible, visible_sensitive
+        )
+        return visible, visible_sensitive
+
+    def _add_tickets_without_programme(
+        self,
+        ticket_ids: set[Any],
+        sensitive_ids: set[Any],
+        visible: dict[User, set[Any]],
+        visible_sensitive: dict[User, set[Any]],
+    ) -> None:
+        """Add the tickets that belong to no programme, visible to any assigner in the business area."""
+        if not ticket_ids:
+            return
+        sensitive_viewers = set(users_with_permissions(self.business_area, SENSITIVE_VIEW_PERMISSIONS))
+        other_viewers = set(users_with_permissions(self.business_area, OTHER_VIEW_PERMISSIONS))
+        for user in users_with_permissions(self.business_area, [Permissions.GRIEVANCE_ASSIGN]):
+            if not self._in_timezone_bucket(user.timezone):
+                continue
+            if user in other_viewers:
+                visible[user].update(ticket_ids - sensitive_ids)
+            if user in sensitive_viewers:
+                visible_sensitive[user].update(ticket_ids & sensitive_ids)
 
     def _unassigned_tickets(self) -> "QuerySet[GrievanceTicket]":
         return self._for_business_area().filter(assigned_to__isnull=True).exclude(status=GrievanceTicket.STATUS_CLOSED)
@@ -435,7 +489,9 @@ class DailyDigestService:
         return timezone_filter
 
     def _for_business_area(self) -> "QuerySet[GrievanceTicket]":
+        """Tickets the My Tasks list can show - it hides finished programmes, so the counts do too."""
         return GrievanceTicket.objects.filter(
+            program_with_status_exists(Program.ACTIVE) | without_program_q(),
             business_area=self.business_area,
             business_area__enable_email_notification=True,
         )

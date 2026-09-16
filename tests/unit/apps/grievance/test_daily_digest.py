@@ -420,12 +420,27 @@ def test_emails_use_only_recipients_in_the_requested_timezone(
     assert utc[daily_digest_service.ASSIGNED] == {}
 
 
-def test_recipient_timezone_names_uses_one_query(
+def test_recipient_timezone_names_includes_an_assigner_who_holds_no_ticket(
+    business_area: BusinessArea,
+    program: Program,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    assigner_in_warsaw = UserFactory(email="warsaw.assigner@example.com", timezone="Europe/Warsaw")
+    create_user_role_with_permissions(
+        assigner_in_warsaw, [Permissions.GRIEVANCE_ASSIGN], business_area, program=program
+    )
+
+    # a run is scheduled per timezone, and this user holds no ticket to be found by
+    assert "Europe/Warsaw" in DailyDigestService.recipient_timezone_names(business_area)
+
+
+def test_recipient_timezone_names_uses_a_fixed_number_of_queries(
     business_area: BusinessArea,
     warsaw_assigned_ticket: GrievanceTicket,
     django_assert_num_queries: Any,
 ) -> None:
-    with django_assert_num_queries(1):
+    # One for the users who hold a ticket, one for the users who hold GRIEVANCE_ASSIGN.
+    with django_assert_num_queries(2):
         timezone_names = DailyDigestService.recipient_timezone_names(business_area)
 
     assert timezone_names == {"UTC", "Europe/Warsaw"}
@@ -595,6 +610,23 @@ def test_a_re_run_sends_only_the_email_that_failed(
     assert mock_send.call_count == 1
     assert retried_email_keys == {f"{two_emails_for_one_recipient.pk}:updated"}
     assert retried_failed == 0
+
+
+@freeze_time(NEXT_DAY)
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_a_failed_reminder_stamp_still_records_the_email_as_sent(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+
+    with (
+        patch.object(daily_digest_service.MailjetClient, "send_email"),
+        patch.object(DailyDigestService, "_stamp_reminder", side_effect=Exception("boom")),
+    ):
+        sent_email_keys, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+
+    # The email went out; a re-run must not send it again just because the clock was not stamped.
+    assert sent_email_keys == {f"{assignee.pk}:overdue"}
+    assert failed == 0
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
@@ -934,8 +966,14 @@ def test_bulk_assign_of_already_assigned_tickets_feeds_nothing(
 
 @pytest.fixture
 def assigner(business_area: BusinessArea, program: Program, create_user_role_with_permissions: Callable) -> User:
+    """Can assign, and can see the non-sensitive list - the two grants the list endpoint needs."""
     user = UserFactory(first_name="Ass", last_name="Igner", email="assigner@example.com")
-    create_user_role_with_permissions(user, [Permissions.GRIEVANCE_ASSIGN], business_area, program=program)
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=program,
+    )
     return user
 
 
@@ -956,9 +994,15 @@ def test_unassigned_ticket_is_counted_for_a_user_who_can_assign_in_its_programme
     }
 
 
-def test_unassigned_sensitive_ticket_is_counted_in_the_sensitive_section(
-    business_area: BusinessArea, program: Program, assigner: User
+def test_unassigned_sensitive_ticket_is_counted_for_an_assigner_who_may_see_sensitive(
+    business_area: BusinessArea,
+    program: Program,
+    assigner: User,
+    create_user_role_with_permissions: Callable,
 ) -> None:
+    create_user_role_with_permissions(
+        assigner, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], business_area, program=program, name="sensitive viewer"
+    )
     ticket = GrievanceTicketFactory(
         business_area=business_area,
         assigned_to=None,
@@ -971,6 +1015,42 @@ def test_unassigned_sensitive_ticket_is_counted_in_the_sensitive_section(
 
     assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
         assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[0], 1)]
+    }
+
+
+def test_nothing_is_counted_for_a_user_who_can_assign_but_cannot_see_the_list(
+    business_area: BusinessArea,
+    program: Program,
+    unassigned_ticket: GrievanceTicket,
+    creator: User,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(creator, [Permissions.GRIEVANCE_ASSIGN], business_area, program=program)
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    # GRIEVANCE_ASSIGN opens no list on its own, so there is nothing to tell this user about.
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {}
+
+
+def test_assigner_who_may_not_see_sensitive_still_gets_the_other_count(
+    business_area: BusinessArea,
+    program: Program,
+    assigner: User,
+    unassigned_ticket: GrievanceTicket,
+) -> None:
+    sensitive = GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=None,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+    )
+    sensitive.programs.set([program])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
     }
 
 
@@ -995,7 +1075,12 @@ def test_unassigned_ticket_is_not_counted_for_an_assigner_in_another_programme(
     create_user_role_with_permissions: Callable,
 ) -> None:
     other_program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="other programme")
-    create_user_role_with_permissions(creator, [Permissions.GRIEVANCE_ASSIGN], business_area, program=other_program)
+    create_user_role_with_permissions(
+        creator,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=other_program,
+    )
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
@@ -1031,7 +1116,10 @@ def test_unassigned_ticket_is_counted_for_an_assigner_with_business_area_wide_ac
     create_user_role_with_permissions: Callable,
 ) -> None:
     create_user_role_with_permissions(
-        creator, [Permissions.GRIEVANCE_ASSIGN], business_area, whole_business_area_access=True
+        creator,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        whole_business_area_access=True,
     )
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
@@ -1049,13 +1137,30 @@ def test_unassigned_ticket_is_counted_for_a_user_whose_partner_can_assign(
     actor: User,
     create_partner_role_with_permissions: Callable,
 ) -> None:
-    create_partner_role_with_permissions(partner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=program)
+    create_partner_role_with_permissions(
+        partner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=program,
+    )
 
     emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
     assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
         actor: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
     }
+
+
+def test_unassigned_ticket_in_a_finished_programme_is_not_counted(business_area: BusinessArea, assigner: User) -> None:
+    finished_program = ProgramFactory(business_area=business_area, status=Program.FINISHED, name="finished programme")
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    ticket.programs.set([finished_program])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    # The email links to /programs/all/, which lists active programmes only, so counting this
+    # ticket would point the recipient at a list it cannot appear in.
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {}
 
 
 def test_needs_assignment_does_not_query_per_programme(
@@ -1067,8 +1172,9 @@ def test_needs_assignment_does_not_query_per_programme(
 ) -> None:
     for_second = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="second programme")
     for_third = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="third programme")
-    create_user_role_with_permissions(assigner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=for_second)
-    create_user_role_with_permissions(assigner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=for_third)
+    assigner_permissions = [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]
+    create_user_role_with_permissions(assigner, assigner_permissions, business_area, program=for_second)
+    create_user_role_with_permissions(assigner, assigner_permissions, business_area, program=for_third)
     first_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
     first_ticket.programs.set([program])
     second_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
@@ -1076,7 +1182,7 @@ def test_needs_assignment_does_not_query_per_programme(
     third_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
     third_ticket.programs.set([for_third])
 
-    with django_assert_num_queries(12):
+    with django_assert_num_queries(16):
         emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
     assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
@@ -1103,7 +1209,12 @@ def test_ticket_in_two_of_a_users_programmes_is_counted_once(
     create_user_role_with_permissions: Callable,
 ) -> None:
     second_program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="second programme")
-    create_user_role_with_permissions(assigner, [Permissions.GRIEVANCE_ASSIGN], business_area, program=second_program)
+    create_user_role_with_permissions(
+        assigner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=second_program,
+    )
     ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
     ticket.programs.set([program, second_program])
 

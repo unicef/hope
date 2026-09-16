@@ -43,15 +43,13 @@ def users_with_permissions(
     business_area: "BusinessArea",
     permissions: "Sequence[Permissions | str]",
     programs: "Collection[Any]" = (),
-    *,
-    exclude_staff: bool = False,
 ) -> "QuerySet[User]":
     """Mailable users holding any of `permissions` in `business_area`, directly or through their partner.
 
     Deactivated users and users without an email address are always dropped. `programs` narrows role
     assignments to business-area-wide ones plus those scoped to the given programs; an empty value
-    applies no program restriction. Unless `NOTIFY_INTERNAL_USERS` is on, superusers are dropped and
-    `exclude_staff` additionally drops staff accounts.
+    applies no program restriction. Internal accounts - superusers and staff - are dropped unless
+    `NOTIFY_INTERNAL_USERS` is on.
     """
     role_assignments = _role_assignments(business_area, permissions, programs)
     users = (
@@ -62,11 +60,7 @@ def users_with_permissions(
         .exclude(email="")
     )
     if not config.NOTIFY_INTERNAL_USERS:
-        users = (
-            users.exclude(Q(is_superuser=True) | Q(is_staff=True))
-            if exclude_staff
-            else users.exclude(is_superuser=True)
-        )
+        users = users.exclude(Q(is_superuser=True) | Q(is_staff=True))
     return users.distinct()
 
 
@@ -74,8 +68,6 @@ def users_with_permissions_by_program(
     business_area: "BusinessArea",
     permissions: "Sequence[Permissions | str]",
     programs: "Collection[Any]",
-    *,
-    exclude_staff: bool = False,
 ) -> dict[User, set[Any]]:
     """Map each user from `users_with_permissions` to which of `programs` they cover.
 
@@ -101,5 +93,5 @@ def users_with_permissions_by_program(
 
     return {
         user: programs_by_user_id.get(user.pk, set()) | programs_by_partner_id.get(user.partner_id, set())
-        for user in users_with_permissions(business_area, permissions, program_ids, exclude_staff=exclude_staff)
+        for user in users_with_permissions(business_area, permissions, program_ids)
     }
