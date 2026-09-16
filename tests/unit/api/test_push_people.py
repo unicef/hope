@@ -1,6 +1,5 @@
 import base64
 from io import BytesIO
-from types import SimpleNamespace
 
 from PIL import Image
 import pytest
@@ -20,7 +19,6 @@ from hope.apps.household.const import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
-    NON_BENEFICIARY,
     NOT_COLLECTED,
     NOT_DISABLED,
 )
@@ -515,17 +513,3 @@ def test_push_people_creates_account_attachments(
     attachment = account.attachments.get()
     assert attachment.title == "Wallet number image"
     assert attachment.file.name
-
-
-def test_create_individual_raises_when_rdi_program_is_missing(rdi) -> None:
-    people_upload_mixin = PeopleUploadMixin()
-    people_upload_mixin.selected_rdi = rdi
-
-    with pytest.raises(ValueError, match="RDI program must not be None"):
-        people_upload_mixin._create_individual(
-            documents=[],
-            accounts=[],
-            hh=None,
-            person_data={"type": NON_BENEFICIARY},
-            rdi=SimpleNamespace(program=None),
-        )

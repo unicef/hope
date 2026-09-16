@@ -72,7 +72,6 @@ from hope.apps.payment.api.serializers import (
     FollowUpInstructionListSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
-    PaymentChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanAbortSerializer,
@@ -1485,10 +1484,7 @@ class PaymentPlanViewSet(
             return status_to_perm_map.get(status)
 
         reject_permission = _get_reject_permission(payment_plan.status)
-        if reject_permission and not request.user.has_perm(
-            reject_permission.value,
-            payment_plan.program_cycle.program or payment_plan.business_area,
-        ):
+        if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan.program_cycle.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         data = dict(request.data)
         data["action"] = PaymentPlan.Action.REJECT
@@ -2719,7 +2715,6 @@ class PaymentGlobalViewSet(
     queryset = Payment.objects.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).all()
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
-        "choices": PaymentChoicesSerializer,
     }
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
     filter_backends = (DjangoFilterBackend, OrderingFilter)
@@ -2728,10 +2723,6 @@ class PaymentGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return with_payment_related_data(super().get_queryset()).order_by("-created_at")
-
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return Response(data=self.get_serializer(instance={}).data)
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})
