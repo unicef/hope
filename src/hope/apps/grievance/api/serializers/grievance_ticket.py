@@ -37,7 +37,7 @@ from hope.models import (
     Program,
     User,
 )
-from hope.models.individual import ascii_name_validator
+from hope.models.individual import ascii_name_validator, normalize_latin_name
 
 
 class CreateAccountSerializer(serializers.Serializer):
@@ -424,15 +424,26 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
         return value
 
 
+class LatinNameField(serializers.CharField):
+    """Collapses whitespace before ascii_name_validator runs, so the stored value is clean."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("validators", [ascii_name_validator])
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data: Any) -> str:
+        return normalize_latin_name(super().to_internal_value(data))
+
+
 class AddIndividualDataSerializer(serializers.Serializer):
     full_name = serializers.CharField()
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
-    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
-    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
-    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
-    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    full_name_latin = LatinNameField(required=False, max_length=500)
+    given_name_latin = LatinNameField(required=False, max_length=150)
+    middle_name_latin = LatinNameField(required=False, max_length=150)
+    family_name_latin = LatinNameField(required=False, max_length=150)
     sex = serializers.CharField()
     birth_date = serializers.DateField()
     estimated_birth_date = serializers.BooleanField()
@@ -470,10 +481,10 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     given_name = serializers.CharField(required=False)
     middle_name = serializers.CharField(required=False)
     family_name = serializers.CharField(required=False)
-    full_name_latin = serializers.CharField(required=False, max_length=500, validators=[ascii_name_validator])
-    given_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
-    middle_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
-    family_name_latin = serializers.CharField(required=False, max_length=150, validators=[ascii_name_validator])
+    full_name_latin = LatinNameField(required=False, max_length=500)
+    given_name_latin = LatinNameField(required=False, max_length=150)
+    middle_name_latin = LatinNameField(required=False, max_length=150)
+    family_name_latin = LatinNameField(required=False, max_length=150)
     sex = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
     estimated_birth_date = serializers.BooleanField(required=False)
