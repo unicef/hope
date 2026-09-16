@@ -2,7 +2,6 @@ import logging
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
-from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.urls import reverse
@@ -10,6 +9,7 @@ import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hope.apps.utils.external_urls import frontend_url
 from hope.models import FileTemp, PaymentVerification, PaymentVerificationPlan
 
 if TYPE_CHECKING:
@@ -200,10 +200,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             xlsx_obj.file.save(filename, File(tmp))
 
     def get_email_context(self, user: "User") -> dict:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         payment_verification_id = str(self.payment_verification_plan.id)
         api = reverse("download-payment-verification-plan", args=[payment_verification_id])
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
+        link = frontend_url(api)
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         return {

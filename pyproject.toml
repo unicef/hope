@@ -4,7 +4,7 @@ requires = [ "setuptools" ]
 
 [project]
 name = "hope"
-version = "4.20.0"
+version = "4.21.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
 license = { text = "None" }
@@ -116,7 +116,7 @@ dependencies = [
   "tomli>=2.0.1,<3",
   "update>=0.0.1,<1",
   "urllib3>=1.26.9,<3",
-  "weasyprint>=68",
+  "weasyprint>=70",
 ]
 
 [dependency-groups]

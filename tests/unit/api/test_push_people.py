@@ -26,6 +26,7 @@ from hope.models import (
     Area,
     DataCollectingType,
     DocumentType,
+    PendingAccount,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -474,3 +475,41 @@ def test_push_single_person_stores_country_workspace_id(
     ind = PendingIndividual.objects.filter(registration_data_import=rdi_obj).first()
     assert ind is not None
     assert ind.country_workspace_id == "42"
+
+
+def test_push_people_creates_account_attachments(
+    token_api_client,
+    push_people_url,
+    program,
+    rdi,
+    afghanistan_country,
+    bank_account_type,
+    generic_bank,
+    base64_image,
+) -> None:
+    data = [
+        {
+            "residence_status": "IDP",
+            "country": "AF",
+            "full_name": "Jane Wallet",
+            "birth_date": "2000-01-01",
+            "sex": "FEMALE",
+            "type": "",
+            "program": str(program.id),
+            "accounts": [
+                {
+                    "type": "bank",
+                    "number": "123",
+                    "attachments": [{"title": "Wallet number image", "file": base64_image}],
+                }
+            ],
+        }
+    ]
+
+    response = token_api_client.post(push_people_url, data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    account = PendingAccount.objects.get(individual__full_name="Jane Wallet")
+    attachment = account.attachments.get()
+    assert attachment.title == "Wallet number image"
+    assert attachment.file.name
