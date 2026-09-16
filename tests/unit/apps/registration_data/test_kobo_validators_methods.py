@@ -768,8 +768,10 @@ def test_latin_name_error_accepts_whitespace_variants(
     assert validator._latin_name_error("full_name_latin_i_c", value) is None
 
 
-@pytest.mark.parametrize("value", ["Anna--Kovalska", "Anna'''Kovalska", "Anna - ' - Kovalska", "Anna1"])
-def test_latin_name_error_rejects_invalid_value(validator: KoboProjectImportDataInstanceValidator, value: str) -> None:
+@pytest.mark.parametrize("value", ["Anna--Kovalska", "Anna'''Kovalska", "Anna - ' - Kovalska", "Anna1", 123, 1.5])
+def test_latin_name_error_rejects_invalid_value(
+    validator: KoboProjectImportDataInstanceValidator, value: str | int | float
+) -> None:
     assert validator._latin_name_error("full_name_latin_i_c", value) == {
         "header": "full_name_latin_i_c",
         "message": (

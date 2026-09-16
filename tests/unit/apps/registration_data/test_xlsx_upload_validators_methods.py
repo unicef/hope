@@ -144,9 +144,9 @@ def test_latin_name_error_accepts_whitespace_variants(program: Any, value: str) 
 
 @pytest.mark.parametrize(
     "value",
-    ["Anna--Kovalska", "Anna'''Kovalska", "Anna - ' - Kovalska", "Anna1", "Анна"],
+    ["Anna--Kovalska", "Anna'''Kovalska", "Anna - ' - Kovalska", "Anna1", "Анна", 123, 1.5],
 )
-def test_latin_name_error_rejects_invalid_value(program: Any, value: str) -> None:
+def test_latin_name_error_rejects_invalid_value(program: Any, value: str | int | float) -> None:
     validator = UploadXLSXInstanceValidator(program)
 
     assert validator._latin_name_error("full_name_latin_i_c", value) == {
