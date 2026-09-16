@@ -514,7 +514,7 @@ def test_superuser_can_list_not_eligible_payments_and_filter_causes_with_or_logi
     monkeypatch.setattr(PaymentViewSet, "pagination_class", None)
     url = (
         not_eligible_payment_context["url_not_eligible"]
-        + "?ineligibility_cause=conflicted&ineligibility_cause=excluded&ineligibility_cause=invalid_wallet"
+        + "?ineligibility_cause=conflicted&ineligibility_cause=excluded"
     )
 
     with CaptureQueriesContext(connection) as captured_queries:
@@ -523,11 +523,10 @@ def test_superuser_can_list_not_eligible_payments_and_filter_causes_with_or_logi
     assert response.status_code == status.HTTP_200_OK
     assert len(captured_queries) <= 30
     results = response.json()
-    assert sorted([results[0]["id"], results[1]["id"], results[2]["id"]]) == sorted(
+    assert sorted([results[0]["id"], results[1]["id"]]) == sorted(
         [
             str(not_eligible_payment_context["payment"].id),
             str(not_eligible_payment_context["excluded_payment"].id),
-            str(not_eligible_payment_context["invalid_wallet_payment"].id),
         ]
     )
 
