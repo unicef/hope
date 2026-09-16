@@ -1557,7 +1557,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             user = self.context["request"].user
             can_view = user.has_perm(
                 Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-                obj.program or obj.business_area,
+                obj.program,
             )
         if not can_view:
             return ""

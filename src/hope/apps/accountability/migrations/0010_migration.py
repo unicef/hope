@@ -28,15 +28,4 @@ class Migration(migrations.Migration):
                 to="program.Program",
             ),
         ),
-        migrations.AlterField(
-            model_name="survey",
-            name="program",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=models.deletion.SET_NULL,
-                related_name="surveys",
-                to="program.Program",
-            ),
-        ),
     ]
