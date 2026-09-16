@@ -1225,6 +1225,46 @@ def test_ticket_in_two_of_a_users_programmes_is_counted_once(
     }
 
 
+def test_ticket_without_a_programme_gives_a_sensitive_only_assigner_just_the_sensitive_count(
+    business_area: BusinessArea,
+    program: Program,
+    creator: User,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        creator,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+        business_area,
+        program=program,
+    )
+    GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=None,
+        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+    )
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        creator: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[0], 1)]
+    }
+
+
+def test_assigner_outside_this_runs_timezone_is_skipped_for_a_ticket_with_no_programme(
+    business_area: BusinessArea, assigner: User
+) -> None:
+    assigner.timezone = "Europe/Warsaw"
+    assigner.save(update_fields=("timezone",))
+    GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE, "UTC").build_emails())
+
+    # the Warsaw run mails them instead
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {}
+
+
 def test_ticket_without_a_programme_is_counted_for_anyone_who_can_assign(
     business_area: BusinessArea, assigner: User
 ) -> None:
@@ -1237,7 +1277,7 @@ def test_ticket_without_a_programme_is_counted_for_anyone_who_can_assign(
     }
 
 
-def test_needs_assignment_is_not_counted_for_an_assigner_in_another_timezone(
+def test_assigner_outside_this_runs_timezone_is_skipped_for_a_ticket_in_a_programme(
     business_area: BusinessArea, unassigned_ticket: GrievanceTicket, assigner: User
 ) -> None:
     assigner.timezone = "Europe/Warsaw"
