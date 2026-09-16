@@ -1216,17 +1216,14 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @extend_schema_field(FundsCommitmentSerializer(allow_null=True))
     def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
-        assigned_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj)
-
         group = (
-            FundsCommitmentGroup.objects.filter(
-                funds_commitment_items__in=assigned_items_qs,
-            )
-            .distinct()
+            FundsCommitmentGroup.objects.filter(payment_plan=obj)
             .prefetch_related(
                 Prefetch(
                     "funds_commitment_items",
-                    queryset=assigned_items_qs,
+                    queryset=FundsCommitmentItem.objects.select_related("funds_commitment_group").order_by(
+                        "funds_commitment_item"
+                    ),
                     to_attr="filtered_items",
                 )
             )
@@ -1250,9 +1247,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             return []
 
         available_items_qs = FundsCommitmentItem.objects.filter(
-            Q(payment_plan__isnull=True) | Q(payment_plan=obj),
+            Q(funds_commitment_group__payment_plan__isnull=True) | Q(funds_commitment_group__payment_plan=obj),
             office=obj.business_area,
-        )
+        ).select_related("funds_commitment_group")
 
         groups = (
             FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
@@ -1260,7 +1257,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             .prefetch_related(
                 Prefetch(
                     "funds_commitment_items",
-                    queryset=available_items_qs,
+                    queryset=available_items_qs.order_by("funds_commitment_item"),
                     to_attr="filtered_items",
                 )
             )

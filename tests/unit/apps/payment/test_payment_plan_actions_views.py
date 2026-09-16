@@ -1636,15 +1636,13 @@ def test_assign_funds_commitments(
         funds_commitment_group=group,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=999,
-        payment_plan=None,
     )
     second_funds_commitment_item = FundsCommitmentItemFactory(
         funds_commitment_group=group,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=1000,
-        payment_plan=None,
     )
-    assert funds_commitment_item.payment_plan is None
+    assert group.payment_plan is None
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
@@ -1660,10 +1658,8 @@ def test_assign_funds_commitments(
 
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.json()
-        funds_commitment_item.refresh_from_db()
-        second_funds_commitment_item.refresh_from_db()
-        assert funds_commitment_item.payment_plan_id == payment_plan_actions_context["pp"].pk
-        assert second_funds_commitment_item.payment_plan_id == payment_plan_actions_context["pp"].pk
+        group.refresh_from_db()
+        assert group.payment_plan_id == payment_plan_actions_context["pp"].pk
 
 
 def test_assign_funds_commitments_validation_errors(
@@ -1693,12 +1689,11 @@ def test_assign_funds_commitments_validation_errors(
         status=PaymentPlan.Status.DRAFT,
         created_by=payment_plan_actions_context["user"],
     )
-    group = FundsCommitmentGroupFactory()
+    group = FundsCommitmentGroupFactory(payment_plan=other_pp)
     FundsCommitmentItemFactory(
         funds_commitment_group=group,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=333,
-        payment_plan=other_pp,
     )
 
     response = payment_plan_actions_context["client"].post(
@@ -1714,7 +1709,6 @@ def test_assign_funds_commitments_validation_errors(
         funds_commitment_group=wrong_business_area_group,
         office=None,
         rec_serial_number=2355,
-        payment_plan=None,
     )
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],

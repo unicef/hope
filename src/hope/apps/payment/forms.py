@@ -23,10 +23,15 @@ class VisionFundsCommitmentItemAssignmentForm(forms.Form):
 
     def __init__(self, *args: Any, payment_plan: "PaymentPlan", **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        available_items = FundsCommitmentItem.objects.filter(
-            Q(payment_plan__isnull=True) | Q(payment_plan=payment_plan),
-            office=payment_plan.business_area,
-        ).order_by("funds_commitment_item")
+        available_items = (
+            FundsCommitmentItem.objects.filter(
+                Q(funds_commitment_group__payment_plan__isnull=True)
+                | Q(funds_commitment_group__payment_plan=payment_plan),
+                office=payment_plan.business_area,
+            )
+            .select_related("funds_commitment_group")
+            .order_by("funds_commitment_item")
+        )
         groups = (
             FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items)
             .distinct()
@@ -56,7 +61,7 @@ class VisionFundsCommitmentItemAssignmentForm(forms.Form):
                         "id": item.pk,
                         "number": item.funds_commitment_item,
                         "serialNumber": item.rec_serial_number,
-                        "currency": item.currency_code or "-",
+                        "currency": item.funds_commitment_group.currency_code or "-",
                         "commitmentAmountLocal": str(item.commitment_amount_local or "-"),
                         "totalOpenAmountLocal": str(item.total_open_amount_local or "-"),
                     }

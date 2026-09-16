@@ -173,7 +173,7 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
-from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import (
     Account,
     AccountAttachment,
@@ -1667,21 +1667,29 @@ class PaymentPlanViewSet(
             raise ValidationError("Payment plan must be in review")
 
         funds_commitment_items = list(
-            FundsCommitmentItem.objects.select_for_update().filter(
+            FundsCommitmentItem.objects.select_for_update()
+            .select_related("funds_commitment_group")
+            .filter(
                 rec_serial_number__in=fund_commitment_items_ids,
             )
         )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in funds_commitment_items):
+        if funds_commitment_items and funds_commitment_items[0].funds_commitment_group.payment_plan_id not in {
+            None,
+            payment_plan.pk,
+        }:
             raise ValidationError("Chosen Funds Commitments are already assigned to a different Payment Plan")
         if any(item.office_id != payment_plan.business_area_id for item in funds_commitment_items):
             raise ValidationError("Chosen Funds Commitments have the wrong Business Area")
         if len({item.funds_commitment_group_id for item in funds_commitment_items}) != 1:
             raise ValidationError("Chosen Funds Commitment Items must belong to the same Funds Commitment Group")
 
-        FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
-        FundsCommitmentItem.objects.filter(pk__in=[item.pk for item in funds_commitment_items]).update(
-            payment_plan=payment_plan
-        )
+        if funds_commitment_items:
+            funds_commitment_group = funds_commitment_items[0].funds_commitment_group
+            FundsCommitmentGroup.objects.select_for_update().filter(payment_plan=payment_plan).exclude(
+                pk=funds_commitment_group.pk
+            ).update(payment_plan=None)
+            funds_commitment_group.payment_plan = payment_plan
+            funds_commitment_group.save(update_fields=["payment_plan"])
 
         payment_plan.refresh_from_db()
         return Response(

@@ -75,19 +75,16 @@ class VisionService:
             )
 
         funds_commitment_group = matching_groups[0]
-        items = list(
-            FundsCommitmentItem.objects.select_for_update().filter(funds_commitment_group=funds_commitment_group)
-        )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in items):
+        if funds_commitment_group.payment_plan_id not in {None, payment_plan.pk}:
             raise FundsCommitmentAssignmentError(
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_CONFLICT,
             )
 
         if (
-            FundsCommitmentItem.objects.select_for_update()
+            FundsCommitmentGroup.objects.select_for_update()
             .filter(payment_plan=payment_plan)
-            .exclude(funds_commitment_group=funds_commitment_group)
+            .exclude(pk=funds_commitment_group.pk)
             .exists()
         ):
             raise FundsCommitmentAssignmentError(
@@ -95,10 +92,8 @@ class VisionService:
                 VisionErrorCode.FC_CONFLICT,
             )
 
-        FundsCommitmentItem.objects.filter(
-            pk__in=[item.pk for item in items],
-            payment_plan__isnull=True,
-        ).update(payment_plan=payment_plan)
+        funds_commitment_group.payment_plan = payment_plan
+        funds_commitment_group.save(update_fields=["payment_plan"])
         return funds_commitment_group
 
     @classmethod
@@ -111,7 +106,11 @@ class VisionService:
         if not item_ids:
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
 
-        items = list(FundsCommitmentItem.objects.select_for_update().filter(pk__in=item_ids))
+        items = list(
+            FundsCommitmentItem.objects.select_for_update()
+            .select_related("funds_commitment_group")
+            .filter(pk__in=item_ids)
+        )
         if len(items) != len(item_ids) or any(item.office_id != payment_plan.business_area_id for item in items):
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
         group_ids = {item.funds_commitment_group_id for item in items}
@@ -120,17 +119,17 @@ class VisionService:
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_AMBIGUOUS,
             )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in items):
+        funds_commitment_group = items[0].funds_commitment_group
+        if funds_commitment_group.payment_plan_id not in {None, payment_plan.pk}:
             raise FundsCommitmentAssignmentError(
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_CONFLICT,
             )
 
-        group_id = group_ids.pop()
         if (
-            FundsCommitmentItem.objects.select_for_update()
+            FundsCommitmentGroup.objects.select_for_update()
             .filter(payment_plan=payment_plan)
-            .exclude(funds_commitment_group_id=group_id)
+            .exclude(pk=funds_commitment_group.pk)
             .exists()
         ):
             raise FundsCommitmentAssignmentError(
@@ -138,7 +137,8 @@ class VisionService:
                 VisionErrorCode.FC_CONFLICT,
             )
 
-        FundsCommitmentItem.objects.filter(pk__in=item_ids, payment_plan__isnull=True).update(payment_plan=payment_plan)
+        funds_commitment_group.payment_plan = payment_plan
+        funds_commitment_group.save(update_fields=["payment_plan"])
 
     @classmethod
     def process_callback(

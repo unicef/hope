@@ -9,18 +9,22 @@ from hope.contrib.vision.models import FundsCommitmentItem
 class FundsCommitmentItemAdmin(HOPEModelAdminBase):
     list_display = (
         "rec_serial_number",
-        "business_area",
-        "office",
-        "funds_commitment_item",
         "funds_commitment_group",
+        "funds_commitment_item",
+        "office",
+        "fc_status",
+        "get_fund_display",
+        "wbs_element",
+        "grant_number",
     )
     list_filter = (
         ("office", AutoCompleteFilter),
         ("funds_commitment_group", AutoCompleteFilter),
     )
-    readonly_fields = ("business_area",)
     search_fields = (
         "rec_serial_number",
-        "funds_commitment_number",
+        "funds_commitment_group__funds_commitment_number",
         "funds_commitment_item",
+        "wbs_element",
+        "grant_number",
     )

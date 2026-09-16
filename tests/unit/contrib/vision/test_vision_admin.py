@@ -282,9 +282,9 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
 
     assert response.status_code == 302
     payment_plan.refresh_from_db()
-    funds_commitment_item.refresh_from_db()
+    funds_commitment_group.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.ACCEPTED
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
-    assert funds_commitment_item.payment_plan_id == payment_plan.pk
+    assert funds_commitment_group.payment_plan_id == payment_plan.pk
     mock_exchange_rate_task.assert_called_once()
     mock_notification_task.assert_called_once()
