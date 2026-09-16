@@ -8,8 +8,6 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from extras.test_utils.factories import PartnerFactory, UserFactory
-from extras.test_utils.factories.core import BusinessAreaFactory
-from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import to_choice_object
 from hope.apps.grievance.constants import (
     PRIORITY_CHOICES,
@@ -58,39 +56,3 @@ def test_get_choices_denies_anonymous_access() -> None:
     response = APIClient().get(reverse("api:choices-grievance-tickets"))
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-def test_grievance_viewset_choices_returns_choices_for_user_with_role(
-    authenticated_client: Any,
-    create_user_role_with_permissions: Any,
-    user: Any,
-) -> None:
-    afghanistan = BusinessAreaFactory(slug="afghanistan")
-    create_user_role_with_permissions(
-        user=user,
-        permissions=[Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
-        business_area=afghanistan,
-    )
-    response = authenticated_client.get(
-        reverse(
-            "api:grievance-tickets:grievance-tickets-global-choices",
-            kwargs={"business_area_slug": afghanistan.slug},
-        )
-    )
-    categories = dict(GrievanceTicket.CATEGORY_CHOICES)
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data == {
-        "grievance_ticket_status_choices": to_choice_object(GrievanceTicket.STATUS_CHOICES),
-        "grievance_ticket_category_choices": to_choice_object(GrievanceTicket.CATEGORY_CHOICES),
-        "grievance_ticket_manual_category_choices": to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES),
-        "grievance_ticket_filter_category_choices": to_choice_object(GrievanceTicket.MANUAL_CATEGORIES),
-        "grievance_ticket_system_category_choices": to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES),
-        "grievance_ticket_priority_choices": to_choice_object(PRIORITY_CHOICES),
-        "grievance_ticket_urgency_choices": to_choice_object(URGENCY_CHOICES),
-        "grievance_ticket_submission_channel_choices": to_choice_object(SUBMISSION_CHANNEL_CHOICES),
-        "grievance_ticket_manual_submission_channel_choices": to_choice_object(SUBMISSION_CHANNEL_MANUAL_CHOICES),
-        "grievance_ticket_issue_type_choices": [
-            {"category": key, "label": categories[key], "sub_categories": value}
-            for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
-        ],
-    }

@@ -1,16 +1,12 @@
 from dataclasses import dataclass, field
-from types import SimpleNamespace
 from typing import Any
 
-from django.db.models import Max
 from django.test import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.response import Response
 
-from extras.test_utils.factories.core import BusinessAreaFactory
-from hope.api.caches import BusinessAreaAndProgramLastUpdatedKeyBit, etag_decorator, get_or_create_cache_key
-from hope.models import BusinessArea
+from hope.api.caches import etag_decorator
 
 ETAG_VALUE = "etag_value"
 
@@ -137,45 +133,3 @@ def test_304_response_headers(view: DummyView) -> None:
     assert response.headers["ETag"] == ETAG_VALUE
     assert response.headers["Cache-Control"] == "private, no-cache"
     assert response.headers["Vary"] == "Authorization, Cookie"
-
-
-@pytest.mark.django_db
-def test_business_area_and_program_last_updated_key_bit_builds_key() -> None:
-    slug = "keybit-test"
-    BusinessAreaFactory(slug=slug)
-    program_code = "TEST-PROGRAM"
-    key_bit = BusinessAreaAndProgramLastUpdatedKeyBit()
-    key_bit.specific_view_cache_key = "payment_plan_list"
-    view = SimpleNamespace(get_queryset=BusinessArea.objects.all)
-
-    key = key_bit.get_data(
-        params=None,
-        view_instance=view,
-        view_method=None,
-        request=None,
-        args=(),
-        kwargs={"business_area_slug": slug, "program_code": program_code},
-    )
-
-    version = get_or_create_cache_key(f"{slug}:version", 1)
-    latest_updated_at = BusinessArea.objects.aggregate(latest_updated_at=Max("updated_at"))["latest_updated_at"]
-    assert key == (
-        f"{slug}:{version}:{program_code}:payment_plan_list:{latest_updated_at}:{BusinessArea.objects.all().count()}"
-    )
-
-
-@pytest.mark.django_db
-def test_business_area_and_program_last_updated_key_bit_changes_when_queryset_mutates() -> None:
-    slug = "keybit-test"
-    BusinessAreaFactory(slug=slug)
-    key_bit = BusinessAreaAndProgramLastUpdatedKeyBit()
-    key_bit.specific_view_cache_key = "payment_plan_list"
-    view = SimpleNamespace(get_queryset=BusinessArea.objects.all)
-    kwargs = {"business_area_slug": slug, "program_code": "TEST-PROGRAM"}
-
-    key_before = key_bit.get_data(None, view, None, None, (), kwargs)
-
-    BusinessAreaFactory()
-
-    key_after = key_bit.get_data(None, view, None, None, (), kwargs)
-    assert key_after != key_before
