@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import patch
 
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -299,3 +300,25 @@ def test_household_payments_unknown_ordering_field_falls_back_to_default(
     results = response.json()["results"]
     assert results[0]["unicef_id"] == payments_context["third"].unicef_id
     assert results[2]["unicef_id"] == payments_context["first"].unicef_id
+
+
+@patch("hope.apps.household.api.views.HouseholdViewSet.pagination_class", None)
+def test_household_payments_no_pagination(
+    create_user_role_with_permissions: Any,
+    payments_context: dict[str, Any],
+    payments_url: str,
+) -> None:
+    create_user_role_with_permissions(
+        user=payments_context["user"],
+        permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+        business_area=payments_context["afghanistan"],
+        program=payments_context["program"],
+    )
+
+    response = payments_context["api_client"].get(payments_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()
+    assert isinstance(results, list)
+    assert len(results) == 3
+    assert results[0]["unicef_id"] == payments_context["third"].unicef_id
