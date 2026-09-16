@@ -174,12 +174,16 @@ export function PaymentsTableRow({
               payment.householdUnicefId
             )}
           </TableCell>
-          <TableCell align="left">{payment.householdSize}</TableCell>
+          {!showIneligibilityCauses && (
+            <TableCell align="left">{payment.householdSize}</TableCell>
+          )}
         </>
       )}
-      <TableCell align="left">
-        {renderSomethingOrDash(payment.householdAdmin2)}
-      </TableCell>
+      {!showIneligibilityCauses && (
+        <TableCell align="left">
+          {renderSomethingOrDash(payment.householdAdmin2)}
+        </TableCell>
+      )}
       {!isSocialDctType && (
         <>
           <TableCell align="left">
@@ -195,9 +199,11 @@ export function PaymentsTableRow({
           </TableCell>
         </>
       )}
-      <TableCell align="left">
-        {payment.fspName ? payment.fspName : '-'}
-      </TableCell>
+      {!showIneligibilityCauses && (
+        <TableCell align="left">
+          {payment.fspName ? payment.fspName : '-'}
+        </TableCell>
+      )}
       <TableCell align="left">
         {payment.entitlementQuantity != null &&
         Number(payment.entitlementQuantity) >= 0
@@ -210,9 +216,11 @@ export function PaymentsTableRow({
             )})`
           : '-'}
       </TableCell>
-      <TableCell data-cy="delivered-quantity-cell" align="left">
-        {renderDeliveredQuantity()}
-      </TableCell>
+      {!showIneligibilityCauses && (
+        <TableCell data-cy="delivered-quantity-cell" align="left">
+          {renderDeliveredQuantity()}
+        </TableCell>
+      )}
       <TableCell>
         <StatusBox
           status={payment.status}
@@ -252,12 +260,13 @@ export function PaymentsTableRow({
           )}
         </TableCell>
       )}
-      {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
-        <TableCell data-cy="fsp-auth-code-cell" align="left">
-          {payment.fspAuthCode || '-'}
-        </TableCell>
-      )}
-      <TableCell>{renderMark()}</TableCell>
+      {!showIneligibilityCauses &&
+        hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
+          <TableCell data-cy="fsp-auth-code-cell" align="left">
+            {payment.fspAuthCode || '-'}
+          </TableCell>
+        )}
+      {!showIneligibilityCauses && <TableCell>{renderMark()}</TableCell>}
     </ClickableTableRow>
   );
 }

@@ -164,6 +164,16 @@ def authorized_payment_context(
 
 
 @pytest.fixture
+def distribution_success_payment_context(
+    authorized_payment_context: dict[str, Any],
+) -> dict[str, Any]:
+    payment = authorized_payment_context["payment"]
+    payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    payment.save(update_fields=["status"])
+    return authorized_payment_context
+
+
+@pytest.fixture
 def non_super_not_eligible_payment_context(
     authorized_payment_context: dict[str, Any],
 ) -> dict[str, Any]:
@@ -484,6 +494,19 @@ def test_filter_by_payment_unicef_id(
 
 
 def test_filter_by_raw_payment_status(
+    distribution_success_payment_context: dict[str, Any],
+) -> None:
+    response = distribution_success_payment_context["client"].get(
+        distribution_success_payment_context["url_list"],
+        {"status": Payment.STATUS_DISTRIBUTION_SUCCESS},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["id"] == str(distribution_success_payment_context["payment"].id)
+    assert len(response.json()["results"]) == 1
+
+
+def test_legacy_transaction_successful_status_is_rejected_by_eligible_payment_filter(
     authorized_payment_context: dict[str, Any],
 ) -> None:
     response = authorized_payment_context["client"].get(
@@ -491,9 +514,7 @@ def test_filter_by_raw_payment_status(
         {"status": Payment.STATUS_SUCCESS},
     )
 
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["results"][0]["id"] == str(authorized_payment_context["payment"].id)
-    assert len(response.json()["results"]) == 1
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_not_eligible_status_is_rejected_by_eligible_payment_filter(

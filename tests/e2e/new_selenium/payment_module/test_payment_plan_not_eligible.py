@@ -1,5 +1,6 @@
 import pytest
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 
 from extras.test_utils.factories import (
     DeliveryMechanismFactory,
@@ -45,7 +46,9 @@ def payment_plan_with_not_eligible_and_pending_breakdown(
         parent=payment_plan,
         program=program,
         status=Payment.STATUS_NOT_ELIGIBLE,
+        conflicted=True,
         excluded=True,
+        has_valid_wallet=False,
     )
     return (
         payment_plan,
@@ -78,7 +81,18 @@ def test_not_eligible_table_status_filter_and_pending_breakdown(
     login.wait_for_text(str(sent_to_fsp_payment.unicef_id))
     login.wait_for_text("Not Eligible Payee List")
     login.wait_for_text(str(not_eligible_payment.unicef_id))
+    login.wait_for_text("Hard Conflict")
     login.wait_for_text("Manual Exclusion")
+    login.wait_for_text("Invalid Wallet")
+
+    not_eligible_table = login.wait_for_element_visible('[data-cy="not-eligible-payments-table"]')
+    not_eligible_headers = not_eligible_table.find_element(By.TAG_NAME, "thead").text
+    assert "Household Size" not in not_eligible_headers
+    assert "Administrative Level 2" not in not_eligible_headers
+    assert "FSP" not in not_eligible_headers
+    assert "Delivered Quantity" not in not_eligible_headers
+    assert "FSP Auth Code" not in not_eligible_headers
+    assert "Reconciliation" not in not_eligible_headers
 
     login.wait_for_text("3", '[data-cy="label-Pending"]')
     pending_summary = login.wait_for_element_visible('[data-cy="label-Pending"]')
@@ -92,6 +106,8 @@ def test_not_eligible_table_status_filter_and_pending_breakdown(
     login.wait_for_element_clickable('[data-cy="filter-payment-status"] [role="combobox"]').click()
     login.wait_for_element_visible('ul[role="listbox"]')
     login.assert_element_absent('li[data-value="Not Eligible"]')
+    login.assert_element_absent('li[data-value="Transaction Successful"]')
+    login.wait_for_element_visible('li[data-value="Distribution Successful"]')
     login.wait_for_element_clickable('li[data-value="Pending"]').click()
     login.find_elements('button[data-cy="button-filters-apply"]')[0].click()
 

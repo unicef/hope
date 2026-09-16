@@ -85,6 +85,15 @@ const ineligibilityCauseHeadCell: HeadCell<PaymentList> = {
   disableSort: true,
 };
 
+const notEligibleHiddenColumns = [
+  'household__size',
+  'household__admin2__name',
+  'financial_service_provider__name',
+  'delivered_quantity',
+  'fsp_auth_code',
+  'reconciliation_rank',
+];
+
 const PaymentsTableSection = ({
   businessArea,
   paymentPlan,
@@ -194,11 +203,13 @@ const PaymentsTableSection = ({
     replacements,
   );
   const tableHeadCells = notEligible
-    ? adjustedHeadCells.flatMap((headCell) =>
-        headCell.id === 'status'
-          ? [headCell, ineligibilityCauseHeadCell]
-          : [headCell],
-      )
+    ? adjustedHeadCells
+        .filter((headCell) => !notEligibleHiddenColumns.includes(headCell.id))
+        .flatMap((headCell) =>
+          headCell.id === 'status'
+            ? [headCell, ineligibilityCauseHeadCell]
+            : [headCell],
+        )
     : adjustedHeadCells;
 
   const handleAppliedFilterChange = (newFilter): void => {
@@ -221,7 +232,14 @@ const PaymentsTableSection = ({
           showIneligibilityCause={notEligible}
         />
       </Box>
-      <div ref={tableRef}>
+      <div
+        ref={tableRef}
+        data-cy={
+          notEligible
+            ? 'not-eligible-payments-table'
+            : 'eligible-payments-table'
+        }
+      >
         <TableWrapper>
           <Paper>
             <StyledBox

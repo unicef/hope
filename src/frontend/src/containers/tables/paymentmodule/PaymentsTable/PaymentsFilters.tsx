@@ -135,7 +135,11 @@ export function PaymentsFilters({
               dataCy="filter-payment-status"
             >
               {Object.values(PaymentStatusEnum)
-                .filter((status) => status !== PaymentStatusEnum.NOT_ELIGIBLE)
+                .filter(
+                  (status) =>
+                    status !== PaymentStatusEnum.NOT_ELIGIBLE &&
+                    status !== PaymentStatusEnum.TRANSACTION_SUCCESSFUL,
+                )
                 .map((status) => (
                   <MenuItem key={status} value={status}>
                     {t(status)}

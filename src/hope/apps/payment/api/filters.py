@@ -292,7 +292,7 @@ class StableOrderingFilter(OrderingFilter):
 
 
 PAYMENT_STATUS_FILTER_CHOICES = tuple(
-    choice for choice in Payment.STATUS_CHOICE if choice[0] != Payment.STATUS_NOT_ELIGIBLE
+    choice for choice in Payment.STATUS_CHOICE if choice[0] not in (Payment.STATUS_NOT_ELIGIBLE, Payment.STATUS_SUCCESS)
 )
 INELIGIBILITY_CAUSE_CHOICES = (
     ("conflicted", "Hard Conflict"),
