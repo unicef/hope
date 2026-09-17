@@ -1237,6 +1237,66 @@ def test_needs_assignment_does_not_query_per_programme(
     }
 
 
+def test_an_internal_assigner_is_skipped_unless_internal_notifications_are_on(
+    business_area: BusinessArea,
+    program: Program,
+    unassigned_ticket: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    staff_assigner = UserFactory(is_staff=True, email="staff@example.com")
+    create_user_role_with_permissions(
+        staff_assigner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=program,
+    )
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {}
+
+
+@override_config(NOTIFY_INTERNAL_USERS=True)
+def test_an_internal_assigner_is_counted_when_internal_notifications_are_on(
+    business_area: BusinessArea,
+    program: Program,
+    unassigned_ticket: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    staff_assigner = UserFactory(is_staff=True, email="staff@example.com")
+    create_user_role_with_permissions(
+        staff_assigner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=program,
+    )
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        staff_assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
+    }
+
+
+def test_a_ticket_in_no_programme_is_counted_for_an_assigner_in_a_business_area_with_no_programmes(
+    business_area: BusinessArea, create_user_role_with_permissions: Callable
+) -> None:
+    assigner = UserFactory(first_name="No", last_name="Programmes", email="no-programmes@example.com")
+    create_user_role_with_permissions(
+        assigner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        whole_business_area_access=True,
+    )
+    GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
+    }
+
+
 def test_a_ticket_in_two_programmes_is_counted_once_for_needs_assignment(
     business_area: BusinessArea,
     assigner: User,
