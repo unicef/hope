@@ -67,7 +67,8 @@ def document(individual: Any) -> Any:
 
 @pytest.fixture
 def supporting_document(payment_plan: Any, tmp_path: Any) -> Any:
-    # An isolated media root, so the stored name cannot pick up a suffix from an earlier run.
+    # An isolated media root: a file of the same name left by an earlier test run would otherwise
+    # make storage append a suffix to the stored name.
     with override_settings(MEDIA_ROOT=str(tmp_path)):
         yield PaymentPlanSupportingDocumentFactory(
             payment_plan=payment_plan,
@@ -85,7 +86,8 @@ def file_temp_for_payment_plan(payment_plan: Any) -> Any:
 
 @pytest.fixture
 def long_named_supporting_document(payment_plan: Any, tmp_path: Any) -> Any:
-    # An isolated media root, so the stored name cannot pick up a suffix from an earlier run.
+    # An isolated media root: a file of the same name left by an earlier test run would otherwise
+    # make storage append a suffix to the stored name.
     with override_settings(MEDIA_ROOT=str(tmp_path)):
         yield PaymentPlanSupportingDocumentFactory(
             payment_plan=payment_plan,
@@ -157,7 +159,8 @@ def file_temp_without_owner() -> Any:
 
 @pytest.fixture
 def storage_file(business_area: Any, tmp_path: Any) -> Any:
-    # An isolated media root, so the stored name cannot pick up a suffix from an earlier run.
+    # An isolated media root: a file of the same name left by an earlier test run would otherwise
+    # make storage append a suffix to the stored name.
     with override_settings(MEDIA_ROOT=str(tmp_path)):
         with freeze_time("2026-09-09 12:00:00"):
             file = StorageFileFactory(

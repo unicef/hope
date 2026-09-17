@@ -73,14 +73,14 @@ class AccountPayload:
     data_fields: list[AccountPayloadField]
 
 
-def _handle_photo_field(new_individual_data: dict, owner: "Model | None" = None) -> None:
+def _handle_photo_field(new_individual_data: dict, scope_of: "Model | None" = None) -> None:
     _not_provided = object()
     photo = new_individual_data.pop("photo", _not_provided)
     if photo is not _not_provided:
         if photo is None:
             new_individual_data["photo"] = ""
         else:
-            saved_photo = handle_photo(photo, None, owner)
+            saved_photo = handle_photo(photo, None, scope_of)
             if saved_photo:
                 new_individual_data["photo"] = saved_photo
 
@@ -103,11 +103,11 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
-        owner = get_program(self.grievance_ticket) or self.grievance_ticket
-        _handle_photo_field(individual_data, owner)
+        scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
+        _handle_photo_field(individual_data, scope_of)
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals", owner)
+        save_images(flex_fields, "individuals", scope_of)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
@@ -125,7 +125,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document, owner), "approve_status": False} for document in documents
+            {"value": handle_document(document, scope_of), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove
@@ -189,10 +189,10 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
-        owner = get_program(self.grievance_ticket) or self.grievance_ticket
-        _handle_photo_field(new_individual_data, owner)
+        scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
+        _handle_photo_field(new_individual_data, scope_of)
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals", owner)
+        save_images(flex_fields, "individuals", scope_of)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
@@ -211,7 +211,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document, owner), "approve_status": False} for document in documents
+            {"value": handle_document(document, scope_of), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove

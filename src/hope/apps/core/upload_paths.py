@@ -16,15 +16,14 @@ UNASSIGNED_SEGMENT = "_unassigned"
 
 # Mirrors the max_length declared on every FileField that uploads through this module.
 MAX_NAME_LENGTH = 255
-# Room kept free for the underscore plus 7 random characters a storage backend appends when
-# the it is set to prevent duplicated names of files
-ALTERNATIVE_NAME_LENGTH = 8
+# Room for the "_xxxxxxx" suffix FileSystemStorage appends when a name is already taken.
+COLLISION_SUFFIX_LENGTH = 8
 
 DEFAULT_PROGRAM_PATH = "program"
 DEFAULT_BUSINESS_AREA_SLUG_PATH = "business_area.slug"
 
-# Models whose programme is not reachable as `instance.program`.
-PROGRAM_PATH = {
+# Models whose programme is not reachable as `instance.program`; the value is the path to it.
+PROGRAM_PATHS = {
     "grievance.GrievanceDocument": "grievance_ticket.programs",
     "grievance.GrievanceTicket": "programs",
     "household.Document": "individual.program",
@@ -36,11 +35,13 @@ PROGRAM_PATH = {
     "periodic_data_update.PDUXlsxUpload": "template.program",
 }
 
-# Models that take the programme of whatever they are attached to.
-OWNER_PATH = {"core.FileTemp": "content_object"}
+# Models filed under the programme of the object they are attached to. The value leads to that
+# object, which is then resolved like any other instance.
+OWNER_PATHS = {"core.FileTemp": "content_object"}
 
-# Models whose business area slug is not reachable as `instance.business_area.slug`.
-BUSINESS_AREA_SLUG_PATH = {
+# Models whose business area slug is not reachable as `instance.business_area.slug`; the value
+# is the path to it.
+BUSINESS_AREA_SLUG_PATHS = {
     "grievance.GrievanceDocument": "grievance_ticket.business_area.slug",
     "registration_data.ImportData": "business_area_slug",
 }
@@ -48,14 +49,16 @@ BUSINESS_AREA_SLUG_PATH = {
 _UNSAFE_SEGMENT_CHARS = re.compile(r"[^A-Za-z0-9_-]")
 
 
-def _segment(value: str | None, fallback: str) -> str:
+def _clean_segment(value: str | None, fallback: str) -> str:
+    """Sanitise one directory segment; return `fallback` when nothing usable is left."""
     cleaned = _UNSAFE_SEGMENT_CHARS.sub("_", value or "")
     return cleaned if cleaned.strip("_") else fallback
 
 
-def _fit(prefix: str, filename: str) -> str:
+def _fit_filename(prefix: str, filename: str) -> str:
+    """Trim the filename so `prefix/filename` fits the column, keeping the extension."""
     name = os.path.basename(filename.replace("\\", "/"))
-    max_filename_length = max(MAX_NAME_LENGTH - len(prefix) - len("/") - ALTERNATIVE_NAME_LENGTH, 1)
+    max_filename_length = max(MAX_NAME_LENGTH - len(prefix) - len("/") - COLLISION_SUFFIX_LENGTH, 1)
     if len(name) <= max_filename_length:
         return name
     root, extension = os.path.splitext(name)
@@ -79,12 +82,12 @@ def build_upload_path(
     """
     directories = [str(year or timezone.localdate().year)]
     if business_area_slug:
-        directories.append(_segment(business_area_slug, UNASSIGNED_SEGMENT))
-        directories.append(_segment(program_code, UNASSIGNED_SEGMENT))
+        directories.append(_clean_segment(business_area_slug, UNASSIGNED_SEGMENT))
+        directories.append(_clean_segment(program_code, UNASSIGNED_SEGMENT))
     else:
         directories.append(GLOBAL_SEGMENT)
     prefix = "/".join(directories)
-    return f"{prefix}/{_fit(prefix, filename)}"
+    return f"{prefix}/{_fit_filename(prefix, filename)}"
 
 
 def _registered_path(registry: dict[str, str], model: type[Any]) -> str | None:
@@ -111,13 +114,13 @@ def get_program(instance: Any) -> "Program | None":
         return None
     if isinstance(instance, Program):
         return instance
-    if owner_path := _registered_path(OWNER_PATH, type(instance)):
+    if owner_path := _registered_path(OWNER_PATHS, type(instance)):
         try:
             owner = nested_getattr(instance, owner_path, None)
         except (ObjectDoesNotExist, ValidationError, ValueError, TypeError):
             return None
         return get_program(owner)
-    program = nested_getattr(instance, _registered_path(PROGRAM_PATH, type(instance)) or DEFAULT_PROGRAM_PATH, None)
+    program = nested_getattr(instance, _registered_path(PROGRAM_PATHS, type(instance)) or DEFAULT_PROGRAM_PATH, None)
     if isinstance(program, Manager):
         return program.order_by("id").first()
     return program
@@ -126,14 +129,17 @@ def get_program(instance: Any) -> "Program | None":
 def get_business_area_slug(instance: Any) -> str | None:
     if instance is None:
         return None
-    path = _registered_path(BUSINESS_AREA_SLUG_PATH, type(instance)) or DEFAULT_BUSINESS_AREA_SLUG_PATH
+    path = _registered_path(BUSINESS_AREA_SLUG_PATHS, type(instance)) or DEFAULT_BUSINESS_AREA_SLUG_PATH
     return nested_getattr(instance, path, None)
 
 
 def upload_path(instance: Any, filename: str) -> str:
-    """Resolve the storage path for a file belonging to `instance`.
+    """Resolve the storage path of `filename` from the scope of `instance`.
 
-    Used on filed fields to resolve path or when writing to storage directly to match intended path
+    Files land under `<programme start year>/<business area>/<programme code>/`, or under
+    `<upload year>/<business area>/_unassigned/` and `<upload year>/_global/` when `instance`
+    reaches no programme or no business area. Set as the `upload_to` of every file field, and
+    called the same way before `default_storage.save` wherever a file is written directly.
     """
     program = get_program(instance)
     if program is None:

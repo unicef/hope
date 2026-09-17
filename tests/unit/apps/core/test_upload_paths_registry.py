@@ -1,4 +1,4 @@
-"""Checks that the project as a whole still conforms to the upload path resolver."""
+"""Checks that every file field uses the upload path resolver and every registry path points at real fields."""
 
 from typing import Any
 
@@ -7,9 +7,9 @@ from django.db import models
 import pytest
 
 from hope.apps.core.upload_paths import (
-    BUSINESS_AREA_SLUG_PATH,
-    OWNER_PATH,
-    PROGRAM_PATH,
+    BUSINESS_AREA_SLUG_PATHS,
+    OWNER_PATHS,
+    PROGRAM_PATHS,
     upload_path,
 )
 from hope.models.program import Program
@@ -76,18 +76,18 @@ def _field_at(label: str, path: str) -> Any:
     return meta.get_field(last)
 
 
-@pytest.mark.parametrize(("label", "path"), sorted(PROGRAM_PATH.items()))
+@pytest.mark.parametrize(("label", "path"), sorted(PROGRAM_PATHS.items()))
 def test_every_program_path_ends_at_the_programme(label: str, path: str) -> None:
     assert _field_at(label, path).related_model is Program
 
 
-@pytest.mark.parametrize(("label", "path"), sorted(OWNER_PATH.items()))
+@pytest.mark.parametrize(("label", "path"), sorted(OWNER_PATHS.items()))
 def test_every_owner_path_ends_at_a_relation(label: str, path: str) -> None:
     """An owner is another object for the resolver to read in turn, not a value."""
     assert _field_at(label, path).is_relation
 
 
-@pytest.mark.parametrize(("label", "path"), sorted(BUSINESS_AREA_SLUG_PATH.items()))
+@pytest.mark.parametrize(("label", "path"), sorted(BUSINESS_AREA_SLUG_PATHS.items()))
 def test_every_business_area_slug_path_ends_at_the_slug(label: str, path: str) -> None:
     """A path stopping a segment short, at the business area itself, hands the resolver an object
     where it expects text.
@@ -96,7 +96,9 @@ def test_every_business_area_slug_path_ends_at_the_slug(label: str, path: str) -
 
 
 def test_every_file_field_uploads_through_the_resolver() -> None:
-    """A file field declared with any other `upload_to` writes outside the folder structure, unless listed."""
+    """A file field with any other `upload_to` writes outside the folder structure, unless it is in
+    `FIELDS_WITH_THEIR_OWN_LAYOUT`.
+    """
     skipping_the_resolver = {
         f"{field.model._meta.label}.{field.name}"
         for model in apps.get_models()
@@ -115,9 +117,10 @@ def test_every_model_storing_an_uploaded_file_is_listed_here() -> None:
 def test_only_the_scopeless_models_have_no_scope_declared() -> None:
     """A model with no scope declared files every upload into the shared `_global` folder."""
     # A model has a scope declared when one of the three registries covers it, under its own label
-    # or an ancestor's, or when it carries the attribute a default path starts from. A declared
-    # route is not a guarantee that it resolves against a real object.
-    registered = {*PROGRAM_PATH, *OWNER_PATH, *BUSINESS_AREA_SLUG_PATH}
+    # or an ancestor's, or when it has a `program` or `business_area` attribute, where the default
+    # paths start. Only the declaration is checked here; whether it resolves is covered by the
+    # resolver tests.
+    registered = {*PROGRAM_PATHS, *OWNER_PATHS, *BUSINESS_AREA_SLUG_PATHS}
 
     scopeless = {
         model._meta.label

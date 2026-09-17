@@ -431,29 +431,29 @@ def generate_filename() -> str:
 
 
 def handle_photo(
-    photo: InMemoryUploadedFile | str | None, photoraw: str | None, owner: "Model | None" = None
+    photo: InMemoryUploadedFile | str | None, photoraw: str | None, scope_of: "Model | None" = None
 ) -> str | None:
     if isinstance(photo, InMemoryUploadedFile):
-        return default_storage.save(upload_path(owner, f"{generate_filename()}.jpg"), photo)
+        return default_storage.save(upload_path(scope_of, f"{generate_filename()}.jpg"), photo)
     if isinstance(photo, str):
         return photoraw
     return None
 
 
-def handle_document(document: dict, owner: "Model | None" = None) -> dict:
+def handle_document(document: dict, scope_of: "Model | None" = None) -> dict:
     # photo is photo URL and raw photo is just name
     photo = document.pop("new_photo") if "new_photo" in document else document.get("photo")
-    photo_name = handle_photo(photo, document.get("photo"), owner)
+    photo_name = handle_photo(photo, document.get("photo"), scope_of)
     document["photo"] = default_storage.url(photo_name) if photo else None
     document["photoraw"] = photo_name if photo else None
     return document
 
 
-def handle_documents(documents: list[dict], owner: "Model | None" = None) -> list[dict]:
-    return [handle_document(document, owner) for document in documents]
+def handle_documents(documents: list[dict], scope_of: "Model | None" = None) -> list[dict]:
+    return [handle_document(document, scope_of) for document in documents]
 
 
-def save_images(flex_fields: dict, associated_with: str, owner: "Model | None" = None) -> None:
+def save_images(flex_fields: dict, associated_with: str, scope_of: "Model | None" = None) -> None:
     if associated_with not in ("households", "individuals"):
         logger.warning("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
@@ -469,7 +469,9 @@ def save_images(flex_fields: dict, associated_with: str, owner: "Model | None" =
         if flex_field["type"] == TYPE_IMAGE:
             if isinstance(value, InMemoryUploadedFile):
                 file_name = "".join(secrets.choice(string.ascii_uppercase + string.digits))
-                flex_fields[name] = default_storage.save(upload_path(owner, f"{file_name}-{timezone.now()}.jpg"), value)
+                flex_fields[name] = default_storage.save(
+                    upload_path(scope_of, f"{file_name}-{timezone.now()}.jpg"), value
+                )
             elif isinstance(value, str):
                 file_name = value.replace(default_storage.base_url, "")
                 unquoted_value = urllib.parse.unquote(file_name)

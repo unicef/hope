@@ -45,19 +45,19 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_date_string(individual_data, "birth_date")
-        owner = get_program(self.grievance_ticket) or self.grievance_ticket
+        scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
         # Handle photo field
         photo = individual_data.pop("photo", None)
         if photo is not None:
-            saved_photo = handle_photo(photo, None, owner)
+            saved_photo = handle_photo(photo, None, scope_of)
             if saved_photo:
                 individual_data["photo"] = saved_photo
         individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals", owner)
+        save_images(flex_fields, "individuals", scope_of)
         individual_data["flex_fields"] = flex_fields
-        individual_data["documents"] = handle_documents(documents, owner)
+        individual_data["documents"] = handle_documents(documents, scope_of)
         ticket_add_individual_details = TicketAddIndividualDetails(
             individual_data=individual_data,
             household=household,
@@ -78,11 +78,11 @@ class AddIndividualService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no")
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_date_string(new_individual_data, "birth_date")
-        owner = get_program(self.grievance_ticket) or self.grievance_ticket
+        scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
         # Handle photo field
         photo = new_individual_data.pop("photo", None)
         if photo is not None:
-            saved_photo = handle_photo(photo, None, owner)
+            saved_photo = handle_photo(photo, None, scope_of)
             if saved_photo:
                 new_individual_data["photo"] = saved_photo
         new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
@@ -90,9 +90,9 @@ class AddIndividualService(DataChangeService):
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
         }
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals", owner)
+        save_images(flex_fields, "individuals", scope_of)
         new_individual_data["flex_fields"] = flex_fields
-        new_individual_data["documents"] = handle_documents(documents, owner)
+        new_individual_data["documents"] = handle_documents(documents, scope_of)
         ticket_details.individual_data = new_individual_data
         ticket_details.approve_status = False
         ticket_details.save()

@@ -270,7 +270,7 @@ class HandleFlexFieldsMixin:
         flex_fields: dict | None,
         associated_with: int,
         file_prefix: str = "",
-        owner: "Model | None" = None,
+        scope_of: "Model | None" = None,
     ) -> list[str]:
         """Process IMAGE type flex fields: convert base64 to storage path.
 
@@ -294,7 +294,7 @@ class HandleFlexFieldsMixin:
             if not photo_file:
                 continue
 
-            saved_path = default_storage.save(upload_path(owner, photo_file.name), photo_file)
+            saved_path = default_storage.save(upload_path(scope_of, photo_file.name), photo_file)
             flex_fields[field_name] = saved_path
             saved_paths.append(saved_path)
 
