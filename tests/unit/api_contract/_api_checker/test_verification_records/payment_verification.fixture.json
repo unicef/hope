@@ -444,7 +444,6 @@
                     "version": 1735688653315202,
                     "name": "RDI 0",
                     "status": "MERGED",
-                    "deduplication_engine_status": null,
                     "business_area": "7dedb4da-fee1-4b5a-b06a-b2d123a89990",
                     "program": "6485040e-3faf-4d2f-a405-0cce536b4a0d",
                     "import_date": "2025-01-01T00:00:00Z",
