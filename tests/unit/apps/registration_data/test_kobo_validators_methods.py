@@ -758,6 +758,28 @@ def test_get_field_type_error(
     assert result == expected
 
 
+@pytest.mark.parametrize(
+    "value",
+    ["Anna Kovalska", "  Anna Kovalska  ", "Anna   Kovalska", "Anna\nKovalska", "Anna\tKovalska", "Anna\xa0Kovalska"],
+)
+def test_latin_name_error_accepts_whitespace_variants(
+    validator: KoboProjectImportDataInstanceValidator, value: str
+) -> None:
+    assert validator._latin_name_error("full_name_latin_i_c", value) is None
+
+
+@pytest.mark.parametrize("value", ["Anna--Kovalska", "Anna'''Kovalska", "Anna - ' - Kovalska", "Anna1", 123, 1.5])
+def test_latin_name_error_rejects_invalid_value(
+    validator: KoboProjectImportDataInstanceValidator, value: str | int | float
+) -> None:
+    assert validator._latin_name_error("full_name_latin_i_c", value) == {
+        "header": "full_name_latin_i_c",
+        "message": (
+            f"invalid_name, Only ASCII letters, spaces, hyphens, and apostrophes are allowed., Value provided: {value}"
+        ),
+    }
+
+
 def test_validate_everything(
     validator: KoboProjectImportDataInstanceValidator,
     business_area: object,
