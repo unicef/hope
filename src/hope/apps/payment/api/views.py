@@ -2650,6 +2650,7 @@ class PaymentViewSet(
             Permissions.PM_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
         ],
+        # Both actions need a functional permission for BaseRestPermission; get_queryset adds the superuser-only gate.
         "not_eligible": [
             Permissions.PM_VIEW_DETAILS,
             Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
@@ -2695,11 +2696,7 @@ class PaymentViewSet(
         filterset_class=NotEligiblePaymentSearchFilter,
     )
     def not_eligible(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            return self.get_paginated_response(self.get_serializer(page, many=True).data)
-        return Response(self.get_serializer(queryset, many=True).data)
+        return self.list(request, *args, **kwargs)
 
     @extend_schema(
         responses={status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})}
@@ -2765,7 +2762,8 @@ class PaymentGlobalViewSet(
     program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
-        return with_payment_related_data(super().get_queryset()).order_by("-created_at")
+        queryset = super().get_queryset().eligible()
+        return with_payment_related_data(queryset).order_by("-created_at")
 
 
 @extend_schema(responses={200: FspChoicesSerializer(many=True)})
