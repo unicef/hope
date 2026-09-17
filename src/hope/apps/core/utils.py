@@ -17,6 +17,7 @@ from typing import (
     Generator,
     Iterable,
     Optional,
+    cast,
 )
 
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -45,10 +46,8 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    def __contains__(  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
-        self, key: str, *args: Any, **kwargs: Any
-    ) -> bool:
-        return key.casefold() in (element.casefold() for element in self)
+    def __contains__(self, key: object) -> bool:
+        return cast("str", key).casefold() in (element.casefold() for element in self)
 
 
 def unique_slugify(

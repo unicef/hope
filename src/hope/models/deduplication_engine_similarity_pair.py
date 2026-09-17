@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 IndividualIdField = Literal["country_workspace_id", "id"]
 
 
-class DeduplicationEngineSimilarityPair(models.Model):
+class BiometricDedupeSimilarityPair(models.Model):
     class StatusCode(models.TextChoices):
         STATUS_200 = "200", "Deduplication success"
         STATUS_404 = "404", "No file found"
@@ -26,7 +26,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
 
         @staticmethod
         def _status_code_choices() -> list[tuple[str, str]]:
-            return DeduplicationEngineSimilarityPair.StatusCode.choices
+            return BiometricDedupeSimilarityPair.StatusCode.choices
 
         @classmethod
         def photo_error_codes(cls) -> tuple[str, ...]:
@@ -88,7 +88,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
         id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_field_name, program)
 
-        duplicates: list[DeduplicationEngineSimilarityPair] = []
+        duplicates: list[BiometricDedupeSimilarityPair] = []
         for pair in duplicates_data:
             if not (pair.first or pair.second):
                 logger.warning("Dedup Engine Findings, both Individuals empty")
@@ -149,6 +149,8 @@ class DeduplicationEngineSimilarityPair(models.Model):
             str(key): str(pk)
             for key, pk in Individual.all_objects.filter(
                 program=program,
+                is_removed=False,
+                withdrawn=False,
                 **{f"{id_field_name}__in": unique_ids},
             ).values_list(id_field_name, "id")
         }
@@ -172,7 +174,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
     def serialize_for_individual(
         cls,
         individual: Individual,
-        similarity_pairs: QuerySet["DeduplicationEngineSimilarityPair"],
+        similarity_pairs: QuerySet["BiometricDedupeSimilarityPair"],
     ) -> list:
         duplicates = []
         for pair in similarity_pairs:

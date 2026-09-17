@@ -4,16 +4,72 @@ from django import forms
 from django.db import models
 import pytest
 
-from extras.test_utils.factories.core import BeneficiaryGroupFactory, DataCollectingTypeFactory
+from extras.test_utils.factories.account import PartnerFactory
+from extras.test_utils.factories.core import (
+    BeneficiaryGroupFactory,
+    DataCollectingTypeFactory,
+    FlexibleAttributeFactory,
+    FlexibleAttributeForPDUFactory,
+)
 from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
-from extras.test_utils.factories.household import DocumentFactory, HouseholdFactory
+from extras.test_utils.factories.household import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualIdentityFactory,
+)
 from extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from extras.test_utils.factories.program import ProgramFactory
+from hope.apps.household.const import UNHCR, WFP
 from hope.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
 from hope.models import DataCollectingType, FinancialServiceProviderXlsxTemplate, MergeStatusModel
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def payment_with_collector_identities():
+    household = HouseholdFactory(size=1)
+    collector = household.head_of_household
+    payment = PaymentFactory(parent=PaymentPlanFactory(), household=household, collector=collector)
+    IndividualIdentityFactory(
+        individual=collector,
+        partner=PartnerFactory(name=UNHCR),
+        number="UNHCR-77",
+        country=CountryFactory(iso_code3="UGA"),
+    )
+    IndividualIdentityFactory(
+        individual=collector,
+        partner=PartnerFactory(name=WFP),
+        number="WFP-88",
+        country=CountryFactory(iso_code3="KEN"),
+    )
+    create_payment_plan_snapshot_data(payment.parent)
+    payment.refresh_from_db()
+    return payment
+
+
+@pytest.fixture
+def payment_without_collector_identities():
+    household = HouseholdFactory(size=1)
+    payment = PaymentFactory(
+        parent=PaymentPlanFactory(),
+        household=household,
+        collector=household.head_of_household,
+    )
+    create_payment_plan_snapshot_data(payment.parent)
+    payment.refresh_from_db()
+    return payment
+
+
+@pytest.fixture
+def flex_attribute():
+    return FlexibleAttributeFactory(name="flex_field_for_template")
+
+
+@pytest.fixture
+def pdu_flex_attribute():
+    return FlexibleAttributeForPDUFactory(label="PDU Field For Template")
 
 
 def test_fsp_template_get_column_from_core_field():
@@ -143,6 +199,63 @@ def test_fsp_template_get_column_from_core_field():
     assert household.country_origin.iso_code3 == country_origin
 
 
+def test_get_column_from_core_field_returns_unhcr_id_no(payment_with_collector_identities):
+    result = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+        payment_with_collector_identities,
+        "unhcr_id_no",
+        FinancialServiceProviderXlsxTemplate.get_areas_dict(),
+        FinancialServiceProviderXlsxTemplate.get_countries_dict(),
+    )
+
+    assert result == "UNHCR-77"
+
+
+def test_get_column_from_core_field_returns_unhcr_id_issuer(payment_with_collector_identities):
+    result = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+        payment_with_collector_identities,
+        "unhcr_id_issuer",
+        FinancialServiceProviderXlsxTemplate.get_areas_dict(),
+        FinancialServiceProviderXlsxTemplate.get_countries_dict(),
+    )
+
+    assert result == "UGA"
+
+
+def test_get_column_from_core_field_returns_scope_id_no(payment_with_collector_identities):
+    result = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+        payment_with_collector_identities,
+        "scope_id_no",
+        FinancialServiceProviderXlsxTemplate.get_areas_dict(),
+        FinancialServiceProviderXlsxTemplate.get_countries_dict(),
+    )
+
+    assert result == "WFP-88"
+
+
+def test_get_column_from_core_field_returns_scope_id_issuer(payment_with_collector_identities):
+    result = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+        payment_with_collector_identities,
+        "scope_id_issuer",
+        FinancialServiceProviderXlsxTemplate.get_areas_dict(),
+        FinancialServiceProviderXlsxTemplate.get_countries_dict(),
+    )
+
+    assert result == "KEN"
+
+
+def test_get_column_from_core_field_returns_none_when_collector_has_no_identity(
+    payment_without_collector_identities,
+):
+    result = FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
+        payment_without_collector_identities,
+        "unhcr_id_no",
+        FinancialServiceProviderXlsxTemplate.get_areas_dict(),
+        FinancialServiceProviderXlsxTemplate.get_countries_dict(),
+    )
+
+    assert result is None
+
+
 def test_choices_dynamic_choice_array_field():
     mock_choices = [("field1", "Field 1"), ("field2", "Field 2")]
     mock_choices_callable = MagicMock(return_value=mock_choices)
@@ -171,3 +284,14 @@ def test_model_form_integration_fsp_template():
     form = FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})
     assert not form.is_valid()
     assert form.errors == {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]}
+
+
+def test_flex_fields_form_choices_exclude_pdu_attributes(flex_attribute, pdu_flex_attribute):
+    class FinancialServiceProviderXlsxTemplateFlexFieldsForm(forms.ModelForm):
+        class Meta:
+            model = FinancialServiceProviderXlsxTemplate
+            fields = ["flex_fields"]
+
+    form = FinancialServiceProviderXlsxTemplateFlexFieldsForm()
+
+    assert list(form.fields["flex_fields"].choices) == [("flex_field_for_template", "flex_field_for_template")]

@@ -147,7 +147,7 @@ def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_l
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end)
 
 

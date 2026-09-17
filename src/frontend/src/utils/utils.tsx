@@ -2,7 +2,6 @@ import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Box, Typography } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
-import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { PaymentVerificationStatusEnum } from '@restgenerated/models/PaymentVerificationStatusEnum';
@@ -224,8 +223,6 @@ export function targetPopulationStatusDisplayMap(status: string): string {
       return 'READY FOR PAYMENT MODULE';
     case PaymentPlanStatus.TP_LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.PROCESSING:
-      return 'PROCESSING';
     case PaymentPlanStatus.STEFICON_WAIT:
       return 'STEFICON WAIT';
     case PaymentPlanStatus.STEFICON_RUN:
@@ -291,27 +288,6 @@ export function registrationDataImportStatusToColor(
   }
 }
 
-export function registrationDataImportDeduplicationEngineStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case DeduplicationEngineStatusEnum.PENDING:
-      return theme.hctPalette.gray;
-    case DeduplicationEngineStatusEnum.UPLOADED:
-      return theme.hctPalette.orange;
-    case DeduplicationEngineStatusEnum.IN_PROGRESS:
-      return theme.hctPalette.orange;
-    case DeduplicationEngineStatusEnum.FINISHED:
-      return theme.hctPalette.green;
-    case DeduplicationEngineStatusEnum.UPLOAD_ERROR:
-    case DeduplicationEngineStatusEnum.ERROR:
-      return theme.palette.error.main;
-    default:
-      return theme.hctPalette.orange;
-  }
-}
-
 export function paymentPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -327,8 +303,6 @@ export function paymentPlanStatusToColor(
     [PaymentPlanStatus.LOCKED]: theme.hctPalette.gray,
     [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.gray,
     [PaymentPlanStatus.OPEN]: theme.hctPalette.lighterGray,
-    [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
-    [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
     [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
     [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
     [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,

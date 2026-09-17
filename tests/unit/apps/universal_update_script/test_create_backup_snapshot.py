@@ -4,11 +4,20 @@ from typing import Callable, Tuple
 
 from _pytest.monkeypatch import MonkeyPatch
 from django.core.files.base import ContentFile
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from openpyxl import Workbook
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, HouseholdFactory, ProgramFactory
-from hope.apps.household.const import MALE
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    CountryFactory,
+    HouseholdFactory,
+    IndividualIdentityFactory,
+    PartnerFactory,
+    ProgramFactory,
+)
+from hope.apps.household.const import MALE, UNHCR, WFP
 from hope.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
     create_and_save_snapshot_chunked,
     create_snapshot_content,
@@ -92,6 +101,32 @@ def individuals(program: Program, admin1: Area, admin2: Area) -> Tuple[Individua
     return ind_1, ind_2
 
 
+@pytest.fixture
+def individual_with_identities(program: Program) -> Individual:
+    household = HouseholdFactory(
+        unicef_id="HH-20-0000.0004",
+        rdi_merge_status="MERGED",
+        business_area=program.business_area,
+        program=program,
+    )
+    individual = household.head_of_household
+    individual.unicef_id = "IND-00-0000.0044"
+    individual.save(update_fields=["unicef_id"])
+    IndividualIdentityFactory(
+        individual=individual,
+        partner=PartnerFactory(name=UNHCR),
+        number="UNHCR-77",
+        country=CountryFactory(iso_code3="UGA"),
+    )
+    IndividualIdentityFactory(
+        individual=individual,
+        partner=PartnerFactory(name=WFP),
+        number="WFP-88",
+        country=CountryFactory(iso_code3="KEN"),
+    )
+    return individual
+
+
 def test_snapshot_json_contains_two_households(program: Program, individuals: Tuple[Individual]) -> None:
     log_message: Callable[[str], None] = lambda message_log: None
     backup_data = json.loads(
@@ -99,6 +134,31 @@ def test_snapshot_json_contains_two_households(program: Program, individuals: Tu
     )
     assert isinstance(backup_data, list)
     assert len(backup_data) == 2
+
+
+def test_snapshot_json_contains_individual_identities(program: Program, individual_with_identities: Individual) -> None:
+    log_message: Callable[[str], None] = lambda message_log: None
+
+    backup_data = json.loads(create_snapshot_content(log_message, str(program.id), ["IND-00-0000.0044"]))
+
+    assert backup_data[0]["individuals"][0]["identities"] == [
+        {"partner": "UNHCR", "number": "UNHCR-77", "country": "UGA"},
+        {"partner": "WFP", "number": "WFP-88", "country": "KEN"},
+    ]
+
+
+def test_snapshot_json_reads_identity_partner_and_country_without_extra_queries(
+    program: Program, individual_with_identities: Individual
+) -> None:
+    log_message: Callable[[str], None] = lambda message_log: None
+
+    with CaptureQueriesContext(connection) as captured:
+        create_snapshot_content(log_message, str(program.id), ["IND-00-0000.0044"])
+
+    partner_queries = [query for query in captured.captured_queries if "account_partner" in query["sql"]]
+    country_queries = [query for query in captured.captured_queries if "geo_country" in query["sql"]]
+    assert len(partner_queries) == 1
+    assert len(country_queries) == 1
 
 
 def test_snapshot_json_generation_with_mocking(monkeypatch: MonkeyPatch, program: Program) -> None:

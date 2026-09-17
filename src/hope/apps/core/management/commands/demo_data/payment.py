@@ -6,6 +6,8 @@ from uuid import UUID
 from django.utils import timezone
 
 from extras.test_utils.factories import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
     BeneficiaryGroupFactory,
     CurrencyFactory,
     EntitlementCardFactory,
@@ -31,6 +33,7 @@ from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import to_decimal
 from hope.models import (
     AccountType,
+    Approval,
     Area,
     BusinessArea,
     DataCollectingType,
@@ -552,6 +555,24 @@ def generate_reconciled_payment_plan() -> None:
     flow = PaymentPlanFlow(payment_plan)
     flow.status_finished()
     payment_plan.save()
+
+    # full approval chain so the PDF summary export (approval/authorization/release columns) works
+    approval_process = ApprovalProcessFactory(
+        payment_plan=payment_plan,
+        sent_for_approval_by=root,
+        sent_for_approval_date=now,
+        sent_for_authorization_by=root,
+        sent_for_authorization_date=now,
+        sent_for_finance_release_by=root,
+        sent_for_finance_release_date=now,
+    )
+    ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL, created_by=root, comment="Approved")
+    ApprovalFactory(
+        approval_process=approval_process, type=Approval.AUTHORIZATION, created_by=root, comment="Authorized"
+    )
+    ApprovalFactory(
+        approval_process=approval_process, type=Approval.FINANCE_RELEASE, created_by=root, comment="Released"
+    )
 
     create_payment_verification_plan_with_status(
         payment_plan,

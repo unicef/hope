@@ -14,6 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models, transaction
+from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
@@ -22,7 +23,6 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
-from psycopg2._range import NumericRange
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
@@ -132,17 +132,11 @@ class PaymentPlan(
         # new from TP
         TP_OPEN = "TP_OPEN", "Open"
         TP_LOCKED = "TP_LOCKED", "Locked"
-        TP_PROCESSING = "PROCESSING", "Processing"  # TODO: do we need this one?
         TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
         TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
         TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
         TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
         DRAFT = "DRAFT", "Draft"  # like ready for PP create
-
-        PREPARING = (
-            "PREPARING",
-            "Preparing",
-        )  # deprecated will remove it after data migrations
 
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
@@ -167,7 +161,6 @@ class PaymentPlan(
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
-        Status.TP_PROCESSING,
         Status.TP_STEFICON_WAIT,
         Status.TP_STEFICON_RUN,
         Status.TP_STEFICON_COMPLETED,
@@ -761,9 +754,6 @@ class PaymentPlan(
 
     def is_population_open(self) -> bool:
         return self.status == self.Status.TP_OPEN
-
-    def is_population_finalized(self) -> bool:
-        return self.status == self.Status.TP_PROCESSING
 
     def is_population_locked(self) -> bool:
         return self.status in (

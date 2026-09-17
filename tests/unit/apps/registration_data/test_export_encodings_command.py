@@ -12,6 +12,7 @@ from django.core.management.base import CommandError
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, IndividualFactory
+from hope.apps.registration_data.management.commands.export_encodings import DedupEngineClient
 from hope.models import BusinessArea, Individual
 
 pytestmark = pytest.mark.django_db
@@ -938,3 +939,12 @@ def test_missing_credentials_raise_command_error(state_key: str, monkeypatch: py
             "--state-file",
             state_key,
         )
+
+
+def test_dedup_engine_client_requests_url_without_double_slash() -> None:
+    client = DedupEngineClient(base_url="https://dedup.test/", token=DEDUP_TOKEN)
+
+    with mock.patch.object(client.session, "request", return_value=mock.MagicMock(status_code=200)) as request:
+        client._request("GET", "deduplication_sets/")
+
+    request.assert_called_once_with("GET", "https://dedup.test/deduplication_sets/", timeout=300)
