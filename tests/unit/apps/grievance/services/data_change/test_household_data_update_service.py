@@ -4,11 +4,13 @@ from typing import Any
 from django.test import TestCase
 from django.utils import timezone
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     CountryFactory,
+    FacilityFactory,
     FlexibleAttributeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -612,6 +614,53 @@ def test_close_household_update_applies_only_approved_flex_fields(program: Progr
         "total_dwellers_h_f": 3,
         "living_situation_h_f": "renter",
     }
+
+
+def test_close_household_update_applies_approved_facility(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    facility = FacilityFactory(name="Kabul Clinic", business_area=program.business_area)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        household_data={"facility": {"value": "Kabul Clinic", "previous_value": None, "approve_status": True}},
+    )
+
+    service = HouseholdDataUpdateService(ticket_details.ticket, {})
+    service.close(user)
+
+    household.refresh_from_db()
+    assert household.facility == facility
+
+
+def test_close_household_update_rejects_facility_name_without_a_match(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        household_data={"facility": {"value": "No Such Place", "previous_value": None, "approve_status": True}},
+    )
+
+    service = HouseholdDataUpdateService(ticket_details.ticket, {})
+
+    with pytest.raises(ValidationError, match="does not match exactly one facility"):
+        service.close(user)
+
+
+def test_close_household_update_applies_approved_consent_sign(program: Program, user: User) -> None:
+    household = HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        household_data={
+            "consent_sign": {"value": "consent/signature.jpg", "previous_value": "", "approve_status": True}
+        },
+    )
+
+    service = HouseholdDataUpdateService(ticket_details.ticket, {})
+    service.close(user)
+
+    household.refresh_from_db()
+    assert household.consent_sign.name == "consent/signature.jpg"
 
 
 def test_save_currency_change_records_previous_value_as_code(all_currencies: None) -> None:

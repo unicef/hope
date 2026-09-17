@@ -27,7 +27,13 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.grievance.api.serializers.grievance_ticket import (
+    HouseholdUpdateDataSerializer,
+    IndividualUpdateDataSerializer,
+)
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import (
     FEMALE,
@@ -685,3 +691,21 @@ def test_edit_account_bank_with_financial_institution(
     response = authenticated_client.post(list_url, input_data_success, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response.data[0]
+
+
+def test_household_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:
+    offered = {field["name"] for field in FieldFactory.from_scope(Scope.HOUSEHOLD_UPDATE).associated_with_household()}
+
+    assert offered - set(HouseholdUpdateDataSerializer().fields) == set()
+
+
+def test_individual_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:
+    offered = {field["name"] for field in FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()}
+
+    assert offered - set(IndividualUpdateDataSerializer().fields) == set()
+
+
+def test_people_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:
+    offered = {field["name"] for field in FieldFactory.from_scope(Scope.PEOPLE_UPDATE)}
+
+    assert offered - set(IndividualUpdateDataSerializer().fields) == set()

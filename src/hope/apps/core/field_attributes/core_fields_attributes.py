@@ -396,7 +396,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.KOBO_IMPORT,
             Scope.HOUSEHOLD_UPDATE,
             Scope.XLSX_PEOPLE,
-            Scope.PEOPLE_UPDATE,
         ],
     },
     {
@@ -416,7 +415,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.KOBO_IMPORT,
             Scope.HOUSEHOLD_UPDATE,
             Scope.XLSX_PEOPLE,
-            Scope.PEOPLE_UPDATE,
         ],
     },
     {
@@ -2442,7 +2440,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "facility_admin_area_h_c",
         "scope": [
             Scope.XLSX,
-            Scope.HOUSEHOLD_UPDATE,
             Scope.XLSX_PEOPLE,
         ],
     },

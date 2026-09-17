@@ -374,6 +374,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     admin_area_title = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
     consent = serializers.BooleanField(required=False, allow_null=True)
+    consent_sign = serializers.ImageField(required=False, allow_null=True)
     consent_sharing = serializers.ListField(child=serializers.CharField(), required=False)
     residence_status = serializers.CharField(required=False, allow_blank=True)
     country_origin = serializers.CharField(required=False)
@@ -414,6 +415,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     registration_method = serializers.CharField(required=False, allow_blank=True)
     currency = serializers.CharField(required=False)
     unhcr_id = serializers.CharField(required=False)
+    facility = serializers.CharField(required=False, allow_blank=True)
     flex_fields = serializers.JSONField(required=False)
     roles = serializers.ListField(child=HouseholdUpdateRolesSerializer(), required=False)
 
@@ -515,6 +517,7 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     flex_fields = serializers.JSONField(required=False)
     payment_delivery_phone_no = serializers.CharField(required=False)
     photo = serializers.ImageField(required=False, allow_null=True)
+    ind_identification_key = serializers.CharField(required=False, allow_blank=True)
     # people fields
     consent = serializers.CharField(required=False, allow_null=True, help_text="People update")
     residence_status = serializers.CharField(required=False, allow_blank=True, help_text="People update")
@@ -529,6 +532,8 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     org_name_enumerator = serializers.CharField(required=False, help_text="People update")
     registration_method = serializers.CharField(required=False, help_text="People update")
     admin_area_title = serializers.CharField(required=False, help_text="People update")
+    consent_sign = serializers.ImageField(required=False, allow_null=True, help_text="People update")
+    hh_identification_key = serializers.CharField(required=False, allow_blank=True, help_text="People update")
 
 
 class PositiveFeedbackTicketExtras(serializers.Serializer):
@@ -743,13 +748,13 @@ class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
     approved_identities_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
     approved_accounts_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
     approved_accounts_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
-    flex_fields_approve_data = serializers.JSONField(required=False)
+    flex_fields_approve_data = serializers.DictField(child=serializers.BooleanField(), required=False)
     version = serializers.IntegerField(required=False)
 
 
 class GrievanceHouseholdDataChangeApproveSerializer(serializers.Serializer):
     household_approve_data = serializers.JSONField(required=False)
-    flex_fields_approve_data = serializers.JSONField(required=False)
+    flex_fields_approve_data = serializers.DictField(child=serializers.BooleanField(), required=False)
     version = serializers.IntegerField(required=False)
 
 

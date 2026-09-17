@@ -634,6 +634,71 @@ def test_update_people_individual_hh_admin_area(
     assert hh.admin2.parent == hh.admin1
 
 
+def test_close_individual_update_applies_approved_identification_key(update_context: dict[str, Any]) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "ind_identification_key": {"value": "IND-KEY-1", "previous_value": None, "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+    service.close(update_context["user"])
+
+    individual = update_context["individual"]
+    individual.refresh_from_db()
+    assert individual.identification_key == "IND-KEY-1"
+
+
+def test_close_individual_update_rejects_identification_key_used_in_the_programme(
+    update_context: dict[str, Any],
+) -> None:
+    IndividualFactory(
+        business_area=update_context["business_area"],
+        program=update_context["program"],
+        identification_key="IND-KEY-1",
+    )
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "ind_identification_key": {"value": "IND-KEY-1", "previous_value": None, "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+
+    with pytest.raises(DRFValidationError, match="is already used in this programme"):
+        service.close(update_context["user"])
+
+
+def test_close_people_update_applies_approved_household_identification_key(update_context: dict[str, Any]) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "hh_identification_key": {"value": "HH-KEY-1", "previous_value": None, "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+    service.close(update_context["user"])
+
+    household = update_context["household"]
+    household.refresh_from_db()
+    assert household.identification_key == "HH-KEY-1"
+
+
+def test_close_people_update_applies_approved_consent_sign(update_context: dict[str, Any]) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "consent_sign": {"value": "consent/signature.jpg", "previous_value": "", "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+    service.close(update_context["user"])
+
+    household = update_context["household"]
+    household.refresh_from_db()
+    assert household.consent_sign.name == "consent/signature.jpg"
+
+
 def test_update_phone_no_data(update_context: dict[str, Any]) -> None:
     update_context["ticket"].individual_data_update_ticket_details.individual_data = {
         "phone_no": {"approve_status": True, "previous_value": "+485656565665", "value": "+485544332211"},
