@@ -218,6 +218,34 @@ def registration_data_import(business_area, program, import_data) -> object:
 
 
 @pytest.fixture
+def import_data_padded_latin(business_area) -> object:
+    wb = openpyxl.load_workbook(FILES_DIR / "new_reg_data_import.xlsx")
+    sheet = wb["Individuals"]
+    headers = [cell.value for cell in sheet[1]]
+    sheet.cell(row=3, column=headers.index("middle_name_latin_i_c") + 1, value="  Middle \t\xa0 Latin ")
+    output = BytesIO()
+    wb.save(output)
+    file = File(BytesIO(output.getvalue()), name="new_reg_data_import.xlsx")
+    return ImportDataFactory(
+        file=file,
+        number_of_households=3,
+        number_of_individuals=6,
+        business_area_slug=business_area.slug,
+    )
+
+
+@pytest.fixture
+def registration_data_import_padded_latin(business_area, program, import_data_padded_latin) -> object:
+    return RegistrationDataImportFactory(
+        business_area=business_area,
+        program=program,
+        import_data=import_data_padded_latin,
+        number_of_households=3,
+        number_of_individuals=6,
+    )
+
+
+@pytest.fixture
 def import_data_flex(business_area) -> object:
     content = (FILES_DIR / "new_reg_data_import_flex_field.xlsx").read_bytes()
     file = File(BytesIO(content), name="new_reg_data_import_flex_field.xlsx")
@@ -259,6 +287,26 @@ def rdi_setup(
         "flex_fields": flex_fields,
         "pdu_attributes": pdu_attributes,
     }
+
+
+def test_execute_stores_normalized_latin_name(
+    rdi_setup: dict[str, object],
+    registration_data_import_padded_latin: object,
+    import_data_padded_latin: object,
+    business_area: object,
+    program: Program,
+) -> None:
+    assert rdi_setup
+    task = RdiXlsxCreateTask()
+
+    task.execute(
+        registration_data_import_padded_latin.id,
+        import_data_padded_latin.id,
+        business_area.id,
+        program.id,
+    )
+
+    assert PendingIndividual.objects.get(full_name="Some Full Name").middle_name_latin == "Middle Latin"
 
 
 def test_execute(

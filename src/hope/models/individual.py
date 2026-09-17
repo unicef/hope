@@ -74,6 +74,19 @@ def sanction_list_last_check_key(program_id: Any) -> str:
     return f"sanction_list_last_check:{program_id}"
 
 
+LATIN_NAME_FIELDS = ("given_name_latin", "middle_name_latin", "family_name_latin", "full_name_latin")
+
+
+def normalize_latin_name(value: Any) -> Any:
+    """Strip and collapse any whitespace run to a single space so the value can be validated and stored cleanly.
+
+    Non-string cells (numeric XLSX values) are coerced so the validator reports them instead of crashing.
+    """
+    if not value:
+        return value
+    return " ".join(str(value).split())
+
+
 class IndividualCollection(UnicefIdentifiedModel):
     """Collection of individual representations."""
 
