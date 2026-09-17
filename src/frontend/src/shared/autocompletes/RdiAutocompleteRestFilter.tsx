@@ -1,19 +1,20 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
-import { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
+import type { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 export function RdiAutocompleteRestFilter({
   disabled,
@@ -108,14 +109,17 @@ export function RdiAutocompleteRestFilter({
     name: rdi.name,
   }));
 
+  // Both sides arrive as `AutocompleteOption | string`: MUI hands back the raw
+  // input text before an option is picked. Comparing without narrowing
+  // `option` reads `.id` off a string and silently never matches.
   const handleOptionSelected = (
-    option: AutocompleteOption,
+    option: AutocompleteOption | string,
     selectedValue: AutocompleteOption | string,
   ) => {
-    if (typeof selectedValue === 'string') {
-      return option?.id === selectedValue;
-    }
-    return option?.id === selectedValue?.id;
+    const optionKey = typeof option === 'string' ? option : option?.id;
+    const valueKey =
+      typeof selectedValue === 'string' ? selectedValue : selectedValue?.id;
+    return optionKey === valueKey;
   };
 
   const handleOptionLabel = (option: AutocompleteOption | string) => {

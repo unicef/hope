@@ -27,6 +27,8 @@ from hope.admin.utils import (
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    UnicefIdSearchMixin,
+    ViewOnUiMixin,
 )
 from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
 from hope.apps.utils.security import is_root
@@ -64,17 +66,20 @@ class IndividualAccountInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 @admin.register(Individual)
 class IndividualAdmin(
+    UnicefIdSearchMixin,
+    ViewOnUiMixin,
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
     SmartFieldsetMixin,
+    RdiMergeStatusAdminMixin,
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
-    RdiMergeStatusAdminMixin,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
     cursor_ordering_field = "unicef_id"
+    unicef_id_search_map = {"IND": "unicef_id", "HH": "household__unicef_id"}
 
     list_display = (
         "unicef_id",
@@ -183,6 +188,7 @@ class IndividualAdmin(
     ]
     inlines = [IndividualAccountInline]
     show_full_result_count = False
+    show_query_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -192,10 +198,14 @@ class IndividualAdmin(
                 "household",
                 "registration_data_import",
                 "individual_collection",
-                "program",
+                "program__data_collecting_type",
                 "business_area",
             )
         )
+
+    def frontend_url(self, obj: Individual) -> str | None:
+        section = "people" if obj.program.is_social_worker_program else "individuals"
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/population/{section}/{obj.id}"
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "household":

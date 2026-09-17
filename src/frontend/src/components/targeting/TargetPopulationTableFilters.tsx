@@ -13,7 +13,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface TargetPopulationTableFiltersProps {
   filter;

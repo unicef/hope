@@ -159,7 +159,9 @@ class TestSmokePeople:
         unicef_id = page_people.get_individual_table_row(0).text.split(" ")[0]
         page_people.get_individual_table_row(0).click()
         individual = Individual.objects.filter(unicef_id=unicef_id).first()
-        assert f"Individual ID: {individual.unicef_id}" in page_people_details.get_page_header_title().text
+        page_people_details.wait_for_text(
+            f"Individual ID: {individual.unicef_id}", page_people_details.page_header_title
+        )
         assert individual.full_name in page_people_details.get_label_full_name().text
         assert individual.given_name in page_people_details.get_label_given_name().text
         assert individual.middle_name or "-" in page_people_details.get_label_middle_name().text

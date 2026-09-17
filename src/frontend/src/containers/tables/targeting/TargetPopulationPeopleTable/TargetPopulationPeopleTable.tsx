@@ -4,13 +4,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
 import { createApiParams } from '@utils/apiUtils';
-import { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
-import { PendingPayment } from '@restgenerated/models/PendingPayment';
+import type { PaginatedPendingPaymentList } from '@restgenerated/models/PaginatedPendingPaymentList';
+import type { PendingPayment } from '@restgenerated/models/PendingPayment';
 
 interface TargetPopulationPeopleTableProps {
   id?: string;

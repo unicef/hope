@@ -1,4 +1,4 @@
-import { AreaTree } from '@restgenerated/models/AreaTree';
+import type { AreaTree } from '@restgenerated/models/AreaTree';
 
 export class AreaTreeNode {
   id: string;

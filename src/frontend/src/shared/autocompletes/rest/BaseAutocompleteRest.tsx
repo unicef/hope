@@ -1,5 +1,6 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';

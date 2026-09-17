@@ -3,12 +3,13 @@ import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeFieldRowProps {
   fields;

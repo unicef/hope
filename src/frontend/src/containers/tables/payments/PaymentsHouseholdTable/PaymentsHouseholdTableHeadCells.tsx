@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 
 export const headCells: HeadCell<PaymentList>[] = [
   {
@@ -16,8 +16,27 @@ export const headCells: HeadCell<PaymentList>[] = [
   },
   {
     disablePadding: false,
+    label: 'Payment Purpose',
+    id: 'paymentPlanPurposes',
+    numeric: false,
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Cycle',
+    id: 'paymentPlanCycle',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Head of Household',
-    id: 'headOfHousehold',
+    id: 'hohFullName',
     numeric: false,
   },
 
@@ -52,6 +71,25 @@ export const headCellsPeople: HeadCell<any>[] = [
     disablePadding: false,
     label: 'Status',
     id: 'status',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Payment Purpose',
+    id: 'paymentPlanPurposes',
+    numeric: false,
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Group',
+    id: 'paymentPlanGroup',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Cycle',
+    id: 'paymentPlanCycle',
     numeric: false,
   },
   {

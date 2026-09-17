@@ -12,7 +12,7 @@ title: Stack
 | **Django** | 5.2 | Web framework |
 | **Django REST Framework** | 3.x | REST API |
 | **Celery** | 5.x | Task queue |
-| **PostgreSQL** | 14 | Primary database |
+| **PostgreSQL** | 15.x | Primary database |
 | **Redis** | 4.x | Cache & message broker |
 | **Elasticsearch** | 8.14 | Search engine |
 

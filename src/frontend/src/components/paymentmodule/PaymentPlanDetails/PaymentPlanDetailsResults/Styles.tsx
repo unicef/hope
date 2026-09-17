@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { MiśTheme } from '../../../../theme';
+import type { MiśTheme } from '../../../../theme';
 
 export const colors = {
   femaleChildren: '#5F02CF',

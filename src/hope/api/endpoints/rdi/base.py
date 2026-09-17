@@ -16,6 +16,7 @@ from hope.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hope.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hope.api.endpoints.rdi.upload import HouseholdSerializer
 from hope.api.utils import humanize_errors
+from hope.apps.core.api.fields import ScopedSlugRelatedField
 from hope.apps.registration_data.celery_tasks import classify_findings_and_schedule_merge_async_task
 from hope.models import Country, Grant, PendingHousehold, PendingIndividual, Program, RegistrationDataImport, User
 
@@ -24,9 +25,7 @@ if TYPE_CHECKING:
 
 
 class RDISerializer(serializers.ModelSerializer):
-    program = serializers.SlugRelatedField(
-        slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
-    )
+    program = ScopedSlugRelatedField(slug_field="id", required=True, queryset=Program.objects.all(), write_only=True)
     imported_by_email = serializers.EmailField(required=True, write_only=True)
     country_workspace_id = serializers.CharField(
         required=False,
@@ -100,7 +99,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
             return RegistrationDataImport.objects.get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404
@@ -134,7 +133,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
             return RegistrationDataImport.objects.get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404
@@ -204,7 +203,7 @@ class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
             return RegistrationDataImport.objects.get(
                 status=RegistrationDataImport.LOADING,
                 id=self.kwargs["rdi"],
-                business_area__slug=self.kwargs["business_area"],
+                business_area=self.selected_business_area,
             )
         except RegistrationDataImport.DoesNotExist:
             raise Http404

@@ -6,13 +6,13 @@ import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/Program
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';
 import { TableCell } from '@mui/material';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 

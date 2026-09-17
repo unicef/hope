@@ -3,14 +3,15 @@ import { headCells } from '@containers/pages/paymentmodule/FollowUpInstructions/
 import { FollowUpInstructionTableRow } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePersistedCount } from '@hooks/usePersistedCount';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
-import { PaginatedFollowUpInstructionListList } from '@restgenerated/models/PaginatedFollowUpInstructionListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
+import type { PaginatedFollowUpInstructionListList } from '@restgenerated/models/PaginatedFollowUpInstructionListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 export const FollowUpInstructionTable = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
@@ -39,7 +40,9 @@ export const FollowUpInstructionTable = (): ReactElement => {
       refetchInterval: (query) => {
         const results = query.state.data?.results ?? [];
         const hasPendingAction = results.some(
-          (r) => r.backgroundActionStatus !== null && r.backgroundActionStatus !== '',
+          (r) =>
+            r.backgroundActionStatus !== null &&
+            r.backgroundActionStatus !== '',
         );
         return hasPendingAction ? 3000 : false;
       },

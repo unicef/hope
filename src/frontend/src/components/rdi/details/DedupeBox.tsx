@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Box, Grid } from '@mui/material';
-import { MiśTheme } from '../../../theme';
-import { ReactElement } from 'react';
+import type { MiśTheme } from '../../../theme';
+import type { ReactElement } from 'react';
 
 const GreyBox = styled.div`
   background-color: #f5f5f5;

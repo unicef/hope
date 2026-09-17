@@ -4,8 +4,8 @@ import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { Survey } from '@restgenerated/models/Survey';
+import type { ReactElement } from 'react';
+import type { Survey } from '@restgenerated/models/Survey';
 
 interface SurveysTableRowProps {
   survey: Survey;

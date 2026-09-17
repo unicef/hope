@@ -5,8 +5,8 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import { FieldInputProps, FormikProps } from 'formik';
-import { ReactElement } from 'react';
+import type { FieldInputProps, FormikProps } from 'formik';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface Choice {

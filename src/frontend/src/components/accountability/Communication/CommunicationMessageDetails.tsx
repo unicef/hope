@@ -3,8 +3,8 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Box, Grid, Paper, Typography } from '@mui/material';
-import { MessageDetail } from '@restgenerated/models/MessageDetail';
-import { ReactElement } from 'react';
+import type { MessageDetail } from '@restgenerated/models/MessageDetail';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

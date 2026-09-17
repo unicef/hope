@@ -2,13 +2,15 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
@@ -20,8 +22,8 @@ import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { IndividualList } from '@restgenerated/models/IndividualList';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -80,30 +82,30 @@ function EditIndividualDataChange({
     enabled: Boolean(businessArea),
   });
 
-  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+  const { data: documentTypeChoices, isLoading: documentTypeChoicesLoading } =
+    useDocumentTypeChoices();
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery({
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
+      enabled: Boolean(businessArea),
+    });
+
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
     queryKey: restQueryKey(
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve,
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList,
       { businessAreaSlug: businessArea },
     ),
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList({
         businessAreaSlug: businessArea,
       }),
     enabled: Boolean(businessArea),
   });
-
-  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
-    useQuery({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-      enabled: Boolean(businessArea),
-    });
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: restQueryKey(RestService.restChoicesCountriesList),
@@ -149,8 +151,9 @@ function EditIndividualDataChange({
   if (
     addIndividualFieldsLoading ||
     fullIndividualLoading ||
-    choicesLoading ||
+    documentTypeChoicesLoading ||
     individualChoicesLoading ||
+    financialInstitutionChoicesLoading ||
     countriesLoading ||
     !fullIndividual ||
     !addIndividualFieldsData
@@ -165,7 +168,7 @@ function EditIndividualDataChange({
   const combinedData = {
     allAddIndividualsFieldsAttributes: addIndividualFieldsData || [],
     countriesChoices: countriesData || [],
-    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    documentTypeChoices: documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
@@ -281,11 +284,17 @@ function EditIndividualDataChange({
             setFieldValue={setFieldValue}
             individual={fullIndividual}
             individualChoicesData={individualChoicesData}
+            accountFinancialInstitutionChoices={
+              financialInstitutionChoices || []
+            }
           />
           {!isEditTicket && (
             <NewAccountFieldArray
               values={values}
               individualChoicesData={individualChoicesData}
+              accountFinancialInstitutionChoices={
+                financialInstitutionChoices || []
+              }
             />
           )}
         </Box>

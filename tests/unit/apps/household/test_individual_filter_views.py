@@ -40,7 +40,7 @@ from hope.apps.household.const import (
     STATUS_WITHDRAWN,
     UNIQUE,
 )
-from hope.apps.household.filters import IndividualFilter, IndividualOfficeSearchFilter, MergedIndividualFilter
+from hope.apps.household.filters import IndividualFilter, IndividualOfficeSearchFilter
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
 from hope.models import BusinessArea, Individual, MergeStatusModel, Program
 
@@ -145,15 +145,6 @@ def flagged_individuals(afghanistan: BusinessArea, program: Program) -> dict[str
         "possible_match": possible_match,
         "confirmed_match": confirmed_match,
     }
-
-
-@pytest.fixture
-def golden_duplicate_individual(afghanistan: BusinessArea, program: Program) -> Individual:
-    household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
-    individual = household.head_of_household
-    individual.deduplication_golden_record_status = DUPLICATE
-    individual.save(update_fields=["deduplication_golden_record_status"])
-    return individual
 
 
 @pytest.fixture
@@ -560,6 +551,32 @@ def test_search(
     assert response_data[0]["id"] == str(individuals[1].id)
 
 
+@pytest.mark.xdist_group(name="elasticsearch")
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+@pytest.mark.elasticsearch
+@pytest.mark.usefixtures("django_elasticsearch_setup")
+def test_search_matches_latin_name(
+    search_client: Any,
+    list_url: str,
+    afghanistan: BusinessArea,
+    program: Program,
+) -> None:
+    response_data, individuals = _test_search(
+        search_client,
+        list_url,
+        afghanistan,
+        program,
+        {"search": "Yuriy Shevchenko"},
+        {"full_name": "Анна Ковальська", "full_name_latin": "Anna Kovalska"},
+        {"full_name": "Юрій Шевченко", "full_name_latin": "Yuriy Shevchenko"},
+        {},
+        {},
+        is_elasticsearch_enabled=True,
+    )
+    assert len(response_data) == 1
+    assert response_data[0]["id"] == str(individuals[1].id)
+
+
 @pytest.mark.parametrize(
     ("filters", "individual1_data", "individual2_data", "household1_data", "household2_data"),
     [
@@ -672,35 +689,6 @@ def test_filter_is_active_program_with_none_returns_queryset_unchanged(db: Any) 
     individual_filter = IndividualFilter(data={}, queryset=queryset, request=None)
 
     assert individual_filter.filter_is_active_program(queryset, "is_active_program", None) is queryset
-
-
-def test_merged_individual_filter_rdi_id_filters_by_rdi(golden_duplicate_individual: Individual) -> None:
-    queryset = Individual.all_objects.all()
-    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
-
-    result = individual_filter.filter_rdi_id(
-        queryset, None, str(golden_duplicate_individual.registration_data_import_id)
-    )
-
-    assert list(result) == [golden_duplicate_individual]
-
-
-def test_merged_individual_filter_duplicates_only_true(golden_duplicate_individual: Individual) -> None:
-    queryset = Individual.all_objects.all()
-    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
-
-    result = individual_filter.filter_duplicates_only(queryset, None, True)
-
-    assert list(result) == [golden_duplicate_individual]
-
-
-def test_merged_individual_filter_duplicates_only_false_returns_queryset_unchanged(
-    golden_duplicate_individual: Individual,
-) -> None:
-    queryset = Individual.all_objects.all()
-    individual_filter = MergedIndividualFilter(data={}, queryset=queryset)
-
-    assert individual_filter.filter_duplicates_only(queryset, None, False) is queryset
 
 
 def test_office_search_filter_by_grievance_returns_ticket_individual(

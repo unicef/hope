@@ -2,10 +2,10 @@ import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface CreateTargetPopulationHeaderProps {

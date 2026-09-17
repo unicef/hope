@@ -1,6 +1,6 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -35,7 +35,8 @@ import {
   showApiErrorMessages,
 } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -312,7 +313,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
           const f = field as PduField;
           const backendKey = f.fieldName;
 
-          acc[backendKey] = {
+          acc[backendKey ?? ''] = {
             round_number: f.roundNumber,
             value: f.value,
             subtype: f.subtype,

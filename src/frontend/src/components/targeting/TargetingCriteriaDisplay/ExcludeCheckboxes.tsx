@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import styled from 'styled-components';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 

@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
 
 export const headCells: HeadCell<PaginatedPaymentVerificationPlanListList>[] = [
   {

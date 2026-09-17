@@ -189,7 +189,7 @@ class PDUXlsxUploadViewSet(
             serializer.validated_data["created_by"] = request.user
             try:
                 serializer.validated_data["template"] = PDUXlsxImportService.read_periodic_data_update_template_object(
-                    serializer.validated_data["file"]
+                    serializer.validated_data["file"], self.program
                 )
             except DjangoValidationError as e:
                 return Response(
@@ -305,7 +305,7 @@ class PDUOnlineEditViewSet(
             instance,
             "SEND_FOR_APPROVAL",
             str(request.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent for approval."})
@@ -368,7 +368,7 @@ class PDUOnlineEditViewSet(
             instance,
             "SEND_BACK",
             str(request.user.pk),
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
 
         return Response(status=status.HTTP_200_OK, data={"message": "PDU Online Edit sent back successfully."})
@@ -396,7 +396,7 @@ class PDUOnlineEditViewSet(
                 pdu_edit,
                 "APPROVE",
                 str(request.user.pk),
-                f"{timezone.now():%-d %B %Y}",
+                timezone.now().isoformat(),
             )
 
         return Response(

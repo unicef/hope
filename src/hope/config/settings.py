@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from single_source import get_version
 
+from hope.config.db_options import postgres_options
 from hope.config.env import env
 from hope.config.process_role import get_process_role
 
@@ -90,22 +91,13 @@ EMAIL_SUBJECT_PREFIX = ""
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
 
-DB_ZOMBIE_TIMEOUT_MS = 4 * 60 * 60 * 1000
-
 PROCESS_ROLE = get_process_role()
 
 RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
         "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {
-            "options": (
-                "-c default_transaction_read_only=on "
-                f"-c application_name={PROCESS_ROLE}-ro "
-                f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
-                f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
-            )
-        },
+        "OPTIONS": {"options": postgres_options(PROCESS_ROLE, read_only=True)},
         "TEST": {
             "READ_ONLY": True,
             "MIRROR": "default",
@@ -119,13 +111,7 @@ DATABASES = {
 DATABASES["default"].update(
     {
         "CONN_MAX_AGE": 60,
-        "OPTIONS": {
-            "options": (
-                f"-c application_name={PROCESS_ROLE} "
-                f"-c statement_timeout={DB_ZOMBIE_TIMEOUT_MS} "
-                f"-c idle_in_transaction_session_timeout={DB_ZOMBIE_TIMEOUT_MS}"
-            )
-        },
+        "OPTIONS": {"options": postgres_options(PROCESS_ROLE)},
     }
 )
 DASHBOARD_DB = "read_only"
@@ -311,12 +297,6 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
-GRAPHENE = {
-    "SCHEMA": "hope.schema.schema",
-    "SCHEMA_OUTPUT": "schema.json",
-    "SCHEMA_INDENT": 2,
-}
-
 # Social Auth settings.
 
 
@@ -410,11 +390,6 @@ IMPERSONATE = {
     "PAGINATE_COUNT": 50,
     "DISABLE_LOGGING": False,
 }
-
-POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
-POWER_QUERY_EXTRA_CONNECTIONS = [
-    "core.businessarea",
-]
 
 CONCURRENCY_ENABLED = False
 

@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 export const headCells: HeadCell<TargetPopulationList>[] = [
   {

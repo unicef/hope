@@ -35,6 +35,7 @@ from hope.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hope.apps.payment.api.filters import PaymentSearchFilter
+from hope.apps.payment.api.querysets import with_payment_related_data
 from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.periodic_data_update.service.flexible_attribute_service import (
     FlexibleAttributeForPDUService,
@@ -47,7 +48,6 @@ from hope.apps.program.api.caches import (
 from hope.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
 from hope.apps.program.api.serializers import (
     BeneficiaryGroupSerializer,
-    ProgramChoicesSerializer,
     ProgramCopySerializer,
     ProgramCreateSerializer,
     ProgramCycleCreateSerializer,
@@ -109,7 +109,6 @@ class ProgramViewSet(
         "update_partner_access": [Permissions.PROGRAMME_UPDATE],
         "copy": [Permissions.PROGRAMME_DUPLICATE],
         "destroy": [Permissions.PROGRAMME_REMOVE],
-        "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "deduplication_flags": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
         "payments_count": [Permissions.PM_VIEW_PAYMENT_LIST],
@@ -122,7 +121,6 @@ class ProgramViewSet(
         "update": ProgramUpdateSerializer,
         "update_partner_access": ProgramUpdatePartnerAccessSerializer,
         "copy": ProgramCopySerializer,
-        "choices": ProgramChoicesSerializer,
         "payments": PaymentListSerializer,
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -406,10 +404,6 @@ class ProgramViewSet(
             new_object=instance,
         )
 
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
-
     @action(detail=True, methods=["get"])
     def deduplication_flags(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
@@ -456,7 +450,7 @@ class ProgramViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
-        payments = Payment.objects.filter(parent__program_cycle__program=program)
+        payments = with_payment_related_data(Payment.objects.filter(parent__program_cycle__program=program))
         filterset = PaymentSearchFilter(
             request.GET,
             queryset=payments,

@@ -1,6 +1,6 @@
 /**
  * Enum for Survey Category values
- * Maps to the REST API string values and GraphQL enum values
+ * Maps to the REST API string values
  */
 export enum SurveyCategoryEnum {
   MANUAL = 'MANUAL',

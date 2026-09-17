@@ -75,6 +75,10 @@ class GenericRegistrationService(BaseRegistrationService):
             "middle_name_i_c": "individual.middle_name",
             "family_name_i_c": "individual.family_name",
             "full_name_i_c": "individual.full_name",
+            "given_name_latin_i_c": "individual.given_name_latin",
+            "middle_name_latin_i_c": "individual.middle_name_latin",
+            "family_name_latin_i_c": "individual.family_name_latin",
+            "full_name_latin_i_c": "individual.full_name_latin",
             "birth_date_i_c": "individual.birth_date",
             "gender_i_c": "individual.sex",
             "disability_i_c": "individual.disability",
@@ -336,6 +340,16 @@ class GenericRegistrationService(BaseRegistrationService):
                         if key in individual_dict
                     ]
                 )
+            if "full_name_latin" not in individual_dict:
+                full_name_latin = " ".join(
+                    [
+                        individual_dict[key]
+                        for key in ["given_name_latin", "middle_name_latin", "family_name_latin"]
+                        if individual_dict.get(key)
+                    ]
+                )
+                if full_name_latin:
+                    individual_dict["full_name_latin"] = full_name_latin
             if not self.master_detail:
                 individual_dict["relationship"] = HEAD
             individual: PendingIndividual = self._create_object_and_validate(

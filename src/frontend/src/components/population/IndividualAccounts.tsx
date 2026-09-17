@@ -1,22 +1,26 @@
 import { DividerLine } from '@components/core/DividerLine';
-import React, { FC } from 'react';
+import { LoadingComponent } from '@core/LoadingComponent';
+import type { FC } from 'react';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
-import { Grid, Paper, Theme, Typography } from '@mui/material';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { Theme } from '@mui/material';
+import { Grid, Paper, Typography } from '@mui/material';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { renderSomethingOrDash, splitCamelCase } from '@utils/utils';
 import { t } from 'i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import type { Account } from '@restgenerated/models/Account';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
+import { useQuery } from '@tanstack/react-query';
 
 interface IndividualAccountsProps {
   individual: IndividualDetail;
-  choicesData: IndividualChoices;
 }
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
@@ -49,7 +53,7 @@ const AccountItem: FC<AccountItemProps> = ({
         <Grid size={3}>
           <LabelizedField label={t('Financial Institution')}>
             {renderSomethingOrDash(
-              accountFinancialInstitutionsDict[account.financialInstitution],
+              accountFinancialInstitutionsDict[account.financialInstitution ?? ''],
             )}
           </LabelizedField>
         </Grid>
@@ -76,7 +80,6 @@ const AccountItem: FC<AccountItemProps> = ({
 
 export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   individual,
-  choicesData,
 }) => {
   const permissions = usePermissions();
   const canViewDeliveryMechanisms = hasPermissions(
@@ -84,15 +87,33 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
     permissions,
   );
   const { selectedProgram } = useProgramContext();
+  const { businessAreaSlug } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const {
+    data: financialInstitutionChoices,
+    isLoading: financialInstitutionChoicesLoading,
+  } = useQuery({
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList,
+      { businessAreaSlug },
+    ),
+    queryFn: () =>
+      RestService.restBusinessAreasFinancialInstitutionsChoicesList({
+        businessAreaSlug,
+      }),
+  });
   const accountFinancialInstitutionsDict = useArrayToDict(
-    choicesData.accountFinancialInstitutionChoices,
+    financialInstitutionChoices,
     'value',
     'name',
   );
 
   if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
     return null;
+  }
+
+  if (financialInstitutionChoicesLoading) {
+    return <LoadingComponent />;
   }
 
   return (

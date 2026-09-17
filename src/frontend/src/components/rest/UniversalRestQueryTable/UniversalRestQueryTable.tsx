@@ -1,9 +1,9 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Order } from '@components/rest/TableRestComponent/TableRestComponent';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { Order } from '@components/rest/TableRestComponent/TableRestComponent';
 import { isUndefined, omitBy } from 'lodash';
 import { restQueryKey } from '@utils/queryKeys';
 

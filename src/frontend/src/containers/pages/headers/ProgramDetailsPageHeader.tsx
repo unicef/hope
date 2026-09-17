@@ -1,10 +1,10 @@
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
 import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';

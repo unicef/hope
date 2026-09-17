@@ -3,7 +3,7 @@ import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface DocumentationFieldProps {
   index: number;
@@ -49,7 +49,7 @@ export function DocumentationField({
             onChange={(event) => {
               setFieldValue(
                 `${baseName}[${index}].file`,
-                event.currentTarget.files[0],
+                event.currentTarget.files?.[0],
               );
             }}
           />

@@ -1,17 +1,18 @@
-import { ReactElement, useCallback, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 type LanguageOption = AutocompleteOption & { code: string };
 
@@ -76,14 +77,17 @@ export function LanguageAutocompleteRestFilter({
     name: lang.name,
   }));
 
+  // Both sides arrive as `LanguageOption | string`: MUI hands back the raw
+  // input text before an option is picked. Comparing without narrowing
+  // `option` reads `.code` off a string and silently never matches.
   const handleOptionSelected = (
-    option: LanguageOption,
+    option: LanguageOption | string,
     selectedValue: LanguageOption | string,
   ) => {
-    if (typeof selectedValue === 'string') {
-      return option?.code === selectedValue;
-    }
-    return option?.code === selectedValue?.code;
+    const optionKey = typeof option === 'string' ? option : option?.code;
+    const valueKey =
+      typeof selectedValue === 'string' ? selectedValue : selectedValue?.code;
+    return optionKey === valueKey;
   };
 
   const handleOptionLabel = (option: LanguageOption | string) => {

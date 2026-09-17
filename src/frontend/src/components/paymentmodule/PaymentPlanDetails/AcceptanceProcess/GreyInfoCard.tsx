@@ -2,8 +2,8 @@ import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MessageDialog } from './MessageDialog';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const GreyText = styled.div`
   color: #9e9e9e;

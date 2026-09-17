@@ -20,16 +20,17 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
-import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
+import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, grievanceTicketStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -144,7 +145,7 @@ export function LinkedGrievancesModal({
               <ContentLink href={grievanceDetailsPath}>
                 {`${el.unicefId} - ${
                   categoryChoices[el.category]
-                } - ${statusChoices[el.status]}`}
+                } - ${statusChoices[el.status ?? '']}`}
               </ContentLink>{' '}
               <br />
             </span>

@@ -6,7 +6,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import styled from 'styled-components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StyledFormControl = styled(FormControl)`
   margin: ${(props) => props.theme.spacing(1)};

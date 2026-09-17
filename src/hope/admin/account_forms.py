@@ -1,5 +1,6 @@
 import csv
 import logging
+from typing import Any
 
 from adminactions.api import delimiters, quotes
 from django import forms
@@ -84,7 +85,7 @@ class RoleAssignmentAdminForm(forms.ModelForm):
 class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
     model = RoleAssignment
 
-    def add_fields(self, form: "forms.Form", index: int | None) -> None:
+    def add_fields(self, form: forms.ModelForm[Any], index: int | None) -> None:
         super().add_fields(form, index)
         form.fields["role"].required = True
 

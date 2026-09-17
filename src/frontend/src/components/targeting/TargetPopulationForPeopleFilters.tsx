@@ -12,7 +12,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface TargetPopulationFiltersProps {
   filter;

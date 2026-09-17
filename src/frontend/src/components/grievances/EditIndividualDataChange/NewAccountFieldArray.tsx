@@ -5,17 +5,20 @@ import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { AccountField } from '../AccountField';
 import { removeItemById } from '../utils/helpers';
-import { ReactElement } from 'react';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { ReactElement } from 'react';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
 
 export interface NewAccountFieldArrayProps {
   values;
   individualChoicesData: IndividualChoices;
+  accountFinancialInstitutionChoices: FinancialInstitutionChoice[];
 }
 
 export function NewAccountFieldArray({
   values,
   individualChoicesData,
+  accountFinancialInstitutionChoices,
 }: NewAccountFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
@@ -43,7 +46,7 @@ export function NewAccountFieldArray({
                   values={values}
                   accountTypeChoices={individualChoicesData.accountTypeChoices}
                   accountFinancialInstitutionChoices={
-                    individualChoicesData.accountFinancialInstitutionChoices
+                    accountFinancialInstitutionChoices
                   }
                 />
               );

@@ -1,12 +1,12 @@
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.models import Survey
 
 
 @admin.register(Survey)
-class SurveyAdmin(HOPEModelAdminBase):
+class SurveyAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     filter_horizontal = ["recipients"]
     list_display = (
         "unicef_id",
@@ -28,3 +28,8 @@ class SurveyAdmin(HOPEModelAdminBase):
     )
     list_filter = ("category", ("flow_id", AutoCompleteFilter))
     search_fields = ("unicef_id", "title")
+
+    def frontend_url(self, obj: Survey) -> str | None:
+        if not obj.program:
+            return None
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/accountability/surveys/{obj.id}"

@@ -1,4 +1,4 @@
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingButton } from '@components/core/LoadingButton';
@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import { Box, Grid } from '@mui/system';
 import { RestService } from '@restgenerated/index';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -35,7 +35,8 @@ import { createApiParams } from '@utils/apiUtils';
 import { FeedbackSteps } from '@utils/constants';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Formik } from 'formik';
-import { ReactElement, ReactNode, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';

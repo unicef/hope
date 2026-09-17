@@ -13,13 +13,15 @@ import {
   PROGRAM_STATE_CHOICES,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../programContext';
-import { ProgramList } from '@restgenerated/models/ProgramList';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
+import { useSexChoices } from '@hooks/useSexChoices';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface PeopleFilterProps {
   filter;
@@ -48,6 +50,8 @@ export function PeopleFilter({
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
+  const { data: sexChoices } = useSexChoices();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -107,7 +111,7 @@ export function PeopleFilter({
               fullWidth
               disableClearable
             >
-              {choicesData?.documentTypeChoices?.map(({ name, value }) => (
+              {documentTypeChoices?.map(({ name, value }) => (
                 <MenuItem key={value} value={value}>
                   {name}
                 </MenuItem>
@@ -135,7 +139,7 @@ export function PeopleFilter({
               icon={<FlashOnIcon />}
               data-cy="filters-program"
             >
-              {programs.map((program) => (
+              {programs?.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
                 </MenuItem>
@@ -194,7 +198,7 @@ export function PeopleFilter({
             data-cy="ind-filters-gender"
             fullWidth
           >
-            {choicesData?.sexChoices?.map(({ name, value }) => (
+            {sexChoices?.map(({ name, value }) => (
               <MenuItem key={value} value={value}>
                 {name}
               </MenuItem>

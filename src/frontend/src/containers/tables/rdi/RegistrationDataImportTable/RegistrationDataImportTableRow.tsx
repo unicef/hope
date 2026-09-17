@@ -7,8 +7,8 @@ import { registrationDataImportStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import type { ReactElement } from 'react';
+import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 import { useProgramContext } from 'src/programContext';
 
 interface PaymentRecordTableRowProps {

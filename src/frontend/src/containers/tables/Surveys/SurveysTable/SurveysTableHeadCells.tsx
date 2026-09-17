@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { Survey } from '@restgenerated/models/Survey';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { Survey } from '@restgenerated/models/Survey';
 
 export const headCells: HeadCell<Survey>[] = [
   {

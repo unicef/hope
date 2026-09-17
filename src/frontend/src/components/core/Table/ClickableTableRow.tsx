@@ -1,5 +1,7 @@
-import { MouseEventHandler, ReactElement, useState } from 'react';
-import TableRow, { TableRowProps } from '@mui/material/TableRow';
+import type { MouseEventHandler, ReactElement } from 'react';
+import { useState } from 'react';
+import type { TableRowProps } from '@mui/material/TableRow';
+import TableRow from '@mui/material/TableRow';
 import styled from 'styled-components';
 
 const StyledTableRow = styled(TableRow)`

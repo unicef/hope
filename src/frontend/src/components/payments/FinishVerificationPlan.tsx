@@ -5,7 +5,8 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -19,7 +20,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useProgramContext } from '../../programContext';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
@@ -82,7 +83,7 @@ export function FinishVerificationPlan({
       const receivedWithProblemsTicketsCount =
         verificationPlan?.receivedWithProblemsCount;
 
-      return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
+      return (notReceivedTicketsCount ?? 0) + (receivedWithProblemsTicketsCount ?? 0);
     }
     return null;
   };

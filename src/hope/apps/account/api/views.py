@@ -18,16 +18,18 @@ from hope.apps.account.api.caches import UserListKeyConstructor
 from hope.apps.account.api.serializers import (
     GroupDetailSerializer,
     GroupListSerializer,
+    PartnerChoicesSerializer,
     ProfileSerializer,
     ProgramUsersSerializer,
-    UserChoicesSerializer,
     UserSerializer,
+    UserTimezoneSerializer,
 )
 from hope.apps.account.filters import UsersFilter
 from hope.apps.account.permissions import ALL_GRIEVANCES_CREATE_MODIFY, Permissions
 from hope.apps.account.profile_cache import ProfileEtagKey, ProfileKeyConstructor
 from hope.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     CountActionMixin,
     CustomSerializerMixin,
     PermissionActionMixin,
@@ -50,6 +52,7 @@ class UserViewSet(
 ):
     permission_classes_by_action = {
         "profile": [IsAuthenticated],
+        "profile_timezone": [IsAuthenticated],
     }
     permissions_by_action = {
         "list": [
@@ -65,10 +68,6 @@ class UserViewSet(
             Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
             Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
         ],
-        "choices": [
-            Permissions.USER_MANAGEMENT_VIEW_LIST,
-            *ALL_GRIEVANCES_CREATE_MODIFY,
-        ],
         "partner_for_grievance_choices": [
             Permissions.USER_MANAGEMENT_VIEW_LIST,
             *ALL_GRIEVANCES_CREATE_MODIFY,
@@ -78,8 +77,8 @@ class UserViewSet(
 
     serializer_classes_by_action = {
         "profile": ProfileSerializer,
+        "profile_timezone": UserTimezoneSerializer,
         "list": UserSerializer,
-        "choices": UserChoicesSerializer,
     }
     serializer_classes = {
         "program_users": ProgramUsersSerializer,
@@ -90,10 +89,16 @@ class UserViewSet(
     def get_serializer_context(self) -> dict[str, Any]:
         context = dict(super().get_serializer_context())
 
-        if self.request and self.action == "profile" and (program_code := self.request.query_params.get("program")):
-            context["program"] = get_object_or_404(
-                Program, code=program_code, business_area__slug=self.kwargs.get("business_area_slug")
-            )
+        if self.request and self.action in {"profile", "profile_timezone"}:
+            business_area_slug = self.kwargs.get("business_area_slug")
+            if business_area_slug and business_area_slug not in {"global", "undefined"}:
+                context["business_area"] = get_object_or_404(
+                    BusinessArea.objects.only("id", "slug", "timezone"), slug=business_area_slug
+                )
+            if program_code := self.request.query_params.get("program"):
+                context["program"] = get_object_or_404(
+                    Program, code=program_code, business_area__slug=business_area_slug
+                )
 
         return context
 
@@ -152,6 +157,14 @@ class UserViewSet(
         data = self.get_serializer(user).data
         return Response(data)
 
+    @extend_schema(request=UserTimezoneSerializer, responses=UserTimezoneSerializer)
+    @action(detail=False, methods=["patch"], url_path="profile-timezone", url_name="profile-timezone")
+    def profile_timezone(self, request: "Request", *args: object, **kwargs: object) -> Response:
+        serializer = self.get_serializer(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
     @extend_schema(
         parameters=[
             OpenApiParameter(name="serializer", type=str),
@@ -163,10 +176,6 @@ class UserViewSet(
     @cached_response(key_func=UserListKeyConstructor())
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
-
-    @action(detail=False, methods=["get"])
-    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer(instance={}).data)
 
     @action(
         detail=False,
@@ -183,16 +192,38 @@ class UserViewSet(
         individual_id = request.query_params.get("individual")
 
         if program_code:
-            program = Program.objects.get(business_area=business_area, code=program_code)
+            program = get_object_or_404(Program, business_area=business_area, code=program_code)
         elif household_id:
-            program = Household.objects.get(id=household_id).program
+            program = get_object_or_404(Household, id=household_id, business_area=business_area).program
         elif individual_id:
-            program = Individual.objects.get(id=individual_id).program
+            program = get_object_or_404(Individual, id=individual_id, business_area=business_area).program
         else:
             program = None
 
         choices_data = Partner.get_partners_for_program_as_choices(business_area.id, program.id if program else None)
         return Response(to_choice_object(choices_data))
+
+
+class PartnerViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
+    """Serve the partner choices scoped to a business area."""
+
+    queryset = Partner.objects.all()
+    permissions_by_action = {
+        "choices": [
+            Permissions.USER_MANAGEMENT_VIEW_LIST,
+            *ALL_GRIEVANCES_CREATE_MODIFY,
+        ],
+    }
+    serializer_classes_by_action = {
+        "choices": PartnerChoicesSerializer,
+    }
+
+    @extend_schema(responses={200: PartnerChoicesSerializer})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices")
+    def choices(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
+        """Return the partner choice lists used by the user and program screens."""
+        serializer = self.get_serializer(instance={}, context={"business_area": self.business_area})
+        return Response(serializer.data)
 
 
 class GroupViewSet(

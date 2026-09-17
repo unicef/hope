@@ -8,7 +8,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -25,7 +26,7 @@ import {
   ApproveBox,
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export const NeedsAdjudicationDetailsOld = ({
@@ -75,6 +76,9 @@ export const NeedsAdjudicationDetailsOld = ({
     details?.selectedIndividual?.id,
   );
   const [isEditMode, setIsEditMode] = useState(false);
+  // ticketDetails is nullable and everything below reads through it. Placed
+  // after the hooks so the hook order stays stable.
+  if (!details) return null;
   const confirmationText = t(
     'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
   );
@@ -315,7 +319,7 @@ export const NeedsAdjudicationDetailsOld = ({
                   !isActiveProgram
                 }
                 checked={selectedDuplicate === details.possibleDuplicate?.id}
-                onChange={(event, checked) =>
+                onChange={(_event, checked) =>
                   setSelectedDuplicate(
                     checked ? details.possibleDuplicate?.id : null,
                   )

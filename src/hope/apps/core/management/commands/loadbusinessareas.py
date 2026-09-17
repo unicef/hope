@@ -46,18 +46,21 @@ class Command(BaseCommand):
         root = tree.getroot()
 
         for business_area_tag in root:
+            business_area_name = business_area_tag.find("BUSINESS_AREA_NAME").text
+            country = Country.objects.filter(name=business_area_name).first()
             business_area, _ = BusinessArea.objects.get_or_create(
                 code=business_area_tag.find("BUSINESS_AREA_CODE").text,
                 defaults={
-                    "name": business_area_tag.find("BUSINESS_AREA_NAME").text,
+                    "name": business_area_name,
                     "long_name": business_area_tag.find("BUSINESS_AREA_LONG_NAME").text,
                     "region_code": business_area_tag.find("REGION_CODE").text,
                     "region_name": business_area_tag.find("REGION_NAME").text,
                     "has_data_sharing_agreement": True,
+                    "office_country": country,
                 },
             )
 
-            if country := Country.objects.filter(name=business_area.name).first():
+            if country:
                 business_area.countries.add(country)
         BusinessArea.objects.get_or_create(
             code="GLOBAL",
@@ -67,6 +70,7 @@ class Command(BaseCommand):
                 "region_code": "GLOBAL",
                 "region_name": "GLOBAL",
                 "has_data_sharing_agreement": True,
+                "timezone": "UTC",
             },
         )
         logger.debug(f"Imported business areas from {file}")

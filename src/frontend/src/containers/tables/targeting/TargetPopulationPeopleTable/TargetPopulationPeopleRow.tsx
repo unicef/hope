@@ -3,8 +3,9 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { PendingPayment } from '@restgenerated/models/PendingPayment';
+import type { ReactElement } from 'react';
+import type { PendingPayment } from '@restgenerated/models/PendingPayment';
+import { displayNameWithLatin } from '@utils/utils';
 
 interface TargetPopulationPeopleTableRowProps {
   payment: PendingPayment;
@@ -41,7 +42,7 @@ export function TargetPopulationPeopleTableRow({
           payment?.headOfHousehold.unicefId
         )}
       </TableCell>
-      <AnonTableCell>{payment?.headOfHousehold?.fullName || '-'}</AnonTableCell>
+      <AnonTableCell>{displayNameWithLatin(payment?.headOfHousehold, 'fullName') || '-'}</AnonTableCell>
       <TableCell align="left">{payment?.householdAdmin2 || '-'}</TableCell>
       <TableCell align="left">
         {payment?.householdSize != null ? payment.householdSize : '-'}

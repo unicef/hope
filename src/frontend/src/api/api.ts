@@ -169,7 +169,10 @@ export const handleApiResponse = async <T>(apiCall: Promise<T>): Promise<T> => {
   }
 };
 
-export const handleMutationError = (error: unknown, action: string): never => {
+export const handleMutationError: (error: unknown, action: string) => never = (
+  error,
+  action,
+) => {
   const errorMessage =
     (error as { message?: string })?.message || 'An unknown error occurred';
   const err = new Error(`Failed to ${action}: ${errorMessage}`) as Error & {

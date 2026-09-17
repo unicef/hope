@@ -9,9 +9,9 @@ import {
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 interface LookUpTargetPopulationTableRowCommunicationProps {
   targetPopulation: TargetPopulationList;

@@ -1,5 +1,6 @@
 import { Box, Button, Grid } from '@mui/material';
-import { ReactElement, useCallback, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ClearApplyButtonsProps {

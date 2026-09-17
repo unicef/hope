@@ -14,12 +14,12 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { PDUXlsxTemplateDetail } from '@restgenerated/models/PDUXlsxTemplateDetail';
-import { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
+import type { PDUXlsxTemplateDetail } from '@restgenerated/models/PDUXlsxTemplateDetail';
+import type { PDUXlsxTemplateList } from '@restgenerated/models/PDUXlsxTemplateList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {

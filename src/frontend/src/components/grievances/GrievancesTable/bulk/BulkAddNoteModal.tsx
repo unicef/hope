@@ -7,11 +7,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { BulkGrievanceTicketsAddNote } from '@restgenerated/models/BulkGrievanceTicketsAddNote';
+import type { BulkGrievanceTicketsAddNote } from '@restgenerated/models/BulkGrievanceTicketsAddNote';
 import { BulkBaseModal } from './BulkBaseModal';
-import { ReactElement, useState } from 'react';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 
 export const StyledLink = styled.div`
   color: #000;

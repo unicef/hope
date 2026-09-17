@@ -1,4 +1,4 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<any>[] = [
   {

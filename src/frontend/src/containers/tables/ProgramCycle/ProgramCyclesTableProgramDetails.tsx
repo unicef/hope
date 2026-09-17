@@ -12,16 +12,17 @@ import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor, formatFigure } from '@utils/utils';
-import React, { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { createApiParams } from '@utils/apiUtils';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;

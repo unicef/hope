@@ -8,16 +8,16 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -64,10 +64,14 @@ const EditPaymentPlanForm = ({
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
         });
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansList,
+          ),
         });
       },
     });
@@ -183,7 +187,14 @@ const EditPaymentPlanPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { data: paymentPlan, isLoading: loadingPaymentPlan } =
     useQuery<PaymentPlanDetail>({
-      queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
+      queryKey: restQueryKey(
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        {
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programCode: programId,
+        },
+      ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
           businessAreaSlug: businessArea,

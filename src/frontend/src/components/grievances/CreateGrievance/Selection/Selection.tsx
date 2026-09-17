@@ -13,9 +13,9 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
 } from '@utils/constants';
-import { ChangeEvent, ReactElement } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 export interface SelectionProps {
   handleChange: (e: ChangeEvent) => void;

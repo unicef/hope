@@ -4,9 +4,9 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { sexToCapitalize } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import { displayNameWithLatin, sexToCapitalize } from '@utils/utils';
+import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 interface LookUpIndividualTableRowProps {
@@ -54,7 +54,7 @@ export function LookUpIndividualTableRow({
           <span>{individual.unicefId || '-'}</span>
         )}
       </TableCell>
-      <TableCell align="left">{individual.fullName}</TableCell>
+      <TableCell align="left">{displayNameWithLatin(individual, 'fullName')}</TableCell>
       {!isSocialDctType && (
         <TableCell align="left">
           {individual.household ? individual.household.unicefId : '-'}

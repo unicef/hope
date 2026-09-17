@@ -149,6 +149,7 @@ def test_signature_after_prepare_payment_plan(
 ) -> None:
     DeliveryMechanismFactory(code="cash", name="Cash")
     fsp = FinancialServiceProviderFactory()
+    fsp.allowed_business_areas.add(business_area)
 
     hoh1 = IndividualFactory(household=None, program=program, business_area=business_area)
     hoh2 = IndividualFactory(household=None, program=program, business_area=business_area)
@@ -210,7 +211,7 @@ def test_signature_after_prepare_payment_plan(
         pp = PaymentPlanService.create(
             input_data=input_data,
             user=user,
-            business_area_slug=business_area.slug,
+            program=program,
         )
 
     pp.refresh_from_db()

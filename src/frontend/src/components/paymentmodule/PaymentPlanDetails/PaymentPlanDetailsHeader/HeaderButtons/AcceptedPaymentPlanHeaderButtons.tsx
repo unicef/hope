@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import { CreateChildPaymentPlan } from '../../../CreateChildPaymentPlan';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;

@@ -28,15 +28,8 @@ import {
   validate,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Formik } from 'formik';
-import {
-  Component,
-  ReactElement,
-  ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { Component, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -50,7 +43,7 @@ import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndi
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { FspChoices } from '@restgenerated/models/FspChoices';
+import type { FspChoices } from '@restgenerated/models/FspChoices';
 import { restQueryKey } from '@utils/queryKeys';
 
 const ButtonBox = styled.div`
@@ -168,7 +161,7 @@ class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps, any> {
     return arrayHelpers;
   }
 
-  render(): ReactNode {
+  override render(): ReactNode {
     const { children } = this.props;
     return children;
   }
@@ -220,10 +213,13 @@ export const TargetingCriteriaForm = ({
       }),
   });
   const { data, isLoading: loading } = useQuery({
-    queryKey: restQueryKey(RestService.restBusinessAreasAllFieldsAttributesList, {
-      slug: businessArea,
-      programId: selectedProgram?.id,
-    }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasAllFieldsAttributesList,
+      {
+        slug: businessArea,
+        programId: selectedProgram?.id,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasAllFieldsAttributesList({
         slug: businessArea,
@@ -375,19 +371,17 @@ export const TargetingCriteriaForm = ({
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                {
-                  (errors as { nonFieldErrors?: string[] }).nonFieldErrors && (
-                    <DialogError>
-                      <ul>
-                        {(
-                          errors as { nonFieldErrors?: string[] }
-                        ).nonFieldErrors.map((message) => (
-                          <li key={message}>{message}</li>
-                        ))}
-                      </ul>
-                    </DialogError>
-                  )
-                }
+                {(errors as { nonFieldErrors?: string[] }).nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {(
+                        errors as { nonFieldErrors?: string[] }
+                      ).nonFieldErrors.map((message) => (
+                        <li key={message}>{message}</li>
+                      ))}
+                    </ul>
+                  </DialogError>
+                )}
                 <DialogDescription>
                   {isSocialDctType
                     ? ''
@@ -443,11 +437,11 @@ export const TargetingCriteriaForm = ({
                           data={
                             isSocialDctType
                               ? data
-                              : householdData.allFieldsAttributes
+                              : householdData?.allFieldsAttributes
                           }
                           choicesDict={allDataChoicesDict}
                           each={each}
-                          onChange={(e, object) => {
+                          onChange={(_e, object) => {
                             if (object) {
                               return chooseFieldType(
                                 object,
@@ -475,7 +469,7 @@ export const TargetingCriteriaForm = ({
                       <Button
                         onClick={() =>
                           householdsFiltersBlocksWrapperRef.current
-                            .getArrayHelpers()
+                            ?.getArrayHelpers()
                             .push({ fieldName: '' })
                         }
                         color="primary"
@@ -558,7 +552,7 @@ export const TargetingCriteriaForm = ({
                           data-cy="button-individual-rule"
                           onClick={() =>
                             individualsFiltersBlocksWrapperRef.current
-                              .getArrayHelpers()
+                              ?.getArrayHelpers()
                               .push({
                                 individualBlockFilters: [{ fieldName: '' }],
                               })

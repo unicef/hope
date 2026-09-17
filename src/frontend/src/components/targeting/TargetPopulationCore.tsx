@@ -9,7 +9,7 @@ import TargetingHouseholds from './TargetingHouseholds';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import ResultsForPeople from '@components/targeting/ResultsForPeople';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import AddFilterTargetingCriteriaDisplay from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
 const Label = styled.p`

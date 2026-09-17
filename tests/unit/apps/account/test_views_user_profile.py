@@ -1,10 +1,12 @@
 """Tests for user profile API views."""
 
 import datetime
+from types import SimpleNamespace
 from typing import Any
 
 from django.utils import timezone
 import pytest
+from pytest_django import DjangoCaptureOnCommitCallbacks
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -16,6 +18,8 @@ from extras.test_utils.factories import (
     RoleFactory,
     UserFactory,
 )
+from extras.test_utils.fixtures.api_client import ReauthenticateAPIClient
+from hope.apps.account.api.serializers import ProfileSerializer
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Partner, Program, Role, User
 
@@ -267,6 +271,38 @@ def user_profile_url(afghanistan: BusinessArea) -> str:
 
 
 @pytest.fixture
+def user_timezone_url(afghanistan: BusinessArea) -> str:
+    return reverse(
+        "api:accounts:users-profile-timezone",
+        kwargs={"business_area_slug": afghanistan.slug},
+    )
+
+
+@pytest.fixture
+def profile_serializer_without_business_area_context(afghanistan: BusinessArea) -> ProfileSerializer:
+    request = SimpleNamespace(
+        parser_context={"kwargs": {"business_area_slug": afghanistan.slug}},
+        query_params={},
+    )
+    return ProfileSerializer(context={"request": request})
+
+
+@pytest.fixture
+def profile_serializer_with_undefined_business_area() -> ProfileSerializer:
+    request = SimpleNamespace(
+        parser_context={"kwargs": {"business_area_slug": "undefined"}},
+        query_params={},
+    )
+    return ProfileSerializer(context={"request": request})
+
+
+@pytest.fixture
+def profile_superuser(user: User) -> User:
+    user.is_superuser = True
+    return user
+
+
+@pytest.fixture
 def authenticated_client(api_client: Any, user: User):
     return api_client(user)
 
@@ -301,6 +337,8 @@ def test_user_profile_in_scope_business_area(
     assert profile_data["email"] == user.email
     assert profile_data["first_name"] == user.first_name
     assert profile_data["last_name"] == user.last_name
+    assert profile_data["timezone"] is None
+    assert profile_data["effective_timezone"] == "UTC"
     assert profile_data["is_superuser"] == user.is_superuser
     assert profile_data["partner"] == {
         "id": partner.id,
@@ -559,6 +597,22 @@ def test_cross_area_filter_available_in_scope_business_area(
     assert profile_data["cross_area_filter_available"] == filter_available
 
 
+def test_cross_area_filter_falls_back_to_business_area_lookup(
+    profile_serializer_without_business_area_context: ProfileSerializer,
+    user: User,
+) -> None:
+    assert profile_serializer_without_business_area_context.get_cross_area_filter_available(user) is False
+
+
+def test_cross_area_filter_uses_global_scope_when_business_area_is_undefined(
+    profile_serializer_with_undefined_business_area: ProfileSerializer,
+    profile_superuser: User,
+    django_assert_num_queries: Any,
+) -> None:
+    with django_assert_num_queries(0):
+        assert profile_serializer_with_undefined_business_area.get_cross_area_filter_available(profile_superuser)
+
+
 @pytest.mark.parametrize(
     ("permissions", "filter_available"),
     [
@@ -588,3 +642,77 @@ def test_cross_area_filter_available_in_scope_program(
     assert response.status_code == status.HTTP_200_OK
     profile_data = response.data
     assert profile_data["cross_area_filter_available"] == filter_available
+
+
+def test_user_profile_uses_business_area_timezone_when_user_timezone_is_not_set(
+    authenticated_client: ReauthenticateAPIClient,
+    afghanistan: BusinessArea,
+    user_profile_url: str,
+) -> None:
+    afghanistan.timezone = "Asia/Kabul"
+    afghanistan.save(update_fields=("timezone",))
+
+    response = authenticated_client.get(user_profile_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["timezone"] is None
+    assert response.data["effective_timezone"] == "Asia/Kabul"
+
+
+def test_user_can_set_personal_timezone(
+    authenticated_client: ReauthenticateAPIClient,
+    user: User,
+    user_timezone_url: str,
+) -> None:
+    response = authenticated_client.patch(user_timezone_url, {"timezone": "Europe/Warsaw"}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {"timezone": "Europe/Warsaw", "effective_timezone": "Europe/Warsaw"}
+    user.refresh_from_db()
+    assert str(user.timezone) == "Europe/Warsaw"
+
+
+def test_user_can_clear_personal_timezone(
+    authenticated_client: ReauthenticateAPIClient,
+    user: User,
+    afghanistan: BusinessArea,
+    user_timezone_url: str,
+) -> None:
+    user.timezone = "Europe/Warsaw"
+    user.save(update_fields=("timezone",))
+    afghanistan.timezone = "Asia/Kabul"
+    afghanistan.save(update_fields=("timezone",))
+
+    response = authenticated_client.patch(user_timezone_url, {"timezone": None}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {"timezone": None, "effective_timezone": "Asia/Kabul"}
+    user.refresh_from_db()
+    assert user.timezone is None
+
+
+def test_user_timezone_update_rejects_invalid_identifier(
+    authenticated_client: ReauthenticateAPIClient,
+    user_timezone_url: str,
+) -> None:
+    response = authenticated_client.patch(user_timezone_url, {"timezone": "Not/A_Timezone"}, format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data == {"timezone": ["A valid timezone is required."]}
+
+
+def test_business_area_timezone_change_invalidates_cached_profile(
+    authenticated_client: ReauthenticateAPIClient,
+    afghanistan: BusinessArea,
+    user_profile_url: str,
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+) -> None:
+    initial_response = authenticated_client.get(user_profile_url)
+    assert initial_response.data["effective_timezone"] == "UTC"
+
+    with django_capture_on_commit_callbacks(execute=True):
+        afghanistan.timezone = "Asia/Kabul"
+        afghanistan.save(update_fields=("timezone",))
+
+    updated_response = authenticated_client.get(user_profile_url)
+    assert updated_response.data["effective_timezone"] == "Asia/Kabul"

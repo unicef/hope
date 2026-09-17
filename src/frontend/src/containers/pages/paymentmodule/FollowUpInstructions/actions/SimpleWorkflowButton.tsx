@@ -1,11 +1,11 @@
 import { LoadingButton } from '@core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface SimpleWorkflowButtonProps {

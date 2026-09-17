@@ -11,9 +11,9 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
-import { ReactElement } from 'react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { ReactElement } from 'react';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -71,7 +71,9 @@ export function EntriesTable({
     'identitiesToRemove',
     'flexFields',
   ];
-  const biodataFields = entries.filter((item) => !wrongFields.includes(item[0]));
+  const biodataFields = entries.filter(
+    (item) => !wrongFields.includes(item[0]),
+  );
   return (
     <StyledTable>
       <TableHead>

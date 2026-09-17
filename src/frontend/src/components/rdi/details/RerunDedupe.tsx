@@ -5,7 +5,8 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -13,7 +14,7 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
-import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
+import type { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 import { useActionMutation } from '@hooks/useActionMutation';
 import { RestService } from '@restgenerated/services/RestService';
 import { showApiErrorMessages } from '@utils/utils';
@@ -37,7 +38,7 @@ export const RerunDedupe = ({
       RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
     ),
   );
-  const rerunDedupe = async(): Promise<void> => {
+  const rerunDedupe = async (): Promise<void> => {
     try {
       await mutate();
       showMessage('Rerunning Deduplication started');

@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 export const headCells: HeadCell<HouseholdList>[] = [
   {

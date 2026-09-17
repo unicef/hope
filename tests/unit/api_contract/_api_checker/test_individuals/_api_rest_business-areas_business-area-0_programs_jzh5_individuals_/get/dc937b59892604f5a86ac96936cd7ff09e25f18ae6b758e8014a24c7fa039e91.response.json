@@ -4,13 +4,13 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, HEAD, OPTIONS",
-        "ETag": "f5cf6c00292d61d5fa037021e4245d00",
+        "ETag": "6ebc5a9ad2c9b0462136da230ac686a2",
         "Cache-Control": "private, no-cache",
         "X-Hope-Backend-Version": "None",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "1130"
+        "Content-Length": "1151"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/business-area-0/programs/jzh5/individuals/?limit=50&offset=50",
@@ -20,6 +20,7 @@
                 "id": "39153afe-db31-418c-bc62-5da4f46a9efc",
                 "unicef_id": "IND-25-0000.0004",
                 "full_name": "Person 0",
+                "full_name_latin": null,
                 "household": null,
                 "status": "ACTIVE",
                 "relationship": "",

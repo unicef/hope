@@ -1,5 +1,6 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import { ReactElement, ReactNode, useEffect, useRef } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 
 type OptionType = any;

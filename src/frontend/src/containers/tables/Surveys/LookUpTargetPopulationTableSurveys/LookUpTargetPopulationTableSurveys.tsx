@@ -6,14 +6,15 @@ import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
 import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import type { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 interface LookUpTargetPopulationTableSurveysProps {
   filter;

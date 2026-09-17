@@ -1,7 +1,7 @@
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceIndividualPhotoModal } from '../GrievancesPhotoModals/GrievanceIndividualPhotoModal';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface CurrentValueProps {
@@ -27,26 +27,38 @@ export function CurrentValue({
 }: CurrentValueProps): ReactElement {
   const { t } = useTranslation();
   // Handle core photo field - check both field.name and passed fieldName as fallback
-  const isPhotoField = field?.name === 'photo' || (fieldName === 'photo' && !field?.isFlexField);
+  const isPhotoField =
+    field?.name === 'photo' || (fieldName === 'photo' && !field?.isFlexField);
 
   if (isPhotoField && (field?.type === 'IMAGE' || !field)) {
-    return <>{individualId ? <GrievanceIndividualPhotoModal isCurrent individualId={individualId} /> : '-'}</>;
+    return (
+      <>
+        {individualId ? (
+          <GrievanceIndividualPhotoModal
+            isCurrent
+            individualId={individualId}
+          />
+        ) : (
+          '-'
+        )}
+      </>
+    );
   }
 
   let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value)?.labelEn || '-';
+        field.choices?.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'SELECT_MANY':
       displayValue =
-        field.choices.find((item) => item.value === value)?.labelEn || '-';
+        field.choices?.find((item) => item.value === value)?.labelEn || '-';
       if (value instanceof Array) {
         displayValue = value
           .map(
             (choice) =>
-              field.choices.find((item) => item.value === choice)?.labelEn ||
+              field.choices?.find((item) => item.value === choice)?.labelEn ||
               '-',
           )
           .join(', ');
@@ -62,7 +74,10 @@ export function CurrentValue({
         );
       } else if (field?.name === 'photo') {
         displayValue = (
-          <GrievanceIndividualPhotoModal isCurrent individualId={individualId} />
+          <GrievanceIndividualPhotoModal
+            isCurrent
+            individualId={individualId}
+          />
         );
       } else {
         displayValue = value ? <PhotoModal src={value} /> : '-';

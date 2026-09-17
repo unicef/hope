@@ -118,7 +118,7 @@ def increment_cache_key(key: str) -> int:
 
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -135,7 +135,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
 class RendererKeyBit(KeyBitBase):
     """Key bit that includes renderer class information in cache keys."""
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -162,7 +162,7 @@ class KeyConstructorMixin(KeyConstructor):
 class BusinessAreaKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -182,7 +182,7 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
 class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -221,7 +221,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     ) -> QuerySet:
         return view_instance.get_queryset()
 
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,
@@ -247,7 +247,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
 
 
 class AreaLimitKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

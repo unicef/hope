@@ -1,4 +1,3 @@
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, renderWithProviders, screen, waitFor } from 'src/testUtils/testUtils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

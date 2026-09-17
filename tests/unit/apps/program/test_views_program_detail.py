@@ -3,6 +3,8 @@
 from typing import Any, Callable
 from unittest.mock import patch
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -440,6 +442,34 @@ def test_program_detail_get_payments_paginated(
     assert len(response_data["results"]) == 2
     assert "next" in response_data
     assert "previous" in response_data
+
+
+def test_program_detail_get_payments_query_count_does_not_grow_with_rows(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    payments_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PM_VIEW_PAYMENT_LIST],
+        afghanistan,
+        program,
+    )
+
+    # Warm the permission cache so it is not charged to the first measured request.
+    authenticated_client.get(payments_url)
+
+    with CaptureQueriesContext(connection) as one_row:
+        first_page = authenticated_client.get(payments_url, {"limit": 1})
+    with CaptureQueriesContext(connection) as all_rows:
+        full_page = authenticated_client.get(payments_url, {"limit": 2})
+
+    assert len(first_page.json()["results"]) == 1
+    assert len(full_page.json()["results"]) == 2
+    assert len(all_rows.captured_queries) == len(one_row.captured_queries)
 
 
 @patch("hope.apps.program.api.views.ProgramViewSet.pagination_class", None)

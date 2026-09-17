@@ -1,6 +1,6 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 import json
-from typing import Any, Callable
+from typing import Any, Callable, cast
 from unittest.mock import patch
 
 from constance.test import override_config
@@ -84,6 +84,18 @@ def assigned_ticket(business_area: BusinessArea, assignee: User, actor: User) ->
 
 
 @pytest.fixture
+def warsaw_assigned_ticket(business_area: BusinessArea, assignee: User, actor: User) -> GrievanceTicket:
+    assignee.timezone = "Europe/Warsaw"
+    assignee.save(update_fields=("timezone",))
+    return GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        assigned_at=DURING_THE_DAY,
+        assigned_by=actor,
+    )
+
+
+@pytest.fixture
 def edited_ticket(business_area: BusinessArea, assignee: User, creator: User, actor: User) -> GrievanceTicket:
     return GrievanceTicketFactory(
         business_area=business_area,
@@ -92,6 +104,64 @@ def edited_ticket(business_area: BusinessArea, assignee: User, creator: User, ac
         user_modified=DURING_THE_DAY,
         user_modified_by=actor,
     )
+
+
+@pytest.fixture
+def daily_digest_job_config(business_area: BusinessArea) -> dict[str, str]:
+    delivery_key = f"{business_area.id}:UTC:{DIGEST_DATE.isoformat()}"
+    return {
+        "business_area_id": str(business_area.id),
+        "digest_date": DIGEST_DATE.isoformat(),
+        "timezone_name": "UTC",
+        "delivery_key": delivery_key,
+    }
+
+
+@pytest.fixture
+def missing_business_area_digest_job_config() -> dict[str, str]:
+    business_area_id = "11111111-1111-1111-1111-111111111111"
+    return {
+        "business_area_id": business_area_id,
+        "digest_date": DIGEST_DATE.isoformat(),
+        "timezone_name": "UTC",
+        "delivery_key": f"{business_area_id}:UTC:{DIGEST_DATE.isoformat()}",
+    }
+
+
+@pytest.fixture
+def completed_daily_digest_job(daily_digest_job_config: dict[str, str]) -> PeriodicAsyncJob:
+    return PeriodicAsyncJob.objects.create(
+        type=PeriodicAsyncJob.JobType.JOB_TASK,
+        job_name="daily_grievance_digest_async_task",
+        action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
+        config={
+            **daily_digest_job_config,
+            "completed": True,
+        },
+    )
+
+
+@pytest.fixture
+def partially_sent_daily_digest_job(
+    edited_ticket: GrievanceTicket,
+    daily_digest_job_config: dict[str, str],
+) -> tuple[PeriodicAsyncJob, User, User]:
+    assignee = cast("User", edited_ticket.assigned_to)
+    creator = cast("User", edited_ticket.created_by)
+    PeriodicAsyncJob.objects.create(
+        type=PeriodicAsyncJob.JobType.JOB_TASK,
+        job_name="daily_grievance_digest_async_task",
+        action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
+        config={**daily_digest_job_config, "sent_user_ids": [str(assignee.pk)]},
+        errors={"exception": "Mail delivery failed"},
+    )
+    retry_job = PeriodicAsyncJob.objects.create(
+        type=PeriodicAsyncJob.JobType.JOB_TASK,
+        job_name="daily_grievance_digest_async_task",
+        action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
+        config=daily_digest_job_config,
+    )
+    return retry_job, assignee, creator
 
 
 @pytest.fixture
@@ -277,6 +347,38 @@ def test_business_area_with_email_notification_disabled_lists_nothing(
     assert digests == []
 
 
+def test_digest_uses_only_recipients_in_the_requested_timezone(
+    business_area: BusinessArea,
+    warsaw_assigned_ticket: GrievanceTicket,
+    assignee: User,
+) -> None:
+    warsaw_digests = DailyDigestService(business_area, DIGEST_DATE, "Europe/Warsaw").build_digests()
+    utc_digests = DailyDigestService(business_area, DIGEST_DATE, "UTC").build_digests()
+
+    assert len(warsaw_digests) == 1
+    assert warsaw_digests[0].user == assignee
+    assert warsaw_digests[0].assigned == [warsaw_assigned_ticket]
+    assert utc_digests == []
+
+
+def test_recipient_timezone_names_uses_one_query(
+    business_area: BusinessArea,
+    warsaw_assigned_ticket: GrievanceTicket,
+    django_assert_num_queries: Any,
+) -> None:
+    with django_assert_num_queries(1):
+        timezone_names = DailyDigestService.recipient_timezone_names(business_area)
+
+    assert timezone_names == {"UTC", "Europe/Warsaw"}
+
+
+def test_digest_converts_local_dst_day_boundaries_to_utc(business_area: BusinessArea) -> None:
+    service = DailyDigestService(business_area, date(2026, 3, 29), "Europe/Warsaw")
+
+    assert service.start == datetime(2026, 3, 28, 23, tzinfo=UTC)
+    assert service.end == datetime(2026, 3, 29, 22, tzinfo=UTC)
+
+
 def test_inactive_assignee_is_not_listed(business_area: BusinessArea, actor: User) -> None:
     GrievanceTicketFactory(
         business_area=business_area,
@@ -306,10 +408,10 @@ def test_assignee_without_an_email_is_not_listed(business_area: BusinessArea, ac
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_no_email_is_sent_when_both_buckets_are_empty(business_area: BusinessArea) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
-        sent, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
     mock_send.assert_not_called()
-    assert (sent, failed) == (0, 0)
+    assert (len(sent_user_ids), failed) == (0, 0)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)
@@ -317,19 +419,19 @@ def test_no_email_is_sent_when_the_global_flag_is_off(
     business_area: BusinessArea, assigned_ticket: GrievanceTicket
 ) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
-        sent, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
     mock_send.assert_not_called()
-    assert (sent, failed) == (0, 0)
+    assert (len(sent_user_ids), failed) == (0, 0)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_one_email_per_recipient_is_sent(business_area: BusinessArea, edited_ticket: GrievanceTicket) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
-        sent, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
     assert mock_send.call_count == 2
-    assert (sent, failed) == (2, 0)
+    assert (len(sent_user_ids), failed) == (2, 0)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
@@ -337,9 +439,9 @@ def test_a_failing_recipient_does_not_stop_the_others(
     business_area: BusinessArea, edited_ticket: GrievanceTicket
 ) -> None:
     with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=[Exception("boom"), None]):
-        sent, failed = DailyDigestService(business_area, DIGEST_DATE).send()
+        sent_user_ids, failed = DailyDigestService(business_area, DIGEST_DATE).send()
 
-    assert (sent, failed) == (1, 1)
+    assert (len(sent_user_ids), failed) == (1, 1)
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
@@ -447,6 +549,49 @@ def test_fan_out_pins_yesterday_as_the_digest_date(business_area: BusinessArea) 
     assert mock_queue_task.call_args.kwargs["config"]["digest_date"] == "2026-08-09"
 
 
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_fan_out_catches_up_the_latest_missed_local_morning(business_area: BusinessArea) -> None:
+    with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
+        with freeze_time("2026-08-10 05:30:00+00:00"):
+            daily_grievance_digest_async_task()
+
+    assert mock_queue_task.call_args.kwargs["config"]["digest_date"] == "2026-08-08"
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True, GRIEVANCE_NOTIFICATION_HOUR=8)
+def test_fan_out_uses_the_configured_local_notification_hour(business_area: BusinessArea) -> None:
+    with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
+        with freeze_time("2026-08-10 07:30:00+00:00"):
+            daily_grievance_digest_async_task()
+
+    assert mock_queue_task.call_args.kwargs["config"]["digest_date"] == "2026-08-08"
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_fan_out_queues_effective_recipient_timezones(
+    business_area: BusinessArea,
+    warsaw_assigned_ticket: GrievanceTicket,
+) -> None:
+    with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
+        with freeze_time(NEXT_DAY):
+            daily_grievance_digest_async_task()
+
+    queued_timezones = {call.kwargs["config"]["timezone_name"] for call in mock_queue_task.call_args_list}
+    assert queued_timezones == {"UTC", "Europe/Warsaw"}
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_fan_out_skips_an_existing_delivery(
+    business_area: BusinessArea,
+    completed_daily_digest_job: PeriodicAsyncJob,
+) -> None:
+    with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
+        with freeze_time(NEXT_DAY):
+            daily_grievance_digest_async_task()
+
+    mock_queue_task.assert_not_called()
+
+
 @override_config(SEND_GRIEVANCES_NOTIFICATION=False)
 def test_fan_out_queues_nothing_when_the_global_flag_is_off(business_area: BusinessArea) -> None:
     with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
@@ -457,13 +602,15 @@ def test_fan_out_queues_nothing_when_the_global_flag_is_off(business_area: Busin
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_action_sends_the_digest_for_the_pinned_business_area_and_day(
-    business_area: BusinessArea, assigned_ticket: GrievanceTicket
+    business_area: BusinessArea,
+    assigned_ticket: GrievanceTicket,
+    daily_digest_job_config: dict[str, str],
 ) -> None:
     job = PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={"business_area_id": str(business_area.id), "digest_date": "2026-08-09"},
+        config=daily_digest_job_config,
     )
 
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
@@ -471,16 +618,20 @@ def test_action_sends_the_digest_for_the_pinned_business_area_and_day(
 
     mock_send.assert_called_once()
     job.refresh_from_db()
-    assert job.config["completed_for"] == f"{business_area.id}:2026-08-09"
+    assert job.config["sent_user_ids"] == [str(assigned_ticket.assigned_to_id)]
+    assert job.config["completed"] is True
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
-def test_rerunning_the_same_job_sends_nothing(business_area: BusinessArea, assigned_ticket: GrievanceTicket) -> None:
+def test_rerunning_the_same_job_sends_nothing(
+    assigned_ticket: GrievanceTicket,
+    daily_digest_job_config: dict[str, str],
+) -> None:
     job = PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={"business_area_id": str(business_area.id), "digest_date": "2026-08-09"},
+        config=daily_digest_job_config,
     )
 
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
@@ -492,23 +643,23 @@ def test_rerunning_the_same_job_sends_nothing(business_area: BusinessArea, assig
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_a_second_job_for_a_finished_day_sends_nothing(
-    business_area: BusinessArea, assigned_ticket: GrievanceTicket
+    assigned_ticket: GrievanceTicket,
+    daily_digest_job_config: dict[str, str],
 ) -> None:
     PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
         config={
-            "business_area_id": str(business_area.id),
-            "digest_date": "2026-08-09",
-            "completed_for": f"{business_area.id}:2026-08-09",
+            **daily_digest_job_config,
+            "completed": True,
         },
     )
     duplicate_job = PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={"business_area_id": str(business_area.id), "digest_date": "2026-08-09"},
+        config=daily_digest_job_config,
     )
 
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
@@ -518,12 +669,15 @@ def test_a_second_job_for_a_finished_day_sends_nothing(
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
-def test_failed_send_leaves_the_day_unmarked(business_area: BusinessArea, assigned_ticket: GrievanceTicket) -> None:
+def test_failed_send_leaves_the_day_unmarked(
+    assigned_ticket: GrievanceTicket,
+    daily_digest_job_config: dict[str, str],
+) -> None:
     job = PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={"business_area_id": str(business_area.id), "digest_date": "2026-08-09"},
+        config=daily_digest_job_config,
     )
 
     with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=Exception("boom")):
@@ -531,16 +685,19 @@ def test_failed_send_leaves_the_day_unmarked(business_area: BusinessArea, assign
             daily_grievance_digest_async_task_action(job)
 
     job.refresh_from_db()
-    assert "completed_for" not in job.config
+    assert "completed" not in job.config
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
-def test_failed_day_is_delivered_by_later_run(business_area: BusinessArea, assigned_ticket: GrievanceTicket) -> None:
+def test_failed_day_is_delivered_by_later_run(
+    assigned_ticket: GrievanceTicket,
+    daily_digest_job_config: dict[str, str],
+) -> None:
     job = PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={"business_area_id": str(business_area.id), "digest_date": "2026-08-09"},
+        config=daily_digest_job_config,
     )
     with patch.object(daily_digest_service.MailjetClient, "send_email", side_effect=Exception("boom")):
         with pytest.raises(RuntimeError):
@@ -551,16 +708,32 @@ def test_failed_day_is_delivered_by_later_run(business_area: BusinessArea, assig
 
     mock_send.assert_called_once()
     job.refresh_from_db()
-    assert job.config["completed_for"] == f"{business_area.id}:2026-08-09"
+    assert job.config["completed"] is True
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
-def test_action_skips_a_business_area_that_no_longer_exists() -> None:
+def test_retry_skips_recipients_recorded_by_a_failed_job(
+    partially_sent_daily_digest_job: tuple[PeriodicAsyncJob, User, User],
+) -> None:
+    retry_job, assignee, creator = partially_sent_daily_digest_job
+
+    with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
+        daily_grievance_digest_async_task_action(retry_job)
+
+    mock_send.assert_called_once()
+    retry_job.refresh_from_db()
+    assert retry_job.config["sent_user_ids"] == sorted([str(assignee.pk), str(creator.pk)])
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_action_skips_a_business_area_that_no_longer_exists(
+    missing_business_area_digest_job_config: dict[str, str],
+) -> None:
     job = PeriodicAsyncJob.objects.create(
         type=PeriodicAsyncJob.JobType.JOB_TASK,
         job_name="daily_grievance_digest_async_task",
         action="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task_action",
-        config={"business_area_id": "11111111-1111-1111-1111-111111111111", "digest_date": "2026-08-09"},
+        config=missing_business_area_digest_job_config,
     )
 
     with patch.object(daily_digest_service.MailjetClient, "send_email") as mock_send:
@@ -568,7 +741,7 @@ def test_action_skips_a_business_area_that_no_longer_exists() -> None:
 
     mock_send.assert_not_called()
     job.refresh_from_db()
-    assert "completed_for" not in job.config
+    assert "completed" not in job.config
 
 
 def test_bulk_assign_endpoint_feeds_the_digest(

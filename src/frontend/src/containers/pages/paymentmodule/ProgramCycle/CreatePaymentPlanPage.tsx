@@ -8,13 +8,13 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { format, parseISO } from 'date-fns';
 import { Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -48,7 +48,9 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansList,
+          ),
         });
       },
     });

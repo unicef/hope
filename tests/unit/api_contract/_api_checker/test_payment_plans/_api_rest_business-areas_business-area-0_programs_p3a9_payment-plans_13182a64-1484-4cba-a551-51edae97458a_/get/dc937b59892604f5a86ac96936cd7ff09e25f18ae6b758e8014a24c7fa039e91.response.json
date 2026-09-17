@@ -116,9 +116,16 @@
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
         "can_send_to_payment_gateway": false,
-        "can_delete": true,
-        "can_send_to_vision": false,
+        "vision_integration_enabled": false,
+        "vision_managed": false,
+        "vision": {
+            "status": "NOT_SENT",
+            "vision_id": null,
+            "fc_num": null,
+            "error_code": null
+        },
         "can_split": false,
+        "can_delete": true,
         "supporting_documents": [],
         "total_households_count_with_valid_phone_no": 0,
         "financial_service_provider": null,

@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};

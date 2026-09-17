@@ -1,4 +1,5 @@
-import { Fragment, ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
@@ -11,9 +12,9 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
-import { CountResponse } from '@restgenerated/models/CountResponse';
+import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 

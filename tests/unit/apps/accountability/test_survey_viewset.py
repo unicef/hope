@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -225,17 +226,6 @@ def url_export_sample(business_area, program_active, srv):
 def url_flows(business_area, program_active):
     return reverse(
         "api:accountability:surveys-available-flows",
-        kwargs={
-            "business_area_slug": business_area.slug,
-            "program_code": program_active.code,
-        },
-    )
-
-
-@pytest.fixture
-def url_category_choices(business_area, program_active):
-    return reverse(
-        "api:accountability:surveys-category-choices",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program_active.code,
@@ -825,30 +815,21 @@ def test_survey_export_sample_returns_403_without_permission(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_category_choices(
-    create_user_role_with_permissions: Any,
-    authenticated_client,
-    user,
-    business_area,
-    program_active,
-    url_category_choices,
-) -> None:
-    create_user_role_with_permissions(
-        user,
-        [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
-        business_area,
-        program_active,
-    )
-    response = authenticated_client.get(url_category_choices)
+def test_get_category_choices_returns_choices_for_user_without_any_role(authenticated_client) -> None:
+    response = authenticated_client.get(reverse("api:choices-survey-categories"))
+
     assert response.status_code == status.HTTP_200_OK
-    resp_data = response.json()
-    assert len(resp_data) == 3
-    assert resp_data[0]["name"] == "Survey with RapidPro"
-    assert resp_data[0]["value"] == "RAPID_PRO"
-    assert resp_data[1]["name"] == "Survey with SMS"
-    assert resp_data[1]["value"] == "SMS"
-    assert resp_data[2]["name"] == "Survey with manual process"
-    assert resp_data[2]["value"] == "MANUAL"
+    assert response.json() == [
+        {"name": "Survey with RapidPro", "value": "RAPID_PRO"},
+        {"name": "Survey with SMS", "value": "SMS"},
+        {"name": "Survey with manual process", "value": "MANUAL"},
+    ]
+
+
+def test_get_category_choices_denies_anonymous_access() -> None:
+    response = APIClient().get(reverse("api:choices-survey-categories"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_get_available_flows(

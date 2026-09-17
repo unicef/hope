@@ -17,11 +17,12 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { PaymentPlanGroupDetail } from '../types';
+import type { PaymentPlanGroupDetail } from '../types';
 
 interface EditGroupNameProps {
   group: PaymentPlanGroupDetail | null | undefined;
@@ -31,7 +32,9 @@ const validationSchema = Yup.object({
   name: Yup.string().required('Name is required').max(255),
 });
 
-export function EditGroupName({ group }: EditGroupNameProps): ReactElement | null {
+export function EditGroupName({
+  group,
+}: EditGroupNameProps): ReactElement | null {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
@@ -43,8 +46,12 @@ export function EditGroupName({ group }: EditGroupNameProps): ReactElement | nul
       RestService.restBusinessAreasProgramsPaymentPlanGroupsUpdate({
         businessAreaSlug: businessArea,
         programCode: programId,
-        id: group.id,
-        requestBody: { id: group.id, unicefId: group.unicefId ?? null, name },
+        id: group?.id ?? '',
+        requestBody: {
+          id: group?.id ?? '',
+          unicefId: group?.unicefId ?? null,
+          name,
+        },
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({

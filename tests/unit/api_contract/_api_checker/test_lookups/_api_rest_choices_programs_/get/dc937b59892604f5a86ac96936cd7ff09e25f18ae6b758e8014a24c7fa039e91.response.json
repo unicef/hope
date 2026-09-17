@@ -1,0 +1,126 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1188"
+    },
+    "data": {
+        "status_choices": [
+            {
+                "name": "Active",
+                "value": "ACTIVE"
+            },
+            {
+                "name": "Draft",
+                "value": "DRAFT"
+            },
+            {
+                "name": "Finished",
+                "value": "FINISHED"
+            }
+        ],
+        "frequency_of_payments_choices": [
+            {
+                "name": "One-off",
+                "value": "ONE_OFF"
+            },
+            {
+                "name": "Regular",
+                "value": "REGULAR"
+            }
+        ],
+        "sector_choices": [
+            {
+                "name": "Child Protection",
+                "value": "CHILD_PROTECTION"
+            },
+            {
+                "name": "Education",
+                "value": "EDUCATION"
+            },
+            {
+                "name": "Health",
+                "value": "HEALTH"
+            },
+            {
+                "name": "Multi Purpose",
+                "value": "MULTI_PURPOSE"
+            },
+            {
+                "name": "Nutrition",
+                "value": "NUTRITION"
+            },
+            {
+                "name": "Social Policy",
+                "value": "SOCIAL_POLICY"
+            },
+            {
+                "name": "WASH",
+                "value": "WASH"
+            }
+        ],
+        "scope_choices": [
+            {
+                "name": "For partners",
+                "value": "FOR_PARTNERS"
+            },
+            {
+                "name": "Unicef",
+                "value": "UNICEF"
+            }
+        ],
+        "partner_access_choices": [
+            {
+                "name": "All partners access",
+                "value": "ALL_PARTNERS_ACCESS"
+            },
+            {
+                "name": "None partners access",
+                "value": "NONE_PARTNERS_ACCESS"
+            },
+            {
+                "name": "Selected partners access",
+                "value": "SELECTED_PARTNERS_ACCESS"
+            }
+        ],
+        "pdu_subtype_choices": [
+            {
+                "name": "Boolean (true/false)",
+                "value": "BOOL"
+            },
+            {
+                "name": "Date",
+                "value": "DATE"
+            },
+            {
+                "name": "Number",
+                "value": "DECIMAL"
+            },
+            {
+                "name": "Text",
+                "value": "STRING"
+            }
+        ],
+        "program_cycle_status_choices": [
+            {
+                "name": "Active",
+                "value": "ACTIVE"
+            },
+            {
+                "name": "Draft",
+                "value": "DRAFT"
+            },
+            {
+                "name": "Finished",
+                "value": "FINISHED"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

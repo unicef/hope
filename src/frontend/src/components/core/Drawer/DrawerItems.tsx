@@ -7,22 +7,19 @@ import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { ElementType, ReactElement, useEffect, useState } from 'react';
+import type { ElementType, ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import {
-  MenuItem,
-  menuItems,
-  SCOPE_ALL_PROGRAMS,
-  SCOPE_PROGRAM,
-} from './menuItems';
+import type { MenuItem } from './menuItems';
+import { menuItems, SCOPE_ALL_PROGRAMS, SCOPE_PROGRAM } from './menuItems';
 import { useProgramContext } from 'src/programContext';
-import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import type { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
+import type { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';

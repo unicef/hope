@@ -91,6 +91,15 @@ def empty_ticket_details(data_change_ticket: Any, household_with_previous_values
     )
 
 
+@pytest.fixture
+def ticket_details_with_requested_data(data_change_ticket: Any, household_with_previous_values: Any) -> Any:
+    return TicketHouseholdDataUpdateDetailsFactory(
+        ticket=data_change_ticket,
+        household=household_with_previous_values,
+        household_data={"village": {"value": "Test Village", "approve_status": False}},
+    )
+
+
 def test_save_datetime_field_records_previous_value_as_isoformat(
     household_with_previous_values: Any, data_change_ticket: Any
 ) -> None:
@@ -201,6 +210,25 @@ def test_update_admin_area_title_strips_p_code_from_label(
         "admin_area_title": {"value": "AF0101", "approve_status": False, "previous_value": "AF9999"},
         "flex_fields": {},
     }
+
+
+def test_update_without_extras_keeps_requested_data(ticket_details_with_requested_data: Any) -> None:
+    service = HouseholdDataUpdateService(grievance_ticket=ticket_details_with_requested_data.ticket, extras={})
+
+    ticket = service.update()
+
+    assert ticket.ticket_details.household_data == {"village": {"value": "Test Village", "approve_status": False}}
+
+
+def test_update_with_empty_extras_keeps_requested_data(ticket_details_with_requested_data: Any) -> None:
+    service = HouseholdDataUpdateService(
+        grievance_ticket=ticket_details_with_requested_data.ticket,
+        extras={"household_data_update_issue_type_extras": {}},
+    )
+
+    ticket = service.update()
+
+    assert ticket.ticket_details.household_data == {"village": {"value": "Test Village", "approve_status": False}}
 
 
 def test_close_resolves_country_and_country_origin_from_iso_codes() -> None:

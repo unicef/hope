@@ -4,12 +4,12 @@ import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import AddIndividualDataChange from '../AddIndividualDataChange';
 import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -48,19 +48,23 @@ function prepareInitialValueAddIndividual(
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
-    ...ticket.ticketDetails.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   const flexFields = individualData.flexFields;
   delete individualData.flexFields;
-  initialValues.individualData = Object.entries(individualData).reduce(
-    (previousValue, currentValue: [string, { value: string }]) => {
+  initialValues.individualData = Object.entries(
+    individualData as Record<string, { value: string }>,
+  ).reduce(
+    (previousValue, currentValue) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
     {} as EditValuesTypes['individualData'],
   );
-  initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
-    (previousValue, currentValue: [string, { value: string }]) => {
+  initialValues.individualData.flexFields = Object.entries(
+    flexFields as Record<string, { value: string }>,
+  ).reduce(
+    (previousValue, currentValue) => {
       previousValue[camelCase(currentValue[0])] = currentValue[1].value;
       return previousValue;
     },
@@ -129,18 +133,18 @@ function prepareInitialValueEditHousehold(
   };
   const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;
-  const householdDataArray = Object.entries(householdData || {}).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1]?.value,
-    }),
-  );
-  const flexFieldsArray = Object.entries(flexFields || {}).map(
-    (entry: [string, { value: string }]) => ({
-      fieldName: entry[0],
-      fieldValue: entry[1]?.value,
-    }),
-  );
+  const householdDataArray = Object.entries(
+    (householdData || {}) as Record<string, { value: string }>,
+  ).map((entry) => ({
+    fieldName: entry[0],
+    fieldValue: entry[1]?.value,
+  }));
+  const flexFieldsArray = Object.entries(
+    (flexFields || {}) as Record<string, { value: string }>,
+  ).map((entry) => ({
+    fieldName: entry[0],
+    fieldValue: entry[1]?.value,
+  }));
   initialValues.householdDataUpdateFields = [
     ...householdDataArray,
     ...flexFieldsArray,
@@ -275,23 +279,9 @@ function prepareSensitiveVariables(requiredVariables, values) {
 }
 
 function prepareAddIndividualVariables(requiredVariables, values) {
-  let { flexFields } = values.individualData;
-  if (flexFields) {
-    flexFields = { ...flexFields };
-    for (const [key, value] of Object.entries(flexFields)) {
-      if (value === '') {
-        delete flexFields[key];
-      }
-    }
-  }
   return {
     ...requiredVariables,
     linkedTickets: values.selectedLinkedTickets,
-    extras: {
-      addIndividualIssueTypeExtras: {
-        individualData: { ...values.individualData, flexFields },
-      },
-    },
   };
 }
 
@@ -303,81 +293,13 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 }
 
 function prepareEditIndividualVariables(requiredVariables, values) {
-  const individualData = values.individualDataUpdateFields
-    .filter((item) => item.fieldName && !item.isFlexField)
-    .reduce((prev, current) => {
-      prev[camelCase(current.fieldName)] = current.fieldValue;
-      return prev;
-    }, {});
-  const flexFields = values.individualDataUpdateFields
-    .filter((item) => item.fieldName && item.isFlexField)
-    .reduce((prev, current) => {
-      prev[camelCase(current.fieldName)] = current.fieldValue;
-      return prev;
-    }, {});
-  individualData.flexFields = flexFields;
-
-  // Transform documents and identities to extract value from nested structure
-  const transformNestedData = (items) => {
-    if (!items || !Array.isArray(items)) return items;
-    return items.map((item) => {
-      // Handle nested structure {approveStatus, value: {country, key, number}}
-      if (item.value && typeof item.value === 'object') {
-        return item.value;
-      }
-      // Handle direct structure {country, key, number} for backward compatibility
-      return item;
-    });
-  };
-
   return {
     ...requiredVariables,
     linkedTickets: values.selectedLinkedTickets,
-    extras: {
-      individualDataUpdateIssueTypeExtras: {
-        individualData: {
-          ...individualData,
-          documents: transformNestedData(
-            values.individualDataUpdateFieldsDocuments,
-          ),
-          documentsToRemove: values.individualDataUpdateDocumentsToRemove,
-          documentsToEdit: transformNestedData(
-            values.individualDataUpdateDocumentsToEdit,
-          ),
-          identities: transformNestedData(
-            values.individualDataUpdateFieldsIdentities,
-          ),
-          identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
-          identitiesToEdit: transformNestedData(
-            values.individualDataUpdateIdentitiesToEdit,
-          ),
-          accountsToEdit: values.individualDataUpdateAccountsToEdit,
-        },
-      },
-    },
   };
 }
 
-function prepareEditHouseholdVariables(requiredVariables, values) {
-  const householdData = values.householdDataUpdateFields
-    .filter((item) => item.fieldName && !item.isFlexField)
-    .reduce((prev, current) => {
-      prev[camelCase(current.fieldName)] = current.fieldValue;
-      return prev;
-    }, {});
-  const flexFields = values.householdDataUpdateFields
-    .filter((item) => item.fieldName && item.isFlexField)
-    .reduce((prev, current) => {
-      prev[current.fieldName] = current.fieldValue;
-      return prev;
-    }, {});
-  householdData.flexFields = flexFields;
-  // Add roles if present and valid
-  if (Array.isArray(values.roles) && values.roles.length > 0) {
-    householdData.roles = values.roles;
-  } else if (householdData.roles) {
-    delete householdData.roles;
-  }
+function prepareEditHouseholdVariables(requiredVariables) {
   return {
     ...requiredVariables,
   };

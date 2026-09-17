@@ -15,15 +15,15 @@ import {
   DialogTitle,
   Grid,
 } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { showApiErrorMessages } from '@utils/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -74,10 +74,14 @@ export function ClosePaymentPlanDialog({
       showMessage(t('Payment Plan has been closed.'));
       onClose();
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+        ),
       });
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     },
     onError: (error: any) => {

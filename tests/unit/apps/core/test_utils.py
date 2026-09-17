@@ -33,8 +33,6 @@ from hope.apps.core.utils import (
     build_arg_dict_from_dict,
     build_arg_dict_from_dict_if_exists,
     build_flex_arg_dict_from_list_if_exists,
-    chart_create_filter_query,
-    chart_get_filtered_qs,
     check_concurrency_version_in_mutation,
     chunks,
     clear_cache_for_key,
@@ -448,72 +446,6 @@ def test_check_concurrency_version_raises_when_mismatch():
 
     with pytest.raises(ValidationError):
         check_concurrency_version_in_mutation(3, target)
-
-
-@pytest.mark.parametrize(
-    ("filters", "expected"),
-    [
-        ({}, {}),
-        ({"program": "p1"}, {"id": "p1"}),
-        ({"administrative_area": "a1"}, {"admin_areas__id": "a1"}),
-        ({"program": "p1", "administrative_area": "a1"}, {"id": "p1", "admin_areas__id": "a1"}),
-    ],
-)
-def test_chart_create_filter_query(filters, expected):
-    assert chart_create_filter_query(filters) == expected
-
-
-def test_chart_get_filtered_qs_default_year_path_uses_created_at():
-    qs = MagicMock()
-    qs.filter.return_value = qs
-
-    chart_get_filtered_qs(qs, year=2024)
-
-    args, kwargs = qs.filter.call_args
-    year_q = args[0]
-    assert "created_at__year" in str(year_q)
-
-
-def test_chart_get_filtered_qs_custom_year_path_combines_with_or():
-    qs = MagicMock()
-    qs.filter.return_value = qs
-
-    chart_get_filtered_qs(qs, year=2024, year_filter_path="a,b")
-
-    args, kwargs = qs.filter.call_args
-    year_q = args[0]
-    assert "a__year" in str(year_q)
-    assert "b__year" in str(year_q)
-
-
-def test_chart_get_filtered_qs_drops_global_business_area_filter():
-    qs = MagicMock()
-    qs.filter.return_value = qs
-
-    chart_get_filtered_qs(qs, year=2024, business_area_slug_filter={"business_area__slug": "global"})
-
-    _, kwargs = qs.filter.call_args
-    assert "business_area__slug" not in kwargs
-
-
-def test_chart_get_filtered_qs_passes_additional_filters():
-    qs = MagicMock()
-    qs.filter.return_value = qs
-
-    chart_get_filtered_qs(qs, year=2024, additional_filters={"name__icontains": "x"})
-
-    _, kwargs = qs.filter.call_args
-    assert kwargs == {"name__icontains": "x"}
-
-
-def test_chart_get_filtered_qs_keeps_non_global_business_area_filter():
-    qs = MagicMock()
-    qs.filter.return_value = qs
-
-    chart_get_filtered_qs(qs, year=2024, business_area_slug_filter={"business_area__slug": "afghanistan"})
-
-    _, kwargs = qs.filter.call_args
-    assert kwargs == {"business_area__slug": "afghanistan"}
 
 
 def test_chunks_yields_full_buckets():

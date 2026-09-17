@@ -1,9 +1,10 @@
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Box } from '@mui/material';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import Button from '@mui/material/Button';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface RelatedTopUpPaymentPlansProps {

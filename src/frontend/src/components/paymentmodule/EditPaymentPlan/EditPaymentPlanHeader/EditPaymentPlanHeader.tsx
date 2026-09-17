@@ -7,11 +7,11 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ReactElement } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { usePaymentPlanTypeLabel } from '@hooks/usePaymentPlanTypeLabel';

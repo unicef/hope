@@ -1,8 +1,11 @@
+import datetime
+
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.core.timezones import utc_date
 from hope.models import SanctionListIndividual, SanctionListIndividualDateOfBirth
 
 
@@ -16,7 +19,7 @@ class SanctionListIndividualAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "sanction_list",
         "full_name",
-        "listed_on",
+        "listed_on_date",
         "reference_number",
         # "un_list_type",
         # "country_of_birth",
@@ -39,3 +42,7 @@ class SanctionListIndividualAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
     inlines = (SanctionListIndividualDateOfBirthInline,)
     readonly_fields = ("sanction_list", "reference_number", "data_id")
+
+    @admin.display(description="Listed on", ordering="listed_on")
+    def listed_on_date(self, obj: SanctionListIndividual) -> datetime.date | None:
+        return utc_date(obj.listed_on) if obj.listed_on else None

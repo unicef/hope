@@ -7,6 +7,7 @@ from unittest.mock import patch
 from django.conf import settings
 from django.db import connection
 from django.http import Http404
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 import psycopg2
@@ -772,10 +773,16 @@ def test_verification_details(
         verification_context["business_area"],
         verification_context["program_active"],
     )
-    response = verification_context["client"].get(url)
+    with CaptureQueriesContext(connection) as captured_queries:
+        response = verification_context["client"].get(url)
 
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
+        assert any(
+            'JOIN "payment_paymentplan"' in query["sql"]
+            for query in captured_queries.captured_queries
+            if 'FROM "payment_payment"' in query["sql"]
+        )
         resp_data = response.json()
         assert "id" in resp_data
         assert "verification" in resp_data
@@ -1212,13 +1219,21 @@ def test_record_viewset_get_object_returns_parent_payment_plan(
     verification_context: dict[str, Any],
 ) -> None:
     viewset = PaymentVerificationRecordViewSet()
-    viewset.kwargs = {"payment_verification_pk": str(verification_context["payment_plan"].pk)}
+    viewset.kwargs = {
+        "business_area_slug": verification_context["business_area"].slug,
+        "program_code": verification_context["program_active"].code,
+        "payment_verification_pk": str(verification_context["payment_plan"].pk),
+    }
     assert viewset.get_object() == verification_context["payment_plan"]
 
 
-def test_record_viewset_get_object_raises_404_for_unknown_id() -> None:
+def test_record_viewset_get_object_raises_404_for_unknown_id(verification_context: dict[str, Any]) -> None:
     viewset = PaymentVerificationRecordViewSet()
-    viewset.kwargs = {"payment_verification_pk": "00000000-0000-0000-0000-000000000000"}
+    viewset.kwargs = {
+        "business_area_slug": verification_context["business_area"].slug,
+        "program_code": verification_context["program_active"].code,
+        "payment_verification_pk": "00000000-0000-0000-0000-000000000000",
+    }
     with pytest.raises(Http404):
         viewset.get_object()
 

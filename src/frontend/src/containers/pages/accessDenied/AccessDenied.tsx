@@ -4,7 +4,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import styled from 'styled-components';
 import AccessDeniedGraphic from './access_denied.png';
 import HopeLogo from './access_denied_hope_logo.png';
-import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 const Container = styled.div`

@@ -5,8 +5,8 @@ import { formatCurrencyWithSymbol, paymentStatusToColor } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { MouseEvent, ReactElement } from 'react';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { MouseEvent, ReactElement } from 'react';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentList;

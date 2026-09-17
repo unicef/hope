@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { ImportData } from '@restgenerated/models/ImportData';
+import type { ImportData } from '@restgenerated/models/ImportData';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 

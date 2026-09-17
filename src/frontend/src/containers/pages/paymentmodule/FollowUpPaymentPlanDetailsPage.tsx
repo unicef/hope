@@ -6,20 +6,21 @@ import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/Acce
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
+import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
@@ -29,7 +30,14 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const { data: paymentPlan, error } = useQuery<PaymentPlanDetail>({
-    queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansRetrieve, { businessAreaSlug: businessArea, id: paymentPlanId, programCode: programId }),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+      {
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programCode: programId,
+      },
+    ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
         businessAreaSlug: businessArea,
@@ -80,6 +88,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         baseUrl={baseUrl}
         permissions={permissions}
       />
+      <VisionStatusSection paymentPlan={paymentPlan} />
       <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <AcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayFundsCommitment && (

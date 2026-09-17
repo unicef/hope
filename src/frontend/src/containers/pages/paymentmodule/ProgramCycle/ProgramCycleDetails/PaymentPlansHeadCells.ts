@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 export const headCells: HeadCell<PaymentPlanList>[] = [
   {

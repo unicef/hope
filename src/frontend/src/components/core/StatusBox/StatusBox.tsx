@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { theme as themeObj } from '../../../theme';
+import type { theme as themeObj } from '../../../theme';
 import { opacityToHex } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface Props {
   status: string;

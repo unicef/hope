@@ -1,11 +1,9 @@
-import {
-  InputAdornment,
-  TextField,
-  OutlinedTextFieldProps,
-} from '@mui/material';
+import type { OutlinedTextFieldProps } from '@mui/material';
+import { InputAdornment, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 interface StyledTextFieldProps extends OutlinedTextFieldProps {
   $borderRadius?: string;

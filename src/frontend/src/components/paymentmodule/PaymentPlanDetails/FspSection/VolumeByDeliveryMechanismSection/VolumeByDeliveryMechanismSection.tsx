@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { FC } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { FC } from 'react';
+import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { formatFigure } from '@utils/utils';
 
 const Title = styled.div`

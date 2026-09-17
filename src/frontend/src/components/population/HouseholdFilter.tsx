@@ -4,12 +4,13 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
 import { Grid, MenuItem } from '@mui/material';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { ProgramList } from '@restgenerated/models/ProgramList';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
@@ -17,7 +18,7 @@ import {
   PROGRAM_STATE_CHOICES,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -49,6 +50,7 @@ export function HouseholdFilters({
   const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,
@@ -95,7 +97,7 @@ export function HouseholdFilters({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>

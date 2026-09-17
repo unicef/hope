@@ -1,12 +1,12 @@
 import PhotoModal from '@core/PhotoModal/PhotoModal';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { IndividualPhotoDetail } from '@restgenerated/models/IndividualPhotoDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualPhotoDetail } from '@restgenerated/models/IndividualPhotoDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface DocumentRegistrationPhotoModalProps {
   individual: IndividualDetail;

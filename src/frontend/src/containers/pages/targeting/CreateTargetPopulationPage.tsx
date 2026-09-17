@@ -10,7 +10,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Divider, Grid, Typography } from '@mui/material';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import type { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikChipAutocomplete } from '@shared/Formik/FormikChipAutocomplete/FormikChipAutocomplete';
@@ -24,13 +24,14 @@ import {
 } from '@utils/targetingUtils';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();

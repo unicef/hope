@@ -8,7 +8,7 @@ import {
   formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 

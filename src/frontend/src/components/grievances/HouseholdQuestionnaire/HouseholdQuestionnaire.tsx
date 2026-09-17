@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
@@ -8,9 +8,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { displayNameWithLatin } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
 
 interface HouseholdQuestionnaireProps {
@@ -93,7 +94,7 @@ function HouseholdQuestionnaire({
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
             >
-              {selectedHouseholdData.headOfHousehold.fullName}
+              {displayNameWithLatin(selectedHouseholdData.headOfHousehold, 'fullName')}
             </ContentLink>
           ) : (
             '-'

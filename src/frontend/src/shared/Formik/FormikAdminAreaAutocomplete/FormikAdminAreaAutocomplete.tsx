@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { FieldLabel } from '@components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export function FormikAdminAreaAutocomplete({
   field,

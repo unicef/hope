@@ -8,13 +8,14 @@ import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Fade, Tab, Tabs, Tooltip } from '@mui/material';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState, useEffect, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -30,26 +31,14 @@ const PeoplePage = (): ReactElement => {
   const permissions = usePermissions();
   const { data: householdChoicesData, isLoading: householdChoicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesHouseholdsRetrieve),
+      queryFn: () => RestService.restChoicesHouseholdsRetrieve(),
     });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
 
   const initialFilter = {

@@ -13,13 +13,15 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { FC, ReactElement, useState } from 'react';
+import type { FC, ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import { RestService } from 'src/restgenerated';
 import { useMutation } from '@tanstack/react-query';
-import { ApiErrorShape, showApiErrorMessages } from '@utils/utils';
+import type { ApiErrorShape } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface Individual {

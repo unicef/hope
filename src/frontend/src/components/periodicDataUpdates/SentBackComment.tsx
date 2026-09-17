@@ -2,7 +2,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CommentIcon from '@mui/icons-material/Comment';
-import { format } from 'date-fns';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface SentBackCommentProps {
   comment: string;
@@ -15,12 +15,6 @@ const SentBackComment: React.FC<SentBackCommentProps> = ({
   date,
   author,
 }) => {
-  let formattedDate = date;
-  try {
-    formattedDate = format(new Date(date), 'yyyy-MM-dd HH:mm');
-  } catch {
-    // fallback to original date string if parsing fails
-  }
   return (
     <Box
       sx={{
@@ -44,7 +38,8 @@ const SentBackComment: React.FC<SentBackCommentProps> = ({
           variant="subtitle1"
           sx={{ color: '#7B5E3B', fontWeight: 600 }}
         >
-          Sent Back Comment | {formattedDate} | {author}
+          Sent Back Comment |{' '}
+          <UniversalMoment withTime>{date}</UniversalMoment> | {author}
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: 700, mt: 0.5 }}>
           {comment}

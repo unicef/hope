@@ -2,9 +2,9 @@ import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Typography } from '@mui/material';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { grievanceTicketBadgeColors } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getIssueTypeToDisplay } from '../utils/createGrievanceUtils';
 

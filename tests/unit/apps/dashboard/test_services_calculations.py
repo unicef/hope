@@ -1,7 +1,7 @@
 from datetime import timezone as dt_timezone
-import json
-from typing import Any, Optional
+from typing import Optional
 from unittest.mock import patch
+from uuid import uuid4
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -10,7 +10,6 @@ import pytest
 from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
     BusinessAreaFactory,
-    CountryFactory,
     DataCollectingTypeFactory,
     HouseholdFactory,
     PaymentFactory,
@@ -25,7 +24,8 @@ from hope.apps.dashboard.services import (
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
-    get_fertility_rate,
+    _count_household,
+    get_kab_pwd_count_expression,
     get_pwd_count_expression,
 )
 from hope.models import Household, Payment, PaymentPlan
@@ -145,6 +145,75 @@ def test_pwd_count_expression(household_index: int, expected_pwd_count: int, hou
     )
 
     assert hh_annotated.calculated_pwd_count == expected_pwd_count
+
+
+@pytest.fixture
+def households_for_kab_pwd_test(db):
+    ba = BusinessAreaFactory()
+    hh_kab_pwd = HouseholdFactory(
+        business_area=ba,
+        kab_female_age_group_0_5_disabled_count=1,
+        kab_female_age_group_6_11_disabled_count=None,
+        kab_male_age_group_18_59_disabled_count=3,
+    )
+    hh_kab_none = HouseholdFactory(business_area=ba)
+    return hh_kab_pwd, hh_kab_none
+
+
+@pytest.mark.parametrize(
+    ("household_index", "expected_kab_pwd_count"),
+    [
+        (0, 4),  # hh_kab_pwd (1 + 3, NULL treated as 0)
+        (1, 0),  # hh_kab_none
+    ],
+    ids=["some_kab_pwds", "all_none"],
+)
+@pytest.mark.django_db
+def test_kab_pwd_count_expression(
+    household_index: int, expected_kab_pwd_count: int, households_for_kab_pwd_test
+) -> None:
+    hh_kab_pwd, hh_kab_none = households_for_kab_pwd_test
+    households = [hh_kab_pwd, hh_kab_none]
+    target_household = households[household_index]
+
+    hh_annotated = (
+        Household.objects.filter(id=target_household.id)
+        .annotate(calculated_kab_pwd_count=get_kab_pwd_count_expression())
+        .first()
+    )
+    assert hh_annotated.calculated_kab_pwd_count == expected_kab_pwd_count
+
+
+@pytest.mark.parametrize(
+    ("household_data", "expected_individuals", "expected_pwd"),
+    [
+        ({"kab_size": 8, "kab_pwd_known": True, "kab_pwd_count": 2, "legacy_pwd": 99, "dct_type": "STANDARD"}, 8, 2),
+        ({"kab_size": 8, "kab_pwd_known": False, "kab_pwd_count": 0, "legacy_pwd": 3, "dct_type": "STANDARD"}, 8, 3),
+        ({"kab_size": None, "kab_pwd_known": False, "kab_pwd_count": 0, "legacy_pwd": 3, "dct_type": "STANDARD"}, 5, 3),
+        ({"kab_size": 8, "kab_pwd_known": True, "kab_pwd_count": 2, "legacy_pwd": 99, "dct_type": "SOCIAL"}, 1, 2),
+    ],
+    ids=["kab_known", "kab_disabled_null_fallback", "kab_unknown", "social_kab"],
+)
+def test_count_household_kab_individuals_and_pwd(
+    household_data: dict, expected_individuals: int, expected_pwd: int
+) -> None:
+    hh_id = uuid4()
+    summary = DashboardDataCache._create_empty_country_summary()
+    household_map = {
+        hh_id: {
+            "size": 5,
+            "children_count": None,
+            "pwd_count": household_data["legacy_pwd"],
+            "kab_size": household_data["kab_size"],
+            "kab_children_count": None,
+            "kab_pwd_count": household_data["kab_pwd_count"],
+            "kab_pwd_known": household_data["kab_pwd_known"],
+            "dct_type": household_data["dct_type"],
+        }
+    }
+    _count_household(summary, hh_id, household_map, set())
+    assert summary["individuals"] == expected_individuals
+    assert summary["pwd_counts"] == expected_pwd
 
 
 # ============================================================================
@@ -267,7 +336,7 @@ def test_payment_plan_counts(payment_plan_counts_data) -> None:
 
 @pytest.fixture
 def individuals_count_test_data(afghanistan):
-    def _create(test_id, dct_type, household_size, expected_individuals):
+    def _create(test_id, dct_type, household_size, expected_individuals, kab_size=None):
         cache.delete(DashboardDataCache.get_cache_key(afghanistan.slug))
         cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
 
@@ -283,13 +352,10 @@ def individuals_count_test_data(afghanistan):
             program=program,
             business_area=afghanistan,
             size=household_size,
+            kab_size=kab_size,
         )
 
-        status_map = {
-            "social_program_size": Payment.STATUS_SUCCESS,
-            "standard_program_size": Payment.STATUS_DISTRIBUTION_SUCCESS,
-        }
-        status = status_map[test_id]
+        status = Payment.STATUS_SUCCESS if dct_type == "SOCIAL" else Payment.STATUS_DISTRIBUTION_SUCCESS
 
         PaymentFactory(
             household=household,
@@ -311,22 +377,31 @@ def individuals_count_test_data(afghanistan):
 
 
 @pytest.mark.parametrize(
-    ("test_id", "dct_type", "household_size", "expected_individuals"),
+    ("test_id", "dct_type", "household_size", "kab_size", "expected_individuals"),
     [
-        ("social_program_size", "SOCIAL", 5, 1),
-        ("standard_program_size", "STANDARD", 5, 5),
+        ("social_program_size", "SOCIAL", 5, None, 1),
+        ("social_program_kab_size", "SOCIAL", 5, 8, 1),
+        ("standard_program_size", "STANDARD", 5, None, 5),
+        ("standard_program_kab_size", "STANDARD", 5, 8, 8),
     ],
-    ids=["social_program_size", "standard_program_size"],
+    ids=[
+        "social_program_size",
+        "social_program_kab_size",
+        "standard_program_size",
+        "standard_program_kab_size",
+    ],
 )
 @pytest.mark.django_db
 def test_individuals_count_calculation_scenarios(
     test_id: str,
     dct_type: str,
     household_size: int,
+    kab_size: Optional[int],
     expected_individuals: int,
+    *,
     individuals_count_test_data,
 ) -> None:
-    data = individuals_count_test_data(test_id, dct_type, household_size, expected_individuals)
+    data = individuals_count_test_data(test_id, dct_type, household_size, expected_individuals, kab_size=kab_size)
 
     result = DashboardDataCache.refresh_data(data["afghanistan"].slug)
     assert len(result) == 1
@@ -352,9 +427,8 @@ def test_individuals_count_calculation_scenarios(
 
 
 @pytest.fixture
-def children_count_test_data(afghanistan, mocker):
-    def _create(test_id, dct_type, household_children_count, fertility_rate, expected_children):
-        mocker.patch("hope.apps.dashboard.services.get_fertility_rate", return_value=fertility_rate)
+def children_count_test_data(afghanistan):
+    def _create(test_id, dct_type, children_count, kab_children_count, expected_children):
         cache.delete(DashboardDataCache.get_cache_key(afghanistan.slug))
         cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
 
@@ -369,16 +443,11 @@ def children_count_test_data(afghanistan, mocker):
         household = HouseholdFactory(
             program=program,
             business_area=afghanistan,
-            children_count=household_children_count,
+            children_count=children_count,
+            kab_children_count=kab_children_count,
         )
 
-        status_map = {
-            "social_program_with_value": Payment.STATUS_SUCCESS,
-            "social_program_none": Payment.STATUS_SENT_TO_FSP,
-            "standard_program_none": Payment.STATUS_DISTRIBUTION_SUCCESS,
-            "standard_program_with_value": Payment.STATUS_PENDING,
-        }
-        status = status_map[test_id]
+        status = Payment.STATUS_SUCCESS if dct_type == "SOCIAL" else Payment.STATUS_DISTRIBUTION_SUCCESS
 
         PaymentFactory(
             household=household,
@@ -400,30 +469,33 @@ def children_count_test_data(afghanistan, mocker):
 
 
 @pytest.mark.parametrize(
-    ("test_id", "dct_type", "household_children_count", "fertility_rate", "expected_children"),
+    ("test_id", "dct_type", "children_count", "kab_children_count", "expected_children"),
     [
-        ("social_program_with_value", "SOCIAL", 10, 0, 0),
-        ("social_program_none", "SOCIAL", None, 0, 0),
-        ("standard_program_none", "STANDARD", None, 3.8, 4),
-        ("standard_program_with_value", "STANDARD", 7, 0, 7),
+        ("social_program_with_value", "SOCIAL", 10, 10, 0),
+        ("social_program_none", "SOCIAL", None, None, 0),
+        ("standard_program_kab_value", "STANDARD", None, 7, 7),
+        ("standard_program_legacy_value", "STANDARD", 5, None, 5),
+        ("standard_program_none", "STANDARD", None, None, 0),
     ],
     ids=[
         "social_program_with_value",
         "social_program_none",
+        "standard_program_kab_value",
+        "standard_program_legacy_value",
         "standard_program_none",
-        "standard_program_with_value",
     ],
 )
 @pytest.mark.django_db
 def test_children_count_calculation_scenarios(
     test_id: str,
     dct_type: str,
-    household_children_count: Optional[int],
-    fertility_rate: float,
+    children_count: Optional[int],
+    kab_children_count: Optional[int],
     expected_children: int,
+    *,
     children_count_test_data,
 ) -> None:
-    data = children_count_test_data(test_id, dct_type, household_children_count, fertility_rate, expected_children)
+    data = children_count_test_data(test_id, dct_type, children_count, kab_children_count, expected_children)
 
     result = DashboardDataCache.refresh_data(data["afghanistan"].slug)
     assert len(result) == 1
@@ -441,79 +513,3 @@ def test_children_count_calculation_scenarios(
     ]
     assert len(global_agg_group) == 1
     assert global_agg_group[0]["children_counts"] == expected_children
-
-
-# ============================================================================
-# Fertility Rate Tests
-# ============================================================================
-
-
-@pytest.fixture
-def afghanistan_with_country(db):
-    ba = BusinessAreaFactory(name="Afghanistan")
-    country = CountryFactory(name="Afghanistan", short_name="AFG", iso_code2="AF", iso_code3="AFG", iso_num="0004")
-    ba.countries.add(country)
-    cache.delete("fertility_data")
-    return ba
-
-
-@pytest.mark.django_db
-def test_get_fertility_rate_success(afghanistan_with_country, mocker: Any) -> None:
-    rate = get_fertility_rate("Afghanistan", 2020)
-    assert rate == 5.145
-    mock_open = mocker.patch("builtins.open")
-    rate2 = get_fertility_rate("Afghanistan", 2021)
-    assert rate2 == 5.039
-    mock_open.assert_not_called()
-
-
-@pytest.mark.django_db
-def test_get_fertility_rate_fallback_to_latest_year(afghanistan_with_country) -> None:
-    rate = get_fertility_rate("Afghanistan", 2025)
-    assert rate == 4.84
-
-
-@pytest.mark.django_db
-def test_get_fertility_rate_country_not_found() -> None:
-    cache.delete("fertility_data")
-    rate = get_fertility_rate("Wonderland", 2023)
-    assert rate == 0.0
-
-
-@pytest.mark.django_db
-def test_get_fertility_rate_no_data(mocker: Any) -> None:
-    mocker.patch("builtins.open", mocker.mock_open(read_data="[]"))
-    cache.delete("fertility_data")
-    rate = get_fertility_rate("AnyCountry", 2023)
-    assert rate == 0.0
-
-
-@pytest.mark.django_db
-def test_load_fertility_data_file_not_found(mocker: Any) -> None:
-    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
-    mocker.patch("builtins.open", side_effect=FileNotFoundError("File not found"))
-    cache.delete("fertility_data")
-
-    with pytest.raises(FileNotFoundError):
-        get_fertility_rate("AnyCountry", 2023)
-    mock_sentry.capture_exception.assert_called_once()
-
-
-@pytest.mark.django_db
-def test_load_fertility_data_json_decode_error(mocker: Any) -> None:
-    mock_sentry = mocker.patch("hope.apps.dashboard.services.sentry_sdk")
-    mocker.patch("builtins.open", mocker.mock_open(read_data="invalid json"))
-    cache.delete("fertility_data")
-
-    with pytest.raises(json.JSONDecodeError):
-        get_fertility_rate("AnyCountry", 2023)
-    mock_sentry.capture_exception.assert_called_once()
-
-
-@pytest.mark.django_db
-def test_get_fertility_rate_data_exists_but_no_years(mocker: Any) -> None:
-    """Test fallback when data file exists (dict) but has no year keys."""
-    mocker.patch("builtins.open", mocker.mock_open(read_data="{}"))
-    cache.delete("fertility_data")
-    rate = get_fertility_rate("AnyCountry", 2023)
-    assert rate == 0.0

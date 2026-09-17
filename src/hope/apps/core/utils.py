@@ -437,45 +437,6 @@ def rows_iterator(sheet: "Worksheet") -> Generator:
         yield row
 
 
-def chart_get_filtered_qs(
-    qs: Any,
-    year: int,
-    business_area_slug_filter: dict | None = None,
-    additional_filters: dict | None = None,
-    year_filter_path: str | None = None,
-) -> "QuerySet":
-    if additional_filters is None:
-        additional_filters = {}
-    if year_filter_path is None:
-        year_filter = Q(created_at__year=year)
-    else:
-        year_filter = Q()
-        for k in year_filter_path.split(","):
-            year_filter |= Q(**{f"{k}__year": year})
-
-    if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
-        business_area_slug_filter = {}
-
-    return qs.filter(year_filter, **business_area_slug_filter, **additional_filters)
-
-
-def chart_create_filter_query(
-    filters: dict,
-    program_id_path: str = "id",
-    administrative_area_path: str = "admin_areas",
-) -> dict:
-    filter_query = {}
-    if program := filters.get("program"):
-        filter_query.update({program_id_path: program})
-    if administrative_area := filters.get("administrative_area"):
-        filter_query.update(
-            {
-                f"{administrative_area_path}__id": administrative_area,
-            }
-        )
-    return filter_query
-
-
 def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
     from hope.models import FlexibleAttribute
 

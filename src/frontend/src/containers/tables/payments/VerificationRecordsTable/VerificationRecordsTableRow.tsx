@@ -4,13 +4,13 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TableRow } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface VerificationRecordsTableRowProps {
   payment: PaymentList;

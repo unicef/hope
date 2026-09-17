@@ -58,6 +58,13 @@ def _with_ticket_context(error: Exception, unicef_id: str) -> Exception:
 
 
 class BulkActionService:
+    def _open_tickets(self, tickets_ids: Sequence[str], business_area_slug: str) -> QuerySet[GrievanceTicket]:
+        return GrievanceTicket.objects.filter(
+            ~Q(status=GrievanceTicket.STATUS_CLOSED),
+            id__in=tickets_ids,
+            business_area__slug=business_area_slug,
+        )
+
     def _clear_cache(self, business_area_slug: str) -> None:
         cache_key = f"count_{business_area_slug}_GrievanceTicketNodeConnection_"
         clear_cache_for_key(cache_key)
@@ -71,7 +78,7 @@ class BulkActionService:
         action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
-        queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        queryset = self._open_tickets(tickets_ids, business_area_slug)
 
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
         # Capture which tickets actually change assignee before the update; only those count as assigned.
@@ -98,7 +105,7 @@ class BulkActionService:
     ) -> QuerySet[GrievanceTicket]:
         if priority not in [x for x, y in PRIORITY_CHOICES]:
             raise ValidationError("Invalid priority")
-        queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        queryset = self._open_tickets(tickets_ids, business_area_slug)
         updated_count = queryset.update(priority=priority)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
@@ -112,7 +119,7 @@ class BulkActionService:
     ) -> QuerySet[GrievanceTicket]:
         if urgency not in [x for x, y in URGENCY_CHOICES]:
             raise ValidationError("Invalid priority")
-        queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        queryset = self._open_tickets(tickets_ids, business_area_slug)
         updated_count = queryset.update(urgency=urgency)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
@@ -284,7 +291,7 @@ class BulkActionService:
         comment: str,
         business_area_slug: str,
     ) -> QuerySet[GrievanceTicket]:
-        tickets = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+        tickets = self._open_tickets(tickets_ids, business_area_slug)
         if len(tickets) != len(tickets_ids):
             raise ValidationError("Some tickets do not exist, or are closed")
         for ticket in tickets:

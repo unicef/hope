@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyMark, clearMark, individualRole } from './naDecision';
-import { NaIndividual } from './naRoleUtils';
+import type { NaIndividual } from './naRoleUtils';
 
 const withHeadRole = (id: string, householdId: string): NaIndividual => ({
   id,

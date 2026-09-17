@@ -5,9 +5,9 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Grid, Typography } from '@mui/material';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { programCycleStatusToColor } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ProgramCycleDetailsSectionProps {

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.postgres.fields import ArrayField
@@ -180,7 +180,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         )
 
     @property
-    def get_program(self) -> Optional["Program"]:
+    def get_program(self) -> "Program":
         return self.payment_plan.program_cycle.program
 
 

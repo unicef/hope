@@ -1,10 +1,10 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { CountResponse } from '@restgenerated/models/CountResponse';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { IndividualList } from '@restgenerated/models/IndividualList';
-import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
+import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import type { IndividualList } from '@restgenerated/models/IndividualList';
+import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -12,7 +12,8 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
@@ -189,7 +190,9 @@ export function LookUpIndividualTable({
       allProgramsIndividualsParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasIndividualsList(allProgramsIndividualsParams),
+      RestService.restBusinessAreasIndividualsList(
+        allProgramsIndividualsParams,
+      ),
     enabled: !!businessArea && isAllPrograms,
     placeholderData: keepPreviousData,
   });

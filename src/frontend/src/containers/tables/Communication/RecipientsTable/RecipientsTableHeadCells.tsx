@@ -1,5 +1,5 @@
-import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { Recipient } from '@restgenerated/models/Recipient';
+import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import type { Recipient } from '@restgenerated/models/Recipient';
 
 export const headCells: HeadCell<Recipient>[] = [
   {

@@ -1,5 +1,5 @@
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
+import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 export const headCells: HeadCell<ProgramCycleList>[] = [
   {

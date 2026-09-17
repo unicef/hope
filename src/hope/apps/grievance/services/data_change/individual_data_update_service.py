@@ -164,8 +164,11 @@ class IndividualDataUpdateService(DataChangeService):
         return [self.grievance_ticket]
 
     def update(self) -> GrievanceTicket:
-        ticket_details = self.grievance_ticket.individual_data_update_ticket_details
         individual_data_update_extras = self.extras.get("individual_data_update_issue_type_extras")
+        if not individual_data_update_extras:
+            # No data-change payload in the request: keep the stored request, and its approvals, as they are.
+            return self.grievance_ticket
+        ticket_details = self.grievance_ticket.individual_data_update_ticket_details
         individual = ticket_details.individual
         new_individual_data = individual_data_update_extras.get("individual_data", {})
         documents = new_individual_data.pop("documents", [])

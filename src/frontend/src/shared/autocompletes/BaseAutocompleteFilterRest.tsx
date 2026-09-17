@@ -1,13 +1,8 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import {
-  ReactElement,
-  ReactNode,
-  SyntheticEvent,
-  useEffect,
-  useRef,
-} from 'react';
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   value,
@@ -39,7 +34,10 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   handleChange: (event: SyntheticEvent, newValue: TOption | null) => void;
 
   handleClose: (event: SyntheticEvent, reason: string) => void;
-  handleOptionSelected: (option: TOption | string, value: TOption | string) => boolean;
+  handleOptionSelected: (
+    option: TOption | string,
+    value: TOption | string,
+  ) => boolean;
   handleOptionLabel: (option: TOption | string) => string;
   handleOpen: () => void;
   open: boolean;
@@ -81,7 +79,9 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
       data-cy={dataCy}
       open={open}
       options={options}
-      onChange={handleChange}
+      onChange={(event, newValue) =>
+        handleChange(event, newValue as TOption | null)
+      }
       onOpen={handleOpen}
       onClose={handleClose}
       isOptionEqualToValue={(option, selectedValue) =>
@@ -90,7 +90,7 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
           selectedValue as TOption | string,
         )
       }
-      getOptionLabel={handleOptionLabel}
+      getOptionLabel={(option) => handleOptionLabel(option as TOption | string)}
       disabled={disabled}
       loading={loading}
       renderInput={(params) => (

@@ -1,11 +1,29 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
+from rest_framework import serializers
+
 from hope.models import Household, Payment, PaymentPlan
 from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:
     from hope.models import Individual
+
+
+class HouseholdStatusIndividualSerializer(serializers.Serializer):
+    role = serializers.CharField(allow_null=True)
+    relationship = serializers.CharField(allow_null=True)
+    tax_id = serializers.CharField(allow_null=True)
+
+
+class HouseholdStatusInfoSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    date = serializers.DateTimeField(allow_null=True)
+    individual = HouseholdStatusIndividualSerializer(required=False)
+
+
+class HouseholdStatusResponseSerializer(serializers.Serializer):
+    info = HouseholdStatusInfoSerializer()
 
 
 def get_household_status(

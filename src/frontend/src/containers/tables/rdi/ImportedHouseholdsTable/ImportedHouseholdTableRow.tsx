@@ -7,9 +7,9 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
-import { HouseholdList } from '@restgenerated/models/HouseholdList';
-import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
+import type { ReactElement } from 'react';
+import type { HouseholdList } from '@restgenerated/models/HouseholdList';
+import type { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 
 export const StyledLink = styled.div`
   color: #000;

@@ -1,11 +1,12 @@
-import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import type { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import type { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
@@ -71,8 +72,7 @@ export function LookUpPaymentRecordTable({
             createApiParams(
               {
                 householdUnicefId: initialValues?.selectedHousehold?.unicefId,
-                individualUnicefId:
-                  initialValues?.selectedIndividual?.unicefId,
+                individualUnicefId: initialValues?.selectedIndividual?.unicefId,
                 businessAreaSlug: businessArea,
                 code: programId,
               },

@@ -5,13 +5,14 @@ import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
-import { ChangeEvent, ReactElement, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
-import { LogEntry } from '@restgenerated/models/LogEntry';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
 
 const Table = styled.div`
   display: flex;

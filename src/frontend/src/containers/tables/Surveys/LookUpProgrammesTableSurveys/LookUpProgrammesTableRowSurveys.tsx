@@ -2,17 +2,17 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { ProgramList } from '@restgenerated/models/ProgramList';
+import type { ProgramList } from '@restgenerated/models/ProgramList';
 import {
   choicesToDict,
   formatCurrency,
   programStatusToColor,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
   program: ProgramList;
@@ -71,9 +71,7 @@ export function LookUpProgrammesTableRowSurveys({
       <TableCell align="left">
         {programSectorChoiceDict[program.sector]}
       </TableCell>
-      <TableCell align="right">
-        {program.householdCount}
-      </TableCell>
+      <TableCell align="right">{program.householdCount}</TableCell>
       <TableCell align="right">
         {formatCurrency(Number(program.budget))}
       </TableCell>

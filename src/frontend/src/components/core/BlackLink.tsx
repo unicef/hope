@@ -1,10 +1,12 @@
-import React, {
+import type {
   ReactElement,
   ButtonHTMLAttributes,
   AnchorHTMLAttributes,
 } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { Link, LinkProps } from 'react-router-dom';
+import type { LinkProps } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 interface StyledLinkProps {
   fullWidth?: boolean;
@@ -37,15 +39,13 @@ const StyledButton = styled.button<StyledLinkProps>`
 `;
 
 interface BlackLinkButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    StyledLinkProps {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, StyledLinkProps {
   button: true;
   children: React.ReactNode;
 }
 
 interface BlackLinkAnchorProps
-  extends AnchorHTMLAttributes<HTMLAnchorElement>,
-    StyledLinkProps {
+  extends AnchorHTMLAttributes<HTMLAnchorElement>, StyledLinkProps {
   button?: false;
   newTab?: boolean;
   to?: string;
@@ -60,9 +60,7 @@ interface BlackLinkRouterProps extends LinkProps, StyledLinkProps {
 }
 
 type BlackLinkProps =
-  | BlackLinkButtonProps
-  | BlackLinkAnchorProps
-  | BlackLinkRouterProps;
+  BlackLinkButtonProps | BlackLinkAnchorProps | BlackLinkRouterProps;
 
 export const BlackLink = (props: BlackLinkProps): ReactElement => {
   if ('button' in props && props.button) {

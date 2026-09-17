@@ -1,4 +1,5 @@
-import { forwardRef, ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { Autocomplete, Paper, TextField } from '@mui/material';
@@ -8,7 +9,8 @@ const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
 `;
 interface Option {
-  labelEn: string;
+  labelEn?: string | { englishEn?: string };
+  label?: { englishEn?: string };
 }
 
 // Defined at module scope so its identity is stable across renders. A component
@@ -17,7 +19,11 @@ interface Option {
 const CriteriaAutocompletePaper = forwardRef<HTMLDivElement>(
   function CriteriaAutocompletePaper(props, ref) {
     return (
-      <Paper {...props} ref={ref} data-cy="autocomplete-target-criteria-options" />
+      <Paper
+        {...props}
+        ref={ref}
+        data-cy="autocomplete-target-criteria-options"
+      />
     );
   },
 );
@@ -43,8 +49,11 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);
   return (
-    // @ts-ignore
-    <StyledAutocomplete<Option>
+    // `styled()` erases Autocomplete's generic, so options arrive as `unknown`
+    // and are narrowed to Option at the point of use. Passing the type argument
+    // to the JSX tag instead makes TS stop treating the subtree as value
+    // references, which reports every local in this file as unused.
+    <StyledAutocomplete
       {...field}
       {...otherProps}
       open={open}
@@ -57,10 +66,11 @@ function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
       options={choicesWithoutDuplicates || []}
       value={newValue}
       getOptionLabel={(option) => {
-        if (!option) return '';
-        if (typeof option.labelEn === 'string') return option.labelEn;
-        if (option.labelEn?.englishEn) return String(option.labelEn.englishEn);
-        if (option.label?.englishEn) return String(option.label.englishEn);
+        const choice = option as Option;
+        if (!choice) return '';
+        if (typeof choice.labelEn === 'string') return choice.labelEn;
+        if (choice.labelEn?.englishEn) return String(choice.labelEn.englishEn);
+        if (choice.label?.englishEn) return String(choice.label.englishEn);
         return '';
       }}
       renderInput={(params) => (

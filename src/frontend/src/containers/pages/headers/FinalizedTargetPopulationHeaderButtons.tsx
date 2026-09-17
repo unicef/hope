@@ -1,9 +1,10 @@
 import { Box, Button } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { PERMISSIONS } from 'src/config/permissions';
 
 const IconContainer = styled.span`

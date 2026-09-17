@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import { blue } from '@mui/material/colors';
@@ -10,7 +10,10 @@ interface GroupHeaderRowProps {
   id?: string | null;
 }
 
-export function GroupHeaderRow({ name, id }: GroupHeaderRowProps): ReactElement {
+export function GroupHeaderRow({
+  name,
+  id,
+}: GroupHeaderRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   return (
     <TableRow
@@ -41,7 +44,7 @@ export function GroupHeaderRow({ name, id }: GroupHeaderRowProps): ReactElement 
             {name ?? 'No Group'}
           </BlackLink>
         ) : (
-          name ?? 'No Group'
+          (name ?? 'No Group')
         )}
       </TableCell>
     </TableRow>

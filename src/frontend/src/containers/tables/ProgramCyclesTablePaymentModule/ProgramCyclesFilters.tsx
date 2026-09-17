@@ -8,7 +8,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment/moment';
 import { FiltersSection } from '@components/core/FiltersSection';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 interface ProgramCyclesFiltersProps {
   filter;

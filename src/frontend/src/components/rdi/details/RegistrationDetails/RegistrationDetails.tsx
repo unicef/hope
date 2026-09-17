@@ -6,16 +6,17 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { MiśTheme } from '../../../../theme';
+import type { MiśTheme } from '../../../../theme';
 import {
   formatFigure,
   registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
-import { DedupeBox, OptionType } from '../DedupeBox';
+import type { OptionType } from '../DedupeBox';
+import { DedupeBox } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';

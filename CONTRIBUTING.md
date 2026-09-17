@@ -3,7 +3,7 @@ Setup development environment
 
 Prerequisites:
 - This project uses PDM as package manager (see https://github.com/pdm-project/pdm).
-- A Postgres DB v15+
+- A Postgres DB v15.x
 - A Redis server
 - An Elastic Search server
 

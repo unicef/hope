@@ -1,7 +1,7 @@
 import { Box, Radio, RadioGroup, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { GreyBox } from '@components/core/GreyBox';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const FormLabelContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing(3)};

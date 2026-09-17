@@ -2241,7 +2241,7 @@ def test_send_payment_notification_emails_action_sends_email() -> None:
             "payment_plan_id": str(payment_plan.id),
             "action_user_id": str(user.id),
             "action": "SEND_FOR_APPROVAL",
-            "action_date_formatted": "3 April 2026",
+            "action_date": "2026-04-03T12:30:00+00:00",
         }
     )
 

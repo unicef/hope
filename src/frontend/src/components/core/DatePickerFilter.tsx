@@ -2,7 +2,7 @@ import { Box, FormControl } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { format, parseISO } from 'date-fns';
 import { FieldLabel } from './FieldLabel';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export const DatePickerFilter = ({
   topLabel = null,

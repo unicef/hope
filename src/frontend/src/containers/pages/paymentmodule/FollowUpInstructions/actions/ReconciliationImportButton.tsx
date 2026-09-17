@@ -1,10 +1,10 @@
 import { XlsxImportDialog } from '@core/XlsxImportDialog';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
-import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ReconciliationImportButtonProps {

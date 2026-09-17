@@ -7,7 +7,7 @@ from rest_framework_extensions.key_constructor.constructors import KeyConstructo
 
 
 class BusinessAreaListVersionKeyBit(KeyBitBase):
-    def get_data(  # noqa: PLR0913 – override of base method signature
+    def get_data(  # noqa: PLR0913, PLR0917 – override of base method signature
         self,
         params: Any,
         view_instance: Any,

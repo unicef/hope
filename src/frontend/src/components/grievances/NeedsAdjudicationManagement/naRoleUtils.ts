@@ -1,4 +1,8 @@
-import { NaRequiredRole, NaRoleAssignment, NaTicketDecision } from './naTypes';
+import type {
+  NaRequiredRole,
+  NaRoleAssignment,
+  NaTicketDecision,
+} from './naTypes';
 
 // Shape of `rolesInHouseholds` on individuals in the NA comparison payload,
 // as sent by IndividualForNaComparisonSerializer.get_roles_in_households — the

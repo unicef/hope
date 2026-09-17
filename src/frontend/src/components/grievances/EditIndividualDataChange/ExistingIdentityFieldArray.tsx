@@ -1,7 +1,7 @@
 import { Box, Grid } from '@mui/material';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EditIdentityRow } from './EditIdentityRow';
 

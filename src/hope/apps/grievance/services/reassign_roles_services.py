@@ -28,9 +28,9 @@ Reassing data structure:
 {
     "role_id|HEAD":{
         "role": "PRIMARY|ALTERNATE|HEAD",
-        "household": "household_id", # base 64 graphql relay id
-        "individual": "individual_id", # base 64 graphql relay id
-        "new_individual": "new_individual_id" # base 64 graphql relay id
+        "household": "household_id",
+        "individual": "individual_id",
+        "new_individual": "new_individual_id"
         },
     }
 }

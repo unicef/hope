@@ -1,12 +1,13 @@
-import { ReactElement, useState } from 'react';
-import moment from 'moment';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
-import { LogEntry } from '@restgenerated/models/LogEntry';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
@@ -40,7 +41,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
     return (
       <Row role="checkbox">
         <Cell weight={headCells[0].weight}>
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight}>
           {logEntry.user ? `${logEntry.user}` : null}
@@ -56,7 +57,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
     <>
       <Row onClick={() => setExpanded(!expanded)} hover>
         <Cell weight={headCells[0].weight}>
-          {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
+          <UniversalMoment withTime>{logEntry.timestamp}</UniversalMoment>
         </Cell>
         <Cell weight={headCells[1].weight}>
           {logEntry.user ? `${logEntry.user}` : null}

@@ -1,18 +1,19 @@
+import type { Filter } from '@utils/utils';
 import {
   createHandleApplyFilterChange,
-  Filter,
   handleAutocompleteChange,
 } from '@utils/utils';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
-import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import type { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
-import { AutocompleteOption } from './types';
+import type { AutocompleteOption } from './types';
 
 export function AssigneeAutocompleteRestFilter({
   disabled,
@@ -56,7 +57,10 @@ export function AssigneeAutocompleteRestFilter({
     isLoading,
     refetch,
   } = useQuery<PaginatedUserList>({
-    queryKey: restQueryKey(RestService.restBusinessAreasUsersList, queryVariables),
+    queryKey: restQueryKey(
+      RestService.restBusinessAreasUsersList,
+      queryVariables,
+    ),
     queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
   });
 
@@ -90,14 +94,17 @@ export function AssigneeAutocompleteRestFilter({
     name: `${user.firstName} ${user.lastName}`.trim() || user.email,
   }));
 
+  // Both sides arrive as `AutocompleteOption | string`: MUI hands back the raw
+  // input text before an option is picked. Comparing without narrowing
+  // `option` reads `.id` off a string and silently never matches.
   const handleOptionSelected = (
-    option: AutocompleteOption,
+    option: AutocompleteOption | string,
     selectedValue: AutocompleteOption | string,
   ) => {
-    if (typeof selectedValue === 'string') {
-      return option?.id === selectedValue;
-    }
-    return option?.id === selectedValue?.id;
+    const optionKey = typeof option === 'string' ? option : option?.id;
+    const valueKey =
+      typeof selectedValue === 'string' ? selectedValue : selectedValue?.id;
+    return optionKey === valueKey;
   };
 
   const handleOptionLabel = (option: AutocompleteOption | string) => {

@@ -8,13 +8,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';
-import {
-  ChangeEvent,
-  ReactElement,
-  useEffect,
-  useState,
-  useCallback,
-} from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -38,18 +33,18 @@ import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
-import { AreaList } from '@restgenerated/models/AreaList';
+import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import type { AreaList } from '@restgenerated/models/AreaList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useApiErrorSnackbar } from '@hooks/useApiErrorSnackbar';
 import { useSexChoices } from '@hooks/useSexChoices';
 import { useVerificationChannelChoices } from '@hooks/useVerificationChannelChoices';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import type { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
 import { restQueryKey } from '@utils/queryKeys';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
-import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
+import type { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
 const StyledTabs = styled(Tabs)`
@@ -222,8 +217,8 @@ export const EditVerificationPlan = ({
 
   const initialValues = {
     confidenceInterval:
-      paymentVerificationPlanNode.confidenceInterval * 100 || 95,
-    marginOfError: paymentVerificationPlanNode.marginOfError * 100 || 5,
+      (paymentVerificationPlanNode.confidenceInterval ?? 0) * 100 || 95,
+    marginOfError: (paymentVerificationPlanNode.marginOfError ?? 0) * 100 || 5,
     filterAgeMin: paymentVerificationPlanNode.ageFilterMin || '',
     filterAgeMax: paymentVerificationPlanNode.ageFilterMax || '',
     filterSex: paymentVerificationPlanNode.sexFilter || '',

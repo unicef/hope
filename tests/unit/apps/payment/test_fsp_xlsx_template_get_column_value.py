@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 
@@ -219,8 +219,9 @@ def test_get_column_value_delivered_quantity_error(payment_with_snapshot_and_doc
 
 
 def test_get_column_value_delivery_date_string(payment_with_snapshot_and_document, admin_areas_dict):
-    payment_with_snapshot_and_document.delivery_date = datetime(2023, 5, 5).date()
+    payment_with_snapshot_and_document.delivery_date = datetime(2023, 5, 5, 12, 30, tzinfo=UTC)
     payment_with_snapshot_and_document.save(update_fields=["delivery_date"])
+    payment_with_snapshot_and_document.refresh_from_db()
     value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
         payment_with_snapshot_and_document,
         "delivery_date",
@@ -228,7 +229,7 @@ def test_get_column_value_delivery_date_string(payment_with_snapshot_and_documen
         [],
     )
 
-    assert value == str(payment_with_snapshot_and_document.delivery_date)
+    assert value == "2023-05-05"
 
 
 def test_get_column_value_no_snapshot(payment_plan, household, fsp, delivery_mechanism, admin_areas_dict):

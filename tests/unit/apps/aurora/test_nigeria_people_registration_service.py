@@ -146,6 +146,9 @@ def record_fields() -> dict:
                 "birth_date_i_c": "1988-04-08",
                 "given_name_i_c": "Giulio",
                 "middle_name_i_c": "D",
+                "given_name_latin_i_c": "Giulio",
+                "middle_name_latin_i_c": "D",
+                "family_name_latin_i_c": "Franco",
                 "national_id_no": "01234567891",
                 "account_details": {
                     "uba_code": "000004",
@@ -455,6 +458,7 @@ def test_import_data_to_datahub(
     assert primary_collector.sex == MALE
     assert primary_collector.email == "gfranco@unicef.org"
     assert primary_collector.full_name == "Giulio D Franco"
+    assert primary_collector.full_name_latin == "Giulio D Franco"
     assert primary_collector.relationship == HEAD
     assert primary_collector.phone_no_alternative is not None
     assert primary_collector.flex_fields == {

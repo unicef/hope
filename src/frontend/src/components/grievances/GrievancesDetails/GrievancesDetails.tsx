@@ -8,7 +8,8 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Grid, GridSize, Typography } from '@mui/material';
+import type { GridSize } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
@@ -16,7 +17,7 @@ import {
   grievanceTicketStatusToColor,
   renderUserName,
 } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
@@ -25,8 +26,8 @@ import {
   replaceLabels,
 } from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketDetail;
@@ -172,7 +173,7 @@ function GrievancesDetails({
                 label: t('Status'),
                 value: (
                   <StatusBox
-                    status={statusChoices[ticket.status]}
+                    status={statusChoices[ticket.status ?? '']}
                     statusToColor={grievanceTicketStatusToColor}
                   />
                 ),
@@ -217,7 +218,11 @@ function GrievancesDetails({
               },
               {
                 label: t('Submission Channel'),
-                value: <span>{submissionChannelChoices[ticket.submissionChannel] || '-'}</span>,
+                value: (
+                  <span>
+                    {submissionChannelChoices[ticket.submissionChannel ?? ''] || '-'}
+                  </span>
+                ),
                 size: 3,
               },
               {

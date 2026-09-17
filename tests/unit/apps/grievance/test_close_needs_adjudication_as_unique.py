@@ -1,13 +1,15 @@
 """Tests for closing a Unique Identifiers Similarity needs-adjudication ticket as unique.
 
 Covers Document.dedup_signature, TicketNeedsAdjudicationDetails.documents_no_longer_conflict,
-the can_close_as_unique / mark_unique_and_close / find_open_unique_identifiers_ticket_for_individual
+the can_close_as_unique / mark_unique_and_close / find_open_unique_identifiers_ticket_id_for_individual
 services, the close-as-unique API action, and the Data Change ticket's link to its Needs
 Adjudication counterpart (IndividualDataUpdateTicketDetailsSerializer.linked_needs_adjudication_ticket_id).
 """
 
+from datetime import timedelta
 from typing import Any, Callable
 
+from django.utils import timezone
 import pytest
 from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -33,7 +35,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     can_close_as_unique,
-    find_open_unique_identifiers_ticket_for_individual,
+    find_open_unique_identifiers_ticket_id_for_individual,
     mark_unique_and_close,
 )
 from hope.apps.household.const import NEEDS_ADJUDICATION, UNIQUE
@@ -126,6 +128,18 @@ def _build_ticket(
     )
     ticket_details.possible_duplicates.add(*duplicates)
     return ticket_details
+
+
+@pytest.fixture
+def individual_with_tickets_in_both_roles(business_area: Any, program: Any) -> tuple[Any, Any]:
+    individual = _build_individual(program, business_area)
+    other_individual = _build_individual(program, business_area)
+    older_ticket = _build_ticket(business_area, program, other_individual, [individual])
+    _build_ticket(business_area, program, individual, [other_individual])
+    TicketNeedsAdjudicationDetails.objects.filter(pk=older_ticket.pk).update(
+        created_at=timezone.now() - timedelta(days=1)
+    )
+    return individual, older_ticket
 
 
 # --------------------------------------------------------------------------- #
@@ -606,9 +620,9 @@ def test_close_as_unique_endpoint_rejects_non_needs_adjudication_ticket(
 
 
 # --------------------------------------------------------------------------- #
-# find_open_unique_identifiers_ticket_for_individual
+# find_open_unique_identifiers_ticket_id_for_individual
 # --------------------------------------------------------------------------- #
-def test_find_open_unique_identifiers_ticket_for_individual_finds_golden(
+def test_find_open_unique_identifiers_ticket_id_for_individual_finds_golden(
     business_area: Any, program: Any, national_id_type: Any, country: Any
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -617,10 +631,10 @@ def test_find_open_unique_identifiers_ticket_for_individual_finds_golden(
     _add_national_id(duplicate, national_id_type, country, program, "ID-2")
     ticket_details = _build_ticket(business_area, program, golden, [duplicate])
 
-    assert find_open_unique_identifiers_ticket_for_individual(golden) == ticket_details
+    assert find_open_unique_identifiers_ticket_id_for_individual(golden) == ticket_details.ticket_id
 
 
-def test_find_open_unique_identifiers_ticket_for_individual_finds_possible_duplicate(
+def test_find_open_unique_identifiers_ticket_id_for_individual_finds_possible_duplicate(
     business_area: Any, program: Any, national_id_type: Any, country: Any
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -629,10 +643,18 @@ def test_find_open_unique_identifiers_ticket_for_individual_finds_possible_dupli
     _add_national_id(duplicate, national_id_type, country, program, "ID-2")
     ticket_details = _build_ticket(business_area, program, golden, [duplicate])
 
-    assert find_open_unique_identifiers_ticket_for_individual(duplicate) == ticket_details
+    assert find_open_unique_identifiers_ticket_id_for_individual(duplicate) == ticket_details.ticket_id
 
 
-def test_find_open_unique_identifiers_ticket_for_individual_none_when_ticket_closed(
+def test_find_open_unique_identifiers_ticket_id_for_individual_returns_earliest_across_relationships(
+    individual_with_tickets_in_both_roles: tuple[Any, Any],
+) -> None:
+    individual, older_ticket = individual_with_tickets_in_both_roles
+
+    assert find_open_unique_identifiers_ticket_id_for_individual(individual) == older_ticket.ticket_id
+
+
+def test_find_open_unique_identifiers_ticket_id_for_individual_none_when_ticket_closed(
     business_area: Any, program: Any, national_id_type: Any, country: Any
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -641,10 +663,10 @@ def test_find_open_unique_identifiers_ticket_for_individual_none_when_ticket_clo
     _add_national_id(duplicate, national_id_type, country, program, "ID-2")
     _build_ticket(business_area, program, golden, [duplicate], ticket_status=GrievanceTicket.STATUS_CLOSED)
 
-    assert find_open_unique_identifiers_ticket_for_individual(golden) is None
+    assert find_open_unique_identifiers_ticket_id_for_individual(golden) is None
 
 
-def test_find_open_unique_identifiers_ticket_for_individual_none_for_other_issue_type(
+def test_find_open_unique_identifiers_ticket_id_for_individual_none_for_other_issue_type(
     business_area: Any, program: Any, national_id_type: Any, country: Any
 ) -> None:
     golden = _build_individual(program, business_area)
@@ -659,28 +681,32 @@ def test_find_open_unique_identifiers_ticket_for_individual_none_for_other_issue
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
     )
 
-    assert find_open_unique_identifiers_ticket_for_individual(golden) is None
+    assert find_open_unique_identifiers_ticket_id_for_individual(golden) is None
 
 
-def test_find_open_unique_identifiers_ticket_for_individual_none_when_no_ticket(
+def test_find_open_unique_identifiers_ticket_id_for_individual_none_when_no_ticket(
     business_area: Any, program: Any
 ) -> None:
     unrelated = _build_individual(program, business_area)
 
-    assert find_open_unique_identifiers_ticket_for_individual(unrelated) is None
+    assert find_open_unique_identifiers_ticket_id_for_individual(unrelated) is None
 
 
-def test_find_open_unique_identifiers_ticket_for_individual_single_query(
+def test_find_open_unique_identifiers_ticket_id_for_individual_single_query(
     business_area: Any, program: Any, national_id_type: Any, country: Any, django_assert_num_queries: Callable
 ) -> None:
     golden = _build_individual(program, business_area)
     duplicate = _build_individual(program, business_area)
     _add_national_id(golden, national_id_type, country, program, "ID-1")
     _add_national_id(duplicate, national_id_type, country, program, "ID-2")
-    _build_ticket(business_area, program, golden, [duplicate])
+    ticket_details = _build_ticket(business_area, program, golden, [duplicate])
 
-    with django_assert_num_queries(1):
-        find_open_unique_identifiers_ticket_for_individual(golden)
+    with django_assert_num_queries(1) as captured_queries:
+        linked_ticket_id = find_open_unique_identifiers_ticket_id_for_individual(golden)
+
+    assert linked_ticket_id == ticket_details.ticket_id
+    assert "UNION ALL" in captured_queries.captured_queries[0]["sql"]
+    assert "LEFT OUTER JOIN" not in captured_queries.captured_queries[0]["sql"]
 
 
 # --------------------------------------------------------------------------- #

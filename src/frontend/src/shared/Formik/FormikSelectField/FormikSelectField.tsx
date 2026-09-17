@@ -11,7 +11,7 @@ import {
 import { Close } from '@mui/icons-material';
 import get from 'lodash/get';
 import styled from 'styled-components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;

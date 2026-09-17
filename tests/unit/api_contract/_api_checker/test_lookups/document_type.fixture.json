@@ -1,0 +1,18 @@
+{
+    "document_type": {
+        "master": {
+            "model": "household.documenttype",
+            "pk": "7f245542-08a0-4c91-a109-c139ddb0423b",
+            "fields": {
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "label": "Passport",
+                "key": "passport",
+                "is_identity_document": true,
+                "unique_for_individual": false,
+                "valid_for_deduplication": false
+            }
+        },
+        "deps": []
+    }
+}

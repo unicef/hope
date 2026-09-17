@@ -6,8 +6,8 @@ import { grievanceTicketStatusToColor, renderUserName } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
-import { MouseEvent, ReactElement } from 'react';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { MouseEvent, ReactElement } from 'react';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 interface LookUpLinkedTicketsTableRowProps {
   ticket: GrievanceTicketList;
@@ -56,7 +56,7 @@ export function LookUpLinkedTicketsTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={statusChoices[ticket.status]}
+          status={statusChoices[ticket.status ?? '']}
           statusToColor={grievanceTicketStatusToColor}
         />
       </TableCell>

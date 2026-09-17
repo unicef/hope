@@ -459,3 +459,11 @@ def test_formfield_for_foreignkey_partner_excludes_parent_partners(admin: UserAd
     assert parent not in field.queryset
     assert child in field.queryset
     assert standalone in field.queryset
+
+
+def test_get_autocomplete_fields_excludes_partner(admin: UserAdmin) -> None:
+    request = _request()
+
+    fields = admin.get_autocomplete_fields(request)
+
+    assert "partner" not in fields

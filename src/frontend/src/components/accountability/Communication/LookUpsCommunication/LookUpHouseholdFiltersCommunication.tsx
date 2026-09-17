@@ -5,11 +5,11 @@ import { SelectFilter } from '@core/SelectFilter';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import GroupIcon from '@mui/icons-material/Group';
 import { Grid, MenuItem } from '@mui/material';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsGroup } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -138,7 +138,7 @@ export function LookUpHouseholdFiltersCommunication({
             value={filter.orderBy}
             data-cy="hh-filters-order-by"
           >
-            {householdTableOrderOptions.map((order) => (
+            {householdTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

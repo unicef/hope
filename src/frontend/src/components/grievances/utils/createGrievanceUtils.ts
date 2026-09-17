@@ -1,4 +1,4 @@
-import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import type { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -28,7 +28,9 @@ export function isShowIssueType(category: string | number): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
-export const SYSTEM_GENERATED_ISSUE_TYPES = [GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR];
+export const SYSTEM_GENERATED_ISSUE_TYPES = [
+  GRIEVANCE_ISSUE_TYPES.BIOMETRIC_PHOTO_ERROR,
+];
 
 export function isSystemGenerated(category: any, issueType?: number): boolean {
   const cat = category?.toString();
@@ -96,7 +98,8 @@ export const roleDisplayMap = {
 };
 
 export function prepareExistingAccountValues(
-  individualDataUpdateAccountsToEdit: Record<string, unknown>[] | null | undefined,
+  individualDataUpdateAccountsToEdit:
+    Record<string, unknown>[] | null | undefined,
 ) {
   if (!individualDataUpdateAccountsToEdit) {
     return [];
@@ -444,6 +447,7 @@ export const categoriesAndColors = [
   { category: 'Referral', color: '#FFAA20' },
   { category: 'Sensitive Grievance', color: '#7FCB28' },
   { category: 'System Flagging', color: '#00867B' },
+  { category: 'Beneficiary', color: '#8B5CF6' },
 ];
 
 /**

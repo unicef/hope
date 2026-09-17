@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     DocumentFactory,
+    GrievanceDocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -509,6 +510,42 @@ def system_flagging_ticket_hope_detail_url(
     )
 
 
+@pytest.fixture
+def assigned_referral_ticket(afghanistan: BusinessArea, program: Program, user: User) -> GrievanceTicket:
+    referral_details = TicketReferralDetailsFactory(
+        ticket__business_area=afghanistan,
+        ticket__status=GrievanceTicket.STATUS_ASSIGNED,
+        ticket__language="",
+        ticket__created_by=user,
+        ticket__assigned_to=user,
+    )
+    referral_details.ticket.programs.set([program])
+    return referral_details.ticket
+
+
+@pytest.fixture
+def assigned_referral_ticket_detail_url(afghanistan: BusinessArea, assigned_referral_ticket: GrievanceTicket) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={"business_area_slug": afghanistan.slug, "pk": str(assigned_referral_ticket.pk)},
+    )
+
+
+@pytest.fixture
+def linked_referral_ticket(
+    afghanistan: BusinessArea, program: Program, user: User, assigned_referral_ticket: GrievanceTicket
+) -> GrievanceTicket:
+    referral_details = TicketReferralDetailsFactory(
+        ticket__business_area=afghanistan,
+        ticket__status=GrievanceTicket.STATUS_NEW,
+        ticket__language="",
+        ticket__created_by=user,
+    )
+    referral_details.ticket.programs.set([program])
+    assigned_referral_ticket.linked_tickets.add(referral_details.ticket)
+    return referral_details.ticket
+
+
 @pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_hh_update(
     api_client: Any,
@@ -564,6 +601,44 @@ def test_update_grievance_ticket_hh_update(
         "username": owner.username,
     }
     assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New"
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_without_extras_keeps_requested_household_data(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    household_data_change_grievance_ticket: GrievanceTicket,
+    household_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_UPDATE,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+        ],
+        afghanistan,
+        program,
+    )
+
+    client = api_client(user)
+    response = client.patch(
+        household_ticket_detail_url,
+        {"submission_channel": SUBMISSION_CHANNEL_CALL_CENTER},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["submission_channel"] == SUBMISSION_CHANNEL_CALL_CENTER
+    household_data_change_grievance_ticket.refresh_from_db()
+    assert household_data_change_grievance_ticket.submission_channel == SUBMISSION_CHANNEL_CALL_CENTER
+    assert household_data_change_grievance_ticket.household_data_update_ticket_details.household_data == {
+        "village": {"value": "Test Village", "approve_status": True},
+        "size": {"value": 19, "approve_status": True},
+        "country": "AFG",
+    }
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
@@ -1392,6 +1467,41 @@ def test_bulk_add_note(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_without_extras_keeps_requested_individual_data(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    individual_data_change_ticket: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_UPDATE,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+        ],
+        afghanistan,
+        program,
+    )
+    requested_data = individual_data_change_ticket.individual_data_update_ticket_details.individual_data
+    url = reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "pk": str(individual_data_change_ticket.pk),
+        },
+    )
+
+    client = api_client(user)
+    response = client.patch(url, {"priority": PRIORITY_HIGH}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    individual_data_change_ticket.refresh_from_db()
+    assert individual_data_change_ticket.individual_data_update_ticket_details.individual_data == requested_data
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_individual_data_with_photo(
     api_client: Any,
     user: User,
@@ -1561,6 +1671,29 @@ def test_update_grievance_ticket_changes_submission_channel(
     assert referral_ticket_call_center.submission_channel == SUBMISSION_CHANNEL_SUGGESTION_BOX
 
 
+def test_update_grievance_ticket_rejects_hope_submission_channel_on_user_generated_ticket(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    referral_ticket_call_center: GrievanceTicket,
+    referral_ticket_call_center_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(
+        referral_ticket_call_center_detail_url,
+        {"submission_channel": SUBMISSION_CHANNEL_HOPE},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    referral_ticket_call_center.refresh_from_db()
+    assert referral_ticket_call_center.submission_channel == SUBMISSION_CHANNEL_CALL_CENTER
+
+
 def test_update_grievance_ticket_clears_submission_channel(
     api_client: Any,
     user: User,
@@ -1681,3 +1814,157 @@ def test_status_change_back_to_in_progress_does_not_notify_the_owner_who_sent_it
         for recipient in notification.user_recipients
     ]
     assert send_back_recipients == []
+
+
+def test_update_grievance_ticket_without_linked_tickets_keeps_them(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    assigned_referral_ticket: GrievanceTicket,
+    assigned_referral_ticket_detail_url: str,
+    linked_referral_ticket: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(assigned_referral_ticket_detail_url, {"priority": PRIORITY_HIGH}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert list(assigned_referral_ticket.linked_tickets.all()) == [linked_referral_ticket]
+
+
+def test_update_grievance_ticket_with_empty_linked_tickets_clears_them(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    assigned_referral_ticket: GrievanceTicket,
+    assigned_referral_ticket_detail_url: str,
+    linked_referral_ticket: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(assigned_referral_ticket_detail_url, {"linked_tickets": []}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert list(assigned_referral_ticket.linked_tickets.all()) == []
+
+
+def test_update_grievance_ticket_without_assigned_to_keeps_the_assignee(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    assigned_referral_ticket: GrievanceTicket,
+    assigned_referral_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(assigned_referral_ticket_detail_url, {"priority": PRIORITY_HIGH}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assigned_referral_ticket.refresh_from_db()
+    assert assigned_referral_ticket.assigned_to == user
+
+
+def test_update_grievance_ticket_with_null_assigned_to_unassigns_the_ticket(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    assigned_referral_ticket: GrievanceTicket,
+    assigned_referral_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(assigned_referral_ticket_detail_url, {"assigned_to": None}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assigned_referral_ticket.refresh_from_db()
+    assert assigned_referral_ticket.assigned_to is None
+
+
+@pytest.fixture
+def complaint_ticket_document(complaint_ticket: GrievanceTicket) -> Any:
+    return GrievanceDocumentFactory(
+        grievance_ticket=complaint_ticket,
+        name="old name",
+        file=SimpleUploadedFile("old.jpg", b"old-bytes", content_type="image/jpeg"),
+        file_size=9,
+    )
+
+
+@pytest.fixture
+def other_ticket_document(afghanistan: BusinessArea) -> Any:
+    return GrievanceDocumentFactory(
+        grievance_ticket=GrievanceTicketFactory(business_area=afghanistan),
+        name="old name",
+        file=SimpleUploadedFile("old.jpg", b"old-bytes", content_type="image/jpeg"),
+        file_size=9,
+    )
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_documentation(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket_detail_url: str,
+    complaint_ticket_document: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(
+        complaint_ticket_detail_url,
+        {
+            "documentation_to_update[0].id": str(complaint_ticket_document.id),
+            "documentation_to_update[0].name": "new name",
+            "documentation_to_update[0].file": SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    complaint_ticket_document.refresh_from_db()
+    assert complaint_ticket_document.name == "new name"
+    assert complaint_ticket_document.file_size == 10
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_documentation_of_other_ticket_is_denied(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket_detail_url: str,
+    other_ticket_document: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_UPDATE], afghanistan, program)
+
+    client = api_client(user)
+    response = client.patch(
+        complaint_ticket_detail_url,
+        {
+            "documentation_to_update[0].id": str(other_ticket_document.id),
+            "documentation_to_update[0].name": "new name",
+            "documentation_to_update[0].file": SimpleUploadedFile("new.jpg", b"new-bytes!", content_type="image/jpeg"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    other_ticket_document.refresh_from_db()
+    assert other_ticket_document.name == "old name"
+    assert other_ticket_document.file_size == 9

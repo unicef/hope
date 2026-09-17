@@ -195,12 +195,26 @@ def test_execute(
 
     individuals_obj_data = model_to_dict(
         individual,
-        ("country", "sex", "age", "marital_status", "relationship"),
+        (
+            "country",
+            "sex",
+            "age",
+            "marital_status",
+            "relationship",
+            "full_name_latin",
+            "given_name_latin",
+            "middle_name_latin",
+            "family_name_latin",
+        ),
     )
     expected_ind = {
         "relationship": "HEAD",
         "sex": "MALE",
         "marital_status": "MARRIED",
+        "full_name_latin": None,
+        "given_name_latin": "TestLatin",
+        "middle_name_latin": None,
+        "family_name_latin": None,
     }
     assert individuals_obj_data == expected_ind
 
@@ -345,6 +359,14 @@ def test_handle_geopoint_field(business_area: object, registration_data_import: 
     expected = 51.107883, 17.038538
     result = task._handle_geopoint_field(geopoint, False)
     assert result == expected
+
+
+def test_cast_latin_name_value_normalizes_whitespace(business_area: object, registration_data_import: object) -> None:
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+
+    result = task._cast_value("  Anna \t\xa0 Kovalska ", "given_name_latin_i_c")
+
+    assert result == "Anna Kovalska"
 
 
 def test_cast_boolean_value(business_area: object, registration_data_import: object) -> None:

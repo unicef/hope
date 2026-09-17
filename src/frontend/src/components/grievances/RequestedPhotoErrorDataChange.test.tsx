@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { TestProviders } from 'src/testUtils/testProviders';
@@ -86,7 +86,9 @@ describe('RequestedPhotoErrorDataChange', () => {
   });
 
   it('disables the approve button unless the ticket is for approval', () => {
-    renderComponent(makeTicket({ status: GRIEVANCE_TICKET_STATES.IN_PROGRESS }));
+    renderComponent(
+      makeTicket({ status: GRIEVANCE_TICKET_STATES.IN_PROGRESS }),
+    );
     expect(
       (screen.getByTestId('button-approve') as HTMLButtonElement).disabled,
     ).toBe(true);

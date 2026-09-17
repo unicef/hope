@@ -111,7 +111,7 @@ def test_send_pdu_online_edit_notification_emails_queues_async_job(django_captur
         "pdu_online_edit_id": str(online_edit.id),
         "action": "approved",
         "action_user_id": str(user.id),
-        "action_date_formatted": "2026-03-20",
+        "action_date": "2026-03-20",
     }
     mock_queue.assert_called_once_with(job)
 

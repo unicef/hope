@@ -1,6 +1,7 @@
 import { Box, Button, Collapse, Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { FC, ReactElement, useState } from 'react';
+import type { FC, ReactElement } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { ClearApplyButtons } from './ClearApplyButtons';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';

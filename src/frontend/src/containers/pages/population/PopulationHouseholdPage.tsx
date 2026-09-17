@@ -5,14 +5,14 @@ import { HouseholdFilters } from '@components/population/HouseholdFilter';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdTable } from '@containers/tables/population/HouseholdTable/HouseholdTable';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
@@ -20,20 +20,13 @@ import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 
 function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
-  const { businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<HouseholdChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesHouseholdsRetrieve),
+      queryFn: () => RestService.restChoicesHouseholdsRetrieve(),
     });
 
   const initialFilter = {

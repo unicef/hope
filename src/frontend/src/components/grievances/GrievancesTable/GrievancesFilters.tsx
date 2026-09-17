@@ -13,7 +13,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AccountBalance } from '@mui/icons-material';
 import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
@@ -27,10 +27,12 @@ import {
   GrievanceTypes,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 interface GrievancesFiltersProps {
   filter;
@@ -53,6 +55,7 @@ export const GrievancesFilters = ({
 }: GrievancesFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -86,14 +89,17 @@ export const GrievancesFilters = ({
 
   const categoryChoices = useMemo(() => {
     if (isUserGeneratedTab)
-      return choicesData.grievanceTicketManualCategoryChoices;
+      return choicesData.grievanceTicketFilterCategoryChoices;
     // Data Change is a manual category, but it also owns a system-generated issue type
     // (Biometric Photo Error), so it has to be selectable on the system tab too.
     const dataChangeCategory = choicesData.grievanceTicketCategoryChoices?.find(
       (item) => item.value?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE,
     );
     return dataChangeCategory
-      ? [...choicesData.grievanceTicketSystemCategoryChoices, dataChangeCategory]
+      ? [
+          ...choicesData.grievanceTicketSystemCategoryChoices,
+          dataChangeCategory,
+        ]
       : choicesData.grievanceTicketSystemCategoryChoices;
   }, [choicesData, isUserGeneratedTab]);
 
@@ -161,7 +167,7 @@ export const GrievancesFilters = ({
           onChange={handleFilterChange}
           type={filter.documentType}
           number={filter.documentNumber}
-          choices={choicesData?.documentTypeChoices}
+          choices={documentTypeChoices}
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>

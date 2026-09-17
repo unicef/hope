@@ -2,7 +2,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
 import { usePermissions } from '@hooks/usePermissions';
 import { SurveyTabsValues } from '@utils/constants';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpSelectionTablesSurveysProps {

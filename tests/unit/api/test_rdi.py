@@ -334,3 +334,17 @@ def test_complete_transitions_rdi_to_in_review(
     assert data[0] == {"id": str(rdi_loading.id), "status": "IN_REVIEW"}
     rdi_loading.refresh_from_db()
     assert rdi_loading.status == RegistrationDataImport.IN_REVIEW
+
+
+def test_push_invalid_list_returns_400_not_500(
+    token_api_client: APIClient,
+    user_business_area: BusinessArea,
+    rdi_loading: RegistrationDataImport,
+) -> None:
+    url = reverse("api:rdi-push", args=[user_business_area.slug, str(rdi_loading.id)])
+    response = token_api_client.post(url, [{"village": "x"}], format="json")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    body = response.json()
+    assert "households" in body
+    assert isinstance(body["households"], dict)

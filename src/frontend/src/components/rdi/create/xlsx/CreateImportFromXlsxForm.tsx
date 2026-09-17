@@ -6,7 +6,8 @@ import { useMutation } from '@tanstack/react-query';
 import { Box, CircularProgress } from '@mui/material';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -69,7 +70,7 @@ export function CreateImportFromXlsxForm({
     },
   });
 
-  const onSubmit = (values): Promise<void> => {
+  const onSubmit = (values): void => {
     setSubmitDisabled(true);
     if (!xlsxImportData?.id) {
       setSubmitDisabled(false);

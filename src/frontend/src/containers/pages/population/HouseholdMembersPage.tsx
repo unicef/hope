@@ -8,18 +8,20 @@ import { Tab, Tabs } from '@core/Tabs';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Fade, Tooltip } from '@mui/material';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { ReactElement, useState, useEffect, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -34,19 +36,15 @@ export const HouseholdMembersPage = (): ReactElement => {
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
-      queryKey: restQueryKey(
-        RestService.restBusinessAreasIndividualsChoicesRetrieve,
-        { businessAreaSlug: businessArea },
-      ),
-      queryFn: () =>
-        RestService.restBusinessAreasIndividualsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
+      queryKey: restQueryKey(RestService.restChoicesIndividualsRetrieve),
+      queryFn: () => RestService.restChoicesIndividualsRetrieve(),
     });
+
+  const { data: documentTypeChoices } = useDocumentTypeChoices();
 
   const initialFilter = {
     search: '',
-    documentType: individualChoicesData?.documentTypeChoices?.[0]?.value,
+    documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
     sex: '',

@@ -7,9 +7,9 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { MessageDetail } from '@restgenerated/models/MessageDetail';
+import type { MessageDetail } from '@restgenerated/models/MessageDetail';
 
 interface CommunicationDetailsProps {
   message: MessageDetail;

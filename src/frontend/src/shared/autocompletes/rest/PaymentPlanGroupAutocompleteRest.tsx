@@ -1,6 +1,7 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { handleOptionSelected } from '@utils/utils';
-import { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
 import { RestService } from '@restgenerated/services/RestService';
@@ -53,7 +54,9 @@ export const PaymentPlanGroupAutocompleteRest = ({
           ...params,
         })
       }
-      queryKeyMethod={RestService.restBusinessAreasProgramsPaymentPlanGroupsList}
+      queryKeyMethod={
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsList
+      }
       businessArea={businessArea}
       programId={programId}
       handleChange={(_, selectedValue) => {

@@ -33,6 +33,9 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
     )
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
+    # parent is restricted to root-level partners (level=0) via get_form;
+    # the autocomplete widget bypasses that queryset, so it must be excluded.
+    autocomplete_exclude_fields = ("parent",)
 
     def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines

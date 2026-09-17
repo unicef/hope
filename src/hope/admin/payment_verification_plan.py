@@ -11,7 +11,7 @@ from django.http import Http404, HttpRequest, HttpResponseBase, HttpResponseRedi
 from django.urls import reverse
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hope.admin.utils import HOPEModelAdminBase
+from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 @admin.register(PaymentVerificationPlan)
-class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+class PaymentVerificationPlanAdmin(ViewOnUiMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "payment_plan",
         "status",
@@ -62,6 +62,12 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "error",
     )
     search_fields = ("payment_plan__name",)
+
+    def frontend_url(self, obj: PaymentVerificationPlan) -> str | None:
+        program = obj.get_program
+        return (
+            f"/{obj.business_area.slug}/programs/{program.code}/payment-verification/payment-plan/{obj.payment_plan.id}"
+        )
 
     @button(permission="payment.view_paymentverification")
     def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:

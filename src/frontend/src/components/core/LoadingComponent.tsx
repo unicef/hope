@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { CircularProgress } from '@mui/material';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface ContainerProps {
   absolute?: boolean;

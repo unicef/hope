@@ -13,11 +13,12 @@ import {
   ListItem,
   Typography,
 } from '@mui/material';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
-import { ReactElement, useState } from 'react';
+import type { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
+import type { MiśTheme } from '../../theme';
 import { PaperContainer } from './PaperContainer';
 import { formatFigure } from '@utils/utils';
 

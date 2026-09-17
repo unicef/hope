@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -14,6 +15,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import create_diff
+from hope.apps.core.api.mixins import BusinessAreaProgramsAccessMixin
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import LogEntry, Program
 
@@ -142,6 +144,32 @@ def log_entries(
 
 
 @pytest.fixture
+def multi_program_log_entry(user: Any, business_area: Any, program_1: Any, program_2: Any) -> LogEntry:
+    log_entry = LogEntry.objects.create(
+        action=LogEntry.UPDATE,
+        content_object=program_1,
+        user=user,
+        business_area=business_area,
+        object_repr=str(program_1),
+        changes=create_diff(None, program_1, Program.ACTIVITY_LOG_MAPPING),
+    )
+    log_entry.programs.add(program_1, program_2)
+    return log_entry
+
+
+@pytest.fixture
+def programless_log_entry(user: Any, business_area: Any, program_1: Any) -> LogEntry:
+    return LogEntry.objects.create(
+        action=LogEntry.UPDATE,
+        content_object=program_1,
+        user=user,
+        business_area=business_area,
+        object_repr=str(program_1),
+        changes=create_diff(None, program_1, Program.ACTIVITY_LOG_MAPPING),
+    )
+
+
+@pytest.fixture
 def url_list(business_area: Any) -> str:
     return reverse(
         "api:activity-logs:activity-logs-list",
@@ -153,14 +181,6 @@ def url_list(business_area: Any) -> str:
 def url_count(business_area: Any) -> str:
     return reverse(
         "api:activity-logs:activity-logs-count",
-        kwargs={"business_area_slug": business_area.slug},
-    )
-
-
-@pytest.fixture
-def url_choices(business_area: Any) -> str:
-    return reverse(
-        "api:activity-logs:activity-logs-log-entry-action-choices",
         kwargs={"business_area_slug": business_area.slug},
     )
 
@@ -352,6 +372,56 @@ def test_activity_logs_count_returns_count_when_user_has_permission(
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()
     assert resp_data["count"] == 4
+
+
+@pytest.mark.enable_activity_log
+def test_activity_logs_count_counts_entry_with_multiple_allowed_programs_once(  # noqa: PLR0917
+    api_client: Any,
+    user: Any,
+    business_area: Any,
+    program_1: Any,
+    program_2: Any,
+    log_entries: dict,
+    multi_program_log_entry: LogEntry,
+    url_count: str,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
+    create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
+    client = api_client(user)
+    response = client.get(url_count)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 5
+
+
+@pytest.mark.enable_activity_log
+def test_activity_logs_count_includes_entry_without_programs(  # noqa: PLR0917
+    api_client: Any,
+    user: Any,
+    business_area: Any,
+    program_1: Any,
+    program_2: Any,
+    log_entries: dict,
+    programless_log_entry: LogEntry,
+    url_count: str,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
+    create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_2)
+    client = api_client(user)
+    response = client.get(url_count)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["count"] == 5
+
+
+def test_filter_many_programs_access_rejects_non_many_to_many_field() -> None:
+    mixin = BusinessAreaProgramsAccessMixin()
+    mixin.program_model_field = "business_area"
+
+    with pytest.raises(TypeError, match="business_area must be a many-to-many field"):
+        mixin._filter_many_programs_access(LogEntry.objects.all(), [])
 
 
 @pytest.mark.enable_activity_log
@@ -618,24 +688,21 @@ def test_activity_logs_filters_by_program_id(
     assert log["is_user_generated"] is True
 
 
-def test_activity_logs_choices_returns_action_choices(
-    api_client: Any,
-    user: Any,
-    business_area: Any,
-    program_1: Any,
-    url_choices: str,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(user, [Permissions.ACTIVITY_LOG_VIEW], business_area, program_1)
+def test_activity_log_action_choices_returns_choices_for_user_without_any_role(api_client: Any, user: Any) -> None:
     client = api_client(user)
-    response = client.get(url_choices)
+    response = client.get(reverse("api:choices-activity-log-actions"))
 
     assert response.status_code == status.HTTP_200_OK
-    resp_data = response.json()
-    assert len(resp_data) == 4
-    choice = resp_data[0]
-    assert "name" in choice
-    assert "value" in choice
+    assert response.json() == sorted(
+        ({"name": str(label), "value": value} for value, label in LogEntry.LOG_ENTRY_ACTION_CHOICES),
+        key=lambda choice: choice["name"],
+    )
+
+
+def test_activity_log_action_choices_denies_anonymous_access() -> None:
+    response = APIClient().get(reverse("api:choices-activity-log-actions"))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.enable_activity_log

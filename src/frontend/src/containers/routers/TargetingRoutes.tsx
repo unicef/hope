@@ -1,5 +1,5 @@
 import { useRoutes, Navigate } from 'react-router-dom';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import CreateTargetPopulationPage from '@containers/pages/targeting/CreateTargetPopulationPage';
 import EditTargetPopulationPage from '@containers/pages/targeting/EditTargetPopulationPage';
 import TargetPopulationDetailsPage from '@containers/pages/targeting/TargetPopulationDetailsPage';

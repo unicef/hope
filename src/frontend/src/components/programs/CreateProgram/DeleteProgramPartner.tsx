@@ -6,7 +6,8 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';

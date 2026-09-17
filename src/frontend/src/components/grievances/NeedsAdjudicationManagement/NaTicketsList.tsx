@@ -1,13 +1,13 @@
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
-import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
-import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { ReactElement } from 'react';
+import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NaTicketListItem } from './NaTicketListItem';
 import { isDecisionComplete, isDecisionResolved } from './naRoleUtils';
-import { NaTicketDecision } from './naTypes';
+import type { NaTicketDecision } from './naTypes';
 
 interface NaTicketsListProps {
   tickets: GrievanceTicketList[];

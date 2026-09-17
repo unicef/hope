@@ -1,9 +1,6 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  useMutation,
-  UseMutationResult,
-  useQueryClient,
-} from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { DefaultError, QueryKey } from '@tanstack/query-core';
 
 export const useActionMutation = <TData, TOptions>(
@@ -16,14 +13,14 @@ export const useActionMutation = <TData, TOptions>(
   const { businessAreaSlug, programCode } = useBaseUrl();
   const client = useQueryClient();
   return useMutation({
-    mutationFn: async() =>
+    mutationFn: async () =>
       mutationFn({
         businessAreaSlug,
         programCode,
         id: id,
       } as TOptions),
     ...options,
-    onSuccess: async() => {
+    onSuccess: async () => {
       if (options?.onSuccess) {
         await options.onSuccess();
       }

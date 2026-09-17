@@ -224,6 +224,20 @@ def record_with_humanitarian_consent(czech_context: dict, czech_record_fields: d
 
 
 @pytest.fixture
+def record_with_latin_names(czech_context: dict, czech_record_fields: dict):
+    fields = copy.deepcopy(czech_record_fields)
+    fields["primary-carer-info"][0]["given_name_latin_i_c"] = "Tetiana"
+    fields["primary-carer-info"][0]["family_name_latin_i_c"] = "Symkanych"
+    return RecordFactory(
+        registration=czech_context["registration"].source_id,
+        timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
+        source_id=4,
+        fields=fields,
+        files=None,
+    )
+
+
+@pytest.fixture
 def record_with_string_storage(czech_context: dict, czech_record_fields: dict):
     record = RecordFactory(
         registration=czech_context["registration"].source_id,
@@ -400,6 +414,17 @@ def test_create_household_adds_humanitarian_partner_to_consent_sharing(
 
     household = PendingHousehold.objects.first()
     assert household.consent_sharing == [GOVERNMENT_PARTNER, PRIVATE_PARTNER, HUMANITARIAN_PARTNER]
+
+
+def test_create_household_composes_full_name_latin_from_parts(czech_rdi_context: dict, record_with_latin_names) -> None:
+    service = czech_rdi_context["service"]
+    rdi = czech_rdi_context["rdi"]
+
+    service.create_household_for_rdi_household(record_with_latin_names, rdi)
+
+    primary_collector = PendingIndividual.objects.get(full_name="Tetiana Symkanych")
+    assert primary_collector.full_name_latin == "Tetiana Symkanych"
+    assert PendingIndividual.objects.get(full_name="Ivan Drago").full_name_latin is None
 
 
 def test_create_household_parses_string_record_data(czech_rdi_context: dict, record_with_string_storage) -> None:

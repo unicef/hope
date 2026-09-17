@@ -14,11 +14,13 @@ import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { ReactElement, useEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { batchPlanTypeLabel, isGroupBackgroundActionBusy } from './utils';
 
 const initialFilter = {
@@ -65,7 +67,9 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
     if (wasBusy.current && !isBusy) {
       queryClient.invalidateQueries({
-        queryKey: restQueryKey(RestService.restBusinessAreasProgramsPaymentPlansList),
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
       });
     }
     wasBusy.current = isBusy;
@@ -175,6 +179,9 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           paymentPlanGroupId={groupId}
         />
       </TableWrapper>
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={group?.id} />
+      )}
     </>
   );
 };

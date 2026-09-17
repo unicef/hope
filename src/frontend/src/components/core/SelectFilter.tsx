@@ -8,7 +8,8 @@ import {
 import { Close } from '@mui/icons-material';
 import styled from 'styled-components';
 import { StyledFormControl } from '../StyledFormControl';
-import { ReactElement, Children, isValidElement } from 'react';
+import type { ReactElement } from 'react';
+import { Children, isValidElement } from 'react';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;

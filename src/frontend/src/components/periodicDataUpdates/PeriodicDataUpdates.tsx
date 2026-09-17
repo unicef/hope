@@ -1,6 +1,7 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { Box, Tab, Tabs, Fade, Paper } from '@mui/material';
-import { ChangeEvent, ReactElement, useState, useEffect, useMemo } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { useBaseUrl } from '@hooks/useBaseUrl';

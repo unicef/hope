@@ -683,7 +683,6 @@ def test_create_feedback_for_finished_program(
             "comments": "Test Comments",
             "consent": True,
             "description": "Test new description",
-            "household_lookup": str(household_1.pk),
             "issue_type": "POSITIVE_FEEDBACK",
             "admin2": str(area_1.pk),
             "language": "polish",
@@ -896,7 +895,8 @@ def test_update_feedback_with_program_without_permission_in_program(
         },
         format="json",
     )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    # not visible in that program, so not found rather than forbidden
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_update_feedback_hh_lookup_returns_data_with_permission(
@@ -1400,7 +1400,8 @@ def test_create_feedback_message_with_program_without_permission_in_program(
         {"description": "Message for Feedback #1"},
         format="json",
     )
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+    # not visible in that program, so not found rather than forbidden
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_create_feedback_message_per_program_returns_created_with_permission(

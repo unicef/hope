@@ -2,7 +2,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Grid, IconButton, Typography } from '@mui/material';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { useFormikContext } from 'formik';
-import { ReactElement, useRef } from 'react';
+import type { ReactElement } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

@@ -11,8 +11,8 @@ import {
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
-import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface PPDataTableProps {
   ppData: PaginatedPaymentPlanListList;

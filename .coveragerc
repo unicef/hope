@@ -17,7 +17,6 @@ omit =
         */management/commands/*
         */management/sql.py
         */missing_countries.py
-        */base_test_case.py
         */wsgi.py
         */middlewares/silk.py
         */steficon/debug.py

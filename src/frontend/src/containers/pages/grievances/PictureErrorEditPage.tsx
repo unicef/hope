@@ -1,4 +1,4 @@
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -12,13 +12,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Typography } from '@mui/material';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError, showApiErrorMessages } from '@utils/utils';
 import { Formik } from 'formik';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -61,7 +61,8 @@ const PictureErrorEditPage = (): ReactElement => {
         RestService.restBusinessAreasUsersProfileRetrieve,
         profileParams,
       ),
-      queryFn: () => RestService.restBusinessAreasUsersProfileRetrieve(profileParams),
+      queryFn: () =>
+        RestService.restBusinessAreasUsersProfileRetrieve(profileParams),
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,

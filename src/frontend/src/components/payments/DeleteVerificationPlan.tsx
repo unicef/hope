@@ -1,6 +1,7 @@
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';

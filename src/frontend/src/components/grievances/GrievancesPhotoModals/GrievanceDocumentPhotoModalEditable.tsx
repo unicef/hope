@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 
 interface GrievanceDocumentPhotoModalProps {
@@ -36,7 +37,7 @@ export function GrievanceDocumentPhotoModalEditable({
             type="file"
             accept="image/*"
             onChange={(event) => {
-              setFieldValue(fieldName, event.currentTarget.files[0]);
+              setFieldValue(fieldName, event.currentTarget.files?.[0]);
             }}
           />
         </Box>

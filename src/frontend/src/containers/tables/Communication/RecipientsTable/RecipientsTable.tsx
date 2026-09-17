@@ -9,9 +9,10 @@ import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useMemo, useState, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { Recipient } from '@restgenerated/models/Recipient';
+import type { Recipient } from '@restgenerated/models/Recipient';
 interface RecipientsTableProps {
   id: string;
   canViewDetails: boolean;

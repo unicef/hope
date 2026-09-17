@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { useQuery } from '@tanstack/react-query';

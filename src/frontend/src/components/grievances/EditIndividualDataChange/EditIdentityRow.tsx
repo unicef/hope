@@ -3,13 +3,14 @@ import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
-import { IndividualIdentity } from '@restgenerated/models/IndividualIdentity';
+import type { IndividualIdentity } from '@restgenerated/models/IndividualIdentity';
 
 interface DisabledDivProps {
   disabled: boolean;

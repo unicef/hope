@@ -9,7 +9,10 @@ nav:
   - Payment Module: payment.md
   - Payment Groups & Top-Ups: payment-groups-and-purposes.md
   - Payment Verification: payment_verification.md
-  - Grievance: grievance.md
+  - Grievance:
+    - Overview: grievance.md
+    - Biometric Photo Error Tickets: biometric-photo-error.md
+    - Needs Adjudication Management: needs-adjudication-management.md
   - Accountability: accountability.md
   - User Management: user.md
   - Activity Log: log.md

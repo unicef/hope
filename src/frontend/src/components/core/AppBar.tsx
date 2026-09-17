@@ -8,7 +8,7 @@ import MuiAppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import { styled } from '@mui/system';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { theme as muiTheme } from 'src/theme';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';

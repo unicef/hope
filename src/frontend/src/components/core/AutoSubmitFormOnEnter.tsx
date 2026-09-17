@@ -1,5 +1,6 @@
 import { useFormikContext } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 
 export function AutoSubmitFormOnEnter(): ReactElement {
   const { submitForm } = useFormikContext();
