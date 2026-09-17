@@ -16,6 +16,9 @@ class CountrySmallSerializer(serializers.ModelSerializer):
 class BusinessAreaSerializer(serializers.ModelSerializer):
     countries = CountrySmallSerializer(many=True, read_only=True)
     timezone = TimeZoneSerializerField(read_only=True)
+    is_manual_ingest = serializers.BooleanField(
+        source="is_rdi_ingest_source_all_except_country_workspace", read_only=True
+    )
 
     class Meta:
         model = BusinessArea
@@ -31,6 +34,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
             "active",
             "is_accountability_applicable",
             "rdi_import_xlsx_disabled",
+            "is_manual_ingest",
             "countries",
         )
 

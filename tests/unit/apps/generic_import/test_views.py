@@ -19,6 +19,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, ImportData, Partner, Program, RegistrationDataImport, Role, RoleAssignment, User
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 
 
 @pytest.fixture
@@ -149,6 +150,29 @@ def import_assignment_on_other_ba(user, import_role, other_business_area, other_
 @pytest.fixture
 def invalid_upload_file() -> SimpleUploadedFile:
     return SimpleUploadedFile("test.pdf", b"fake content", content_type="application/pdf")
+
+
+@pytest.fixture
+def cw_only_business_area() -> BusinessArea:
+    return BusinessAreaFactory(ingest_source=BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY)
+
+
+@pytest.fixture
+def cw_only_program(cw_only_business_area) -> Program:
+    return ProgramFactory(business_area=cw_only_business_area, status=Program.ACTIVE)
+
+
+@pytest.fixture
+def import_role_assignment_cw_only(user, import_role, cw_only_business_area, cw_only_program) -> RoleAssignment:
+    return RoleAssignmentFactory(
+        user=user, role=import_role, business_area=cw_only_business_area, program=cw_only_program
+    )
+
+
+@pytest.fixture
+def client_with_import_permission_cw_only(client, user, import_role_assignment_cw_only) -> Client:
+    client.force_login(user, "django.contrib.auth.backends.ModelBackend")
+    return client
 
 
 @pytest.mark.django_db
@@ -428,6 +452,33 @@ def test_upload_to_ba_without_import_permission_for_that_ba(
     mock_delay.assert_not_called()
     messages_list = list(response.context["messages"])
     assert any("permission" in str(m).lower() for m in messages_list)
+
+
+@pytest.mark.django_db
+@patch("hope.apps.generic_import.views.process_generic_import_async_task")
+def test_upload_blocked_for_cw_only_business_area(
+    mock_delay,
+    client_with_import_permission_cw_only,
+    upload_url,
+    upload_file,
+    cw_only_business_area,
+    cw_only_program,
+):
+    response = client_with_import_permission_cw_only.post(
+        upload_url,
+        data={
+            "business_area": cw_only_business_area.id,
+            "program": cw_only_program.id,
+            "file": upload_file(),
+        },
+    )
+
+    assert response.status_code == 200
+    assert ImportData.objects.count() == 0
+    assert RegistrationDataImport.objects.count() == 0
+    mock_delay.assert_not_called()
+    messages_list = list(response.context["messages"])
+    assert any(ALL_EXCEPT_CW_INGEST_REJECT_MSG in str(m) for m in messages_list)
 
 
 @pytest.mark.django_db
