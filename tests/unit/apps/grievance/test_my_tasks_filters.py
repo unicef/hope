@@ -180,3 +180,26 @@ def test_unassigned_filter_returns_nothing_for_a_user_who_may_view_but_not_assig
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data["results"] == []
+
+
+def test_unassigned_filter_excludes_tickets_that_already_have_an_assignee(
+    api_client: Any,
+    my_tasks_business_area: BusinessArea,
+    assignable_program: Program,
+    my_tasks_list_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    user = UserFactory()
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        my_tasks_business_area,
+        program=assignable_program,
+    )
+    assigned_ticket = GrievanceTicketFactory(business_area=my_tasks_business_area, assigned_to=user)
+    assigned_ticket.programs.set([assignable_program])
+
+    response = api_client(user).get(my_tasks_list_url, {"unassigned": "true"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["results"] == []

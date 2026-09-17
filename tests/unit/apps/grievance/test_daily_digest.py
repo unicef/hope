@@ -696,12 +696,8 @@ def test_fan_out_queues_the_hour_the_run_was_scheduled_for(business_area: Busine
     with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
         daily_grievance_digest_async_task()
 
-    queued = next(
-        call
-        for call in mock_queue_task.call_args_list
-        if call.kwargs["config"]["business_area_id"] == str(business_area.id)
-    )
-    assert queued.kwargs["config"]["notification_time"] == "2026-08-10T06:00:00+00:00"
+    mock_queue_task.assert_called_once()
+    assert mock_queue_task.call_args.kwargs["config"]["notification_time"] == "2026-08-10T06:00:00+00:00"
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
@@ -1208,6 +1204,31 @@ def test_unassigned_ticket_in_a_finished_programme_is_not_counted(business_area:
     # The email links to /programs/all/, which lists active programmes only, so counting this
     # ticket would point the recipient at a list it cannot appear in.
     assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {}
+
+
+def test_two_assigners_with_the_same_scope_share_one_count_query(
+    business_area: BusinessArea,
+    assigner: User,
+    program: Program,
+    unassigned_ticket: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+    django_assert_num_queries: Any,
+) -> None:
+    second_assigner = UserFactory(first_name="Also", last_name="Assigner", email="also-assigner@example.com")
+    create_user_role_with_permissions(
+        second_assigner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=program,
+    )
+
+    with django_assert_num_queries(14):
+        emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)],
+        second_assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)],
+    }
 
 
 def test_needs_assignment_does_not_query_per_programme(
