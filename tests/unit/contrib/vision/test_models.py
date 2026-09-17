@@ -87,23 +87,25 @@ def test_funds_commitment_str_no_number(afghanistan) -> None:
 
 
 def test_funds_commitment_item_str_all_nulls(afghanistan) -> None:
-    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001")
+    fcg = FundsCommitmentGroup.objects.create(
+        funds_commitment_number="FC-001",
+        vendor_id=None,
+        business_area=None,
+        posting_date=None,
+        document_type=None,
+        currency_code=None,
+        gl_account=None,
+    )
     fci = FundsCommitmentItem.objects.create(
         funds_commitment_group=fcg,
         rec_serial_number=12345,
         funds_commitment_item="001",
-        vendor_id=None,
-        business_area=None,
-        posting_date=None,
         vision_approval=None,
         document_reference=None,
         fc_status=None,
         wbs_element=None,
         grant_number=None,
-        document_type=None,
         document_text=None,
-        currency_code=None,
-        gl_account=None,
         commitment_amount_local=None,
         commitment_amount_usd=None,
         total_open_amount_local=None,

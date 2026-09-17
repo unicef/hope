@@ -28,7 +28,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     OVERRIDE_OPTION,
 )
 from hope.apps.utils.security import is_root
-from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentGroup
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
@@ -46,20 +46,18 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class FundsCommitmentItemInline(admin.TabularInline):
-    model = FundsCommitmentItem
+class FundsCommitmentGroupInline(admin.TabularInline):
+    model = FundsCommitmentGroup
     extra = 0
     can_delete = False
     show_change_link = True
     fields = readonly_fields = (
-        "rec_serial_number",
-        "funds_commitment_group",
-        "funds_commitment_item",
-        "fc_status",
-        "commitment_amount_local",
-        "commitment_amount_usd",
-        "total_open_amount_local",
-        "total_open_amount_usd",
+        "funds_commitment_number",
+        "document_type",
+        "posting_date",
+        "currency_code",
+        "vendor_id",
+        "gl_account",
     )
 
     def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
@@ -185,7 +183,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     filter_horizontal = ("payment_plan_purposes",)
-    inlines = [FundsCommitmentItemInline, PaymentInstructionInline]
+    inlines = [FundsCommitmentGroupInline, PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",

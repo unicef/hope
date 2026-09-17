@@ -17,6 +17,12 @@ def vision_callback_external_field_name(field_name: str) -> str:
 
 
 class FundsCommitmentItemSerializer(serializers.ModelSerializer):
+    currency_code = serializers.CharField(
+        source="funds_commitment_group.currency_code",
+        allow_null=True,
+        required=False,
+    )
+
     class Meta:
         model = FundsCommitmentItem
         fields = [

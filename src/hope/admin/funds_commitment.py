@@ -12,7 +12,9 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         "business_area",
         "funds_commitment_item",
         "funds_commitment_number",
+        "get_document_type_display",
         "posting_date",
+        "get_fund_display",
         "grant_number",
         "wbs_element",
     )

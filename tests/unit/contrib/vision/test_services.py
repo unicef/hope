@@ -16,7 +16,7 @@ from extras.test_utils.factories import (
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
-from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentGroup
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import (
     notify_payment_plan_status_to_vision_async_task,
@@ -107,11 +107,13 @@ def ambiguous_fc_items(vision_payment_plan: PaymentPlan) -> list:
 @pytest.fixture
 def conflicting_fc_group(vision_payment_plan: PaymentPlan):
     other_payment_plan = PaymentPlanFactory()
-    group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    group = FundsCommitmentGroupFactory(
+        funds_commitment_number="FC123",
+        payment_plan=other_payment_plan,
+    )
     FundsCommitmentItemFactory(
         funds_commitment_group=group,
         office=vision_payment_plan.business_area,
-        payment_plan=other_payment_plan,
     )
     return group
 
@@ -123,11 +125,13 @@ def fc_group_with_existing_group_assignment(vision_payment_plan: PaymentPlan) ->
         funds_commitment_group=target_group,
         office=vision_payment_plan.business_area,
     )
-    existing_group = FundsCommitmentGroupFactory(funds_commitment_number="FC999")
+    existing_group = FundsCommitmentGroupFactory(
+        funds_commitment_number="FC999",
+        payment_plan=vision_payment_plan,
+    )
     FundsCommitmentItemFactory(
         funds_commitment_group=existing_group,
         office=vision_payment_plan.business_area,
-        payment_plan=vision_payment_plan,
     )
     return target_group, existing_group
 
@@ -200,20 +204,17 @@ def test_vision_status_treats_malformed_state_as_not_sent(
     assert vision_status == VisionStatus.NOT_SENT.value
 
 
-def test_assign_funds_commitment_from_callback_assigns_all_items_from_matching_group(
+def test_assign_funds_commitment_from_callback_assigns_items_from_matching_group(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(4):
-        VisionService.assign_funds_commitment_from_callback(vision_payment_plan, "FC123")
+    matching_group = matching_fc_items[0].funds_commitment_group
+    with django_assert_num_queries(3):
+        assigned_group = VisionService.assign_funds_commitment_from_callback(vision_payment_plan, "FC123")
 
-    assert all(item.payment_plan_id is None for item in matching_fc_items)
-    assert set(
-        FundsCommitmentItem.objects.filter(
-            pk__in=[item.pk for item in matching_fc_items],
-        ).values_list("payment_plan_id", flat=True)
-    ) == {vision_payment_plan.pk}
+    assert assigned_group.pk == matching_group.pk
+    assert FundsCommitmentGroup.objects.get(pk=matching_group.pk).payment_plan_id == vision_payment_plan.pk
 
 
 def test_assign_funds_commitment_from_callback_reports_missing_items(
@@ -237,40 +238,19 @@ def test_assign_funds_commitment_from_callback_rejects_ambiguous_group(
 
     assert error.value.status == VisionStatus.CALLBACK_FAILED
     assert error.value.error_code == VisionErrorCode.FC_AMBIGUOUS
-    assert all(item.payment_plan_id is None for item in ambiguous_fc_items)
 
 
-def test_assign_funds_commitment_from_callback_rejects_group_item_assigned_to_another_plan(
+def test_assign_funds_commitment_from_callback_rejects_group_assigned_to_another_plan(
     vision_payment_plan: PaymentPlan,
     conflicting_fc_group,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
+    with django_assert_num_queries(1), pytest.raises(FundsCommitmentAssignmentError) as error:
         VisionService.assign_funds_commitment_from_callback(vision_payment_plan, "FC123")
 
     assert error.value.status == VisionStatus.CALLBACK_FAILED
     assert error.value.error_code == VisionErrorCode.FC_CONFLICT
-    assert conflicting_fc_group.funds_commitment_items.exclude(payment_plan=None).exists()
-
-
-def test_assign_funds_commitment_from_callback_rejects_legacy_plan_item_from_another_group(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
-    FundsCommitmentItemFactory(funds_commitment_group=group, office=vision_payment_plan.business_area)
-    legacy_item = FundsCommitmentItemFactory(
-        funds_commitment_group=FundsCommitmentGroupFactory(funds_commitment_number="FC999"),
-        office=vision_payment_plan.business_area,
-        payment_plan=vision_payment_plan,
-    )
-
-    with django_assert_num_queries(3), pytest.raises(FundsCommitmentAssignmentError) as error:
-        VisionService.assign_funds_commitment_from_callback(vision_payment_plan, "FC123")
-
-    assert error.value.error_code == VisionErrorCode.FC_CONFLICT
-    legacy_item.refresh_from_db()
-    assert legacy_item.payment_plan_id == vision_payment_plan.pk
+    assert conflicting_fc_group.payment_plan_id != vision_payment_plan.pk
 
 
 def test_assign_funds_commitment_from_callback_rejects_plan_with_another_group(
@@ -280,13 +260,13 @@ def test_assign_funds_commitment_from_callback_rejects_plan_with_another_group(
 ) -> None:
     matching_group, existing_group = fc_group_with_existing_group_assignment
 
-    with django_assert_num_queries(3), pytest.raises(FundsCommitmentAssignmentError) as error:
+    with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
         VisionService.assign_funds_commitment_from_callback(vision_payment_plan, "FC123")
 
     assert error.value.status == VisionStatus.CALLBACK_FAILED
     assert error.value.error_code == VisionErrorCode.FC_CONFLICT
-    assert matching_group.funds_commitment_items.filter(payment_plan=None).exists()
-    assert existing_group.funds_commitment_items.filter(payment_plan=vision_payment_plan).exists()
+    assert FundsCommitmentGroup.objects.get(pk=matching_group.pk).payment_plan_id is None
+    assert FundsCommitmentGroup.objects.get(pk=existing_group.pk).payment_plan_id == vision_payment_plan.pk
 
 
 def test_process_callback_without_fc_keeps_plan_blocked(
@@ -404,7 +384,7 @@ def test_process_callback_recovers_failed_state_with_valid_fc(
             "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
         ) as mock_send_to_pg,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(6),
+        django_assert_num_queries(5),
     ):
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
@@ -415,10 +395,10 @@ def test_process_callback_recovers_failed_state_with_valid_fc(
 
     assert fc_assignment_failed is False
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
-    assert FundsCommitmentItem.objects.filter(
-        pk__in=[item.pk for item in matching_fc_items],
-        payment_plan=vision_payment_plan,
-    ).count() == len(matching_fc_items)
+    assert (
+        FundsCommitmentGroup.objects.get(pk=matching_fc_items[0].funds_commitment_group_id).payment_plan_id
+        == vision_payment_plan.pk
+    )
     mock_release.assert_called_once_with()
     mock_send_to_pg.assert_not_called()
 
@@ -438,7 +418,7 @@ def test_process_callback_ignores_plan_that_is_not_waiting_for_vision(
 
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {}
-    assert all(item.payment_plan_id is None for item in matching_fc_items)
+    assert FundsCommitmentGroup.objects.get(pk=matching_fc_items[0].funds_commitment_group_id).payment_plan_id is None
 
 
 @pytest.mark.parametrize("payment_plan_status", [PaymentPlan.Status.LOCKED_FSP, PaymentPlan.Status.ABORTED])
@@ -460,7 +440,7 @@ def test_process_callback_ignores_plan_that_has_left_review(
         )
 
     assert vision_payment_plan.vision_status == VisionStatus.WAITING_FOR_CALLBACK.value
-    assert all(item.payment_plan_id is None for item in matching_fc_items)
+    assert FundsCommitmentGroup.objects.get(pk=matching_fc_items[0].funds_commitment_group_id).payment_plan_id is None
 
 
 def test_process_callback_does_not_change_released_plan(
@@ -781,7 +761,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
     with (
         patch("hope.contrib.vision.services.log_create") as mock_activity_log,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-        django_assert_num_queries(6),
+        django_assert_num_queries(5),
     ):
         VisionService.process_callback(
             vision_payment_plan,
@@ -812,7 +792,7 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with (
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(6),
+        django_assert_num_queries(5),
     ):
         VisionService.process_callback(
             vision_payment_plan,
@@ -835,7 +815,8 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
     matching_fc_items: list,
     django_assert_num_queries,
 ) -> None:
-    selected_item, unselected_item = matching_fc_items
+    selected_item = matching_fc_items[0]
+    group_id = selected_item.funds_commitment_group_id
     vision_payment_plan.internal_data = {
         "vision": {
             "sent": True,
@@ -850,10 +831,7 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
     ):
         VisionService.recover_with_funds_commitment_items(vision_payment_plan, [selected_item])
 
-    selected_item.refresh_from_db()
-    unselected_item.refresh_from_db()
-    assert selected_item.payment_plan_id == vision_payment_plan.pk
-    assert unselected_item.payment_plan_id is None
+    assert FundsCommitmentGroup.objects.get(pk=group_id).payment_plan_id == vision_payment_plan.pk
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
     mock_release.assert_called_once_with()
     mock_send_to_pg.assert_called_once_with(

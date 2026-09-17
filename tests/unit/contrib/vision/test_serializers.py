@@ -30,14 +30,13 @@ def business_area() -> None:
 
 @pytest.fixture
 def funds_commitment_item(business_area) -> FundsCommitmentItem:
-    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001")
+    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001", currency_code="USD")
     return FundsCommitmentItem.objects.create(
         funds_commitment_group=fcg,
         rec_serial_number=12345,
         funds_commitment_item="001",
         wbs_element="WBS-001",
         grant_number="GR-001",
-        currency_code="USD",
         commitment_amount_local=1000.00,
         commitment_amount_usd=1000.00,
         total_open_amount_local=500.00,
@@ -65,12 +64,11 @@ def test_funds_commitment_item_serializer(funds_commitment_item) -> None:
 
 
 def test_funds_commitment_serializer() -> None:
-    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001")
+    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001", currency_code="USD")
     fci = FundsCommitmentItem.objects.create(
         funds_commitment_group=fcg,
         rec_serial_number=12345,
         funds_commitment_item="001",
-        currency_code="USD",
         commitment_amount_local=1000.00,
         commitment_amount_usd=1000.00,
     )

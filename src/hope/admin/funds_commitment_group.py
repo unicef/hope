@@ -32,6 +32,18 @@ class FundsCommitmentItemInline(admin.TabularInline):
 
 @admin.register(FundsCommitmentGroup)
 class FundsCommitmentGroupAdmin(HOPEModelAdminBase):
-    list_display = ("funds_commitment_number",)
-    search_fields = ("funds_commitment_number",)
+    list_display = (
+        "funds_commitment_number",
+        "get_document_type_display",
+        "posting_date",
+        "currency_code",
+        "vendor_id",
+        "gl_account",
+    )
+    search_fields = (
+        "funds_commitment_number",
+        "document_type",
+        "posting_date",
+        "vendor_id",
+    )
     inlines = (FundsCommitmentItemInline,)
