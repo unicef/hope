@@ -548,6 +548,19 @@ def ticket_without_admin_area(dashboard_context: dict[str, Any]) -> Any:
 
 
 @pytest.fixture
+def referral_ticket_in_area_named_no_location(dashboard_context: dict[str, Any]) -> Any:
+    admin_area = dashboard_context["tickets"][0].admin2
+    area = AreaFactory(name="No Location", area_type=admin_area.area_type, p_code="789cc789")
+    return GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        issue_type=None,
+        status=GrievanceTicket.STATUS_NEW,
+        business_area=dashboard_context["business_area"],
+        admin2=area,
+    )
+
+
+@pytest.fixture
 def beneficiary_ticket_with_admin_area(dashboard_context: dict[str, Any]) -> Any:
     return GrievanceTicketFactory(
         category=GrievanceTicket.CATEGORY_BENEFICIARY,
@@ -734,7 +747,50 @@ def test_global_dashboard_merges_areas_sharing_a_name_into_one_location_label(
     assert {"label": "Positive Feedback", "data": [4]} in chart["datasets"]
 
 
-def test_global_dashboard_omits_tickets_without_an_admin_area_from_the_location_chart(
+def test_global_dashboard_charts_tickets_without_an_admin_area_in_a_trailing_no_location_row(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    ticket_without_admin_area: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(dashboard_context["global_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    chart = response.json()["tickets_by_location_and_category"]
+    assert chart["labels"] == ["City Test", "No Location"]
+    assert {"label": "Referral", "data": [0, 1]} in chart["datasets"]
+
+
+def test_global_dashboard_keeps_an_area_named_no_location_apart_from_the_no_location_row(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    ticket_without_admin_area: Any,
+    referral_ticket_in_area_named_no_location: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(dashboard_context["global_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    chart = response.json()["tickets_by_location_and_category"]
+    assert chart["labels"] == ["City Test", "No Location", "No Location"]
+    assert {"label": "Referral", "data": [0, 1, 1]} in chart["datasets"]
+
+
+def test_global_dashboard_location_chart_sums_to_the_category_chart_per_category(
     authenticated_client: Any,
     dashboard_context: dict[str, Any],
     ticket_without_admin_area: Any,
@@ -751,11 +807,12 @@ def test_global_dashboard_omits_tickets_without_an_admin_area_from_the_location_
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    chart = data["tickets_by_location_and_category"]
-    assert chart["labels"] == ["City Test"]
-    assert {"label": "Referral", "data": [0]} in chart["datasets"]
-    # the ticket is still counted everywhere the area is not the key
-    assert data["tickets_by_type"]["user_generated_count"] == 5
+    by_category = data["tickets_by_category"]
+    by_location = data["tickets_by_location_and_category"]
+    location_totals = {dataset["label"]: sum(dataset["data"]) for dataset in by_location["datasets"]}
+    assert {label: total for label, total in location_totals.items() if total} == dict(
+        zip(by_category["labels"], by_category["datasets"][0]["data"], strict=True)
+    )
 
 
 def test_global_dashboard_charts_a_beneficiary_ticket_that_has_an_admin_area(
