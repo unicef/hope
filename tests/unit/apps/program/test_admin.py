@@ -25,6 +25,7 @@ from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
     BusinessAreaFactory,
     DataCollectingTypeFactory,
+    FileTempFactory,
     IndividualFactory,
     PartnerFactory,
     ProgramFactory,
@@ -163,7 +164,7 @@ def two_photo_archive() -> SimpleUploadedFile:
 def two_photo_upload_job(program: Program, business_area: BusinessArea, two_photo_archive: SimpleUploadedFile) -> Any:
     IndividualFactory(program=program, unicef_id="IND-1", business_area=business_area)
     IndividualFactory(program=program, unicef_id="IND-2", business_area=business_area)
-    file_temp = FileTemp.objects.create(
+    file_temp = FileTempFactory(
         object_id=str(program.pk),
         content_type=get_content_type_for_model(program),
         file=two_photo_archive,

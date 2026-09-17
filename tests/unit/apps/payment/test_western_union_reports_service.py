@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 import io
+import os
 from pathlib import Path
 import re
 from typing import Callable
@@ -1852,7 +1853,7 @@ def test_send_notification_emails_sends_to_users_with_permission(
             "email": user.email,
             "message": f"Payment Plan: https://example.com/{report.payment_plan.business_area.slug}/programs/"
             f"{report.payment_plan.program.code}/payment-module/payment-plans/{report.payment_plan.id}",
-            "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+            "title": f"Payment Plan {os.path.basename(report.report_file.file.name)} Western Union report",
             "link": "https://example.com/download/report",
         },
     )

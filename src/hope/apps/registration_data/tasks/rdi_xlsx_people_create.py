@@ -325,10 +325,10 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         hh_obj = partial(
             PendingHousehold,
             registration_data_import=rdi,
-            program_id=rdi.program.id,
+            program=rdi.program,
             collect_type=PendingHousehold.CollectType.SINGLE.value,
         )
-        ind_obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
+        ind_obj = partial(PendingIndividual, registration_data_import=rdi, program=rdi.program)
 
         first_row = sheet[1]
         self.header_index_map = {cell.value: idx for idx, cell in enumerate(first_row)}

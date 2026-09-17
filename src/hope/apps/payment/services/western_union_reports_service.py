@@ -8,6 +8,7 @@ from decimal import Decimal, InvalidOperation
 from enum import IntEnum
 import io
 import logging
+import os
 import re
 from tempfile import NamedTemporaryFile
 from typing import IO
@@ -771,7 +772,7 @@ class WesternUnionReportsService:
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",
-                "title": f"Payment Plan {report.report_file.file.name} Western Union report",
+                "title": f"Payment Plan {os.path.basename(report.report_file.file.name)} Western Union report",
                 "link": download_link,
             }
             user.email_user(
