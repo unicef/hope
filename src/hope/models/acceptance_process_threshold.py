@@ -3,7 +3,7 @@ import logging
 from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.db import models
-from psycopg2._range import NumericRange
+from django.db.backends.postgresql.psycopg_any import NumericRange
 
 from hope.models.utils import TimeStampedUUIDModel
 
