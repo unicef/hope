@@ -363,6 +363,10 @@ export const GrievancesTable = ({
     ],
     permissions,
   );
+  const canBulkAssign = hasPermissions(
+    PERMISSIONS.GRIEVANCES_UPDATE,
+    permissions,
+  );
 
   const getCanViewDetailsOfTicket = (ticket: GrievanceTicketList): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
@@ -430,10 +434,12 @@ export const GrievancesTable = ({
             gap: 4,
           }}
         >
-          <BulkAssignModal
-            selectedTickets={selectedTickets}
-            setSelected={setSelectedTickets}
-          />
+          {canBulkAssign && (
+            <BulkAssignModal
+              selectedTickets={selectedTickets}
+              setSelected={setSelectedTickets}
+            />
+          )}
           <BulkSetPriorityModal
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}

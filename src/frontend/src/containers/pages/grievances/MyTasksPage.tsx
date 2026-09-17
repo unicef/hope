@@ -29,22 +29,35 @@ import {
 // they must stay in step with hope.apps.grievance.constants (PRESET_*). Sensitivity is not a tab:
 // every email counts sensitive and other tickets separately and links each count with ?sensitive=,
 // which lands on the filter below.
+// A tab lists groups of alternatives and needs a match in every one of them: loading either tab
+// calls the ticket list, which refuses a user holding no list-view grant of its own.
 export const MY_TASKS_TABS = [
   {
     value: 'needs-assignment',
     label: 'NEEDS ASSIGNMENT',
-    permissions: [PERMISSIONS.GRIEVANCE_ASSIGN],
+    permissions: [
+      GRIEVANCES_VIEW_LIST_PERMISSIONS,
+      [PERMISSIONS.GRIEVANCE_ASSIGN],
+    ],
   },
   {
     value: 'mine',
     label: 'ASSIGNED TO ME',
-    permissions: GRIEVANCES_VIEW_LIST_PERMISSIONS,
+    permissions: [GRIEVANCES_VIEW_LIST_PERMISSIONS],
   },
 ];
 
-export const MY_TASKS_PERMISSIONS = MY_TASKS_TABS.flatMap(
-  (tab) => tab.permissions,
+export const MY_TASKS_PERMISSIONS = MY_TASKS_TABS.flatMap((tab) =>
+  tab.permissions.flat(),
 );
+
+// The entry point on the ticket list uses this too, so the button and the page never disagree.
+export const availableMyTasksTabs = (
+  permissions: string[] | null,
+): typeof MY_TASKS_TABS =>
+  MY_TASKS_TABS.filter((tab) =>
+    tab.permissions.every((group) => hasPermissions(group, permissions)),
+  );
 
 export const MyTasksPage = (): ReactElement => {
   const [shouldScroll, setShouldScroll] = useState(false);
@@ -76,10 +89,7 @@ export const MyTasksPage = (): ReactElement => {
   });
 
   const availableTabs = useMemo(
-    () =>
-      MY_TASKS_TABS.filter((tab) =>
-        hasPermissions(tab.permissions, permissions),
-      ),
+    () => availableMyTasksTabs(permissions),
     [permissions],
   );
 

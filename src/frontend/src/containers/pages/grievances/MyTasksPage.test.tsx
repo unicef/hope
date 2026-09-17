@@ -208,6 +208,14 @@ describe('MyTasksPage', () => {
     expect(screen.queryByTestId('grievances-table')).toBeNull();
   });
 
+  it('denies access to a user who can assign but holds no list-view grant', async () => {
+    mockPermissions = [PERMISSIONS.GRIEVANCE_ASSIGN];
+    renderPage('');
+
+    expect(await screen.findByText('Permission Denied')).toBeTruthy();
+    expect(screen.queryByTestId('grievances-table')).toBeNull();
+  });
+
   it('clears the category from state and URL on a tab switch, keeping overdue', async () => {
     renderPage('?tab=mine&overdue=true&category=3');
 

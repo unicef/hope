@@ -557,9 +557,21 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 name="idx_gt_ba_updated_not_ign",
             ),
             models.Index(fields=["assigned_at"], name="idx_gt_assigned_at"),
-            models.Index(fields=["assigned_to", "status"], name="idx_gt_assigned_to_status"),
-            models.Index(fields=["assigned_to", "category", "status"], name="idx_gt_assigned_cat_status"),
-            models.Index(fields=["assigned_to", "created_at", "status"], name="idx_gt_assigned_created_status"),
+            # the daily digest: one business area per run, and closed tickets are out of both backlogs
+            models.Index(
+                fields=["business_area", "category"],
+                condition=models.Q(assigned_to__isnull=True) & ~models.Q(status=6),  # STATUS_CLOSED
+                name="idx_gt_ba_cat_unassigned_open",
+            ),
+            models.Index(
+                fields=["business_area", "assigned_to", "category", "created_at"],
+                condition=~models.Q(status=6),  # STATUS_CLOSED
+                name="idx_gt_ba_asgn_cat_crtd_open",
+            ),
+            models.Index(fields=["business_area", "user_modified"], name="idx_gt_ba_user_modified"),
+            # the per-user EXISTS pair that picks the timezone buckets to run
+            models.Index(fields=["assigned_to", "business_area"], name="idx_gt_assigned_to_ba"),
+            models.Index(fields=["created_by", "business_area"], name="idx_gt_created_by_ba"),
         ]
 
     def clean(self) -> None:

@@ -129,7 +129,7 @@ class GrievanceTicketFilter(FilterSet):
     payment_record_ids = filters.BaseInFilter(method="filter_by_payment_record")
     overdue = BooleanFilter(method="filter_overdue")
     sensitive = BooleanFilter(method="filter_sensitive")
-    unassigned = BooleanFilter(field_name="assigned_to", lookup_expr="isnull")
+    unassigned = BooleanFilter(method="filter_unassigned")
 
     class Meta:
         fields = {
@@ -168,6 +168,23 @@ class GrievanceTicketFilter(FilterSet):
     def filter_sensitive(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         lookup = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
         return qs.filter(**lookup) if value else qs.exclude(**lookup)
+
+    def filter_unassigned(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        """Unassigned tickets the user could actually assign."""
+        if not value:
+            return qs.filter(assigned_to__isnull=False)
+        assignable_program_ids = set(
+            self.request.user.get_program_ids_for_permissions_in_business_area(
+                self.business_area.id, [Permissions.GRIEVANCE_ASSIGN]
+            )
+        )
+        if not assignable_program_ids:
+            return qs.none()
+        through_model = GrievanceTicket.programs.through
+        in_assignable_program = Exists(
+            through_model.objects.filter(grievanceticket=OuterRef("pk"), program_id__in=assignable_program_ids)
+        )
+        return qs.filter(Q(in_assignable_program) | without_program_q(), assigned_to__isnull=True)
 
     @cached_property
     def business_area(self) -> BusinessArea:

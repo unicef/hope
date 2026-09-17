@@ -1,9 +1,19 @@
-import pytest
+from typing import Any, Callable
 
-from extras.test_utils.factories import GrievanceTicketFactory, UserFactory
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    GrievanceTicketFactory,
+    ProgramFactory,
+    UserFactory,
+)
+from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.filters import GrievanceTicketFilter
 from hope.apps.grievance.models import GrievanceTicket
-from hope.models import User
+from hope.models import BusinessArea, Program, User
 
 pytestmark = pytest.mark.django_db
 
@@ -66,15 +76,6 @@ def test_omitting_the_sensitive_filter_returns_every_ticket(
     assert complaint_ticket in result
 
 
-def test_unassigned_filter_set_to_true_returns_only_tickets_with_no_assignee(
-    unassigned_ticket: GrievanceTicket, assigned_ticket: GrievanceTicket
-) -> None:
-    result = GrievanceTicketFilter(data={"unassigned": "true"}, queryset=GrievanceTicket.objects.all()).qs
-
-    assert unassigned_ticket in result
-    assert assigned_ticket not in result
-
-
 def test_unassigned_filter_set_to_false_returns_only_assigned_tickets(
     unassigned_ticket: GrievanceTicket, assigned_ticket: GrievanceTicket
 ) -> None:
@@ -101,3 +102,81 @@ def test_sensitive_and_assigned_to_compose_into_the_mine_sensitive_preset(
 
     assert sensitive_ticket in result
     assert someone_elses_sensitive not in result
+
+
+@pytest.fixture
+def my_tasks_business_area() -> BusinessArea:
+    return BusinessAreaFactory(slug="my-tasks-area", name="My Tasks Area")
+
+
+@pytest.fixture
+def assignable_program(my_tasks_business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=my_tasks_business_area, status=Program.ACTIVE, name="assignable")
+
+
+@pytest.fixture
+def view_only_program(my_tasks_business_area: BusinessArea) -> Program:
+    return ProgramFactory(business_area=my_tasks_business_area, status=Program.ACTIVE, name="view only")
+
+
+@pytest.fixture
+def my_tasks_list_url(my_tasks_business_area: BusinessArea) -> str:
+    return reverse(
+        "api:grievance:grievance-tickets-global-list",
+        kwargs={"business_area_slug": my_tasks_business_area.slug},
+    )
+
+
+def test_unassigned_filter_returns_tickets_only_from_programmes_the_user_may_assign_in(
+    api_client: Any,
+    my_tasks_business_area: BusinessArea,
+    assignable_program: Program,
+    view_only_program: Program,
+    my_tasks_list_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    user = UserFactory()
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        my_tasks_business_area,
+        program=assignable_program,
+    )
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        my_tasks_business_area,
+        program=view_only_program,
+    )
+    assignable_ticket = GrievanceTicketFactory(business_area=my_tasks_business_area, assigned_to=None)
+    assignable_ticket.programs.set([assignable_program])
+    view_only_ticket = GrievanceTicketFactory(business_area=my_tasks_business_area, assigned_to=None)
+    view_only_ticket.programs.set([view_only_program])
+
+    response = api_client(user).get(my_tasks_list_url, {"unassigned": "true"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["id"] for result in response.data["results"]] == [str(assignable_ticket.id)]
+
+
+def test_unassigned_filter_returns_nothing_for_a_user_who_may_view_but_not_assign(
+    api_client: Any,
+    my_tasks_business_area: BusinessArea,
+    view_only_program: Program,
+    my_tasks_list_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    user = UserFactory()
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        my_tasks_business_area,
+        program=view_only_program,
+    )
+    view_only_ticket = GrievanceTicketFactory(business_area=my_tasks_business_area, assigned_to=None)
+    view_only_ticket.programs.set([view_only_program])
+
+    response = api_client(user).get(my_tasks_list_url, {"unassigned": "true"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["results"] == []

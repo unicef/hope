@@ -15,7 +15,7 @@ import {
   canManageNeedsAdjudication,
   hasPermissions,
 } from '../../../config/permissions';
-import { MY_TASKS_PERMISSIONS } from './MyTasksPage';
+import { availableMyTasksTabs } from './MyTasksPage';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import {
@@ -156,7 +156,7 @@ export const GrievancesTablePage = (): ReactElement => {
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {hasPermissions(MY_TASKS_PERMISSIONS, permissions) && (
+          {availableMyTasksTabs(permissions).length > 0 && (
             <Button
               variant="outlined"
               color="primary"

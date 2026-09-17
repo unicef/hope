@@ -114,11 +114,13 @@ at a short list can see why it is short.
 
 | Tab | Required |
 |---|---|
-| **NEEDS ASSIGNMENT** | `GRIEVANCE_ASSIGN` |
+| **NEEDS ASSIGNMENT** | `GRIEVANCE_ASSIGN` and any grievance list-view grant |
 | **ASSIGNED TO ME** | any grievance list-view grant |
 
 Only the tabs you hold permissions for are shown, and the first of them opens by default. A user
 holding neither does not get the **MY TASKS** button, and is refused the page if they open it
 directly.
 
-On **NEEDS ASSIGNMENT** the list is scoped to the programmes your role covers.
+On **NEEDS ASSIGNMENT** the list is scoped to the programmes you may assign in, which is what the
+**Tickets Needing Assignment** email counts. A programme you may only view has nothing here for you
+to act on.

@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import logging
 
 from constance import config
@@ -99,6 +99,7 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
     digest_date = job.config["digest_date"]
     timezone_name = job.config["timezone_name"]
     delivery_key = job.config["delivery_key"]
+    notification_time = job.config.get("notification_time")
 
     if job.config.get("completed") is True:
         return
@@ -125,6 +126,7 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
         business_area,
         date.fromisoformat(digest_date),
         timezone_name,
+        datetime.fromisoformat(notification_time) if notification_time else None,
     ).send(
         skip_email_keys=sent_email_keys,
     )
@@ -150,7 +152,7 @@ def daily_grievance_digest_async_task() -> None:
     notification_hour = get_grievance_notification_hour()
     for business_area in BusinessArea.objects.filter(enable_email_notification=True).only("id", "name", "timezone"):
         for timezone_name in DailyDigestService.recipient_timezone_names(business_area):
-            notification_date, _ = latest_local_schedule_time(timezone_name, now, notification_hour)
+            notification_date, notification_time = latest_local_schedule_time(timezone_name, now, notification_hour)
             digest_date = notification_date - timedelta(days=1)
             delivery_key = _daily_digest_delivery_key(str(business_area.id), timezone_name, digest_date)
             if _daily_digest_dispatch_exists(delivery_key):
@@ -163,6 +165,7 @@ def daily_grievance_digest_async_task() -> None:
                     "digest_date": digest_date.isoformat(),
                     "timezone_name": timezone_name,
                     "delivery_key": delivery_key,
+                    "notification_time": notification_time.isoformat(),
                 },
                 group_key="grievance",
                 description=f"Send the {digest_date} grievance digest for {business_area.name} in {timezone_name}",

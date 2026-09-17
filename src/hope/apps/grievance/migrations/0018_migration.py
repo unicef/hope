@@ -14,14 +14,30 @@ class Migration(migrations.Migration):
     operations = [
         AddIndexConcurrently(
             model_name="grievanceticket",
-            index=models.Index(fields=["assigned_to", "status"], name="idx_gt_assigned_to_status"),
+            index=models.Index(
+                fields=["business_area", "category"],
+                condition=models.Q(assigned_to__isnull=True) & ~models.Q(status=6),
+                name="idx_gt_ba_cat_unassigned_open",
+            ),
         ),
         AddIndexConcurrently(
             model_name="grievanceticket",
-            index=models.Index(fields=["assigned_to", "category", "status"], name="idx_gt_assigned_cat_status"),
+            index=models.Index(
+                fields=["business_area", "assigned_to", "category", "created_at"],
+                condition=~models.Q(status=6),
+                name="idx_gt_ba_asgn_cat_crtd_open",
+            ),
         ),
         AddIndexConcurrently(
             model_name="grievanceticket",
-            index=models.Index(fields=["assigned_to", "created_at", "status"], name="idx_gt_assigned_created_status"),
+            index=models.Index(fields=["business_area", "user_modified"], name="idx_gt_ba_user_modified"),
+        ),
+        AddIndexConcurrently(
+            model_name="grievanceticket",
+            index=models.Index(fields=["assigned_to", "business_area"], name="idx_gt_assigned_to_ba"),
+        ),
+        AddIndexConcurrently(
+            model_name="grievanceticket",
+            index=models.Index(fields=["created_by", "business_area"], name="idx_gt_created_by_ba"),
         ),
     ]

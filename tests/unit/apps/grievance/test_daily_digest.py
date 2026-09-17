@@ -691,6 +691,53 @@ def test_many_tickets_produce_one_email_carrying_the_full_count(
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+@freeze_time(datetime(2026, 8, 10, 9, 0, tzinfo=UTC))
+def test_fan_out_queues_the_hour_the_run_was_scheduled_for(business_area: BusinessArea) -> None:
+    with patch("hope.apps.grievance.celery_tasks.PeriodicAsyncJob.queue_task") as mock_queue_task:
+        daily_grievance_digest_async_task()
+
+    queued = next(
+        call
+        for call in mock_queue_task.call_args_list
+        if call.kwargs["config"]["business_area_id"] == str(business_area.id)
+    )
+    assert queued.kwargs["config"]["notification_time"] == "2026-08-10T06:00:00+00:00"
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_a_late_run_counts_overdue_against_the_hour_it_was_scheduled_for(
+    business_area: BusinessArea, assignee: User
+) -> None:
+    with freeze_time(LONG_AGO):
+        GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=assignee,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+    # one day old at 07:00 on the 10th, so it is overdue by the time this run actually starts
+    with freeze_time(datetime(2026, 8, 9, 7, 0, tzinfo=UTC)):
+        GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=assignee,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+
+    with freeze_time(datetime(2026, 8, 10, 9, 0, tzinfo=UTC)):
+        emails = dict(
+            DailyDigestService(
+                business_area,
+                DIGEST_DATE,
+                "UTC",
+                datetime(2026, 8, 10, 6, 0, tzinfo=UTC),
+            ).build_emails()
+        )
+
+    assert emails[daily_digest_service.OVERDUE] == {assignee: [(daily_digest_service.OVERDUE.sections[0], 1)]}
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
 def test_fan_out_queues_one_job_per_enabled_business_area(
     business_area: BusinessArea, other_business_area: BusinessArea, silent_business_area: BusinessArea
 ) -> None:
@@ -1182,12 +1229,66 @@ def test_needs_assignment_does_not_query_per_programme(
     third_ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
     third_ticket.programs.set([for_third])
 
-    with django_assert_num_queries(16):
+    with django_assert_num_queries(14):
         emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
 
     assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
         assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 3)]
     }
+
+
+def test_a_ticket_in_two_programmes_is_counted_once_for_needs_assignment(
+    business_area: BusinessArea,
+    assigner: User,
+    program: Program,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    also_in = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="second programme")
+    create_user_role_with_permissions(
+        assigner,
+        [Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        business_area,
+        program=also_in,
+    )
+    ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=None)
+    ticket.programs.set([program, also_in])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.NEEDS_ASSIGNMENT] == {
+        assigner: [(daily_digest_service.NEEDS_ASSIGNMENT.sections[1], 1)]
+    }
+
+
+def test_a_ticket_in_two_programmes_is_counted_once_for_assigned(
+    business_area: BusinessArea, assignee: User, actor: User, program: Program
+) -> None:
+    also_in = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="second programme")
+    ticket = GrievanceTicketFactory(
+        business_area=business_area,
+        assigned_to=assignee,
+        assigned_at=DURING_THE_DAY,
+        assigned_by=actor,
+    )
+    ticket.programs.set([program, also_in])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.ASSIGNED] == {assignee: [(daily_digest_service.ASSIGNED.sections[1], 1)]}
+
+
+@freeze_time(NEXT_DAY)
+def test_a_ticket_in_two_programmes_is_counted_once_for_overdue(
+    business_area: BusinessArea, assignee: User, program: Program
+) -> None:
+    also_in = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="second programme")
+    with freeze_time(LONG_AGO):
+        ticket = GrievanceTicketFactory(business_area=business_area, assigned_to=assignee)
+    ticket.programs.set([program, also_in])
+
+    emails = dict(DailyDigestService(business_area, DIGEST_DATE).build_emails())
+
+    assert emails[daily_digest_service.OVERDUE] == {assignee: [(daily_digest_service.OVERDUE.sections[1], 1)]}
 
 
 def test_needs_assignment_reports_the_standing_backlog_again_on_a_later_day(
@@ -1392,7 +1493,29 @@ def test_sending_the_overdue_email_resets_the_repeat_clock(business_area: Busine
         DailyDigestService(business_area, DIGEST_DATE).send()
 
     ticket.refresh_from_db()
-    assert ticket.last_notification_sent == NEXT_DAY
+    assert ticket.last_notification_sent == datetime(2026, 8, 10, 6, 0, tzinfo=UTC)
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+def test_a_reminder_stamped_at_one_run_is_due_again_at_the_next(business_area: BusinessArea, assignee: User) -> None:
+    with freeze_time(LONG_AGO):
+        GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=assignee,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
+        )
+
+    with (
+        freeze_time(datetime(2026, 8, 10, 6, 0, 30, tzinfo=UTC)),
+        patch.object(daily_digest_service.MailjetClient, "send_email"),
+    ):
+        DailyDigestService(business_area, DIGEST_DATE).send()
+
+    with freeze_time(datetime(2026, 8, 11, 6, 0, 10, tzinfo=UTC)):
+        emails = dict(DailyDigestService(business_area, datetime(2026, 8, 10, tzinfo=UTC).date()).build_emails())
+
+    assert emails[daily_digest_service.OVERDUE] == {assignee: [(daily_digest_service.OVERDUE.sections[0], 1)]}
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)

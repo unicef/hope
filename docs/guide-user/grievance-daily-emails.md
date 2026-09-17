@@ -54,8 +54,8 @@ assigns it.
 **Tickets Assigned to You** counts any assignment made that day, a reassignment of an older ticket
 included. Assigning a ticket to yourself does not mail you.
 
-**Overdue Tickets** counts every overdue ticket assigned to the recipient, so the number matches the
-list behind the link. The email is only sent when at least one of those tickets is due a reminder:
+**Overdue Tickets** counts every overdue ticket assigned to the recipient, not only the ones due a
+reminder. The email is only sent when at least one of those tickets is due a reminder:
 once a ticket has been reported it is not reported again until its threshold has passed a second
 time — thirty days for an ordinary ticket, one day for a sensitive one.
 
@@ -88,7 +88,9 @@ day. The hour is configurable with `GRIEVANCE_NOTIFICATION_HOUR`.
 Recipients in different timezones are mailed in separate runs, each at 06:00 local time. A user
 with no timezone set is treated as being in the business area's timezone.
 
-If one email fails to send, only that one is retried.
+Delivery is tracked for each email separately, so a run that fails before an email reaches the
+mail queue re-sends only that one. A temporary failure at the mail provider is retried up to
+three times by the mail queue itself.
 
 ---
 
