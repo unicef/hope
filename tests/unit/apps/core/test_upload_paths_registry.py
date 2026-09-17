@@ -36,6 +36,9 @@ MODELS_STORING_AN_UPLOADED_FILE = {
 # programme to be filed under, so `_global` is where they belong.
 MODELS_WITHOUT_A_BUSINESS_AREA_OR_PROGRAMME = {"core.XLSXKoboTemplate", "sanction_list.UploadedXLSXFile"}
 
+# An account attachment is filed per individual and account by an `upload_to` of its own.
+FIELDS_WITH_THEIR_OWN_LAYOUT = {"payment.AccountAttachment.file"}
+
 
 def _models_storing_an_uploaded_file() -> set[type[models.Model]]:
     """Ask the app registry which models actually store a file, so a new one cannot go unnoticed.
@@ -93,7 +96,7 @@ def test_every_business_area_slug_path_ends_at_the_slug(label: str, path: str) -
 
 
 def test_every_file_field_uploads_through_the_resolver() -> None:
-    """A file field declared with any other `upload_to` writes outside the folder structure."""
+    """A file field declared with any other `upload_to` writes outside the folder structure, unless listed."""
     skipping_the_resolver = {
         f"{field.model._meta.label}.{field.name}"
         for model in apps.get_models()
@@ -101,7 +104,7 @@ def test_every_file_field_uploads_through_the_resolver() -> None:
         if isinstance(field, models.FileField) and field.upload_to is not upload_path
     }
 
-    assert skipping_the_resolver == set()
+    assert skipping_the_resolver == FIELDS_WITH_THEIR_OWN_LAYOUT
 
 
 def test_every_model_storing_an_uploaded_file_is_listed_here() -> None:
