@@ -39,7 +39,7 @@ const UpdateProgramCycle = ({
   step,
 }: UpdateProgramCycleProps) => {
   const { t } = useTranslation();
-  const { businessArea, programCode } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
 
   let endDate = Yup.date()
@@ -103,7 +103,7 @@ const UpdateProgramCycle = ({
       await mutateAsync({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programCode,
+        programCode: program.code,
         requestBody: {
           title: values.title,
           startDate: values.startDate,

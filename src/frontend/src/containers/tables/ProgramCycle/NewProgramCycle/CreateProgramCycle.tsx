@@ -49,7 +49,7 @@ const CreateProgramCycle = ({
   step,
 }: CreateProgramCycleProps) => {
   const { t } = useTranslation();
-  const { businessArea, programCode } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
 
@@ -103,7 +103,7 @@ const CreateProgramCycle = ({
     mutationFn: async (body) => {
       return RestService.restBusinessAreasProgramsCyclesCreate({
         businessAreaSlug: businessArea,
-        programCode,
+        programCode: program.code,
         requestBody: body,
       });
     },

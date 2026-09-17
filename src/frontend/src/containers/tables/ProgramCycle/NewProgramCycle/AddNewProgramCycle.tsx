@@ -31,7 +31,7 @@ const AddNewProgramCycle = ({
   const [step, setStep] = useState(0);
   const queryClient = useQueryClient();
   const permissions = usePermissions();
-  const { businessAreaSlug, programCode } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
 
   const canCreateProgramCycle =
     program.status === ProgramStatusEnum.ACTIVE &&
@@ -42,7 +42,7 @@ const AddNewProgramCycle = ({
   // missing an end date is the most recently created one. Read it here rather than
   // taking it from the table, whose page is filtered, sorted and paginated.
   const latestCycleParams = createApiParams(
-    { businessAreaSlug, programCode },
+    { businessAreaSlug, programCode: program.code },
     { ordering: '-created_at', limit: 1, offset: 0 },
   );
   const { data: latestCycleData, isFetching: isFetchingLatestCycle } =
@@ -53,7 +53,7 @@ const AddNewProgramCycle = ({
       ),
       queryFn: () =>
         RestService.restBusinessAreasProgramsCyclesList(latestCycleParams),
-      enabled: open,
+      enabled: open && Boolean(program.code),
     });
 
   const handleClose = async () => {
