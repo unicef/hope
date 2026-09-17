@@ -205,7 +205,6 @@
                     "version": 1735688653315200,
                     "name": "RDI 0",
                     "status": "MERGED",
-                    "deduplication_engine_status": null,
                     "business_area": "5050b33f-4ee0-4692-96c6-aee022a65e4f",
                     "program": "0bbd1ea4-3885-4d41-911d-3dd1f49c50af",
                     "import_date": "2025-01-01T00:00:00Z",

@@ -1,0 +1,64 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "7ca97b46a4914bcd45733a8362263ef9",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "913"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/h-t6/grievance-tickets/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "bee8553a-41fe-4f04-b18a-9422fae4e49b",
+                "admin": "",
+                "unicef_id": "GRV-0000001",
+                "status": 1,
+                "household_unicef_id": "",
+                "individual_unicef_id": "",
+                "individual_id": "",
+                "household_id": "",
+                "assigned_to": {
+                    "id": "ee6cddda-3ee6-4e08-ae0b-71ab41c262cb",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "user_modified": null,
+                "category": 2,
+                "issue_type": 16,
+                "priority": 0,
+                "urgency": 0,
+                "created_at": "2025-01-01T00:00:00Z",
+                "created_by": {
+                    "id": "ee6cddda-3ee6-4e08-ae0b-71ab41c262cb",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "user_0@example.com",
+                    "username": "user_0"
+                },
+                "total_days": 0,
+                "related_tickets_count": 0,
+                "programs": [
+                    {
+                        "id": "20fe462a-3c36-45b4-8a09-b25546580b6f",
+                        "code": "h-t6",
+                        "name": "Program 0",
+                        "status": "ACTIVE",
+                        "screen_beneficiary": false
+                    }
+                ],
+                "target_id": ""
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -1,0 +1,21 @@
+{
+    "status_code": 201,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "POST, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "147"
+    },
+    "data": {
+        "id": 1,
+        "title": "Test Document",
+        "file": "test_SPSChpq.pdf",
+        "uploaded_at": "2025-01-01T00:00:00Z",
+        "created_by": "19de4c5d-cb19-495d-ac6f-f2a67cb65fb4"
+    },
+    "content_type": "application/json"
+}
