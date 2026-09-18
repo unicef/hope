@@ -7,8 +7,9 @@ import { headCells } from './SanctionListIndividualsHeadCells';
 import type { PaginatedSanctionListIndividualList } from '@restgenerated/models/PaginatedSanctionListIndividualList';
 import type { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
 import type { ReactElement } from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 
 interface SanctionListIndividualsTableProps {
   filter: {
@@ -22,21 +23,21 @@ export function SanctionListIndividualsTable({
   filter,
 }: SanctionListIndividualsTableProps): ReactElement {
   const { businessAreaSlug } = useBaseUrl();
-  const initialQueryVariables = useMemo(
+  const table = useTableState();
+  const queryVariables = useMemo(
     () => ({
       businessAreaSlug,
       fullName: filter.fullName || undefined,
       referenceNumber: filter.referenceNumber || undefined,
+      ...table.paginationParams,
     }),
-    [businessAreaSlug, filter.fullName, filter.referenceNumber],
+    [
+      businessAreaSlug,
+      filter.fullName,
+      filter.referenceNumber,
+      table.paginationParams,
+    ],
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
 
   const { data, isLoading, error } =
     useQuery<PaginatedSanctionListIndividualList>({
@@ -49,17 +50,14 @@ export function SanctionListIndividualsTable({
     });
 
   return (
-    <UniversalRestTable<SanctionListIndividual, typeof queryVariables>
+    <UniversalRestTable<SanctionListIndividual>
       title={''}
       headCells={headCells}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       data={data}
       isLoading={isLoading}
       error={error}
       itemsCount={data?.results?.length}
-      page={page}
-      setPage={setPage}
       renderRow={(row: SanctionListIndividual) => (
         <SanctionListIndividualsTableRow key={row.id} individual={row} />
       )}

@@ -7,12 +7,13 @@ import { createApiParams } from '@utils/apiUtils';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 
 interface PaymentVerificationTableProps {
   filter?;
@@ -24,10 +25,9 @@ function PaymentVerificationTable({
   canViewDetails,
   businessArea,
 }: PaymentVerificationTableProps): ReactElement {
-  const [page, setPage] = useState(0);
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       programCode: programId,
       businessAreaSlug: businessArea,
@@ -51,13 +51,15 @@ function PaymentVerificationTable({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState();
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
   const paymentVerificationsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -72,8 +74,7 @@ function PaymentVerificationTable({
   });
   const paymentVerificationsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: paymentPlansData,
@@ -103,10 +104,7 @@ function PaymentVerificationTable({
       isLoading={isLoading}
       isFetching={isFetching}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-      page={page}
-      setPage={setPage}
+      tableState={table}
       itemsCount={itemsCount}
       renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow

@@ -15,6 +15,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -89,14 +90,8 @@ const PeriodicDataUpdatePendingForMerge = () => {
   const navigate = useNavigate();
   const { businessArea: businessAreaSlug, programId, baseUrl } = useBaseUrl();
   const [selected, setSelected] = useState<string[]>([]);
-  const [page, setPage] = useState(0);
-  const initialQueryVariables = {
-    ordering: 'created_at',
-    businessAreaSlug,
-    programCode: programId,
-    status: ['APPROVED' as const],
-  };
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const table = useTableState({ defaultOrdering: 'created_at' });
+  const status = ['APPROVED' as const];
   const { mutateAsync: bulkMerge } = useMutation({
     mutationFn: (ids: number[]) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
@@ -133,18 +128,18 @@ const PeriodicDataUpdatePendingForMerge = () => {
       {
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       },
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsList({
         businessAreaSlug,
         programCode: programId,
-        ordering: queryVariables.ordering,
-        status: queryVariables.status,
+        ordering: table.ordering,
+        status,
       }),
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
+    enabled: !!businessAreaSlug && !!programId,
   });
 
   const results = data?.results ?? [];
@@ -271,13 +266,10 @@ const PeriodicDataUpdatePendingForMerge = () => {
       data={data ?? []}
       isLoading={isLoading}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       title="Periodic Data Updates pending for Merge"
       numSelected={selected.length}
       customHeadRenderer={customHeadRenderer}
-      page={page}
-      setPage={setPage}
       actions={
         canMerge
           ? [

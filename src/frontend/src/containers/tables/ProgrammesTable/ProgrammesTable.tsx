@@ -10,8 +10,9 @@ import type { PaginatedProgramListList } from '@restgenerated/models/PaginatedPr
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -31,7 +32,7 @@ function ProgrammesTable({
   const { t } = useTranslation();
   const { programId, isAllPrograms } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       beneficiaryGroupMatch: isAllPrograms ? '' : programId,
@@ -64,17 +65,16 @@ function ProgrammesTable({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState();
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const programsListParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: dataPrograms,
@@ -89,12 +89,12 @@ function ProgrammesTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsList(programsListParams),
     placeholderData: keepPreviousData,
-    enabled: !!queryVariables.businessAreaSlug,
+    enabled: !!filterVariables.businessAreaSlug,
   });
 
   const programsCountParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
+    filterVariables,
   );
   const { data: dataProgramsCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -114,8 +114,7 @@ function ProgrammesTable({
         <UniversalRestTable
           title={t('Programmes')}
           headCells={headCells}
-          queryVariables={queryVariables}
-          setQueryVariables={setQueryVariables}
+          tableState={table}
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           isFetching={isFetchingPrograms}
@@ -128,8 +127,6 @@ function ProgrammesTable({
               choicesData={choicesData}
             />
           )}
-          page={page}
-          setPage={setPage}
         />
       </TableWrapper>
     </>

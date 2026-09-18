@@ -257,6 +257,39 @@ describe('ProgrammesTable', () => {
     ).toHaveBeenCalled();
   });
 
+  it('requests the list once with the table pagination and the count without it', async () => {
+    renderWithProviders(
+      <QueryClientProvider client={queryClient}>
+        <ProgrammesTable
+          businessArea="test-business-area"
+          filter={mockFilter}
+          choicesData={mockChoicesData}
+        />
+      </QueryClientProvider>,
+    );
+
+    await vi.waitFor(() => {
+      expect(RestService.restBusinessAreasProgramsList).toHaveBeenCalled();
+      expect(
+        RestService.restBusinessAreasProgramsCountRetrieve,
+      ).toHaveBeenCalled();
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const listMock = vi.mocked(RestService.restBusinessAreasProgramsList);
+    expect(listMock).toHaveBeenCalledTimes(1);
+    expect(listMock).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 5, offset: 0 }),
+    );
+
+    const countMock = vi.mocked(
+      RestService.restBusinessAreasProgramsCountRetrieve,
+    );
+    expect(countMock).toHaveBeenCalledTimes(1);
+    expect(countMock.mock.calls[0][0]).not.toHaveProperty('limit');
+    expect(countMock.mock.calls[0][0]).not.toHaveProperty('offset');
+  });
+
   it('applies filters correctly to API calls', async () => {
     const filterWithData = {
       search: 'education',

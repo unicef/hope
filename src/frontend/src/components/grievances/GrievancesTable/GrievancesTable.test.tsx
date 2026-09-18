@@ -26,8 +26,8 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock('@restgenerated/services/RestService', () => ({
-  RestService: {
+vi.mock('@restgenerated/services/RestService', () => {
+  const methods = {
     restChoicesGrievanceTicketsRetrieve: vi.fn(),
     restBusinessAreasUsersProfileRetrieve: vi.fn(),
     restBusinessAreasUsersList: vi.fn(),
@@ -35,8 +35,13 @@ vi.mock('@restgenerated/services/RestService', () => ({
     restBusinessAreasGrievanceTicketsCountRetrieve: vi.fn(),
     restBusinessAreasProgramsGrievanceTicketsList: vi.fn(),
     restBusinessAreasProgramsGrievanceTicketsCountRetrieve: vi.fn(),
-  },
-}));
+  };
+  // restQueryKey derives the cache key root from `fn.name`.
+  for (const [name, fn] of Object.entries(methods)) {
+    Object.defineProperty(fn, 'name', { value: name, configurable: true });
+  }
+  return { RestService: methods };
+});
 
 const TICKETS = [
   { id: 'ticket-1', status: 1, category: 3 },
@@ -125,6 +130,53 @@ describe('GrievancesTable', () => {
     (
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve as any
     ).mockResolvedValue({ count: TICKETS.length });
+  });
+
+  it('requests the list and the count exactly once on mount', async () => {
+    renderTable();
+
+    await screen.findByTestId('select-all');
+    await waitFor(() => {
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsList,
+      ).toHaveBeenCalled();
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+      ).toHaveBeenCalled();
+    });
+    // Give any stray re-render a chance to fire a second request.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const listMock = vi.mocked(
+      RestService.restBusinessAreasGrievanceTicketsList,
+    );
+    expect(listMock).toHaveBeenCalledTimes(1);
+    expect(listMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        businessAreaSlug: 'afghanistan',
+        grievanceStatus: 'active',
+        isActiveProgram: true,
+        ordering: '-created_at',
+        limit: 10,
+        offset: 0,
+      }),
+    );
+
+    const countMock = vi.mocked(
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+    );
+    expect(countMock).toHaveBeenCalledTimes(1);
+    const countParams = countMock.mock.calls[0][0];
+    expect(countParams).toEqual(
+      expect.objectContaining({
+        businessAreaSlug: 'afghanistan',
+        grievanceStatus: 'active',
+        isActiveProgram: true,
+      }),
+    );
+    expect(countParams).not.toHaveProperty('ordering');
+    expect(countParams).not.toHaveProperty('limit');
+    expect(countParams).not.toHaveProperty('offset');
   });
 
   it('sends the sensitivity filter to the list endpoint', async () => {

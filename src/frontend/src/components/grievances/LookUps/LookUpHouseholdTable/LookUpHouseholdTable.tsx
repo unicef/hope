@@ -11,12 +11,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import type { MouseEvent, ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
+import { omit } from 'lodash';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -56,7 +58,7 @@ export function LookUpHouseholdTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const initialQueryVariables = useMemo(() => {
+  const filterVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
       if (filter.withdrawn === 'true') {
         return true;
@@ -97,18 +99,16 @@ export function LookUpHouseholdTable({
     filter.withdrawn,
   ]);
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  // Add page state for pagination
-  const [page, setPage] = useState(0);
+  const table = useTableState();
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const programsHouseholdsParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
 
   //selectedProgram
@@ -145,17 +145,14 @@ export function LookUpHouseholdTable({
   });
 
   //allPrograms
-  const restQueryVariables = Object.fromEntries(
-    Object.entries(queryVariables).filter(([key]) => key !== 'programCode'),
-  );
+  const allProgramsFilterVariables = omit(filterVariables, 'programCode');
   const allProgramsHouseholdsParams = createApiParams(
     { businessAreaSlug: businessArea },
-    restQueryVariables,
-    { withPagination: true },
+    { ...allProgramsFilterVariables, ...table.paginationParams },
   );
   const allProgramsHouseholdsCountParams = createApiParams(
     { businessAreaSlug: businessArea },
-    restQueryVariables,
+    allProgramsFilterVariables,
   );
   const {
     data: dataHouseholdsAllPrograms,
@@ -308,10 +305,7 @@ export function LookUpHouseholdTable({
           ? isFetchingHouseholdsAllPrograms
           : isFetchingHouseholdsProgram
       }
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-      page={page}
-      setPage={setPage}
+      tableState={table}
     />
   );
   return noTableStyling ? (

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
@@ -16,6 +16,7 @@ import type { PaginatedPaymentPlanListList } from '@restgenerated/models/Paginat
 import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { GroupHeaderRow } from '@components/core/Table/GroupHeaderRow';
 
 interface PaymentPlansTableProps {
@@ -32,7 +33,7 @@ function PaymentPlansTable({
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -58,17 +59,18 @@ function PaymentPlansTable({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({
+    defaultOrderBy: 'paymentPlanGroup__name,-createdAt',
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const paymentPlansListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: paymentPlansData,
@@ -90,7 +92,7 @@ function PaymentPlansTable({
 
   const paymentPlansCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -134,18 +136,14 @@ function PaymentPlansTable({
 
   return (
     <UniversalRestTable
-      defaultOrderBy="paymentPlanGroup__name,-createdAt"
       title={t('Payment Plans')}
       headCells={adjustedHeadCells as any}
       data={paymentPlansData}
       isLoading={isLoading}
       isFetching={isFetching}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       itemsCount={itemsCount}
-      page={page}
-      setPage={setPage}
       renderRow={(row: PaymentPlanList) => (
         <Fragment key={row.id}>
           {groupStartRowIds.has(row.id) && (
