@@ -10,7 +10,7 @@
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "450"
+        "Content-Length": "477"
     },
     "data": {
         "next": "http://testserver/api/rest/business-areas/?limit=50&offset=50",
@@ -22,6 +22,7 @@
                 "code": "BA9000",
                 "long_name": "Business Area 0 Long Name",
                 "slug": "business-area-contract",
+                "is_manual_ingest": true,
                 "timezone": "UTC",
                 "parent": null,
                 "is_split": false,

@@ -15,9 +15,12 @@ from hope.apps.registration_data.value_caster import (
     StringValueCaster,
 )
 from hope.models import Account, AccountType, FinancialInstitution, PendingAccount, PendingIndividual
+from hope.models.individual import LATIN_NAME_FIELDS, normalize_latin_name
 from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
+
+LATIN_NAME_HEADERS = frozenset(f"{prefix}{field}_i_c" for prefix in ("", "pp_") for field in LATIN_NAME_FIELDS)
 
 
 class RdiBaseCreateTask:
@@ -28,7 +31,7 @@ class RdiBaseCreateTask:
 
     def _cast_value(self, value: Any, header: str) -> Any:
         if isinstance(value, str):
-            value = value.strip()
+            value = normalize_latin_name(value) if header in LATIN_NAME_HEADERS else value.strip()
 
         if not value:
             return value
