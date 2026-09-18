@@ -91,7 +91,11 @@ export function XlsxImportDialog<
         ({
           file: fileToImport as unknown as string,
         } as TFormData);
-      await mutateAsync(formData);
+      try {
+        await mutateAsync(formData);
+      } catch {
+        // handled in onError
+      }
     }
   };
 

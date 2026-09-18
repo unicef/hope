@@ -11,6 +11,8 @@ import TableCell from '@mui/material/TableCell';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import {
@@ -20,6 +22,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
+import type { Filter } from '@utils/utils';
 import {
   programCycleStatusToColor,
   showApiErrorMessages,
@@ -32,9 +35,9 @@ import { useTranslation } from 'react-i18next';
 import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 
 interface ProgramCyclesTablePaymentModuleProps {
-  program;
-  filters;
-  adjustedHeadCells;
+  program: Partial<ProgramDetail>;
+  filters: Filter;
+  adjustedHeadCells: HeadCell<ProgramCycleList>[];
 }
 
 export const ProgramCyclesTablePaymentModule = ({
@@ -122,7 +125,7 @@ export const ProgramCyclesTablePaymentModule = ({
           exact: false,
         });
       },
-      mutationKey: ['finishProgramCycle', businessArea, program.id],
+      mutationKey: ['finishProgramCycle', businessArea, program?.id],
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
@@ -149,7 +152,7 @@ export const ProgramCyclesTablePaymentModule = ({
           exact: false,
         });
       },
-      mutationKey: ['reactivateProgramCycle', businessArea, program.id],
+      mutationKey: ['reactivateProgramCycle', businessArea, program?.id],
     });
 
   const finishAction = async (programCycle: ProgramCycleList) => {
@@ -178,13 +181,7 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const actions = [
-    <AddNewProgramCycle
-      key="add-new"
-      program={program}
-      lastProgramCycle={(data?.results || [])[(data?.results || []).length - 1]}
-    />,
-  ];
+  const actions = [<AddNewProgramCycle key="add-new" program={program} />];
 
   const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">

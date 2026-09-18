@@ -60,9 +60,11 @@ from hope.models import (
     AccountType,
     BusinessArea,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FileTemp,
     FinancialServiceProvider,
     IndividualRoleInHousehold,
+    LogEntry,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -143,6 +145,118 @@ def program(business_area: Any) -> Program:
 @pytest.fixture
 def cycle(program: Program) -> ProgramCycle:
     return ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+
+
+@pytest.fixture
+def lock_status_transition_context(
+    user: User,
+    business_area: BusinessArea,
+    cycle: ProgramCycle,
+) -> dict[str, Any]:
+    purpose = PaymentPlanPurposeFactory()
+    cycle.program.payment_plan_purposes.add(purpose)
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.OPEN,
+    )
+    payment_plan.payment_plan_purposes.add(purpose)
+    conflicting_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    conflicting_plan.payment_plan_purposes.add(purpose)
+    hard_conflicted_payment = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_PENDING,
+        status_date=timezone.now() - timedelta(days=1),
+    )
+    PaymentFactory(
+        parent=conflicting_plan,
+        household=hard_conflicted_payment.household,
+        status=Payment.STATUS_PENDING,
+    )
+    valid_payment = PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING)
+    return {
+        "payment_plan": payment_plan,
+        "hard_conflicted_payment": hard_conflicted_payment,
+        "valid_payment": valid_payment,
+        "user": user,
+    }
+
+
+@pytest.fixture
+def unlock_status_transition_context(
+    user: User,
+    business_area: BusinessArea,
+    cycle: ProgramCycle,
+) -> dict[str, Any]:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    restorable_payment = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        conflicted=True,
+    )
+    excluded_payment = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        conflicted=True,
+        excluded=True,
+    )
+    invalid_wallet_payment = PaymentFactory(
+        parent=payment_plan,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        conflicted=True,
+        has_valid_wallet=False,
+    )
+    return {
+        "payment_plan": payment_plan,
+        "restorable_payment": restorable_payment,
+        "excluded_payment": excluded_payment,
+        "invalid_wallet_payment": invalid_wallet_payment,
+        "user": user,
+    }
+
+
+@pytest.fixture
+def invalid_wallet_payment_plan(
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    account_type_bank: AccountType,
+) -> PaymentPlan:
+    household = HouseholdFactory(business_area=business_area, program=program, size=1)
+    delivery_mechanism = DeliveryMechanismFactory(
+        code="bank_transfer_for_invalid_wallet_test",
+        account_type=account_type_bank,
+    )
+    DeliveryMechanismConfig.objects.create(
+        fsp=fsp,
+        delivery_mechanism=delivery_mechanism,
+        required_fields=["number"],
+    )
+    payment_plan = PaymentPlanFactory(
+        created_by=user,
+        status=PaymentPlan.Status.DRAFT,
+        business_area=business_area,
+        program_cycle=cycle,
+        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+    )
+    TargetingCriteriaRuleFactory(
+        household_ids=household.unicef_id,
+        payment_plan=payment_plan,
+    )
+    return payment_plan
 
 
 @pytest.fixture
@@ -1241,6 +1355,59 @@ def test_lock_if_no_valid_payments(user: User, business_area: Any, cycle: Progra
     assert error.value.detail[0] == "At least one valid Payment should exist in order to Lock the Payment Plan"
 
 
+def test_lock_marks_pending_hard_conflict_not_eligible(
+    lock_status_transition_context: dict[str, Any],
+) -> None:
+    hard_conflicted_payment = lock_status_transition_context["hard_conflicted_payment"]
+    previous_status_date = hard_conflicted_payment.status_date
+
+    PaymentPlanService(lock_status_transition_context["payment_plan"]).execute_update_status_action(
+        {"action": PaymentPlan.Action.LOCK.value},
+        lock_status_transition_context["user"],
+    )
+
+    hard_conflicted_payment.refresh_from_db()
+    lock_status_transition_context["valid_payment"].refresh_from_db()
+    assert hard_conflicted_payment.conflicted is True
+    assert hard_conflicted_payment.status == Payment.STATUS_NOT_ELIGIBLE
+    assert hard_conflicted_payment.status_date > previous_status_date
+    payment_log = LogEntry.objects.get(object_id=hard_conflicted_payment.pk)
+    assert payment_log.changes["status_date"] == {
+        "from": str(previous_status_date),
+        "to": str(hard_conflicted_payment.status_date),
+    }
+    assert lock_status_transition_context["valid_payment"].status == Payment.STATUS_PENDING
+
+
+def test_unlock_only_restores_not_eligible_payment_without_remaining_cause(
+    unlock_status_transition_context: dict[str, Any],
+) -> None:
+    previous_status_date = unlock_status_transition_context["restorable_payment"].status_date
+
+    PaymentPlanService(unlock_status_transition_context["payment_plan"]).execute_update_status_action(
+        {"action": PaymentPlan.Action.UNLOCK.value},
+        unlock_status_transition_context["user"],
+    )
+
+    restorable_payment = unlock_status_transition_context["restorable_payment"]
+    excluded_payment = unlock_status_transition_context["excluded_payment"]
+    invalid_wallet_payment = unlock_status_transition_context["invalid_wallet_payment"]
+    restorable_payment.refresh_from_db()
+    excluded_payment.refresh_from_db()
+    invalid_wallet_payment.refresh_from_db()
+    assert restorable_payment.conflicted is False
+    assert restorable_payment.status == Payment.STATUS_PENDING
+    payment_log = LogEntry.objects.get(object_id=restorable_payment.pk)
+    assert payment_log.changes["status_date"] == {
+        "from": str(previous_status_date),
+        "to": str(restorable_payment.status_date),
+    }
+    assert excluded_payment.conflicted is False
+    assert excluded_payment.status == Payment.STATUS_NOT_ELIGIBLE
+    assert invalid_wallet_payment.conflicted is False
+    assert invalid_wallet_payment.status == Payment.STATUS_NOT_ELIGIBLE
+
+
 def test_update_pp_validation_errors(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -1744,6 +1911,16 @@ def test_create_payments_integrity_error_handling(
         with pytest.raises(ValidationError) as error:
             PaymentPlanService.create_payments(payment_plan)
         assert f"Couldn't find a PRIMARY collector in {household.unicef_id}" in str(error.value)
+
+
+def test_create_payments_marks_invalid_wallet_not_eligible(
+    invalid_wallet_payment_plan: PaymentPlan,
+) -> None:
+    PaymentPlanService.create_payments(invalid_wallet_payment_plan)
+
+    payment = invalid_wallet_payment_plan.payment_items.get()
+    assert payment.has_valid_wallet is False
+    assert payment.status == Payment.STATUS_NOT_ELIGIBLE
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:

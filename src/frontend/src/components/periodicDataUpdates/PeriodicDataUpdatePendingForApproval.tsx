@@ -98,7 +98,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const table = useTableState({ defaultOrdering: 'created_at' });
   const status = ['READY' as const];
-  const { mutateAsync: bulkApprove } = useMutation({
+  const { mutate: bulkApprove } = useMutation({
     mutationFn: (ids: number[]) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate(
         {
@@ -123,9 +123,9 @@ const PeriodicDataUpdatePendingForApproval = () => {
     },
   });
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
     const ids = selected.map((id) => Number(id)).filter((id) => !isNaN(id));
-    await bulkApprove(ids);
+    bulkApprove(ids);
   };
 
   const { data, isLoading, error } = useQuery<PaginatedPDUOnlineEditListList>({
