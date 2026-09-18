@@ -53,7 +53,7 @@ class UploadFile(UploadFilePermissionMixin, View):
                 business_area_id=request.POST["business_area"],
             )
             new_file.save()
-            uploaded_name = os.path.basename(new_file.file.name)
+            uploaded_name = os.path.basename(new_file.file.name or "")
             messages.success(request, f"File {uploaded_name} has been successfully uploaded.")
             return HttpResponseRedirect(reverse("upload-file"))
         messages.error(request, self.format_form_error(form))

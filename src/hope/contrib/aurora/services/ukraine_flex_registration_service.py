@@ -431,7 +431,7 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             # Written only once the individual has validated, so a validation failure leaves no orphan files.
             individual.flex_fields.update(
                 {
-                    field_name: default_storage.save(upload_path(registration_data_import, image.name), image)
+                    field_name: default_storage.save(upload_path(registration_data_import, image.name or ""), image)
                     for field_name, image in flex_images.items()
                 }
             )

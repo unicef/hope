@@ -765,6 +765,7 @@ class WesternUnionReportsService:
                 f"/{payment_plan.business_area.slug}/programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
             )
             download_link = get_link(reverse(path_name, args=[report_id]))
+            report_name = os.path.basename(report.report_file.file.name or "")
 
         for user in users:
             context = {
@@ -772,7 +773,7 @@ class WesternUnionReportsService:
                 "last_name": getattr(user, "last_name", ""),
                 "email": getattr(user, "email", ""),
                 "message": f"Payment Plan: {payment_plan_link}",
-                "title": f"Payment Plan {os.path.basename(report.report_file.file.name)} Western Union report",
+                "title": f"Payment Plan {report_name} Western Union report",
                 "link": download_link,
             }
             user.email_user(
