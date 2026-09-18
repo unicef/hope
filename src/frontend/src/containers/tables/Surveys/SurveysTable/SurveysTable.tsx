@@ -1,10 +1,11 @@
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { dateToIsoString } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
@@ -30,9 +31,7 @@ function SurveysTable({
   const { t } = useTranslation();
   const businessAreaSlug = baseUrl.split('/')[0];
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug,
       programCode: programId,
@@ -43,8 +42,6 @@ function SurveysTable({
         min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
       }),
-      ordering: '-created_at',
-      page,
     }),
     [
       businessAreaSlug,
@@ -54,14 +51,23 @@ function SurveysTable({
       filter.createdBy,
       filter.createdAtRangeMin,
       filter.createdAtRangeMax,
-      page,
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    initialRowsPerPage: 10,
+    defaultOrderBy: 'created_at',
+    defaultOrderDirection: 'desc',
+  });
+  const { page } = table;
+  const surveysListParams = createApiParams(
+    { businessAreaSlug, programCode: programId },
+    { ...filterVariables, ...table.paginationParams },
+  );
+  const surveysCountParams = createApiParams(
+    { businessAreaSlug, programCode: programId },
+    filterVariables,
+  );
 
   const {
     data: dataSurveys,
@@ -71,50 +77,22 @@ function SurveysTable({
   } = useQuery<PaginatedSurveyList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsSurveysList,
-      createApiParams(
-        {
-          businessAreaSlug: queryVariables.businessAreaSlug,
-          programCode: queryVariables.programCode,
-        },
-        queryVariables,
-        { withPagination: true },
-      ),
+      surveysListParams,
     ),
     queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysList(
-        createApiParams(
-          {
-            businessAreaSlug: queryVariables.businessAreaSlug,
-            programCode: queryVariables.programCode,
-          },
-          queryVariables,
-          { withPagination: true },
-        ),
-      ),
+      RestService.restBusinessAreasProgramsSurveysList(surveysListParams),
     placeholderData: keepPreviousData,
-    enabled: !!queryVariables.businessAreaSlug && !!queryVariables.programCode,
+    enabled: !!businessAreaSlug && !!programId,
   });
 
   const { data: dataSurveysCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsSurveysCountRetrieve,
-      createApiParams(
-        {
-          businessAreaSlug: queryVariables.businessAreaSlug,
-          programCode: queryVariables.programCode,
-        },
-        queryVariables,
-      ),
+      surveysCountParams,
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsSurveysCountRetrieve(
-        createApiParams(
-          {
-            businessAreaSlug: queryVariables.businessAreaSlug,
-            programCode: queryVariables.programCode,
-          },
-          queryVariables,
-        ),
+        surveysCountParams,
       ),
     enabled: page === 0,
   });
@@ -130,14 +108,8 @@ function SurveysTable({
         isLoading={isLoadingSurveys}
         isFetching={isFetchingSurveys}
         error={errorSurveys}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
-        defaultOrderBy="created_at"
-        defaultOrderDirection="desc"
+        tableState={table}
         itemsCount={itemsCount}
-        initialRowsPerPage={10}
-        page={page}
-        setPage={setPage}
         renderRow={(row: Survey) => (
           <SurveysTableRow
             key={row.id}

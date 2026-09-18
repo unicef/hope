@@ -11,9 +11,10 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -54,7 +55,6 @@ const PaymentsTable = ({
 
   const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
   const location = useLocation();
-  const [page, setPage] = useState(0);
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -68,7 +68,7 @@ const PaymentsTable = ({
     setShouldScroll(false),
   );
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -87,10 +87,16 @@ const PaymentsTable = ({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 25, 50],
+    defaultOrderBy: 'createdAt',
+    defaultOrderDirection: 'desc',
+  });
+  const { page, setPage } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const paymentsListParams = createApiParams(
     {
@@ -98,8 +104,7 @@ const PaymentsTable = ({
       programCode: programId,
       paymentPlanPk: paymentPlan.id,
     },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: paymentsData,
@@ -126,7 +131,7 @@ const PaymentsTable = ({
       programCode: programId,
       paymentPlanPk: paymentPlan.id,
     },
-    queryVariables,
+    filterVariables,
   );
   const { data: paymentsCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -201,18 +206,12 @@ const PaymentsTable = ({
             <UniversalRestTable
               isOnPaper={false}
               headCells={adjustedHeadCells}
-              rowsPerPageOptions={[10, 25, 50]}
-              defaultOrderBy="createdAt"
-              defaultOrderDirection="desc"
+              tableState={table}
               isLoading={isLoading}
               isFetching={isFetching}
               error={error}
-              queryVariables={queryVariables}
-              setQueryVariables={setQueryVariables}
               data={paymentsData}
               itemsCount={itemsCount}
-              page={page}
-              setPage={setPage}
               renderRow={(row: PaymentList) => (
                 <PaymentsTableRow
                   key={row.id}

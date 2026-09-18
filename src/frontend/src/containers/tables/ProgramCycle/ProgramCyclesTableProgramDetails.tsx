@@ -8,12 +8,12 @@ import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor, formatFigure } from '@utils/utils';
 import type { ReactElement } from 'react';
-import React, { useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -31,27 +31,13 @@ interface ProgramCyclesTableProgramDetailsProps {
 const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
-  const [page, setPage] = useState(0);
-  const [queryVariables, setQueryVariables] = useState({
-    offset: 0,
-    limit: 5,
-    ordering: 'created_at',
-    page,
-  });
-
-  // Update queryVariables when page changes
-  React.useEffect(() => {
-    setQueryVariables((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
+  const table = useTableState({ defaultOrdering: 'created_at' });
+  const { page } = table;
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const programCyclesListParams = createApiParams(
     { businessAreaSlug, programCode: program.code },
-    queryVariables,
-    { withPagination: true },
+    table.paginationParams,
   );
   const { data, error, isLoading, isFetching } = useQuery({
     queryKey: restQueryKey(
@@ -66,10 +52,10 @@ const ProgramCyclesTableProgramDetails = ({
     placeholderData: keepPreviousData,
   });
 
-  const programCyclesCountParams = createApiParams(
-    { businessAreaSlug, programCode: program.code },
-    queryVariables,
-  );
+  const programCyclesCountParams = {
+    businessAreaSlug,
+    programCode: program.code,
+  };
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsCyclesCountRetrieve,
@@ -181,12 +167,9 @@ const ProgramCyclesTableProgramDetails = ({
       error={error}
       isLoading={isLoading}
       isFetching={isFetching}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       actions={actions}
       itemsCount={itemsCount}
-      page={page}
-      setPage={setPage}
     />
   );
 };

@@ -8,8 +8,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
@@ -43,29 +44,27 @@ export function ImportedPeopleTable({
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { programId } = useBaseUrl();
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       rdiId,
       household,
       duplicatesOnly: showDuplicates,
       businessAreaSlug: businessArea,
       programCode: programId,
-      page,
     }),
-    [rdiId, household, showDuplicates, businessArea, programId, page],
+    [rdiId, household, showDuplicates, businessArea, programId],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({ rowsPerPageOptions });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const individualsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedIndividualListList>({
@@ -82,7 +81,7 @@ export function ImportedPeopleTable({
 
   const individualsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
@@ -132,17 +131,13 @@ export function ImportedPeopleTable({
         <UniversalRestTable
           title={title}
           headCells={mergedPeopleTableHeadCells}
-          queryVariables={queryVariables}
-          setQueryVariables={setQueryVariables}
+          tableState={table}
           data={data}
           error={error}
           isLoading={isLoading}
           isFetching={isFetching}
-          rowsPerPageOptions={rowsPerPageOptions}
           isOnPaper={isOnPaper}
           itemsCount={itemsCount}
-          page={page}
-          setPage={setPage}
           renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}
@@ -156,17 +151,13 @@ export function ImportedPeopleTable({
         <UniversalRestTable
           title={title}
           headCells={importedPeopleTableHeadCells}
-          queryVariables={queryVariables}
-          setQueryVariables={setQueryVariables}
-          rowsPerPageOptions={rowsPerPageOptions}
+          tableState={table}
           isOnPaper={isOnPaper}
           data={data}
           error={error}
           isLoading={isLoading}
           isFetching={isFetching}
           itemsCount={itemsCount}
-          page={page}
-          setPage={setPage}
           renderRow={(row: IndividualList) => (
             <ImportedPeopleTableRow
               choices={choicesData}

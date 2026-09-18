@@ -8,8 +8,9 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
@@ -48,7 +49,7 @@ export function TargetPopulationTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       name: filter.name,
       status: filter.status,
@@ -67,13 +68,15 @@ export function TargetPopulationTable({
     ],
   );
 
-  // Controlled pagination state
-  const [page, setPage] = useState(0);
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    defaultOrderBy: 'paymentPlanGroup__name,-createdAt',
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   // Count query (enabled only on page 0)
   const targetPopulationsCountParams = createApiParams(
@@ -81,7 +84,7 @@ export function TargetPopulationTable({
       businessAreaSlug: businessArea,
       programCode: programId,
     },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
@@ -103,8 +106,7 @@ export function TargetPopulationTable({
       businessAreaSlug: businessArea,
       programCode: programId,
     },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: targetPopulationsData,
@@ -148,11 +150,7 @@ export function TargetPopulationTable({
         headCells={
           enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
         }
-        rowsPerPageOptions={[10, 15, 20]}
-        defaultOrderBy="paymentPlanGroup__name,-createdAt"
-        defaultOrderDirection="asc"
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={targetPopulationsData}
         isLoading={isLoading}
         isFetching={isFetching}
@@ -181,8 +179,6 @@ export function TargetPopulationTable({
             </>
           );
         }}
-        page={page}
-        setPage={setPage}
         itemsCount={persistedCount}
       />
     </TableWrapper>

@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsCommunication';
 import { LookUpTargetPopulationTableRowCommunication } from './LookUpTargetPopulationTableRowCommunication';
@@ -45,7 +46,7 @@ const LookUpTargetPopulationTableCommunication = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       totalHouseholdsCountWithValidPhoneNoMin:
         filter.totalHouseholdsCountWithValidPhoneNoMin || 0,
@@ -73,17 +74,19 @@ const LookUpTargetPopulationTableCommunication = ({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    defaultOrderBy: 'createdAt',
+    defaultOrderDirection: 'desc',
+  });
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const targetPopulationsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: paymentPlansData,
@@ -112,17 +115,11 @@ const LookUpTargetPopulationTableCommunication = ({
       <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
-        rowsPerPageOptions={[10, 15, 20]}
-        defaultOrderBy="createdAt"
-        defaultOrderDirection="desc"
         data={paymentPlansData}
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
-        page={page}
-        setPage={setPage}
+        tableState={table}
         renderRow={(row: TargetPopulationList) => (
           <LookUpTargetPopulationTableRowCommunication
             radioChangeHandler={enableRadioButton && handleRadioChange}

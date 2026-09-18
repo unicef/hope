@@ -8,7 +8,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
@@ -18,6 +18,7 @@ import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
 interface ImportedIndividualsTableProps {
@@ -45,14 +46,15 @@ function ImportedIndividualsTable({
   const { selectedProgram } = useProgramContext();
   const { programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const [page, setPage] = useState(0);
+  const table = useTableState();
+  const { page } = table;
   const notAllowedRdiShowPreviewStatuses = [
     RegistrationDataImportStatusEnum.LOADING,
     RegistrationDataImportStatusEnum.IMPORTING,
     RegistrationDataImportStatusEnum.IMPORT_SCHEDULED,
     RegistrationDataImportStatusEnum.IMPORT_ERROR,
   ];
-  const initialVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       rdiId,
       household,
@@ -62,12 +64,6 @@ function ImportedIndividualsTable({
     }),
     [rdiId, household, showDuplicates, businessArea, isMerged],
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialVariables);
-
-  useEffect(() => {
-    setQueryVariables(initialVariables);
-  }, [initialVariables]);
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
@@ -89,7 +85,7 @@ function ImportedIndividualsTable({
 
   const individualsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -135,11 +131,9 @@ function ImportedIndividualsTable({
             : adjustedImportedIndividualsHeadCells
         }
         query={RestService.restBusinessAreasProgramsIndividualsList}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        filterVariables={filterVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
         renderRow={(row) => (
           <ImportedIndividualsTableRow
             key={row.id}

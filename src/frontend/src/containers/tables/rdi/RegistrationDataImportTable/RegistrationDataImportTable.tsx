@@ -4,8 +4,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -53,7 +54,7 @@ function RegistrationDataImportTable({
 
   const { programCode, businessArea, programId } = useBaseUrl();
 
-  const initialVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       search: filter.search,
       importedById: filter.importedBy || undefined,
@@ -78,11 +79,12 @@ function RegistrationDataImportTable({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialVariables);
-
-  useEffect(() => {
-    setQueryVariables(initialVariables);
-  }, [initialVariables]);
+  const table = useTableState();
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
@@ -114,12 +116,9 @@ function RegistrationDataImportTable({
     return header;
   };
 
-  const [page, setPage] = useState(0);
-
   const registrationDataImportsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: listData,
@@ -140,8 +139,7 @@ function RegistrationDataImportTable({
 
   const registrationDataImportsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode },
-    queryVariables,
-    { withPagination: false },
+    filterVariables,
   );
   const { data: countData } = useQuery<{ count: number }>({
     queryKey: restQueryKey(
@@ -160,7 +158,7 @@ function RegistrationDataImportTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalRestTable<RegistrationDataImportList, any>
+      <UniversalRestTable<RegistrationDataImportList>
         renderRow={(row) => (
           <RegistrationDataImportTableRow
             key={row.id}
@@ -173,14 +171,11 @@ function RegistrationDataImportTable({
         title={noTitle ? null : `${t('List of Imports')} (${itemsCount || 0})`}
         itemsCount={itemsCount || 0}
         headCells={prepareHeadCells()}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={listData}
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        page={page}
-        setPage={setPage}
       />
     </TableWrapper>
   );

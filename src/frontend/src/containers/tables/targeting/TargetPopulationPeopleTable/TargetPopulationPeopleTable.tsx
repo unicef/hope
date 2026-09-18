@@ -1,11 +1,12 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
@@ -26,7 +27,7 @@ export function TargetPopulationPeopleTable({
 }: TargetPopulationPeopleTableProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       ...variables,
       businessAreaSlug: businessArea,
@@ -35,10 +36,11 @@ export function TargetPopulationPeopleTable({
     }),
     [variables, businessArea, programId, id],
   );
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({ rowsPerPageOptions: [10, 15, 20] });
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const pendingPaymentsListParams = createApiParams(
     {
@@ -46,8 +48,7 @@ export function TargetPopulationPeopleTable({
       programCode: programId,
       id,
     },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: householdsData,
@@ -72,12 +73,10 @@ export function TargetPopulationPeopleTable({
       <UniversalRestTable
         title={t('People')}
         headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={householdsData}
         renderRow={(row: PendingPayment) => (
           <TargetPopulationPeopleTableRow

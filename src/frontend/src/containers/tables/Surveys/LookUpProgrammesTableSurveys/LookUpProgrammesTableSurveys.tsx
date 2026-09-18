@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import styled from 'styled-components';
 import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -43,9 +44,7 @@ export function LookUpProgrammesTableSurveys({
   const { selectedProgram: programFromContext } = useProgramContext();
   const beneficiaryGroup = programFromContext?.beneficiaryGroup;
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       search: filter.search,
@@ -58,8 +57,6 @@ export function LookUpProgrammesTableSurveys({
       budgetMax: filter.budgetMax,
       budgetMin: filter.budgetMin,
       dataCollectingType: filter.dataCollectingType,
-      ordering: 'startDate',
-      page,
     }),
     [
       businessArea,
@@ -73,20 +70,21 @@ export function LookUpProgrammesTableSurveys({
       filter.budgetMin,
       filter.budgetMax,
       filter.dataCollectingType,
-      page,
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    defaultOrderBy: 'startDate',
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const programsListParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: dataPrograms,
@@ -101,12 +99,12 @@ export function LookUpProgrammesTableSurveys({
     queryFn: () =>
       RestService.restBusinessAreasProgramsList(programsListParams),
     placeholderData: keepPreviousData,
-    enabled: !!queryVariables.businessAreaSlug,
+    enabled: !!filterVariables.businessAreaSlug,
   });
 
   const programsCountParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
@@ -141,16 +139,12 @@ export function LookUpProgrammesTableSurveys({
       <TableWrapper>
         <UniversalRestTable
           headCells={adjustedHeadCells}
-          queryVariables={queryVariables}
-          setQueryVariables={setQueryVariables}
-          defaultOrderBy="startDate"
+          tableState={table}
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           isFetching={isFetchingPrograms}
           error={errorPrograms}
           itemsCount={itemsCount}
-          page={page}
-          setPage={setPage}
           renderRow={(row: ProgramList) => (
             <LookUpProgrammesTableRowSurveys
               key={row.id}

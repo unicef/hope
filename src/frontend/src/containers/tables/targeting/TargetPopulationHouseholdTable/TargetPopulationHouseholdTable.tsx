@@ -6,8 +6,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
@@ -29,9 +30,8 @@ export function TargetPopulationHouseholdTable({
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const { businessAreaSlug, programCode } = useBaseUrl();
-  const [page, setPage] = useState(0);
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       ...variables,
       businessAreaSlug,
@@ -41,10 +41,12 @@ export function TargetPopulationHouseholdTable({
     [variables, businessAreaSlug, programCode, id],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({ rowsPerPageOptions: [10, 15, 20] });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const pendingPaymentsListParams = createApiParams(
     {
@@ -52,8 +54,7 @@ export function TargetPopulationHouseholdTable({
       programCode,
       id,
     },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: householdsData,
@@ -116,16 +117,12 @@ export function TargetPopulationHouseholdTable({
       <UniversalRestTable
         title={t(`${beneficiaryGroup?.groupLabelPlural}`)}
         headCells={adjustedHeadCells}
-        rowsPerPageOptions={[10, 15, 20]}
         isLoading={isLoading}
         isFetching={isFetching}
         data={householdsData}
         error={error}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
         renderRow={(row: PendingPayment) => (
           <TargetPopulationHouseholdTableRow
             key={row.id}
