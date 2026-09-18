@@ -153,6 +153,14 @@ def file_temp_for_missing_owner() -> Any:
 
 
 @pytest.fixture
+def file_temp_for_owner_with_an_invalid_key() -> Any:
+    return FileTempFactory(
+        object_id="legacy-key",
+        content_type=ContentType.objects.get_for_model(Program),
+    )
+
+
+@pytest.fixture
 def file_temp_without_owner() -> Any:
     return FileTempFactory()
 
@@ -276,6 +284,9 @@ def test_build_upload_path_keeps_only_the_filename() -> None:
     [
         pytest.param("a" * 300 + ".xlsx", "2024/ukraine/ab12/" + "a" * 224 + ".xlsx", id="with-an-extension"),
         pytest.param("a" * 300, "2024/ukraine/ab12/" + "a" * 229, id="without-an-extension"),
+        pytest.param(
+            "a." + "b" * 300, "2024/ukraine/ab12/a." + "b" * 227, id="with-an-extension-longer-than-the-limit"
+        ),
     ],
 )
 def test_build_upload_path_truncates_a_long_filename(filename: str, expected: str) -> None:
@@ -368,6 +379,12 @@ def test_build_upload_path_uses_the_upload_year_when_no_year_is_given() -> None:
         ),
         pytest.param(
             "file_temp_for_missing_owner", "report.xlsx", "2026/_global/report.xlsx", id="owner-no-longer-exists"
+        ),
+        pytest.param(
+            "file_temp_for_owner_with_an_invalid_key",
+            "report.xlsx",
+            "2026/_global/report.xlsx",
+            id="owner-key-is-not-a-valid-key",
         ),
         pytest.param("file_temp_without_owner", "report.xlsx", "2026/_global/report.xlsx", id="no-owner"),
         pytest.param("uploaded_sanction_list_file", "report.xlsx", "2026/_global/report.xlsx", id="no-scope-at-all"),

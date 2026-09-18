@@ -139,6 +139,11 @@ def document(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
     )
 
 
+@pytest.fixture
+def document_without_a_file(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(payment_plan=payment_plan, file=None)
+
+
 def test_validate_file_size_success(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
     document_data = {"file": upload_file, "title": "test"}
     serializer = PaymentPlanSupportingDocumentSerializer(data=document_data, context=serializer_context)
@@ -186,6 +191,14 @@ def test_validate_file_limit_failure(payment_plan: PaymentPlan, serializer_conte
         serializer.errors["non_field_errors"][0]
         == f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
     )
+
+
+def test_to_representation_leaves_a_missing_file_as_none(
+    document_without_a_file: PaymentPlanSupportingDocument,
+) -> None:
+    data = PaymentPlanSupportingDocumentSerializer(document_without_a_file).data
+
+    assert data["file"] is None
 
 
 def test_post_successful_upload(
