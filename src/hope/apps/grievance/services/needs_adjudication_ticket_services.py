@@ -20,6 +20,7 @@ from hope.apps.grievance.utils import (
 )
 from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -396,6 +397,7 @@ def mark_as_duplicate_individual(
         household.refresh_from_db()
         if household.active_individuals.count() == 0:
             household.withdraw()
+        recalculate_data(household)
 
 
 def mark_as_distinct_individual(
@@ -418,3 +420,4 @@ def mark_as_distinct_individual(
         household.refresh_from_db()
         if household.active_individuals.count() > 0:
             household.unwithdraw()
+        recalculate_data(household)
