@@ -28,7 +28,6 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     OVERRIDE_OPTION,
 )
 from hope.apps.utils.security import is_root
-from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
@@ -448,9 +447,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             "opts": self.model._meta,
             "original": payment_plan,
             "payment_plan": payment_plan,
-            "vision_receipt_unconfirmed": (
-                not payment_plan.sent_to_vision and payment_plan.vision_status != VisionStatus.PP_CREATED.value
-            ),
+            "vision_receipt_unconfirmed": not payment_plan.sent_to_vision,
             "form": form,
             "funds_commitment_options": form.funds_commitment_options,
             "selected_funds_commitment_item_ids": request.POST.getlist("funds_commitment_items"),

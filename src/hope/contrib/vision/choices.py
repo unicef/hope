@@ -19,6 +19,25 @@ class VisionStatus(StrEnum):
     RELEASED = "RELEASED"
 
 
+VISION_RECOVERABLE_STATUSES = frozenset(
+    {
+        VisionStatus.SEND_FAILED.value,
+        VisionStatus.WAITING_FOR_CALLBACK.value,
+        VisionStatus.PP_CREATED.value,
+        VisionStatus.CALLBACK_FAILED.value,
+        VisionStatus.FC_MISSING.value,
+        VisionStatus.FC_NOT_FOUND.value,
+    }
+)
+
+VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES = frozenset(
+    {
+        VisionStatus.SEND_FAILED.value,
+        VisionStatus.WAITING_FOR_CALLBACK.value,
+        VisionStatus.PP_CREATED.value,
+    }
+)
+
 VISION_SEND_MUTABLE_STATUSES = frozenset(
     {
         VisionStatus.NOT_SENT.value,

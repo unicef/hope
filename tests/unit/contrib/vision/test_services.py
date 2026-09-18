@@ -327,6 +327,7 @@ def test_process_callback_records_payment_plan_created_acknowledgement(
     assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "00000110",
         "status": VisionStatus.PP_CREATED.value,
     }
@@ -354,6 +355,7 @@ def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
 
     assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "VISION-1",
         "fc_num": "UNKNOWN",
         "status": VisionStatus.FC_NOT_FOUND.value,

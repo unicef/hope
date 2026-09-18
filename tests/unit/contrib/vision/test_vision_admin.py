@@ -94,7 +94,7 @@ def waiting_without_send_confirmation_payment_plan(vision_admin_context) -> Paym
 
 
 @pytest.fixture
-def payment_plan_created_without_send_confirmation(vision_admin_context) -> PaymentPlan:
+def payment_plan_created_payment_plan(vision_admin_context) -> PaymentPlan:
     payment_plan = _create_payment_plan(
         vision_admin_context["business_area"],
         vision_admin_context["user"],
@@ -102,6 +102,7 @@ def payment_plan_created_without_send_confirmation(vision_admin_context) -> Paym
     )
     payment_plan.internal_data = {
         "vision": {
+            "sent": True,
             "status": VisionStatus.PP_CREATED.value,
             "vision_id": "00000110",
         }
@@ -258,13 +259,13 @@ def test_manual_fc_item_recovery_is_available_while_waiting_without_send_confirm
 
 
 def test_manual_fc_item_recovery_does_not_warn_after_payment_plan_created_acknowledgement(
-    payment_plan_created_without_send_confirmation,
+    payment_plan_created_payment_plan,
     admin_client,
 ) -> None:
     action_response = admin_client.get(
         reverse(
             "admin:payment_paymentplan_assign_vision_funds_commitment_items",
-            args=[payment_plan_created_without_send_confirmation.pk],
+            args=[payment_plan_created_payment_plan.pk],
         )
     )
 

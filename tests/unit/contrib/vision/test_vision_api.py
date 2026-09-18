@@ -498,6 +498,7 @@ def test_callback_view_records_payment_plan_created_acknowledgement(mock_get, mo
         "payplanSno": "PP-0060-24-0000002a",
     }
     vision_data = mock_pp.internal_data["vision"]
+    assert vision_data["sent"] is True
     assert vision_data["vision_id"] == "00000110"
     assert vision_data["status"] == VisionStatus.PP_CREATED.value
     entry = vision_data["log"][0]
