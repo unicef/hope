@@ -414,7 +414,7 @@ class IndividualFilter(UpdatedAtFilter):
         return [
             {"term": {"unicef_id.keyword": search.lower()}},
             {"term": {"household.unicef_id.keyword": search.lower()}},
-            {"wildcard": {"household.address.keyword": f"*{search.lower()}*"}},
+            {"wildcard": {"household.address": f"*{search.lower()}*"}},
             {"match": {"full_name": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
             {"match": {"full_name_latin": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
         ]
@@ -438,8 +438,8 @@ class IndividualFilter(UpdatedAtFilter):
             .filter(
                 program_filter
                 & (
-                    Q(unicef_id=search)
-                    | Q(household__unicef_id=search)
+                    Q(unicef_id__iexact=search)
+                    | Q(household__unicef_id__iexact=search)
                     | Q(full_name__icontains=search)
                     | Q(full_name_latin__icontains=search)
                     | Q(household__address__icontains=search)
