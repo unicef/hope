@@ -97,6 +97,7 @@ export function LookUpReassignRoleModal({
   const initialFilterIND = {
     search: '',
     documentType: documentTypeChoices?.[0]?.value,
+    phone: '',
     documentNumber: '',
     admin2: '',
     sex: '',
@@ -106,6 +107,7 @@ export function LookUpReassignRoleModal({
     orderBy: 'unicef_id',
     status: '',
     household: '',
+    birthDate: '',
   };
 
   if (household) {
