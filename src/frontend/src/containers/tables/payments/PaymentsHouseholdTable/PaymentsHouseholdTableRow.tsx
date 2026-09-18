@@ -70,10 +70,15 @@ export function PaymentsHouseholdTableRow({
         {formatCurrencyWithSymbol(
           Number(payment.entitlementQuantity),
           payment.currency,
+          payment.currencyVisionCode,
         )}
       </TableCell>
       <TableCell align="right">
-        {formatCurrencyWithSymbol(payment.deliveredQuantity, payment.currency)}
+        {formatCurrencyWithSymbol(
+          payment.deliveredQuantity,
+          payment.currency,
+          payment.currencyVisionCode,
+        )}
       </TableCell>
       <TableCell align="right">
         <UniversalMoment>{payment.deliveryDate}</UniversalMoment>

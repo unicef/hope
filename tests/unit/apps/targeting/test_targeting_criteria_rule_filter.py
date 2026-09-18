@@ -7,6 +7,7 @@ import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    CurrencyFactory,
     FlexibleAttributeFactory,
     FlexibleAttributeForPDUFactory,
     HouseholdFactory,
@@ -796,3 +797,71 @@ def test_rule_filter_pdu_boolean_is_null(households_pdu):
     queryset = get_individuals_queryset(households_pdu["individuals"]).filter(rule_filter.get_query()).distinct()
     assert queryset.count() == 1
     assert households_pdu["individuals"][2] in queryset
+
+
+@pytest.fixture
+def households_on_syp_before_redenomination(business_area, program, currency_pln):
+    """Both SYP denominations active under distinct codes, as before the new row takes over ``SYP``."""
+    currency_old = CurrencyFactory(code="SYP", name="Syrian Pound (old)", vision_code="SYP", active=True)
+    currency_new = CurrencyFactory(code="SYP01", name="Syrian Pound", vision_code="SYP01", active=True)
+    return {
+        "old": HouseholdFactory(business_area=business_area, program=program, currency=currency_old),
+        "new": HouseholdFactory(business_area=business_area, program=program, currency=currency_new),
+        "pln": HouseholdFactory(business_area=business_area, program=program, currency=currency_pln),
+    }
+
+
+@pytest.fixture
+def households_on_syp_after_redenomination(business_area, program, currency_syp_deprecated, currency_syp, currency_pln):
+    return {
+        "old": HouseholdFactory(business_area=business_area, program=program, currency=currency_syp_deprecated),
+        "new": HouseholdFactory(business_area=business_area, program=program, currency=currency_syp),
+        "pln": HouseholdFactory(business_area=business_area, program=program, currency=currency_pln),
+        "none": HouseholdFactory(business_area=business_area, program=program, currency=None),
+    }
+
+
+@pytest.mark.parametrize(("argument", "expected"), [("SYP", "old"), ("SYP01", "new")])
+def test_rule_filter_currency_before_redenomination_selects_one_denomination(
+    households_on_syp_before_redenomination, argument, expected
+):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=[argument])
+
+    queryset = Household.objects.filter(rule_filter.get_query())
+
+    assert set(queryset) == {households_on_syp_before_redenomination[expected]}
+
+
+@pytest.mark.parametrize("argument", ["SYP", "SYP01"])
+def test_rule_filter_currency_after_redenomination_selects_both_denominations(
+    households_on_syp_after_redenomination, argument
+):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=[argument])
+
+    queryset = Household.objects.filter(rule_filter.get_query())
+
+    assert set(queryset) == {
+        households_on_syp_after_redenomination["old"],
+        households_on_syp_after_redenomination["new"],
+    }
+
+
+def test_rule_filter_currency_not_equals_after_redenomination_excludes_both_denominations(
+    households_on_syp_after_redenomination,
+):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="NOT_EQUALS", field_name="currency", arguments=["SYP"])
+
+    queryset = Household.objects.filter(rule_filter.get_query())
+
+    assert set(queryset) == {
+        households_on_syp_after_redenomination["pln"],
+        households_on_syp_after_redenomination["none"],
+    }
+
+
+@pytest.mark.parametrize("argument", ["XXX", "VEF"])
+def test_rule_filter_currency_rejects_code_without_active_currency(currency_retired, argument):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=[argument])
+
+    with pytest.raises(ValidationError, match=f"Unknown currency code: {argument}"):
+        rule_filter.get_query()

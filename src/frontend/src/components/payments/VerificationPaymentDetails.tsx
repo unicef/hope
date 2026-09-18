@@ -2,6 +2,7 @@ import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
+  formatCurrencyCode,
   formatCurrencyWithSymbol,
   formatFigure,
   paymentStatusDisplayMap,
@@ -81,6 +82,7 @@ export function VerificationPaymentDetails({
               value={formatCurrencyWithSymbol(
                 payment.verification.receivedAmount,
                 payment.currency,
+                payment.currencyVisionCode,
               )}
             />
           </Grid>
@@ -109,7 +111,13 @@ export function VerificationPaymentDetails({
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField label={t('CURRENCY')} value={payment.currency} />
+            <LabelizedField
+              label={t('CURRENCY')}
+              value={formatCurrencyCode(
+                payment.currency,
+                payment.currencyVisionCode,
+              )}
+            />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField

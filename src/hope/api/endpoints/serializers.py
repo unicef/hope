@@ -32,6 +32,7 @@ class CurrencySerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "code",
+            "vision_code",
             "name",
             "is_crypto",
         )
