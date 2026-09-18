@@ -40,7 +40,7 @@ export function BulkAssignModal({
   const [inputValue, setInputValue] = useState('');
   const queryClient = useQueryClient();
 
-  const { mutate } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
         {
@@ -88,8 +88,8 @@ export function BulkAssignModal({
   const onFilterChange = (data: User | null): void => {
     setValue(data);
   };
-  const onSave = (): void => {
-    mutate({
+  const onSave = async (): Promise<void> => {
+    await mutateAsync({
       assignedTo: value?.id || '',
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
     });

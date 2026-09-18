@@ -43,7 +43,7 @@ export const BulkSetPriorityModal = ({
     queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
-  const { mutate } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: (params: BulkUpdateGrievanceTicketsPriority) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate(
         {
@@ -74,8 +74,8 @@ export const BulkSetPriorityModal = ({
   });
 
   const priorityChoices = choices?.grievanceTicketPriorityChoices;
-  const onSave = (): void => {
-    mutate({
+  const onSave = async (): Promise<void> => {
+    await mutateAsync({
       grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
       priority: value,
     });
