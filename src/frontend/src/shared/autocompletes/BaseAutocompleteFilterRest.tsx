@@ -68,7 +68,9 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
     }
   }, [open, debouncedInputText, loadData]);
 
-  if (!data) return null;
+  // Hide only while the first fetch is in flight, so a consumer that defers
+  // fetching until the dropdown opens still renders its (empty) field.
+  if (!data && loading) return null;
 
   return (
     <StyledAutocomplete

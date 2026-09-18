@@ -65,6 +65,9 @@ export const CreatedByAutocompleteRestFilter = ({
       queryVariables,
     ),
     queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: open || !!value,
   });
 
   useEffect(() => {
@@ -74,11 +77,12 @@ export const CreatedByAutocompleteRestFilter = ({
     }));
   }, [debouncedInputText]);
 
+  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (businessArea) {
+    if (businessArea && (open || value)) {
       refetch();
     }
-  }, [businessArea, refetch]);
+  }, [businessArea, open, value, refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
