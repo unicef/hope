@@ -195,7 +195,6 @@ class PaymentNotification:
             self.payment_plan.business_area,
             [permission],
             [self.payment_plan.program],
-            exclude_staff=True,
         ).exclude(id=self.action_user.id)
 
     def _prepare_emails(self) -> list[MailjetClient]:

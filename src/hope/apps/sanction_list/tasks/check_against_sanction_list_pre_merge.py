@@ -9,7 +9,6 @@ from django.utils import timezone
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.utils.querysets import evaluate_qs
@@ -139,7 +138,7 @@ def _resolve_individual_hit(
     return marked_individual
 
 
-def _save_tickets_and_notify(
+def _save_tickets(
     tickets_to_create: list[GrievanceTicket],
     tickets_programs: list,
     ticket_details_to_create: list[TicketSystemFlaggingDetails],
@@ -147,10 +146,6 @@ def _save_tickets_and_notify(
     GrievanceTicket.objects.bulk_create(tickets_to_create)
     grievance_ticket_program_through = GrievanceTicket.programs.through
     grievance_ticket_program_through.objects.bulk_create(tickets_programs)
-    for ticket in tickets_to_create:
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
-        )
     TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)
 
 
@@ -239,4 +234,4 @@ def check_against_sanction_list_pre_merge(
         )
         not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
-    _save_tickets_and_notify(tickets_to_create, tickets_programs, ticket_details_to_create)
+    _save_tickets(tickets_to_create, tickets_programs, ticket_details_to_create)
