@@ -209,6 +209,25 @@ def test_search_db_fallback_name_still_works_when_es_disabled(
     assert results[0]["id"] == str(john.id)
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=False)
+def test_search_db_fallback_unicef_id_case_insensitive(
+    es_client: Any,
+    individuals_list_url: str,
+    es_program: Program,
+    afghanistan: BusinessArea,
+) -> None:
+    john = _create_individual(es_program, afghanistan, full_name="John Smith")
+    john.unicef_id = "IND-24-0000.0001"
+    john.save(update_fields=["unicef_id"])
+    _create_individual(es_program, afghanistan, full_name="Jane Doe")
+
+    response = es_client.get(individuals_list_url, {"search": "ind-24-0000.0001"})
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == str(john.id)
+
+
 # ── Phase 5: HOPE ID exact (term), address wildcard ──────────────────
 
 
@@ -445,7 +464,7 @@ def test_es_query_shape_contains_expected_clauses(
 
     assert ("term", "unicef_id.keyword") in clause_signatures
     assert ("term", "household.unicef_id.keyword") in clause_signatures
-    assert ("wildcard", "household.address.keyword") in clause_signatures
+    assert ("wildcard", "household.address") in clause_signatures
     assert ("match", "full_name") in clause_signatures
 
 
@@ -463,7 +482,7 @@ def test_es_query_shape_flag_off_uses_match_phrase_prefix(
     assert ("match_phrase_prefix", "full_name") in clause_signatures
     assert ("term", "unicef_id.keyword") not in clause_signatures
     assert ("term", "household.unicef_id.keyword") not in clause_signatures
-    assert ("wildcard", "household.address.keyword") not in clause_signatures
+    assert ("wildcard", "household.address") not in clause_signatures
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=False)

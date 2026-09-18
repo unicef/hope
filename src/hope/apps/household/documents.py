@@ -68,9 +68,7 @@ class IndividualDocument(_PreparedFieldsFix, Document):
             "unicef_id": fields.TextField(
                 fields={"keyword": fields.KeywordField(normalizer=lowercase_normalizer)},
             ),
-            "address": fields.TextField(
-                fields={"keyword": fields.KeywordField(normalizer=lowercase_normalizer)},
-            ),
+            "address": fields.KeywordField(normalizer=lowercase_normalizer),
         }
     )
     documents = fields.ObjectField(
