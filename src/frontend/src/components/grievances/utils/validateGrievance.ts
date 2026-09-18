@@ -13,8 +13,10 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
+// Mirrors normalize_latin_name on the backend: whitespace is collapsed before validation
 const isInvalidLatin = (value): boolean =>
-  !isEmpty(value) && !LATIN_NAME_REGEX.test(String(value).trim());
+  !isEmpty(value) &&
+  !LATIN_NAME_REGEX.test(String(value).trim().replace(/\s+/g, ' '));
 
 // Mirrors ascii_name_validator on the backend so the form fails fast
 function validateLatinNameRows(values): string | undefined {

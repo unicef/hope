@@ -80,13 +80,6 @@ export const headCellsPeople: HeadCell<RegistrationDataImportList>[] = [
     numeric: false,
   },
   {
-    disablePadding: false,
-    label: 'Biometric Deduplicated',
-    id: 'biometricDeduplicated',
-    numeric: false,
-    disableSort: true,
-  },
-  {
     disablePadding: true,
     label: 'Num. of People',
     id: 'numberOfIndividuals',

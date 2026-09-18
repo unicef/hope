@@ -13,7 +13,7 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
-import psycopg2
+import psycopg
 import pytest
 from rest_framework import serializers as drf_serializers, status
 
@@ -454,7 +454,7 @@ def test_pvp_activate_returns_400_when_row_is_locked(
     pvp = verification_context["pvp"]
 
     db = connection.settings_dict
-    locker = psycopg2.connect(
+    locker = psycopg.connect(
         dbname=db["NAME"],
         user=db["USER"],
         password=db["PASSWORD"],

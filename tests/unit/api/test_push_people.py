@@ -556,6 +556,7 @@ def test_push_people_creates_account_attachments(
             "sex": "FEMALE",
             "type": "",
             "program": str(program.id),
+            "country_workspace_id": "cw-wallet-attachments",
             "accounts": [
                 {
                     "type": "bank",

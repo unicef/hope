@@ -10,7 +10,7 @@ from hope.apps.core.utils import timezone_datetime
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Area, BusinessArea, Facility, Household, Program
 from hope.models.currency import Currency
-from hope.models.individual import ascii_name_validator
+from hope.models.individual import ascii_name_validator, normalize_latin_name
 
 
 def handle_date_field(
@@ -215,10 +215,16 @@ def validate_latin_name(
     if value is None or value == "":
         return None
     try:
-        ascii_name_validator(value)
+        ascii_name_validator(normalize_latin_name(value))
     except ValidationError as e:
         return f"Invalid value {value} for column {name}: {e.message}"
     return None
+
+
+def handle_latin_name_field(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> Any:
+    return normalize_latin_name(value)
 
 
 def validate_boolean(

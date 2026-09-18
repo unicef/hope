@@ -14,6 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models, transaction
+from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils import timezone
@@ -22,7 +23,6 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
-from psycopg2._range import NumericRange
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
