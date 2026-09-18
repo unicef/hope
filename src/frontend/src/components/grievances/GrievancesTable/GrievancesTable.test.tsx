@@ -1,29 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderWithProviders, waitFor } from 'src/testUtils/testUtils';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { TestProviders } from 'src/testUtils/testProviders';
 import { RestService } from '@restgenerated/services/RestService';
+import { PERMISSIONS } from '../../../config/permissions';
 import { GrievancesTable } from './GrievancesTable';
+
+vi.mock('@hooks/usePermissions', () => ({
+  usePermissions: () => [PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE],
+}));
 
 vi.mock('@hooks/useBaseUrl', () => ({
   useBaseUrl: () => ({
-    businessArea: 'ukraine',
-    businessAreaSlug: 'ukraine',
+    baseUrl: 'afghanistan/programs/all',
+    businessArea: 'afghanistan',
+    businessAreaSlug: 'afghanistan',
     programCode: 'all',
     programId: 'all',
     isAllPrograms: true,
-    baseUrl: 'ukraine/programs/all',
+    isGlobal: false,
   }),
-}));
-
-vi.mock('src/programContext', () => ({
-  useProgramContext: () => ({
-    isSocialDctType: false,
-    selectedProgram: null,
-  }),
-}));
-
-vi.mock('@hooks/usePermissions', () => ({
-  usePermissions: () => [],
 }));
 
 vi.mock('react-i18next', () => ({
@@ -32,13 +28,13 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@restgenerated/services/RestService', () => {
   const methods = {
+    restChoicesGrievanceTicketsRetrieve: vi.fn(),
+    restBusinessAreasUsersProfileRetrieve: vi.fn(),
+    restBusinessAreasUsersList: vi.fn(),
     restBusinessAreasGrievanceTicketsList: vi.fn(),
     restBusinessAreasGrievanceTicketsCountRetrieve: vi.fn(),
     restBusinessAreasProgramsGrievanceTicketsList: vi.fn(),
     restBusinessAreasProgramsGrievanceTicketsCountRetrieve: vi.fn(),
-    restBusinessAreasUsersList: vi.fn(),
-    restBusinessAreasUsersProfileRetrieve: vi.fn(),
-    restChoicesGrievanceTicketsRetrieve: vi.fn(),
   };
   // restQueryKey derives the cache key root from `fn.name`.
   for (const [name, fn] of Object.entries(methods)) {
@@ -47,7 +43,29 @@ vi.mock('@restgenerated/services/RestService', () => {
   return { RestService: methods };
 });
 
-const filter = {
+const TICKETS = [
+  { id: 'ticket-1', status: 1, category: 3 },
+  { id: 'ticket-2', status: 1, category: 3 },
+];
+
+// The real table is exercised elsewhere; here it is a probe for the params the query is built
+// with and for how many rows are still ticked.
+const universalTableProps = vi.fn();
+vi.mock('@components/rest/UniversalRestTable/UniversalRestTable', () => ({
+  UniversalRestTable: (props: any) => {
+    universalTableProps(props);
+    return (
+      <button
+        data-cy="select-all"
+        onClick={() => props.onSelectAllClick(null, TICKETS)}
+      >
+        {props.numSelected}
+      </button>
+    );
+  },
+}));
+
+const BASE_FILTER = {
   search: '',
   documentType: '',
   documentNumber: '',
@@ -65,57 +83,59 @@ const filter = {
   cashPlan: '',
   scoreMin: '',
   scoreMax: '',
-  grievanceType: 'system',
+  grievanceType: '',
   grievanceStatus: 'active',
   priority: '',
   urgency: '',
   submissionChannel: '',
   preferredLanguage: '',
   program: '',
-  areaScope: '',
+  areaScope: 'all',
+  overdue: '',
+  sensitive: '',
 };
 
-describe('GrievancesTable', () => {
-  let queryClient: QueryClient;
+const renderTable = (props: Record<string, unknown> = {}) =>
+  render(
+    <MemoryRouter>
+      <GrievancesTable filter={BASE_FILTER} {...props} />
+    </MemoryRouter>,
+    { wrapper: TestProviders },
+  );
 
+const listParams = () =>
+  (RestService.restBusinessAreasGrievanceTicketsList as any).mock.calls.at(
+    -1,
+  )?.[0];
+
+describe('GrievancesTable', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
-
-    vi.mocked(
-      RestService.restBusinessAreasGrievanceTicketsList,
-    ).mockResolvedValue({ next: null, previous: null, results: [] });
-    vi.mocked(
-      RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
-    ).mockResolvedValue({ count: 0 });
-    vi.mocked(RestService.restBusinessAreasUsersList).mockResolvedValue({
-      next: null,
-      previous: null,
-      results: [],
-    });
-    vi.mocked(
-      RestService.restBusinessAreasUsersProfileRetrieve,
-    ).mockResolvedValue({ id: 'user-1' } as any);
-    vi.mocked(
-      RestService.restChoicesGrievanceTicketsRetrieve,
-    ).mockResolvedValue({
-      grievanceTicketStatusChoices: [],
+    (RestService.restChoicesGrievanceTicketsRetrieve as any).mockResolvedValue({
       grievanceTicketCategoryChoices: [],
       grievanceTicketIssueTypeChoices: [],
       grievanceTicketPriorityChoices: [],
       grievanceTicketUrgencyChoices: [],
-    } as any);
+      grievanceTicketStatusChoices: [],
+    });
+    (
+      RestService.restBusinessAreasUsersProfileRetrieve as any
+    ).mockResolvedValue({ id: 'user-1' });
+    (RestService.restBusinessAreasUsersList as any).mockResolvedValue({
+      results: [],
+    });
+    (
+      RestService.restBusinessAreasGrievanceTicketsList as any
+    ).mockResolvedValue({ results: TICKETS, count: TICKETS.length });
+    (
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve as any
+    ).mockResolvedValue({ count: TICKETS.length });
   });
 
   it('requests the list and the count exactly once on mount', async () => {
-    renderWithProviders(
-      <QueryClientProvider client={queryClient}>
-        <GrievancesTable filter={filter} selectedTab={0} />
-      </QueryClientProvider>,
-    );
+    renderTable();
 
+    await screen.findByTestId('select-all');
     await waitFor(() => {
       expect(
         RestService.restBusinessAreasGrievanceTicketsList,
@@ -133,8 +153,7 @@ describe('GrievancesTable', () => {
     expect(listMock).toHaveBeenCalledTimes(1);
     expect(listMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        businessAreaSlug: 'ukraine',
-        grievanceType: 'system',
+        businessAreaSlug: 'afghanistan',
         grievanceStatus: 'active',
         isActiveProgram: true,
         ordering: '-created_at',
@@ -150,8 +169,7 @@ describe('GrievancesTable', () => {
     const countParams = countMock.mock.calls[0][0];
     expect(countParams).toEqual(
       expect.objectContaining({
-        businessAreaSlug: 'ukraine',
-        grievanceType: 'system',
+        businessAreaSlug: 'afghanistan',
         grievanceStatus: 'active',
         isActiveProgram: true,
       }),
@@ -159,5 +177,46 @@ describe('GrievancesTable', () => {
     expect(countParams).not.toHaveProperty('ordering');
     expect(countParams).not.toHaveProperty('limit');
     expect(countParams).not.toHaveProperty('offset');
+  });
+
+  it('sends the sensitivity filter to the list endpoint', async () => {
+    renderTable({ filter: { ...BASE_FILTER, sensitive: 'false' } });
+
+    await screen.findByTestId('select-all');
+    // 'false' means "every category but sensitive" on the backend, so it has to survive the
+    // empty-param stripping rather than being treated as unset.
+    await waitFor(() => expect(listParams().sensitive).toBe('false'));
+  });
+
+  it('omits the sensitivity filter when the page does not use it', async () => {
+    renderTable({ filter: { ...BASE_FILTER, sensitive: '' } });
+
+    await screen.findByTestId('select-all');
+    await waitFor(() => expect(listParams()).not.toHaveProperty('sensitive'));
+  });
+
+  it('clears the selection when the query changes', async () => {
+    const { rerender } = renderTable({
+      extraQueryParams: { unassigned: true },
+    });
+
+    const selectAll = await screen.findByTestId('select-all');
+    selectAll.click();
+    await waitFor(() => expect(selectAll.textContent).toBe('2'));
+
+    // Switching tab swaps the pinned params. The previously ticked rows are not in the new list,
+    // but they would still have been picked up by a bulk action.
+    rerender(
+      <MemoryRouter>
+        <GrievancesTable
+          filter={BASE_FILTER}
+          extraQueryParams={{ assignedTo: 'user-1' }}
+        />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('select-all').textContent).toBe('0'),
+    );
   });
 });

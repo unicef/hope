@@ -18,7 +18,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { adjustHeadCells, choicesToDict } from '@utils/utils';
+import { choicesToDict } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,10 +28,11 @@ import {
   hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
+import type { GrievanceColumnId } from './GrievancesTableColumns';
 import {
-  headCellsSocialProgram,
-  headCellsStandardProgram,
-} from './GrievancesTableHeadCells';
+  DEFAULT_GRIEVANCE_COLUMNS,
+  GRIEVANCE_COLUMNS,
+} from './GrievancesTableColumns';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
@@ -44,11 +45,24 @@ import { useTableState } from '@hooks/useTableState';
 
 interface GrievancesTableProps {
   filter;
-  selectedTab;
+  selectedTab?;
+  /** Columns to show, in order; the header and the rows are both derived from this. */
+  columns?: GrievanceColumnId[];
+  /** Query params the page pins itself, applied on top of the filter bar's. */
+  extraQueryParams?: { [key: string]: any };
+  defaultOrderBy?: string;
+  title?: string;
+  /** Hidden on lists that can never contain a closable ticket, e.g. Needs Assignment. */
+  showBulkClose?: boolean;
 }
 
 export const GrievancesTable = ({
   filter,
+  columns = DEFAULT_GRIEVANCE_COLUMNS,
+  extraQueryParams,
+  defaultOrderBy = 'created_at',
+  title,
+  showBulkClose = true,
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
@@ -57,15 +71,24 @@ export const GrievancesTable = ({
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
-  const replacements = {
-    household_unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
-  };
+  // Across every programme the list gains a Programmes column, whatever the page asked for.
+  const visibleColumns = useMemo<GrievanceColumnId[]>(
+    () =>
+      isAllPrograms && !columns.includes('programs')
+        ? [...columns, 'programs']
+        : columns,
+    [columns, isAllPrograms],
+  );
 
-  const adjustedHeadCells = adjustHeadCells(
-    headCellsStandardProgram,
-    beneficiaryGroup,
-    replacements,
+  const headCells = useMemo(
+    () =>
+      visibleColumns.map((id) => {
+        const { head } = GRIEVANCE_COLUMNS[id];
+        return typeof head === 'function'
+          ? head({ isSocialDctType, isAllPrograms, beneficiaryGroup })
+          : head;
+      }),
+    [visibleColumns, isSocialDctType, isAllPrograms, beneficiaryGroup],
   );
 
   const filterVariables = useMemo(
@@ -97,6 +120,10 @@ export const GrievancesTable = ({
       programCode: isAllPrograms ? undefined : programCode,
       isActiveProgram: isAllPrograms ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
+      overdue: filter.overdue,
+      sensitive: filter.sensitive,
+      // Last, so a page's pinned params win over anything the filter bar set.
+      ...extraQueryParams,
     }),
     [
       filter.search,
@@ -124,6 +151,9 @@ export const GrievancesTable = ({
       filter.preferredLanguage,
       filter.program,
       filter.areaScope,
+      filter.overdue,
+      filter.sensitive,
+      extraQueryParams,
       isAllPrograms,
       programCode,
     ],
@@ -131,8 +161,9 @@ export const GrievancesTable = ({
 
   const table = useTableState({
     rowsPerPageOptions: [10, 15, 20, 40],
-    defaultOrderBy: 'created_at',
+    defaultOrderBy,
     defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const listVariables = useMemo(
@@ -142,6 +173,20 @@ export const GrievancesTable = ({
 
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
+  const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
+    [key: number]: GrievanceTicketList[];
+  }>({ 0: [] });
+
+  // A different query lists different rows, so anything still ticked is now invisible - and
+  // would silently take part in the next bulk action. Only the filter and the page's pinned
+  // params are in here; paging and ordering live in the table state, so selecting across
+  // pages still works.
+  const [prevFilterVariables, setPrevFilterVariables] =
+    useState(filterVariables);
+  if (prevFilterVariables !== filterVariables) {
+    setPrevFilterVariables(filterVariables);
+    setSelectedTicketsPerPage({ 0: [] });
+  }
 
   const { data: usersListData } = useQuery<PaginatedUserList>({
     queryKey: restQueryKey(RestService.restBusinessAreasUsersList, {
@@ -261,10 +306,6 @@ export const GrievancesTable = ({
 
   const optionsData = usersData;
 
-  const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
-    [key: number]: GrievanceTicketList[];
-  }>({ 0: [] });
-
   const selectedTickets: GrievanceTicketList[] = [];
   const currentSelectedTickets = selectedTicketsPerPage[page];
   for (const pageKey of Object.keys(selectedTicketsPerPage)) {
@@ -329,6 +370,10 @@ export const GrievancesTable = ({
     ],
     permissions,
   );
+  const canBulkAssign = hasPermissions(
+    PERMISSIONS.GRIEVANCES_UPDATE,
+    permissions,
+  );
 
   const getCanViewDetailsOfTicket = (ticket: GrievanceTicketList): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
@@ -383,34 +428,10 @@ export const GrievancesTable = ({
     setSelectedTickets([]);
   };
 
-  const getHeadCells = () => {
-    const baseCells =
-      isSocialDctType || isAllPrograms
-        ? headCellsSocialProgram
-        : adjustedHeadCells;
-
-    if (isAllPrograms) {
-      return [
-        ...baseCells,
-        {
-          disablePadding: false,
-          label: 'Programmes',
-          id: 'programs',
-          numeric: false,
-          dataCy: 'programs',
-        },
-      ];
-    }
-
-    return baseCells;
-  };
-
-  const headCells = getHeadCells();
-
   return (
     <TableWrapper>
       <Paper>
-        <EnhancedTableToolbar title={t('Grievance Tickets List')} />
+        <EnhancedTableToolbar title={title ?? t('Grievance Tickets List')} />
         <Box
           component="div"
           sx={{
@@ -420,10 +441,12 @@ export const GrievancesTable = ({
             gap: 4,
           }}
         >
-          <BulkAssignModal
-            selectedTickets={selectedTickets}
-            setSelected={setSelectedTickets}
-          />
+          {canBulkAssign && (
+            <BulkAssignModal
+              selectedTickets={selectedTickets}
+              setSelected={setSelectedTickets}
+            />
+          )}
           <BulkSetPriorityModal
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}
@@ -436,7 +459,7 @@ export const GrievancesTable = ({
             selectedTickets={selectedTickets}
             setSelected={setSelectedTickets}
           />
-          {canBulkClose && (
+          {canBulkClose && showBulkClose && (
             <BulkCloseModal
               selectedTickets={selectedTickets}
               setSelected={setSelectedTickets}
@@ -474,6 +497,7 @@ export const GrievancesTable = ({
               )}
               optionsData={optionsData}
               setInputValue={setInputValue}
+              columns={visibleColumns}
             />
           )}
         />
