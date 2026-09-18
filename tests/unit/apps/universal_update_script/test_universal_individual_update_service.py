@@ -1123,6 +1123,20 @@ def test_update_individual_latin_name_stored_as_provided(
     assert "Update successful" in latin_name_update.saved_logs
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_individual_latin_name_stored_normalized(
+    individual: Individual, latin_name_update: UniversalUpdate
+) -> None:
+    _write_column(latin_name_update, "full_name_latin", "  Anna \t\xa0 Kovalska ")
+
+    UniversalIndividualUpdateService(latin_name_update).execute()
+
+    individual.refresh_from_db()
+    latin_name_update.refresh_from_db()
+    assert individual.full_name_latin == "Anna Kovalska"
+    assert "Update successful" in latin_name_update.saved_logs
+
+
 def test_update_individual_latin_name_rejects_non_latin_value(
     individual: Individual, latin_name_update: UniversalUpdate
 ) -> None:
@@ -1146,6 +1160,33 @@ def test_update_individual_latin_name_rejects_non_latin_value(
         ("", None),
         (None, None),
         ("Anna O'Neil-Kovalska", None),
+        ("  Anna Kovalska", None),
+        ("Anna Kovalska  ", None),
+        ("Anna   Kovalska", None),
+        ("Anna\nKovalska", None),
+        ("Anna\tKovalska", None),
+        ("Anna\xa0Kovalska", None),
+        (
+            "Anna--Kovalska",
+            (
+                "Invalid value Anna--Kovalska for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
+        ),
+        (
+            "Anna'''Kovalska",
+            (
+                "Invalid value Anna'''Kovalska for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
+        ),
+        (
+            "Anna - ' - Kovalska",
+            (
+                "Invalid value Anna - ' - Kovalska for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
+        ),
         (
             "Anna1",
             (
