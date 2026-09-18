@@ -8,8 +8,10 @@ from unittest.mock import patch
 
 from django.core.files import File
 from django.forms import model_to_dict
+from django.test import override_settings
 from django.utils.dateparse import parse_datetime
 from django_countries.fields import Country
+from freezegun import freeze_time
 import openpyxl
 from PIL import Image
 import pytest
@@ -173,6 +175,11 @@ def flex_fields() -> dict[str, object]:
 @pytest.fixture
 def program(business_area) -> Program:
     return ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+
+
+@pytest.fixture
+def program_started_in_2024(business_area) -> Program:
+    return ProgramFactory(business_area=business_area, code="ab12", start_date=date(2024, 3, 1))
 
 
 @pytest.fixture
@@ -644,7 +651,8 @@ def test_create_documents(countries: dict[str, object]) -> None:
 
     document = PendingDocument.objects.first()
     photo = document.photo.name
-    assert photo.startswith("image")
+    program = individual.program
+    assert photo.startswith(f"{program.start_date.year}/{program.business_area.slug}/{program.code}/image")
     assert photo.endswith(".png")
 
 
@@ -946,6 +954,20 @@ def test_misc_handlers_coverage() -> None:
     ind.birth_date = datetime.datetime.now() + datetime.timedelta(days=100)
     task._validate_birth_date(ind)
     assert ind.estimated_birth_date is True
+
+
+@freeze_time("2026-09-09 12:00:00")
+def test_handle_image_field_stores_a_flex_field_image_under_the_programme(
+    program_started_in_2024: Program, tmp_path: Path
+) -> None:
+    task = RdiXlsxCreateTask()
+    task.image_loader = ImageLoaderMock()
+    task.program = program_started_in_2024
+
+    with override_settings(MEDIA_ROOT=str(tmp_path)):
+        stored_name = task._handle_image_field(CellMock("image.jpg", "A1"), is_flex_field=True)
+
+    assert stored_name == "2024/afghanistan/ab12/A1-2026-09-09 12:00:00+00:00.jpg"
 
 
 def test_process_lookup_field() -> None:
