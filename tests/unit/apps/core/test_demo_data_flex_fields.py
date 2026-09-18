@@ -12,6 +12,17 @@ def test_program(db):
     return ProgramFactory(business_area=business_area, name="Test Program")
 
 
+@pytest.fixture
+def household_in_test_program(test_program):
+    return HouseholdFactory(program=test_program, business_area=test_program.business_area, size=3)
+
+
+@pytest.fixture
+def household_outside_test_program(test_program):
+    other_program = ProgramFactory(business_area=test_program.business_area, name="Other Program")
+    return HouseholdFactory(program=other_program, business_area=test_program.business_area)
+
+
 def test_generate_household_flex_fields_creates_household_attributes(test_program):
     generate_household_flex_fields()
 
@@ -33,16 +44,14 @@ def test_generate_household_flex_fields_creates_household_attributes(test_progra
     assert not serialize_flex_attributes()["individuals"]
 
 
-def test_generate_household_flex_fields_fills_test_program_households(test_program):
-    in_program = HouseholdFactory(program=test_program, business_area=test_program.business_area, size=3)
-    other_program = ProgramFactory(business_area=test_program.business_area, name="Other Program")
-    outside_program = HouseholdFactory(program=other_program, business_area=test_program.business_area)
-
+def test_generate_household_flex_fields_fills_test_program_households(
+    household_in_test_program, household_outside_test_program
+):
     generate_household_flex_fields()
 
-    assert Household.objects.get(pk=in_program.pk).flex_fields == {
+    assert Household.objects.get(pk=household_in_test_program.pk).flex_fields == {
         "hh_total_eligible_ind_h_f": 1,
         "total_dwellers_h_f": 3,
         "living_situation_h_f": "renter",
     }
-    assert Household.objects.get(pk=outside_program.pk).flex_fields == {}
+    assert Household.objects.get(pk=household_outside_test_program.pk).flex_fields == {}

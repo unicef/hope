@@ -46,13 +46,20 @@ def _prepare_roles_with_approve_status(roles_data: list[dict[Any, Any]]) -> list
     return roles_with_approve_status
 
 
-def _resolve_facility(household: Household, name: str) -> Facility | None:
+def _resolve_facility(household: Household, name: str | None, admin_area_p_code: str | None) -> Facility | None:
     if not name:
         return None
     facilities = Facility.objects.filter(name=name.upper(), business_area=household.business_area)
+    if admin_area_p_code:
+        facilities = facilities.filter(admin_area__p_code=admin_area_p_code)
     if len(facilities) != 1:
-        raise ValidationError(f"Ticket cannot be closed, {name} does not match exactly one facility")
+        scope = f" in admin area {admin_area_p_code}" if admin_area_p_code else ""
+        raise ValidationError(f"Ticket cannot be closed, {name} does not match exactly one facility{scope}")
     return facilities[0]
+
+
+def _facility_admin_area_p_code(household: Household) -> str | None:
+    return household.facility.admin_area.p_code if household.facility else None
 
 
 class HouseholdDataUpdateService(DataChangeService):
@@ -94,6 +101,9 @@ class HouseholdDataUpdateService(DataChangeService):
                 admin_area_title["value"] = value
             admin_area_title["previous_value"] = current_value
             household_data_with_approve_status["admin_area_title"] = admin_area_title
+
+        if facility_admin_area := household_data_with_approve_status.get("facility_admin_area"):
+            facility_admin_area["previous_value"] = _facility_admin_area_p_code(household)
 
         flex_fields_with_approve_status = {
             field: {
@@ -161,6 +171,9 @@ class HouseholdDataUpdateService(DataChangeService):
             admin_area_title["previous_value"] = current_value
             household_data_with_approve_status["admin_area_title"] = admin_area_title
 
+        if facility_admin_area := household_data_with_approve_status.get("facility_admin_area"):
+            facility_admin_area["previous_value"] = _facility_admin_area_p_code(household)
+
         flex_fields_with_approve_status = {
             field: {
                 "value": value,
@@ -209,10 +222,19 @@ class HouseholdDataUpdateService(DataChangeService):
                 code=currency.get("value")
             ).first()
         facility = household_data.get("facility", {})
+        facility_admin_area = household_data.pop("facility_admin_area", {})
+        admin_area_p_code = facility_admin_area.get("value") if is_approved(facility_admin_area) else None
         if facility.get("value") is not None and is_approved(facility):
             household_data["facility"]["value"] = _resolve_facility(  # type: ignore[index]
-                household, facility.get("value")
+                household, facility.get("value"), admin_area_p_code
             )
+        elif admin_area_p_code:
+            if household.facility is None:
+                raise ValidationError("Ticket cannot be closed, the household has no facility to move")
+            household_data["facility"] = {  # type: ignore[index]
+                "value": _resolve_facility(household, household.facility.name, admin_area_p_code),
+                "approve_status": True,
+            }
         only_approved_data = {
             field: value_and_approve_status.get("value")
             for field, value_and_approve_status in household_data.items()

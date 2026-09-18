@@ -83,6 +83,15 @@ def update_context() -> dict[str, Any]:
     }
 
 
+@pytest.fixture
+def individual_with_identification_key(update_context: dict[str, Any]) -> Any:
+    return IndividualFactory(
+        business_area=update_context["business_area"],
+        program=update_context["program"],
+        identification_key="IND-KEY-1",
+    )
+
+
 def test_add_document_of_same_type_not_unique_per_individual_valid(update_context: dict[str, Any]) -> None:
     DocumentFactory(
         individual=update_context["individual"],
@@ -649,14 +658,10 @@ def test_close_individual_update_applies_approved_identification_key(update_cont
     assert individual.identification_key == "IND-KEY-1"
 
 
+@pytest.mark.usefixtures("individual_with_identification_key")
 def test_close_individual_update_rejects_identification_key_used_in_the_programme(
     update_context: dict[str, Any],
 ) -> None:
-    IndividualFactory(
-        business_area=update_context["business_area"],
-        program=update_context["program"],
-        identification_key="IND-KEY-1",
-    )
     ticket_details = update_context["ticket"].individual_data_update_ticket_details
     ticket_details.individual_data = {
         "ind_identification_key": {"value": "IND-KEY-1", "previous_value": None, "approve_status": True}

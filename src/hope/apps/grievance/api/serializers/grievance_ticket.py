@@ -416,6 +416,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     currency = serializers.CharField(required=False)
     unhcr_id = serializers.CharField(required=False)
     facility = serializers.CharField(required=False, allow_blank=True)
+    facility_admin_area = serializers.CharField(required=False, allow_blank=True)
     flex_fields = serializers.JSONField(required=False)
     roles = serializers.ListField(child=HouseholdUpdateRolesSerializer(), required=False)
 
