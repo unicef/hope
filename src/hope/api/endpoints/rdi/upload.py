@@ -41,7 +41,6 @@ from hope.models import (
     RegistrationDataImport,
 )
 from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
