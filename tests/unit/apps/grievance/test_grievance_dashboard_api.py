@@ -584,6 +584,11 @@ def two_referral_tickets(dashboard_context: dict[str, Any]) -> None:
     )
 
 
+@pytest.fixture
+def program_without_tickets(dashboard_context: dict[str, Any]) -> Any:
+    return ProgramFactory(name="Program Without Tickets", business_area=dashboard_context["business_area"])
+
+
 def test_global_dashboard_runs_one_grouped_pass_over_the_tickets(
     authenticated_client: Any,
     dashboard_context: dict[str, Any],
@@ -788,6 +793,32 @@ def test_global_dashboard_keeps_an_area_named_no_location_apart_from_the_no_loca
     chart = response.json()["tickets_by_location_and_category"]
     assert chart["labels"] == ["City Test", "No Location", "No Location"]
     assert {"label": "Referral", "data": [0, 1, 1]} in chart["datasets"]
+
+
+def test_program_dashboard_returns_an_empty_location_chart_when_the_program_has_no_tickets(
+    authenticated_client: Any,
+    dashboard_context: dict[str, Any],
+    program_without_tickets: Any,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        dashboard_context["user"],
+        [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+        dashboard_context["business_area"],
+        program_without_tickets,
+    )
+    url = reverse(
+        "api:grievance:grievance-tickets-dashboard",
+        kwargs={
+            "business_area_slug": dashboard_context["business_area"].slug,
+            "program_code": program_without_tickets.code,
+        },
+    )
+
+    response = authenticated_client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["tickets_by_location_and_category"] == {"labels": [], "datasets": []}
 
 
 def test_global_dashboard_location_chart_sums_to_the_category_chart_per_category(
