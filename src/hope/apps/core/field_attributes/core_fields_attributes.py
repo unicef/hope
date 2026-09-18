@@ -396,7 +396,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.KOBO_IMPORT,
             Scope.HOUSEHOLD_UPDATE,
             Scope.XLSX_PEOPLE,
-            Scope.PEOPLE_UPDATE,
         ],
     },
     {
@@ -416,7 +415,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.KOBO_IMPORT,
             Scope.HOUSEHOLD_UPDATE,
             Scope.XLSX_PEOPLE,
-            Scope.PEOPLE_UPDATE,
         ],
     },
     {

@@ -38,14 +38,20 @@ export function GrievanceFlexFieldPhotoModal({
     return null;
   }
 
+  // individualData is camelized by the REST client, householdData is not
+  const ticketData = isIndividual
+    ? data.ticketDetails?.individualData
+    : data.ticketDetails?.householdData;
   const flexFields = isIndividual
-    ? data?.ticketDetails?.individualData?.flex_fields
-    : data.ticketDetails?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+    ? ticketData?.flexFields
+    : ticketData?.flex_fields;
+  // core IMAGE fields (photo, consent_sign) sit next to flex_fields, not inside them
+  const change = flexFields?.[field.name] ?? ticketData?.[field.name];
 
-  const picUrl: string = isCurrent
-    ? flexFields[field.name]?.previousValue
-    : flexFields[field.name]?.value;
+  const previousValue = isIndividual
+    ? change?.previousValue
+    : change?.previous_value;
+  const picUrl: string = isCurrent ? previousValue : change?.value;
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (

@@ -77,19 +77,21 @@ export function RequestedHouseholdDataChange({
       showApiErrorMessages(error, showMessage);
     },
   });
-  const householdData = React.useMemo(
-    () => ({
-      ...ticket.ticketDetails?.householdData,
-    }),
-    [ticket.ticketDetails?.householdData],
-  );
-  const rolesArr = React.useMemo(
-    () => householdData.roles || [],
-    [householdData.roles],
-  );
+  // householdData is not camelized by the REST client, so keys are snake_case
+  // (flex_fields, approve_status, ...)
+  const { householdData, flexFields, rolesArr } = React.useMemo(() => {
+    const {
+      flex_fields: flexFieldsData,
+      roles,
+      ...fields
+    } = ticket.ticketDetails?.householdData || {};
+    return {
+      householdData: fields,
+      flexFields: flexFieldsData || {},
+      rolesArr: roles || [],
+    };
+  }, [ticket.ticketDetails?.householdData]);
   let allApprovedCount = 0;
-  const flexFields = householdData?.flexFields || {};
-  delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   // Count approved top-level fields
@@ -122,7 +124,8 @@ export function RequestedHouseholdDataChange({
       vals.selected.length +
       vals.selectedFlexFields.length +
       vals.selectedRoles.length;
-    const countAll = entries.length + flexFieldsEntries.length;
+    const countAll =
+      entries.length + flexFieldsEntries.length + rolesArr.length;
     return selectedCount === countAll;
   };
 
@@ -171,13 +174,10 @@ export function RequestedHouseholdDataChange({
     );
   };
   const initialValues = React.useMemo(() => {
-    // Use householdData from upper scope
-    // Top-level fields (exclude roles and flex_fields)
+    // Top-level fields
     const selected = Object.entries(householdData)
       .filter(
-        ([key, val]) =>
-          key !== 'roles' &&
-          key !== 'flex_fields' &&
+        ([, val]) =>
           val &&
           typeof val === 'object' &&
           'approve_status' in val &&
@@ -186,8 +186,7 @@ export function RequestedHouseholdDataChange({
       .map(([key]) => key);
 
     // Flex fields
-    const flexFieldsObj = householdData.flex_fields || {};
-    const selectedFlexFields = Object.entries(flexFieldsObj)
+    const selectedFlexFields = Object.entries(flexFields)
       .filter(
         ([, val]) =>
           val &&
@@ -213,7 +212,7 @@ export function RequestedHouseholdDataChange({
       selectedFlexFields,
       selectedRoles,
     };
-  }, [householdData, rolesArr]);
+  }, [householdData, flexFields, rolesArr]);
 
   return (
     <Formik

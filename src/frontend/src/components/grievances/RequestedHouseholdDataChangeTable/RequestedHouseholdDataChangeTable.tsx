@@ -95,9 +95,11 @@ function RequestedHouseholdDataChangeTable(
     enabled: Boolean(businessArea),
   });
 
+  // No `?? []` fallback: a fresh array on every render re-triggers the effect
+  // inside useArrayToDict (it already handles undefined).
   const fieldsDict = useArrayToDict(
     //@ts-ignore
-    allEditHouseholdFieldsData ?? [],
+    allEditHouseholdFieldsData,
     'name',
     '*',
   );
