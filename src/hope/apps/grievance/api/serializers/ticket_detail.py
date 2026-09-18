@@ -38,13 +38,32 @@ from hope.apps.sanction_list.api.serializers import SanctionListIndividualSerial
 from hope.models import BusinessArea, Household, Individual
 
 
+def _image_names_to_urls(data: dict, field_name: str) -> None:
+    image_data = data.get(field_name)
+    if isinstance(image_data, dict):
+        if image_data.get("value"):
+            image_data["value"] = default_storage.url(image_data["value"])
+        if image_data.get("previous_value"):
+            image_data["previous_value"] = default_storage.url(image_data["previous_value"])
+
+
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
+    household_data = serializers.SerializerMethodField()
+
     class Meta:
         model = TicketHouseholdDataUpdateDetails
         fields = (
             "id",
             "household_data",
         )
+
+    def get_household_data(self, obj: TicketHouseholdDataUpdateDetails) -> dict | None:
+        data = obj.household_data
+        if not data:
+            return data
+        data = deepcopy(data)
+        _image_names_to_urls(data, "consent_sign")
+        return data
 
 
 class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
@@ -65,12 +84,8 @@ class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
         if not data:
             return data
         data = deepcopy(data)
-        photo_data = data.get("photo")
-        if isinstance(photo_data, dict):
-            if photo_data.get("value"):
-                photo_data["value"] = default_storage.url(photo_data["value"])
-            if photo_data.get("previous_value"):
-                photo_data["previous_value"] = default_storage.url(photo_data["previous_value"])
+        _image_names_to_urls(data, "photo")
+        _image_names_to_urls(data, "consent_sign")
         return data
 
     def get_linked_needs_adjudication_ticket_id(self, obj: TicketIndividualDataUpdateDetails) -> str | None:
