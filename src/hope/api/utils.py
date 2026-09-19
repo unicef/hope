@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.http import HttpRequest
 from rest_framework.authentication import SessionAuthentication
 
 
@@ -72,5 +73,5 @@ def _humanize_members_info(members: Any) -> list | dict:
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
-    def enforce_csrf(self, request: Any) -> None:
+    def enforce_csrf(self, request: HttpRequest) -> None:
         return

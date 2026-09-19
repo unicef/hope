@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from enum import auto
 from functools import cached_property
 import logging
@@ -88,7 +89,7 @@ class GrievanceNotification:
             "title": "Grievance and feedback notification",
         }
 
-    def _prepare_user_recipients(self) -> Any:
+    def _prepare_user_recipients(self) -> Iterable[User]:
         func: Callable = GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action]
         return func(self)
 

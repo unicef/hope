@@ -16,7 +16,9 @@ from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
 from django.contrib.admin.views.main import ChangeList
 from django.db.models import Model, QuerySet
+from django.db.models.fields import Field
 from django.forms import BooleanField, FileField, FileInput, Form, TextInput
+from django.forms.fields import Field as FormField
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from smart_admin.mixins import FieldsetMixin
@@ -26,6 +28,7 @@ from hope.apps.geo.celery_tasks import import_areas_from_csv_async_task
 from hope.models import Area, AreaType, Country
 
 if TYPE_CHECKING:
+    from django.contrib.admin.options import _ListDisplayT
     from django.db.models.fields.related import RelatedField
     from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
     from django.utils.functional import _StrOrPromise
@@ -114,13 +117,13 @@ class CountryAdmin(ValidityManagerMixin, SyncModelAdmin, FieldsetMixin, HOPEMode
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    def formfield_for_dbfield(self, db_field: Any, request: "HttpRequest", **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Field, request: "HttpRequest", **kwargs: Any) -> FormField | None:
         if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_list_display(self, request: "HttpRequest") -> Any:
+    def get_list_display(self, request: "HttpRequest") -> "_ListDisplayT[Any]":
         return super().get_list_display(request)
 
 

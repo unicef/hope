@@ -209,7 +209,7 @@ class GrievanceTicketViewSet(
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
     @cached_response(key_func=GrievanceTicketListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(responses={200: GrievanceDashboardSerializer})
