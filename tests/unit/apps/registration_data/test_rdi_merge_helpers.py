@@ -138,7 +138,7 @@ def test_process_collisions_with_collision_detected(
     with patch.object(
         type(rdi.program), "collision_detector", new_callable=lambda: property(lambda self: mock_collision_detector)
     ):
-        households_to_merge_ids, household_ids_to_exclude = task._process_collisions(rdi, [pending_household.id])
+        households_to_merge_ids, household_ids_to_exclude, _ = task._process_collisions(rdi, [pending_household.id])
 
     assert pending_household.id in household_ids_to_exclude
     assert pending_household.id not in households_to_merge_ids
@@ -247,7 +247,7 @@ def test_process_collisions_no_collision_detected(
     with patch.object(
         type(rdi.program), "collision_detector", new_callable=lambda: property(lambda self: mock_collision_detector)
     ):
-        households_to_merge_ids, household_ids_to_exclude = task._process_collisions(rdi, [pending_household.id])
+        households_to_merge_ids, household_ids_to_exclude, _ = task._process_collisions(rdi, [pending_household.id])
 
     assert pending_household.id not in household_ids_to_exclude
     assert pending_household.id in households_to_merge_ids

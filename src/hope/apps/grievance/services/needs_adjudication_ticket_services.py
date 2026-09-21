@@ -64,6 +64,11 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
 
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
+    affected_household_ids = {
+        individual.household_id
+        for individual in [*duplicate_individuals, *distinct_individuals]
+        if individual.household_id
+    }
     if duplicate_individuals:
         for individual_to_remove in duplicate_individuals:
             unique_individual = None
@@ -83,6 +88,10 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
         _clear_deduplication_individuals_fields(distinct_individuals)  # type: ignore[arg-type]
+
+    # after the reassignment above: a new head of household can change child_hoh
+    for household in Household.objects.filter(id__in=affected_household_ids).order_by("pk"):
+        recalculate_data(household)
 
     # both individuals are distinct, report false positive
     if (
@@ -422,7 +431,6 @@ def mark_as_duplicate_individual(
         household.refresh_from_db()
         if household.active_individuals.count() == 0:
             household.withdraw()
-        recalculate_data(household)
 
 
 def mark_as_distinct_individual(
@@ -445,4 +453,3 @@ def mark_as_distinct_individual(
         household.refresh_from_db()
         if household.active_individuals.count() > 0:
             household.unwithdraw()
-        recalculate_data(household)

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from django.db import transaction
 from django.db.models import Case, F, Value, When
 from django.db.models.expressions import RawSQL
@@ -88,7 +90,7 @@ class HouseholdBulkWithdrawService:
 
         return count
 
-    def _schedule_recalculation(self, household_ids: list) -> None:
+    def _schedule_recalculation(self, household_ids: list[UUID]) -> None:
         """Refresh composition and KAB counters for the affected households.
 
         Bulk .update() bypasses signals, so the counters would otherwise keep their pre-withdrawal
