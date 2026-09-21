@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from django.db import transaction
 from django.db.models import Case, F, Value, When
 from django.db.models.expressions import RawSQL
@@ -22,7 +20,7 @@ class HouseholdBulkWithdrawService:
     @transaction.atomic
     def withdraw(self, households_qs: QuerySet, tag: str = "", processed_ticket_id: int | None = None) -> int:
         households = households_qs.filter(withdrawn=False)
-        household_ids = list(households.values_list("id", flat=True))
+        household_ids = [str(household_id) for household_id in households.values_list("id", flat=True)]
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
@@ -59,7 +57,7 @@ class HouseholdBulkWithdrawService:
     @transaction.atomic
     def unwithdraw(self, households_qs: QuerySet, reopen_tickets: bool = True) -> int:
         households = households_qs.filter(withdrawn=True)
-        household_ids = list(households.values_list("id", flat=True))
+        household_ids = [str(household_id) for household_id in households.values_list("id", flat=True)]
         individuals = Individual.objects.filter(household__in=households, duplicate=False)
 
         if reopen_tickets:
@@ -90,7 +88,7 @@ class HouseholdBulkWithdrawService:
 
         return count
 
-    def _schedule_recalculation(self, household_ids: list[UUID]) -> None:
+    def _schedule_recalculation(self, household_ids: list[str]) -> None:
         """Refresh composition and KAB counters for the affected households.
 
         Bulk .update() bypasses signals, so the counters would otherwise keep their pre-withdrawal
