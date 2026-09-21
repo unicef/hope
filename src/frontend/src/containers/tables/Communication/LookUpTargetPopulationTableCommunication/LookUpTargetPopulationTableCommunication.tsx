@@ -78,6 +78,7 @@ const LookUpTargetPopulationTableCommunication = ({
     rowsPerPageOptions: [10, 15, 20],
     defaultOrderBy: 'createdAt',
     defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
   });
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),

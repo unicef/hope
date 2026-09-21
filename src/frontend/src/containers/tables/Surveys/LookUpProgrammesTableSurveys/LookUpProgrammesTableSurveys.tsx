@@ -75,6 +75,7 @@ export function LookUpProgrammesTableSurveys({
 
   const table = useTableState({
     defaultOrderBy: 'startDate',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const listVariables = useMemo(

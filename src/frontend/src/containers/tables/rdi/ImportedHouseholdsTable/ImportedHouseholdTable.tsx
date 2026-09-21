@@ -20,8 +20,6 @@ import { RegistrationDataImportStatusEnum } from '@restgenerated/models/Registra
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const { selectedProgram } = useProgramContext();
   const { programId } = useBaseUrl();
-  const table = useTableState();
-  const { page } = table;
   const notAllowedRdiShowPreviewStatuses = [
     RegistrationDataImportStatusEnum.LOADING,
     RegistrationDataImportStatusEnum.IMPORTING,
@@ -38,6 +36,8 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     }),
     [rdi.id, businessArea, programId, isMerged],
   );
+  const table = useTableState({ resetPageOn: filterVariables });
+  const { page } = table;
 
   const householdsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },

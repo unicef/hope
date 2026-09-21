@@ -55,7 +55,10 @@ export const ProgramCyclesTablePaymentModule = ({
     }),
     [businessArea, programId, filters],
   );
-  const table = useTableState({ defaultOrdering: 'created_at' });
+  const table = useTableState({
+    defaultOrdering: 'created_at',
+    resetPageOn: filterVariables,
+  });
   const { page } = table;
 
   const { t } = useTranslation();

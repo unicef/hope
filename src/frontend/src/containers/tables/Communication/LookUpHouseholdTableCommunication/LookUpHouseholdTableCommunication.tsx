@@ -97,7 +97,7 @@ function LookUpHouseholdTableCommunication({
     filter.orderBy,
   ]);
 
-  const table = useTableState();
+  const table = useTableState({ resetPageOn: filterVariables });
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),
     [filterVariables, table.paginationParams],

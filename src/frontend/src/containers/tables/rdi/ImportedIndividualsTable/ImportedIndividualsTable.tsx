@@ -46,8 +46,6 @@ function ImportedIndividualsTable({
   const { selectedProgram } = useProgramContext();
   const { programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const table = useTableState();
-  const { page } = table;
   const notAllowedRdiShowPreviewStatuses = [
     RegistrationDataImportStatusEnum.LOADING,
     RegistrationDataImportStatusEnum.IMPORTING,
@@ -64,6 +62,8 @@ function ImportedIndividualsTable({
     }),
     [rdiId, household, showDuplicates, businessArea, isMerged],
   );
+  const table = useTableState({ resetPageOn: filterVariables });
+  const { page } = table;
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,

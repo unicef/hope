@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { renderWithProviders } from 'src/testUtils/testUtils';
+import { TestProviders } from 'src/testUtils/testProviders';
 import { setupCommonMocks } from 'src/testUtils/commonMocks';
 import ProgrammesTable from './ProgrammesTable';
 import { RestService } from '@restgenerated/services/RestService';
@@ -333,6 +336,63 @@ describe('ProgrammesTable', () => {
           dataCollectingType: 'full',
         }),
       );
+    });
+  });
+
+  it('goes back to the first page when the filter changes', async () => {
+    vi.mocked(
+      RestService.restBusinessAreasProgramsCountRetrieve,
+    ).mockResolvedValue({ count: 42 });
+
+    // The wrapper has to keep the same shape across rerenders, otherwise
+    // ProgrammesTable remounts and the page resets for the wrong reason.
+    const Harness = ({ currentFilter }: { currentFilter: any }) => (
+      <TestProviders>
+        <BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <ProgrammesTable
+              businessArea="test-business-area"
+              filter={currentFilter}
+              choicesData={mockChoicesData}
+            />
+          </QueryClientProvider>
+        </BrowserRouter>
+      </TestProviders>
+    );
+
+    const { rerender } = render(<Harness currentFilter={mockFilter} />);
+
+    const nextPage = await waitFor(
+      () => {
+        const button = screen
+          .getAllByRole('button')
+          .find((candidate) =>
+            /next page/i.test(
+              candidate.getAttribute('aria-label') ||
+                candidate.getAttribute('title') ||
+                '',
+            ),
+          );
+        if (!button) throw new Error('pagination not rendered yet');
+        return button;
+      },
+      { timeout: 3000 },
+    );
+
+    const listMock = vi.mocked(RestService.restBusinessAreasProgramsList);
+
+    fireEvent.click(nextPage);
+    await waitFor(() => expect(listMock.mock.calls.at(-1)[0].offset).toBe(5));
+
+    rerender(
+      <Harness currentFilter={{ ...mockFilter, search: 'education' }} />,
+    );
+
+    await waitFor(() => {
+      const lastCall = listMock.mock.calls.at(-1)[0];
+      expect(lastCall.search).toBe('education');
+      // The new filter never goes out together with the old page's offset.
+      expect(lastCall.offset).toBe(0);
     });
   });
 });

@@ -66,6 +66,7 @@ function FeedbackTable({
     rowsPerPageOptions: [10, 15, 20],
     defaultOrderBy: 'createdAt',
     defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const listVariables = useMemo(

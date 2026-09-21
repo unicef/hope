@@ -41,7 +41,10 @@ export function TargetPopulationHouseholdTable({
     [variables, businessAreaSlug, programCode, id],
   );
 
-  const table = useTableState({ rowsPerPageOptions: [10, 15, 20] });
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    resetPageOn: filterVariables,
+  });
   const { page } = table;
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),

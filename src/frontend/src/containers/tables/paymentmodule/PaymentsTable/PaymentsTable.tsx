@@ -149,8 +149,9 @@ const PaymentsTableSection = ({
     rowsPerPageOptions: [10, 25, 50],
     defaultOrderBy: 'createdAt',
     defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
   });
-  const { page, setPage } = table;
+  const { page } = table;
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),
     [filterVariables, table.paginationParams],
@@ -219,7 +220,8 @@ const PaymentsTableSection = ({
   const handleAppliedFilterChange = (newFilter): void => {
     setAppliedFilter(newFilter);
     setShouldScroll(true);
-    setPage(0);
+    // The page reset rides on `resetPageOn: filterVariables`, so switching the
+    // eligible/not-eligible tab resets it too, not just the filter bar.
   };
 
   return (

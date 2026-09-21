@@ -61,6 +61,7 @@ function PaymentPlansTable({
 
   const table = useTableState({
     defaultOrderBy: 'paymentPlanGroup__name,-createdAt',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const listVariables = useMemo(

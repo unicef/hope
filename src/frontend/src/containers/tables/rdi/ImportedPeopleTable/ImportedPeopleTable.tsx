@@ -55,7 +55,10 @@ export function ImportedPeopleTable({
     [rdiId, household, showDuplicates, businessArea, programId],
   );
 
-  const table = useTableState({ rowsPerPageOptions });
+  const table = useTableState({
+    rowsPerPageOptions,
+    resetPageOn: filterVariables,
+  });
   const { page } = table;
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),

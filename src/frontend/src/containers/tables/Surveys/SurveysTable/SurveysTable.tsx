@@ -58,6 +58,7 @@ function SurveysTable({
     initialRowsPerPage: 10,
     defaultOrderBy: 'created_at',
     defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const surveysListParams = createApiParams(

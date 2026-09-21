@@ -23,20 +23,18 @@ export function SanctionListIndividualsTable({
   filter,
 }: SanctionListIndividualsTableProps): ReactElement {
   const { businessAreaSlug } = useBaseUrl();
-  const table = useTableState();
-  const queryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug,
       fullName: filter.fullName || undefined,
       referenceNumber: filter.referenceNumber || undefined,
-      ...table.paginationParams,
     }),
-    [
-      businessAreaSlug,
-      filter.fullName,
-      filter.referenceNumber,
-      table.paginationParams,
-    ],
+    [businessAreaSlug, filter.fullName, filter.referenceNumber],
+  );
+  const table = useTableState({ resetPageOn: filterVariables });
+  const queryVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
   );
 
   const { data, isLoading, error } =

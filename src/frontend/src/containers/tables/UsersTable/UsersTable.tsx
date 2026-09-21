@@ -38,6 +38,7 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
     rowsPerPageOptions: [10, 15, 20],
     defaultOrderBy: 'status',
     defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const usersListParams = createApiParams(

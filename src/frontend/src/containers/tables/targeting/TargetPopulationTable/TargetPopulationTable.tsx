@@ -71,6 +71,7 @@ export function TargetPopulationTable({
   const table = useTableState({
     rowsPerPageOptions: [10, 15, 20],
     defaultOrderBy: 'paymentPlanGroup__name,-createdAt',
+    resetPageOn: filterVariables,
   });
   const { page } = table;
   const listVariables = useMemo(

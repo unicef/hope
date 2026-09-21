@@ -125,7 +125,10 @@ export function LookUpIndividualTable({
     ],
   );
 
-  const table = useTableState({ rowsPerPageOptions: [5, 10, 15, 20] });
+  const table = useTableState({
+    rowsPerPageOptions: [5, 10, 15, 20],
+    resetPageOn: filterVariables,
+  });
   const { page } = table;
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),

@@ -51,7 +51,7 @@ function PaymentVerificationTable({
     ],
   );
 
-  const table = useTableState();
+  const table = useTableState({ resetPageOn: filterVariables });
   const { page } = table;
   const listVariables = useMemo(
     () => ({ ...filterVariables, ...table.paginationParams }),

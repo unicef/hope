@@ -50,7 +50,10 @@ function CommunicationTable({
     filter.createdBy,
   ]);
 
-  const table = useTableState({ initialRowsPerPage: 10 });
+  const table = useTableState({
+    initialRowsPerPage: 10,
+    resetPageOn: filterVariables,
+  });
   const { page } = table;
   const messagesListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
