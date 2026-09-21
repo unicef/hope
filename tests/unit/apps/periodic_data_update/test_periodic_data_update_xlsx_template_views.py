@@ -1,7 +1,6 @@
 """Tests for PDU xlsx template views."""
 
 import json
-import os
 from typing import Any, Callable
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -939,7 +938,7 @@ def test_download_periodic_data_update_template(
         object_id=pdu_template1.pk,
         content_type=get_content_type_for_model(pdu_template1),
         created=timezone.now(),
-        file=ContentFile(b"Test content", f"Test File {pdu_template1.pk}.xlsx"),
+        file=ContentFile(b"Test content", "template.xlsx"),
     )
     pdu_template1.file = file
     pdu_template1.status = PDUXlsxTemplate.Status.EXPORTED
@@ -951,7 +950,7 @@ def test_download_periodic_data_update_template(
     pdu_template1.refresh_from_db()
     assert pdu_template1.status == PDUXlsxTemplate.Status.EXPORTED
     assert isinstance(response, FileResponse) is True
-    assert f'filename="{os.path.basename(file.file.name)}"' in response["Content-Disposition"]
+    assert 'filename="template.xlsx"' in response["Content-Disposition"]
     assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert response.getvalue() == b"Test content"
 

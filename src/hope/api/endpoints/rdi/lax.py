@@ -453,8 +453,8 @@ class CreateLaxIndividuals(CreateLaxBaseView, PhotoMixin):
             type_id = doc_type_map.get(item["type_key"]) if item["type_key"] else None
 
             doc = PendingDocument(
-                individual_id=ind.id,
-                program_id=ind.program_id,
+                individual=ind,
+                program=ind.program,
                 document_number=item["document_number"] or "",
                 type_id=type_id,
                 country_id=country_id,
