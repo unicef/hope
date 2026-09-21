@@ -340,7 +340,7 @@ def test_withdraw_schedules_population_recalculation(
         with django_capture_on_commit_callbacks(execute=True):
             HouseholdBulkWithdrawService(household.program).withdraw(Household.objects.filter(pk=household.pk))
 
-    mock_recalculate.assert_called_once_with(household_ids=[household.pk], program_id=str(household.program.id))
+    mock_recalculate.assert_called_once_with(household_ids=[str(household.pk)], program_id=str(household.program.id))
 
 
 def test_unwithdraw_schedules_population_recalculation(
@@ -355,4 +355,4 @@ def test_unwithdraw_schedules_population_recalculation(
         with django_capture_on_commit_callbacks(execute=True):
             HouseholdBulkWithdrawService(household.program).unwithdraw(Household.objects.filter(pk=household.pk))
 
-    mock_recalculate.assert_called_once_with(household_ids=[household.pk], program_id=str(household.program.id))
+    mock_recalculate.assert_called_once_with(household_ids=[str(household.pk)], program_id=str(household.program.id))
