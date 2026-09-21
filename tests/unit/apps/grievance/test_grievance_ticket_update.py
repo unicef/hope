@@ -663,7 +663,7 @@ def test_update_grievance_ticket_household_data_records_previous_facility_and_co
     }
     assert household_data["consent_sign"] == {
         "value": "",
-        "previous_value": "consent/old-signature.jpg",
+        "previous_value": "/api/uploads/consent/old-signature.jpg",
         "approve_status": False,
     }
 

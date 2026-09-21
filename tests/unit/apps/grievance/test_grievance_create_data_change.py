@@ -529,10 +529,12 @@ def test_grievance_create_household_data_change_stores_consent_sign_and_facility
         "previous_value": "dffgh565556",
         "approve_status": False,
     }
-    assert household_data["consent_sign"]["previous_value"] == "consent/old-signature.jpg"
+    assert household_data["consent_sign"]["previous_value"] == "/api/uploads/consent/old-signature.jpg"
     assert household_data["consent_sign"]["approve_status"] is False
+    assert household_data["consent_sign"]["value"].startswith("/api/uploads/")
     assert household_data["consent_sign"]["value"].endswith(".jpg")
-    assert default_storage.exists(household_data["consent_sign"]["value"])
+    ticket_details = GrievanceTicket.objects.get(id=response.data[0]["id"]).household_data_update_ticket_details
+    assert default_storage.exists(ticket_details.household_data["consent_sign"]["value"])
 
 
 def test_grievance_create_individual_data_change_records_previous_identification_key(

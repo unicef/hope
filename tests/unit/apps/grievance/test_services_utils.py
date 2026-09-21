@@ -42,6 +42,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_add_identity,
     handle_edit_document,
     handle_edit_identity,
+    handle_image_field,
     handle_photo,
     handle_role,
     prepare_previous_documents,
@@ -659,6 +660,12 @@ def test_handle_photo_saves_and_return() -> None:
     result = handle_photo(file, photoraw=None)
     assert result is not None
     assert result.endswith(".jpg")
+
+
+def test_handle_image_field_keeps_stored_name_out_of_the_data_when_nothing_was_uploaded() -> None:
+    data = {"consent_sign": "consent/already-stored.jpg", "village": "Kabul"}
+    handle_image_field(data, "consent_sign")
+    assert data == {"village": "Kabul"}
 
 
 def test_set_status_based_on_assigned_to(user: Any) -> None:

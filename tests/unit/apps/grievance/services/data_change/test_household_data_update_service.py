@@ -816,6 +816,21 @@ def test_close_household_update_rejects_facility_name_without_a_match(
         service.close(user)
 
 
+def test_close_household_update_clears_facility_when_approved_value_is_blank(
+    household_at_kabul_clinic: Any, household_ticket_details: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility": {"value": "", "previous_value": "Kabul Clinic", "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+    service.close(user)
+
+    household_at_kabul_clinic.refresh_from_db()
+    assert household_at_kabul_clinic.facility is None
+
+
 def test_close_household_update_applies_approved_consent_sign(
     household: Any, household_ticket_details: Any, user: User
 ) -> None:
