@@ -417,19 +417,12 @@ class ProgramViewSet(
         )
         queryset = filterset.qs.distinct()
 
-        context = {
-            **self.get_serializer_context(),
-            "can_view_fsp_auth_code": request.user.has_perm(
-                Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-                program,
-            ),
-        }
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True, context=context)
+            serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True, context=context)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @extend_schema(
