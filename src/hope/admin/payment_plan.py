@@ -158,7 +158,7 @@ def has_payment_instruction_download_permission(request: Any) -> bool:
 
 
 class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
-    list_display = (
+    list_display: tuple[str, ...] = (
         "unicef_id",
         "name",
         "business_area",
@@ -167,7 +167,7 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "background_action_status",
         "build_status",
     )
-    list_filter = (
+    list_filter: tuple[Any, ...] = (
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
