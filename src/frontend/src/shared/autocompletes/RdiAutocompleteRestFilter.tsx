@@ -66,7 +66,9 @@ export function RdiAutocompleteRestFilter({
       RestService.restBusinessAreasProgramsRegistrationDataImportsList(
         queryVariables,
       ),
-    enabled: !!programId && !!businessArea,
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: !!programId && !!businessArea && (open || !!value),
   });
 
   useEffect(() => {
@@ -83,11 +85,12 @@ export function RdiAutocompleteRestFilter({
     }));
   }, [programId]);
 
+  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (businessArea && programId) {
+    if (businessArea && programId && (open || value)) {
       refetch();
     }
-  }, [businessArea, programId, refetch]);
+  }, [businessArea, programId, open, value, refetch]);
 
   // Create handleFilterChange only if filter-related props are provided
   const handleFilterChange =

@@ -67,6 +67,9 @@ export function ProgramAutocompleteRestFilter({
       queryVariables,
     ),
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: open || !!value,
   });
 
   // Update query variables when search text changes
@@ -77,11 +80,12 @@ export function ProgramAutocompleteRestFilter({
     }));
   }, [debouncedInputText]);
 
+  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (businessArea) {
+    if (businessArea && (open || value)) {
       refetch();
     }
-  }, [businessArea, refetch]);
+  }, [businessArea, open, value, refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,

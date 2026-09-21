@@ -81,14 +81,17 @@ export const TargetPopulationAutocompleteRestFilter = ({
       RestService.restBusinessAreasProgramsTargetPopulationsList(
         targetPopulationsParams,
       ),
-    enabled: !!businessArea && !!programId,
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: !!businessArea && !!programId && (open || !!value),
   });
 
+  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (businessArea && programId) {
+    if (businessArea && programId && (open || value)) {
       refetch();
     }
-  }, [businessArea, programId, refetch]);
+  }, [businessArea, programId, open, value, refetch]);
 
   // Create handleFilterChange only if filter-related props are provided
   const { handleFilterChange } =
