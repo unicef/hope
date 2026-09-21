@@ -199,12 +199,26 @@ def test_frontend_url_survey(program):
 
 
 @pytest.mark.django_db
+def test_frontend_url_survey_without_program(program):
+    program = program()
+    survey = SurveyFactory(program=None, business_area=program.business_area)
+    assert site._registry[Survey].frontend_url(survey) is None
+
+
+@pytest.mark.django_db
 def test_frontend_url_message(program):
     program = program()
     message = CommunicationMessageFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[Message].frontend_url(message) == f"/afg/programs/TEST/accountability/communication/{message.id}"
     )
+
+
+@pytest.mark.django_db
+def test_frontend_url_message_without_program(program):
+    program = program()
+    message = CommunicationMessageFactory(program=None, business_area=program.business_area)
+    assert site._registry[Message].frontend_url(message) is None
 
 
 @pytest.mark.django_db
@@ -273,16 +287,12 @@ def test_view_on_ui_without_original():
 
 
 @pytest.mark.django_db
-def test_view_on_ui_without_frontend_url(program):
+def test_view_on_ui_without_frontend_url(program, monkeypatch):
     programme_admin = site._registry[Program]
-    original = programme_admin.frontend_url
-    programme_admin.frontend_url = lambda obj: None  # type: ignore[method-assign]
-    try:
-        btn = _button(program())
-        _handler(Program).func(programme_admin, btn)
-        assert btn.href is None
-    finally:
-        programme_admin.frontend_url = original
+    monkeypatch.setattr(programme_admin, "frontend_url", lambda obj: None)
+    btn = _button(program())
+    _handler(Program).func(programme_admin, btn)
+    assert btn.href is None
 
 
 @pytest.mark.django_db
