@@ -51,6 +51,9 @@ export function FormikSelectField({
 
   const isValue = checkValue(otherProps.value || field.value);
 
+
+  const choices = otherProps.choices ?? [];
+
   const showX = isValue && !disableClearable && !otherProps.disabled;
 
   return (
@@ -81,7 +84,7 @@ export function FormikSelectField({
           if (Array.isArray(selected)) {
             return selected
               .map((s) => {
-                const selectedItem = otherProps.choices.find(
+                const selectedItem = choices.find(
                   (choice) =>
                     choice.value === s ||
                     choice.name === s ||
@@ -95,7 +98,7 @@ export function FormikSelectField({
               })
               .join(', ');
           }
-          const selectedItem = otherProps.choices.find(
+          const selectedItem = choices.find(
             (choice) => choice.value === selected || choice.name === selected,
           );
 
@@ -132,7 +135,7 @@ export function FormikSelectField({
           ) : null
         }
       >
-        {otherProps.choices.map((each) => (
+        {choices.map((each) => (
           <MenuItem
             key={each.value ? each.value : each.name || ''}
             value={each.value ? each.value : each.name || ''}

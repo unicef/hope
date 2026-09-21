@@ -33,6 +33,7 @@ from hope.models import (
     BusinessArea,
     FlexibleAttribute,
     Partner,
+    Payment,
     PaymentPlan,
     Program,
     RegistrationDataImport,
@@ -177,6 +178,21 @@ def payments(afghanistan: BusinessArea, payment_plan: PaymentPlan, payment_plan_
         currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
     )
     return p1, p2, p3
+
+
+@pytest.fixture
+def not_eligible_payment(
+    afghanistan: BusinessArea,
+    payment_plan: PaymentPlan,
+    program: Program,
+) -> Payment:
+    return PaymentFactory(
+        business_area=afghanistan,
+        parent=payment_plan,
+        program=program,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        excluded=True,
+    )
 
 
 @pytest.fixture
@@ -429,6 +445,7 @@ def test_program_detail_get_payments_paginated(
     program: Program,
     payments_url: str,
     create_user_role_with_permissions: Callable,
+    not_eligible_payment: Payment,
 ) -> None:
     create_user_role_with_permissions(
         user,
@@ -503,6 +520,7 @@ def test_program_get_payments_count(
     program: Program,
     payments_count_url: str,
     create_user_role_with_permissions: Callable,
+    not_eligible_payment: Payment,
 ) -> None:
     create_user_role_with_permissions(
         user,

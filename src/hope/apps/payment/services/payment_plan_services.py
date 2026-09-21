@@ -8,7 +8,7 @@ from uuid import UUID
 from constance import config
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import (
     BooleanField,
     Case,
@@ -23,7 +23,6 @@ from django.db.models import (
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
-from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
@@ -246,7 +245,7 @@ class PaymentPlanService:
             self.payment_plan,
             PaymentPlan.Action.REVIEW.value,
             release_user_id,
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
         return self.payment_plan
 
@@ -337,9 +336,14 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise ValidationError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
+        user_id = str(self.user.pk) if self.user else None
         self.payment_plan.eligible_payments_with_conflicts.filter(payment_plan_hard_conflicted=True).update_and_log(
-            {"conflicted": True},
-            str(self.user.pk) if self.user else None,
+            {
+                "conflicted": True,
+                "status": Payment.STATUS_NOT_ELIGIBLE,
+                "status_date": timezone.now(),
+            },
+            user_id,
         )
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_lock()
@@ -351,10 +355,21 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
-        self.payment_plan.payment_items.all().update_and_log(
-            {"conflicted": False},
-            str(self.user.pk) if self.user else None,
+        restorable_payments = self.payment_plan.payment_items.filter(
+            status=Payment.STATUS_NOT_ELIGIBLE,
+            excluded=False,
+            has_valid_wallet=True,
         )
+        user_id = str(self.user.pk) if self.user else None
+        restorable_payments.update_and_log(
+            {
+                "conflicted": False,
+                "status": Payment.STATUS_PENDING,
+                "status_date": timezone.now(),
+            },
+            user_id,
+        )
+        self.payment_plan.payment_items.filter(conflicted=True).update_and_log({"conflicted": False}, user_id)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -628,7 +643,11 @@ class PaymentPlanService:
                     parent_split=pp_split,
                     program_id=payment_plan.program_cycle.program_id,
                     business_area_id=payment_plan.business_area_id,
-                    status=Payment.STATUS_PENDING,
+                    status=(
+                        Payment.STATUS_PENDING
+                        if wallet_validity_by_collector_id[collector.id]
+                        else Payment.STATUS_NOT_ELIGIBLE
+                    ),
                     status_date=timezone.now(),
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],

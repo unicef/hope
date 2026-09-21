@@ -73,6 +73,7 @@ from .household import (
     XlsxUpdateFileFactory,
 )
 from .payment import (
+    AccountAttachmentFactory,
     AccountFactory,
     AccountTypeFactory,
     ApprovalFactory,
@@ -106,7 +107,7 @@ from .periodic_data_update import (
 )
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import (
-    DeduplicationEngineSimilarityPairFactory,
+    BiometricDeduplicationEngineSimilarityPairFactory,
     ImportDataFactory,
     KoboImportDataFactory,
     RegistrationDataImportFactory,
@@ -133,6 +134,7 @@ from .vision import DownPaymentFactory, FundsCommitmentFactory, FundsCommitmentG
 
 __all__ = [
     "AdminAreaLimitedToFactory",
+    "AccountAttachmentFactory",
     "AccountFactory",
     "AccountTypeFactory",
     "APITokenFactory",
@@ -149,7 +151,7 @@ __all__ = [
     "CountryCodeMapFactory",
     "CurrencyFactory",
     "DataCollectingTypeFactory",
-    "DeduplicationEngineSimilarityPairFactory",
+    "BiometricDeduplicationEngineSimilarityPairFactory",
     "DeliveryMechanismConfigFactory",
     "DeliveryMechanismFactory",
     "DocumentFactory",
