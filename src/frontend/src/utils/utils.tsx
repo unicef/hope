@@ -2,7 +2,6 @@ import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Box, Typography } from '@mui/material';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BuildStatusEnum } from '@restgenerated/models/BuildStatusEnum';
-import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
 import { PaymentVerificationStatusEnum } from '@restgenerated/models/PaymentVerificationStatusEnum';
@@ -192,6 +191,8 @@ export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentStatusEnum.PENDING:
       return 'PENDING';
+    case PaymentStatusEnum.NOT_ELIGIBLE:
+      return 'NOT ELIGIBLE';
     case PaymentStatusEnum.DISTRIBUTION_SUCCESSFUL:
     case PaymentStatusEnum.TRANSACTION_SUCCESSFUL:
       return 'DELIVERED FULLY';
@@ -283,27 +284,6 @@ export function registrationDataImportStatusToColor(
     case RegistrationDataImportStatusEnum.IMPORT_ERROR:
     case RegistrationDataImportStatusEnum.MERGE_ERROR:
     case RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED:
-      return theme.palette.error.main;
-    default:
-      return theme.hctPalette.orange;
-  }
-}
-
-export function registrationDataImportDeduplicationEngineStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  switch (status) {
-    case DeduplicationEngineStatusEnum.PENDING:
-      return theme.hctPalette.gray;
-    case DeduplicationEngineStatusEnum.UPLOADED:
-      return theme.hctPalette.orange;
-    case DeduplicationEngineStatusEnum.IN_PROGRESS:
-      return theme.hctPalette.orange;
-    case DeduplicationEngineStatusEnum.FINISHED:
-      return theme.hctPalette.green;
-    case DeduplicationEngineStatusEnum.UPLOAD_ERROR:
-    case DeduplicationEngineStatusEnum.ERROR:
       return theme.palette.error.main;
     default:
       return theme.hctPalette.orange;

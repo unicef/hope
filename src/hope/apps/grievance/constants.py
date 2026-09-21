@@ -50,3 +50,10 @@ def get_urgency_choices() -> tuple:
 
 def get_submission_channel_choices() -> tuple:
     return SUBMISSION_CHANNEL_CHOICES
+
+
+# The two tabs on the My Tasks page. The daily emails link into them with ?tab=. Each email counts
+# sensitive and other tickets separately, so every count links with ?sensitive= to match.
+MY_TASKS_PAGE = "my-tasks"
+PRESET_NEEDS_ASSIGNMENT = "needs-assignment"
+PRESET_MINE = "mine"

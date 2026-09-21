@@ -45,11 +45,9 @@ from hope.apps.registration_data.utils import (
     find_attachment_in_kobo,
 )
 from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
-from hope.models.individual import ascii_name_validator
+from hope.models.individual import LATIN_NAME_FIELDS, ascii_name_validator, normalize_latin_name
 
 logger = logging.getLogger(__name__)
-
-LATIN_NAME_FIELDS = ("given_name_latin", "middle_name_latin", "family_name_latin", "full_name_latin")
 
 
 class XlsxError(Exception):
@@ -122,6 +120,14 @@ class ImportDataInstanceValidator:
     def __init__(self, program: Program) -> None:
         self.is_social_worker_program = program.is_social_worker_program
         self.all_fields = self.get_all_fields()
+
+    @staticmethod
+    def _latin_name_error(header: str, value: str) -> dict[str, str] | None:
+        try:
+            ascii_name_validator(normalize_latin_name(value))
+        except ValidationError as e:
+            return {"header": header, "message": f"{e.code}, {e.message}, Value provided: {value}"}
+        return None
 
     def get_combined_attributes(self) -> dict:
         scope_list = (
@@ -687,16 +693,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         value = self.get_cell_value(first_row, row, field_name)
                         if not value:
                             continue
-                        try:
-                            ascii_name_validator(value)
-                        except ValidationError as e:
-                            invalid_rows.append(
-                                {
-                                    "row_number": row_number,
-                                    "header": field_name,
-                                    "message": f"{e.code}, {e.message}, Value provided: {value}",
-                                }
-                            )
+                        if error := self._latin_name_error(field_name, value):
+                            invalid_rows.append({"row_number": row_number, **error})
 
             if self.sheet_title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
@@ -1881,15 +1879,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         return None
 
     def _validate_latin_fields(self, field: str, value: str, errors: list[dict[str, str]]) -> None:
-        try:
-            ascii_name_validator(value)
-        except ValidationError as e:
-            errors.append(
-                {
-                    "header": field,
-                    "message": f"{e.code}, {e.message}, Value provided: {value}",
-                }
-            )
+        if error := self._latin_name_error(field, value):
+            errors.append(error)
 
     def _validate_household(
         self,

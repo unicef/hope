@@ -1,11 +1,22 @@
-import { Grid } from '@mui/material';
+import { Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { PaymentStatusEnum } from '@restgenerated/models/PaymentStatusEnum';
+
+export interface PaymentFilterKeys {
+  paymentUnicefId: string;
+  individualUnicefId: string;
+  householdUnicefId: string;
+  collectorFullName: string;
+  status?: string;
+  ineligibilityCause?: string;
+}
 
 interface PaymentsFiltersProps {
   filter;
@@ -13,6 +24,9 @@ interface PaymentsFiltersProps {
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
+  filterKeys: PaymentFilterKeys;
+  showStatus?: boolean;
+  showIneligibilityCause?: boolean;
 }
 
 export function PaymentsFilters({
@@ -21,6 +35,9 @@ export function PaymentsFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
+  filterKeys,
+  showStatus = false,
+  showIneligibilityCause = false,
 }: PaymentsFiltersProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -62,10 +79,10 @@ export function PaymentsFilters({
         <Grid size={3}>
           <SearchTextField
             label={t('Payment ID')}
-            value={filter.paymentUnicefId}
+            value={filter[filterKeys.paymentUnicefId]}
             fullWidth
             onChange={(e) =>
-              handleFilterChange('paymentUnicefId', e.target.value)
+              handleFilterChange(filterKeys.paymentUnicefId, e.target.value)
             }
             data-cy="filter-payment-unicef-id"
           />
@@ -74,20 +91,23 @@ export function PaymentsFilters({
           {isSocialDctType ? (
             <SearchTextField
               label={t(`${beneficiaryGroup?.memberLabel} ID`)}
-              value={filter.individualUnicefId}
+              value={filter[filterKeys.individualUnicefId]}
               fullWidth
               onChange={(e) =>
-                handleFilterChange('individualUnicefId', e.target.value)
+                handleFilterChange(
+                  filterKeys.individualUnicefId,
+                  e.target.value,
+                )
               }
               data-cy="filter-individual-id"
             />
           ) : (
             <SearchTextField
               label={t(`${beneficiaryGroup?.groupLabel} ID`)}
-              value={filter.householdUnicefId}
+              value={filter[filterKeys.householdUnicefId]}
               fullWidth
               onChange={(e) =>
-                handleFilterChange('householdUnicefId', e.target.value)
+                handleFilterChange(filterKeys.householdUnicefId, e.target.value)
               }
               data-cy="filter-household-id"
             />
@@ -96,14 +116,58 @@ export function PaymentsFilters({
         <Grid size={3}>
           <SearchTextField
             label={t('Collector Full Name')}
-            value={filter.collectorFullName}
+            value={filter[filterKeys.collectorFullName]}
             fullWidth
             onChange={(e) =>
-              handleFilterChange('collectorFullName', e.target.value)
+              handleFilterChange(filterKeys.collectorFullName, e.target.value)
             }
             data-cy="filter-collector-fullname"
           />
         </Grid>
+        {showStatus && filterKeys.status && (
+          <Grid size={3}>
+            <SelectFilter
+              label={t('Status')}
+              value={filter[filterKeys.status]}
+              onChange={(e) =>
+                handleFilterChange(filterKeys.status, e.target.value)
+              }
+              dataCy="filter-payment-status"
+            >
+              {Object.values(PaymentStatusEnum)
+                .filter(
+                  (status) =>
+                    status !== PaymentStatusEnum.NOT_ELIGIBLE &&
+                    status !== PaymentStatusEnum.TRANSACTION_SUCCESSFUL,
+                )
+                .map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {t(status)}
+                  </MenuItem>
+                ))}
+            </SelectFilter>
+          </Grid>
+        )}
+        {showIneligibilityCause && filterKeys.ineligibilityCause && (
+          <Grid size={3}>
+            <SelectFilter
+              label={t('Ineligibility Cause')}
+              value={filter[filterKeys.ineligibilityCause]}
+              onChange={(e) =>
+                handleFilterChange(
+                  filterKeys.ineligibilityCause,
+                  e.target.value,
+                )
+              }
+              multiple
+              dataCy="filter-ineligibility-cause"
+            >
+              <MenuItem value="conflicted">{t('Hard Conflict')}</MenuItem>
+              <MenuItem value="excluded">{t('Manual Exclusion')}</MenuItem>
+              <MenuItem value="invalid_wallet">{t('Invalid Wallet')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
       </Grid>
     </FiltersSection>
   );
