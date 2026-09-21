@@ -85,13 +85,13 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     filename = forms.CharField(label="Output filename")
-    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore # FIXME: 'data' is an internal field
-    fields = forms.CharField(widget=HiddenInput)  # type: ignore # FIXME: 'fields' is an internal field
+    data = forms.CharField(widget=Textarea({"hidden": ""}))  # type: ignore[assignment]
+    fields = forms.CharField(widget=HiddenInput)  # type: ignore[assignment]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
-            self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
+            self.fields[fname].widget = HiddenInput()  # type: ignore[index]
 
     def clean_fields(self) -> list | None:
         try:

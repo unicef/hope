@@ -48,7 +48,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.registration_data import DeduplicationEngineSimilarityPairFactory
+from extras.test_utils.factories.registration_data import BiometricDeduplicationEngineSimilarityPairFactory
 from extras.test_utils.factories.sanction_list import (
     SanctionListIndividualDateOfBirthFactory,
     SanctionListIndividualDocumentFactory,
@@ -1108,7 +1108,6 @@ def test_grievance_detail_individual_data_update(
     assert data["ticket_details"] == {
         "id": str(ticket_details.id),
         "individual_data": ticket_details.individual_data,
-        "role_reassign_data": ticket_details.role_reassign_data,
         "linked_needs_adjudication_ticket_id": None,
     }
 
@@ -1714,7 +1713,7 @@ def test_grievance_detail_needs_adjudication(
         photo=ContentFile(b"abc", name="doc_aaa.png"),
     )
 
-    dedup_engine_similarity_pair = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=golden_records_individual,
         individual2=duplicate,

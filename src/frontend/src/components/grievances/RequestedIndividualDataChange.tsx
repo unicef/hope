@@ -8,10 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
-} from '@utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
@@ -19,18 +16,10 @@ import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicke
 import type { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
 import type { ApiErrorShape } from '@utils/utils';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
-
-export type RoleReassignData = {
-  role: string;
-  individual: IndividualDetail;
-  household: HouseholdDetail;
-};
 
 export function RequestedIndividualDataChange({
   ticket,
@@ -213,28 +202,6 @@ export function RequestedIndividualDataChange({
     }
   }
 
-  const isHeadOfHousehold =
-    ticket.individual?.id === ticket.household?.headOfHousehold?.id;
-
-  const primaryCollectorRolesCount =
-    ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
-      .length + (isHeadOfHousehold ? 1 : 0);
-  const primaryColletorRolesReassignedCount = Object.values(
-    (ticket.ticketDetails?.roleReassignData ?? {}) as Record<
-      string,
-      RoleReassignData
-    >,
-  )?.filter((el) => el.role === 'PRIMARY' || el.role === 'HEAD').length;
-
-  let approveEnabled = false;
-  if (ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-    approveEnabled =
-      isForApproval &&
-      primaryCollectorRolesCount === primaryColletorRolesReassignedCount;
-  } else {
-    approveEnabled = isForApproval;
-  }
-
   const shouldShowEditButton = (allChangesLength): boolean =>
     allChangesLength && !isEdit && isForApproval;
 
@@ -261,7 +228,7 @@ export function RequestedIndividualDataChange({
           onClick={submitForm}
           variant="contained"
           color="primary"
-          disabled={!approveEnabled}
+          disabled={!isForApproval}
           data-cy="button-approve"
           data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
         >
@@ -281,7 +248,7 @@ export function RequestedIndividualDataChange({
         }
         variant="contained"
         color="primary"
-        disabled={!approveEnabled}
+        disabled={!isForApproval}
         data-cy="button-approve"
         data-perm={PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE}
       >

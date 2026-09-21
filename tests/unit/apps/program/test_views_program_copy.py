@@ -154,7 +154,6 @@ def setup_partners_with_role_assignments(
 ) -> None:
     partner.allowed_business_areas.set([afghanistan])
 
-    # TODO: Temporary solution - remove the below lines after proper solution is applied
     RoleAssignmentFactory(partner=partner, business_area=afghanistan, program=None)
     RoleAssignmentFactory(partner=partner1_for_assign, business_area=afghanistan, program=None)
     RoleAssignmentFactory(partner=partner2_for_assign, business_area=afghanistan, program=None)

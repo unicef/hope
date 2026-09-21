@@ -9,6 +9,7 @@ from django.forms import model_to_dict
 from hope.apps.household.const import HEAD, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hope.models import (
+    AccountAttachment,
     Country,
     DocumentType,
     Household,
@@ -53,8 +54,16 @@ class DocumentMixin:
 
 class AccountMixin:
     @staticmethod
-    def save_account(member: PendingIndividual, doc: dict) -> None:
-        PendingAccount.objects.create(individual=member, **doc)
+    def save_account(member: PendingIndividual, doc: dict) -> PendingAccount:
+        attachments = doc.pop("attachments", [])
+        account = PendingAccount.objects.create(individual=member, **doc)
+        for attachment in attachments:
+            AccountAttachment.objects.create(
+                account=account,
+                title=attachment.get("title", ""),
+                file=PhotoMixin.get_photo(attachment["file"]),
+            )
+        return account
 
 
 DATA_PREFIX_PREFIX = "data:"
@@ -119,10 +128,7 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
-        program = rdi.program
-        if program is None:
-            raise ValueError("RDI program must not be None")
-        member_data["flex_fields"] = populate_pdu_with_null_values(program, member_data.get("flex_fields"))
+        member_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, member_data.get("flex_fields"))
         role = member_data.pop("role", None)
         ind = PendingIndividual.objects.create(
             household=member_of,

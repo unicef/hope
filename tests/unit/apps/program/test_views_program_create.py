@@ -584,10 +584,8 @@ def test_create_program_with_partners_data(
         ],
     }
 
-    # TODO: the below code is needed due to the temporary solution on the partners access in program actions
     RoleAssignmentFactory(partner=partner, business_area=afghanistan, program=None)
     RoleAssignmentFactory(partner=partner2, business_area=afghanistan, program=None)
-    # TODO: remove the above code when the partners access in program actions is implemented properly
 
     response = authenticated_client.post(list_url, input_data_with_partners_data)
     assert response.status_code == status.HTTP_201_CREATED

@@ -9,11 +9,11 @@ from django.utils import timezone
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.household.const import IDENTIFICATION_TYPE_NATIONAL_ID
 from hope.apps.household.documents import get_individual_doc
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import Individual, Program, RegistrationDataImport, SanctionListIndividual
+from hope.models.individual import sanction_list_last_check_key
 
 log = logging.getLogger(__name__)
 
@@ -138,7 +138,7 @@ def _resolve_individual_hit(
     return marked_individual
 
 
-def _save_tickets_and_notify(
+def _save_tickets(
     tickets_to_create: list[GrievanceTicket],
     tickets_programs: list,
     ticket_details_to_create: list[TicketSystemFlaggingDetails],
@@ -146,10 +146,6 @@ def _save_tickets_and_notify(
     GrievanceTicket.objects.bulk_create(tickets_to_create)
     grievance_ticket_program_through = GrievanceTicket.programs.through
     grievance_ticket_program_through.objects.bulk_create(tickets_programs)
-    for ticket in tickets_to_create:
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
-        )
     TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)
 
 
@@ -173,7 +169,8 @@ def check_against_sanction_list_pre_merge(
         sanction_list_individuals_queryset = sanction_list_individuals_queryset.filter(
             id__in=sanction_list_individuals,
         )
-    if not individuals_ids:
+    full_run = not individuals_ids
+    if full_run:
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
     individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
@@ -211,7 +208,8 @@ def check_against_sanction_list_pre_merge(
                 f" Scores: ",
             )
             log.debug([(r.full_name, r.meta.score) for r in results])
-    cache.set("sanction_list_last_check", timezone.now(), None)
+    if full_run:
+        cache.set(sanction_list_last_check_key(program_id), timezone.now(), None)
 
     possible_matches_individuals = evaluate_qs(
         Individual.objects.filter(
@@ -224,16 +222,16 @@ def check_against_sanction_list_pre_merge(
     )
     possible_matches_individuals.update(sanction_list_possible_match=True)
 
-    if not individuals_ids:
+    if full_run:
         # If we not pass individuals_ids, it means we want to check all individuals in the program.
         # So we know that individuals which are not found in the possible matches
         # need to be marked as not possible matches.
         not_possible_matches_individuals = evaluate_qs(
             Individual.objects.exclude(id__in=possible_matches)
-            .filter(sanction_list_possible_match=True)
+            .filter(sanction_list_possible_match=True, program_id=program.id)
             .select_for_update()
             .order_by("pk")
         )
         not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
-    _save_tickets_and_notify(tickets_to_create, tickets_programs, ticket_details_to_create)
+    _save_tickets(tickets_to_create, tickets_programs, ticket_details_to_create)

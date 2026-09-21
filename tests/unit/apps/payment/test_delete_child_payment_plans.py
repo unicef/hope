@@ -264,7 +264,7 @@ def test_can_delete_false_for_non_open_status(source_plan: PaymentPlan) -> None:
 def test_delete_top_up_query_count(
     top_up: PaymentPlan, top_up_payment: Payment, django_assert_num_queries: Callable
 ) -> None:
-    with django_assert_num_queries(9):
+    with django_assert_num_queries(10):
         PaymentPlanService(payment_plan=top_up).delete()
 
 

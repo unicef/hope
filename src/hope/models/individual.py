@@ -70,6 +70,23 @@ ascii_name_validator = RegexValidator(
 )
 
 
+def sanction_list_last_check_key(program_id: Any) -> str:
+    return f"sanction_list_last_check:{program_id}"
+
+
+LATIN_NAME_FIELDS = ("given_name_latin", "middle_name_latin", "family_name_latin", "full_name_latin")
+
+
+def normalize_latin_name(value: Any) -> Any:
+    """Strip and collapse any whitespace run to a single space so the value can be validated and stored cleanly.
+
+    Non-string cells (numeric XLSX values) are coerced so the validator reports them instead of crashing.
+    """
+    if not value:
+        return value
+    return " ".join(str(value).split())
+
+
 class IndividualCollection(UnicefIdentifiedModel):
     """Collection of individual representations."""
 
@@ -519,9 +536,8 @@ class Individual(
 
     @property
     def sanction_list_last_check(self) -> datetime | None:
-        # TODO: SANCTION LIST CHECK PER LIST
         if self.program.sanction_lists.exists():
-            return cache.get("sanction_list_last_check")
+            return cache.get(sanction_list_last_check_key(self.program_id))
         return None
 
     def withdraw(self, notify: bool = True) -> None:
@@ -645,6 +661,11 @@ class Individual(
                 fields=["originating_id"],
                 condition=Q(is_removed=False) & Q(originating_id__isnull=False),
                 name="originating_id_ind_unique_constraint",
+            ),
+            UniqueConstraint(
+                fields=["business_area", "country_workspace_id"],
+                condition=Q(is_removed=False) & Q(withdrawn=False) & Q(country_workspace_id__isnull=False),
+                name="country_workspace_id_ind_unique_constraint",
             ),
         ]
         permissions = (

@@ -11,6 +11,8 @@ nav:
   - Payment Verification: payment_verification.md
   - Grievance:
     - Overview: grievance.md
+    - My Tasks: my-tasks.md
+    - Grievance Daily Emails: grievance-daily-emails.md
     - Biometric Photo Error Tickets: biometric-photo-error.md
     - Needs Adjudication Management: needs-adjudication-management.md
   - Accountability: accountability.md

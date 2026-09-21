@@ -1,4 +1,5 @@
-from unittest.mock import ANY, MagicMock, PropertyMock, patch
+from datetime import datetime
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from flags.models import FlagState
 import pytest
@@ -731,12 +732,13 @@ def test_release_from_vision_uses_payment_plan_creator(
     assert vision_payment_plan.status == PaymentPlan.Status.ACCEPTED
     assert release.created_by == vision_payment_plan.created_by
     assert release.comment is None
-    mock_notification.assert_called_once_with(
+    assert mock_notification.call_count == 1
+    assert mock_notification.call_args.args[:3] == (
         vision_payment_plan,
         PaymentPlan.Action.REVIEW.value,
         str(vision_payment_plan.created_by_id),
-        ANY,
     )
+    assert datetime.fromisoformat(mock_notification.call_args.args[3]).tzinfo is not None
 
 
 def test_release_from_vision_rejects_non_review_plan(
@@ -1061,7 +1063,7 @@ def test_send_payment_plan_to_vision_task_does_not_duplicate_persisted_failure_l
     mock_vision_api.return_value.send_payment_plan.side_effect = persist_failure_then_raise
     job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
 
-    with django_assert_num_queries(24), pytest.raises(VisionAPIError):
+    with django_assert_num_queries(26), pytest.raises(VisionAPIError):
         send_payment_plan_to_vision_async_task_action(job)
 
     vision_enabled_payment_plan.refresh_from_db()

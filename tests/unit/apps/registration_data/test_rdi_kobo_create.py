@@ -361,6 +361,14 @@ def test_handle_geopoint_field(business_area: object, registration_data_import: 
     assert result == expected
 
 
+def test_cast_latin_name_value_normalizes_whitespace(business_area: object, registration_data_import: object) -> None:
+    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
+
+    result = task._cast_value("  Anna \t\xa0 Kovalska ", "given_name_latin_i_c")
+
+    assert result == "Anna Kovalska"
+
+
 def test_cast_boolean_value(business_area: object, registration_data_import: object) -> None:
     task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
 
@@ -725,49 +733,6 @@ def test_phone_number_validation_flags(
     tesa_ind = individuals.get(full_name="Tesa Testowski")
     assert tesa_ind.phone_no_valid is None
     assert tesa_ind.phone_no_alternative_valid is None
-
-
-def test_finalize_individual_with_no_program(
-    business_area: object,
-    registration_data_import: object,
-) -> None:
-    """Exercise _finalize_individual when RDI has no program (False branches of `if rdi_program is not None`)."""
-    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
-    # Simulate program=None on the RDI
-    RegistrationDataImport.objects.filter(pk=registration_data_import.pk).update(program=None)
-    task.registration_data_import.refresh_from_db()
-
-    individual_obj = PendingIndividual(
-        first_registration_date="2024-01-01",
-        birth_date="2000-01-01",
-        flex_fields={},
-    )
-    household_obj = PendingHousehold()
-
-    result = task._finalize_individual(individual_obj, household_obj, only_collector_flag=False, role=None)
-    assert result is None
-    assert individual_obj.program_id is None
-
-
-def test_finalize_household_with_no_program(
-    business_area: object,
-    registration_data_import: object,
-) -> None:
-    """Exercise _finalize_household when RDI has no program."""
-    task = RdiKoboCreateTask(registration_data_import.id, business_area.id)
-    RegistrationDataImport.objects.filter(pk=registration_data_import.pk).update(program=None)
-    task.registration_data_import.refresh_from_db()
-
-    household_obj = PendingHousehold()
-
-    task._finalize_household(
-        household_obj,
-        registration_date="2024-01-01",
-        current_individuals=[],
-        individuals_to_create_list=[],
-        documents_and_identities_to_create=[],
-    )
-    assert household_obj.program_id is None
 
 
 def test_kobo_end_to_end_with_sdg_succeeds(
