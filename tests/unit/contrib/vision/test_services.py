@@ -9,7 +9,7 @@ from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
     FollowUpInstructionFactory,
-    FundsCommitmentGroupFactory,
+    FundsCommitmentHeaderFactory,
     FundsCommitmentItemFactory,
     PaymentPlanFactory,
 )
@@ -87,49 +87,49 @@ def follow_up_vision_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> P
 
 @pytest.fixture
 def matching_fc_items(vision_payment_plan: PaymentPlan) -> list:
-    group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     return [
-        FundsCommitmentItemFactory(funds_commitment_group=group, office=vision_payment_plan.business_area),
-        FundsCommitmentItemFactory(funds_commitment_group=group, office=None),
+        FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_payment_plan.business_area),
+        FundsCommitmentItemFactory(funds_commitment_header=header, office=None),
     ]
 
 
 @pytest.fixture
 def ambiguous_fc_items(vision_payment_plan: PaymentPlan) -> list:
-    first_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
-    second_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    first_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
+    second_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     return [
-        FundsCommitmentItemFactory(funds_commitment_group=first_group, office=vision_payment_plan.business_area),
-        FundsCommitmentItemFactory(funds_commitment_group=second_group, office=vision_payment_plan.business_area),
+        FundsCommitmentItemFactory(funds_commitment_header=first_header, office=vision_payment_plan.business_area),
+        FundsCommitmentItemFactory(funds_commitment_header=second_header, office=vision_payment_plan.business_area),
     ]
 
 
 @pytest.fixture
-def conflicting_fc_group(vision_payment_plan: PaymentPlan):
+def conflicting_fc_header(vision_payment_plan: PaymentPlan):
     other_payment_plan = PaymentPlanFactory()
-    group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+        funds_commitment_header=header,
         office=vision_payment_plan.business_area,
         payment_plan=other_payment_plan,
     )
-    return group
+    return header
 
 
 @pytest.fixture
-def fc_group_with_existing_group_assignment(vision_payment_plan: PaymentPlan) -> tuple[object, object]:
-    target_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+def fc_header_with_existing_header_assignment(vision_payment_plan: PaymentPlan) -> tuple[object, object]:
+    target_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     FundsCommitmentItemFactory(
-        funds_commitment_group=target_group,
+        funds_commitment_header=target_header,
         office=vision_payment_plan.business_area,
     )
-    existing_group = FundsCommitmentGroupFactory(funds_commitment_number="FC999")
+    existing_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC999")
     FundsCommitmentItemFactory(
-        funds_commitment_group=existing_group,
+        funds_commitment_header=existing_header,
         office=vision_payment_plan.business_area,
         payment_plan=vision_payment_plan,
     )
-    return target_group, existing_group
+    return target_header, existing_header
 
 
 @pytest.fixture
@@ -200,7 +200,7 @@ def test_vision_status_treats_malformed_state_as_not_sent(
     assert vision_status == VisionStatus.NOT_SENT.value
 
 
-def test_assign_funds_commitment_from_callback_assigns_all_items_from_matching_group(
+def test_assign_funds_commitment_from_callback_assigns_all_items_from_matching_header(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
     django_assert_num_queries,
@@ -227,7 +227,7 @@ def test_assign_funds_commitment_from_callback_reports_missing_items(
     assert error.value.error_code is None
 
 
-def test_assign_funds_commitment_from_callback_rejects_ambiguous_group(
+def test_assign_funds_commitment_from_callback_rejects_ambiguous_header(
     vision_payment_plan: PaymentPlan,
     ambiguous_fc_items: list,
     django_assert_num_queries,
@@ -240,9 +240,9 @@ def test_assign_funds_commitment_from_callback_rejects_ambiguous_group(
     assert all(item.payment_plan_id is None for item in ambiguous_fc_items)
 
 
-def test_assign_funds_commitment_from_callback_rejects_group_item_assigned_to_another_plan(
+def test_assign_funds_commitment_from_callback_rejects_header_item_assigned_to_another_plan(
     vision_payment_plan: PaymentPlan,
-    conflicting_fc_group,
+    conflicting_fc_header,
     django_assert_num_queries,
 ) -> None:
     with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
@@ -250,17 +250,17 @@ def test_assign_funds_commitment_from_callback_rejects_group_item_assigned_to_an
 
     assert error.value.status == VisionStatus.CALLBACK_FAILED
     assert error.value.error_code == VisionErrorCode.FC_CONFLICT
-    assert conflicting_fc_group.funds_commitment_items.exclude(payment_plan=None).exists()
+    assert conflicting_fc_header.funds_commitment_items.exclude(payment_plan=None).exists()
 
 
-def test_assign_funds_commitment_from_callback_rejects_legacy_plan_item_from_another_group(
+def test_assign_funds_commitment_from_callback_rejects_legacy_plan_item_from_another_header(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
-    group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
-    FundsCommitmentItemFactory(funds_commitment_group=group, office=vision_payment_plan.business_area)
+    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
+    FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_payment_plan.business_area)
     legacy_item = FundsCommitmentItemFactory(
-        funds_commitment_group=FundsCommitmentGroupFactory(funds_commitment_number="FC999"),
+        funds_commitment_header=FundsCommitmentHeaderFactory(funds_commitment_number="FC999"),
         office=vision_payment_plan.business_area,
         payment_plan=vision_payment_plan,
     )
@@ -273,20 +273,20 @@ def test_assign_funds_commitment_from_callback_rejects_legacy_plan_item_from_ano
     assert legacy_item.payment_plan_id == vision_payment_plan.pk
 
 
-def test_assign_funds_commitment_from_callback_rejects_plan_with_another_group(
+def test_assign_funds_commitment_from_callback_rejects_plan_with_another_header(
     vision_payment_plan: PaymentPlan,
-    fc_group_with_existing_group_assignment: tuple[object, object],
+    fc_header_with_existing_header_assignment: tuple[object, object],
     django_assert_num_queries,
 ) -> None:
-    matching_group, existing_group = fc_group_with_existing_group_assignment
+    matching_header, existing_header = fc_header_with_existing_header_assignment
 
     with django_assert_num_queries(3), pytest.raises(FundsCommitmentAssignmentError) as error:
         VisionService.assign_funds_commitment_from_callback(vision_payment_plan, "FC123")
 
     assert error.value.status == VisionStatus.CALLBACK_FAILED
     assert error.value.error_code == VisionErrorCode.FC_CONFLICT
-    assert matching_group.funds_commitment_items.filter(payment_plan=None).exists()
-    assert existing_group.funds_commitment_items.filter(payment_plan=vision_payment_plan).exists()
+    assert matching_header.funds_commitment_items.filter(payment_plan=None).exists()
+    assert existing_header.funds_commitment_items.filter(payment_plan=vision_payment_plan).exists()
 
 
 def test_process_callback_without_fc_keeps_plan_blocked(
@@ -897,7 +897,7 @@ def test_assign_selected_funds_commitment_items_rejects_wrong_business_area(
     assert error.value.status == VisionStatus.FC_NOT_FOUND
 
 
-def test_assign_selected_funds_commitment_items_rejects_items_from_different_groups(
+def test_assign_selected_funds_commitment_items_rejects_items_from_different_headers(
     vision_payment_plan: PaymentPlan,
     ambiguous_fc_items: list,
     django_assert_num_queries,
@@ -910,10 +910,10 @@ def test_assign_selected_funds_commitment_items_rejects_items_from_different_gro
 
 def test_assign_selected_funds_commitment_items_rejects_item_assigned_to_another_plan(
     vision_payment_plan: PaymentPlan,
-    conflicting_fc_group,
+    conflicting_fc_header,
     django_assert_num_queries,
 ) -> None:
-    conflicting_item = conflicting_fc_group.funds_commitment_items.get()
+    conflicting_item = conflicting_fc_header.funds_commitment_items.get()
 
     with django_assert_num_queries(1), pytest.raises(FundsCommitmentAssignmentError) as error:
         VisionService.assign_selected_funds_commitment_items(vision_payment_plan, [conflicting_item])
@@ -921,13 +921,13 @@ def test_assign_selected_funds_commitment_items_rejects_item_assigned_to_another
     assert error.value.error_code == VisionErrorCode.FC_CONFLICT
 
 
-def test_assign_selected_funds_commitment_items_rejects_plan_items_from_another_group(
+def test_assign_selected_funds_commitment_items_rejects_plan_items_from_another_header(
     vision_payment_plan: PaymentPlan,
-    fc_group_with_existing_group_assignment: tuple[object, object],
+    fc_header_with_existing_header_assignment: tuple[object, object],
     django_assert_num_queries,
 ) -> None:
-    target_group, _existing_group = fc_group_with_existing_group_assignment
-    selected_item = target_group.funds_commitment_items.get()
+    target_header, _existing_header = fc_header_with_existing_header_assignment
+    selected_item = target_header.funds_commitment_items.get()
 
     with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
         VisionService.assign_selected_funds_commitment_items(vision_payment_plan, [selected_item])

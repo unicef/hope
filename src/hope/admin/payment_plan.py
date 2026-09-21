@@ -53,7 +53,7 @@ class FundsCommitmentItemInline(admin.TabularInline):
     show_change_link = True
     fields = readonly_fields = (
         "rec_serial_number",
-        "funds_commitment_group",
+        "funds_commitment_header",
         "funds_commitment_item",
         "fc_status",
         "commitment_amount_local",

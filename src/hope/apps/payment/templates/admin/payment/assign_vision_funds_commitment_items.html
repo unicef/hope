@@ -7,15 +7,15 @@
       processing may have stopped before confirmation was recorded.
     {% endif %}
     Assigning these FC items will automatically release the Payment Plan and immediately send it to Payment Gateway if
-    it is a PG plan. All selected items must belong to the same FC group.
+    it is a PG plan. All selected items must belong to the same Funds Commitment Header.
   </p>
   <form method="post">
     {% csrf_token %}
     {{ form.non_field_errors }}
     <div class="form-row">
-      {{ form.funds_commitment_group.errors }}
-      {{ form.funds_commitment_group.label_tag }}
-      {{ form.funds_commitment_group }}
+      {{ form.funds_commitment_header.errors }}
+      {{ form.funds_commitment_header.label_tag }}
+      {{ form.funds_commitment_header }}
     </div>
     <div id="vision-fc-items-section" class="form-row" hidden>
       {{ form.funds_commitment_items.errors }}
@@ -29,21 +29,21 @@
   {{ selected_funds_commitment_item_ids|json_script:"vision-selected-fc-items" }}
   <script>
     (() => {
-      const groups = JSON.parse(document.getElementById("vision-fc-options").textContent);
+      const headers = JSON.parse(document.getElementById("vision-fc-options").textContent);
       const selectedItemIds = new Set(
         JSON.parse(document.getElementById("vision-selected-fc-items").textContent).map(String),
       );
-      const groupSelect = document.getElementById("id_funds_commitment_group");
+      const headerSelect = document.getElementById("id_funds_commitment_header");
       const itemsSection = document.getElementById("vision-fc-items-section");
       const itemsContainer = document.getElementById("vision-fc-items");
 
       const renderItems = () => {
-        const group = groups.find((option) => String(option.id) === groupSelect.value);
+        const header = headers.find((option) => String(option.id) === headerSelect.value);
         itemsContainer.replaceChildren();
-        itemsSection.hidden = !group;
-        if (!group) return;
+        itemsSection.hidden = !header;
+        if (!header) return;
 
-        group.items.forEach((item) => {
+        header.items.forEach((item) => {
           const label = document.createElement("label");
           label.style.display = "block";
           label.style.marginBottom = "8px";
@@ -63,7 +63,7 @@
         });
       };
 
-      groupSelect.addEventListener("change", () => {
+      headerSelect.addEventListener("change", () => {
         selectedItemIds.clear();
         renderItems();
       });

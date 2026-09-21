@@ -3,12 +3,12 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.contrib.vision.models import DownPayment, FundsCommitment, FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.models import DownPayment, FundsCommitment, FundsCommitmentHeader, FundsCommitmentItem
 
 
-class FundsCommitmentGroupFactory(DjangoModelFactory):
+class FundsCommitmentHeaderFactory(DjangoModelFactory):
     class Meta:
-        model = FundsCommitmentGroup
+        model = FundsCommitmentHeader
 
     funds_commitment_number = factory.Sequence(lambda n: f"FC{n:06d}")
 
@@ -17,7 +17,7 @@ class FundsCommitmentItemFactory(DjangoModelFactory):
     class Meta:
         model = FundsCommitmentItem
 
-    funds_commitment_group = factory.SubFactory(FundsCommitmentGroupFactory)
+    funds_commitment_header = factory.SubFactory(FundsCommitmentHeaderFactory)
     funds_commitment_item = factory.Sequence(lambda n: f"{n % 1000:03d}")
     rec_serial_number = factory.Sequence(lambda n: n + 1)
     office = None

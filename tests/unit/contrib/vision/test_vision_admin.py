@@ -1,14 +1,20 @@
+from datetime import date
+from decimal import Decimal
 from typing import Any
 from unittest.mock import patch
 
+from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.test import Client
+from django.test import Client, RequestFactory
 from django.urls import reverse
 from flags.models import FlagState
 import pytest
 
-from extras.test_utils.factories import ApprovalProcessFactory, FundsCommitmentGroupFactory, FundsCommitmentItemFactory
+from extras.test_utils.factories import ApprovalProcessFactory, FundsCommitmentHeaderFactory, FundsCommitmentItemFactory
+from hope.admin.funds_commitment_header import FundsCommitmentHeaderAdmin, FundsCommitmentItemInline
 from hope.contrib.vision.choices import VisionStatus
+from hope.contrib.vision.fixtures import FundsCommitmentFactory
+from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -175,9 +181,9 @@ def test_manual_fc_item_recovery_shows_warning_and_available_item(
         }
     }
     payment_plan.save(update_fields=["internal_data"])
-    funds_commitment_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    funds_commitment_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     funds_commitment_item = FundsCommitmentItemFactory(
-        funds_commitment_group=funds_commitment_group,
+        funds_commitment_header=funds_commitment_header,
         office=afghanistan,
     )
 
@@ -193,7 +199,7 @@ def test_manual_fc_item_recovery_shows_warning_and_available_item(
     assert "Assigning these FC items will automatically release the Payment Plan" in content
     assert "immediately send it to Payment Gateway if" in content
     assert "it is a PG plan" in content
-    assert 'id="id_funds_commitment_group"' in content
+    assert 'id="id_funds_commitment_header"' in content
     assert 'id="vision-fc-options"' in content
     assert "FC123" in content
     assert str(funds_commitment_item.funds_commitment_item) in content
@@ -261,9 +267,9 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
     }
     payment_plan.save(update_fields=["internal_data"])
     ApprovalProcessFactory(payment_plan=payment_plan)
-    funds_commitment_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
+    funds_commitment_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     funds_commitment_item = FundsCommitmentItemFactory(
-        funds_commitment_group=funds_commitment_group,
+        funds_commitment_header=funds_commitment_header,
         office=vision_admin_context["business_area"],
     )
     action_url = reverse(
@@ -275,7 +281,7 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
         response = vision_admin_context["client"].post(
             action_url,
             {
-                "funds_commitment_group": funds_commitment_group.pk,
+                "funds_commitment_header": funds_commitment_header.pk,
                 "funds_commitment_items": [funds_commitment_item.pk],
             },
         )
@@ -288,3 +294,66 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
     assert funds_commitment_item.payment_plan_id == payment_plan.pk
     mock_exchange_rate_task.assert_called_once()
     mock_notification_task.assert_called_once()
+
+
+@pytest.fixture
+def funds_commitment_header_for_admin(afghanistan) -> FundsCommitmentHeader:
+    FundsCommitmentFactory(
+        rec_serial_number=100,
+        funds_commitment_number="FC123",
+        vendor_id="VENDOR-1",
+        posting_date=date(2026, 9, 1),
+        document_reference="REFERENCE-1",
+        fc_status="O",
+        currency_code="USD",
+        commitment_amount_local=Decimal("100.25"),
+        commitment_amount_usd=Decimal("100.50"),
+    )
+    return FundsCommitmentHeader.objects.get(funds_commitment_number="FC123")
+
+
+def test_funds_commitment_header_admin_displays_derived_fields(
+    admin_user,
+    funds_commitment_header_for_admin: FundsCommitmentHeader,
+    django_assert_num_queries,
+) -> None:
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    model_admin = FundsCommitmentHeaderAdmin(FundsCommitmentHeader, admin.site)
+
+    with django_assert_num_queries(1):
+        header = model_admin.get_queryset(request).get(pk=funds_commitment_header_for_admin.pk)
+
+    assert model_admin.list_display == (
+        "funds_commitment_number",
+        "rec_serial_number",
+        "vendor_id",
+        "posting_date",
+        "document_reference",
+        "fc_status",
+        "total_amount_usd",
+        "total_amount_local",
+        "currency",
+    )
+    assert model_admin.readonly_fields == model_admin.list_display[1:]
+    assert model_admin.rec_serial_number(header) == 100
+    assert model_admin.vendor_id(header) == "VENDOR-1"
+    assert model_admin.posting_date(header) == date(2026, 9, 1)
+    assert model_admin.document_reference(header) == "REFERENCE-1"
+    assert model_admin.fc_status(header) == "O"
+    assert model_admin.total_amount_usd(header) == Decimal("100.50")
+    assert model_admin.total_amount_local(header) == Decimal("100.25")
+    assert model_admin.currency(header) == "USD"
+
+
+def test_funds_commitment_item_inline_remains_unchanged() -> None:
+    assert FundsCommitmentItemInline.fields == (
+        "rec_serial_number",
+        "funds_commitment_item",
+        "office",
+        "fc_status",
+        "commitment_amount_local",
+        "commitment_amount_usd",
+        "total_open_amount_local",
+        "total_open_amount_usd",
+    )

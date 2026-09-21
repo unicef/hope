@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.postgres.forms import DecimalRangeField
 from django.db.models import Prefetch, Q
 
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 from hope.models import AcceptanceProcessThreshold, FinancialServiceProviderXlsxTemplate
 
 if TYPE_CHECKING:
@@ -12,9 +12,9 @@ if TYPE_CHECKING:
 
 
 class VisionFundsCommitmentItemAssignmentForm(forms.Form):
-    funds_commitment_group = forms.ModelChoiceField(
-        queryset=FundsCommitmentGroup.objects.none(),
-        label="Funds Commitment Group",
+    funds_commitment_header = forms.ModelChoiceField(
+        queryset=FundsCommitmentHeader.objects.none(),
+        label="Funds Commitment Header",
     )
     funds_commitment_items = forms.ModelMultipleChoiceField(
         queryset=FundsCommitmentItem.objects.none(),
@@ -27,8 +27,8 @@ class VisionFundsCommitmentItemAssignmentForm(forms.Form):
             Q(payment_plan__isnull=True) | Q(payment_plan=payment_plan),
             office=payment_plan.business_area,
         ).order_by("funds_commitment_item")
-        groups = (
-            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items)
+        headers = (
+            FundsCommitmentHeader.objects.filter(funds_commitment_items__in=available_items)
             .distinct()
             .order_by("funds_commitment_number")
             .prefetch_related(
@@ -39,18 +39,18 @@ class VisionFundsCommitmentItemAssignmentForm(forms.Form):
                 )
             )
         )
-        self.fields["funds_commitment_group"].queryset = groups
+        self.fields["funds_commitment_header"].queryset = headers
 
-        selected_group_id = self.data.get(self.add_prefix("funds_commitment_group")) if self.is_bound else None
-        if selected_group_id and str(selected_group_id).isdigit():
+        selected_header_id = self.data.get(self.add_prefix("funds_commitment_header")) if self.is_bound else None
+        if selected_header_id and str(selected_header_id).isdigit():
             self.fields["funds_commitment_items"].queryset = available_items.filter(
-                funds_commitment_group_id=selected_group_id
+                funds_commitment_header_id=selected_header_id
             )
 
         self.funds_commitment_options = [
             {
-                "id": group.pk,
-                "number": group.funds_commitment_number,
+                "id": header.pk,
+                "number": header.funds_commitment_number,
                 "items": [
                     {
                         "id": item.pk,
@@ -60,10 +60,10 @@ class VisionFundsCommitmentItemAssignmentForm(forms.Form):
                         "commitmentAmountLocal": str(item.commitment_amount_local or "-"),
                         "totalOpenAmountLocal": str(item.total_open_amount_local or "-"),
                     }
-                    for item in getattr(group, "available_items", [])
+                    for item in getattr(header, "available_items", [])
                 ],
             }
-            for group in groups
+            for header in headers
         ]
 
 

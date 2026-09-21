@@ -50,7 +50,7 @@ from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.choices import VisionStatus
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 from hope.models import (
     Account,
     AccountAttachment,
@@ -1249,8 +1249,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
         assigned_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj)
 
-        group = (
-            FundsCommitmentGroup.objects.filter(
+        header = (
+            FundsCommitmentHeader.objects.with_derived_fields()
+            .filter(
                 funds_commitment_items__in=assigned_items_qs,
             )
             .distinct()
@@ -1258,22 +1259,15 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 Prefetch(
                     "funds_commitment_items",
                     queryset=assigned_items_qs,
-                    to_attr="filtered_items",
                 )
             )
             .first()
         )
 
-        if not group:
+        if not header:
             return None
 
-        return FundsCommitmentSerializer(
-            {
-                "id": group.pk,
-                "funds_commitment_number": group.funds_commitment_number,
-                "funds_commitment_items": group.filtered_items,
-            }
-        ).data
+        return FundsCommitmentSerializer(header).data
 
     @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
@@ -1285,28 +1279,19 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             office=obj.business_area,
         )
 
-        groups = (
-            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+        headers = (
+            FundsCommitmentHeader.objects.with_derived_fields()
+            .filter(funds_commitment_items__in=available_items_qs)
             .distinct()
             .prefetch_related(
                 Prefetch(
                     "funds_commitment_items",
                     queryset=available_items_qs,
-                    to_attr="filtered_items",
                 )
             )
         )
 
-        return [
-            FundsCommitmentSerializer(
-                {
-                    "id": group.pk,
-                    "funds_commitment_number": group.funds_commitment_number,
-                    "funds_commitment_items": group.filtered_items,
-                }
-            ).data
-            for group in groups
-        ]
+        return [FundsCommitmentSerializer(header).data for header in headers]
 
     @extend_schema_field(VisionStateSerializer)
     def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:

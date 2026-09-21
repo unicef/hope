@@ -1,10 +1,67 @@
 from django.db import models
+from django.db.models import OuterRef, Subquery, Sum
 
 from hope.models import BusinessArea, PaymentPlan
 
 
-class FundsCommitmentGroup(models.Model):
+class FundsCommitmentHeaderQuerySet(models.QuerySet):
+    def with_derived_fields(self) -> "FundsCommitmentHeaderQuerySet":
+        matching_commitments = FundsCommitment.objects.filter(
+            funds_commitment_number=OuterRef("funds_commitment_number")
+        ).order_by("rec_serial_number")
+        totals = (
+            FundsCommitment.objects.filter(funds_commitment_number=OuterRef("funds_commitment_number"))
+            .values("funds_commitment_number")
+            .annotate(
+                total_amount_usd=Sum("commitment_amount_usd"),
+                total_amount_local=Sum("commitment_amount_local"),
+            )
+        )
+        amount_field = models.DecimalField(max_digits=15, decimal_places=2)
+
+        return self.annotate(
+            rec_serial_number=Subquery(
+                matching_commitments.values("rec_serial_number")[:1],
+                output_field=models.IntegerField(),
+            ),
+            vendor_id=Subquery(
+                matching_commitments.values("vendor_id")[:1],
+                output_field=models.CharField(max_length=10),
+            ),
+            posting_date=Subquery(
+                matching_commitments.values("posting_date")[:1],
+                output_field=models.DateField(),
+            ),
+            document_reference=Subquery(
+                matching_commitments.values("document_reference")[:1],
+                output_field=models.CharField(max_length=16),
+            ),
+            fc_status=Subquery(
+                matching_commitments.values("fc_status")[:1],
+                output_field=models.CharField(max_length=1),
+            ),
+            total_amount_usd=Subquery(
+                totals.values("total_amount_usd")[:1],
+                output_field=amount_field,
+            ),
+            total_amount_local=Subquery(
+                totals.values("total_amount_local")[:1],
+                output_field=amount_field,
+            ),
+            currency=Subquery(
+                matching_commitments.values("currency_code")[:1],
+                output_field=models.CharField(max_length=5),
+            ),
+        )
+
+
+class FundsCommitmentHeader(models.Model):
     funds_commitment_number = models.CharField(max_length=10)
+    objects = FundsCommitmentHeaderQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = "Funds Commitment Header"
+        verbose_name_plural = "Funds Commitment Headers"
 
     def __str__(self) -> str:
         return self.funds_commitment_number
@@ -18,8 +75,8 @@ class FundsCommitmentItem(models.Model):
         on_delete=models.SET_NULL,
         related_name="funds_commitments",
     )
-    funds_commitment_group = models.ForeignKey(
-        FundsCommitmentGroup,
+    funds_commitment_header = models.ForeignKey(
+        FundsCommitmentHeader,
         on_delete=models.CASCADE,
         related_name="funds_commitment_items",
     )
@@ -83,7 +140,7 @@ class FundsCommitmentItem(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.funds_commitment_group} - {self.funds_commitment_item}"
+        return f"{self.funds_commitment_header} - {self.funds_commitment_item}"
 
 
 class FundsCommitment(models.Model):
