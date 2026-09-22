@@ -88,7 +88,8 @@ class VisionAPI(BaseAPI):
             current_status_can_be_changed_by_send_result = current_status in cls.SEND_MUTABLE_STATUSES
 
             # Normally the attempt is WAITING_FOR_CALLBACK when the initial request succeeds. A fast callback may have
-            # already changed it to an FC result; that is still the same active attempt and must be marked as sent.
+            # already changed it to PP_CREATED or an FC result; that is still the same active attempt and must be
+            # marked as sent.
             # NOT_SENT or a plan outside IN_REVIEW means that the attempt was reset or completed, so a late response
             # from the old request must not reactivate it.
             if (
@@ -106,7 +107,7 @@ class VisionAPI(BaseAPI):
                 send_result_updates_status
                 # A late HTTP response must not change an aborted, rejected, or released plan.
                 and plan_is_still_in_review
-                # Preserve a newer callback status such as FC_NOT_FOUND, FC_MISSING, or CALLBACK_FAILED.
+                # Preserve a newer callback status such as PP_CREATED, FC_NOT_FOUND, FC_MISSING, or CALLBACK_FAILED.
                 and current_status_can_be_changed_by_send_result
             ):
                 VisionService.set_status(locked_payment_plan, cast("VisionStatus", vision_status))
