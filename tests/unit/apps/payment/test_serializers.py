@@ -47,7 +47,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def business_area() -> Any:
-    return BusinessAreaFactory()
+    return BusinessAreaFactory(code="BA01")
 
 
 @pytest.fixture
@@ -465,7 +465,7 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
         rec_serial_number=100,
         funds_commitment_number="FC123",
         vendor_id="VENDOR-1",
-        business_area="BA01",
+        business_area=payment_plan.business_area.code,
         posting_date=date(2026, 9, 1),
         document_reference="REFERENCE-1",
         fc_status="O",
@@ -475,9 +475,8 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
         commitment_amount_usd=Decimal("100.50"),
     )
     item = FundsCommitmentItem.objects.get(pk=funds_commitment.pk)
-    item.office = payment_plan.business_area
     item.payment_plan = payment_plan
-    item.save(update_fields=["office", "payment_plan"])
+    item.save(update_fields=["payment_plan"])
     return payment_plan_detail_context
 
 
