@@ -67,6 +67,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     Program,
     ProgramCycle,
@@ -585,6 +586,26 @@ def test_create_raises_when_payment_plan_group_does_not_exist(user: User, busine
     with pytest.raises(ValidationError) as error:
         PaymentPlanService.create(input_data=input_data, user=user, program=program)
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
+
+
+def test_create_raises_when_payment_plan_group_is_not_open(user: User, business_area: Any) -> None:
+    program = ProgramFactory(status=Program.ACTIVE, business_area=business_area)
+    program_cycle = ProgramCycleFactory(program=program)
+    locked_group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.LOCKED)
+
+    input_data = {
+        "business_area_slug": business_area.slug,
+        "name": "Test TP",
+        "program_cycle_id": program_cycle.id,
+        "payment_plan_group_id": locked_group.id,
+        "flag_exclude_if_active_adjudication_ticket": False,
+        "flag_exclude_if_on_sanction_list": False,
+        "rules": [],
+    }
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService.create(input_data=input_data, user=user, program=program)
+    assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
 
 
 @freeze_time("2020-10-10")
@@ -1715,6 +1736,17 @@ def test_edit_cycle_rejects_missing_group(payment_plan_base: PaymentPlan, progra
     assert error.value.detail[0] == "Payment Plan Group is required when changing Programme Cycle."
 
 
+def test_edit_cycle_rejects_group_not_open(payment_plan_base: PaymentPlan, program: Program) -> None:
+    new_cycle = ProgramCycleFactory(program=program)
+    locked_group = PaymentPlanGroupFactory(cycle=new_cycle, status=PaymentPlanGroup.Status.ACCEPTED)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan_base).update(
+            {"program_cycle_id": new_cycle.id, "payment_plan_group_id": locked_group.id}
+        )
+    assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
+
+
 def test_update_pp_vulnerability_score(payment_plan_base: PaymentPlan) -> None:
     PaymentPlanService(payment_plan_base).update(
         {
@@ -2500,6 +2532,26 @@ def test_set_group_for_open_pp_returns_early_when_cycle_is_changing(
     service._set_group_for_open_pp({"payment_plan_group_id": str(group_in_b.id), "program_cycle_id": cycle_b.id})
 
     assert pp.payment_plan_group != group_in_b
+
+
+def test_change_group_rejects_group_not_open(
+    user: User,
+    business_area: Any,
+    program: Program,
+) -> None:
+    cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+    pp = PaymentPlanFactory(
+        created_by=user,
+        business_area=business_area,
+        program_cycle=cycle,
+        status=PaymentPlan.Status.TP_OPEN,
+    )
+    locked_group = PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.LOCKED)
+    service = PaymentPlanService(pp)
+
+    with pytest.raises(ValidationError) as error:
+        service._set_group_for_open_pp({"payment_plan_group_id": str(locked_group.id)})
+    assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
 
 
 def test_split_removes_existing_export_file_delivery(

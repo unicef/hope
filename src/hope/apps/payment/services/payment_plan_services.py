@@ -735,6 +735,7 @@ class PaymentPlanService:
             ).first()
         ):
             raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+        PaymentPlanService._validate_group_accepts_new_payment_plans(payment_plan_group)
 
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.create(
@@ -931,6 +932,7 @@ class PaymentPlanService:
                 ).first()
             ):
                 raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+            self._validate_group_accepts_new_payment_plans(payment_plan_group)
             self.payment_plan.payment_plan_group = payment_plan_group
 
     def _set_group_for_open_pp(self, input_data: dict) -> None:
@@ -950,6 +952,7 @@ class PaymentPlanService:
             ).first()
         ):
             raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+        self._validate_group_accepts_new_payment_plans(payment_plan_group)
         # Check FSP consistency using the current FSP before _update_fsp_and_delivery_mechanism may clear it.
         self._check_group_fsp_consistency(
             payment_plan_group,
@@ -1020,6 +1023,14 @@ class PaymentPlanService:
             targeting_criteria_input["flag_exclude_if_active_adjudication_ticket"] = input_data[
                 "flag_exclude_if_active_adjudication_ticket"
             ]
+
+    @staticmethod
+    def _validate_group_accepts_new_payment_plans(payment_plan_group: PaymentPlanGroup) -> None:
+        if payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
+            raise ValidationError(
+                f"Adding Target Population to Payment Plan Group is possible only within Status "
+                f"{PaymentPlanGroup.Status.OPEN}"
+            )
 
     @staticmethod
     def _check_group_fsp_consistency(

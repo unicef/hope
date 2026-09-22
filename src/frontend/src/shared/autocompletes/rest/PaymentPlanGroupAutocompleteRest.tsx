@@ -27,6 +27,7 @@ export const PaymentPlanGroupAutocompleteRest = ({
     limit: 100,
     ordering: 'name',
     cycle: cycleId,
+    status: ['OPEN'],
   });
   const { businessArea, programId } = useBaseUrl();
 
