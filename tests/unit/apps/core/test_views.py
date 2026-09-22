@@ -61,6 +61,17 @@ def test_logout_view_logs_user_out_and_redirects_to_login(client: Client, user: 
     assert "_auth_user_id" not in client.session
 
 
+def test_logout_view_rejects_session_cookie_issued_before_logout(client: Client, user: User) -> None:
+    client.force_login(user, "django.contrib.auth.backends.ModelBackend")
+    session_cookie = client.cookies["sessionid"].value
+
+    client.get(reverse("logout"))
+    client.cookies["sessionid"] = session_cookie
+    response = client.get(reverse("api:core:business-areas-list"))
+
+    assert response.status_code == 403
+
+
 def test_trigger_error_raises_zero_division_error() -> None:
     request = RequestFactory().get("/sentry-debug/")
 
