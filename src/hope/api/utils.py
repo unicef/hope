@@ -74,12 +74,13 @@ class CurrencySlugRelatedField(serializers.SlugRelatedField):
         return current if isinstance(current, self.get_queryset().model) else None
 
     def to_internal_value(self, data: Any) -> Any:
+        # psycopg 3 raises DataError (a 500) on a NUL byte, so it must be rejected before the query.
+        if not isinstance(data, str) or "\x00" in data:
+            self.fail("invalid")
         try:
             return resolve_currency_for_update(data, self._current_currency())
         except ObjectDoesNotExist:
             self.fail("does_not_exist", slug_name=self.slug_field, value=smart_str(data))
-        except (TypeError, ValueError):
-            self.fail("invalid")
 
 
 def humanize_errors(errors: dict) -> dict:
