@@ -61,6 +61,12 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
     }
   }, [open, debouncedInputText, loadData]);
 
+  // A value preselected from the URL has only its id until the first fetch
+  // resolves its label; hide the field for that interval rather than flash
+  // the raw id. Never hide while open, or the first open would unmount the
+  // input and drop focus.
+  if (loading && !open) return null;
+
   return (
     <StyledAutocomplete
       key={prevValueRef.current}

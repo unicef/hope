@@ -2,14 +2,18 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders, screen } from 'src/testUtils/testUtils';
 import { BaseAutocompleteFilterRest } from './BaseAutocompleteFilterRest';
 
-function renderFilter(props: { open: boolean; loadData: () => void }) {
+function renderFilter(props: {
+  open: boolean;
+  loadData: () => void;
+  loading?: boolean;
+}) {
   return renderWithProviders(
     <BaseAutocompleteFilterRest
       value=""
       label="Assignee"
       dataCy="assignee-autocomplete"
       loadData={props.loadData}
-      loading={false}
+      loading={props.loading ?? false}
       options={[]}
       handleChange={vi.fn()}
       handleClose={vi.fn()}
@@ -27,6 +31,18 @@ function renderFilter(props: { open: boolean; loadData: () => void }) {
 describe('BaseAutocompleteFilterRest', () => {
   it('renders the field before any data has loaded', () => {
     renderFilter({ open: false, loadData: vi.fn() });
+
+    expect(screen.getByTestId('assignee-autocomplete')).toBeTruthy();
+  });
+
+  it('hides the field while a closed dropdown resolves its initial label', () => {
+    renderFilter({ open: false, loadData: vi.fn(), loading: true });
+
+    expect(screen.queryByTestId('assignee-autocomplete')).toBeNull();
+  });
+
+  it('keeps the field mounted while loading with the dropdown open', () => {
+    renderFilter({ open: true, loadData: vi.fn(), loading: true });
 
     expect(screen.getByTestId('assignee-autocomplete')).toBeTruthy();
   });
