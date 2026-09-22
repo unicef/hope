@@ -936,6 +936,14 @@ export const MIN_PHONE_SEARCH_DIGITS = 4;
 export const isPhoneSearchTooShort = (phone?: string | null): boolean =>
   !!phone && phone.replace(/\D/g, '').length < MIN_PHONE_SEARCH_DIGITS;
 
+// Filter state can be seeded straight from the URL, which bypasses the apply-time
+// guard in the filter components. The backend rejects a short phone with a 400, so
+// drop it here rather than firing a request that cannot succeed.
+export const sanitizePhoneSearch = (phone?: string | null): string => {
+  const trimmed = phone?.trim() ?? '';
+  return isPhoneSearchTooShort(trimmed) ? '' : trimmed;
+};
+
 export const createHandleApplyFilterChange = (
   initialFilter: Filter,
   navigate: ReturnType<typeof useNavigate>,

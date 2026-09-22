@@ -20,7 +20,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 import { DocumentSearchField } from '@core/DocumentSearchField';
-import { type ReactElement, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
 import type { ProgramList } from '@restgenerated/models/ProgramList';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
@@ -69,6 +69,16 @@ export function IndividualsFilter({
     );
 
   const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  // The applied filter can be seeded from the URL without going through
+  // handleApplyFilter, so flag a short phone that arrived that way too.
+  useEffect(() => {
+    setPhoneError(
+      isPhoneSearchTooShort(appliedFilter.phone)
+        ? t('Phone search requires at least 4 digits')
+        : null,
+    );
+  }, [appliedFilter.phone, t]);
 
   const handleApplyFilter = (): void => {
     if (isPhoneSearchTooShort(filter.phone)) {

@@ -16,7 +16,7 @@ import {
   createHandleApplyFilterChange,
   isPhoneSearchTooShort,
 } from '@utils/utils';
-import { type ReactElement, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../programContext';
@@ -68,6 +68,16 @@ export function PeopleFilter({
     );
 
   const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  // The applied filter can be seeded from the URL without going through
+  // handleApplyFilter, so flag a short phone that arrived that way too.
+  useEffect(() => {
+    setPhoneError(
+      isPhoneSearchTooShort(appliedFilter.phone)
+        ? t('Phone search requires at least 4 digits')
+        : null,
+    );
+  }, [appliedFilter.phone, t]);
 
   const handleApplyFilter = (): void => {
     if (isPhoneSearchTooShort(filter.phone)) {
