@@ -74,6 +74,8 @@ DEFAULTS = {
     "ADMIN_PANEL_URL": (str, "unicorn"),
     "SESSION_COOKIE_SECURE": (bool, True),
     "SESSION_COOKIE_HTTPONLY": (bool, True),
+    "SESSION_COOKIE_AGE": (int, 86400),
+    "SESSION_EXPIRE_AT_BROWSER_CLOSE": (bool, True),
     "CSRF_COOKIE_HTTPONLY": (bool, True),
     "CSRF_COOKIE_SECURE": (bool, True),
     "SECURE_CONTENT_TYPE_NOSNIFF": (bool, True),
