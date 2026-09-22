@@ -396,6 +396,10 @@ class ProgramViewSet(
             new_object=instance,
         )
 
+    @staticmethod
+    def _eligible_payments(program: Program) -> QuerySet[Payment]:
+        return Payment.objects.filter(parent__program_cycle__program=program).eligible()
+
     @extend_schema(
         parameters=filterset_to_openapi_params(PaymentSearchFilter),
         responses={
@@ -405,7 +409,7 @@ class ProgramViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
-        payments = with_payment_related_data(Payment.objects.filter(parent__program_cycle__program=program))
+        payments = with_payment_related_data(self._eligible_payments(program))
         filterset = PaymentSearchFilter(
             request.GET,
             queryset=payments,
@@ -437,7 +441,7 @@ class ProgramViewSet(
     )
     def payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_object()
-        payments = Payment.objects.filter(parent__program_cycle__program=program)
+        payments = self._eligible_payments(program)
         filterset = PaymentSearchFilter(
             request.GET,
             queryset=payments,

@@ -181,6 +181,16 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
 
 
 @pytest.fixture
+def payment_plan_pending_breakdown_context(
+    payment_plan_detail_context: dict[str, Any],
+) -> dict[str, Any]:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    PaymentFactory(parent=payment_plan, status=Payment.STATUS_SENT_TO_PG)
+    PaymentFactory(parent=payment_plan, status=Payment.STATUS_SENT_TO_FSP)
+    return payment_plan_detail_context
+
+
+@pytest.fixture
 def vision_payment_plan_detail_context(payment_plan_detail_context: dict[str, Any]) -> dict[str, Any]:
     from flags.models import FlagState
 
@@ -410,6 +420,11 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
 
     assert data["id"] == str(payment_plan.id)
     assert data["reconciliation_summary"]["pending"] == 1
+    assert data["reconciliation_summary"]["pending_breakdown"] == {
+        "pending": 1,
+        "sent_to_payment_gateway": 0,
+        "sent_to_fsp": 0,
+    }
     assert data["reconciliation_summary"]["number_of_payments"] == 1
     assert data["excluded_households"] == []
     assert data["excluded_individuals"] == []
@@ -420,6 +435,24 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["status_date"] is not None
     assert data["start_date"] == "2024-01-02"
     assert data["end_date"] == "2024-02-03"
+
+
+def test_payment_plan_detail_serializer_returns_pending_status_breakdown(
+    payment_plan_pending_breakdown_context: dict[str, Any],
+) -> None:
+    serializer = PaymentPlanDetailSerializer(
+        instance=payment_plan_pending_breakdown_context["payment_plan"],
+        context={"request": Mock(user=payment_plan_pending_breakdown_context["user"])},
+    )
+
+    summary = serializer.data["reconciliation_summary"]
+
+    assert summary["pending"] == 3
+    assert summary["pending_breakdown"] == {
+        "pending": 1,
+        "sent_to_payment_gateway": 1,
+        "sent_to_fsp": 1,
+    }
 
 
 @pytest.mark.parametrize(

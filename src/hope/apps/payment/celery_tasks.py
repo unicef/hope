@@ -1183,10 +1183,32 @@ def payment_plan_exclude_beneficiaries_async_task_action(job: AsyncRetryJob) -> 
             )
             raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
 
-        payments_for_exclude = payment_plan.eligible_payments.filter(**{f"{filter_key}__in": excluding_hh_or_ind_ids})
-
-        payments_for_exclude.update_and_log({"excluded": True}, job.config.get("user_id"))
-        payments_for_undo_exclude.update_and_log({"excluded": False}, job.config.get("user_id"))
+        payments_for_exclude = payment_plan.eligible_payments.filter(
+            **{f"{filter_key}__in": excluding_hh_or_ind_ids}
+        ).distinct()
+        restorable_payments = payments_for_undo_exclude.filter(
+            status=Payment.STATUS_NOT_ELIGIBLE,
+            conflicted=False,
+            has_valid_wallet=True,
+        )
+        user_id = job.config.get("user_id")
+        payments_for_exclude.update_and_log(
+            {
+                "excluded": True,
+                "status": Payment.STATUS_NOT_ELIGIBLE,
+                "status_date": timezone.now(),
+            },
+            user_id,
+        )
+        restorable_payments.update_and_log(
+            {
+                "excluded": False,
+                "status": Payment.STATUS_PENDING,
+                "status_date": timezone.now(),
+            },
+            user_id,
+        )
+        payments_for_undo_exclude.update_and_log({"excluded": False}, user_id)
 
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
