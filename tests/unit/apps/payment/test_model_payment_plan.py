@@ -28,6 +28,8 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory
+from hope.apps.household.const import NON_BENEFICIARY
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.models import Approval, FileTemp, Payment, PaymentPlan, ProgramCycle, Rule
 
@@ -248,6 +250,110 @@ def test_update_population_count_fields(payment_plan):
     assert payment_plan.male_adults_count == 1
     assert payment_plan.total_households_count == 2
     assert payment_plan.total_individuals_count == 4
+
+
+def test_update_population_count_fields_excludes_withdrawn_individuals(payment_plan):
+    hoh = IndividualFactory(
+        household=None,
+        sex="FEMALE",
+        birth_date=datetime.now().date() - relativedelta(years=30),
+    )
+    household = HouseholdFactory(head_of_household=hoh, registration_data_import=hoh.registration_data_import)
+
+    IndividualFactory(
+        household=household,
+        sex="MALE",
+        birth_date=datetime.now().date() - relativedelta(years=20),
+        withdrawn=True,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualFactory(
+        household=household,
+        sex="FEMALE",
+        birth_date=datetime.now().date() - relativedelta(years=5),
+        withdrawn=True,
+        registration_data_import=household.registration_data_import,
+    )
+
+    PaymentFactory(parent=payment_plan, household=household, collector=hoh)
+
+    payment_plan.update_population_count_fields()
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.total_individuals_count == 1
+    assert payment_plan.female_adults_count == 1
+    assert payment_plan.male_adults_count == 0
+    assert payment_plan.female_children_count == 0
+    assert payment_plan.total_households_count == 1
+
+
+def test_update_population_count_fields_excludes_duplicates_and_non_beneficiaries(payment_plan):
+    hoh = IndividualFactory(
+        household=None,
+        sex="FEMALE",
+        birth_date=datetime.now().date() - relativedelta(years=30),
+    )
+    household = HouseholdFactory(head_of_household=hoh, registration_data_import=hoh.registration_data_import)
+
+    IndividualFactory(
+        household=household,
+        sex="MALE",
+        birth_date=datetime.now().date() - relativedelta(years=20),
+        duplicate=True,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualFactory(
+        household=household,
+        sex="MALE",
+        birth_date=datetime.now().date() - relativedelta(years=40),
+        relationship=NON_BENEFICIARY,
+        registration_data_import=household.registration_data_import,
+    )
+
+    PaymentFactory(parent=payment_plan, household=household, collector=hoh)
+
+    payment_plan.update_population_count_fields()
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.total_individuals_count == 1
+    assert payment_plan.female_adults_count == 1
+    assert payment_plan.male_adults_count == 0
+
+
+def test_update_population_count_fields_total_matches_sum_of_household_sizes(payment_plan):
+    hoh = IndividualFactory(
+        household=None,
+        sex="FEMALE",
+        birth_date=datetime.now().date() - relativedelta(years=30),
+    )
+    household = HouseholdFactory(head_of_household=hoh, registration_data_import=hoh.registration_data_import)
+
+    IndividualFactory(
+        household=household,
+        sex="MALE",
+        birth_date=datetime.now().date() - relativedelta(years=20),
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualFactory(
+        household=household,
+        sex="MALE",
+        birth_date=datetime.now().date() - relativedelta(years=25),
+        withdrawn=True,
+        registration_data_import=household.registration_data_import,
+    )
+
+    PaymentFactory(parent=payment_plan, household=household, collector=hoh)
+
+    data_collecting_type = household.program.data_collecting_type
+    data_collecting_type.recalculate_composition = True
+    data_collecting_type.save(update_fields=["recalculate_composition"])
+
+    recalculate_data(household)
+    payment_plan.update_population_count_fields()
+
+    household.refresh_from_db()
+    payment_plan.refresh_from_db()
+    assert payment_plan.total_individuals_count == household.size
 
 
 def test_update_money_fields(payment_plan):

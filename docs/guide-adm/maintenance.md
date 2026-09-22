@@ -20,6 +20,19 @@ In a containerised deployment the same command is run inside the backend contain
 docker compose run --rm backend python manage.py <command>
 ```
 
+## Recount programme size
+
+`recount_program_size` refreshes `household_count` and `individual_count` on every programme.
+
+The counters are kept up to date as households and individuals change, so a programme nobody
+touches keeps whatever it last recorded. Run this when the stored numbers no longer match the data.
+
+```bash
+python manage.py recount_program_size
+```
+
+Safe to re-run.
+
 ## Backfill KAB
 
 `backfill_kab` populates the [known affected beneficiaries](../guide-user/known-affected-beneficiaries.md)

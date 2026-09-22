@@ -22,6 +22,7 @@ from hope.apps.household.const import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
+    NON_BENEFICIARY,
 )
 from hope.models import (
     Area,
@@ -453,3 +454,36 @@ def test_individual_erase(business_area: BusinessArea) -> None:
     assert individual.given_name_latin == "GDPR REMOVED"
     assert individual.middle_name_latin == "GDPR REMOVED"
     assert individual.family_name_latin == "GDPR REMOVED"
+
+
+def test_active_individuals_excludes_withdrawn_duplicate_and_non_beneficiary():
+    household = HouseholdFactory()
+    IndividualFactory(
+        household=household,
+        program=household.program,
+        business_area=household.business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualFactory(
+        household=household,
+        program=household.program,
+        business_area=household.business_area,
+        withdrawn=True,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualFactory(
+        household=household,
+        program=household.program,
+        business_area=household.business_area,
+        duplicate=True,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualFactory(
+        household=household,
+        program=household.program,
+        business_area=household.business_area,
+        relationship=NON_BENEFICIARY,
+        registration_data_import=household.registration_data_import,
+    )
+
+    assert household.active_individuals.count() == 2
