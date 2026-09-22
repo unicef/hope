@@ -206,7 +206,7 @@ function Entitlement({
       queryFn: () => RestService.restEngineRulesList(engineRulesParams),
     });
 
-  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
+  const { mutate: mutateExport, isPending: loadingExport } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       id,

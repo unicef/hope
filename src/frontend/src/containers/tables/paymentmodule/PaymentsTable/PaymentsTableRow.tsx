@@ -5,8 +5,9 @@ import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
-import TableCell from '@mui/material/TableCell';
+import { Box, Chip, TableCell } from '@mui/material';
 import type { PaymentList } from '@restgenerated/models/PaymentList';
+import type { NotEligiblePaymentList } from '@restgenerated/models/NotEligiblePaymentList';
 import {
   displayNameWithLatin,
   formatCurrencyWithSymbol,
@@ -50,10 +51,11 @@ const RoutedBox = styled.div`
 `;
 
 interface PaymentsTableRowProps {
-  payment: PaymentList;
+  payment: PaymentList | NotEligiblePaymentList;
   canViewDetails: boolean;
   onWarningClick?: (payment: PaymentList) => void;
   permissions;
+  showIneligibilityCauses?: boolean;
 }
 
 export function PaymentsTableRow({
@@ -61,6 +63,7 @@ export function PaymentsTableRow({
   canViewDetails,
   onWarningClick,
   permissions,
+  showIneligibilityCauses = false,
 }: PaymentsTableRowProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -171,12 +174,16 @@ export function PaymentsTableRow({
               payment.householdUnicefId
             )}
           </TableCell>
-          <TableCell align="left">{payment.householdSize}</TableCell>
+          {!showIneligibilityCauses && (
+            <TableCell align="left">{payment.householdSize}</TableCell>
+          )}
         </>
       )}
-      <TableCell align="left">
-        {renderSomethingOrDash(payment.householdAdmin2)}
-      </TableCell>
+      {!showIneligibilityCauses && (
+        <TableCell align="left">
+          {renderSomethingOrDash(payment.householdAdmin2)}
+        </TableCell>
+      )}
       {!isSocialDctType && (
         <>
           <TableCell align="left">
@@ -192,9 +199,11 @@ export function PaymentsTableRow({
           </TableCell>
         </>
       )}
-      <TableCell align="left">
-        {payment.fspName ? payment.fspName : '-'}
-      </TableCell>
+      {!showIneligibilityCauses && (
+        <TableCell align="left">
+          {payment.fspName ? payment.fspName : '-'}
+        </TableCell>
+      )}
       <TableCell align="left">
         {payment.entitlementQuantity != null &&
         Number(payment.entitlementQuantity) >= 0
@@ -208,9 +217,11 @@ export function PaymentsTableRow({
             )})`
           : '-'}
       </TableCell>
-      <TableCell data-cy="delivered-quantity-cell" align="left">
-        {renderDeliveredQuantity()}
-      </TableCell>
+      {!showIneligibilityCauses && (
+        <TableCell data-cy="delivered-quantity-cell" align="left">
+          {renderDeliveredQuantity()}
+        </TableCell>
+      )}
       <TableCell>
         <StatusBox
           status={payment.status}
@@ -218,12 +229,45 @@ export function PaymentsTableRow({
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
-      {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
-        <TableCell data-cy="fsp-auth-code-cell" align="left">
-          {payment.fspAuthCode || '-'}
+      {showIneligibilityCauses && (
+        <TableCell>
+          {'conflicted' in payment && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {payment.conflicted && (
+                <Chip
+                  color="error"
+                  label={t('Hard Conflict')}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+              {payment.excluded && (
+                <Chip
+                  color="error"
+                  label={t('Manual Exclusion')}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+              {!payment.hasValidWallet && (
+                <Chip
+                  color="error"
+                  label={t('Invalid Wallet')}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          )}
         </TableCell>
       )}
-      <TableCell>{renderMark()}</TableCell>
+      {!showIneligibilityCauses &&
+        hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
+          <TableCell data-cy="fsp-auth-code-cell" align="left">
+            {payment.fspAuthCode || '-'}
+          </TableCell>
+        )}
+      {!showIneligibilityCauses && <TableCell>{renderMark()}</TableCell>}
     </ClickableTableRow>
   );
 }

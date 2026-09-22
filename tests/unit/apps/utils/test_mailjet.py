@@ -11,6 +11,7 @@ from openpyxl import Workbook
 import pytest
 
 from extras.test_utils.factories import UserFactory
+from hope.apps.utils.celery_tasks import MailjetSendError, MailjetTemporaryError, send_email_async_task
 from hope.apps.utils.mailjet import MailjetClient
 
 pytestmark = pytest.mark.django_db
@@ -412,3 +413,23 @@ def test_email_user_via_mailjet(mocked_requests_post: Any) -> None:
         data=expected_data,
         timeout=30,
     )
+
+
+@patch("hope.apps.utils.celery_tasks.requests.post")
+def test_a_mailjet_server_fault_raises_a_retryable_error(mocked_requests_post: Any) -> None:
+    mocked_requests_post.return_value.status_code = 503
+    mocked_requests_post.return_value.text = "Service Unavailable"
+
+    with pytest.raises(MailjetTemporaryError, match="Service Unavailable"):
+        send_email_async_task(json.dumps({"Messages": []}))
+
+
+@patch("hope.apps.utils.celery_tasks.requests.post")
+def test_a_mailjet_rejection_raises_without_a_retry(mocked_requests_post: Any) -> None:
+    mocked_requests_post.return_value.status_code = 400
+    mocked_requests_post.return_value.text = "Bad Request"
+
+    with pytest.raises(MailjetSendError, match="Bad Request") as raised:
+        send_email_async_task(json.dumps({"Messages": []}))
+
+    assert not isinstance(raised.value, MailjetTemporaryError)
