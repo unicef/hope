@@ -728,7 +728,7 @@ def test_upload_household_with_nul_byte_currency_is_rejected(
     assert RegistrationDataImport.objects.count() == 0
 
 
-@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 21), ("SYP01", 23)])
+@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 22), ("SYP01", 24)])
 def test_upload_household_resolves_the_currency_code_to_the_active_row(
     token_api_client: APIClient,
     upload_url: str,

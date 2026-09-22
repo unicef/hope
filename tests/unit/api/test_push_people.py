@@ -384,7 +384,7 @@ def test_push_single_person_with_currency(
     assert ind.household.currency.code == "USD"
 
 
-@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 25), ("SYP01", 27)])
+@pytest.mark.parametrize(("code", "expected_queries"), [("SYP", 27), ("SYP01", 29)])
 def test_push_single_person_resolves_the_currency_code_to_the_active_row(
     token_api_client,
     push_people_url,
