@@ -23,10 +23,23 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         [
             "name",
             "cycle",
+            "status",
             "background_action_status",
             "delivery_import_file",
         ],
     )
+
+    class Status(models.TextChoices):
+        OPEN = "OPEN", "Open"
+        LOCKED = "LOCKED", "Locked"
+        IN_APPROVAL = "IN_APPROVAL", "In Approval"
+        IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
+        IN_REVIEW = "IN_REVIEW", "In Review"
+        ACCEPTED = "ACCEPTED", "Accepted"
+        ABORTED = "ABORTED", "Aborted"
+        FINISHED = "FINISHED", "Finished"
+        READY_FOR_CLOSURE = "READY_FOR_CLOSURE", "Ready for Closure"
+        CLOSED = "CLOSED", "Closed"
 
     class BackgroundActionStatus(models.TextChoices):
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
@@ -49,6 +62,13 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         verbose_name=_("Programme Cycle"),
     )
     name = models.CharField(max_length=255, default="Default Group")
+    status = models.CharField(
+        max_length=50,
+        default=Status.OPEN,
+        db_index=True,
+        choices=Status.choices,
+    )
+    status_date = models.DateTimeField(blank=True, null=True)
     delivery_import_file = models.ForeignKey(
         "core.FileTemp",
         null=True,

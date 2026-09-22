@@ -2074,7 +2074,7 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle", "created_at"]
+        fields = ["id", "unicef_id", "name", "cycle", "status", "created_at"]
 
 
 class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):

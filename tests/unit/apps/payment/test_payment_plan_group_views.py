@@ -579,6 +579,46 @@ def test_create_group_same_name_different_cycle_allowed(
     assert response.status_code == status.HTTP_201_CREATED
 
 
+def test_create_group_status_in_payload_ignored(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+
+    response = client.post(
+        _list_url(business_area.slug, program.code),
+        {"name": "New Master", "cycle": str(cycle.id), "status": PaymentPlanGroup.Status.CLOSED},
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert PaymentPlanGroup.objects.get(id=response.json()["id"]).status == PaymentPlanGroup.Status.OPEN
+
+
+def test_list_filter_by_status(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
+    locked_group = PaymentPlanGroupFactory(cycle=cycle, name="Locked", status=PaymentPlanGroup.Status.LOCKED)
+    PaymentPlanGroupFactory(cycle=cycle, name="Open", status=PaymentPlanGroup.Status.OPEN)
+
+    response = client.get(_list_url(business_area.slug, program.code), {"status": PaymentPlanGroup.Status.LOCKED})
+
+    assert response.status_code == status.HTTP_200_OK
+    returned_ids = {row["id"] for row in response.json()["results"]}
+    assert returned_ids == {str(locked_group.id)}
+
+
 def test_retrieve_detail_aggregated_totals(
     client: Any,
     user: Any,

@@ -219,18 +219,20 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
 class PaymentPlanGroupFilter(FilterSet):
     cycle = django_filters.UUIDFilter(field_name="cycle__id")
     search = django_filters.CharFilter(method="search_filter")
+    status = django_filters.MultipleChoiceFilter(choices=PaymentPlanGroup.Status.choices)
     ordering = OrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
             ("name", "name"),
             ("created_at", "created_at"),
             ("cycle__title", "cycle"),
+            ("status", "status"),
         )
     )
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["cycle"]
+        fields = ["cycle", "status"]
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))
