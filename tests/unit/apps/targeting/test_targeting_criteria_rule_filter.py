@@ -859,9 +859,25 @@ def test_rule_filter_currency_not_equals_after_redenomination_excludes_both_deno
     }
 
 
-@pytest.mark.parametrize("argument", ["XXX", "VEF"])
-def test_rule_filter_currency_rejects_code_without_active_currency(currency_retired, argument):
-    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=[argument])
+@pytest.fixture
+def households_on_retired_currency(business_area, program, currency_retired, currency_pln):
+    return {
+        "retired": HouseholdFactory(business_area=business_area, program=program, currency=currency_retired),
+        "pln": HouseholdFactory(business_area=business_area, program=program, currency=currency_pln),
+    }
 
-    with pytest.raises(ValidationError, match=f"Unknown currency code: {argument}"):
-        rule_filter.get_query()
+
+def test_rule_filter_currency_retired_without_successor_still_matches_its_households(households_on_retired_currency):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=["VEF"])
+
+    queryset = Household.objects.filter(rule_filter.get_query())
+
+    assert set(queryset) == {households_on_retired_currency["retired"]}
+
+
+def test_rule_filter_currency_unknown_code_matches_nothing(households_on_retired_currency):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=["XXX"])
+
+    queryset = Household.objects.filter(rule_filter.get_query())
+
+    assert not queryset.exists()
