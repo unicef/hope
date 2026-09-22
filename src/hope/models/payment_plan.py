@@ -28,7 +28,7 @@ from model_utils.models import SoftDeletableModel
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hope.apps.household.const import FEMALE, MALE
+from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.contrib.vision.choices import VisionStatus
@@ -698,7 +698,11 @@ class PaymentPlan(
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
 
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+        active_beneficiary = Q(withdrawn=False, duplicate=False) & ~Q(relationship=NON_BENEFICIARY)
+
+        targeted_individuals = Individual.objects.filter(
+            active_beneficiary, household__id__in=households_ids
+        ).aggregate(
             male_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
             female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
             male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),

@@ -123,7 +123,7 @@ class ProgramFilter(UpdatedAtFilter):
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: slice) -> QuerySet:
-        queryset = queryset.annotate(hh_count=Count("households"))
+        queryset = queryset.annotate(hh_count=Count("households", filter=Q(households__withdrawn=False)))
         if min_value := value.start:
             queryset = queryset.filter(hh_count__gte=min_value)
         if max_value := value.stop:

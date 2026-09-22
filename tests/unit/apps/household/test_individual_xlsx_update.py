@@ -5,6 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
+import openpyxl
 import pytest
 
 from extras.test_utils.factories import (
@@ -145,6 +146,27 @@ def invalid_phone_no_file():
 def xlsx_update_file(business_area, valid_file):
     return XlsxUpdateFileFactory(
         file=valid_file,
+        business_area=business_area,
+        xlsx_match_columns=["individual__given_name"],
+    )
+
+
+@pytest.fixture
+def relationship_file():
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "Individuals"
+    sheet.append(["individual__given_name", "individual__relationship"])
+    sheet.append(["Karolina", SON_DAUGHTER])
+    content = BytesIO()
+    workbook.save(content)
+    return File(BytesIO(content.getvalue()), name="relationship_update.xlsx")
+
+
+@pytest.fixture
+def xlsx_update_relationship_file(business_area, relationship_file):
+    return XlsxUpdateFileFactory(
+        file=relationship_file,
         business_area=business_area,
         xlsx_match_columns=["individual__given_name"],
     )
@@ -308,4 +330,29 @@ def test_update_individuals_skips_recalculation_without_recalc_fields(xlsx_updat
 
     assert not AsyncJob.objects.filter(
         action="hope.apps.household.celery_tasks.recalculate_population_fields_async_task_action"
+    ).exists()
+
+
+def test_update_individuals_recounts_program_when_relationship_updated(
+    xlsx_update_relationship_file, individuals, program, django_capture_on_commit_callbacks
+) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_relationship_file)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        updater.update_individuals()
+
+    job = AsyncJob.objects.get(action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action")
+    assert job.config["program_id"] == str(program.id)
+
+
+def test_update_individuals_skips_program_recount_without_relationship(
+    xlsx_update_valid_file_complex, individuals, django_capture_on_commit_callbacks
+) -> None:
+    updater = IndividualXlsxUpdate(xlsx_update_valid_file_complex)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        updater.update_individuals()
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action"
     ).exists()

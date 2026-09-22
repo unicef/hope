@@ -32,7 +32,7 @@ export function FinishedPaymentPlanHeaderButtons({
   const { businessArea, programId } = useBaseUrl();
 
   const {
-    mutateAsync: markReadyForClosure,
+    mutate: markReadyForClosure,
     isPending: loadingReadyForClosure,
   } = useMutation({
     mutationFn: () =>
@@ -60,7 +60,7 @@ export function FinishedPaymentPlanHeaderButtons({
   });
 
   const {
-    mutateAsync: sendToPaymentGateway,
+    mutate: sendToPaymentGateway,
     isPending: LoadingSendToPaymentGateway,
   } = useMutation({
     mutationFn: () =>

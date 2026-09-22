@@ -7,7 +7,6 @@ from django.db.models import Q, QuerySet
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_marking_as_duplicate_individual_service,
 )
@@ -21,6 +20,7 @@ from hope.apps.grievance.utils import (
 )
 from hope.apps.household.const import UNIQUE, UNIQUE_IN_BATCH
 from hope.apps.household.documents import get_individual_doc
+from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.registration_data.tasks.deduplicate import HardDocumentDeduplication
 from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -63,6 +63,11 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
 
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
+    affected_household_ids = {
+        individual.household_id
+        for individual in [*duplicate_individuals, *distinct_individuals]
+        if individual.household_id
+    }
     if duplicate_individuals:
         for individual_to_remove in duplicate_individuals:
             unique_individual = None
@@ -82,6 +87,10 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
         _clear_deduplication_individuals_fields(distinct_individuals)  # type: ignore[arg-type]
+
+    # after the reassignment above: a new head of household can change child_hoh
+    for household in Household.objects.filter(id__in=affected_household_ids).order_by("pk"):
+        recalculate_data(household)
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -268,8 +277,6 @@ def create_grievance_ticket_with_details(
     if possible_duplicates:
         ticket_details.possible_duplicates.add(*possible_duplicates)
     ticket_details.populate_cross_area_flag()
-
-    GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
     return ticket, ticket_details
 

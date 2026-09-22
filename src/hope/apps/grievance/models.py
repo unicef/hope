@@ -559,6 +559,24 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 name="idx_gt_ba_updated_not_ign",
             ),
             models.Index(fields=["assigned_at"], name="idx_gt_assigned_at"),
+            # _unassigned_tickets(): one business area, no assignee, `.exclude(status=STATUS_CLOSED)`
+            models.Index(
+                fields=["business_area", "category"],
+                condition=models.Q(assigned_to__isnull=True) & ~models.Q(status=6),  # STATUS_CLOSED
+                name="idx_gt_ba_cat_unassigned_open",
+            ),
+            # _overdue_tickets(): one business area, grouped by assignee, a created_at cutoff per
+            # category, and the same `.exclude(status=STATUS_CLOSED)`
+            models.Index(
+                fields=["business_area", "assigned_to", "category", "created_at"],
+                condition=~models.Q(status=6),  # STATUS_CLOSED
+                name="idx_gt_ba_asgn_cat_crtd_open",
+            ),
+            # _updated_tickets(): one business area, a one-day user_modified window
+            models.Index(fields=["business_area", "user_modified"], name="idx_gt_ba_user_modified"),
+            # recipient_timezone_names(): one EXISTS per user, for tickets they own or created
+            models.Index(fields=["assigned_to", "business_area"], name="idx_gt_assigned_to_ba"),
+            models.Index(fields=["created_by", "business_area"], name="idx_gt_created_by_ba"),
         ]
 
     def clean(self) -> None:

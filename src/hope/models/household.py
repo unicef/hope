@@ -22,6 +22,7 @@ from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.upload_paths import upload_path
 from hope.apps.household.const import (
     BLANK,
+    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     STATUS_ACTIVE,
@@ -770,7 +771,7 @@ class Household(
 
     @property
     def active_individuals(self) -> QuerySet:
-        return self.individuals.filter(withdrawn=False, duplicate=False)
+        return self.individuals.filter(withdrawn=False, duplicate=False).exclude(relationship=NON_BENEFICIARY)
 
     @cached_property
     def primary_collector(self) -> "Individual" | None:

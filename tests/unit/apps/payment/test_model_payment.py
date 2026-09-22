@@ -48,6 +48,7 @@ def test_household_admin2_property(payment_plan):
     ("status", "expected"),
     [
         (Payment.STATUS_PENDING, "Pending"),
+        (Payment.STATUS_NOT_ELIGIBLE, "Not Eligible"),
         (Payment.STATUS_DISTRIBUTION_SUCCESS, "Delivered Fully"),
         (Payment.STATUS_SUCCESS, "Delivered Fully"),
         (Payment.STATUS_DISTRIBUTION_PARTIAL, "Delivered Partially"),
