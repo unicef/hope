@@ -89,6 +89,9 @@ Each batch gets its own **Batch Detail page** (linked from the group) showing th
 
 **Send to Payment Gateway** — sends each qualifying plan in the group to the payment gateway.
 
+**Upload Reconciliation** — imports delivered quantities and distribution information from the group's XLSX. See
+[Payment Reconciliation](payment-reconciliation.md) for normal uploads, corrections, and resets.
+
 **Delete** — only allowed when the group has no Payment Plans attached. A Cycle must always have at least one group, so the last remaining group cannot be deleted.
 
 
