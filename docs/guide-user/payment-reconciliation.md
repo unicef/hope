@@ -36,12 +36,14 @@ Text, dates, values above the entitlement, and negative numbers other than `-1` 
 
 Use normal mode for the first reconciliation:
 
-1. Open the Payment Plan Group.
-2. Select **Upload Reconciliation**.
-3. Select the completed XLSX without enabling overwrite.
-4. Submit the file.
+1. Open the Payment Plan Group and select **Upload Reconciliation**.
 
-![Upload reconciliation XLSX](_screenshots/payment/pay_28.png)
+   ![Upload Reconciliation button](_screenshots/payment/pay_28.png)
+
+2. Select the completed XLSX without enabling overwrite.
+3. Submit the file.
+
+![Reconciliation upload options](_screenshots/payment/reconciliation-options.jpg)
 
 HOPE processes each row as follows:
 
