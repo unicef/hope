@@ -1,5 +1,6 @@
 import type { Order } from '@components/rest/TableRestComponent/TableRestComponent';
 import { columnToOrderBy } from '@utils/utils';
+import isEqual from 'lodash/isEqual';
 import { useCallback, useMemo, useState } from 'react';
 
 export interface UseTableStateOptions {
@@ -10,7 +11,8 @@ export interface UseTableStateOptions {
   defaultOrderDirection?: Order;
   // Raw `ordering` query value used while no column sort is active.
   defaultOrdering?: string;
-  // Page goes back to 0 whenever this (memoized) value changes.
+  // Page goes back to 0 whenever this value changes (compared by value, so
+  // an inline object literal is fine).
   resetPageOn?: unknown;
 }
 
@@ -60,10 +62,12 @@ export function useTableState({
 
   // Reset the page while rendering (not in an effect): React re-renders
   // immediately with page 0 before committing, so no query goes out with a
-  // stale offset.
-  const [prevResetPageOn, setPrevResetPageOn] = useState(resetPageOn);
-  if (prevResetPageOn !== resetPageOn) {
-    setPrevResetPageOn(resetPageOn);
+  // stale offset. A `defaultOrdering` change is a sort change, so it resets
+  // the page like `requestSort` does.
+  const resetKey = [resetPageOn, defaultOrdering];
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (!isEqual(prevResetKey, resetKey)) {
+    setPrevResetKey(resetKey);
     setPage(0);
   }
 

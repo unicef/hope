@@ -116,6 +116,31 @@ describe('useTableState', () => {
     ]);
   });
 
+  it('does not reset the page when resetPageOn is a new but equal object', () => {
+    const { result, rerender } = renderHook(
+      ({ filters }) => useTableState({ resetPageOn: filters }),
+      { initialProps: { filters: { search: 'a' } } },
+    );
+
+    act(() => result.current.setPage(2));
+    rerender({ filters: { search: 'a' } });
+
+    expect(result.current.page).toBe(2);
+  });
+
+  it('resets the page when defaultOrdering changes', () => {
+    const { result, rerender } = renderHook(
+      ({ ordering }) => useTableState({ defaultOrdering: ordering }),
+      { initialProps: { ordering: 'unicef_id' } },
+    );
+
+    act(() => result.current.setPage(2));
+    rerender({ ordering: '-unicef_id' });
+
+    expect(result.current.page).toBe(0);
+    expect(result.current.ordering).toBe('-unicef_id');
+  });
+
   it('memoizes paginationParams while nothing changes', () => {
     const { result, rerender } = renderHook(() => useTableState());
     const first = result.current.paginationParams;

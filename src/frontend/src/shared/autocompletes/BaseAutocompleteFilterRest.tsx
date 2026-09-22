@@ -18,7 +18,6 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   handleOptionLabel,
   handleOpen,
   open,
-  data,
   inputValue,
   onInputTextChange,
   debouncedInputText,
@@ -41,7 +40,6 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
   handleOptionLabel: (option: TOption | string) => string;
   handleOpen: () => void;
   open: boolean;
-  data: unknown;
   inputValue: string;
   onInputTextChange: (value: string) => void;
   debouncedInputText: string;
@@ -57,20 +55,11 @@ export function BaseAutocompleteFilterRest<TOption = AutocompleteOption>({
     prevValueRef.current = value;
   }, [value, onInputTextChange, inputValue]);
 
-  // load data on mount to match the value from the url
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
   useEffect(() => {
     if (open) {
       loadData();
     }
   }, [open, debouncedInputText, loadData]);
-
-  // Hide only while the first fetch is in flight, so a consumer that defers
-  // fetching until the dropdown opens still renders its (empty) field.
-  if (!data && loading) return null;
 
   return (
     <StyledAutocomplete

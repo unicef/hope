@@ -86,12 +86,11 @@ export const TargetPopulationAutocompleteRestFilter = ({
     enabled: !!businessArea && !!programId && (open || !!value),
   });
 
-  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (businessArea && programId && (open || value)) {
+    if (businessArea && programId) {
       refetch();
     }
-  }, [businessArea, programId, open, value, refetch]);
+  }, [businessArea, programId, refetch]);
 
   // Create handleFilterChange only if filter-related props are provided
   const { handleFilterChange } =
@@ -162,7 +161,6 @@ export const TargetPopulationAutocompleteRestFilter = ({
         }
         return option?.name || '';
       }}
-      data={targetPopulationData}
       inputValue={inputValue}
       onInputTextChange={setInputValue}
       debouncedInputText={debouncedInputText}

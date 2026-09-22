@@ -77,12 +77,11 @@ export const CreatedByAutocompleteRestFilter = ({
     }));
   }, [debouncedInputText]);
 
-  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (businessArea && (open || value)) {
+    if (businessArea) {
       refetch();
     }
-  }, [businessArea, open, value, refetch]);
+  }, [businessArea, refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -152,7 +151,6 @@ export const CreatedByAutocompleteRestFilter = ({
       }}
       handleOptionSelected={handleOptionSelected}
       handleOptionLabel={handleOptionLabel}
-      data={userData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

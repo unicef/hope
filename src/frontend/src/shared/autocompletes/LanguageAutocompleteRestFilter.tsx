@@ -56,12 +56,9 @@ export function LanguageAutocompleteRestFilter({
     enabled: open || !!value,
   });
 
-  // `refetch` ignores `enabled`, so mirror the same guard here.
   const loadData = useCallback(() => {
-    if (open || value) {
-      refetch();
-    }
-  }, [open, value, refetch]);
+    refetch();
+  }, [refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -128,7 +125,6 @@ export function LanguageAutocompleteRestFilter({
       }}
       handleOptionSelected={handleOptionSelected}
       handleOptionLabel={handleOptionLabel}
-      data={languageData}
       inputValue={inputValue}
       onInputTextChange={setInputValue}
       debouncedInputText={debouncedInputText}
