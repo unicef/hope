@@ -2471,6 +2471,7 @@ def test_mark_as_released_is_allowed_after_vision_flags_are_disabled(
     "vision_status",
     [
         VisionStatus.WAITING_FOR_CALLBACK,
+        VisionStatus.PP_CREATED,
         VisionStatus.SEND_FAILED,
         VisionStatus.CALLBACK_FAILED,
         VisionStatus.FC_MISSING,
@@ -2546,7 +2547,7 @@ def test_abort_invalidates_vision_attempt(
     payment_plan.internal_data = {
         "vision": {
             "sent": True,
-            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
+            "status": VisionStatus.PP_CREATED.value,
             "log": [{"type": "api-call"}],
         }
     }

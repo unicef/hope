@@ -169,6 +169,28 @@ def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
     assert serializer.validated_message_id == "msg-001"
 
 
+def test_payment_plan_callback_request_serializer_accepts_payment_plan_created_acknowledgement() -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={
+            "messageId": "msg-created",
+            "payplanSno": "PP-0060-24-0000002a",
+            "vision_payplanSno": "00000110",
+            "status": "",
+            "fc_num": "",
+        }
+    )
+
+    serializer.is_valid(raise_exception=True)
+
+    assert serializer.validated_data == {
+        "message_id": "msg-created",
+        "payplan_sno": "PP-0060-24-0000002a",
+        "vision_payplan_sno": "00000110",
+        "status": "",
+        "fc_num": "",
+    }
+
+
 def test_payment_plan_callback_request_serializer_external_payload() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={
