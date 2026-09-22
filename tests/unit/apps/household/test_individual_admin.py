@@ -2,18 +2,22 @@
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages import get_messages
+from django.forms.models import modelform_factory
+from django.test import RequestFactory
 from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
+    DataCollectingTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.admin.individual import IndividualAdmin
-from hope.models import Individual
+from hope.apps.household.services.household_recalculate_data import recalculate_data
+from hope.models import AsyncJob, Individual
 
 pytestmark = pytest.mark.django_db
 
@@ -96,3 +100,49 @@ def test_individual_change_page_loads(admin_client, individual):
     url = reverse("admin:household_individual_change", args=[individual.pk])
     response = admin_client.get(url)
     assert response.status_code == 200
+
+
+@pytest.fixture
+def household_with_member():
+    program = ProgramFactory(data_collecting_type=DataCollectingTypeFactory(recalculate_composition=True))
+    household = HouseholdFactory(program=program, business_area=program.business_area)
+    IndividualFactory(
+        household=household,
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=household.registration_data_import,
+    )
+    recalculate_data(household)
+    household.refresh_from_db()
+    return household
+
+
+def test_admin_withdrawing_individual_recalculates_household(household_with_member, django_capture_on_commit_callbacks):
+    assert household_with_member.size == 2
+    member = household_with_member.individuals.exclude(pk=household_with_member.head_of_household_id).get()
+
+    form = modelform_factory(Individual, fields=["withdrawn"])({"withdrawn": True}, instance=member)
+    assert form.is_valid()
+
+    with django_capture_on_commit_callbacks(execute=True):
+        IndividualAdmin(Individual, AdminSite()).save_model(
+            RequestFactory().post("/"), form.save(commit=False), form, change=True
+        )
+
+    household_with_member.refresh_from_db()
+    assert household_with_member.size == 1
+    assert AsyncJob.objects.filter(job_name="adjust_program_size_async_task").exists()
+
+
+def test_admin_editing_unrelated_field_skips_recalculation(household_with_member, django_capture_on_commit_callbacks):
+    member = household_with_member.individuals.exclude(pk=household_with_member.head_of_household_id).get()
+
+    form = modelform_factory(Individual, fields=["given_name"])({"given_name": "Renamed"}, instance=member)
+    assert form.is_valid()
+
+    with django_capture_on_commit_callbacks(execute=True):
+        IndividualAdmin(Individual, AdminSite()).save_model(
+            RequestFactory().post("/"), form.save(commit=False), form, change=True
+        )
+
+    assert not AsyncJob.objects.filter(job_name="adjust_program_size_async_task").exists()
