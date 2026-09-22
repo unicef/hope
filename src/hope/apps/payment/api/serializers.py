@@ -1276,7 +1276,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
         available_items_qs = FundsCommitmentItem.objects.filter(
             Q(payment_plan__isnull=True) | Q(payment_plan=obj),
-            office=obj.business_area,
+            office_id=obj.business_area_id,
         )
 
         headers = (

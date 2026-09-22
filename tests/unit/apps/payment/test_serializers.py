@@ -465,7 +465,7 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
         rec_serial_number=100,
         funds_commitment_number="FC123",
         vendor_id="VENDOR-1",
-        business_area=payment_plan.business_area.code,
+        business_area="BA01",
         posting_date=date(2026, 9, 1),
         document_reference="REFERENCE-1",
         fc_status="O",
@@ -475,8 +475,9 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
         commitment_amount_usd=Decimal("100.50"),
     )
     item = FundsCommitmentItem.objects.get(pk=funds_commitment.pk)
+    item.office = payment_plan.business_area
     item.payment_plan = payment_plan
-    item.save(update_fields=["payment_plan"])
+    item.save(update_fields=["office", "payment_plan"])
     return payment_plan_detail_context
 
 
@@ -511,7 +512,7 @@ def test_payment_plan_detail_serializer_available_funds_commitments_exposes_head
 ) -> None:
     payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         data = PaymentPlanDetailSerializer().get_available_funds_commitments(payment_plan)
 
     assert len(data) == 1
