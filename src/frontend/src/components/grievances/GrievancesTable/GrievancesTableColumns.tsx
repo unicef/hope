@@ -57,7 +57,7 @@ export interface GrievanceCellContext {
   isSocialDctType: boolean;
   optionsData;
   setInputValue;
-  onFilterChange: (assignee, ids) => Promise<void>;
+  onFilterChange: (assignee, ids) => void;
 }
 
 interface GrievanceColumn {
