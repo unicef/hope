@@ -29,7 +29,7 @@ class CurrencyAdmin(HOPEModelAdminBase):
             return
 
         old, new = active[0], inactive[0]
-        if old.code != new.code:
+        if old.code.casefold() != new.code.casefold():
             self.message_user(request, "Selected currencies must share the same code.", level=messages.ERROR)
             return
 

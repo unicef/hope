@@ -54,6 +54,13 @@ def syp_awaiting_deprecation() -> tuple[Currency, Currency]:
     return old, new
 
 
+@pytest.fixture
+def syp_awaiting_deprecation_with_lowercase_successor() -> tuple[Currency, Currency]:
+    old = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=True)
+    new = CurrencyFactory(code="syp", name="Syrian pound", vision_code="SYP01", active=False)
+    return old, new
+
+
 def test_deprecate_requires_exactly_two(
     admin_instance: CurrencyAdmin, request_with_messages, lone_currency: Currency, django_assert_num_queries
 ) -> None:
@@ -164,3 +171,19 @@ def test_deprecate_action_is_offered_with_change_permission(
     admin_instance: CurrencyAdmin, request_with_change_permission
 ) -> None:
     assert "deprecate_currency" in admin_instance.get_actions(request_with_change_permission)
+
+
+def test_deprecate_treats_codes_differing_only_in_case_as_the_same(
+    admin_instance: CurrencyAdmin,
+    request_with_messages,
+    syp_awaiting_deprecation_with_lowercase_successor: tuple[Currency, Currency],
+) -> None:
+    # The active-code constraint is on Lower(code), so the action must compare codes the same way.
+    old, new = syp_awaiting_deprecation_with_lowercase_successor
+
+    admin_instance.deprecate_currency(request_with_messages, Currency.objects.filter(code__iexact="SYP"))
+
+    old.refresh_from_db()
+    new.refresh_from_db()
+    assert old.active is False
+    assert new.active is True
