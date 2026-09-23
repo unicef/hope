@@ -881,3 +881,27 @@ def test_rule_filter_currency_unknown_code_matches_nothing(households_on_retired
     queryset = Household.objects.filter(rule_filter.get_query())
 
     assert not queryset.exists()
+
+
+@pytest.fixture
+def households_on_syp_rows_differing_in_case(business_area, program, currency_pln):
+    currency_old = CurrencyFactory(code="SYP", name="Syrian Pound (old)", vision_code="SYP", active=False)
+    currency_new = CurrencyFactory(code="syp", name="Syrian Pound", vision_code="SYP01", active=True)
+    return {
+        "old": HouseholdFactory(business_area=business_area, program=program, currency=currency_old),
+        "new": HouseholdFactory(business_area=business_area, program=program, currency=currency_new),
+        "pln": HouseholdFactory(business_area=business_area, program=program, currency=currency_pln),
+    }
+
+
+def test_rule_filter_currency_spans_denominations_whose_codes_differ_only_in_case(
+    households_on_syp_rows_differing_in_case,
+):
+    rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="currency", arguments=["SYP"])
+
+    queryset = Household.objects.filter(rule_filter.get_query())
+
+    assert set(queryset) == {
+        households_on_syp_rows_differing_in_case["old"],
+        households_on_syp_rows_differing_in_case["new"],
+    }

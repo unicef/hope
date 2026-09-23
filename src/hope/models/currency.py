@@ -28,14 +28,14 @@ class CurrencyManager(models.Manager.from_queryset(CurrencyQuerySet)):
         ``vision_code``. ``code`` goes first, so an ISO code never resolves through another row's alias,
         and a deactivated ``code`` stays rejected even when an active row carries it as ``vision_code``.
         """
-        currency = self.filter(code=code, active=True).first()
+        currency = self.filter(code__iexact=code, active=True).first()
         if currency is not None:
             return currency
         # TODO(AB#343525): everything below is the vision_code alias; when the transition period ends,
         # replace it with `return None`.
-        if self.filter(code=code).exists():
+        if self.filter(code__iexact=code).exists():
             return None
-        alias = self.filter(vision_code=code, active=True).first()
+        alias = self.filter(vision_code__iexact=code, active=True).first()
         if alias is not None:
             logger.warning("Currency %r resolved through the vision_code alias of %r.", code, alias.code)
         return alias

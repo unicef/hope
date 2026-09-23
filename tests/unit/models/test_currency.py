@@ -46,6 +46,13 @@ def deactivated_code_reused_as_alias(db) -> tuple[Currency, Currency]:
 
 
 @pytest.fixture
+def syp_pair_swapped_in_lowercase(db) -> tuple[Currency, Currency]:
+    deprecated = CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+    active = CurrencyFactory(code="syp", name="Syrian pound", vision_code="SYP01", active=True)
+    return deprecated, active
+
+
+@pytest.fixture
 def code_shadowing_an_alias(db) -> tuple[Currency, Currency]:
     """Two active rows where one's ``code`` is the other's ``vision_code``."""
     by_code = CurrencyFactory(code="ABC", name="By code", vision_code="ABC01", active=True)
@@ -255,6 +262,38 @@ def test_get_active_by_code_or_none_returns_none_for_a_deactivated_code_reused_a
     deactivated_code_reused_as_alias: tuple[Currency, Currency],
 ) -> None:
     assert Currency.objects.get_active_by_code_or_none("ZWL") is None
+
+
+@pytest.mark.parametrize("code", ["SYP", "syp", "Syp"])
+def test_get_active_by_code_matches_a_code_stored_in_another_case(
+    syp_pair_swapped_in_lowercase: tuple[Currency, Currency], code: str
+) -> None:
+    _deprecated, active = syp_pair_swapped_in_lowercase
+
+    assert Currency.objects.get_active_by_code(code) == active
+
+
+def test_get_active_by_code_or_none_matches_a_code_stored_in_another_case(
+    syp_pair_swapped_in_lowercase: tuple[Currency, Currency],
+) -> None:
+    _deprecated, active = syp_pair_swapped_in_lowercase
+
+    assert Currency.objects.get_active_by_code_or_none("SYP") == active
+
+
+def test_get_active_by_code_matches_a_vision_code_alias_in_another_case(
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    _deprecated, active = syp_pair
+
+    assert Currency.objects.get_active_by_code("syp01") == active
+
+
+def test_get_active_by_code_raises_for_a_deprecated_code_differing_only_in_case(
+    deprecated_syp: Currency,
+) -> None:
+    with pytest.raises(Currency.DoesNotExist):
+        Currency.objects.get_active_by_code("syp")
 
 
 def test_active_code_lookup_is_not_reachable_from_a_queryset(db) -> None:

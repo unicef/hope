@@ -27,6 +27,6 @@ def resolve_currency_for_update(code: str, current: Currency | None) -> Currency
     An unchanged code keeps the existing row, so a record on a deprecated currency is not
     repointed onto the active one. Only a different code resolves to the active row.
     """
-    if current is not None and current.code == code:
+    if current is not None and current.code.casefold() == code.casefold():
         return current
     return Currency.objects.get_active_by_code(code)

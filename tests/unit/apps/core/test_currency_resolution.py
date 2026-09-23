@@ -48,6 +48,15 @@ def test_resolve_currency_for_update_keeps_current_row_when_code_is_unchanged(
     assert resolve_currency_for_update("SYP", deprecated) == deprecated
 
 
+def test_resolve_currency_for_update_keeps_current_row_when_code_differs_only_in_case(
+    syp_pair: tuple[Currency, Currency],
+) -> None:
+    # Case alone is not a change: the active-code constraint is on Lower(code).
+    deprecated, _active = syp_pair
+
+    assert resolve_currency_for_update("syp", deprecated) == deprecated
+
+
 def test_resolve_currency_for_update_returns_active_row_when_code_actually_changes(
     syp_pair: tuple[Currency, Currency], currency_eur: Currency
 ) -> None:
