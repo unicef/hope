@@ -19,6 +19,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ApiErrorShape } from '@utils/utils';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
+import { getTicketData, isApprovedTicketFieldChange } from './utils/ticketData';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -77,38 +78,32 @@ export function RequestedHouseholdDataChange({
       showApiErrorMessages(error, showMessage);
     },
   });
-  // householdData is not camelized by the REST client, so keys are snake_case
-  // (flex_fields, approve_status, ...)
   const { householdData, flexFields, rolesArr } = React.useMemo(() => {
     const {
       flex_fields: flexFieldsData,
       roles,
       ...fields
-    } = ticket.ticketDetails?.householdData || {};
+    } = getTicketData(ticket.ticketDetails);
     return {
       householdData: fields,
       flexFields: flexFieldsData || {},
       rolesArr: roles || [],
     };
-  }, [ticket.ticketDetails?.householdData]);
+  }, [ticket.ticketDetails]);
   let allApprovedCount = 0;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   // Count approved top-level fields
-  allApprovedCount += entries.filter(
-    ([, val]) => (val as { approve_status?: boolean })?.approve_status,
+  allApprovedCount += entries.filter(([, val]) =>
+    isApprovedTicketFieldChange(val),
   ).length;
   // Count approved flex fields
-  allApprovedCount += flexFieldsEntries.filter(
-    ([, val]) => (val as { approve_status?: boolean })?.approve_status,
+  allApprovedCount += flexFieldsEntries.filter(([, val]) =>
+    isApprovedTicketFieldChange(val),
   ).length;
   // Count approved roles
-  allApprovedCount += rolesArr.filter(
-    (role) =>
-      role &&
-      typeof role === 'object' &&
-      'approve_status' in role &&
-      role.approve_status === true,
+  allApprovedCount += rolesArr.filter((role) =>
+    isApprovedTicketFieldChange(role),
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -176,35 +171,17 @@ export function RequestedHouseholdDataChange({
   const initialValues = React.useMemo(() => {
     // Top-level fields
     const selected = Object.entries(householdData)
-      .filter(
-        ([, val]) =>
-          val &&
-          typeof val === 'object' &&
-          'approve_status' in val &&
-          (val as { approve_status?: boolean }).approve_status === true,
-      )
+      .filter(([, val]) => isApprovedTicketFieldChange(val))
       .map(([key]) => key);
 
     // Flex fields
     const selectedFlexFields = Object.entries(flexFields)
-      .filter(
-        ([, val]) =>
-          val &&
-          typeof val === 'object' &&
-          'approve_status' in val &&
-          (val as { approve_status?: boolean }).approve_status === true,
-      )
+      .filter(([, val]) => isApprovedTicketFieldChange(val))
       .map(([key]) => key);
 
     // Roles
     const selectedRoles = rolesArr
-      .filter(
-        (role) =>
-          role &&
-          typeof role === 'object' &&
-          'approve_status' in role &&
-          role.approve_status === true,
-      )
+      .filter((role) => isApprovedTicketFieldChange(role))
       .map((role) => role.individual_id);
 
     return {

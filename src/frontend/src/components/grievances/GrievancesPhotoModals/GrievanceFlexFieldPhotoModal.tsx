@@ -7,6 +7,10 @@ import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
+import {
+  getTicketFieldChange,
+  normalizeTicketFieldChange,
+} from '../utils/ticketData';
 
 export interface GrievanceFlexFieldPhotoModalProps {
   field;
@@ -38,20 +42,11 @@ export function GrievanceFlexFieldPhotoModal({
     return null;
   }
 
-  // individualData is camelized by the REST client, householdData is not
-  const ticketData = isIndividual
-    ? data.ticketDetails?.individualData
-    : data.ticketDetails?.householdData;
-  const flexFields = isIndividual
-    ? ticketData?.flexFields
-    : ticketData?.flex_fields;
-  // core IMAGE fields (photo, consent_sign) sit next to flex_fields, not inside them
-  const change = flexFields?.[field.name] ?? ticketData?.[field.name];
-
-  const previousValue = isIndividual
-    ? change?.previousValue
-    : change?.previous_value;
-  const picUrl: string = isCurrent ? previousValue : change?.value;
+  const { value, previousValue } = normalizeTicketFieldChange(
+    getTicketFieldChange(data.ticketDetails, field.name, isIndividual),
+    isIndividual,
+  );
+  const picUrl: string = isCurrent ? previousValue : value;
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (

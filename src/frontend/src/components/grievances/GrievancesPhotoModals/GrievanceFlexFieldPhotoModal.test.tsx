@@ -25,7 +25,8 @@ vi.mock('@restgenerated/index', () => ({
 const mocked = (fn: unknown) => fn as ReturnType<typeof vi.fn>;
 
 // householdData is delivered in snake_case (the REST client does not camelize
-// household_data), individualData is camelized.
+// household_data), individualData is camelized - including its core field
+// names, so consent_sign arrives as consentSign. See utils/ticketData.
 const ticket = {
   id: 'ticket-1',
   ticketDetails: {
@@ -44,6 +45,11 @@ const ticket = {
       },
     },
     individualData: {
+      consentSign: {
+        value: '/api/uploads/people/new.jpg',
+        previousValue: '/api/uploads/people/old.jpg',
+        approveStatus: false,
+      },
       flexFields: {
         photo_i_f: {
           value: '/api/uploads/ind/new.jpg',
@@ -97,6 +103,16 @@ describe('GrievanceFlexFieldPhotoModal', () => {
       'individual flex field current value',
       { field: { name: 'photo_i_f' }, isCurrent: true, isIndividual: true },
       '/api/uploads/ind/old.jpg',
+    ],
+    [
+      'individual core field new value',
+      { field: { name: 'consent_sign' }, isIndividual: true },
+      '/api/uploads/people/new.jpg',
+    ],
+    [
+      'individual core field current value',
+      { field: { name: 'consent_sign' }, isCurrent: true, isIndividual: true },
+      '/api/uploads/people/old.jpg',
     ],
   ])('shows the %s', async (_label, props, expectedSrc) => {
     renderModal(props);
