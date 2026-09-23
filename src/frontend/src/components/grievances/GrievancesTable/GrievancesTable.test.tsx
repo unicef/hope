@@ -135,17 +135,14 @@ describe('GrievancesTable', () => {
   it('requests the list and the count exactly once on mount', async () => {
     renderTable();
 
-    await screen.findByTestId('select-all');
+    // Wait until both responses have landed and been rendered. A duplicate request would come
+    // from state being rewritten after mount, which happens before this point.
     await waitFor(() => {
-      expect(
-        RestService.restBusinessAreasGrievanceTicketsList,
-      ).toHaveBeenCalled();
-      expect(
-        RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
-      ).toHaveBeenCalled();
+      const props = universalTableProps.mock.lastCall?.[0];
+      expect(props?.isFetching).toBe(false);
+      expect(props?.data?.results).toEqual(TICKETS);
+      expect(props?.itemsCount).toBe(TICKETS.length);
     });
-    // Give any stray re-render a chance to fire a second request.
-    await new Promise((resolve) => setTimeout(resolve, 50));
 
     const listMock = vi.mocked(
       RestService.restBusinessAreasGrievanceTicketsList,
