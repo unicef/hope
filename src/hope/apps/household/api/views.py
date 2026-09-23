@@ -177,15 +177,6 @@ class HouseholdViewSet(
         serializer = self.get_serializer(members, many=True)
         return Response(serializer.data)
 
-    @action(
-        detail=True,
-        methods=["post"],
-    )
-    def withdraw(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        instance = self.get_object()
-        instance.withdraw()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     @extend_schema(
         responses={
             200: PaymentListSerializer(many=True),
