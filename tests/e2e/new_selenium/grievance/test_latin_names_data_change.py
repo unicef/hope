@@ -31,7 +31,7 @@ def test_add_individual_stores_latin_name_as_provided(
     login.wait_for_element_visible('[data-cy="input-radio-household"]').click()
     login.click(BUTTON_SUBMIT)
     login.wait_for_ready_state_complete()
-    login.click('[data-cy="input-consent"]')
+    login.check_consent()
     login.click(BUTTON_SUBMIT)
 
     login.type('textarea[name="description"]', "Add member with Cyrillic name")

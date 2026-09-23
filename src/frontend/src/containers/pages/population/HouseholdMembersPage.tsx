@@ -44,7 +44,7 @@ export const HouseholdMembersPage = (): ReactElement => {
 
   const initialFilter = {
     search: '',
-    phone: '',    
+    phone: '',
     documentType: documentTypeChoices?.[0]?.value,
     documentNumber: '',
     admin2: '',
