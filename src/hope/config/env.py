@@ -98,6 +98,7 @@ DEFAULTS = {
             "'self'",
             "'unsafe-inline'",
             "'unsafe-eval'",
+            "https://fonts.googleapis.com",
             "https://*.blob.core.windows.net",
         ),
     ),
