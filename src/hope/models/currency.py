@@ -31,7 +31,7 @@ class CurrencyManager(models.Manager.from_queryset(CurrencyQuerySet)):
         currency = self.filter(code=code, active=True).first()
         if currency is not None:
             return currency
-        # TODO(<ticket>): everything below is the vision_code alias; when the transition period ends,
+        # TODO(AB#343525): everything below is the vision_code alias; when the transition period ends,
         # replace it with `return None`.
         if self.filter(code=code).exists():
             return None
