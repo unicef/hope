@@ -1,7 +1,7 @@
 from django.db import migrations, models
 
 TRIGGER_FUNCTION = """
-CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
+CREATE OR REPLACE FUNCTION funds_commitment_header_trigger_function()
 RETURNS TRIGGER AS $$
 DECLARE
     fc_header_id INT;
@@ -105,6 +105,14 @@ END;
 $$ LANGUAGE plpgsql;
 """
 
+TRIGGER_CREATION = """
+DROP TRIGGER IF EXISTS funds_commitment_insert_trigger ON vision_fundscommitment;
+CREATE TRIGGER funds_commitment_insert_trigger
+AFTER INSERT ON vision_fundscommitment
+FOR EACH ROW
+EXECUTE FUNCTION funds_commitment_header_trigger_function();
+"""
+
 REVERSE_TRIGGER_FUNCTION = """
 CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
 RETURNS TRIGGER AS $$
@@ -194,6 +202,15 @@ END;
 $$ LANGUAGE plpgsql;
 """
 
+REVERSE_TRIGGER_CREATION = """
+DROP TRIGGER IF EXISTS funds_commitment_insert_trigger ON vision_fundscommitment;
+DROP FUNCTION IF EXISTS funds_commitment_header_trigger_function;
+CREATE TRIGGER funds_commitment_insert_trigger
+AFTER INSERT ON vision_fundscommitment
+FOR EACH ROW
+EXECUTE FUNCTION funds_commitment_trigger_function();
+"""
+
 BACKFILL_HEADER_FIELDS = """
 UPDATE vision_fundscommitmentheader AS header
 SET
@@ -272,5 +289,8 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=5, null=True),
         ),
         migrations.RunSQL(BACKFILL_HEADER_FIELDS, migrations.RunSQL.noop),
-        migrations.RunSQL(TRIGGER_FUNCTION, REVERSE_TRIGGER_FUNCTION),
+        migrations.RunSQL(
+            TRIGGER_FUNCTION + TRIGGER_CREATION,
+            REVERSE_TRIGGER_FUNCTION + REVERSE_TRIGGER_CREATION,
+        ),
     ]
