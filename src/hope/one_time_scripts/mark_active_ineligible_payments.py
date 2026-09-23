@@ -28,14 +28,11 @@ def mark_active_ineligible_payments(*, dry_run: bool = True) -> dict[str, object
         _candidate_payments().values("business_area_id", "program_id").annotate(candidate_count=Count("pk"))
     )
     business_areas = BusinessArea.objects.in_bulk({group["business_area_id"] for group in candidate_groups})
-    programs = Program._base_manager.in_bulk(
-        {group["program_id"] for group in candidate_groups if group["program_id"] is not None}
-    )
+    programs = Program._base_manager.in_bulk({group["program_id"] for group in candidate_groups})
     candidate_groups.sort(
         key=lambda group: (
             business_areas[group["business_area_id"]].slug,
-            group["program_id"] is None,
-            programs[group["program_id"]].name if group["program_id"] is not None else "",
+            programs[group["program_id"]].name,
         )
     )
     group_summaries: list[dict[str, object]] = []
@@ -53,15 +50,11 @@ def mark_active_ineligible_payments(*, dry_run: bool = True) -> dict[str, object
         business_area_id = candidate_group["business_area_id"]
         program_id = candidate_group["program_id"]
         candidate_count = candidate_group["candidate_count"]
-        group_filter: dict[str, object] = {"business_area_id": business_area_id}
-        if program_id is None:
-            group_filter["program_id__isnull"] = True
-        else:
-            group_filter["program_id"] = program_id
+        group_filter: dict[str, object] = {"business_area_id": business_area_id, "program_id": program_id}
 
         business_area = business_areas[business_area_id].slug
-        program = programs[program_id].name if program_id is not None else None
-        group_label = f"[{group_number:,}/{total_groups:,}] {business_area} / {program or '[no program]'}"
+        program = programs[program_id].name
+        group_label = f"[{group_number:,}/{total_groups:,}] {business_area} / {program}"
         candidate_label = "candidate" if candidate_count == 1 else "candidates"
         updated_count = 0
         if dry_run:
@@ -76,7 +69,7 @@ def mark_active_ineligible_payments(*, dry_run: bool = True) -> dict[str, object
             {
                 "business_area_id": str(business_area_id),
                 "business_area": business_area,
-                "program_id": str(program_id) if program_id else None,
+                "program_id": str(program_id),
                 "program": program,
                 "candidate_count": candidate_count,
                 "updated_count": updated_count,
