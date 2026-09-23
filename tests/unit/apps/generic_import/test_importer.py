@@ -963,12 +963,54 @@ def test_importer_household_resolves_the_currency_code_to_the_active_row(
         identities_data=[],
     )
 
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(4):
         importer.import_data()
 
     assert importer.errors == []
     household = Household.pending_objects.get(id=household_temp_id)
     assert household.currency == currency_syp
+
+
+def test_importer_household_accepts_the_vision_code_alias(rdi: RegistrationDataImport, currency_syp: Currency) -> None:
+    household_temp_id = uuid.uuid4().hex
+    households_data = [{"id": household_temp_id, "size": 1, "currency": "SYP01"}]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=households_data,
+        individuals_data=[],
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    importer.import_data()
+
+    assert importer.errors == []
+    household = Household.pending_objects.get(id=household_temp_id)
+    assert household.currency == currency_syp
+
+
+def test_importer_resolves_a_repeated_currency_code_once(
+    rdi: RegistrationDataImport, currency_syp: Currency, django_assert_num_queries
+) -> None:
+    households_data = [
+        {"id": uuid.uuid4().hex, "size": 1, "currency": "SYP"},
+        {"id": uuid.uuid4().hex, "size": 1, "currency": "SYP"},
+    ]
+    importer = Importer(
+        registration_data_import=rdi,
+        households_data=households_data,
+        individuals_data=[],
+        documents_data=[],
+        accounts_data=[],
+        identities_data=[],
+    )
+
+    # One lookup for both rows: a second resolution would make it 7, the per-household writes 6.
+    with django_assert_num_queries(6):
+        importer.import_data()
+
+    assert importer.errors == []
 
 
 def test_importer_household_with_a_retired_currency_yields_error(

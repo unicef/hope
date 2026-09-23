@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.forms import modelform_factory
 
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import (
     Account,
@@ -18,7 +19,6 @@ from hope.models import (
     IndividualIdentity,
     RegistrationDataImport,
 )
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from django.core.files.uploadedfile import UploadedFile
@@ -103,14 +103,21 @@ class Importer:
         # Cache Country lookups (iso_code3 -> id mapping)
         self._countries = {c.iso_code3: c.id for c in Country.objects.all()}
 
-        # Cache Currency lookups (code -> id mapping)
-        self._currencies = {c.code: c.id for c in Currency.objects.active()}
+        # Memo of resolved currency codes (code -> id or None); see _resolve_currency_id
+        self._currency_ids: dict[str, int | None] = {}
 
         # Dictionary to store household instances by their parser ID (for FK linking)
         self._household_instances = {}
 
         # Dictionary to store individual instances by their parser ID (for FK linking)
         self._individual_instances = {}
+
+    def _resolve_currency_id(self, code: str) -> int | None:
+        """Resolve a submitted code to the active currency, memoized for one import."""
+        if code not in self._currency_ids:
+            currency = resolve_active_currency_or_none(code)
+            self._currency_ids[code] = currency.id if currency is not None else None
+        return self._currency_ids[code]
 
     def import_data(self) -> list[dict[str, Any]]:
         """Import all data types in sequence."""
@@ -201,7 +208,7 @@ class Importer:
         ]
 
         if currency_code := household_data.get("currency"):
-            if currency_id := self._currencies.get(currency_code):
+            if currency_id := self._resolve_currency_id(currency_code):
                 household_data = {**household_data, "currency": currency_id}
             else:
                 self.errors.append(
