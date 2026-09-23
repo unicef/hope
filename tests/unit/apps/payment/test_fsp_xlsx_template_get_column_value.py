@@ -19,6 +19,7 @@ from extras.test_utils.factories.payment import (
 from hope.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
+from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
 from hope.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -28,6 +29,13 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db
+
+# account_data is stripped in XlsxPaymentPlanDeliveryExportService.prepare_headers and read by
+# get_account_value_from_payment, so it never reaches get_column_value_from_payment.
+DECLARED_EXPORT_COLUMNS = sorted(
+    (set(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) | set(XlsxPaymentPlanBaseService.HEADERS))
+    - {"account_data"}
+)
 
 
 @pytest.fixture
@@ -105,6 +113,22 @@ def registration_token_document(registration_token_document_type, household):
 
 
 @pytest.fixture
+def national_id_document_type():
+    return DocumentTypeFactory(label="National ID", key="national_id")
+
+
+@pytest.fixture
+def national_id_document(national_id_document_type, household):
+    return DocumentFactory(
+        individual=household.head_of_household,
+        program=household.program,
+        document_number="NAT-001",
+        type=national_id_document_type,
+        rdi_merge_status=MergeStatusModel.MERGED,
+    )
+
+
+@pytest.fixture
 def alternate_collector(household):
     alternate = IndividualFactory(
         household=household,
@@ -150,6 +174,15 @@ def payment_with_snapshot_and_document(payment_plan, payment, registration_token
 
 
 @pytest.fixture
+def payment_with_snapshot_and_document_columns(
+    payment_plan, payment, registration_token_document, national_id_document
+):
+    create_payment_plan_snapshot_data(payment_plan)
+    payment.refresh_from_db()
+    return payment
+
+
+@pytest.fixture
 def payment_with_snapshot_and_alternate(payment_plan, payment, alternate_collector_documents):
     create_payment_plan_snapshot_data(payment_plan)
     payment.refresh_from_db()
@@ -182,6 +215,50 @@ def test_get_column_value_from_payment(
     )
 
     assert value == expected_value(payment, registration_token_document)
+
+
+@pytest.mark.parametrize("column_name", DECLARED_EXPORT_COLUMNS)
+def test_declared_export_column_does_not_resolve_to_the_unknown_column_sentinel(
+    column_name,
+    payment_with_snapshot_and_document_columns,
+    admin_areas_dict,
+):
+    value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+        payment_with_snapshot_and_document_columns, column_name, admin_areas_dict, []
+    )
+
+    assert value != "wrong_column_name"
+
+
+@pytest.mark.parametrize(
+    ("column_name", "expected_value"),
+    [
+        pytest.param("registration_token", "REG-001", id="registration_token"),
+        pytest.param("national_id", "NAT-001", id="national_id"),
+    ],
+)
+def test_get_column_value_document_column_without_document_type_in_lookup_list(
+    column_name,
+    expected_value,
+    payment_with_snapshot_and_document_columns,
+    admin_areas_dict,
+):
+    value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+        payment_with_snapshot_and_document_columns, column_name, admin_areas_dict, []
+    )
+
+    assert value == expected_value
+
+
+def test_get_column_value_registration_token_empty_when_collector_has_no_such_document(
+    payment_with_snapshot_and_alternate,
+    admin_areas_dict,
+):
+    value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
+        payment_with_snapshot_and_alternate, "registration_token", admin_areas_dict, []
+    )
+
+    assert value == ""
 
 
 def test_get_column_value_admin_level_2(

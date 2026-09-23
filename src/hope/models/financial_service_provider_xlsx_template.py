@@ -102,6 +102,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
 
+    # Exported unconditionally, so they must resolve without a DocumentType row for the key.
+    DOCUMENT_NUMBER_COLUMNS = ("registration_token", "national_id")
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -307,7 +310,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data, areas_dict]),
             "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
         }
-        if column_name in document_types:
+        if column_name in document_types or column_name in cls.DOCUMENT_NUMBER_COLUMNS:
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
         result: str | float | list | None

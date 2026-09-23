@@ -550,6 +550,34 @@ def make_auth_code_group_with_typed_plan(
     return build_group
 
 
+@pytest.fixture
+def group_with_registration_token_in_snapshot(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    payment = PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plan.program,
+    )
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data={
+            "primary_collector": {
+                "documents": [{"type": "registration_token", "document_number": "REG-TOKEN-001"}],
+            }
+        },
+    )
+    return group
+
+
 def test_workbook_has_single_sheet_with_group_title(group_with_one_accepted_plan):
     wb = XlsxPaymentPlanGroupDeliveryExportService(
         group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
@@ -634,6 +662,19 @@ def test_payment_row_contains_snapshot_household_data(group_with_payment_and_ful
     assert ws.cell(row=2, column=household_id_col).value == "HH-SNAP-001"
     assert ws.cell(row=2, column=household_size_col).value == 5
     assert ws.cell(row=2, column=collector_name_col).value == "Jan Kowalski"
+
+
+def test_registration_token_column_holds_document_number_without_document_type_row(
+    group_with_registration_token_in_snapshot,
+):
+    wb = XlsxPaymentPlanGroupDeliveryExportService(
+        group_with_registration_token_in_snapshot, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    registration_token_col = headers.index("registration_token") + 1
+
+    assert ws.cell(row=2, column=registration_token_col).value == "REG-TOKEN-001"
 
 
 def test_account_values_are_omitted_when_group_template_excludes_account_data(
