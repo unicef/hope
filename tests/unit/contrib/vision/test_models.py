@@ -90,14 +90,8 @@ def test_funds_commitment_header_derived_fields(
     with django_assert_num_queries(1):
         header = FundsCommitmentHeader.objects.with_derived_fields().get(pk=header_with_multiple_commitments.pk)
 
-        assert header.rec_serial_number == 100
-        assert header.vendor_id == "VENDOR-1"
-        assert header.posting_date == date(2026, 9, 1)
-        assert header.document_reference == "REFERENCE-1"
-        assert header.fc_status == "O"
         assert header.total_amount_usd == Decimal("401.00")
         assert header.total_amount_local == Decimal("351.00")
-        assert header.currency == "USD"
 
 
 def test_funds_commitment_item_str(afghanistan) -> None:

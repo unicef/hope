@@ -1,4 +1,4 @@
-from django.db import migrations
+from django.db import migrations, models
 
 TRIGGER_FUNCTION = """
 CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
@@ -12,8 +12,24 @@ BEGIN
     WHERE funds_commitment_number = NEW.funds_commitment_number;
 
     IF fc_header_id IS NULL THEN
-        INSERT INTO vision_fundscommitmentheader (funds_commitment_number)
-        VALUES (NEW.funds_commitment_number)
+        INSERT INTO vision_fundscommitmentheader (
+            funds_commitment_number,
+            rec_serial_number,
+            vendor_id,
+            posting_date,
+            document_reference,
+            fc_status,
+            currency
+        )
+        VALUES (
+            NEW.funds_commitment_number,
+            NEW.rec_serial_number,
+            NEW.vendor_id,
+            NEW.posting_date,
+            NEW.document_reference,
+            NEW.fc_status,
+            NEW.currency_code
+        )
         RETURNING id INTO fc_header_id;
     END IF;
 
@@ -178,6 +194,30 @@ END;
 $$ LANGUAGE plpgsql;
 """
 
+BACKFILL_HEADER_FIELDS = """
+UPDATE vision_fundscommitmentheader AS header
+SET
+    rec_serial_number = commitment.rec_serial_number,
+    vendor_id = commitment.vendor_id,
+    posting_date = commitment.posting_date,
+    document_reference = commitment.document_reference,
+    fc_status = commitment.fc_status,
+    currency = commitment.currency_code
+FROM (
+    SELECT DISTINCT ON (funds_commitment_number)
+        funds_commitment_number,
+        rec_serial_number,
+        vendor_id,
+        posting_date,
+        document_reference,
+        fc_status,
+        currency_code
+    FROM vision_fundscommitment
+    ORDER BY funds_commitment_number, rec_serial_number
+) AS commitment
+WHERE header.funds_commitment_number = commitment.funds_commitment_number;
+"""
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -201,5 +241,36 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Funds Commitment Headers",
             },
         ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="rec_serial_number",
+            field=models.IntegerField(null=True),
+        ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="vendor_id",
+            field=models.CharField(blank=True, max_length=10, null=True),
+        ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="posting_date",
+            field=models.DateField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="document_reference",
+            field=models.CharField(blank=True, max_length=16, null=True),
+        ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="fc_status",
+            field=models.CharField(blank=True, max_length=1, null=True),
+        ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="currency",
+            field=models.CharField(blank=True, max_length=5, null=True),
+        ),
+        migrations.RunSQL(BACKFILL_HEADER_FIELDS, migrations.RunSQL.noop),
         migrations.RunSQL(TRIGGER_FUNCTION, REVERSE_TRIGGER_FUNCTION),
     ]
