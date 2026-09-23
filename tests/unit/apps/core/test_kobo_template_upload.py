@@ -114,7 +114,7 @@ def test_upload_invalid_template_returns_expected_errors(
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(6):
         response = _upload_file(logged_in_client, "kobo-template-invalid.xlsx")
 
     form = response.context["form"]
@@ -163,7 +163,7 @@ def test_upload_valid_template_shows_success_message(
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    with django_assert_num_queries(22):
+    with django_assert_num_queries(18):
         response = _upload_file(logged_in_client, "kobo-template-valid.xlsx")
 
         messages = [m.message for m in get_messages(response.wsgi_request)]
@@ -195,7 +195,7 @@ def test_upload_template_with_validation_error_shows_errors_in_response(
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(6):
         response = _upload_file(logged_in_client, "kobo-template-invalid.xlsx")
 
         assert "Field: residence_status_h_c" in response.text
