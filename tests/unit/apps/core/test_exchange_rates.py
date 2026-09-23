@@ -7,6 +7,7 @@ import requests_mock as requests_mock_lib
 
 from hope.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hope.apps.core.exchange_rates.api import ExchangeRateClientDummy
+from hope.apps.core.exchange_rates.models import HistoryExchangeRate
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     "ROWSET": {
@@ -266,6 +267,16 @@ def test_convert_response_json_to_exchange_rates(api_key_in_env):
     assert datetime(9999, 12, 31) == cup1.valid_to
 
     assert cup1.historical_exchange_rates == []
+
+
+def test_history_exchange_rate_is_valid_without_dispersion_date() -> None:
+    exchange_rate = HistoryExchangeRate(
+        valid_from=datetime(1998, 1, 1),
+        valid_to=datetime(1998, 1, 31),
+        past_xrate=0.906,
+        past_ratio=1.0,
+    )
+    assert exchange_rate.is_valid(None) is True
 
 
 @pytest.mark.parametrize(
