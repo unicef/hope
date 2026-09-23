@@ -57,20 +57,19 @@ def create_async_job(action: str, config: dict) -> AsyncJob:
     )
 
 
-def _upload_file(client, admin_user, filename: str):
+def _upload_file(client, filename: str):
     file_path = f"{settings.TESTS_ROOT}/apps/core/test_files/{filename}"
     with open(file_path, "rb") as f:
-        return _upload_content(client, admin_user, filename, f.read())
+        return _upload_content(client, filename, f.read())
 
 
-def _upload_content(client, admin_user, filename: str, content: bytes):
+def _upload_content(client, filename: str, content: bytes):
     uploaded_file = SimpleUploadedFile(
         filename,
         content,
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     url = reverse("admin:core_xlsxkobotemplate_add")
-    client.login(username=admin_user.username, password="password")
     return client.post(url, {"xls_file": uploaded_file}, follow=True, format="multipart")
 
 
@@ -80,6 +79,12 @@ def admin_user(db):
     user.set_password("password")
     user.save()
     return user
+
+
+@pytest.fixture
+def logged_in_client(client, admin_user):
+    client.login(username=admin_user.username, password="password")
+    return client
 
 
 @pytest.fixture
@@ -105,12 +110,12 @@ def xlsx_kobo_template(db):
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
 def test_upload_invalid_template_returns_expected_errors(
-    mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
+    mock_country_choices, logged_in_client, all_currencies, django_assert_num_queries
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
     with django_assert_num_queries(10):
-        response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
+        response = _upload_file(logged_in_client, "kobo-template-invalid.xlsx")
 
     form = response.context["form"]
     expected_errors = {
@@ -154,12 +159,12 @@ def test_upload_invalid_template_returns_expected_errors(
 )
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
 def test_upload_valid_template_shows_success_message(
-    mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
+    mock_country_choices, logged_in_client, all_currencies, django_assert_num_queries
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
     with django_assert_num_queries(22):
-        response = _upload_file(client, admin_user, "kobo-template-valid.xlsx")
+        response = _upload_file(logged_in_client, "kobo-template-valid.xlsx")
 
         messages = [m.message for m in get_messages(response.wsgi_request)]
         assert response.status_code == 302 or response.redirect_chain
@@ -171,11 +176,11 @@ def test_upload_valid_template_shows_success_message(
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
 def test_upload_template_without_optional_fields_is_accepted(
-    mock_country_choices, client, admin_user, all_currencies, template_without_optional_fields
+    mock_country_choices, logged_in_client, all_currencies, template_without_optional_fields
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
-    response = _upload_content(client, admin_user, "kobo-template.xlsx", template_without_optional_fields)
+    response = _upload_content(logged_in_client, "kobo-template.xlsx", template_without_optional_fields)
 
     messages = [m.message for m in get_messages(response.wsgi_request)]
     assert (
@@ -186,12 +191,12 @@ def test_upload_template_without_optional_fields_is_accepted(
 
 @patch("hope.apps.core.field_attributes.core_fields_attributes.Country.get_choices")
 def test_upload_template_with_validation_error_shows_errors_in_response(
-    mock_country_choices, client, admin_user, all_currencies, django_assert_num_queries
+    mock_country_choices, logged_in_client, all_currencies, django_assert_num_queries
 ):
     mock_country_choices.return_value = _get_all_country_choices()
 
     with django_assert_num_queries(10):
-        response = _upload_file(client, admin_user, "kobo-template-invalid.xlsx")
+        response = _upload_file(logged_in_client, "kobo-template-invalid.xlsx")
 
         assert "Field: residence_status_h_c" in response.text
         assert "Choice: RETURNEE is not present" in response.text
@@ -200,8 +205,8 @@ def test_upload_template_with_validation_error_shows_errors_in_response(
         assert "Upload XLS" in response.text
 
 
-def test_upload_template_with_missing_sheet_returns_error(client, admin_user):
-    response = _upload_file(client, admin_user, "kobo-template-invalid-missing-sheet.xlsx")
+def test_upload_template_with_missing_sheet_returns_error(logged_in_client):
+    response = _upload_file(logged_in_client, "kobo-template-invalid-missing-sheet.xlsx")
 
     form = response.context["form"]
     assert "Missing sheet: 'Worksheet survey does not exist.'" in form.errors["xls_file"]
