@@ -79,7 +79,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
     householdSizeMin: '',
     householdSizeMax: '',
     orderBy: 'unicef_id',
-    withdrawn: '',
     programState: PROGRAM_STATE_FILTER.ACTIVE,
   };
   const initialFilterIND = {
@@ -194,6 +193,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
                 setAppliedFilter={setAppliedFilterHH}
                 isOnPaper={false}
                 programs={programs}
+                showStatusFilter={false}
               />
             </Box>
             <LookUpHouseholdTable

@@ -56,18 +56,8 @@ export function LookUpHouseholdTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const initialQueryVariables = useMemo(() => {
-    const matchWithdrawnValue = (): boolean | undefined => {
-      if (filter.withdrawn === 'true') {
-        return true;
-      }
-      if (filter.withdrawn === 'false') {
-        return false;
-      }
-      return undefined;
-    };
-
-    return {
+  const initialQueryVariables = useMemo(
+    () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
       familySize: JSON.stringify({
@@ -80,22 +70,22 @@ export function LookUpHouseholdTable({
       admin1: filter.admin1,
       admin2: filter.admin2,
       residenceStatus: filter.residenceStatus,
-      withdrawn: matchWithdrawnValue(),
+      withdrawn: false,
       rdiMergeStatus: RdiMergeStatusEnum.MERGED,
-    };
-  }, [
-    businessArea,
-    programId,
-    filter.householdSizeMin,
-    filter.householdSizeMax,
-    filter.search,
-    filter.documentType,
-    filter.documentNumber,
-    filter.admin1,
-    filter.admin2,
-    filter.residenceStatus,
-    filter.withdrawn,
-  ]);
+    }),
+    [
+      businessArea,
+      programId,
+      filter.householdSizeMin,
+      filter.householdSizeMax,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.admin1,
+      filter.admin2,
+      filter.residenceStatus,
+    ],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
   useEffect(() => {
