@@ -28,6 +28,32 @@ def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Call
     return _predicate
 
 
+class StaleSafeElement(WebElement):
+    """An element that re-locates itself when its DOM node gets replaced.
+
+    React re-renders and page navigations swap the node out between the moment
+    ``wait_for`` returns an element and the moment a test reads it, which raises
+    ``StaleElementReferenceException``. Every element operation goes through
+    ``_execute``, so retrying there covers ``.text``, ``.click()``, attribute
+    reads and nested lookups alike.
+    """
+
+    def __init__(self, element: WebElement, relocate: Callable[[], WebElement], attempts: int = 3) -> None:
+        super().__init__(element.parent, element.id)
+        self._relocate = relocate
+        self._attempts = attempts
+
+    def _execute(self, command: str, params: dict | None = None) -> dict:
+        for attempt in range(self._attempts):
+            try:
+                return super()._execute(command, params)
+            except StaleElementReferenceException:
+                if attempt == self._attempts - 1:
+                    raise
+                self._id = self._relocate().id
+        raise StaleElementReferenceException(f"Element stayed stale after {self._attempts} attempts")
+
+
 class Common:
     DEFAULT_TIMEOUT = 20
     DEFAULT_TIMEOUT_WAITING_PAGE = 10
@@ -65,10 +91,21 @@ class Common:
         element_type: str = By.CSS_SELECTOR,
         timeout: int = DEFAULT_TIMEOUT,
     ) -> WebElement:
-        try:
-            return self._wait(timeout).until(expected_conditions.visibility_of_element_located((element_type, locator)))
-        except TimeoutException as e:
-            raise NoSuchElementException(f"Element {locator} not visible after {timeout}s") from e
+        """Wait for the element to be visible and return it.
+
+        The element re-locates itself if the node is replaced before it is used,
+        so callers can hold on to it across a re-render (see ``StaleSafeElement``).
+        """
+
+        def locate() -> WebElement:
+            try:
+                return self._wait(timeout).until(
+                    expected_conditions.visibility_of_element_located((element_type, locator))
+                )
+            except TimeoutException as e:
+                raise NoSuchElementException(f"Element {locator} not visible after {timeout}s") from e
+
+        return StaleSafeElement(locate(), locate)
 
     def wait_for_header_text(self, locator: str, text: str, timeout: int = DEFAULT_TIMEOUT):
         WebDriverWait(self.driver, timeout).until(

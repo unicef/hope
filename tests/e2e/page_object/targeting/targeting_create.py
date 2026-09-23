@@ -23,7 +23,6 @@ class TargetingCreate(BaseComponents):
     criteria_container = 'div[data-cy="criteria-container"]'
     target_population_save_button = 'button[data-cy="button-target-population-create"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_target_population_create = 'button[data-cy="button-target-population-create"]'
     input_div_name = 'div[data-cy="input-name"]'
     input_included_household_ids = 'div[data-cy="input-included-household-ids"]'
@@ -96,9 +95,6 @@ class TargetingCreate(BaseComponents):
 
     # Texts
     text_targeting_criteria = "Targeting Criteria"
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_target_population_create(self) -> WebElement:
         return self.wait_for(self.button_target_population_create)

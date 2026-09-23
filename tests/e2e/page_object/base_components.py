@@ -49,6 +49,7 @@ class BaseComponents(Common):
     nav_resources_release_note = 'a[data-cy="nav-resources-Release Note"]'
     nav_program_log = 'a[data-cy="nav-Programme Log"]'
     main_content = 'div[data-cy="main-content"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
     drawer_items = 'div[data-cy="drawer-items"]'
     drawer_inactive_subheader = 'div[data-cy="program-inactive-subheader"]'
     menu_item_clear_cache = 'li[data-cy="menu-item-clear-cache"]'
@@ -72,6 +73,14 @@ class BaseComponents(Common):
 
     def get_main_content(self) -> WebElement:
         return self.wait_for(self.main_content)
+
+    def assert_page_header_title(self, text: str) -> None:
+        """Wait until the page header shows ``text``.
+
+        Reading the header once races the re-render that fills in the title, so
+        poll for the expected text instead of asserting on a single read.
+        """
+        self.wait_for_text(text, self.page_header_title)
 
     def get_business_area_container(self) -> WebElement:
         return self.wait_for(self.business_area_container)

@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class People(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     ind_filters_search = 'div[data-cy="ind-filters-search"]'
     select_filter = 'div[data-cy="select-filter"]'
     filters_document_type = 'div[data-cy="filters-document-type"]'
@@ -39,9 +38,6 @@ class People(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_ind_filters_search(self) -> WebElement:
         return self.wait_for(self.ind_filters_search)

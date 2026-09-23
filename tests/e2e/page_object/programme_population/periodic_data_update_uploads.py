@@ -7,7 +7,6 @@ class PDUXlsxUploads(BaseComponents):
     nav_program_population = 'a[data-cy="nav-Programme Population"]'
     nav_program_details = 'a[data-cy="nav-Programme Details"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     tab_individuals = 'button[data-cy="tab-individuals"]'
     tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
     title = 'h6[data-cy="title"]'
@@ -40,9 +39,6 @@ class PDUXlsxUploads(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_tab_individuals(self) -> WebElement:
         return self.wait_for(self.tab_individuals)

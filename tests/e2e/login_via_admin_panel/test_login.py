@@ -83,4 +83,6 @@ class TestAdminPanel:
     def test_log_out_via_admin_panel(self, login: Chrome, page_admin_panel: AdminPanel) -> None:
         login.get(f"{login.live_server.url}/api/unicorn/")
         page_admin_panel.get_button_logout().click()
-        assert "Logged out" in page_admin_panel.get_logged_out().text
+        # logging out navigates away, so wait for the new page's text instead of
+        # reading the element the old document left behind
+        assert page_admin_panel.wait_for_text("Logged out", page_admin_panel.logged_out, By.XPATH)

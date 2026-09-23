@@ -7,7 +7,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class PaymentModuleDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     pp_unicef_id = 'span[data-cy="pp-unicef-id"]'
     status_container = 'div[data-cy="status-container"]'
     button_export_xlsx = 'button[data-cy="button-export-xlsx"]'
@@ -79,9 +78,6 @@ class PaymentModuleDetails(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_pp_unicef_id(self) -> WebElement:
         return self.wait_for(self.pp_unicef_id)

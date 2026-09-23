@@ -6,7 +6,6 @@ from e2e.page_object.base_components import BaseComponents
 class PaymentVerification(BaseComponents):
     # Locators
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     filter_search = 'div[data-cy="filter-search"]'
     select_filter = 'div[data-cy="select-filter"]'
     filter_status = 'div[data-cy="filter-status"]'
@@ -48,9 +47,6 @@ class PaymentVerification(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_filter_search(self) -> WebElement:
         return self.wait_for(self.filter_search)
