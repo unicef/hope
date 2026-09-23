@@ -31,6 +31,11 @@ from hope.admin.utils import (
     ViewOnUiMixin,
 )
 from hope.apps.household.celery_tasks import revalidate_phone_number_async_task
+from hope.apps.household.services.household_recalculate_data import (
+    RECALCULATION_INDIVIDUAL_FIELDS,
+    recalculate_data,
+)
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.security import is_root
 from hope.models import (
     Account,
@@ -189,6 +194,15 @@ class IndividualAdmin(
     inlines = [IndividualAccountInline]
     show_full_result_count = False
     show_query_result_count = False
+
+    def save_model(self, request: HttpRequest, obj: Individual, form: Any, change: bool) -> None:
+        recalculation_needed = bool(RECALCULATION_INDIVIDUAL_FIELDS.intersection(form.changed_data))
+        super().save_model(request, obj, form, change)
+        if not recalculation_needed:
+            return
+        if obj.household:
+            recalculate_data(obj.household)
+        adjust_program_size(obj.program)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (

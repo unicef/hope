@@ -35,7 +35,9 @@ class BusinessAreaFactory(DjangoModelFactory):
 
     code = factory.Sequence(lambda n: f"BA{n:04d}")
     slug = factory.Sequence(lambda n: f"business-area-{n}")
-    name = factory.Sequence(lambda n: f"Business Area {n}")
+    # save() regenerates slug from name, so deriving name from slug is what lets
+    # BusinessAreaFactory(slug="ukraine") come back with slug "ukraine".
+    name = factory.LazyAttribute(lambda o: o.slug.replace("-", " ").title())
     long_name = factory.Sequence(lambda n: f"Business Area {n} Long Name")
     region_code = "64"
     region_name = "TEST"
