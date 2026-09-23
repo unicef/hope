@@ -310,6 +310,58 @@ def test_process_callback_without_fc_keeps_plan_blocked(
     }
 
 
+def test_process_callback_records_payment_plan_created_acknowledgement(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="00000110",
+            vision_result="",
+            fc_num="",
+        )
+
+    assert fc_assignment_failed is False
+    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert vision_payment_plan.vision_data == {
+        "sent": True,
+        "vision_id": "00000110",
+        "status": VisionStatus.PP_CREATED.value,
+    }
+
+
+def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    vision_payment_plan.internal_data = {
+        "vision": {
+            "vision_id": "VISION-1",
+            "fc_num": "UNKNOWN",
+            "status": VisionStatus.FC_NOT_FOUND.value,
+        }
+    }
+
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="",
+            fc_num="",
+        )
+
+    assert fc_assignment_failed is False
+    assert vision_payment_plan.vision_data == {
+        "sent": True,
+        "vision_id": "VISION-1",
+        "fc_num": "UNKNOWN",
+        "status": VisionStatus.FC_NOT_FOUND.value,
+    }
+
+
 def test_process_callback_records_fc_assignment_failure(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
@@ -356,6 +408,29 @@ def test_process_callback_failure_stores_returned_fc_number(
     }
 
 
+def test_process_callback_records_failure_when_fc_callback_has_no_success_status(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
+
+    with django_assert_num_queries(1):
+        fc_assignment_failed = VisionService.process_callback(
+            vision_payment_plan,
+            vision_payment_plan_id="VISION-1",
+            vision_result="",
+            fc_num="FC123",
+        )
+
+    assert fc_assignment_failed is False
+    assert vision_payment_plan.vision_data == {
+        "vision_id": "VISION-1",
+        "fc_num": "FC123",
+        "status": VisionStatus.CALLBACK_FAILED.value,
+        "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
+    }
+
+
 def test_process_callback_reprocesses_existing_fc_assignment_failure(
     payment_plan_with_fc_assignment_failure: PaymentPlan,
     django_assert_num_queries,
@@ -382,12 +457,13 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
     ("vision_status", "error_code"),
     [
         (VisionStatus.SEND_FAILED, None),
+        (VisionStatus.PP_CREATED, None),
         (VisionStatus.CALLBACK_FAILED, VisionErrorCode.VISION_STATUS_FAILED),
         (VisionStatus.FC_MISSING, None),
         (VisionStatus.FC_NOT_FOUND, None),
     ],
 )
-def test_process_callback_recovers_failed_state_with_valid_fc(
+def test_process_callback_processes_valid_fc_from_recoverable_state(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
     vision_status: VisionStatus,
@@ -711,6 +787,18 @@ def test_manual_fc_recovery_is_available_when_waiting_without_send_confirmation(
         can_recover = VisionService.can_recover_with_funds_commitment_items(vision_payment_plan)
 
     assert vision_payment_plan.sent_to_vision is False
+    assert can_recover is True
+
+
+def test_manual_fc_recovery_is_available_after_payment_plan_created_acknowledgement(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
+
+    with django_assert_num_queries(1):
+        can_recover = VisionService.can_recover_with_funds_commitment_items(vision_payment_plan)
+
     assert can_recover is True
 
 
