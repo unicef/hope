@@ -9,7 +9,7 @@ from _pytest.config.argparsing import Parser
 from constance import config as constance_config
 from constance.backends.memory import MemoryBackend
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
 from elasticsearch.dsl import connections
@@ -158,7 +158,11 @@ def pytest_configure(config: Config) -> None:
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
-        }
+        },
+        "sessions": {
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
+            "LOCATION": "sessions",
+        },
     }
     settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
@@ -312,6 +316,7 @@ def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> 
 @pytest.fixture(autouse=True)
 def clear_cache_before_each_test() -> None:
     cache.clear()
+    caches["sessions"].clear()
 
 
 @pytest.fixture(autouse=True)

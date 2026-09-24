@@ -43,6 +43,20 @@ def fake_async_retry_job_non_retriable_action(job: AsyncRetryJob) -> None:
     raise NonRetriableTaskError("permanent failure")
 
 
+@pytest.fixture
+def expired_and_live_sessions() -> None:
+    Session.objects.create(
+        session_key="expired-session",
+        session_data="",
+        expire_date=timezone.now() - timedelta(days=1),
+    )
+    Session.objects.create(
+        session_key="live-session",
+        session_data="",
+        expire_date=timezone.now() + timedelta(days=1),
+    )
+
+
 ON_FAILURE_ACTION = "unit.apps.core.on_failure_handlers.record_failure"
 
 
@@ -481,18 +495,7 @@ def test_cleanup_old_periodic_async_jobs_task_calls_action() -> None:
 
 
 @pytest.mark.django_db
-def test_clear_expired_sessions_action_deletes_only_expired_sessions() -> None:
-    Session.objects.create(
-        session_key="expired-session",
-        session_data="",
-        expire_date=timezone.now() - timedelta(days=1),
-    )
-    Session.objects.create(
-        session_key="live-session",
-        session_data="",
-        expire_date=timezone.now() + timedelta(days=1),
-    )
-
+def test_clear_expired_sessions_action_deletes_only_expired_sessions(expired_and_live_sessions: None) -> None:
     clear_expired_sessions_async_task_action()
 
     assert list(Session.objects.values_list("session_key", flat=True)) == ["live-session"]
