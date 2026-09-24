@@ -27,6 +27,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from extras.test_utils.factories.core import CurrencyFactory
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
@@ -111,6 +112,20 @@ def _import_url(ba_slug: str, program_code: str, group_id: Any) -> str:
 def _send_xlsx_password_url(ba_slug: str, program_code: str, group_id: Any) -> str:
     return reverse(
         "api:payments:payment-plan-groups-send-xlsx-password",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+def _lock_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-lock",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+def _unlock_url(ba_slug: str, program_code: str, group_id: Any) -> str:
+    return reverse(
+        "api:payments:payment-plan-groups-unlock",
         kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
     )
 
@@ -617,6 +632,119 @@ def test_list_filter_by_status(
     assert response.status_code == status.HTTP_200_OK
     returned_ids = {row["id"] for row in response.json()["results"]}
     assert returned_ids == {str(locked_group.id)}
+
+
+@pytest.fixture
+def group_with_lockable_plan(business_area: Any, cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    delivery_mechanism = DeliveryMechanismFactory()
+    fsp = FinancialServiceProviderFactory()
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+    )
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.LOCKED,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        currency=CurrencyFactory(),
+    )
+    return group
+
+
+def test_lock_group_with_correct_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_lockable_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_LOCK_AND_UNLOCK_FSP], business_area, program=program)
+
+    response = client.post(_lock_url(business_area.slug, program.code, group_with_lockable_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.LOCKED
+
+
+def test_lock_group_without_permission_returns_403(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_lockable_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.post(_lock_url(business_area.slug, program.code, group_with_lockable_plan.id))
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.enable_activity_log
+def test_lock_group_logs_activity_entry(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_lockable_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_LOCK_AND_UNLOCK_FSP], business_area, program=program)
+
+    response = client.post(_lock_url(business_area.slug, program.code, group_with_lockable_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    log = LogEntry.objects.get(
+        content_type=ContentType.objects.get_for_model(PaymentPlanGroup),
+        object_id=group_with_lockable_plan.pk,
+    )
+    assert log.user == user
+    assert log.changes["status"] == {
+        "from": PaymentPlanGroup.Status.OPEN,
+        "to": PaymentPlanGroup.Status.LOCKED,
+    }
+
+
+def test_unlock_group_with_correct_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_with_lockable_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_LOCK_AND_UNLOCK_FSP], business_area, program=program)
+    client.post(_lock_url(business_area.slug, program.code, group_with_lockable_plan.id))
+
+    response = client.post(_unlock_url(business_area.slug, program.code, group_with_lockable_plan.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.OPEN
+
+
+def test_lock_group_without_payment_plans_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_LOCK_AND_UNLOCK_FSP], business_area, program=program)
+    empty_group = cycle.payment_plan_groups.first()
+
+    response = client.post(_lock_url(business_area.slug, program.code, empty_group.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "without Payment Plans" in str(response.json())
 
 
 def test_retrieve_detail_aggregated_totals(

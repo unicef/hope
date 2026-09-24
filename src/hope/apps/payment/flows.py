@@ -5,6 +5,7 @@ from viewflow import fsm
 
 from hope.models.follow_up_instruction import FollowUpInstruction
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_group import PaymentPlanGroup
 
 
 class PaymentPlanFlow:
@@ -511,6 +512,35 @@ class PaymentPlanFlow:
     def status_reactivate_abort(self) -> None:
         self.payment_plan.status_date = timezone.now()
         self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
+
+
+class PaymentPlanGroupFlow:
+    status = fsm.State(PaymentPlanGroup.Status)
+
+    def __init__(self, payment_plan_group: "PaymentPlanGroup"):
+        self.payment_plan_group = payment_plan_group
+
+    @status.setter()
+    def _set_status(self, value: str) -> None:
+        self.payment_plan_group.status = value
+
+    @status.getter()
+    def _get_status(self) -> str:
+        return self.payment_plan_group.status
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.OPEN,
+        target=PaymentPlanGroup.Status.LOCKED,
+    )
+    def status_lock(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.LOCKED,
+        target=PaymentPlanGroup.Status.OPEN,
+    )
+    def status_unlock(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
 
 
 class FollowUpInstructionFlow:

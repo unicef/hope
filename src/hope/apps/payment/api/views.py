@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from decimal import Decimal
 from functools import cached_property
 from io import BytesIO
@@ -131,6 +132,7 @@ from hope.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
 )
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.sampling import Sampling
 from hope.apps.payment.services.top_up_amount_service import TopUpAmountTemplateService
@@ -2844,6 +2846,8 @@ class PaymentPlanGroupViewSet(
         "create": [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE],
         "update": [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE],
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
+        "lock": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        "unlock": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
         "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
@@ -3088,6 +3092,33 @@ class PaymentPlanGroupViewSet(
                 override=override,
                 null_delivery_policy=null_delivery_policy,
             )
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="lock")
+    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_status_action(request, PaymentPlanGroupService.lock)
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="unlock")
+    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_status_action(request, PaymentPlanGroupService.unlock)
+
+    def _run_status_action(self, request: Request, action_method: Callable) -> Response:
+        payment_plan_group = self.get_object()
+        old_payment_plan_group = copy_model_object(payment_plan_group)
+        payment_plan_group = action_method(PaymentPlanGroupService(payment_plan_group))
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=request.user,
+            programs=payment_plan_group.cycle.program.pk,
+            old_object=old_payment_plan_group,
+            new_object=payment_plan_group,
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
