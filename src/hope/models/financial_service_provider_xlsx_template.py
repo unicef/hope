@@ -102,7 +102,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
 
-    # Exported unconditionally, so they must resolve without a DocumentType row for the key.
+    # Declared as export columns, so they must resolve without a DocumentType row for the key.
     DOCUMENT_NUMBER_COLUMNS = ("registration_token", "national_id")
 
     created_by = models.ForeignKey(
