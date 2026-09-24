@@ -39,14 +39,12 @@ def three_business_areas(
     business_area: BusinessArea, api_user: User, read_only_api_token: APIToken
 ) -> list[BusinessArea]:
     ba1 = BusinessAreaFactory(
-        slug="ukraine11",
         code="1234",
         name="Ukraine",
         long_name="the long name of Ukraine",
         active=True,
     )
     ba2 = BusinessAreaFactory(
-        slug="ba-2",
         code="5678",
         name="Bus Area 2",
         long_name="Business Area 2",
@@ -94,6 +92,7 @@ def test_list_business_area_returns_all_areas(
         "is_accountability_applicable": ba_base.is_accountability_applicable,
         "rdi_import_xlsx_disabled": ba_base.rdi_import_xlsx_disabled,
         "countries": [],
+        "is_manual_ingest": True,
     } in results
     assert {
         "id": str(ba_ukraine.id),
@@ -108,6 +107,7 @@ def test_list_business_area_returns_all_areas(
         "is_accountability_applicable": ba_ukraine.is_accountability_applicable,
         "rdi_import_xlsx_disabled": ba_ukraine.rdi_import_xlsx_disabled,
         "countries": [],
+        "is_manual_ingest": True,
     } in results
     assert {
         "id": str(ba_child.id),
@@ -122,4 +122,5 @@ def test_list_business_area_returns_all_areas(
         "is_accountability_applicable": ba_child.is_accountability_applicable,
         "rdi_import_xlsx_disabled": ba_child.rdi_import_xlsx_disabled,
         "countries": [],
+        "is_manual_ingest": True,
     } in results

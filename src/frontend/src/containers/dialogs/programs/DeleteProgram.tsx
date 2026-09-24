@@ -52,7 +52,7 @@ export const DeleteProgram = ({
   const { businessArea } = useBaseUrl();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: deleteProgram, isPending: isPendingDelete } =
+  const { mutate: deleteProgram, isPending: isPendingDelete } =
     useMutation({
       mutationFn: () =>
         RestService.restBusinessAreasProgramsDestroy({

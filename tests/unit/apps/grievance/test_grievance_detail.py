@@ -48,7 +48,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.registration_data import DeduplicationEngineSimilarityPairFactory
+from extras.test_utils.factories.registration_data import BiometricDeduplicationEngineSimilarityPairFactory
 from extras.test_utils.factories.sanction_list import (
     SanctionListIndividualDateOfBirthFactory,
     SanctionListIndividualDocumentFactory,
@@ -58,6 +58,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
     DUPLICATE,
+    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
@@ -1598,7 +1599,7 @@ def test_grievance_detail_needs_adjudication(
         photo=ContentFile(b"abc", name="doc_aaa.png"),
     )
 
-    dedup_engine_similarity_pair = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=golden_records_individual,
         individual2=duplicate,
@@ -2984,16 +2985,18 @@ def test_needs_adjudication_comparison_query_count_for_three_duplicates(
 def na_ticket_duplicate_in_mixed_household(
     afghanistan: BusinessArea, program: Program, na_grievance: GrievanceTicket, na_golden_record: Individual
 ) -> TicketNeedsAdjudicationDetails:
-    """Four members in the candidate's household, of which only two are active.
+    """Five members in the candidate's household, of which only two are active.
 
-    Active are the head, which HouseholdFactory creates, and the candidate itself.
-    The withdrawn member and the one an earlier adjudication already marked duplicate do not count.
+    Active are the head, which HouseholdFactory creates, and the candidate itself. The withdrawn
+    member, the one an earlier adjudication already marked duplicate, and the non-beneficiary
+    collector do not count.
     """
     household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
     candidate = IndividualFactory(household=household, program=program, business_area=afghanistan)
     IndividualRoleInHouseholdFactory(individual=candidate, household=household, role=ROLE_ALTERNATE)
     IndividualFactory(household=household, program=program, business_area=afghanistan, withdrawn=True)
     IndividualFactory(household=household, program=program, business_area=afghanistan, duplicate=True)
+    IndividualFactory(household=household, program=program, business_area=afghanistan, relationship=NON_BENEFICIARY)
     ticket_details = TicketNeedsAdjudicationDetailsFactory(
         ticket=na_grievance,
         golden_records_individual=na_golden_record,

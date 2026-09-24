@@ -19,6 +19,7 @@ from model_utils.models import SoftDeletableModel
 from strategy_field.fields import StrategyField
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.household.const import NON_BENEFICIARY
 from hope.apps.program.collision_detectors import collision_detectors_registry
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.beneficiary_group import BeneficiaryGroup
@@ -269,6 +270,19 @@ class Program(
 
     def clean(self) -> None:
         super().clean()
+        if (
+            self.biometric_deduplication_enabled
+            and self.business_area_id
+            and self.business_area.is_rdi_ingest_source_all_except_country_workspace
+        ):
+            raise ValidationError(
+                {
+                    "biometric_deduplication_enabled": _(
+                        "Biometric deduplication cannot be enabled for a business area that does not ingest data "
+                        "from Country Workspace."
+                    )
+                }
+            )
         if not self.data_collecting_type_id or not self.beneficiary_group_id:
             return
         if (
@@ -323,8 +337,10 @@ class Program(
         )
 
     def adjust_program_size(self) -> None:
-        self.household_count = self.households.count()
-        self.individual_count = self.individuals.count()
+        self.household_count = self.households.filter(withdrawn=False).count()
+        self.individual_count = (
+            self.individuals.filter(withdrawn=False, duplicate=False).exclude(relationship=NON_BENEFICIARY).count()
+        )
 
     @property
     def households_with_payments_in_program(self) -> QuerySet:

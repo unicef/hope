@@ -1086,6 +1086,33 @@ def test_schedule_population_recalculation_skips_without_recalc_fields(
     ).exists()
 
 
+def test_schedule_population_recalculation_recounts_program_when_relationship_updated(
+    individual: Individual, program: Program, django_capture_on_commit_callbacks
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["relationship"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        service.schedule_population_recalculation([str(individual.id)])
+
+    job = AsyncJob.objects.get(action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action")
+    assert job.config["program_id"] == str(program.id)
+
+
+def test_schedule_population_recalculation_skips_program_recount_without_relationship(
+    individual: Individual, program: Program, django_capture_on_commit_callbacks
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        service.schedule_population_recalculation([str(individual.id)])
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action"
+    ).exists()
+
+
 @pytest.fixture
 def latin_name_update(individual: Individual, program: Program) -> UniversalUpdate:
     universal_update = UniversalUpdate(program=program)
@@ -1123,6 +1150,20 @@ def test_update_individual_latin_name_stored_as_provided(
     assert "Update successful" in latin_name_update.saved_logs
 
 
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_update_individual_latin_name_stored_normalized(
+    individual: Individual, latin_name_update: UniversalUpdate
+) -> None:
+    _write_column(latin_name_update, "full_name_latin", "  Anna \t\xa0 Kovalska ")
+
+    UniversalIndividualUpdateService(latin_name_update).execute()
+
+    individual.refresh_from_db()
+    latin_name_update.refresh_from_db()
+    assert individual.full_name_latin == "Anna Kovalska"
+    assert "Update successful" in latin_name_update.saved_logs
+
+
 def test_update_individual_latin_name_rejects_non_latin_value(
     individual: Individual, latin_name_update: UniversalUpdate
 ) -> None:
@@ -1146,6 +1187,33 @@ def test_update_individual_latin_name_rejects_non_latin_value(
         ("", None),
         (None, None),
         ("Anna O'Neil-Kovalska", None),
+        ("  Anna Kovalska", None),
+        ("Anna Kovalska  ", None),
+        ("Anna   Kovalska", None),
+        ("Anna\nKovalska", None),
+        ("Anna\tKovalska", None),
+        ("Anna\xa0Kovalska", None),
+        (
+            "Anna--Kovalska",
+            (
+                "Invalid value Anna--Kovalska for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
+        ),
+        (
+            "Anna'''Kovalska",
+            (
+                "Invalid value Anna'''Kovalska for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
+        ),
+        (
+            "Anna - ' - Kovalska",
+            (
+                "Invalid value Anna - ' - Kovalska for column full_name_latin: "
+                "Only ASCII letters, spaces, hyphens, and apostrophes are allowed."
+            ),
+        ),
         (
             "Anna1",
             (
