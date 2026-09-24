@@ -479,6 +479,19 @@ def test_process_regular_field_currency_header(task, currency_usd, django_assert
         assert obj.currency == currency_usd
 
 
+def test_process_regular_field_currency_header_resolves_the_active_row(task, currency_syp, django_assert_num_queries):
+    obj = MagicMock()
+    obj.currency = None
+    task.COMBINED_FIELDS["currency_h_c"] = {"type": "STRING", "name": "currency"}
+    cell = MagicMock()
+    cell.value = "SYP"
+
+    with django_assert_num_queries(1):
+        task._process_regular_field("currency_h_c", "SYP", cell, obj)
+
+    assert obj.currency == currency_syp
+
+
 def test_process_complex_field_households_sheet(task):
     handler = MagicMock(return_value="processed")
     obj = MagicMock()

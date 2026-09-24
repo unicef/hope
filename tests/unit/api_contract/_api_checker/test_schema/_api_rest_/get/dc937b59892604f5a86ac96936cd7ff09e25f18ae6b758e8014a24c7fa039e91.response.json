@@ -31749,6 +31749,9 @@
                         "currency": {
                             "type": "string"
                         },
+                        "currency_vision_code": {
+                            "type": "string"
+                        },
                         "total_delivered_quantity": {
                             "type": "string",
                             "format": "decimal",
@@ -31757,6 +31760,7 @@
                     },
                     "required": [
                         "currency",
+                        "currency_vision_code",
                         "total_delivered_quantity"
                     ]
                 },

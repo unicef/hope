@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Exists, OuterRef, Q
 
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.household.const import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
@@ -285,6 +286,12 @@ def get_collector_has_valid_phone_no_query(
     ).filter(Q(individual__phone_no_valid=True) | Q(individual__phone_no_alternative_valid=True))
     has_valid_collector_phone = Q(Exists(valid_collector))
     return has_valid_collector_phone if wants_valid else ~has_valid_collector_phone
+
+
+def get_currency_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
+    currency = resolve_active_currency_or_none(args[0])
+    query = Q(currency__code__iexact=currency.code if currency is not None else args[0])
+    return ~query if comparison_method == "NOT_EQUALS" else query
 
 
 def get_has_bank_account_number_query(_: Any, args: Any, is_social_worker_query: bool = False) -> Q:

@@ -192,6 +192,38 @@ def delivery_template(fsp, delivery_mechanism):
     return template
 
 
+@pytest.fixture
+def child_payment_plans_in_inactive_currency(child_payment_plans, currency_syp_deprecated):
+    PaymentPlan.objects.filter(pk__in=[plan.pk for plan in child_payment_plans]).update(
+        currency=currency_syp_deprecated
+    )
+    return child_payment_plans
+
+
+@pytest.fixture
+def instruction_payments_in_redenominated_currency(instruction_payments, child_payment_plans, currency_syp):
+    """Plans and payments in the active SYP, whose vision_code (SYP01) differs from the ISO code FSPs understand."""
+    PaymentPlan.objects.filter(pk__in=[plan.pk for plan in child_payment_plans]).update(currency=currency_syp)
+    Payment.objects.filter(pk__in=[payment.pk for payment in instruction_payments]).update(currency=currency_syp)
+    return instruction_payments
+
+
+@pytest.fixture
+def delivery_template_with_currency(fsp, delivery_mechanism):
+    template = FinancialServiceProviderXlsxTemplateFactory(
+        columns=["payment_id", "currency", "entitlement_quantity"],
+        core_fields=[],
+        flex_fields=[],
+        document_types=[],
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    return template
+
+
 def _load_exported_workbook(instruction: FollowUpInstruction) -> openpyxl.Workbook:
     assert instruction.export_file is not None
     instruction.export_file.file.open("rb")
@@ -247,6 +279,26 @@ def test_delivery_export_includes_fsp_extra_field_from_later_child_plan(
 
     assert "later_child_reference" in headers
     assert rows[payment_from_later_plan.household.unicef_id]["later_child_reference"] == "FSP-LATER-001"
+
+
+def test_delivery_export_refuses_instruction_in_inactive_currency(
+    instruction,
+    child_payment_plans_in_inactive_currency,
+    delivery_template,
+):
+    with pytest.raises(ValueError, match=r"currency SYP - Syrian Pound \(old\) is inactive"):
+        XlsxFollowUpInstructionDeliveryExportService(instruction)
+
+
+def test_delivery_export_currency_column_carries_iso_code_of_redenominated_currency(
+    instruction,
+    instruction_payments_in_redenominated_currency,
+    delivery_template_with_currency,
+):
+    workbook = XlsxFollowUpInstructionDeliveryExportService(instruction).generate_workbook()
+    rows = _rows_by_household(workbook.active)
+
+    assert {row["currency"] for row in rows.values()} == {"SYP"}
 
 
 class _MinimalExportService(XlsxFollowUpInstructionBaseExportService):

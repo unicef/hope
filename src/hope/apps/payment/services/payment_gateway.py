@@ -19,6 +19,7 @@ from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
+    inactive_currency_reason,
     log_payment_plan_change,
     to_decimal,
 )
@@ -452,8 +453,15 @@ class PaymentGatewayService:
         self.user_id = user_id
         self.user = User.objects.filter(pk=user_id).first() if user_id else None
 
+    @staticmethod
+    def _ensure_currency_is_active(payment_plan: PaymentPlan) -> None:
+        # Only outgoing calls are guarded: sync_records must still bring home the statuses of payments sent earlier.
+        if reason := inactive_currency_reason(payment_plan):
+            raise ValueError(reason)
+
     def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
         if payment_plan.is_payment_gateway:
+            self._ensure_currency_is_active(payment_plan)
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
                 data = PaymentInstructionFromSplitSerializer(split, context={"user_email": user_email}).data
                 response = self.api.create_payment_instruction(data)
@@ -522,6 +530,7 @@ class PaymentGatewayService:
             id_filters = []
 
         if payment_plan.is_payment_gateway:
+            self._ensure_currency_is_active(payment_plan)
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
                 payments_qs = (
                     split.split_payment_items.eligible()

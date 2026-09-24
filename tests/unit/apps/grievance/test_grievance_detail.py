@@ -456,7 +456,7 @@ def assert_base_grievance_data(
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
                 "delivered_quantities": delivered_quantities
-                or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                or [{"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}],
                 "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ")
                 if individual.household.start
                 else None,
@@ -496,7 +496,7 @@ def assert_base_grievance_data(
                         "total_cash_received": role.household.total_cash_received,
                         "total_cash_received_usd": role.household.total_cash_received_usd,
                         "delivered_quantities": delivered_quantities
-                        or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                        or [{"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}],
                         "start": f"{role.household.start:%Y-%m-%dT%H:%M:%SZ}" if role.household.start else None,
                         "zip_code": role.household.zip_code,
                         "residence_status": role.household.get_residence_status_display(),
@@ -1230,7 +1230,9 @@ def test_grievance_detail_delete_household(
             "last_registration_date": ticket_details.reason_household.last_registration_date.strftime("%Y-%m-%d"),
             "total_cash_received": None,
             "total_cash_received_usd": None,
-            "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+            "delivered_quantities": [
+                {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+            ],
             "start": ticket_details.reason_household.start.strftime("%Y-%m-%dT%H:%M:%SZ")
             if ticket_details.reason_household.start
             else None,
@@ -1374,6 +1376,7 @@ def test_grievance_detail_system_flagging(
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00",
                 }
             ],
@@ -1517,8 +1520,8 @@ def test_grievance_detail_payment_verification(
         linked_ticket=linked_ticket,
         existing_ticket=existing_ticket,
         delivered_quantities=[
-            {"currency": "USD", "total_delivered_quantity": "50.00"},
-            {"currency": "PLN", "total_delivered_quantity": "100.00"},
+            {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "50.00"},
+            {"currency": "PLN", "currency_vision_code": "PLN", "total_delivered_quantity": "100.00"},
         ],
     )
 
@@ -1730,6 +1733,7 @@ def test_grievance_detail_needs_adjudication(
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00",
                 }
             ],
@@ -1839,6 +1843,7 @@ def test_grievance_detail_needs_adjudication(
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00",
                 }
             ],
@@ -1920,6 +1925,7 @@ def test_grievance_detail_needs_adjudication(
                 "delivered_quantities": [
                     {
                         "currency": "USD",
+                        "currency_vision_code": "USD",
                         "total_delivered_quantity": "0.00",
                     }
                 ],
@@ -2013,6 +2019,7 @@ def test_grievance_detail_needs_adjudication(
         "delivered_quantities": [
             {
                 "currency": "USD",
+                "currency_vision_code": "USD",
                 "total_delivered_quantity": "0.00",
             }
         ],

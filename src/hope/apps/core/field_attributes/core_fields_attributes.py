@@ -1,5 +1,6 @@
+from collections.abc import Callable
 import copy
-from functools import reduce
+from functools import cache, reduce
 import logging
 from typing import Any, Iterable
 
@@ -9,6 +10,7 @@ from hope.apps.core.attributes_qet_queries import (
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_collector_has_valid_phone_no_query,
+    get_currency_query,
     get_drivers_license_document_number_query,
     get_drivers_licensee_issuer_query,
     get_electoral_card_document_number_query,
@@ -32,6 +34,7 @@ from hope.apps.core.attributes_qet_queries import (
     registration_data_import_query,
 )
 from hope.apps.core.countries import Countries
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
@@ -92,6 +95,15 @@ from hope.models.currency import Currency
 from hope.models.registration_data_import import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
+
+
+def _active_currency_code_validator() -> Callable[[str], bool]:
+    @cache
+    def is_active_currency_code(value: str) -> bool:
+        return resolve_active_currency_or_none(value) is not None
+
+    return is_active_currency_code
+
 
 # about "snapshot_field"
 # if it's the same field that can connect with "associated_with" and "lookup"
@@ -799,13 +811,17 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_SELECT_ONE,
         "name": "currency",
         "lookup": "currency",
+        "get_query": get_currency_query,
         "required": False,
         "label": {"English(EN)": "Which currency will be used for financial questions?"},
         "hint": "",
         "choices": [],
         "_choices": lambda *args, **kwargs: [
-            {"label": {"English(EN)": c.name}, "value": c.code} for c in Currency.objects.all().order_by("code")
+            {"label": {"English(EN)": c.name}, "value": c.code} for c in Currency.objects.active().order_by("code")
         ],
+        # Import validates by lookup, not against "choices": the lookup accepts aliases that
+        # must not be offered as choices.
+        "_custom_validate_choices": _active_currency_code_validator,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",
         "scope": [
@@ -2582,6 +2598,9 @@ class FieldFactory(list):
             choices = field.get("_choices")
             if callable(choices):
                 field["choices"] = choices(business_area_slug=business_area_slug, program_id=program_id)
+            make_validator = field.get("_custom_validate_choices")
+            if callable(make_validator):
+                field["custom_validate_choices"] = make_validator()
         return factory
 
     @classmethod

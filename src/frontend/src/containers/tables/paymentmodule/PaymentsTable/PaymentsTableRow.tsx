@@ -210,6 +210,7 @@ export function PaymentsTableRow({
           ? `${formatCurrencyWithSymbol(
               payment.entitlementQuantity,
               payment.currency,
+              payment.currencyVisionCode,
             )} (${formatCurrencyWithSymbol(
               payment.entitlementQuantityUsd,
               'USD',
