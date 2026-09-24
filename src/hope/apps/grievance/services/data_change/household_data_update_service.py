@@ -18,6 +18,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_image_field,
     handle_role,
     is_approved,
+    save_images,
     to_date_string,
     verify_flex_fields,
 )
@@ -74,6 +75,7 @@ class HouseholdDataUpdateService(DataChangeService):
         handle_image_field(household_data, "consent_sign")
         flex_fields = {to_snake_case(field): value for field, value in household_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "households")
+        save_images(flex_fields, "households")
         household_data_with_approve_status = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
         }
@@ -142,6 +144,7 @@ class HouseholdDataUpdateService(DataChangeService):
             to_snake_case(field): value for field, value in new_household_data.pop("flex_fields", {}).items()
         }
         verify_flex_fields(flex_fields, "households")
+        save_images(flex_fields, "households")
         household_data_with_approve_status = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_household_data.items()

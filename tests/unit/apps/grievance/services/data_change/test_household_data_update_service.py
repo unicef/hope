@@ -186,6 +186,28 @@ def flex_fields_ticket_details(program: Program, household_with_flex_fields: Any
     )
 
 
+@pytest.fixture
+def household_with_image_flex_field(program: Program) -> Any:
+    FlexibleAttributeFactory(
+        name="hh_photo_h_f",
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    return HouseholdFactory(program=program, business_area=program.business_area, create_role=False, flex_fields={})
+
+
+@pytest.fixture
+def image_flex_field_ticket_details(program: Program, household_with_image_flex_field: Any) -> Any:
+    return TicketHouseholdDataUpdateDetailsFactory(
+        household=household_with_image_flex_field,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={},
+    )
+
+
 def test_save_datetime_field_records_previous_value_as_isoformat(
     household_with_previous_values: Any, data_change_ticket: Any
 ) -> None:
@@ -349,6 +371,44 @@ def test_update_records_previous_facility_and_consent_sign(
         "facility_admin_area": {"value": "AF0002", "approve_status": False, "previous_value": "AF0001"},
         "consent_sign": {"value": "", "approve_status": False, "previous_value": "consent/old-signature.jpg"},
         "flex_fields": {},
+    }
+
+
+def test_save_stores_household_image_flex_field_under_its_storage_name(
+    household_with_image_flex_field: Any, data_change_ticket: Any
+) -> None:
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household_with_image_flex_field,
+                "household_data": {"flex_fields": {"hh_photo_h_f": "/api/uploads/house%20front.jpg"}},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=data_change_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    assert ticket.ticket_details.household_data == {
+        "flex_fields": {"hh_photo_h_f": {"value": "house front.jpg", "approve_status": False, "previous_value": None}},
+    }
+
+
+def test_update_stores_household_image_flex_field_under_its_storage_name(
+    household_with_image_flex_field: Any, image_flex_field_ticket_details: Any
+) -> None:
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household_with_image_flex_field,
+            "household_data": {"flex_fields": {"hh_photo_h_f": "/api/uploads/house%20front.jpg"}},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=image_flex_field_ticket_details.ticket, extras=update_extras)
+    ticket = service.update()
+
+    assert ticket.ticket_details.household_data == {
+        "flex_fields": {"hh_photo_h_f": {"value": "house front.jpg", "approve_status": False, "previous_value": None}},
     }
 
 

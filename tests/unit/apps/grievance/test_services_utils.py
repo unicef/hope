@@ -593,10 +593,41 @@ def test_handle_photo_saves_and_return() -> None:
     assert result.endswith(".jpg")
 
 
-def test_handle_image_field_keeps_stored_name_out_of_the_data_when_nothing_was_uploaded() -> None:
-    data = {"consent_sign": "consent/already-stored.jpg", "village": "Kabul"}
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        pytest.param({"village": "Kabul"}, {"village": "Kabul"}, id="field-not-provided"),
+        pytest.param(
+            {"consent_sign": None, "village": "Kabul"},
+            {"consent_sign": "", "village": "Kabul"},
+            id="cleared",
+        ),
+        pytest.param(
+            {"consent_sign": "consent/already-stored.jpg", "village": "Kabul"},
+            {"village": "Kabul"},
+            id="stored-name-sent-back",
+        ),
+    ],
+)
+def test_handle_image_field_keeps_only_a_new_upload_or_a_clear_in_the_data(data: dict, expected: dict) -> None:
     handle_image_field(data, "consent_sign")
-    assert data == {"village": "Kabul"}
+    assert data == expected
+
+
+def test_handle_image_field_stores_uploaded_image_under_generated_name() -> None:
+    uploaded = InMemoryUploadedFile(
+        file=BytesIO(b"123"),
+        field_name="consent_sign",
+        name="signature.jpg",
+        content_type="image/jpeg",
+        size=3,
+        charset=None,
+    )
+    data = {"consent_sign": uploaded, "village": "Kabul"}
+    handle_image_field(data, "consent_sign")
+    assert data["village"] == "Kabul"
+    assert data["consent_sign"].endswith(".jpg")
+    assert data["consent_sign"] != "signature.jpg"
 
 
 def test_set_status_based_on_assigned_to(user: Any) -> None:

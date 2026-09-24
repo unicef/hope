@@ -29,7 +29,6 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_edit_document,
     handle_edit_identity,
     handle_image_field,
-    handle_photo,
     handle_update_account,
     is_approved,
     prepare_edit_accounts_save,
@@ -80,18 +79,6 @@ def _validate_identification_key(model: type[Household] | type[Individual], obj:
         raise ValidationError(f"Ticket cannot be closed, identification key {key} is already used in this programme")
 
 
-def _handle_photo_field(new_individual_data: dict) -> None:
-    _not_provided = object()
-    photo = new_individual_data.pop("photo", _not_provided)
-    if photo is not _not_provided:
-        if photo is None:
-            new_individual_data["photo"] = ""
-        else:
-            saved_photo = handle_photo(photo, None)
-            if saved_photo:
-                new_individual_data["photo"] = saved_photo
-
-
 class IndividualDataUpdateService(DataChangeService):
     def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
@@ -110,7 +97,7 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
-        _handle_photo_field(individual_data)
+        handle_image_field(individual_data, "photo")
         handle_image_field(individual_data, "consent_sign")
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
@@ -196,7 +183,7 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
-        _handle_photo_field(new_individual_data)
+        handle_image_field(new_individual_data, "photo")
         handle_image_field(new_individual_data, "consent_sign")
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
