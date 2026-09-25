@@ -1,4 +1,5 @@
 from contextlib import suppress
+import copy
 from datetime import datetime
 import logging
 import os
@@ -11,11 +12,12 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
+from django.test import override_settings
 from flags.models import FlagState
 import pytest
 from pytest_html import extras
 import responses
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -131,11 +133,51 @@ def create_role_with_all_permissions() -> None:
     Role.objects.get_or_create(name="Role with all permissions")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def cache_per_xdist_worker(worker_id: str) -> None:
+    """Give each xdist worker its own Redis database.
+
+    All workers read `CACHE_LOCATION`, so they shared one database while each ran against
+    its own test database. A list response cached by one worker could then be served to
+    another one holding different data, and the autouse `cache.clear()` wiped the other
+    workers' caches in the middle of their tests.
+    """
+    location = settings.CACHES["default"].get("LOCATION", "")
+    if worker_id == "master" or not str(location).startswith("redis"):
+        yield
+        return
+
+    # Redis has 16 databases; 0 and 1 are the app's own. The key prefix keeps workers
+    # apart if there are ever more of them than databases left.
+    index = 2 + int(worker_id.removeprefix("gw")) % 14
+    caches = copy.deepcopy(settings.CACHES)
+    caches["default"]["LOCATION"] = re.sub(r"/\d+$", f"/{index}", str(location))
+    caches["default"]["KEY_PREFIX"] = worker_id
+    with override_settings(CACHES=caches):
+        yield
+
+
 @pytest.fixture(autouse=True)
 def clear_default_cache() -> None:
     from django.core.cache import cache
 
     cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def never_answer_304(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stop the API answering `304 Not Modified` while the e2e suite runs.
+
+    Chrome is shared by every test on a worker and `live_server` keeps one origin for the
+    whole session, so a body cached in an earlier test is still in the browser when the next
+    one starts. The API's ETags are built from version counters in Redis that the autouse
+    `cache.clear()` resets to 1, so the same URL can produce the same ETag over a different
+    database — the server then says 304 and Chrome shows the previous test's data.
+
+    Always answering with the body keeps each test's data its own. Static files are
+    unaffected: their ETags come from the file content, so the JS bundle stays cached.
+    """
+    monkeypatch.setattr("hope.api.caches._inm_matches", lambda *args, **kwargs: False)
 
 
 @pytest.fixture(autouse=True)
@@ -244,8 +286,10 @@ def screenshot_path(worker_id: str) -> str:
     return str(path)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def driver(download_path: str) -> Chrome:
+    # One Chrome per xdist worker: starting and quitting it per test cost about 2s a test.
+    # `browser` puts it back to a clean state between tests.
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -264,7 +308,29 @@ def driver(download_path: str) -> Chrome:
     prefs = {"download.default_directory": download_path}
     chrome_options.add_experimental_option("prefs", prefs)
 
-    return Chrome(options=chrome_options)
+    chrome = Chrome(options=chrome_options)
+    yield chrome
+    chrome.quit()
+
+
+def _reset_browser(driver: Chrome) -> None:
+    """Leave the browser as a fresh one would be, ready for the next test."""
+    with suppress(WebDriverException):
+        driver.switch_to.alert.dismiss()
+    with suppress(WebDriverException):
+        for handle in driver.window_handles[1:]:
+            driver.switch_to.window(handle)
+            driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+    # A test can end inside the dashboard iframe, and storage is per document.
+    with suppress(WebDriverException):
+        driver.switch_to.default_content()
+    with suppress(WebDriverException):
+        driver.execute_script(CLEAR_BROWSER_STORAGE_JS)
+    with suppress(WebDriverException):
+        driver.delete_all_cookies()
+    with suppress(WebDriverException):
+        driver.get("about:blank")
 
 
 @pytest.fixture
@@ -292,7 +358,7 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
         driver.live_server = live_server_with_static
         yield driver
     finally:
-        driver.quit()
+        _reset_browser(driver)
 
 
 @pytest.fixture
