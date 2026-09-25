@@ -52,7 +52,6 @@ export const PeopleListTable = ({
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
       birthDate: filter.birthDate,
-      page,
     }),
     [
       filter.ageMin,
