@@ -10,8 +10,9 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import type { MouseEvent, ReactElement } from 'react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
+import { useTableState } from '@hooks/useTableState';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 
@@ -38,7 +39,7 @@ export function LookUpLinkedTicketsTable({
 
   const { data: documentTypeChoices } = useDocumentTypeChoices();
 
-  const initialQueryVariables = useMemo(() => {
+  const filterVariables = useMemo(() => {
     return {
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -64,53 +65,44 @@ export function LookUpLinkedTicketsTable({
     documentTypeChoices,
   ]);
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const [selected, setSelected] = useState(initialValues.selectedLinkedTickets);
+
+  const listParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    listVariables,
+  );
+  const countParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    filterVariables,
+  );
 
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedGrievanceTicketListList>({
       queryKey: programId
         ? restQueryKey(
             RestService.restBusinessAreasProgramsGrievanceTicketsList,
-            createApiParams(
-              { businessAreaSlug: businessArea, programCode: programId },
-              queryVariables,
-              { withPagination: true },
-            ),
+            listParams,
           )
         : restQueryKey(
             RestService.restBusinessAreasGrievanceTicketsList,
-            createApiParams(
-              { businessAreaSlug: businessArea },
-              queryVariables,
-              { withPagination: true },
-            ),
+            listParams,
           ),
-      queryFn: () => {
-        if (programId) {
-          return RestService.restBusinessAreasProgramsGrievanceTicketsList(
-            createApiParams(
-              { businessAreaSlug: businessArea, programCode: programId },
-              queryVariables,
-              { withPagination: true },
-            ),
-          );
-        } else {
-          return RestService.restBusinessAreasGrievanceTicketsList(
-            createApiParams(
-              { businessAreaSlug: businessArea },
-              queryVariables,
-              { withPagination: true },
-            ),
-          );
-        }
-      },
+      queryFn: () =>
+        programId
+          ? RestService.restBusinessAreasProgramsGrievanceTicketsList(
+              listParams,
+            )
+          : RestService.restBusinessAreasGrievanceTicketsList(listParams),
       placeholderData: keepPreviousData,
       enabled: !choicesLoading && !!choicesData,
     });
@@ -119,29 +111,20 @@ export function LookUpLinkedTicketsTable({
     queryKey: programId
       ? restQueryKey(
           RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
-          ),
+          countParams,
         )
       : restQueryKey(
           RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
-          createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+          countParams,
         ),
-    queryFn: () => {
-      if (programId) {
-        return RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
-          createApiParams(
-            { businessAreaSlug: businessArea, programCode: programId },
-            queryVariables,
+    queryFn: () =>
+      programId
+        ? RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
+            countParams,
+          )
+        : RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
+            countParams,
           ),
-        );
-      } else {
-        return RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
-          createApiParams({ businessAreaSlug: businessArea }, queryVariables),
-        );
-      }
-    },
     enabled: !choicesLoading && !!choicesData && page === 0,
   });
 
@@ -201,19 +184,15 @@ export function LookUpLinkedTicketsTable({
     <TableWrapper>
       <UniversalRestTable
         headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
         onSelectAllClick={handleSelectAllCheckboxesClick}
         numSelected={numSelected}
         data={data}
         error={error}
         isLoading={isLoading}
         isFetching={isFetching}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={countData?.count}
         renderRow={renderRow}
-        page={page}
-        setPage={setPage}
       />
     </TableWrapper>
   );

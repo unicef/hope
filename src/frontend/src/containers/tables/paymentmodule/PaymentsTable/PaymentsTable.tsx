@@ -5,6 +5,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
+import { useTableState } from '@hooks/useTableState';
 import { Box, Paper, Typography } from '@mui/material';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { NotEligiblePaymentList } from '@restgenerated/models/NotEligiblePaymentList';
@@ -19,7 +20,7 @@ import { createApiParams } from '@utils/apiUtils';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -112,7 +113,6 @@ const PaymentsTableSection = ({
     : eligibleInitialFilter;
 
   const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
-  const [page, setPage] = useState(0);
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -125,7 +125,7 @@ const PaymentsTableSection = ({
     setShouldScroll(false),
   );
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -145,19 +145,24 @@ const PaymentsTableSection = ({
     [appliedFilter, businessArea, filterKeys, notEligible, programId],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 25, 50],
+    defaultOrderBy: 'createdAt',
+    defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const primaryParams = {
     businessAreaSlug: businessArea,
     programCode: programId,
     paymentPlanPk: paymentPlan.id,
   };
-  const paymentsListParams = createApiParams(primaryParams, queryVariables, {
-    withPagination: true,
-  });
+  const paymentsListParams = createApiParams(primaryParams, listVariables);
   const listService = notEligible
     ? RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleList
     : RestService.restBusinessAreasProgramsPaymentPlansPaymentsList;
@@ -172,7 +177,7 @@ const PaymentsTableSection = ({
     placeholderData: keepPreviousData,
   });
 
-  const paymentsCountParams = createApiParams(primaryParams, queryVariables);
+  const paymentsCountParams = createApiParams(primaryParams, filterVariables);
   const countService = notEligible
     ? RestService.restBusinessAreasProgramsPaymentPlansPaymentsNotEligibleCountRetrieve
     : RestService.restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve;
@@ -215,7 +220,8 @@ const PaymentsTableSection = ({
   const handleAppliedFilterChange = (newFilter): void => {
     setAppliedFilter(newFilter);
     setShouldScroll(true);
-    setPage(0);
+    // The page reset rides on `resetPageOn: filterVariables`, so switching the
+    // eligible/not-eligible tab resets it too, not just the filter bar.
   };
 
   return (
@@ -256,18 +262,12 @@ const PaymentsTableSection = ({
             <UniversalRestTable
               isOnPaper={false}
               headCells={tableHeadCells}
-              rowsPerPageOptions={[10, 25, 50]}
-              defaultOrderBy="createdAt"
-              defaultOrderDirection="desc"
+              tableState={table}
               isLoading={isLoading}
               isFetching={isFetching}
               error={error}
-              queryVariables={queryVariables}
-              setQueryVariables={setQueryVariables}
               data={paymentsData}
               itemsCount={itemsCount}
-              page={page}
-              setPage={setPage}
               renderRow={(row: PaymentList | NotEligiblePaymentList) => (
                 <PaymentsTableRow
                   key={row.id}
