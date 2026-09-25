@@ -25,7 +25,6 @@ from hope.apps.household.const import HOST, SEEING
 from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
-    Country,
     DataCollectingType,
     Individual,
     Payment,
@@ -65,8 +64,8 @@ def add_people(social_worker_program: Program) -> List:
         )
         hoh.household = household
         hoh.save()
-        # The grievance edit form reads document.country.name, so the document needs a country.
-        DocumentFactory(individual=hoh, country=Country.objects.get(iso_code3="AFG"))
+        # No country on purpose: the grievance edit form used to crash on document.country.name.
+        DocumentFactory(individual=hoh)
     return [hoh, household]
 
 
