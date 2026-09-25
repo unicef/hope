@@ -145,5 +145,4 @@ class PaymentModule(BaseComponents):
         # Rows render one by one, so wait until the one asked for exists rather than
         # sleeping and hoping. The old TimeoutException handler could never fire:
         # indexing a short list raises IndexError.
-        self._wait().until(lambda _: len(self.get_elements(self.rows)) > number)
-        return self.get_elements(self.rows)[number]
+        return self.wait_for_nth(self.rows, number)

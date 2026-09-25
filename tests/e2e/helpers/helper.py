@@ -123,6 +123,28 @@ class Common:
 
         return StaleSafeElement(locate(), locate)
 
+    def wait_for_nth(
+        self,
+        locator: str,
+        index: int,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> WebElement:
+        """Wait until at least ``index + 1`` elements match and return that one.
+
+        Table rows arrive one by one and a mutation re-renders the whole table, so the
+        returned element re-locates itself by index like ``wait_for`` does.
+        """
+
+        def locate() -> WebElement:
+            try:
+                self._wait(timeout).until(lambda _: len(self.get_elements(locator, element_type)) > index)
+            except TimeoutException as e:
+                raise NoSuchElementException(f"Fewer than {index + 1} elements {locator} after {timeout}s") from e
+            return self.get_elements(locator, element_type)[index]
+
+        return StaleSafeElement(locate(), locate)
+
     def wait_for_header_text(self, locator: str, text: str, timeout: int = DEFAULT_TIMEOUT):
         WebDriverWait(self.driver, timeout).until(
             expected_conditions.text_to_be_present_in_element(
