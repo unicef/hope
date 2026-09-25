@@ -143,7 +143,8 @@ export const GRIEVANCE_COLUMNS: Record<GrievanceColumnId, GrievanceColumn> = {
       numeric: false,
       dataCy: 'issueType',
     },
-    render: ({ ticket }) => getIssueTypeToDisplay(ticket.issueType),
+    render: ({ ticket, issueTypeChoicesData }) =>
+      getIssueTypeToDisplay(ticket.issueType, issueTypeChoicesData),
   },
   target: {
     // The only header that depends on context, and the reason the row used to need an alias map:
@@ -182,7 +183,9 @@ export const GRIEVANCE_COLUMNS: Record<GrievanceColumnId, GrievanceColumn> = {
       <StatusBox
         status={
           priorityChoicesData[
-            priorityChoicesData.findIndex((obj) => obj.value === ticket.priority)
+            priorityChoicesData.findIndex(
+              (obj) => obj.value === ticket.priority,
+            )
           ]?.name || '-'
         }
         statusToColor={grievanceTicketBadgeColors}

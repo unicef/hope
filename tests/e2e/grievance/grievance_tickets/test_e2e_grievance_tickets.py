@@ -602,8 +602,7 @@ class TestGrievanceTickets:
                 id="Sensitive Grievance Miscellaneous",
             ),
             pytest.param(
-                # The details page title-cases the issue type's enum name instead of using its label.
-                {"category": "Sensitive Grievance", "type": "Personal disputes", "details_type": "Personal Disputes"},
+                {"category": "Sensitive Grievance", "type": "Personal disputes"},
                 id="Sensitive Grievance Personal disputes",
             ),
             pytest.param(
@@ -614,12 +613,11 @@ class TestGrievanceTickets:
                 {
                     "category": "Grievance Complaint",
                     "type": "Registration Related Complaint",
-                    "details_type": "Registration Complaint",
                 },
                 id="Grievance Complaint Registration Related Complaint",
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "FSP Related Complaint", "details_type": "Fsp Complaint"},
+                {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
                 id="Grievance Complaint FSP Related Complaint",
             ),
             pytest.param(
@@ -672,8 +670,7 @@ class TestGrievanceTickets:
         user = User.objects.get(email="test@example.com")
         assert f"{user.first_name} {user.last_name}" in page_grievance_details_page.get_label_created_by().text
         assert test_data["category"] in page_grievance_details_page.get_ticket_category().text
-        details_type = test_data.get("details_type", test_data["type"])
-        assert details_type in page_grievance_details_page.get_label_issue_type().text
+        assert test_data["type"] in page_grievance_details_page.get_label_issue_type().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
