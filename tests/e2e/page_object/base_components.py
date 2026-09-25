@@ -49,6 +49,7 @@ class BaseComponents(Common):
     nav_resources_release_note = 'a[data-cy="nav-resources-Release Note"]'
     nav_program_log = 'a[data-cy="nav-Programme Log"]'
     main_content = 'div[data-cy="main-content"]'
+    page_header_title = 'h5[data-cy="page-header-title"]'
     drawer_items = 'div[data-cy="drawer-items"]'
     drawer_inactive_subheader = 'div[data-cy="program-inactive-subheader"]'
     menu_item_clear_cache = 'li[data-cy="menu-item-clear-cache"]'
@@ -72,6 +73,14 @@ class BaseComponents(Common):
 
     def get_main_content(self) -> WebElement:
         return self.wait_for(self.main_content)
+
+    def assert_page_header_title(self, text: str) -> None:
+        """Wait until the page header shows ``text``.
+
+        Reading the header once races the re-render that fills in the title, so
+        poll for the expected text instead of asserting on a single read.
+        """
+        self.wait_for_text(text, self.page_header_title)
 
     def get_business_area_container(self) -> WebElement:
         return self.wait_for(self.business_area_container)
@@ -228,7 +237,7 @@ class BaseComponents(Common):
             time.sleep(0.01)
             if text in self.wait_for(self.row_index_template.format(index + 1)).text:
                 return
-        assert text in self.wait_for(self.row_index_.format(index + 1)).text
+        assert text in self.wait_for(self.row_index_template.format(index + 1)).text
 
     def get_rows(self) -> [WebElement]:
         return self.get_elements(self.rows)
@@ -245,10 +254,10 @@ class BaseComponents(Common):
         assert text in self.get_alert().text
 
     def wait_for_number_of_rows(self, number: int) -> bool:
-        for _ in range(5):
+        for _ in range(50):
             if len(self.get_rows()) == number:
                 return True
-            sleep(1)
+            sleep(0.1)
         return False
 
     def clear_input(self, element: WebElement) -> None:

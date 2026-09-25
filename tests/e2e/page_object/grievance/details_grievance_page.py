@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -25,9 +23,10 @@ class GrievanceDetailsPage(BaseComponents):
     ticket_assigment = 'div[data-cy="label-Assigned to"]'
     ticket_category = 'div[data-cy="label-Category"]'
     label_issue_type = 'div[data-cy="label-Issue Type"]'
-    ticket_household_id = 'div[data-cy="label-Household ID"]'
+    # Labelled after the programme's beneficiary group, e.g. "Items Group ID".
+    ticket_household_id = 'div[data-cy="label-{} ID"]'
     ticket_target_id = 'div[data-cy="label-Target ID"]'
-    ticket_individual_id = 'div[data-cy="label-Individual ID"]'
+    ticket_individual_id = 'div[data-cy="label-{} ID"]'
     ticket_payment_label = 'div[data-cy="label-Payment ID"]'
     label_payment_plan = 'div[data-cy="label-Payment Plan"]'
     label_payment_plan_verification = 'div[data-cy="label-Payment Plan Verification"]'
@@ -203,7 +202,7 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for_disappear(self.people_icon)
 
     def disappear_person_icon(self) -> WebElement:
-        return self.wait_for_disappear(self.people_icon)
+        return self.wait_for_disappear(self.person_icon)
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
@@ -215,36 +214,18 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.label_ticket_id)
 
     def get_button_close_ticket(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_close_ticket)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_close_ticket)
 
     def get_button_assign_to_me(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_assign_to_me)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_assign_to_me)
 
     def get_button_send_for_approval(self) -> WebElement:
         return self.wait_for(self.button_send_for_approval)
 
     def get_button_approval(self) -> WebElement:
-        button = self.wait_for(self.button_approval)
-        # Force click using JavaScript if regular click might not work
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
-        sleep(1)
-        return button
+        return self.scroll_to_and_wait_for(self.button_approval)
 
     def get_button_set_in_progress(self) -> WebElement:
         return self.wait_for(self.button_set_in_progress)
@@ -282,14 +263,14 @@ class GrievanceDetailsPage(BaseComponents):
     def get_ticket_category(self) -> WebElement:
         return self.wait_for(self.ticket_category)
 
-    def get_ticket_household_id(self) -> WebElement:
-        return self.wait_for(self.ticket_household_id)
+    def get_ticket_household_id(self, group_label: str = "Items Group") -> WebElement:
+        return self.wait_for(self.ticket_household_id.format(group_label))
 
     def get_ticket_target_id(self) -> WebElement:
         return self.wait_for(self.ticket_target_id)
 
-    def get_ticket_individual_id(self) -> WebElement:
-        return self.wait_for(self.ticket_individual_id)
+    def get_ticket_individual_id(self, member_label: str = "Item") -> WebElement:
+        return self.wait_for(self.ticket_individual_id.format(member_label))
 
     def get_ticket_payment_label(self) -> WebElement:
         return self.wait_for(self.ticket_payment_label)

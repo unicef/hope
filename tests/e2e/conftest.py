@@ -1,4 +1,5 @@
 from contextlib import suppress
+import copy
 from datetime import datetime
 import logging
 import os
@@ -11,6 +12,7 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from django.conf import settings
 from django.contrib.staticfiles.handlers import StaticFilesHandler
+from django.test import override_settings
 from flags.models import FlagState
 import pytest
 from pytest_html import extras
@@ -80,6 +82,7 @@ from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.selenium import CLEAR_BROWSER_STORAGE_JS, reset_browser, session_cookie_for
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import (
@@ -130,11 +133,51 @@ def create_role_with_all_permissions() -> None:
     Role.objects.get_or_create(name="Role with all permissions")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def cache_per_xdist_worker(worker_id: str) -> None:
+    """Give each xdist worker its own Redis database.
+
+    All workers read `CACHE_LOCATION`, so they shared one database while each ran against
+    its own test database. A list response cached by one worker could then be served to
+    another one holding different data, and the autouse `cache.clear()` wiped the other
+    workers' caches in the middle of their tests.
+    """
+    location = settings.CACHES["default"].get("LOCATION", "")
+    if worker_id == "master" or not str(location).startswith("redis"):
+        yield
+        return
+
+    # Redis has 16 databases; 0 and 1 are the app's own. The key prefix keeps workers
+    # apart if there are ever more of them than databases left.
+    index = 2 + int(worker_id.removeprefix("gw")) % 14
+    caches = copy.deepcopy(settings.CACHES)
+    caches["default"]["LOCATION"] = re.sub(r"/\d+$", f"/{index}", str(location))
+    caches["default"]["KEY_PREFIX"] = worker_id
+    with override_settings(CACHES=caches):
+        yield
+
+
 @pytest.fixture(autouse=True)
 def clear_default_cache() -> None:
     from django.core.cache import cache
 
     cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def never_answer_304(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stop the API answering `304 Not Modified` while the e2e suite runs.
+
+    Chrome is shared by every test on a worker and `live_server` keeps one origin for the
+    whole session, so a body cached in an earlier test is still in the browser when the next
+    one starts. The API's ETags are built from version counters in Redis that the autouse
+    `cache.clear()` resets to 1, so the same URL can produce the same ETag over a different
+    database — the server then says 304 and Chrome shows the previous test's data.
+
+    Always answering with the body keeps each test's data its own. Static files are
+    unaffected: their ETags come from the file content, so the JS bundle stays cached.
+    """
+    monkeypatch.setattr("hope.api.caches._inm_matches", lambda *args, **kwargs: False)
 
 
 @pytest.fixture(autouse=True)
@@ -243,14 +286,17 @@ def screenshot_path(worker_id: str) -> str:
     return str(path)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def driver(download_path: str) -> Chrome:
+    # One Chrome per xdist worker: starting and quitting it per test cost about 2s a test.
+    # `browser` puts it back to a clean state between tests.
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
-    chrome_options.add_argument("--disable-images")
+    # No --disable-images: it is not a real Chrome flag, so it never did anything, and
+    # the pref that does work breaks the grievance tests that click photo thumbnails.
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
@@ -262,7 +308,9 @@ def driver(download_path: str) -> Chrome:
     prefs = {"download.default_directory": download_path}
     chrome_options.add_experimental_option("prefs", prefs)
 
-    return Chrome(options=chrome_options)
+    chrome = Chrome(options=chrome_options)
+    yield chrome
+    chrome.quit()
 
 
 @pytest.fixture
@@ -290,7 +338,7 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
         driver.live_server = live_server_with_static
         yield driver
     finally:
-        driver.quit()
+        reset_browser(driver)
 
 
 @pytest.fixture
@@ -325,31 +373,10 @@ def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> Any:
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.get(f"{browser.live_server.url}/api/{settings.ADMIN_PANEL_URL}/")
-
-    browser.execute_script(
-        """
-    window.indexedDB.databases().then(dbs => dbs.forEach(db => {
-        console.log('Deleting database:', db.name);
-        indexedDB.deleteDatabase(db.name);
-    }));
-    window.localStorage.clear();
-    window.sessionStorage.clear();
-    """
-    )
-    login = "id_username"
-    password = "id_password"
-    login_button = '//*[@id="login-form"]/div[3]/input'
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support import expected_conditions
-    from selenium.webdriver.support.wait import WebDriverWait
-
-    WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.XPATH, login_button)))
-    login_form = browser.find_element(By.ID, "login-form")
-    browser.find_element(By.ID, login).send_keys("superuser")
-    browser.find_element(By.ID, password).send_keys("testtest2")
-    browser.find_element(By.XPATH, login_button).click()
-    WebDriverWait(browser, 10).until(expected_conditions.staleness_of(login_form))
+    # Log in by cookie instead of the admin form; test_login.py covers the form itself.
+    browser.get(f"{browser.live_server.url}/_health")
+    browser.execute_script(CLEAR_BROWSER_STORAGE_JS)
+    browser.add_cookie(session_cookie_for("superuser"))
     browser.get(f"{browser.live_server.url}/")
 
     from django.core.cache import cache

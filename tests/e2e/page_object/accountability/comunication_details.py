@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class AccountabilityCommunicationDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     label_created_by = 'div[data-cy="label-Created By"]'
     label_date_created = 'div[data-cy="label-Date Created"]'
     label_target_population = 'div[data-cy="label-Target Population"]'
@@ -24,9 +23,6 @@ class AccountabilityCommunicationDetails(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_label_created_by(self) -> WebElement:
         return self.wait_for(self.label_created_by)

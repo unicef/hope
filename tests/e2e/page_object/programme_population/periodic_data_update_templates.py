@@ -7,7 +7,6 @@ class PDUXlsxTemplates(BaseComponents):
     nav_program_population = 'a[data-cy="nav-Programme Population"]'
     nav_program_details = 'a[data-cy="nav-Programme Details"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     tab_individuals = 'button[data-cy="tab-individuals"]'
     tab_periodic_data_updates = 'button[data-cy="tab-periodic-data-updates"]'
     tab_offline_templates = 'button[data-cy="pdu-offline-templates"]'
@@ -48,9 +47,6 @@ class PDUXlsxTemplates(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_tab_individuals(self) -> WebElement:
         return self.wait_for(self.tab_individuals)
@@ -161,7 +157,6 @@ class PDUXlsxTemplatesDetails(BaseComponents):
     breadcrumbs_container = 'div[data-cy="breadcrumbs-container"]'
     breadcrumbs_element_container = 'span[data-cy="breadcrumbs-element-container"]'
     breadcrumbs_link = 'a[data-cy="breadcrumbs-link"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     title = 'h6[data-cy="title"]'
     label_key = 'div[data-cy="label-key"]'
     filters_registration_data_import = 'div[data-cy="filters-registration-data-import"]'
@@ -215,9 +210,6 @@ class PDUXlsxTemplatesDetails(BaseComponents):
 
     def get_breadcrumbs_link(self) -> WebElement:
         return self.wait_for(self.breadcrumbs_link)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_title(self) -> WebElement:
         return self.wait_for(self.title)

@@ -4,7 +4,6 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class ProgramCycleDetailsPage(BaseComponents):
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_create_payment_plan = 'a[data-cy="button-create-payment-plan"]'
     button_finish_programme_cycle = 'button[data-cy="button-finish-programme-cycle"]'
     button_reactivate_programme_cycle = 'button[data-cy="button-reactivate-programme-cycle"]'
@@ -24,9 +23,6 @@ class ProgramCycleDetailsPage(BaseComponents):
     table_row = 'tr[data-cy="table-row"]'
     table_pagination = 'div[data-cy="table-pagination"]'
 
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
-
     def get_button_create_payment_plan(self) -> WebElement:
         return self.wait_for(self.button_create_payment_plan)
 
@@ -34,16 +30,8 @@ class ProgramCycleDetailsPage(BaseComponents):
         return self.wait_for(self.button_finish_programme_cycle)
 
     def get_button_reactivate_programme_cycle(self) -> WebElement:
-        self.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-600)
-            """
-        )
-        from time import sleep
-
-        sleep(2)
-        return self.wait_for(self.button_reactivate_programme_cycle)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_reactivate_programme_cycle)
 
     def get_status_container(self) -> WebElement:
         return self.wait_for(self.status_container)

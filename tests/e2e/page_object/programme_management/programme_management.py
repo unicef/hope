@@ -40,7 +40,7 @@ class ProgrammeManagement(BaseComponents):
     label_admin_area = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendar_icon = 'button[data-cy="calendar-icon"]'
     calendar = "//*[@data-popper-placement]"
-    calendar_month_year = 'div[role="presentation"]'
+    calendar_month_year = ".MuiPickersCalendarHeader-label"
     calendar_change_month = 'button[title="Next month"]'
     calendar_days = "//*[@data-timestamp]"
     filters_search = '//*[@data-cy="filters-search"]/div/input'
@@ -48,7 +48,8 @@ class ProgrammeManagement(BaseComponents):
     button_edit_program = 'button[data-cy="button-edit-program"]'
     select_edit_program_details = 'li[data-cy="menu-item-edit-details"]'
     select_edit_program_partners = 'li[data-cy="menu-item-edit-partners"]'
-    select_options_container = 'ul[data-cy="select-options-container"]'
+    # MUI no longer forwards MenuListProps, so the list has no data-cy.
+    select_options_container = 'ul[role="listbox"]'
     input_programme_code = 'input[data-cy="input-programme-code"]'
     table_row = 'tr[data-cy="table-row-{}"]'
     step_button_details = 'button[data-cy="step-button-details"]'
@@ -60,6 +61,12 @@ class ProgrammeManagement(BaseComponents):
     select_pdu_fields_object_pdu_data_subtype = 'div[data-cy="select-pduFields.{}.pduData.subtype"]'
     select_pdu_fields_object_pdu_data_number_of_rounds = 'div[data-cy="select-pduFields.{}.pduData.numberOfRounds"]'
     input_pdu_fields_rounds_names = 'input[data-cy="input-pduFields.{}.pduData.roundsNames.{}"]'
+    # The edit form names the same fields in snake_case.
+    select_pdu_fields_object_pdu_data_subtype_edit = 'div[data-cy="select-pduFields.{}.pdu_data.subtype"]'
+    select_pdu_fields_object_pdu_data_number_of_rounds_edit = (
+        'div[data-cy="select-pduFields.{}.pdu_data.number_of_rounds"]'
+    )
+    input_pdu_fields_rounds_names_edit = 'input[data-cy="input-pduFields.{}.pdu_data.rounds_names.{}"]'
     button_add_time_series_field = 'button[data-cy="button-add-time-series-field"]'
     input_payment_plan_purposes = '[data-cy="input-payment-plan-purposes"] input'
 
@@ -82,17 +89,27 @@ class ProgrammeManagement(BaseComponents):
         locator = self.input_pdu_fields_object_label.format(index)
         return self.wait_for(locator)
 
-    def get_select_pdu_fields_object_pdu_data_subtype(self, index: int) -> WebElement:
-        locator = self.select_pdu_fields_object_pdu_data_subtype.format(index)
-        return self.wait_for(locator)
+    def get_select_pdu_fields_object_pdu_data_subtype(self, index: int, edit: bool = False) -> WebElement:
+        locator = (
+            self.select_pdu_fields_object_pdu_data_subtype_edit
+            if edit
+            else self.select_pdu_fields_object_pdu_data_subtype
+        )
+        return self.wait_for(locator.format(index))
 
-    def get_select_pdu_fields_object_pdu_data_number_of_rounds(self, index: int) -> WebElement:
-        locator = self.select_pdu_fields_object_pdu_data_number_of_rounds.format(index)
-        return self.wait_for(locator)
+    def get_select_pdu_fields_object_pdu_data_number_of_rounds(self, index: int, edit: bool = False) -> WebElement:
+        locator = (
+            self.select_pdu_fields_object_pdu_data_number_of_rounds_edit
+            if edit
+            else self.select_pdu_fields_object_pdu_data_number_of_rounds
+        )
+        return self.wait_for(locator.format(index))
 
-    def get_input_pdu_fields_rounds_names(self, pdu_field_index: int, round_name_index: int) -> WebElement:
-        locator = self.input_pdu_fields_rounds_names.format(pdu_field_index, round_name_index)
-        return self.wait_for(locator)
+    def get_input_pdu_fields_rounds_names(
+        self, pdu_field_index: int, round_name_index: int, edit: bool = False
+    ) -> WebElement:
+        locator = self.input_pdu_fields_rounds_names_edit if edit else self.input_pdu_fields_rounds_names
+        return self.wait_for(locator.format(pdu_field_index, round_name_index))
 
     def get_button_add_time_series_field(self) -> WebElement:
         return self.wait_for(self.button_add_time_series_field)
@@ -233,15 +250,8 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.header_title)
 
     def get_button_new_program(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector(\"div[data-cy='main-content']\")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_new_program)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_new_program)
 
     def fill_filters_search(self, filter_text: str) -> None:
         self.wait_for(self.filters_search, By.XPATH).send_keys(filter_text)
@@ -251,15 +261,8 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.button_apply)
 
     def get_button_edit_program(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector(\"div[data-cy='main-content']\")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_edit_program)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_edit_program)
 
     def get_select_edit_program_details(self) -> WebElement:
         return self.wait_for(self.select_edit_program_details)

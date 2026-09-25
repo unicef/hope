@@ -9,7 +9,8 @@ import { useProgramContext } from 'src/programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BiometricsResults } from './BiometricsResults';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import type { ApiErrorShape } from '@utils/utils';
@@ -40,6 +41,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { baseUrl, businessArea } = useBaseUrl();
   const navigate = useNavigate();
   const confirm = useConfirmation();
+  const queryClient = useQueryClient();
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
@@ -58,6 +60,12 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
     onSuccess: () => {
       showMessage(t('Action successful'));
       setSelectedIndividualIds([]);
+      // Refetch the ticket so the distinct/duplicate icons reflect the new state.
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasGrievanceTicketsRetrieve,
+        ),
+      });
     },
     onError: (error: ApiErrorShape) => {
       showApiErrorMessages(error, showMessage);

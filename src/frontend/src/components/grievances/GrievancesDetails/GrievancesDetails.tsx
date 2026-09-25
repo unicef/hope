@@ -64,7 +64,10 @@ function GrievancesDetails({
   } = choicesToDict(choicesData.grievanceTicketSubmissionChannelChoices || []);
 
   const showIssueType = isShowIssueType(ticket.category);
-  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
+  const issueTypeToDisplay = getIssueTypeToDisplay(
+    ticket.issueType,
+    choicesData.grievanceTicketIssueTypeChoices,
+  );
 
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
@@ -220,7 +223,8 @@ function GrievancesDetails({
                 label: t('Submission Channel'),
                 value: (
                   <span>
-                    {submissionChannelChoices[ticket.submissionChannel ?? ''] || '-'}
+                    {submissionChannelChoices[ticket.submissionChannel ?? ''] ||
+                      '-'}
                   </span>
                 ),
                 size: 3,

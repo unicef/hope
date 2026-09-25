@@ -64,6 +64,7 @@ def add_people(social_worker_program: Program) -> List:
         )
         hoh.household = household
         hoh.save()
+        # No country on purpose: the grievance edit form used to crash on document.country.name.
         DocumentFactory(individual=hoh)
     return [hoh, household]
 
@@ -223,7 +224,6 @@ class TestSmokePeople:
         assert add_people_with_payment_record.unicef_id in page_people_details.get_rows()[0].text
 
 
-@pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
 @pytest.mark.usefixtures("login")
 class TestPeople:
     @pytest.mark.parametrize(

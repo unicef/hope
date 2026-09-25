@@ -210,19 +210,22 @@ def add_payment_verification() -> None:
 
 
 @pytest.fixture
-def create_targeting() -> None:
+def create_targeting(create_programs: None) -> None:
     user = User.objects.first()
     business_area = BusinessArea.objects.get(slug="afghanistan")
+    cycle = Program.objects.get(name="Test Programm").cycles.first()
     PaymentPlanFactory(
         name="Test",
         created_by=user,
         business_area=business_area,
+        program_cycle=cycle,
         status=PaymentPlan.Status.TP_OPEN,
     )
     PaymentPlanFactory(
         name="Targeting 2",
         created_by=user,
         business_area=business_area,
+        program_cycle=cycle,
         status=PaymentPlan.Status.TP_OPEN,
     )
 
@@ -283,7 +286,6 @@ def create_programs(business_area: BusinessArea) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeFilters:
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
         filters.select_global_program_filter("Test Programm")
 
@@ -428,30 +430,32 @@ class TestSmokeFilters:
                 except TimeoutException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "module",
         [
             pytest.param(
-                [["Registration Data Import"], "filter-search", "Test"],
+                [["Registration Data Import"], "filter-search", "Test", 2],
                 id="Registration Data Import",
             ),
-            pytest.param([["Targeting"], "filters-search", "Test"], id="Targeting"),
+            # The two verification plans ("TEST") are listed here too, next to the two target populations.
+            pytest.param([["Targeting"], "filters-search", "Targeting 2", 4], id="Targeting"),
             pytest.param(
-                [["Payment Verification"], "filter-search", "PP-0000-00-11223344"],
+                [["Payment Verification"], "filter-search", "PP-0000-00-11223344", 2],
                 id="Payment Verification",
             ),
-            pytest.param([["Grievance"], "filters-search", "GRV-0000123"], id="Grievance"),
+            pytest.param([["Grievance"], "filters-search", "GRV-0000123", 2], id="Grievance"),
             pytest.param(
                 [
                     ["Payment Module", "Payment Plans"],
                     "filter-search",
                     "PP-0060-22-11223344",
+                    2,
                 ],
                 id="Payment Module",
             ),
             pytest.param(
-                ["Main Menu", "hh-filters-search", "HH-00-0000.1380"],
+                # add_household's household plus one per verification plan.
+                [["Main Menu", "Items Groups"], "hh-filters-search", "HH-00-0000.1380", 3],
                 id="Programme Population",
             ),
         ],
@@ -471,16 +475,17 @@ class TestSmokeFilters:
         filters.select_global_program_filter("Test Programm")
         assert "Test Programm" in page_programme_details.get_header_title().text
 
-        for element in module[0]:
-            filters.wait_for(f'[data-cy="nav-{element}').click()
+        nav, locator, value, rows_before = module
+        for element in nav:
+            filters.wait_for(f'[data-cy="nav-{element}"]').click()
 
-        assert filters.wait_for_number_of_rows(2)
-        filters.get_filter_by_locator(module[1]).send_keys("Wrong value")
+        assert filters.wait_for_number_of_rows(rows_before)
+        filters.get_filter_by_locator(locator).send_keys("Wrong value")
         filters.get_button_filters_apply().click()
         assert filters.wait_for_number_of_rows(0)
         filters.get_button_filters_clear().click()
-        assert filters.wait_for_number_of_rows(2)
-        filters.get_filter_by_locator(module[1]).send_keys(module[2])
+        assert filters.wait_for_number_of_rows(rows_before)
+        filters.get_filter_by_locator(locator).send_keys(value)
         filters.get_button_filters_apply().click()
         assert filters.wait_for_number_of_rows(1)
 

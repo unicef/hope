@@ -56,21 +56,30 @@ def add_feedbacks() -> None:
 
 @pytest.fixture
 def add_households() -> None:
-    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
+    # The tests pick household row 1 and member row 2 of the chosen household, so make
+    # three households with three members each.
     program = Program.objects.filter(name="Test Programm").first()
-    ind = IndividualFactory(
-        household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi
-    )
-    household = HouseholdFactory(
-        registration_data_import=rdi,
-        admin2=Area.objects.order_by("?").first(),
-        program=program,
-        head_of_household=ind,
-    )
-    household.unicef_id = "HH-00-0000.1380"
-    household.save()
-    ind.household = household
-    ind.save()
+    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=program.business_area)
+    for _ in range(3):
+        ind = IndividualFactory(
+            household=None, business_area=program.business_area, program=program, registration_data_import=rdi
+        )
+        household = HouseholdFactory(
+            registration_data_import=rdi,
+            admin2=Area.objects.order_by("?").first(),
+            business_area=program.business_area,
+            program=program,
+            head_of_household=ind,
+        )
+        ind.household = household
+        ind.save()
+        IndividualFactory.create_batch(
+            2,
+            household=household,
+            business_area=program.business_area,
+            program=program,
+            registration_data_import=rdi,
+        )
 
 
 @pytest.fixture
@@ -253,7 +262,6 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_optional_fields(
         self,
@@ -287,7 +295,6 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_feedback_filtering_by_chosen_programme(
         self,
         create_programs: None,
@@ -333,7 +340,6 @@ class TestFeedback:
         page_feedback.disappear_table_row_loading()
         assert len(page_feedback.get_rows()) == 2
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_household(
         self,
         create_programs: None,
@@ -362,7 +368,6 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         page_feedback.get_rows()
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_feedback_with_household_and_individual(
         self,
         create_programs: None,
@@ -393,7 +398,6 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         page_feedback.get_rows()
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_individual(
         self,
         create_programs: None,
@@ -458,7 +462,6 @@ class TestFeedback:
         assert "English" in page_feedback_details.get_languages_spoken().text
         assert "Shakardara" in page_feedback_details.get_administrative_level2().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_linked_ticket(
         self,
         page_grievance_new_ticket: NewTicket,

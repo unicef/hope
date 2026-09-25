@@ -20,16 +20,17 @@ class TargetingCreate(BaseComponents):
     targeting_criteria_value = 'div[data-cy="autocomplete-target-criteria-values"]'
     targeting_criteria_add_dialog_save_button = 'button[data-cy="button-target-population-add-criteria"]'
     targeting_criteria_add_dialog_save_button_edit = 'button[data-cy="button-target-population-add-criteria"]'
+    # The edit page's "Add 'OR' filter" button shares the data-cy, so scope to the dialog.
+    criteria_dialog_save_button = 'div[role="dialog"] button[data-cy="button-target-population-add-criteria"]'
     criteria_container = 'div[data-cy="criteria-container"]'
     target_population_save_button = 'button[data-cy="button-target-population-create"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_target_population_create = 'button[data-cy="button-target-population-create"]'
     input_div_name = 'div[data-cy="input-name"]'
     input_included_household_ids = 'div[data-cy="input-included-household-ids"]'
     input_householdids = 'div[data-cy="input-included-household-ids"] textarea:not([aria-hidden="true"])'
     input_included_individual_ids = 'div[data-cy="input-included-individual-ids"]'
-    input_individualids = 'div[data-cy="input-included-individual-ids"] textarea:not([aria-hidden="true"])'
+    input_individualids = 'div[data-cy="input-included-individual-ids"] input'
     input_flag_exclude_if_on_sanction_list = 'span[data-cy="input-flagExcludeIfOnSanctionList"]'
     input_flag_exclude_if_active_adjudication_ticket = 'span[data-cy="input-flagExcludeIfActiveAdjudicationTicket"]'
     icon_selected = '[data-testid="CheckBoxIcon"]'
@@ -96,9 +97,6 @@ class TargetingCreate(BaseComponents):
 
     # Texts
     text_targeting_criteria = "Targeting Criteria"
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_target_population_create(self) -> WebElement:
         return self.wait_for(self.button_target_population_create)
@@ -205,6 +203,9 @@ class TargetingCreate(BaseComponents):
 
     def get_targeting_criteria_add_dialog_save_button(self) -> WebElement:
         return self.wait_for(self.targeting_criteria_add_dialog_save_button)
+
+    def get_criteria_dialog_save_button(self) -> WebElement:
+        return self.wait_for(self.criteria_dialog_save_button)
 
     def get_criteria_container(self) -> WebElement:
         return self.wait_for(self.criteria_container)
@@ -399,3 +400,29 @@ class TargetingCreate(BaseComponents):
 
     def get_no_validation_fsp_accept(self) -> WebElement:
         return self.wait_for(self.no_validation_fsp_accept)
+
+    def fill_required_fields(
+        self,
+        cycle: str = "First Cycle In Programme",
+        group: str = "Test Group",
+        purpose: str = "Test Purpose",
+    ) -> None:
+        """Pick the programme cycle, payment plan group and purpose the create form requires."""
+        self.get_filters_program_cycle_autocomplete().click()
+        self.select_listbox_element(cycle)
+        self.get_filters_payment_plan_group_autocomplete().click()
+        self.select_listbox_element(group)
+        self.get_input_payment_plan_purposes().click()
+        self.select_listbox_element(purpose)
+
+    def add_ids_criteria(self, household_ids: str = "", individual_ids: str = "") -> None:
+        """Add a targeting criteria that selects by IDs, through the Add Filter dialog."""
+        self.get_div_target_population_add_criteria().click()
+        if household_ids:
+            self.get_input_household_ids().click()
+            self.get_input_household_ids().send_keys(household_ids)
+        if individual_ids:
+            self.get_input_individual_ids().click()
+            self.get_input_individual_ids().send_keys(individual_ids)
+        self.get_targeting_criteria_add_dialog_save_button().click()
+        self.get_no_validation_fsp_accept().click()

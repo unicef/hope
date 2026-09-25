@@ -18,6 +18,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     IndividualFactory,
     PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -52,9 +53,19 @@ def program_with_three_cycles() -> Program:
         status=Program.ACTIVE,
         program_cycle_status=ProgramCycle.DRAFT,
     )
-    ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
-    ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
-    program.save()
+    # Each cycle has to start after the latest one, which ends 10 days from now.
+    ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.DRAFT,
+        start_date=datetime.now() + relativedelta(days=11),
+        end_date=datetime.now() + relativedelta(days=17),
+    )
+    ProgramCycleFactory(
+        program=program,
+        status=ProgramCycle.DRAFT,
+        start_date=datetime.now() + relativedelta(days=18),
+        end_date=datetime.now() + relativedelta(days=20),
+    )
     return program
 
 
@@ -325,12 +336,13 @@ class TestSmokeProgrammeDetails:
 
 @pytest.mark.usefixtures("login")
 class TestProgrammeDetails:
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_program_details_check_default_cycle(
         self,
         page_programme_management: ProgrammeManagement,
         page_programme_details: ProgrammeDetails,
     ) -> None:
+        # The form loads the purposes when it opens, so this has to exist before.
+        purpose = PaymentPlanPurposeFactory()
         # Go to Programme Management
         page_programme_management.get_nav_programme_management().click()
         # Create Programme
@@ -339,9 +351,10 @@ class TestProgrammeDetails:
         page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
         page_programme_management.fill_input_end_date(FormatTime(1, 2, 2032).numerically_formatted_date)
         page_programme_management.choose_option_selector("Health")
-        page_programme_management.choose_option_data_collecting_type("Partial")
+        page_programme_management.choose_option_data_collecting_type("Full")
         page_programme_management.get_input_beneficiary_group().click()
         page_programme_management.select_listbox_element("Main Menu")
+        page_programme_management.choose_payment_plan_purpose(purpose.name)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
@@ -517,7 +530,6 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[0].text
         assert "Edited title check" in page_programme_details.get_program_cycle_title()[0].text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_program_details_delete_programme_cycle(
         self,
         program_with_three_cycles: Program,
@@ -535,7 +547,7 @@ class TestProgrammeDetails:
         page_programme_details.get_delete_programme_cycle()[1].click()
         page_programme_details.get_button_delete().click()
         for _ in range(50):
-            if len(page_programme_details.get_program_cycle_title()) == 3:
+            if len(page_programme_details.get_program_cycle_title()) == 2:
                 break
             sleep(0.1)
         else:

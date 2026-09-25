@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 
 from django.conf import settings
 from elasticsearch.dsl import connections
@@ -130,7 +129,7 @@ class TestSmokeRegistrationDataImport:
         page_registration_data_import.select_global_program_filter("Test Programm")
         page_registration_data_import.get_nav_registration_data_import().click()
         # Check Elements on Page
-        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.assert_page_header_title(page_registration_data_import.title_text)
         assert page_registration_data_import.import_text in page_registration_data_import.get_button_import().text
         assert page_registration_data_import.table_title_text in page_registration_data_import.get_table_title().text
         assert page_registration_data_import.expected_rows(2)
@@ -152,7 +151,7 @@ class TestSmokeRegistrationDataImport:
         # Go to Registration Data Import
         page_registration_data_import.select_global_program_filter("Test Programm")
         page_registration_data_import.get_nav_registration_data_import().click()
-        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.assert_page_header_title(page_registration_data_import.title_text)
         page_registration_data_import.get_button_import().click()
         # Check Elements on Page
         assert (
@@ -182,7 +181,7 @@ class TestSmokeRegistrationDataImport:
         assert "2" in page_registration_data_import.get_table_title().text
         page_registration_data_import.get_rows()[0].click()
         # Check Elements on Details page
-        assert "Test Other Status" in page_details_registration_data_import.get_page_header_title().text
+        page_details_registration_data_import.assert_page_header_title("Test Other Status")
         assert "IN REVIEW" in page_details_registration_data_import.get_label_status().text
         assert "KoBo" in page_details_registration_data_import.get_label_source_of_data().text
         assert (
@@ -225,7 +224,7 @@ class TestRegistrationDataImport:
         # Go to Registration Data Import
         page_registration_data_import.select_global_program_filter("Test Programm")
         page_registration_data_import.get_nav_registration_data_import().click()
-        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.assert_page_header_title(page_registration_data_import.title_text)
         page_registration_data_import.get_button_import().click()
         page_registration_data_import.get_import_type_select().click()
         page_registration_data_import.get_excel_item().click()
@@ -242,12 +241,9 @@ class TestRegistrationDataImport:
         page_details_registration_data_import.wait_for_status("IN REVIEW")
         assert "50" in page_details_registration_data_import.get_label_total_number_of_households().text
         assert "208" in page_details_registration_data_import.get_label_total_number_of_individuals().text
-        page_details_registration_data_import.element_clickable(page_details_registration_data_import.button_merge_rdi)
-        sleep(2)
-        page_details_registration_data_import.get_button_merge_rdi().click()
-        page_details_registration_data_import.element_clickable(page_details_registration_data_import.button_merge)
-        sleep(2)
-        page_details_registration_data_import.get_button_merge().click()
+        # `click` retries a click that gets intercepted, so no fixed wait is needed here.
+        page_details_registration_data_import.click(page_details_registration_data_import.button_merge_rdi)
+        page_details_registration_data_import.click(page_details_registration_data_import.button_merge)
         page_details_registration_data_import.wait_for_status("MERGED")
         page_details_registration_data_import.wait_for_text(
             "MERGED", page_details_registration_data_import.status_container
@@ -259,7 +255,7 @@ class TestRegistrationDataImport:
             page_details_registration_data_import.get_imported_households_row(0).find_elements("tag name", "td")[1].text
         )
         page_details_registration_data_import.get_imported_households_row(0).find_elements("tag name", "td")[1].click()
-        assert hausehold_id in page_households_details.get_page_header_title().text
+        page_households_details.assert_page_header_title(hausehold_id)
 
     @pytest.mark.night
     @pytest.mark.skip(reason="Kobo form is not available. This is a external service, we cannot control it.")
@@ -274,7 +270,7 @@ class TestRegistrationDataImport:
         # Go to Registration Data Import
         page_registration_data_import.select_global_program_filter("Test Programm")
         page_registration_data_import.get_nav_registration_data_import().click()
-        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.assert_page_header_title(page_registration_data_import.title_text)
         page_registration_data_import.get_button_import().click()
         # Check Elements on Page
         assert page_registration_data_import.get_button_import_file().get_property("disabled")
@@ -307,7 +303,7 @@ class TestRegistrationDataImport:
         # Go to Registration Data Import
         page_registration_data_import.select_global_program_filter("Test Programm")
         page_registration_data_import.get_nav_registration_data_import().click()
-        assert page_registration_data_import.title_text in page_registration_data_import.get_page_header_title().text
+        page_registration_data_import.assert_page_header_title(page_registration_data_import.title_text)
         page_registration_data_import.get_button_import().click()
         # Check Elements on Page
         assert page_registration_data_import.get_button_import_file().get_property("disabled")

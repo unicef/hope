@@ -1,4 +1,3 @@
-import base64
 from datetime import datetime
 from time import sleep
 from typing import Optional
@@ -47,14 +46,52 @@ from hope.models import (
 pytestmark = pytest.mark.django_db()
 
 
-def id_to_base64(object_id: str, name: str) -> str:
-    return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
-
-
 @pytest.fixture
 def add_grievance() -> None:
     create_grievance(name="GRV-0000123")
     create_grievance(name="GRV-0000666")
+
+
+@pytest.fixture
+def add_referral_grievance(create_programs: None, business_area: BusinessArea) -> GrievanceTicket:
+    """One user-generated referral with the values the smoke details tests check, plus one system-generated ticket."""
+    from hope.apps.grievance.constants import PRIORITY_MEDIUM, URGENCY_URGENT
+    from hope.apps.grievance.models import TicketReferralDetails
+
+    program = Program.objects.get(name="Test Programm")
+    individual = IndividualFactory(household=None, business_area=business_area, program=program)
+    household = HouseholdFactory(business_area=business_area, program=program, head_of_household=individual)
+    individual.household = household
+    individual.unicef_id = "IND-74-0000.0001"
+    individual.save()
+    household.unicef_id = "HH-20-0000.0002"
+    household.save()
+
+    referral = GrievanceTicket.objects.create(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        priority=PRIORITY_MEDIUM,
+        urgency=URGENCY_URGENT,
+        household_unicef_id=household.unicef_id,
+        admin2=Area.objects.get(name="Shakardara"),
+        area="Village 1",
+        language="English | English",
+        description="Test 4",
+        consent=True,
+    )
+    TicketReferralDetails.objects.create(ticket=referral, household=household, individual=individual)
+    referral.programs.add(program)
+
+    system_ticket = GrievanceTicket.objects.create(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="System flagging",
+        consent=True,
+    )
+    system_ticket.programs.add(program)
+    return referral
 
 
 @pytest.fixture
@@ -258,20 +295,24 @@ def generate_grievance(
     # list of duplicate Individuals
     selected_individuals = []
 
-    role = IndividualRoleInHouseholdFactory(role="PRIMARY", household=hh, individual=individual_qs[0])
+    # HouseholdFactory already made a primary collector and the factory get_or_creates on
+    # (household, role), so it returns that role; hand it to IND-00-0000.0011.
+    role = IndividualRoleInHouseholdFactory(role="PRIMARY", household=hh)
+    role.individual = individual_qs[0]
+    role.save(update_fields=["individual"])
 
     role_data = {
         "HEAD": {
             "role": "HEAD",
-            "household": id_to_base64(hh.id, "HouseholdNode"),
-            "individual": id_to_base64(individual_qs[0].id, "IndividualNode"),
-            "new_individual": id_to_base64(individual_qs[2].id, "IndividualNode"),
+            "household": str(hh.id),
+            "individual": str(individual_qs[0].id),
+            "new_individual": str(individual_qs[2].id),
         },
         str(role.id): {
             "role": "PRIMARY",
-            "household": id_to_base64(hh.id, "HouseholdNode"),
-            "individual": id_to_base64(individual_qs[0].id, "IndividualNode"),
-            "new_individual": id_to_base64(individual_qs[2].id, "IndividualNode"),
+            "household": str(hh.id),
+            "individual": str(individual_qs[0].id),
+            "new_individual": str(individual_qs[2].id),
         },
     }
 
@@ -426,12 +467,9 @@ class TestSmokeGrievanceTickets:
         ]
         assert expected_labels == [i.text for i in page_grievance_tickets.get_table_label()]
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_system_generated_page(
         self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
+        add_referral_grievance: GrievanceTicket,
         page_grievance_tickets: GrievanceTickets,
     ) -> None:
         """
@@ -451,12 +489,9 @@ class TestSmokeGrievanceTickets:
         assert "ADD NOTE" in page_grievance_tickets.get_button_add_note().text
         assert "NEW TICKET" in page_grievance_tickets.get_button_new_ticket().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_details_page(
         self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
+        add_referral_grievance: GrievanceTicket,
         page_grievance_tickets: GrievanceTickets,
         page_grievance_details_page: GrievanceDetailsPage,
     ) -> None:
@@ -482,19 +517,16 @@ class TestSmokeGrievanceTickets:
         assert "-" in page_grievance_details_page.get_ticket_payment_label().text
         assert "-" in page_grievance_details_page.get_label_payment_plan().text
         assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
-        assert "Andarab" in page_grievance_details_page.get_administrative_level().text
+        assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
         assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
         assert "Test 4" in page_grievance_details_page.get_ticket_description().text
         assert "" in page_grievance_details_page.get_new_note_field().text
         assert "ADD NEW NOTE" in page_grievance_details_page.get_button_new_note().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_details_page_normal_program(
         self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
+        add_referral_grievance: GrievanceTicket,
         page_grievance_tickets: GrievanceTickets,
         page_grievance_details_page: GrievanceDetailsPage,
     ) -> None:
@@ -523,7 +555,7 @@ class TestSmokeGrievanceTickets:
         assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
         assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
-        assert "-" in page_grievance_details_page.get_area_village().text
+        assert "Village 1" in page_grievance_details_page.get_area_village().text
         assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
         assert "Test 4" in page_grievance_details_page.get_ticket_description().text
@@ -571,7 +603,6 @@ class TestGrievanceTickets:
             pytest.param(
                 {"category": "Sensitive Grievance", "type": "Personal disputes"},
                 id="Sensitive Grievance Personal disputes",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "Other Complaint"},
@@ -583,22 +614,18 @@ class TestGrievanceTickets:
                     "type": "Registration Related Complaint",
                 },
                 id="Grievance Complaint Registration Related Complaint",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
                 id="Grievance Complaint FSP Related Complaint",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Individual"},
+                {"category": "Data Change", "type": "Withdraw Member"},
                 id="Data Change Withdraw Individual",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Household"},
+                {"category": "Data Change", "type": "Withdraw Group"},
                 id="Data Change Withdraw Household",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
             ),
         ],
     )
@@ -623,9 +650,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         if test_data["type"] not in [
-            "Withdraw Household",
-            "Household Data Update",
-            "Add Individual",
+            "Withdraw Group",
+            "Group Data Update",
+            "Add Member",
         ]:
             page_grievance_new_ticket.get_individual_tab().click()
             page_grievance_new_ticket.get_individual_table_rows(0).click()
@@ -674,8 +701,15 @@ class TestGrievanceTickets:
             "Update Delegate": "None",
         }
 
+        # The listbox element can show up before all of its options have rendered, so wait
+        # for the full set once instead of sleeping in front of every option.
+        for _ in range(50):
+            items = select_element.find_elements("tag name", "li")
+            if len(items) == len(check_list):
+                break
+            sleep(0.1)
+
         for item in items:
-            sleep(0.5)
             assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
 
     def test_grievance_tickets_create_new_ticket_data_change_add_individual_all_fields(
@@ -1131,7 +1165,6 @@ class TestGrievanceTickets:
         for str_row in page_grievance_tickets.get_rows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_process_tickets(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1147,9 +1180,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name("Data Change")
         page_grievance_new_ticket.get_issue_type().click()
-        page_grievance_new_ticket.select_listbox_element("Household Data Update")
+        page_grievance_new_ticket.select_listbox_element("Group Data Update")
         assert "Data Change" in page_grievance_new_ticket.get_select_category().text
-        assert "Items Group Data Update" in page_grievance_new_ticket.get_issue_type().text
+        assert "Group Data Update" in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
@@ -1169,6 +1202,8 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_button_send_for_approval().click()
         page_grievance_details_page.get_checkbox_household_data().click()
         page_grievance_details_page.get_button_approval().click()
+        # "You approved 1 change ..." warning
+        page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
         assert "Ticket ID" in page_grievance_details_page.get_title().text
@@ -1229,7 +1264,6 @@ class TestGrievanceTickets:
         assert "grievance_ticket_1" in page_admin_panel.get_unicef_id().text
         assert GrievanceTicket.objects.first().unicef_id in page_admin_panel.get_unicef_id().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_needs_adjudication(
         self,
         add_grievance_needs_adjudication: None,
@@ -1335,6 +1369,7 @@ class TestGrievanceTickets:
             By.CSS_SELECTOR, 'input[type="checkbox"]'
         ).click()
         page_grievance_details_page.get_button_mark_duplicate().click()
+        page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.get_people_icon()
         assert "people-icon" in [
             ii.get_attribute("data-cy")
@@ -1354,7 +1389,6 @@ class TestGrievanceTickets:
                 "IND-00-0000.0022"
             ).find_elements(By.TAG_NAME, "svg")
         ]
-        duplicated_individual_unicef_id = "IND-00-0000.0022"
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.disappear_button_confirm()
@@ -1364,16 +1398,18 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_nav_programme_population().click()
         page_individuals.get_nav_individuals().click()
         page_individuals.get_individual_table_row()
-        assert len(page_individuals.get_individual_table_row()) == 3
-        for icon in page_individuals.get_individual_table_row()[0].find_elements(By.TAG_NAME, "svg"):
-            assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
-            break
-        else:
-            raise AssertionError(f"Icon for {page_individuals.get_individual_table_row()[0].text} does not appear")
-        for individual_row in page_individuals.get_individual_table_row():
-            if duplicated_individual_unicef_id in individual_row.text:
-                for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
-                    assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
+
+        # The factories add other people to the programme, so look the three up by ID.
+        def is_confirmed_duplicate(unicef_id: str) -> bool:
+            row = next(r for r in page_individuals.get_individual_table_row() if unicef_id in r.text)
+            return any(
+                "Confirmed Duplicate" in (icon.get_attribute("aria-label") or "")
+                for icon in row.find_elements(By.TAG_NAME, "svg")
+            )
+
+        assert is_confirmed_duplicate("IND-00-0000.0011")
+        assert is_confirmed_duplicate("IND-00-0000.0022")
+        assert not is_confirmed_duplicate("IND-00-0000.0033")
 
     def test_grievance_tickets_create_new_error(
         self,

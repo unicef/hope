@@ -1,11 +1,55 @@
+from contextlib import suppress
 import time
 
 from django.conf import settings
-from selenium.common.exceptions import StaleElementReferenceException
+from django.test import Client
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webdriver import WebDriver
 from seleniumbase import BaseCase
 
 from e2e.helpers.date_picker import fill_mui_date
+from hope.models import User
+
+CLEAR_BROWSER_STORAGE_JS = """
+window.indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)));
+window.localStorage.clear();
+window.sessionStorage.clear();
+"""
+
+
+def reset_browser(driver: WebDriver) -> None:
+    """Leave the browser as a fresh one would be, ready for the next test."""
+    with suppress(WebDriverException):
+        driver.switch_to.alert.dismiss()
+    with suppress(WebDriverException):
+        for handle in driver.window_handles[1:]:
+            driver.switch_to.window(handle)
+            driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+    # A test can end inside the dashboard iframe, and storage is per document.
+    with suppress(WebDriverException):
+        driver.switch_to.default_content()
+    with suppress(WebDriverException):
+        driver.execute_script(CLEAR_BROWSER_STORAGE_JS)
+    with suppress(WebDriverException):
+        driver.delete_all_cookies()
+    with suppress(WebDriverException):
+        driver.get("about:blank")
+
+
+def session_cookie_for(username: str) -> dict[str, str]:
+    """Build an authenticated session cookie for ``username`` without going through the login form.
+
+    Sessions are signed cookies, so ``force_login`` yields a cookie the live server accepts as is.
+    """
+    client = Client()
+    client.force_login(User.objects.get(username=username))
+    return {
+        "name": settings.SESSION_COOKIE_NAME,
+        "value": client.cookies[settings.SESSION_COOKIE_NAME].value,
+        "path": "/",
+    }
 
 
 class HopeTestBrowser(BaseCase):
@@ -30,27 +74,19 @@ class HopeTestBrowser(BaseCase):
         # maximize_window() is a no-op in headless Chrome, leaving the small
         # default viewport that breaks layout-sensitive click targets on CI.
         self.set_window_size(1920, 1080)
-        return super().open(f"{self.live_server_url}{url}")
+        # SeleniumBase opens about:blank itself when it reuses the browser between tests.
+        if url.startswith("/"):
+            url = f"{self.live_server_url}{url}"
+        return super().open(url)
 
     def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
-        self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
-        self.execute_script(
-            """
-            window.indexedDB.databases().then(dbs => dbs.forEach(db => {
-                indexedDB.deleteDatabase(db.name);
-            }));
-            window.localStorage.clear();
-            window.sessionStorage.clear();
-            """
-        )
-        self.wait_for_element_visible("#id_username")
-        self.type("#id_username", username)
-        self.type("#id_password", password)
-        self.click('#login-form input[type="submit"]')
-        self.wait_for_ready_state_complete()
+        # `password` is kept for call-site readability; the session is created server side,
+        # which skips loading the admin login form and its heavy redirect target.
+        # _health is the cheapest same-origin page to attach the cookie to.
+        self.open("/_health")
+        self.execute_script(CLEAR_BROWSER_STORAGE_JS)
+        self.add_cookie(session_cookie_for(username))
         if wait_for_drawer:
-            # Django admin login redirects back to /api/admin/, not the SPA.
-            # Navigate explicitly to the frontend root.
             self.open("/")
             self.wait_for_ready_state_complete()
             # wait_for_ready_state_complete only checks document.readyState; the React

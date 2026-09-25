@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -7,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class PaymentModuleDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     pp_unicef_id = 'span[data-cy="pp-unicef-id"]'
     status_container = 'div[data-cy="status-container"]'
     button_export_xlsx = 'button[data-cy="button-export-xlsx"]'
@@ -79,9 +76,6 @@ class PaymentModuleDetails(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_pp_unicef_id(self) -> WebElement:
         return self.wait_for(self.pp_unicef_id)
@@ -231,10 +225,9 @@ class PaymentModuleDetails(BaseComponents):
         return self.wait_for(self.button_send_for_approval)
 
     def click_button(self, locator: str) -> None:
-        self.wait_for(locator)
-        self.element_clickable(locator)
-        sleep(5)
-        self.get(locator).click()
+        # `click` retries a click that gets intercepted, which is what the fixed sleep
+        # that used to sit here was working around.
+        self.click(locator)
 
     def click_button_send_for_approval(self) -> None:
         self.click_button(self.button_send_for_approval)

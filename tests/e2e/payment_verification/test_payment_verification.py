@@ -319,7 +319,7 @@ class TestSmokePaymentVerification:
     ) -> None:
         page_payment_verification.select_global_program_filter("Active Program")
         page_payment_verification.get_nav_payment_verification().click()
-        assert "Payment Verification" in page_payment_verification.get_page_header_title().text
+        page_payment_verification.assert_page_header_title("Payment Verification")
         assert "List of Payment Plans" in page_payment_verification.get_table_title().text
         assert "Payment Plan ID" in page_payment_verification.get_unicef_id().text
         assert "Verification Status" in page_payment_verification.get_verification_status().text
@@ -342,7 +342,7 @@ class TestSmokePaymentVerification:
         page_payment_verification.select_global_program_filter("Active Program")
         page_payment_verification.get_nav_payment_verification().click()
         page_payment_verification.get_cash_plan_table_row().click()
-        assert "Payment Plan PP-0000-00-1122334" in page_payment_verification_details.get_page_header_title().text
+        page_payment_verification_details.assert_page_header_title("Payment Plan PP-0000-00-1122334")
         assert "CREATE VERIFICATION PLAN" in page_payment_verification_details.get_button_new_plan().text
         assert "Payment Plan Details" in page_payment_verification_details.get_div_payment_plan_details().text
         assert "Active Program" in page_payment_verification_details.get_label_programme_name().text
@@ -424,7 +424,7 @@ class TestSmokePaymentVerification:
 
         page_payment_verification_details.get_rows()[0].find_elements(By.TAG_NAME, "a")[0].click()
         payment_record = Payment.objects.first()
-        assert "Payment" in page_payment_record.get_page_header_title().text
+        page_payment_record.assert_page_header_title("Payment")
         assert "VERIFY" in page_payment_record.get_button_ed_plan().text
         assert "DELIVERED FULLY" in page_payment_record.get_label_status()[0].text
         assert "DELIVERED FULLY" in page_payment_record.get_status_container().text
@@ -549,7 +549,6 @@ class TestSmokePaymentVerification:
     ) -> None:
         page_payment_verification.select_global_program_filter("Active Program")
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_successful(
         self,
         clear_downloaded_files: None,
@@ -731,5 +730,6 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_download_xlsx().click()
         page_payment_verification_details.get_button_mark_as_invalid().click()
 
-        sleep(2)
-        assert "INVALID" in page_payment_verification_details.get_verification_plan_status().text
+        page_payment_verification_details.wait_for_text(
+            "INVALID", page_payment_verification_details.verification_plan_status
+        )

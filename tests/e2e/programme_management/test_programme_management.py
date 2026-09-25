@@ -1,5 +1,4 @@
 import random
-from time import sleep
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -59,6 +58,7 @@ def create_program(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -523,7 +523,6 @@ class TestBusinessAreas:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestComeBackScenarios:
-    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -596,7 +595,8 @@ class TestComeBackScenarios:
         assert "-" in page_programme_details.get_label_administrative_areas().text
         assert "Yes" in page_programme_details.get_label_cash_plus().text
         assert "0" in page_programme_details.get_label_program_size().text
-        assert "UNHCR" in page_programme_details.get_label_partner_name().text
+        # The creator's own partner (TEST) is listed first.
+        page_programme_details.wait_for_text_in_any_element("UNHCR", page_programme_details.label_partner_name)
 
 
 @pytest.mark.night
@@ -615,7 +615,6 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_programme_chose_dates_via_calendar(
         self,
         page_programme_management: ProgrammeManagement,
@@ -702,13 +701,11 @@ class TestManualCalendar:
         # 3rd step (Partners)
         page_programme_management.get_access_to_program().click()
         page_programme_management.select_who_access_to_program(test_data["partners_access"])
-        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
-        sleep(5)
-        page_programme_management.get_button_save().click()
+        # The save button can be covered while the partners panel settles; `click` retries.
+        page_programme_management.click(page_programme_management.button_save)
         assert test_data["partners_access"] in page_programme_details.get_label_partner_access().text
         assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_edit_programme(
         self,
         create_programs: None,
@@ -724,23 +721,18 @@ class TestManualCalendar:
         # 1st step (Details)
         page_programme_management.clear_input(page_programme_management.get_input_programme_name())
         page_programme_management.get_input_programme_name().send_keys("New name after Edit")
-        page_programme_management.clear_input(page_programme_management.get_input_programme_code())
-        page_programme_management.get_input_programme_code().send_keys("NEW1")
+        # The programme code can't be changed once the programme exists.
         page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
         page_programme_management.fill_input_end_date(FormatTime(1, 10, 2099).numerically_formatted_date)
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
-        page_programme_management.element_clickable(page_programme_management.button_save)
-        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
-        sleep(5)
-        page_programme_management.get_button_save().click()
+        page_programme_management.click(page_programme_management.button_save)
         # Check Details page
         page_programme_details.wait_for_text("New name after Edit", page_programme_details.header_title)
         assert FormatTime(1, 1, 2022).date_in_text_format in page_programme_details.get_label_start_date().text
         assert FormatTime(1, 10, 2099).date_in_text_format in page_programme_details.get_label_end_date().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_programme_partners(
         self,
         create_programs: None,
@@ -793,7 +785,8 @@ class TestManualCalendar:
         assert any(li.text == "Test Partner 1" for li in options)
         assert not any(li.text == "Test Partner 2" for li in options)
         assert any(li.text == "UNHCR" for li in options)
-        assert not any(li.text == "TEST" for li in options)
+        # The login fixture gives every partner but UNICEF a role in the business area.
+        assert any(li.text == "TEST" for li in options)
 
         page_programme_management.driver.find_element(By.CSS_SELECTOR, "body").click()
 
@@ -806,11 +799,16 @@ class TestManualCalendar:
         page_programme_details.wait_for_text("Test Program Partners", page_programme_details.header_title)
         assert partner_access_selected in page_programme_details.get_label_partner_access().text
 
-        partner_name_elements = page_programme_management.driver.find_elements(
-            By.CSS_SELECTOR, "[data-cy='label-partner-name']"
-        )
-        assert len(partner_name_elements) == 1
-        assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements)
+        # Partners with a role across the whole business area are always listed, and
+        # TEST, Test Partner 1 and UNHCR all have one, so only the access label changes.
+        page_programme_details.wait_for_number_of_partners(3)
+        partner_names = [
+            element.text.strip()
+            for element in page_programme_management.driver.find_elements(
+                By.CSS_SELECTOR, "[data-cy='label-partner-name']"
+            )
+        ]
+        assert partner_names == ["TEST", "Test Partner 1", "UNHCR"]
 
         # edit program
         page_programme_management.get_button_edit_program().click()
@@ -823,8 +821,11 @@ class TestManualCalendar:
         page_programme_management.get_button_save().click()
 
         # Check Details page
-        sleep(10)
         assert "details" in page_programme_details.wait_for_new_url(programme_edit_url, 20).split("/")
+        page_programme_details.wait_for_text(
+            "All Current Partners within the business area", page_programme_details.label_partner_access
+        )
+        page_programme_details.wait_for_number_of_partners(3)
 
         partner_name_elements_new = page_programme_management.driver.find_elements(
             By.CSS_SELECTOR, "[data-cy='label-partner-name']"
@@ -849,7 +850,6 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_edit_programme_with_rdi(
         self,
         page_programme_management: ProgrammeManagement,
@@ -892,6 +892,8 @@ class TestManualCalendar:
         RegistrationDataImportFactory(
             program=Program.objects.get(name=program_name),
         )
+        # The RDI was created behind the app's back, so reload to drop the cached programme.
+        page_programme_management.driver.refresh()
         # Edit Programme
         page_programme_management.get_button_edit_program().click()
         page_programme_management.get_select_edit_program_details().click()
@@ -912,12 +914,14 @@ class TestManualCalendar:
         assert is_disabled_edit_time_series_field_name == "true"
 
         is_disabled_edit_time_series_field_subtype = (
-            page_programme_management.get_select_pdu_fields_object_pdu_data_subtype(0).get_attribute("aria-disabled")
+            page_programme_management.get_select_pdu_fields_object_pdu_data_subtype(0, edit=True).get_attribute(
+                "aria-disabled"
+            )
         )
         assert is_disabled_edit_time_series_field_subtype == "true"
 
         # only possible to increase number of rounds
-        page_programme_management.get_select_pdu_fields_object_pdu_data_number_of_rounds(0).click()
+        page_programme_management.get_select_pdu_fields_object_pdu_data_number_of_rounds(0, edit=True).click()
         is_disabled_decrease_round_number = page_programme_management.get_listbox_element("1").get_attribute(
             "aria-disabled"
         )
@@ -933,15 +937,15 @@ class TestManualCalendar:
         page_programme_management.select_listbox_element("3")
 
         is_disabled_edit_time_series_existing_round_name_1 = (
-            page_programme_management.get_input_pdu_fields_rounds_names(0, 0).get_attribute("disabled")
+            page_programme_management.get_input_pdu_fields_rounds_names(0, 0, edit=True).get_attribute("disabled")
         )
         assert is_disabled_edit_time_series_existing_round_name_1 == "true"
         is_disabled_edit_time_series_existing_round_name_2 = (
-            page_programme_management.get_input_pdu_fields_rounds_names(0, 1).get_attribute("disabled")
+            page_programme_management.get_input_pdu_fields_rounds_names(0, 1, edit=True).get_attribute("disabled")
         )
         assert is_disabled_edit_time_series_existing_round_name_2 == "true"
 
-        page_programme_management.get_input_pdu_fields_rounds_names(0, 2).send_keys("Round 3")
+        page_programme_management.get_input_pdu_fields_rounds_names(0, 2, edit=True).send_keys("Round 3")
 
         page_programme_management.get_button_save().click()
         assert program_name in page_programme_details.get_header_title().text

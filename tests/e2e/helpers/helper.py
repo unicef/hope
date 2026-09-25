@@ -3,10 +3,14 @@ import logging
 import os
 import time
 from time import sleep
-from typing import Callable, Literal, Tuple, Union
+from typing import Callable, Literal, Tuple, TypeVar, Union
 
 from selenium.common import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -15,6 +19,8 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
 
 
 def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable:
@@ -28,6 +34,56 @@ def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Call
     return _predicate
 
 
+class StaleSafeElement(WebElement):
+    """An element that re-locates itself when its DOM node gets replaced.
+
+    React re-renders and page navigations swap the node out between the moment
+    ``wait_for`` returns an element and the moment a test reads it, which raises
+    ``StaleElementReferenceException``. Most element operations go through
+    ``_execute``, so retrying there covers ``.text``, ``.click()`` and nested
+    lookups. ``get_attribute()`` and ``is_displayed()`` hand the element to
+    ``execute_script`` instead, so they are retried separately.
+
+    A click that lands on something drawn over the element is retried the same way,
+    which is what the fixed sleeps in front of the old call sites were for.
+    """
+
+    def __init__(self, element: WebElement, relocate: Callable[[], WebElement], attempts: int = 5) -> None:
+        super().__init__(element.parent, element.id)
+        self._relocate = relocate
+        self._attempts = attempts
+
+    def _retry(self, action: Callable[[], T]) -> T:
+        for attempt in range(self._attempts):
+            try:
+                return action()
+            except StaleElementReferenceException:
+                if attempt == self._attempts - 1:
+                    raise
+                self._id = self._relocate().id
+            except ElementClickInterceptedException:
+                # A sticky header or a MUI backdrop that is still fading out covers the
+                # element. The click did not land, so centre the element away from the
+                # sticky edges and retry once the transition has had time to finish.
+                if attempt == self._attempts - 1:
+                    raise
+                with contextlib.suppress(Exception):
+                    self.parent.execute_script("arguments[0].scrollIntoView({block: 'center'});", self)
+                sleep(0.2)
+        raise StaleElementReferenceException(f"Element stayed stale after {self._attempts} attempts")
+
+    def _execute(self, command: str, params: dict | None = None) -> dict:
+        execute = super()._execute
+        return self._retry(lambda: execute(command, params))
+
+    def get_attribute(self, name: str) -> str | None:
+        get_attribute = super().get_attribute
+        return self._retry(lambda: get_attribute(name))
+
+    def is_displayed(self) -> bool:
+        return self._retry(super().is_displayed)
+
+
 class Common:
     DEFAULT_TIMEOUT = 20
     DEFAULT_TIMEOUT_WAITING_PAGE = 10
@@ -37,8 +93,8 @@ class Common:
         self.action = ActionChains(self.driver)
 
     def _wait(self, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
-        # ensure page finished loading first
-        self.wait_for_page_ready()
+        # driver.get() already blocks until the document has loaded, and the SPA never
+        # reloads the document on client-side navigation, so no readyState check here.
         return WebDriverWait(self.driver, timeout)
 
     @staticmethod
@@ -65,10 +121,43 @@ class Common:
         element_type: str = By.CSS_SELECTOR,
         timeout: int = DEFAULT_TIMEOUT,
     ) -> WebElement:
-        try:
-            return self._wait(timeout).until(expected_conditions.visibility_of_element_located((element_type, locator)))
-        except TimeoutException as e:
-            raise NoSuchElementException(f"Element {locator} not visible after {timeout}s") from e
+        """Wait for the element to be visible and return it.
+
+        The element re-locates itself if the node is replaced before it is used,
+        so callers can hold on to it across a re-render (see ``StaleSafeElement``).
+        """
+
+        def locate() -> WebElement:
+            try:
+                return self._wait(timeout).until(
+                    expected_conditions.visibility_of_element_located((element_type, locator))
+                )
+            except TimeoutException as e:
+                raise NoSuchElementException(f"Element {locator} not visible after {timeout}s") from e
+
+        return StaleSafeElement(locate(), locate)
+
+    def wait_for_nth(
+        self,
+        locator: str,
+        index: int,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> WebElement:
+        """Wait until at least ``index + 1`` elements match and return that one.
+
+        Table rows arrive one by one and a mutation re-renders the whole table, so the
+        returned element re-locates itself by index like ``wait_for`` does.
+        """
+
+        def locate() -> WebElement:
+            try:
+                self._wait(timeout).until(lambda _: len(self.get_elements(locator, element_type)) > index)
+            except TimeoutException as e:
+                raise NoSuchElementException(f"Fewer than {index + 1} elements {locator} after {timeout}s") from e
+            return self.get_elements(locator, element_type)[index]
+
+        return StaleSafeElement(locate(), locate)
 
     def wait_for_header_text(self, locator: str, text: str, timeout: int = DEFAULT_TIMEOUT):
         WebDriverWait(self.driver, timeout).until(
@@ -161,10 +250,9 @@ class Common:
         raise NoSuchElementException(f"Text '{text}' not found in any element matching {locator}.")
 
     def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
-        for _ in range(retry):
-            sleep(1)
-            if old_url == self.driver.current_url:
-                break
+        """Wait up to ``retry`` seconds for the URL to change and return the current URL."""
+        with contextlib.suppress(TimeoutException):
+            WebDriverWait(self.driver, retry, poll_frequency=0.1).until(lambda d: d.current_url != old_url)
         return self.driver.current_url
 
     def element_clickable(
@@ -180,12 +268,14 @@ class Common:
         locator: str,
         element_type: str = By.CSS_SELECTOR,
         timeout: int = DEFAULT_TIMEOUT,
-        attempts: int = 3,
+        attempts: int = 5,
     ) -> WebElement:
         """Wait for the element to be clickable and click it, re-locating on each attempt.
 
         Re-locating makes the click resilient to the element going stale between the
-        lookup and the click.
+        lookup and the click, and to a click that lands on an overlay instead. An
+        intercepted click also scrolls the element to the middle of the screen, since
+        the usual cause is the sticky header covering it.
         """
         for attempt in range(attempts):
             try:
@@ -194,48 +284,83 @@ class Common:
                 )
                 element.click()
                 return element
-            except StaleElementReferenceException:
+            except (StaleElementReferenceException, ElementClickInterceptedException) as e:
                 if attempt == attempts - 1:
                     raise
+                if isinstance(e, ElementClickInterceptedException):
+                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+                sleep(0.2)
         raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
+
+    def scroll_to_and_wait_for(
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        scroll_by: int = -600,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> WebElement:
+        """Scroll the main content and return the element once it is clickable.
+
+        Page objects used to scroll and then sleep a fixed amount, because a button can be
+        covered by the sticky header or a still-animating panel even though Selenium
+        reports it visible. Waiting for it to be clickable gives the same guarantee, and
+        the returned element retries a click that gets intercepted anyway.
+        """
+        self.scroll(scroll_by)
+        element = self.wait_for(locator, element_type, timeout)
+        self._wait(timeout).until(expected_conditions.element_to_be_clickable(element))
+        return element
+
+    def _find_listbox_item(
+        self,
+        name: str,
+        listbox: str,
+        tag_name: str,
+        timeout: int,
+    ) -> WebElement:
+        """Poll the listbox until an item containing ``name`` shows up and return it.
+
+        Options of async listboxes render after the listbox itself, so a single read
+        can miss them; polling replaces the fixed sleeps the callers used to need.
+        """
+        deadline = time.monotonic() + timeout
+        labels: list[str] = []
+        while True:
+            try:
+                items = self.wait_for(listbox, timeout=timeout).find_elements("tag name", tag_name)
+                labels = [item.text for item in items]
+                for item, label in zip(items, labels, strict=True):
+                    if name in label:
+                        return item
+            except StaleElementReferenceException:
+                labels = []
+            if time.monotonic() >= deadline:
+                raise AssertionError(f"Element: {name} is not in the list: {labels}")
+            sleep(0.1)
 
     def select_listbox_element(
         self,
         name: str,
         listbox: str = 'ul[role="listbox"]',
         tag_name: str = "li",
-        delay_before: int = 2,
-        delay_between_checks: float = 0.5,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
-        sleep(delay_before)
-        select_element = self.wait_for(listbox)
-        items = select_element.find_elements("tag name", tag_name)
-        for item in items:
-            sleep(delay_between_checks)
-            if name in item.text:
-                self._wait().until(expected_conditions.element_to_be_clickable(item))
-                item.click()
-                self.wait_for_disappear('ul[role="listbox"]')
-                break
-        else:
-            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+        item = self._find_listbox_item(name, listbox, tag_name, timeout)
+        # Long menus scroll on their own; without this an item below the fold gets
+        # clicked through to the menu backdrop.
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
+        self._wait().until(expected_conditions.element_to_be_clickable(item))
+        item.click()
+        self.wait_for_disappear('ul[role="listbox"]')
 
     def get_listbox_element(
         self,
         name: str,
         listbox: str = 'ul[role="listbox"]',
         tag_name: str = "li",
-        delay_before: int = 2,
-        delay_between_checks: float = 0.5,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> WebElement:
-        sleep(delay_before)
-        select_element = self.wait_for(listbox)
-        items = select_element.find_elements("tag name", tag_name)
-        for item in items:
-            sleep(delay_between_checks)
-            if name in item.text:
-                return item
-        raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+        return self._find_listbox_item(name, listbox, tag_name, timeout)
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         current_page_url = self.driver.current_url
@@ -251,13 +376,9 @@ class Common:
         xpath: str = "//input[@type='file']",
         timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
-        from time import sleep
-
-        sleep(5)
         self._wait(timeout).until(expected_conditions.presence_of_element_located((By.XPATH, xpath))).send_keys(
             upload_file
         )
-        sleep(2)
 
     def select_option_by_name(self, option_name: str) -> None:
         select_option = f'li[data-cy="select-option-{option_name}"]'
@@ -309,17 +430,18 @@ class Common:
     def scroll(
         self,
         scroll_by: int = 600,
-        wait_after_start_scrolling: int = 2,
+        wait_after_start_scrolling: float = 0,
         execute: int = 1,
     ) -> None:
         for _ in range(execute):
             self.driver.execute_script(
                 f"""
-                container = document.querySelector("div[data-cy='main-content']")
-                container.scrollBy(0,{scroll_by})
+                const container = document.querySelector("div[data-cy='main-content']")
+                if (container) {{ container.scrollBy(0,{scroll_by}) }}
                 """
             )
-            sleep(wait_after_start_scrolling)
+            if wait_after_start_scrolling:
+                sleep(wait_after_start_scrolling)
 
     def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
         sleep(1)
