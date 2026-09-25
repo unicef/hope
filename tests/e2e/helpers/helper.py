@@ -273,7 +273,9 @@ class Common:
         """Wait for the element to be clickable and click it, re-locating on each attempt.
 
         Re-locating makes the click resilient to the element going stale between the
-        lookup and the click, and to a click that lands on an overlay instead.
+        lookup and the click, and to a click that lands on an overlay instead. An
+        intercepted click also scrolls the element to the middle of the screen, since
+        the usual cause is the sticky header covering it.
         """
         for attempt in range(attempts):
             try:
@@ -282,9 +284,11 @@ class Common:
                 )
                 element.click()
                 return element
-            except (StaleElementReferenceException, ElementClickInterceptedException):
+            except (StaleElementReferenceException, ElementClickInterceptedException) as e:
                 if attempt == attempts - 1:
                     raise
+                if isinstance(e, ElementClickInterceptedException):
+                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
                 sleep(0.2)
         raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
 

@@ -192,12 +192,13 @@ def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
     rule = RuleFactory(
+        name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
         deprecated=False,
         enabled=True,
     )
     rule.allowed_business_areas.add(business_area)
-    RuleCommitFactory(rule=rule, version=2)
+    RuleCommitFactory(rule=rule, version=2, is_release=True, enabled=True)
     # create payments
     PaymentPlanService.create_payments(payment_plan)
 
@@ -570,7 +571,6 @@ class TestSmokePaymentModule:
         assert "FSP Auth Code" in page_payment_module_details.get_table_label()[10].text
         assert "Reconciliation" in page_payment_module_details.get_table_label()[11].text
 
-    @pytest.mark.xfail(reason="psycopg.errors.DeadlockDetected: deadlock detected", run=False)
     def test_payment_plan_happy_path(
         self,
         clear_downloaded_files: None,
