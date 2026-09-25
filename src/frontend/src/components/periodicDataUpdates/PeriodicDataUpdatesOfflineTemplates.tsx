@@ -5,6 +5,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -17,7 +18,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
@@ -89,7 +90,8 @@ const templatesHeadCells: HeadCell<PDUXlsxTemplateList>[] = [
 ];
 
 export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
-  const [page, setPage] = useState(0);
+  const table = useTableState({ defaultOrdering: '-created_at' });
+  const { page } = table;
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
@@ -144,20 +146,10 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
     setSelectedTemplateId(null);
   };
 
-  const initialQueryVariables = useMemo(
-    () => ({
-      ordering: '-created_at',
-      businessAreaSlug,
-      programCode: programId,
-    }),
-    [businessAreaSlug, programId],
+  const templatesListParams = createApiParams(
+    { businessAreaSlug, programCode: programId },
+    table.paginationParams,
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const {
     data: templatesData,
     isLoading,
@@ -166,21 +158,12 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
   } = useQuery<PaginatedPDUXlsxTemplateListList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList,
-      createApiParams(
-        { businessAreaSlug, programCode: programId },
-        queryVariables,
-        { withPagination: true },
-      ),
+      templatesListParams,
     ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
-        createApiParams(
-          { businessAreaSlug, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
-      );
-    },
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
+        templatesListParams,
+      ),
     placeholderData: keepPreviousData,
   });
 
@@ -290,10 +273,7 @@ export const PeriodicDataUpdatesOfflineTemplates = (): ReactElement => {
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
-        page={page}
-        setPage={setPage}
+        tableState={table}
       />
       {selectedTemplate && (
         <PeriodicDataUpdatesTemplateDetailsDialog

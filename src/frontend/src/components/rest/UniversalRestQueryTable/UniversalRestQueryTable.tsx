@@ -2,45 +2,46 @@ import type { ReactElement } from 'react';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import type { TableState } from '@hooks/useTableState';
 import type { HeadCell } from '@core/Table/EnhancedTableHead';
-import type { Order } from '@components/rest/TableRestComponent/TableRestComponent';
 import { isUndefined, omitBy } from 'lodash';
 import { restQueryKey } from '@utils/queryKeys';
 
-interface UniversalRestQueryTableProps<T = any, K = any> {
-  rowsPerPageOptions?: number[];
+interface UniversalRestQueryTableProps<T = any> {
+  tableState: TableState;
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
   getTitle?: (data: any) => string;
   title?: string;
   isOnPaper?: boolean;
-  defaultOrderBy?: string;
-  defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event: any, rows: any) => void;
   numSelected?: number;
   allowSort?: boolean;
-  filterOrderBy?: string;
-  onPageChanged?: (page: number) => void;
-  queryVariables: any;
-  setQueryVariables: (variables: K) => void;
+  filterVariables: any;
   itemsCount?: number;
-  query: (variables: K) => Promise<any>;
-  page?: number;
-  setPage?: (page: number) => void;
+  query: (variables: any) => Promise<any>;
   customEnabled?: boolean;
 }
 
-export const UniversalRestQueryTable = <T, K>(
+export function UniversalRestQueryTable<T>(
   props: UniversalRestQueryTableProps,
-): ReactElement => {
-  const { query, page, setPage, customEnabled = true, ...propsToPass } = props;
+): ReactElement {
+  const {
+    query,
+    filterVariables,
+    tableState,
+    customEnabled = true,
+    ...propsToPass
+  } = props;
   const { businessArea, programCode } = useBaseUrl();
-  const { queryVariables } = props;
-  const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
+  const queryVariables = {
+    ...omitBy(filterVariables, isUndefined),
+    ...tableState.paginationParams,
+  };
   const { data, isLoading, error } = useQuery({
     queryKey: restQueryKey(query, {
-      ...cleanedQueryVariables,
+      ...queryVariables,
       programCode,
       businessArea,
     }),
@@ -48,18 +49,17 @@ export const UniversalRestQueryTable = <T, K>(
       query({
         businessAreaSlug: businessArea,
         programCode,
-        ...cleanedQueryVariables,
+        ...queryVariables,
       }),
     enabled: customEnabled && !!businessArea && !!programCode,
   });
   return (
-    <UniversalRestTable<T, K>
+    <UniversalRestTable<T>
       {...propsToPass}
-      page={page}
-      setPage={setPage}
+      tableState={tableState}
       data={data}
       isLoading={isLoading}
       error={error}
     />
   );
-};
+}
