@@ -1,10 +1,46 @@
 from django.db import models
+from django.db.models import OuterRef, Subquery, Sum
 
 from hope.models import BusinessArea, PaymentPlan
 
 
-class FundsCommitmentGroup(models.Model):
+class FundsCommitmentHeaderQuerySet(models.QuerySet):
+    def with_derived_fields(self) -> "FundsCommitmentHeaderQuerySet":
+        totals = (
+            FundsCommitment.objects.filter(funds_commitment_number=OuterRef("funds_commitment_number"))
+            .values("funds_commitment_number")
+            .annotate(
+                total_amount_usd=Sum("commitment_amount_usd"),
+                total_amount_local=Sum("commitment_amount_local"),
+            )
+        )
+        amount_field = models.DecimalField(max_digits=15, decimal_places=2)
+
+        return self.annotate(
+            total_amount_usd=Subquery(
+                totals.values("total_amount_usd")[:1],
+                output_field=amount_field,
+            ),
+            total_amount_local=Subquery(
+                totals.values("total_amount_local")[:1],
+                output_field=amount_field,
+            ),
+        )
+
+
+class FundsCommitmentHeader(models.Model):
     funds_commitment_number = models.CharField(max_length=10)
+    rec_serial_number = models.IntegerField(null=True)
+    vendor_id = models.CharField(max_length=10, blank=True, null=True)
+    posting_date = models.DateField(blank=True, null=True)
+    document_reference = models.CharField(max_length=16, blank=True, null=True)
+    fc_status = models.CharField(max_length=1, blank=True, null=True)
+    currency = models.CharField(max_length=5, blank=True, null=True)
+    objects = FundsCommitmentHeaderQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = "Funds Commitment Header"
+        verbose_name_plural = "Funds Commitment Headers"
 
     def __str__(self) -> str:
         return self.funds_commitment_number
@@ -18,8 +54,8 @@ class FundsCommitmentItem(models.Model):
         on_delete=models.SET_NULL,
         related_name="funds_commitments",
     )
-    funds_commitment_group = models.ForeignKey(
-        FundsCommitmentGroup,
+    funds_commitment_header = models.ForeignKey(
+        FundsCommitmentHeader,
         on_delete=models.CASCADE,
         related_name="funds_commitment_items",
     )
@@ -83,7 +119,7 @@ class FundsCommitmentItem(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.funds_commitment_group} - {self.funds_commitment_item}"
+        return f"{self.funds_commitment_header} - {self.funds_commitment_item}"
 
 
 class FundsCommitment(models.Model):

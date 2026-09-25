@@ -25,7 +25,7 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FollowUpInstructionFactory,
-    FundsCommitmentGroupFactory,
+    FundsCommitmentHeaderFactory,
     FundsCommitmentItemFactory,
     PartnerFactory,
     PaymentFactory,
@@ -1630,16 +1630,16 @@ def test_assign_funds_commitments(
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
 
-    group = FundsCommitmentGroupFactory()
+    header = FundsCommitmentHeaderFactory()
 
     funds_commitment_item = FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+        funds_commitment_header=header,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=999,
         payment_plan=None,
     )
     second_funds_commitment_item = FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+        funds_commitment_header=header,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=1000,
         payment_plan=None,
@@ -1693,9 +1693,9 @@ def test_assign_funds_commitments_validation_errors(
         status=PaymentPlan.Status.DRAFT,
         created_by=payment_plan_actions_context["user"],
     )
-    group = FundsCommitmentGroupFactory()
+    header = FundsCommitmentHeaderFactory()
     FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+        funds_commitment_header=header,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=333,
         payment_plan=other_pp,
@@ -1709,9 +1709,9 @@ def test_assign_funds_commitments_validation_errors(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "Chosen Funds Commitments are already assigned to a different Payment Plan" in response.json()
 
-    wrong_business_area_group = FundsCommitmentGroupFactory()
+    wrong_business_area_header = FundsCommitmentHeaderFactory()
     FundsCommitmentItemFactory(
-        funds_commitment_group=wrong_business_area_group,
+        funds_commitment_header=wrong_business_area_header,
         office=None,
         rec_serial_number=2355,
         payment_plan=None,
@@ -1726,24 +1726,24 @@ def test_assign_funds_commitments_validation_errors(
 
 
 @pytest.fixture
-def funds_commitment_items_from_different_groups(
+def funds_commitment_items_from_different_headers(
     payment_plan_actions_context: dict[str, Any],
 ) -> list:
     return [
         FundsCommitmentItemFactory(
-            funds_commitment_group=FundsCommitmentGroupFactory(),
+            funds_commitment_header=FundsCommitmentHeaderFactory(),
             office=payment_plan_actions_context["business_area"],
         ),
         FundsCommitmentItemFactory(
-            funds_commitment_group=FundsCommitmentGroupFactory(),
+            funds_commitment_header=FundsCommitmentHeaderFactory(),
             office=payment_plan_actions_context["business_area"],
         ),
     ]
 
 
-def test_assign_funds_commitments_rejects_items_from_different_groups(
+def test_assign_funds_commitments_rejects_items_from_different_headers(
     payment_plan_actions_context: dict[str, Any],
-    funds_commitment_items_from_different_groups: list,
+    funds_commitment_items_from_different_headers: list,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
@@ -1754,7 +1754,7 @@ def test_assign_funds_commitments_rejects_items_from_different_groups(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
-    first_item, second_item = funds_commitment_items_from_different_groups
+    first_item, second_item = funds_commitment_items_from_different_headers
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
@@ -1768,7 +1768,7 @@ def test_assign_funds_commitments_rejects_items_from_different_groups(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == ["Chosen Funds Commitment Items must belong to the same Funds Commitment Group"]
+    assert response.json() == ["Chosen Funds Commitment Items must belong to the same Funds Commitment Header"]
 
 
 def test_fsp_xlsx_template_list(

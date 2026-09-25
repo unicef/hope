@@ -9,7 +9,8 @@ from hope.contrib.api.serializers.vision import (
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
 )
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.fixtures import FundsCommitmentFactory
+from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db
 
@@ -30,9 +31,9 @@ def business_area() -> None:
 
 @pytest.fixture
 def funds_commitment_item(business_area) -> FundsCommitmentItem:
-    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001")
+    header = FundsCommitmentHeader.objects.create(funds_commitment_number="FC-001")
     return FundsCommitmentItem.objects.create(
-        funds_commitment_group=fcg,
+        funds_commitment_header=header,
         rec_serial_number=12345,
         funds_commitment_item="001",
         wbs_element="WBS-001",
@@ -65,9 +66,9 @@ def test_funds_commitment_item_serializer(funds_commitment_item) -> None:
 
 
 def test_funds_commitment_serializer() -> None:
-    fcg = FundsCommitmentGroup.objects.create(funds_commitment_number="FC-001")
+    header = FundsCommitmentHeader.objects.create(funds_commitment_number="FC-001")
     fci = FundsCommitmentItem.objects.create(
-        funds_commitment_group=fcg,
+        funds_commitment_header=header,
         rec_serial_number=12345,
         funds_commitment_item="001",
         currency_code="USD",
@@ -75,12 +76,12 @@ def test_funds_commitment_serializer() -> None:
         commitment_amount_usd=1000.00,
     )
     data: dict[str, Any] = {
-        "id": fcg.pk,
+        "id": header.pk,
         "funds_commitment_number": "FC-001",
         "funds_commitment_items": [fci],
     }
     serializer = FundsCommitmentSerializer(data)
-    assert serializer.data["id"] == fcg.pk
+    assert serializer.data["id"] == header.pk
     assert serializer.data["funds_commitment_number"] == "FC-001"
     items = serializer.data["funds_commitment_items"]
     assert len(items) == 1
@@ -89,6 +90,62 @@ def test_funds_commitment_serializer() -> None:
     assert items[0]["currency_code"] == "USD"
     assert items[0]["commitment_amount_local"] == "1000.00"
     assert items[0]["commitment_amount_usd"] == "1000.00"
+
+
+@pytest.fixture
+def funds_commitment_header_data(business_area) -> dict[str, Any]:
+    FundsCommitmentFactory(
+        rec_serial_number=200,
+        funds_commitment_number="FC-002",
+        vendor_id="VENDOR-2",
+        posting_date="2026-09-02",
+        document_reference="REFERENCE-2",
+        fc_status="C",
+        funds_commitment_item="002",
+        currency_code="EUR",
+        commitment_amount_local="250.75",
+        commitment_amount_usd="300.50",
+    )
+    FundsCommitmentFactory(
+        rec_serial_number=100,
+        funds_commitment_number="FC-002",
+        vendor_id="VENDOR-1",
+        posting_date="2026-09-01",
+        document_reference="REFERENCE-1",
+        fc_status="O",
+        funds_commitment_item="001",
+        currency_code="USD",
+        commitment_amount_local="100.25",
+        commitment_amount_usd="100.50",
+    )
+    header = FundsCommitmentHeader.objects.with_derived_fields().get(funds_commitment_number="FC-002")
+    return {
+        "id": header.pk,
+        "rec_serial_number": header.rec_serial_number,
+        "funds_commitment_number": header.funds_commitment_number,
+        "vendor_id": header.vendor_id,
+        "posting_date": header.posting_date,
+        "document_reference": header.document_reference,
+        "fc_status": header.fc_status,
+        "total_amount_usd": header.total_amount_usd,
+        "total_amount_local": header.total_amount_local,
+        "currency": header.currency,
+        "funds_commitment_items": list(header.funds_commitment_items.all()),
+    }
+
+
+def test_funds_commitment_serializer_exposes_derived_header_fields(funds_commitment_header_data) -> None:
+    serializer = FundsCommitmentSerializer(funds_commitment_header_data)
+
+    assert serializer.data["rec_serial_number"] == 200
+    assert serializer.data["funds_commitment_number"] == "FC-002"
+    assert serializer.data["vendor_id"] == "VENDOR-2"
+    assert serializer.data["posting_date"] == "2026-09-02"
+    assert serializer.data["document_reference"] == "REFERENCE-2"
+    assert serializer.data["fc_status"] == "C"
+    assert serializer.data["total_amount_usd"] == "401.00"
+    assert serializer.data["total_amount_local"] == "351.00"
+    assert serializer.data["currency"] == "EUR"
 
 
 def test_payment_plan_callback_request_serializer_to_internal_value() -> None:

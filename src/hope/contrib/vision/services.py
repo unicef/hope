@@ -8,7 +8,7 @@ from hope.contrib.vision.choices import (
     VisionErrorCode,
     VisionStatus,
 )
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 from hope.models import PaymentPlan, log_create
 
 
@@ -55,23 +55,23 @@ class VisionService:
         cls,
         payment_plan: PaymentPlan,
         fc_num: str,
-    ) -> FundsCommitmentGroup:
-        matching_group_ids = FundsCommitmentItem.objects.filter(
-            funds_commitment_group__funds_commitment_number=fc_num,
+    ) -> FundsCommitmentHeader:
+        matching_header_ids = FundsCommitmentItem.objects.filter(
+            funds_commitment_header__funds_commitment_number=fc_num,
             office=payment_plan.business_area,
-        ).values("funds_commitment_group_id")
-        matching_groups = list(FundsCommitmentGroup.objects.select_for_update().filter(pk__in=matching_group_ids))
-        if not matching_groups:
+        ).values("funds_commitment_header_id")
+        matching_headers = list(FundsCommitmentHeader.objects.select_for_update().filter(pk__in=matching_header_ids))
+        if not matching_headers:
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        if len(matching_groups) != 1:
+        if len(matching_headers) != 1:
             raise FundsCommitmentAssignmentError(
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_AMBIGUOUS,
             )
 
-        funds_commitment_group = matching_groups[0]
+        funds_commitment_header = matching_headers[0]
         items = list(
-            FundsCommitmentItem.objects.select_for_update().filter(funds_commitment_group=funds_commitment_group)
+            FundsCommitmentItem.objects.select_for_update().filter(funds_commitment_header=funds_commitment_header)
         )
         if any(item.payment_plan_id not in {None, payment_plan.pk} for item in items):
             raise FundsCommitmentAssignmentError(
@@ -82,7 +82,7 @@ class VisionService:
         if (
             FundsCommitmentItem.objects.select_for_update()
             .filter(payment_plan=payment_plan)
-            .exclude(funds_commitment_group=funds_commitment_group)
+            .exclude(funds_commitment_header=funds_commitment_header)
             .exists()
         ):
             raise FundsCommitmentAssignmentError(
@@ -94,7 +94,7 @@ class VisionService:
             pk__in=[item.pk for item in items],
             payment_plan__isnull=True,
         ).update(payment_plan=payment_plan)
-        return funds_commitment_group
+        return funds_commitment_header
 
     @classmethod
     def assign_selected_funds_commitment_items(
@@ -109,8 +109,8 @@ class VisionService:
         items = list(FundsCommitmentItem.objects.select_for_update().filter(pk__in=item_ids))
         if len(items) != len(item_ids) or any(item.office_id != payment_plan.business_area_id for item in items):
             raise FundsCommitmentAssignmentError(VisionStatus.FC_NOT_FOUND)
-        group_ids = {item.funds_commitment_group_id for item in items}
-        if len(group_ids) != 1:
+        header_ids = {item.funds_commitment_header_id for item in items}
+        if len(header_ids) != 1:
             raise FundsCommitmentAssignmentError(
                 VisionStatus.CALLBACK_FAILED,
                 VisionErrorCode.FC_AMBIGUOUS,
@@ -121,11 +121,11 @@ class VisionService:
                 VisionErrorCode.FC_CONFLICT,
             )
 
-        group_id = group_ids.pop()
+        header_id = header_ids.pop()
         if (
             FundsCommitmentItem.objects.select_for_update()
             .filter(payment_plan=payment_plan)
-            .exclude(funds_commitment_group_id=group_id)
+            .exclude(funds_commitment_header_id=header_id)
             .exists()
         ):
             raise FundsCommitmentAssignmentError(

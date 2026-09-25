@@ -32742,8 +32742,53 @@
                         "id": {
                             "type": "integer"
                         },
+                        "rec_serial_number": {
+                            "type": "integer",
+                            "nullable": true,
+                            "readOnly": true
+                        },
                         "funds_commitment_number": {
                             "type": "string"
+                        },
+                        "vendor_id": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "posting_date": {
+                            "type": "string",
+                            "format": "date",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "document_reference": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "fc_status": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "total_amount_usd": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "total_amount_local": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "currency": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
                         },
                         "funds_commitment_items": {
                             "type": "array",
@@ -32753,9 +32798,17 @@
                         }
                     },
                     "required": [
+                        "currency",
+                        "document_reference",
+                        "fc_status",
                         "funds_commitment_items",
                         "funds_commitment_number",
-                        "id"
+                        "id",
+                        "posting_date",
+                        "rec_serial_number",
+                        "total_amount_local",
+                        "total_amount_usd",
+                        "vendor_id"
                     ]
                 },
                 "FundsCommitmentItem": {

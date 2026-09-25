@@ -12,11 +12,11 @@ class FundsCommitmentItemAdmin(HOPEModelAdminBase):
         "business_area",
         "office",
         "funds_commitment_item",
-        "funds_commitment_group",
+        "funds_commitment_header",
     )
     list_filter = (
         ("office", AutoCompleteFilter),
-        ("funds_commitment_group", AutoCompleteFilter),
+        ("funds_commitment_header", AutoCompleteFilter),
     )
     readonly_fields = ("business_area",)
     search_fields = (

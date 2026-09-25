@@ -341,6 +341,54 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   {paymentPlan.fundsCommitments.fundsCommitmentNumber}
                 </Typography>
               )}
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Vendor')}
+                    value={paymentPlan.fundsCommitments.vendorId}
+                  />
+                </Grid>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Posting Date')}
+                    value={paymentPlan.fundsCommitments.postingDate}
+                  />
+                </Grid>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Document Reference')}
+                    value={paymentPlan.fundsCommitments.documentReference}
+                  />
+                </Grid>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Status')}
+                    value={paymentPlan.fundsCommitments.fcStatus}
+                  />
+                </Grid>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Total Amount USD')}
+                    value={formatFigure(
+                      paymentPlan.fundsCommitments.totalAmountUsd,
+                    )}
+                  />
+                </Grid>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Total Amount Local')}
+                    value={formatFigure(
+                      paymentPlan.fundsCommitments.totalAmountLocal,
+                    )}
+                  />
+                </Grid>
+                <Grid size={3}>
+                  <LabelizedField
+                    label={t('Currency')}
+                    value={paymentPlan.fundsCommitments.currency}
+                  />
+                </Grid>
+              </Grid>
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
                 (item, index) => (
                   <Box

@@ -1677,8 +1677,8 @@ class PaymentPlanViewSet(
             raise ValidationError("Chosen Funds Commitments are already assigned to a different Payment Plan")
         if any(item.office_id != payment_plan.business_area_id for item in funds_commitment_items):
             raise ValidationError("Chosen Funds Commitments have the wrong Business Area")
-        if len({item.funds_commitment_group_id for item in funds_commitment_items}) != 1:
-            raise ValidationError("Chosen Funds Commitment Items must belong to the same Funds Commitment Group")
+        if len({item.funds_commitment_header_id for item in funds_commitment_items}) != 1:
+            raise ValidationError("Chosen Funds Commitment Items must belong to the same Funds Commitment Header")
 
         FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
         FundsCommitmentItem.objects.filter(pk__in=[item.pk for item in funds_commitment_items]).update(
