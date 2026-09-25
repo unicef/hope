@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     DocumentFactory,
+    FacilityFactory,
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
@@ -192,6 +193,16 @@ def household_one(afghanistan: BusinessArea, program: Program, document_types: N
     household.individuals_list = [first_individual, second_individual]
 
     return household
+
+
+@pytest.fixture
+def household_one_with_facility(afghanistan: BusinessArea, household_one: Any) -> Any:
+    household_one.facility = FacilityFactory(
+        name="Old Clinic", business_area=afghanistan, admin_area=AreaFactory(p_code="AF0001")
+    )
+    household_one.consent_sign = "consent/old-signature.jpg"
+    household_one.save(update_fields=["facility", "consent_sign"])
+    return household_one
 
 
 @pytest.fixture
@@ -601,6 +612,60 @@ def test_update_grievance_ticket_hh_update(
         "username": owner.username,
     }
     assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New"
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_household_data_records_previous_facility_and_consent_sign(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    household_one_with_facility: Any,
+    household_data_change_grievance_ticket: GrievanceTicket,
+    household_ticket_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [
+            Permissions.GRIEVANCES_UPDATE,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+        ],
+        afghanistan,
+        program,
+    )
+    data = {
+        "extras": {
+            "household_data_update_issue_type_extras": {
+                "household_data": {
+                    "facility": "Kabul Clinic",
+                    "facility_admin_area": "AF0002",
+                    "consent_sign": None,
+                }
+            }
+        },
+    }
+
+    client = api_client(user)
+    response = client.patch(household_ticket_detail_url, data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    household_data = response.json()["ticket_details"]["household_data"]
+    assert household_data["facility"] == {
+        "value": "Kabul Clinic",
+        "previous_value": "OLD CLINIC",
+        "approve_status": False,
+    }
+    assert household_data["facility_admin_area"] == {
+        "value": "AF0002",
+        "previous_value": "AF0001",
+        "approve_status": False,
+    }
+    assert household_data["consent_sign"] == {
+        "value": "",
+        "previous_value": "/api/uploads/consent/old-signature.jpg",
+        "approve_status": False,
+    }
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

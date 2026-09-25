@@ -885,7 +885,7 @@ def test_all_edit_people_fields_attributes(
 
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 47
+    assert len(data) == 45
 
     first_field = data[0]
     assert "id" in first_field

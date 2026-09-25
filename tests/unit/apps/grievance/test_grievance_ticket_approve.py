@@ -315,6 +315,34 @@ def household_data_change_ticket(
     return ticket
 
 
+@pytest.fixture
+def household_data_change_ticket_with_flex_field(
+    afghanistan: BusinessArea,
+    program: Program,
+    household_one: Any,
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        business_area=afghanistan,
+    )
+    ticket.programs.set([program])
+    TicketHouseholdDataUpdateDetailsFactory(
+        ticket=ticket,
+        household=household_one,
+        household_data={
+            "flex_fields": {
+                "hh_total_eligible_ind_h_f": {
+                    "value": 2,
+                    "previous_value": 1,
+                    "approve_status": False,
+                }
+            },
+        },
+    )
+    return ticket
+
+
 @pytest.mark.usefixtures("mock_elasticsearch")
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
@@ -468,6 +496,46 @@ def test_approve_household_data_change(
         assert resp_data["ticket_details"]["household_data"]["flex_fields"] == {}
         for role in resp_data["ticket_details"]["household_data"]["roles"]:
             assert role["approve_status"] is True
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+@pytest.mark.parametrize(
+    ("sent_approve_status", "expected_approve_status"),
+    [
+        pytest.param("true", True, id="approved"),
+        pytest.param("false", False, id="rejected"),
+    ],
+)
+def test_approve_household_data_change_stores_flex_field_status_sent_as_form_data_as_boolean(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    household_data_change_ticket_with_flex_field: GrievanceTicket,
+    sent_approve_status: str,
+    expected_approve_status: bool,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], afghanistan, program)
+
+    url = reverse(
+        "api:grievance-tickets:grievance-tickets-global-approve-household-data-change",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "pk": str(household_data_change_ticket_with_flex_field.pk),
+        },
+    )
+
+    client = api_client(user)
+    response = client.post(
+        url,
+        {"flex_fields_approve_data.hh_total_eligible_ind_h_f": sent_approve_status},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    flex_fields = response.json()["ticket_details"]["household_data"]["flex_fields"]
+    assert flex_fields["hh_total_eligible_ind_h_f"]["approve_status"] is expected_approve_status
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
