@@ -1,4 +1,3 @@
-import base64
 from datetime import datetime
 from time import sleep
 from typing import Optional
@@ -45,10 +44,6 @@ from hope.models import (
 )
 
 pytestmark = pytest.mark.django_db()
-
-
-def id_to_base64(object_id: str, name: str) -> str:
-    return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
 
 @pytest.fixture
@@ -300,20 +295,24 @@ def generate_grievance(
     # list of duplicate Individuals
     selected_individuals = []
 
-    role = IndividualRoleInHouseholdFactory(role="PRIMARY", household=hh, individual=individual_qs[0])
+    # HouseholdFactory already made a primary collector and the factory get_or_creates on
+    # (household, role), so it returns that role; hand it to IND-00-0000.0011.
+    role = IndividualRoleInHouseholdFactory(role="PRIMARY", household=hh)
+    role.individual = individual_qs[0]
+    role.save(update_fields=["individual"])
 
     role_data = {
         "HEAD": {
             "role": "HEAD",
-            "household": id_to_base64(hh.id, "HouseholdNode"),
-            "individual": id_to_base64(individual_qs[0].id, "IndividualNode"),
-            "new_individual": id_to_base64(individual_qs[2].id, "IndividualNode"),
+            "household": str(hh.id),
+            "individual": str(individual_qs[0].id),
+            "new_individual": str(individual_qs[2].id),
         },
         str(role.id): {
             "role": "PRIMARY",
-            "household": id_to_base64(hh.id, "HouseholdNode"),
-            "individual": id_to_base64(individual_qs[0].id, "IndividualNode"),
-            "new_individual": id_to_base64(individual_qs[2].id, "IndividualNode"),
+            "household": str(hh.id),
+            "individual": str(individual_qs[0].id),
+            "new_individual": str(individual_qs[2].id),
         },
     }
 
@@ -1265,11 +1264,6 @@ class TestGrievanceTickets:
         assert "grievance_ticket_1" in page_admin_panel.get_unicef_id().text
         assert GrievanceTicket.objects.first().unicef_id in page_admin_panel.get_unicef_id().text
 
-    @pytest.mark.xfail(
-        reason="App bug: the approve-needs-adjudication mutation (NeedsAdjudicationActions.tsx) never refetches "
-        "the ticket, so the icons stay after Clear until the page is reloaded",
-        run=False,
-    )
     def test_grievance_tickets_needs_adjudication(
         self,
         add_grievance_needs_adjudication: None,
@@ -1375,6 +1369,7 @@ class TestGrievanceTickets:
             By.CSS_SELECTOR, 'input[type="checkbox"]'
         ).click()
         page_grievance_details_page.get_button_mark_duplicate().click()
+        page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.get_people_icon()
         assert "people-icon" in [
             ii.get_attribute("data-cy")
@@ -1394,7 +1389,6 @@ class TestGrievanceTickets:
                 "IND-00-0000.0022"
             ).find_elements(By.TAG_NAME, "svg")
         ]
-        duplicated_individual_unicef_id = "IND-00-0000.0022"
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.disappear_button_confirm()
@@ -1404,16 +1398,18 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_nav_programme_population().click()
         page_individuals.get_nav_individuals().click()
         page_individuals.get_individual_table_row()
-        assert len(page_individuals.get_individual_table_row()) == 3
-        for icon in page_individuals.get_individual_table_row()[0].find_elements(By.TAG_NAME, "svg"):
-            assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
-            break
-        else:
-            raise AssertionError(f"Icon for {page_individuals.get_individual_table_row()[0].text} does not appear")
-        for individual_row in page_individuals.get_individual_table_row():
-            if duplicated_individual_unicef_id in individual_row.text:
-                for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
-                    assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
+
+        # The factories add other people to the programme, so look the three up by ID.
+        def is_confirmed_duplicate(unicef_id: str) -> bool:
+            row = next(r for r in page_individuals.get_individual_table_row() if unicef_id in r.text)
+            return any(
+                "Confirmed Duplicate" in (icon.get_attribute("aria-label") or "")
+                for icon in row.find_elements(By.TAG_NAME, "svg")
+            )
+
+        assert is_confirmed_duplicate("IND-00-0000.0011")
+        assert is_confirmed_duplicate("IND-00-0000.0022")
+        assert not is_confirmed_duplicate("IND-00-0000.0033")
 
     def test_grievance_tickets_create_new_error(
         self,
