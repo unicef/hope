@@ -251,7 +251,8 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
-    chrome_options.add_argument("--disable-images")
+    # No --disable-images: it is not a real Chrome flag, so it never did anything, and
+    # the pref that does work breaks the grievance tests that click photo thumbnails.
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
