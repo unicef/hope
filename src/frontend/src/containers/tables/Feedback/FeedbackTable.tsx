@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -18,6 +18,7 @@ import type { PaginatedFeedbackListList } from '@restgenerated/models/PaginatedF
 import type { FeedbackList } from '@restgenerated/models/FeedbackList';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 
 interface FeedbackTableProps {
   filter;
@@ -34,7 +35,7 @@ function FeedbackTable({
 
   const { isAllPrograms, programId, businessArea } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       feedbackId: filter.feedbackId,
       issueType: filter.issueType || null,
@@ -61,14 +62,34 @@ function FeedbackTable({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    defaultOrderBy: 'createdAt',
+    defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
-  // Effect to update queryVariables when filters change
-  useMemo(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const selectedProgramListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    listVariables,
+  );
+  const selectedProgramCountParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    filterVariables,
+  );
+  const allProgramsListParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    listVariables,
+  );
+  const allProgramsCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    filterVariables,
+  );
 
   // Selected Program Feedbacks
   const {
@@ -79,19 +100,11 @@ function FeedbackTable({
   } = useQuery<PaginatedFeedbackListList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsFeedbacksList,
-      createApiParams(
-        { businessAreaSlug: businessArea, programCode: programId },
-        queryVariables,
-        { withPagination: true },
-      ),
+      selectedProgramListParams,
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsFeedbacksList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        selectedProgramListParams,
       ),
     enabled: !isAllPrograms,
     placeholderData: keepPreviousData,
@@ -101,17 +114,11 @@ function FeedbackTable({
   const { data: selectedProgramFeedbacksCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsFeedbacksCountRetrieve,
-      createApiParams(
-        { businessAreaSlug: businessArea, programCode: programId },
-        queryVariables,
-      ),
+      selectedProgramCountParams,
     ),
     queryFn: () =>
       RestService.restBusinessAreasProgramsFeedbacksCountRetrieve(
-        createApiParams(
-          { businessAreaSlug: businessArea, programCode: programId },
-          queryVariables,
-        ),
+        selectedProgramCountParams,
       ),
     enabled: !isAllPrograms && page === 0,
   });
@@ -125,17 +132,10 @@ function FeedbackTable({
   } = useQuery<PaginatedFeedbackListList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasFeedbacksList,
-      createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-        withPagination: true,
-      }),
+      allProgramsListParams,
     ),
-    queryFn: () => {
-      return RestService.restBusinessAreasFeedbacksList(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-          withPagination: true,
-        }),
-      );
-    },
+    queryFn: () =>
+      RestService.restBusinessAreasFeedbacksList(allProgramsListParams),
     enabled: isAllPrograms,
     placeholderData: keepPreviousData,
   });
@@ -144,11 +144,11 @@ function FeedbackTable({
   const { data: allProgramsFeedbacksCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasFeedbacksCountRetrieve,
-      createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      allProgramsCountParams,
     ),
     queryFn: () =>
       RestService.restBusinessAreasFeedbacksCountRetrieve(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+        allProgramsCountParams,
       ),
     enabled: isAllPrograms && page === 0,
   });
@@ -187,11 +187,7 @@ function FeedbackTable({
           isAllPrograms ? headCellsWithProgramColumn : adjustedHeadCells
         }
         title={t('Feedbacks List')}
-        rowsPerPageOptions={[10, 15, 20]}
-        defaultOrderBy="createdAt"
-        defaultOrderDirection="desc"
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={
           isAllPrograms
             ? allProgramsFeedbacksData
@@ -205,8 +201,6 @@ function FeedbackTable({
           isAllPrograms ? isFetchingAllPrograms : isFetchingSelectedProgram
         }
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
         renderRow={(row: FeedbackList) => (
           <FeedbackTableRow
             key={row.id}
