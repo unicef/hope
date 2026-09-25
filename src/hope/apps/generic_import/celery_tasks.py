@@ -16,6 +16,8 @@ from hope.models import AsyncRetryJob, ImportData, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
+PROCESS_GENERIC_IMPORT_LOCK_PREFIX = "process_generic_import_async_task-"
+
 if TYPE_CHECKING:
     from hope.models import ImportData, RegistrationDataImport
 
@@ -64,7 +66,7 @@ def _handle_import_success(import_data: ImportData, rdi: RegistrationDataImport,
 def _process_generic_import(registration_data_import_id: str, import_data_id: str) -> None:
     from hope.models import ImportData, RegistrationDataImport
 
-    with locked_cache(key=f"process_generic_import_async_task-{registration_data_import_id}") as locked:
+    with locked_cache(key=f"{PROCESS_GENERIC_IMPORT_LOCK_PREFIX}{registration_data_import_id}") as locked:
         if not locked:
             raise AlreadyRunningError(
                 f"Task with key process_generic_import_async_task-{registration_data_import_id} is already running"

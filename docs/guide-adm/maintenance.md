@@ -113,6 +113,6 @@ Deployment order:
 
 3. Start the new worker pods.
 
-The command matches keys by prefix. The list lives in
-`src/hope/apps/core/management/commands/clear_celery_locks.py` and must be extended when a task gets a
+The command matches keys by prefix. Each prefix is a constant next to the task that takes the lock, and the list in
+`src/hope/apps/core/management/commands/clear_celery_locks.py` must be extended when a task gets a
 lock with a new key.
