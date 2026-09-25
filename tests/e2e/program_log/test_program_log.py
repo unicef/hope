@@ -50,7 +50,7 @@ class TestProgrammeLog:
         page_programme_details.click_button_finish_program_popup()
         page_programme_details.select_global_program_filter("All Programmes")
         page_program_log.get_nav_activity_log().click()
-        assert "Activity Log" in page_program_log.get_page_header_title().text
+        page_program_log.assert_page_header_title("Activity Log")
         assert "Update" in page_program_log.get_action_cell().text
         # Date only — asserting the hour flakes when the test crosses an hour boundary
         assert datetime.today().strftime("%-d %b %Y") in page_program_log.get_timestamp_cell().text

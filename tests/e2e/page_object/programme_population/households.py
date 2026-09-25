@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class Households(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     hh_filters_search = 'div[data-cy="hh-filters-search"]'
     filter_document_type = 'div[data-cy="filters-document-type"]'
     hh_filters_residence_status = 'div[data-cy="hh-filters-residence-status"]'
@@ -35,9 +34,6 @@ class Households(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_hh_filters_search(self) -> WebElement:
         return self.wait_for(self.hh_filters_search)

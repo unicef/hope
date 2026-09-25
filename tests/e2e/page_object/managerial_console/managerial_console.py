@@ -4,7 +4,6 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class ManagerialConsole(BaseComponents):
-    page_header_title = 'h5[data-cy="page-header-title"]'
     title = 'h6[data-cy="title"]'
     approve_button = 'button[data-cy="approve-button"]'
     select_all_approval = 'span[data-cy="select-all-approval"]'
@@ -28,9 +27,6 @@ class ManagerialConsole(BaseComponents):
     button_cancel = 'button[data-cy="button-cancel"]'
     button_save = 'button[data-cy="button-save"]'
     comment_approve = 'div[data-cy="comment-approve"]'
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_title(self) -> WebElement:
         return self.wait_for(self.title)

@@ -471,7 +471,7 @@ class TestSmokePaymentModule:
         page_payment_module.get_nav_payment_module().click()
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.wait_for_page_ready()
-        assert "Payment Module" in page_payment_module.get_page_header_title()
+        page_payment_module.assert_page_header_title("Payment Module")
         assert "Status" in page_payment_module.get_select_filter().text
         assert "" in page_payment_module.get_filters_total_entitled_quantity_from().text
         assert "" in page_payment_module.get_filters_total_entitled_quantity_to().text
@@ -511,7 +511,7 @@ class TestSmokePaymentModule:
         ).find_element(By.TAG_NAME, "a").click()
         page_program_cycle_details.get_button_create_payment_plan().click()
         page_new_payment_plan.wait_for_page_ready()
-        assert "New Payment Plan" in page_new_payment_plan.get_page_header_title().text
+        page_new_payment_plan.assert_page_header_title("New Payment Plan")
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
         assert "Currency" in page_new_payment_plan.get_input_currency().text

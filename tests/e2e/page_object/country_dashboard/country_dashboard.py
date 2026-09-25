@@ -14,7 +14,6 @@ class CountryDashboard(BaseComponents):
     nav_resources_release_note = 'a[data-cy="nav-resources-Release Note"]'
     main_content = 'div[data-cy="main-content"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     iframe_locator = 'iframe[title="Dashboard"]'
     total_amount_paid = "div#total-amount-paid"
     total_amount_paid_local = "div#total-amount-paid-local"
@@ -53,9 +52,6 @@ class CountryDashboard(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_total_amount_paid(self) -> WebElement:
         return self.wait_for(self.total_amount_paid)

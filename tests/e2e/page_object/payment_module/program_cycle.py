@@ -6,7 +6,6 @@ from e2e.page_object.base_components import BaseComponents
 class ProgramCyclePage(BaseComponents):
     main_content = 'div[data-cy="main-content"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     select_filter = 'div[data-cy="select-filter"]'
     date_picker_filter = 'div[data-cy="date-picker-filter-"]'
     date_picker_filter_from = 'div[data-cy="date-picker-filter-"]'
@@ -35,9 +34,6 @@ class ProgramCyclePage(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_select_filter(self) -> WebElement:
         return self.wait_for(self.select_filter)

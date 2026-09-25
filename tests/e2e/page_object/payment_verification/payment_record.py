@@ -11,7 +11,6 @@ from e2e.page_object.base_components import BaseComponents
 class PaymentRecord(BaseComponents):
     verify_manual_dialog = '.MuiDialog-container[role="presentation"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_ed_plan = 'button[data-cy="button-ed-plan"]'
     label_status = 'div[data-cy="label-STATUS"]'
     status_container = 'div[data-cy="status-container"]'
@@ -42,9 +41,6 @@ class PaymentRecord(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_ed_plan(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:

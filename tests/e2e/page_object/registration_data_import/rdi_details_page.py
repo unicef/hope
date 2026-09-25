@@ -8,7 +8,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class RDIDetailsPage(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     label_status = 'div[data-cy="label-status"]'
     status_container = 'div[data-cy="status-container"]'
     label_source_of_data = 'div[data-cy="label-Source of Data"]'
@@ -36,9 +35,6 @@ class RDIDetailsPage(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_label_status(self) -> WebElement:
         return self.wait_for(self.label_status)

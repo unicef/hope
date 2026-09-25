@@ -25,7 +25,7 @@ def individual(business_area: BusinessArea) -> Individual:
 @pytest.mark.usefixtures("login")
 def test_country_search_finds_household_by_id(page_country_search: CountrySearch, household: Household) -> None:
     page_country_search.get_nav_country_search().click()
-    assert "Country Search" in page_country_search.get_page_header_title().text
+    page_country_search.assert_page_header_title("Country Search")
 
     page_country_search.select_search_for("HH")
     page_country_search.get_office_search_input().send_keys(household.unicef_id)
@@ -37,7 +37,7 @@ def test_country_search_finds_household_by_id(page_country_search: CountrySearch
 @pytest.mark.usefixtures("login")
 def test_country_search_finds_individual_by_id(page_country_search: CountrySearch, individual: Individual) -> None:
     page_country_search.get_nav_country_search().click()
-    assert "Country Search" in page_country_search.get_page_header_title().text
+    page_country_search.assert_page_header_title("Country Search")
 
     page_country_search.select_search_for("IND")
     page_country_search.get_office_search_input().send_keys(individual.unicef_id)
@@ -51,7 +51,7 @@ def test_country_search_shows_no_results_for_unknown_id(
     page_country_search: CountrySearch, household: Household
 ) -> None:
     page_country_search.get_nav_country_search().click()
-    assert "Country Search" in page_country_search.get_page_header_title().text
+    page_country_search.assert_page_header_title("Country Search")
 
     page_country_search.select_search_for("HH")
     page_country_search.get_office_search_input().send_keys("HH-00-0000.0000")
