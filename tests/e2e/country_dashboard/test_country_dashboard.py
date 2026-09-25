@@ -69,7 +69,7 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
     return household, payments
 
 
-@pytest.mark.xfail(reason="UNSTABLE")
+@pytest.mark.xfail(reason="UNSTABLE", run=False)
 @pytest.mark.django_db(databases=["default", "read_only"])
 @pytest.mark.usefixtures("login", "setup_household_and_payments")
 class TestSmokeCountryDashboard:

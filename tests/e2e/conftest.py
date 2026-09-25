@@ -80,6 +80,7 @@ from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
+from extras.test_utils.selenium import CLEAR_BROWSER_STORAGE_JS, session_cookie_for
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import (
@@ -325,31 +326,10 @@ def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> Any:
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.get(f"{browser.live_server.url}/api/{settings.ADMIN_PANEL_URL}/")
-
-    browser.execute_script(
-        """
-    window.indexedDB.databases().then(dbs => dbs.forEach(db => {
-        console.log('Deleting database:', db.name);
-        indexedDB.deleteDatabase(db.name);
-    }));
-    window.localStorage.clear();
-    window.sessionStorage.clear();
-    """
-    )
-    login = "id_username"
-    password = "id_password"
-    login_button = '//*[@id="login-form"]/div[3]/input'
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support import expected_conditions
-    from selenium.webdriver.support.wait import WebDriverWait
-
-    WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.XPATH, login_button)))
-    login_form = browser.find_element(By.ID, "login-form")
-    browser.find_element(By.ID, login).send_keys("superuser")
-    browser.find_element(By.ID, password).send_keys("testtest2")
-    browser.find_element(By.XPATH, login_button).click()
-    WebDriverWait(browser, 10).until(expected_conditions.staleness_of(login_form))
+    # Log in by cookie instead of the admin form; test_login.py covers the form itself.
+    browser.get(f"{browser.live_server.url}/_health")
+    browser.execute_script(CLEAR_BROWSER_STORAGE_JS)
+    browser.add_cookie(session_cookie_for("superuser"))
     browser.get(f"{browser.live_server.url}/")
 
     from django.core.cache import cache

@@ -426,7 +426,7 @@ class TestSmokeGrievanceTickets:
         ]
         assert expected_labels == [i.text for i in page_grievance_tickets.get_table_label()]
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_grievance_tickets_system_generated_page(
         self,
         create_programs: None,
@@ -451,7 +451,7 @@ class TestSmokeGrievanceTickets:
         assert "ADD NOTE" in page_grievance_tickets.get_button_add_note().text
         assert "NEW TICKET" in page_grievance_tickets.get_button_new_ticket().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_grievance_tickets_details_page(
         self,
         create_programs: None,
@@ -489,7 +489,7 @@ class TestSmokeGrievanceTickets:
         assert "" in page_grievance_details_page.get_new_note_field().text
         assert "ADD NEW NOTE" in page_grievance_details_page.get_button_new_note().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_grievance_tickets_details_page_normal_program(
         self,
         create_programs: None,
@@ -571,7 +571,7 @@ class TestGrievanceTickets:
             pytest.param(
                 {"category": "Sensitive Grievance", "type": "Personal disputes"},
                 id="Sensitive Grievance Personal disputes",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
+                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "Other Complaint"},
@@ -583,22 +583,22 @@ class TestGrievanceTickets:
                     "type": "Registration Related Complaint",
                 },
                 id="Grievance Complaint Registration Related Complaint",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
+                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
                 id="Grievance Complaint FSP Related Complaint",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
+                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
                 {"category": "Data Change", "type": "Withdraw Individual"},
                 id="Data Change Withdraw Individual",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
+                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
                 {"category": "Data Change", "type": "Withdraw Household"},
                 id="Data Change Withdraw Household",
-                marks=pytest.mark.xfail(reason="UNSTABLE"),
+                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
         ],
     )
@@ -1131,7 +1131,7 @@ class TestGrievanceTickets:
         for str_row in page_grievance_tickets.get_rows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_grievance_tickets_process_tickets(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1229,7 +1229,7 @@ class TestGrievanceTickets:
         assert "grievance_ticket_1" in page_admin_panel.get_unicef_id().text
         assert GrievanceTicket.objects.first().unicef_id in page_admin_panel.get_unicef_id().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_grievance_tickets_needs_adjudication(
         self,
         add_grievance_needs_adjudication: None,

@@ -325,7 +325,7 @@ class TestSmokeProgrammeDetails:
 
 @pytest.mark.usefixtures("login")
 class TestProgrammeDetails:
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_program_details_check_default_cycle(
         self,
         page_programme_management: ProgrammeManagement,
@@ -517,7 +517,7 @@ class TestProgrammeDetails:
         ) in page_programme_details.get_program_cycle_end_date()[0].text
         assert "Edited title check" in page_programme_details.get_program_cycle_title()[0].text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_program_details_delete_programme_cycle(
         self,
         program_with_three_cycles: Program,

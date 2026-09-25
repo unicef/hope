@@ -1,11 +1,33 @@
 import time
 
 from django.conf import settings
+from django.test import Client
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from seleniumbase import BaseCase
 
 from e2e.helpers.date_picker import fill_mui_date
+from hope.models import User
+
+CLEAR_BROWSER_STORAGE_JS = """
+window.indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)));
+window.localStorage.clear();
+window.sessionStorage.clear();
+"""
+
+
+def session_cookie_for(username: str) -> dict[str, str]:
+    """Build an authenticated session cookie for ``username`` without going through the login form.
+
+    Sessions are signed cookies, so ``force_login`` yields a cookie the live server accepts as is.
+    """
+    client = Client()
+    client.force_login(User.objects.get(username=username))
+    return {
+        "name": settings.SESSION_COOKIE_NAME,
+        "value": client.cookies[settings.SESSION_COOKIE_NAME].value,
+        "path": "/",
+    }
 
 
 class HopeTestBrowser(BaseCase):
@@ -33,24 +55,13 @@ class HopeTestBrowser(BaseCase):
         return super().open(f"{self.live_server_url}{url}")
 
     def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
-        self.open(f"/api/{settings.ADMIN_PANEL_URL}/")
-        self.execute_script(
-            """
-            window.indexedDB.databases().then(dbs => dbs.forEach(db => {
-                indexedDB.deleteDatabase(db.name);
-            }));
-            window.localStorage.clear();
-            window.sessionStorage.clear();
-            """
-        )
-        self.wait_for_element_visible("#id_username")
-        self.type("#id_username", username)
-        self.type("#id_password", password)
-        self.click('#login-form input[type="submit"]')
-        self.wait_for_ready_state_complete()
+        # `password` is kept for call-site readability; the session is created server side,
+        # which skips loading the admin login form and its heavy redirect target.
+        # _health is the cheapest same-origin page to attach the cookie to.
+        self.open("/_health")
+        self.execute_script(CLEAR_BROWSER_STORAGE_JS)
+        self.add_cookie(session_cookie_for(username))
         if wait_for_drawer:
-            # Django admin login redirects back to /api/admin/, not the SPA.
-            # Navigate explicitly to the frontend root.
             self.open("/")
             self.wait_for_ready_state_complete()
             # wait_for_ready_state_complete only checks document.readyState; the React

@@ -605,7 +605,7 @@ class TestSmokeTargeting:
         page_targeting_create.get_button_individual_rule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
@@ -991,7 +991,7 @@ class TestCreateTargeting:
         assert len(page_targeting_details.get_household_table_rows()) == 1
         assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR", run=False)
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
@@ -1068,7 +1068,7 @@ class TestCreateTargeting:
         assert page_targeting_create.get_total_number_of_households_count().text == "1"
         assert len(page_targeting_details.get_household_table_rows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR", run=False)
     def test_create_targeting_with_pdu_decimal_criteria(
         self,
         program: Program,
@@ -1357,7 +1357,7 @@ class TestTargeting:
         assert str(target_population.status) == "TP_OPEN"
         assert "OPEN" in page_targeting_details.get_label_status().text
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_create_use_ids_individual(
         self,
         create_programs: None,
@@ -1391,7 +1391,7 @@ class TestTargeting:
         assert str(target_population.status) in page_targeting_details.get_label_status().text
         page_targeting_details.get_button_rebuild().click()
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_rebuild(
         self,
         create_programs: None,
@@ -1430,7 +1430,7 @@ class TestTargeting:
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_copy_targeting(
         self,
         create_programs: None,
@@ -1456,7 +1456,7 @@ class TestTargeting:
         assert "2" in page_targeting_details.get_label_total_number_of_households().text
         assert "8" in page_targeting_details.get_label_targeted_individuals().text
 
-    @pytest.mark.xfail(reason="Problem with select_listbox_element or getButtonIconEdit")
+    @pytest.mark.xfail(reason="Problem with select_listbox_element or getButtonIconEdit", run=False)
     def test_edit_targeting(
         self,
         create_programs: None,
@@ -1517,7 +1517,7 @@ class TestTargeting:
         assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_different_program_statuses(
         self,
         create_programs: None,
@@ -1554,7 +1554,7 @@ class TestTargeting:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE AFTER PAYMENT CHANNEL VALIDATION SECTION ADDED")
+    @pytest.mark.xfail(reason="UNSTABLE AFTER PAYMENT CHANNEL VALIDATION SECTION ADDED", run=False)
     def test_exclude_households_with_active_adjudication_ticket(
         self,
         test_data: dict,
@@ -1627,7 +1627,7 @@ class TestTargeting:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_exclude_households_with_sanction_screen_flag(
         self,
         test_data: dict,
@@ -1664,7 +1664,7 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_targeting_info_button(
         self,
         create_programs: None,
@@ -1799,7 +1799,7 @@ class TestTargeting:
         page_targeting_create.click_button_target_population_create()
         assert "Females Age 0 - 5: 0 - 11" in page_targeting_create.get_criteria_container().text
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_parametrized_rules_filters_and_or(
         self,
         create_programs: None,

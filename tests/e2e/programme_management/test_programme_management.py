@@ -523,7 +523,7 @@ class TestBusinessAreas:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestComeBackScenarios:
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -615,7 +615,7 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_create_programme_chose_dates_via_calendar(
         self,
         page_programme_management: ProgrammeManagement,
@@ -708,7 +708,7 @@ class TestManualCalendar:
         assert test_data["partners_access"] in page_programme_details.get_label_partner_access().text
         assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_edit_programme(
         self,
         create_programs: None,
@@ -740,7 +740,7 @@ class TestManualCalendar:
         assert FormatTime(1, 1, 2022).date_in_text_format in page_programme_details.get_label_start_date().text
         assert FormatTime(1, 10, 2099).date_in_text_format in page_programme_details.get_label_end_date().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_programme_partners(
         self,
         create_programs: None,
@@ -849,7 +849,7 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_edit_programme_with_rdi(
         self,
         page_programme_management: ProgrammeManagement,

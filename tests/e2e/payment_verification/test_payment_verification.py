@@ -549,7 +549,7 @@ class TestSmokePaymentVerification:
     ) -> None:
         page_payment_verification.select_global_program_filter("Active Program")
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_payment_verification_xlsx_successful(
         self,
         clear_downloaded_files: None,

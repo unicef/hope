@@ -237,7 +237,7 @@ class BaseComponents(Common):
             time.sleep(0.01)
             if text in self.wait_for(self.row_index_template.format(index + 1)).text:
                 return
-        assert text in self.wait_for(self.row_index_.format(index + 1)).text
+        assert text in self.wait_for(self.row_index_template.format(index + 1)).text
 
     def get_rows(self) -> [WebElement]:
         return self.get_elements(self.rows)
@@ -254,10 +254,10 @@ class BaseComponents(Common):
         assert text in self.get_alert().text
 
     def wait_for_number_of_rows(self, number: int) -> bool:
-        for _ in range(5):
+        for _ in range(50):
             if len(self.get_rows()) == number:
                 return True
-            sleep(1)
+            sleep(0.1)
         return False
 
     def clear_input(self, element: WebElement) -> None:

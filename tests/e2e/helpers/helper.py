@@ -63,8 +63,8 @@ class Common:
         self.action = ActionChains(self.driver)
 
     def _wait(self, timeout: int = DEFAULT_TIMEOUT) -> WebDriverWait:
-        # ensure page finished loading first
-        self.wait_for_page_ready()
+        # driver.get() already blocks until the document has loaded, and the SPA never
+        # reloads the document on client-side navigation, so no readyState check here.
         return WebDriverWait(self.driver, timeout)
 
     @staticmethod
@@ -198,10 +198,9 @@ class Common:
         raise NoSuchElementException(f"Text '{text}' not found in any element matching {locator}.")
 
     def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
-        for _ in range(retry):
-            sleep(1)
-            if old_url == self.driver.current_url:
-                break
+        """Wait up to ``retry`` seconds for the URL to change and return the current URL."""
+        with contextlib.suppress(TimeoutException):
+            WebDriverWait(self.driver, retry, poll_frequency=0.1).until(lambda d: d.current_url != old_url)
         return self.driver.current_url
 
     def element_clickable(
@@ -236,43 +235,53 @@ class Common:
                     raise
         raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
 
+    def _find_listbox_item(
+        self,
+        name: str,
+        listbox: str,
+        tag_name: str,
+        timeout: int,
+    ) -> WebElement:
+        """Poll the listbox until an item containing ``name`` shows up and return it.
+
+        Options of async listboxes render after the listbox itself, so a single read
+        can miss them; polling replaces the fixed sleeps the callers used to need.
+        """
+        deadline = time.monotonic() + timeout
+        labels: list[str] = []
+        while True:
+            try:
+                items = self.wait_for(listbox, timeout=timeout).find_elements("tag name", tag_name)
+                labels = [item.text for item in items]
+                for item, label in zip(items, labels, strict=True):
+                    if name in label:
+                        return item
+            except StaleElementReferenceException:
+                labels = []
+            if time.monotonic() >= deadline:
+                raise AssertionError(f"Element: {name} is not in the list: {labels}")
+            sleep(0.1)
+
     def select_listbox_element(
         self,
         name: str,
         listbox: str = 'ul[role="listbox"]',
         tag_name: str = "li",
-        delay_before: int = 2,
-        delay_between_checks: float = 0.5,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
-        sleep(delay_before)
-        select_element = self.wait_for(listbox)
-        items = select_element.find_elements("tag name", tag_name)
-        for item in items:
-            sleep(delay_between_checks)
-            if name in item.text:
-                self._wait().until(expected_conditions.element_to_be_clickable(item))
-                item.click()
-                self.wait_for_disappear('ul[role="listbox"]')
-                break
-        else:
-            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+        item = self._find_listbox_item(name, listbox, tag_name, timeout)
+        self._wait().until(expected_conditions.element_to_be_clickable(item))
+        item.click()
+        self.wait_for_disappear('ul[role="listbox"]')
 
     def get_listbox_element(
         self,
         name: str,
         listbox: str = 'ul[role="listbox"]',
         tag_name: str = "li",
-        delay_before: int = 2,
-        delay_between_checks: float = 0.5,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> WebElement:
-        sleep(delay_before)
-        select_element = self.wait_for(listbox)
-        items = select_element.find_elements("tag name", tag_name)
-        for item in items:
-            sleep(delay_between_checks)
-            if name in item.text:
-                return item
-        raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+        return self._find_listbox_item(name, listbox, tag_name, timeout)
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         current_page_url = self.driver.current_url
@@ -288,13 +297,9 @@ class Common:
         xpath: str = "//input[@type='file']",
         timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
-        from time import sleep
-
-        sleep(5)
         self._wait(timeout).until(expected_conditions.presence_of_element_located((By.XPATH, xpath))).send_keys(
             upload_file
         )
-        sleep(2)
 
     def select_option_by_name(self, option_name: str) -> None:
         select_option = f'li[data-cy="select-option-{option_name}"]'
@@ -346,7 +351,7 @@ class Common:
     def scroll(
         self,
         scroll_by: int = 600,
-        wait_after_start_scrolling: int = 2,
+        wait_after_start_scrolling: float = 0,
         execute: int = 1,
     ) -> None:
         for _ in range(execute):
@@ -356,7 +361,8 @@ class Common:
                 container.scrollBy(0,{scroll_by})
                 """
             )
-            sleep(wait_after_start_scrolling)
+            if wait_after_start_scrolling:
+                sleep(wait_after_start_scrolling)
 
     def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
         sleep(1)

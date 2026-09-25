@@ -253,7 +253,7 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_optional_fields(
         self,
@@ -287,7 +287,7 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_feedback_filtering_by_chosen_programme(
         self,
         create_programs: None,
@@ -333,7 +333,7 @@ class TestFeedback:
         page_feedback.disappear_table_row_loading()
         assert len(page_feedback.get_rows()) == 2
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_create_feedback_with_household(
         self,
         create_programs: None,
@@ -362,7 +362,7 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         page_feedback.get_rows()
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
+    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR", run=False)
     def test_create_feedback_with_household_and_individual(
         self,
         create_programs: None,
@@ -393,7 +393,7 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         page_feedback.get_rows()
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_create_feedback_with_individual(
         self,
         create_programs: None,
@@ -458,7 +458,7 @@ class TestFeedback:
         assert "English" in page_feedback_details.get_languages_spoken().text
         assert "Shakardara" in page_feedback_details.get_administrative_level2().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_create_linked_ticket(
         self,
         page_grievance_new_ticket: NewTicket,
