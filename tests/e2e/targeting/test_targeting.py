@@ -5,7 +5,6 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 import factory
 import pytest
-from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
@@ -30,6 +29,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     RuleCommitFactory,
     RuleFactory,
+    SanctionListFactory,
     TargetingCriteriaRuleFactory,
     UserFactory,
 )
@@ -44,7 +44,6 @@ from hope.apps.household.const import (
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
-    populate_pdu_with_null_values,
 )
 from hope.models import (
     BeneficiaryGroup,
@@ -55,7 +54,6 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Individual,
-    IndividualRoleInHousehold,
     PaymentPlan,
     PeriodicFieldData,
     Program,
@@ -116,68 +114,6 @@ def program(business_area: BusinessArea) -> Program:
     program.payment_plan_purposes.add(purpose)
     PaymentPlanGroupFactory(cycle=cycle, name="Test Group")
     return program
-
-
-@pytest.fixture
-def create_household_with_individual_with_collectors(program: Program) -> Household:
-    observed_disability = []
-    residence_status: str = HOST
-    unicef_id: str = "HH-00-0000.0442"
-    size: int = 2
-    rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
-    hoh = IndividualFactory(
-        household=None,
-        business_area=program.business_area,
-        program=program,
-        relationship="HEAD",
-        observed_disability=observed_disability,
-        registration_data_import=rdi,
-    )
-    ind_2 = IndividualFactory(
-        household=None,
-        business_area=program.business_area,
-        program=program,
-        relationship="NON_BENEFICIARY",
-        observed_disability=observed_disability,
-        registration_data_import=rdi,
-    )
-    household = HouseholdFactory(
-        unicef_id=unicef_id,
-        head_of_household=hoh,
-        size=size,
-        program=program,
-        business_area=program.business_area,
-        residence_status=residence_status,
-    )
-    hoh.household = household
-    ind_2.household = household
-    hoh.save()
-    ind_2.save()
-    IndividualRoleInHouseholdFactory(
-        individual=hoh,
-        household=household,
-        role=ROLE_PRIMARY,
-        rdi_merge_status="MERGED",
-    )
-    IndividualRoleInHouseholdFactory(
-        individual=ind_2,
-        household=household,
-        role=ROLE_ALTERNATE,
-        rdi_merge_status="MERGED",
-    )
-    return household, [hoh, ind_2]
-
-
-@pytest.fixture
-def individual(create_household_with_individual_with_collectors) -> Callable:
-    def _individual(program: Program) -> Individual:
-        individual = IndividualRoleInHousehold.objects.filter().first().individual
-
-        individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
-        individual.save()
-        return individual
-
-    return _individual
 
 
 @pytest.fixture
@@ -605,7 +541,6 @@ class TestSmokeTargeting:
         page_targeting_create.get_button_individual_rule().click()
         page_targeting_create.get_autocomplete_target_criteria_option().click()
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
@@ -991,29 +926,28 @@ class TestCreateTargeting:
         assert len(page_targeting_details.get_household_table_rows()) == 1
         assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.household.unicef_id
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR", run=False)
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
+        add_individuals: None,
         bool_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[bool_attribute.name]["2"]["value"] = True
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[bool_attribute.name]["2"]["value"] = False
-        individual2.save()
-        individual(program)
+        update_individual_flex_fields(
+            [
+                {"full_name": "Test Individual 1", "flex_fields": {bool_attribute.name: {"2": {"value": True}}}},
+                {"full_name": "Test Individual 2", "flex_fields": {bool_attribute.name: {"2": {"value": False}}}},
+            ]
+        )
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
+        individual2 = Individual.objects.get(full_name="Test Individual 2")
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.fill_required_fields(cycle="Cycle In Programme")
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_individual_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
@@ -1068,28 +1002,27 @@ class TestCreateTargeting:
         assert page_targeting_create.get_total_number_of_households_count().text == "1"
         assert len(page_targeting_details.get_household_table_rows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR", run=False)
     def test_create_targeting_with_pdu_decimal_criteria(
         self,
         program: Program,
         page_targeting: Targeting,
         page_targeting_create: TargetingCreate,
         page_targeting_details: TargetingDetails,
-        individual: Callable,
+        add_individuals: None,
         decimal_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual(program)
-        individual1.flex_fields[decimal_attribute.name]["1"]["value"] = 2.5
-        individual1.save()
-        individual2 = individual(program)
-        individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 7.0
-        individual2.save()
-        individual(program)
+        update_individual_flex_fields(
+            [
+                {"full_name": "Test Individual 1", "flex_fields": {decimal_attribute.name: {"1": {"value": 2.5}}}},
+                {"full_name": "Test Individual 2", "flex_fields": {decimal_attribute.name: {"1": {"value": 7.0}}}},
+            ]
+        )
+        individual1 = Individual.objects.get(full_name="Test Individual 1")
+        individual2 = Individual.objects.get(full_name="Test Individual 2")
         page_targeting.navigate_to_page("afghanistan", program.code)
         page_targeting.get_button_create_new().click()
         assert "New Target Population" in page_targeting_create.get_title_page().text
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("Cycle In Programme")
+        page_targeting_create.fill_required_fields(cycle="Cycle In Programme")
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_individual_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
@@ -1133,11 +1066,8 @@ class TestCreateTargeting:
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
         page_targeting_create.get_button_save().click()
         page_targeting_details.get_lock_button()
-        page_targeting_details.disappear_status_container()
-        page_targeting_details.wait_for_text(
-            individual1.household.unicef_id,
-            page_targeting_details.household_table_cell.format(1, 1),
-        )
+        # Both households match now and their order is not fixed, so wait for the second row.
+        page_targeting_details.wait_for_nth(page_targeting_details.household_table_rows, 1)
         assert page_targeting_details.get_criteria_container().text == bool_no_expected_criteria_text
         assert page_targeting_create.get_total_number_of_households_count().text == "2"
         assert len(page_targeting_details.get_household_table_rows()) == 2
@@ -1357,7 +1287,6 @@ class TestTargeting:
         assert str(target_population.status) == "TP_OPEN"
         assert "OPEN" in page_targeting_details.get_label_status().text
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_create_use_ids_individual(
         self,
         create_programs: None,
@@ -1373,25 +1302,20 @@ class TestTargeting:
         page_targeting.wait_for_page_ready()
         page_targeting_create.assert_page_header_title("New Target Population")
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_input_individual_ids().send_keys("IND-88-0000.0002")
-        page_targeting_create.get_input_name().send_keys("Target Population for IND-88-0000.0002")
+        page_targeting_create.fill_required_fields()
+        individual = household_with_disability.head_of_household
+        page_targeting_create.add_ids_criteria(individual_ids=individual.unicef_id)
+        page_targeting_create.get_input_name().send_keys(f"Target Population for {individual.unicef_id}")
         page_targeting_create.click_button_target_population_create()
-        target_population = PaymentPlan.objects.get(name="Target Population for IND-88-0000.0002")
+        assert "OPEN" in page_targeting_details.get_label_status().text
+        target_population = PaymentPlan.objects.get(name__startswith="Target Population for")
+        assert target_population.total_households_count == 1
         assert (
-            "4"
-            == str(target_population.total_individuals_count)
+            str(target_population.total_individuals_count)
             == page_targeting_details.get_label_targeted_individuals().text
         )
-        assert (
-            str(target_population.total_households_count)
-            == page_targeting_details.get_label_total_number_of_households().text
-        )
-        assert str(target_population.status) in page_targeting_details.get_label_status().text
-        page_targeting_details.get_button_rebuild().click()
+        assert page_targeting_details.get_label_total_number_of_households().text == "1"
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_rebuild(
         self,
         create_programs: None,
@@ -1405,8 +1329,9 @@ class TestTargeting:
         page_targeting.choose_target_populations(0).click()
         page_targeting_details.get_label_status()
         page_targeting_details.get_button_rebuild().click()
-        page_targeting_details.get_status_container()
-        page_targeting_details.disappear_status_container()
+        # Celery runs eagerly here, so the rebuild is done by the time the request returns.
+        assert page_targeting_details.wait_for_text("Payment Plan has been rebuilt.", ".MuiSnackbarContent-message")
+        assert "OPEN" in page_targeting_details.get_label_status().text
 
     def test_targeting_mark_ready(
         self,
@@ -1430,7 +1355,6 @@ class TestTargeting:
         page_targeting_details.get_button_popup_mark_ready().click()
         page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_copy_targeting(
         self,
         create_programs: None,
@@ -1444,8 +1368,7 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.choose_target_populations(0).click()
         page_targeting_details.get_button_target_population_duplicate().click()
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.fill_required_fields()
         page_targeting_details.get_input_name().send_keys("a1!")
         page_targeting_details.get_elements(page_targeting_details.button_target_population_duplicate)[1].click()
         page_targeting_details.disappear_input_name()
@@ -1453,10 +1376,17 @@ class TestTargeting:
         assert "OPEN" in page_targeting_details.get_target_population_status().text
         assert "PROGRAMME" in page_targeting_details.get_labelized_field_container_program_name().text
         assert "Test Programm" in page_targeting_details.get_label_programme().text
-        assert "2" in page_targeting_details.get_label_total_number_of_households().text
-        assert "8" in page_targeting_details.get_label_targeted_individuals().text
+        # The copy re-runs the same criteria, so it targets what the original does.
+        create_targeting.refresh_from_db()
+        assert (
+            str(create_targeting.total_households_count)
+            == page_targeting_details.get_label_total_number_of_households().text
+        )
+        assert (
+            str(create_targeting.total_individuals_count)
+            == page_targeting_details.get_label_targeted_individuals().text
+        )
 
-    @pytest.mark.xfail(reason="Problem with select_listbox_element or getButtonIconEdit", run=False)
     def test_edit_targeting(
         self,
         create_programs: None,
@@ -1471,17 +1401,16 @@ class TestTargeting:
         page_targeting.choose_target_populations(0).click()
         page_targeting_details.get_button_edit().click()
         page_targeting_details.get_button_icon_edit().click()
-        page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
-        page_targeting_create.get_button_household_rule().send_keys(Keys.TAB)
-        page_targeting_create.get_button_household_rule().send_keys(Keys.SPACE)
-        page_targeting_create.get_autocomplete_target_criteria_option().click()
+        page_targeting_create.get_add_household_rule_button().click()
+        page_targeting_create.get_targeting_criteria_auto_complete().click()
         page_targeting_create.select_listbox_element("What is the Household size?")
         page_targeting_details.get_household_size_from().send_keys("0")
         page_targeting_details.get_household_size_to().send_keys("9")
-        page_targeting_create.get_targeting_criteria_auto_complete().send_keys(Keys.ENTER)
+        # This target population already has an FSP, so no FSP validation warning follows.
+        page_targeting_create.get_criteria_dialog_save_button().click()
         page_targeting_details.clear_input(page_targeting_details.get_input_name())
         page_targeting_details.get_input_name().send_keys("New Test Data")
-        page_targeting_details.get_input_name().send_keys(Keys.ENTER)
+        page_targeting_create.get_button_save().click()
         page_targeting_details.get_button_edit()
         assert page_targeting_details.wait_for_text_title_page("New Test Data")
         assert "9" in page_targeting_details.get_criteria_container().text
@@ -1517,7 +1446,6 @@ class TestTargeting:
         assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_different_program_statuses(
         self,
         create_programs: None,
@@ -1554,7 +1482,6 @@ class TestTargeting:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE AFTER PAYMENT CHANNEL VALIDATION SECTION ADDED", run=False)
     def test_exclude_households_with_active_adjudication_ticket(
         self,
         test_data: dict,
@@ -1571,24 +1498,14 @@ class TestTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_div_target_population_add_criteria().click()
-        page_targeting_create.get_input_household_ids().click()
-        page_targeting_create.get_input_household_ids().send_keys(household_with_disability.unicef_id)
-        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
-        page_targeting_create.get_no_validation_fsp_accept().click()
+        page_targeting_create.fill_required_fields()
+        page_targeting_create.add_ids_criteria(household_ids=household_with_disability.unicef_id)
         page_targeting_create.get_input_name().send_keys(f"Test {household_with_disability.unicef_id}")
         page_targeting_create.get_input_flag_exclude_if_active_adjudication_ticket().click()
         page_targeting_create.click_button_target_population_create()
-        with pytest.raises(NoSuchElementException):
-            page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
-                By.CSS_SELECTOR, page_targeting_details.icon_selected
-            )
         if test_data["type"] == "SOCIAL":
-            page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket()
-            page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket().find_element(
-                By.CSS_SELECTOR, page_targeting_details.icon_selected
+            page_targeting_details.wait_for_checked(
+                page_targeting_details.checkbox_exclude_people_if_active_adjudication_ticket
             )
             assert (
                 test_data["text"]
@@ -1597,9 +1514,8 @@ class TestTargeting:
                 .text
             )
         elif test_data["type"] == "STANDARD":
-            page_targeting_details.get_checkbox_exclude_if_active_adjudication_ticket()
-            page_targeting_details.get_checkbox_exclude_if_active_adjudication_ticket().find_element(
-                By.CSS_SELECTOR, page_targeting_details.icon_selected
+            page_targeting_details.wait_for_checked(
+                page_targeting_details.checkbox_exclude_if_active_adjudication_ticket
             )
             assert (
                 test_data["text"]
@@ -1607,6 +1523,7 @@ class TestTargeting:
                 .find_element(By.XPATH, "./..")
                 .text
             )
+        assert not page_targeting_details.is_checked(page_targeting_details.checkbox_exclude_if_on_sanction_list)
 
     @pytest.mark.parametrize(
         "test_data",
@@ -1614,20 +1531,19 @@ class TestTargeting:
             pytest.param(
                 {
                     "type": "SOCIAL",
-                    "text": "Exclude People with an active sanction screen flag",
+                    "text": "Exclude Items with an Active Sanction Screen Flag",
                 },
                 id="People",
             ),
             pytest.param(
                 {
                     "type": "STANDARD",
-                    "text": "Exclude Households with an active sanction screen flag",
+                    "text": "Exclude Items Groups with an Active Sanction Screen Flag",
                 },
                 id="Programme population",
             ),
         ],
     )
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_exclude_households_with_sanction_screen_flag(
         self,
         test_data: dict,
@@ -1641,13 +1557,17 @@ class TestTargeting:
         program = Program.objects.get(name="Test Programm")
         program.data_collecting_type.type = test_data["type"]
         program.data_collecting_type.save()
+        # The sanction list checkbox only shows for programmes screened against a sanction list.
+        program.sanction_lists.add(SanctionListFactory())
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("First Cycle In Programme")
-        page_targeting_create.get_input_household_ids().click()
-        page_targeting_create.get_input_household_ids().send_keys(household_with_disability.unicef_id)
+        page_targeting_create.fill_required_fields()
+        if test_data["type"] == "SOCIAL":
+            # People programmes only filter by individual IDs.
+            page_targeting_create.add_ids_criteria(individual_ids=household_with_disability.head_of_household.unicef_id)
+        else:
+            page_targeting_create.add_ids_criteria(household_ids=household_with_disability.unicef_id)
         page_targeting_create.get_input_name().send_keys(f"Test {household_with_disability.unicef_id}")
         page_targeting_create.get_input_flag_exclude_if_on_sanction_list().click()
         page_targeting_create.click_button_target_population_create()
@@ -1656,13 +1576,10 @@ class TestTargeting:
             test_data["text"]
             in page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(By.XPATH, "./..").text
         )
-        page_targeting_details.get_checkbox_exclude_if_on_sanction_list().find_element(
-            By.CSS_SELECTOR, page_targeting_details.icon_selected
+        page_targeting_details.wait_for_checked(page_targeting_details.checkbox_exclude_if_on_sanction_list)
+        assert not page_targeting_details.is_checked(
+            page_targeting_details.checkbox_exclude_people_if_active_adjudication_ticket
         )
-        with pytest.raises(NoSuchElementException):
-            page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket().find_element(
-                By.CSS_SELECTOR, page_targeting_details.icon_selected
-            )
 
     def test_targeting_info_button(
         self,
@@ -1798,7 +1715,6 @@ class TestTargeting:
         page_targeting_create.click_button_target_population_create()
         assert "Females Age 0 - 5: 0 - 11" in page_targeting_create.get_criteria_container().text
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318", run=False)
     def test_targeting_parametrized_rules_filters_and_or(
         self,
         create_programs: None,
@@ -1813,8 +1729,7 @@ class TestTargeting:
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
         assert "New Target Population" in page_targeting_create.get_title_page().text
-        page_targeting_create.get_filters_program_cycle_autocomplete().click()
-        page_targeting_create.select_listbox_element("First Cycle In Programme")
+        page_targeting_create.fill_required_fields()
         page_targeting_create.get_add_criteria_button().click()
         page_targeting_create.get_add_people_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
@@ -1832,32 +1747,38 @@ class TestTargeting:
         page_targeting_create.wait_for_page_ready()
         page_targeting_create.select_multiple_option_by_name(HEARING, SEEING)
         page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
-        assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
+        page_targeting_create.get_no_validation_fsp_accept().click()
+        assert "Females Age 0 - 5: 0 - 1" in page_targeting_create.get_criteria_container().text
         assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
             "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing "
             "(even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
+        # Reopen the criteria and save it unchanged.
         page_targeting_create.get_button_edit().click()
         page_targeting_create.get_targeting_criteria_auto_complete_individual()
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        page_targeting_create.get_criteria_dialog_save_button().click()
+        page_targeting_create.get_no_validation_fsp_accept().click()
         page_targeting_create.get_input_name().send_keys("Target Population")
-        assert "ADD 'OR'FILTER" in page_targeting_create.get_targeting_criteria_add_dialog_save_button().text
-        page_targeting_create.get_targeting_criteria_add_dialog_save_button().click()
+        # Add a second criteria, OR-ed with the first.
+        or_filter_button = page_targeting_create.get_button_target_population_add_criteria()
+        assert "ADD 'OR' FILTER" in or_filter_button.text
+        or_filter_button.click()
         page_targeting_create.get_add_household_rule_button().click()
         page_targeting_create.get_targeting_criteria_auto_complete().click()
         page_targeting_create.select_listbox_element("Males age 0 - 5 with disability")
         page_targeting_create.get_input_filters_value_from(0).send_keys("1")
         page_targeting_create.get_input_filters_value_to(0).send_keys("10")
-        page_targeting_create.get_elements(page_targeting_create.targetingCriteriaAddDialogSaveButton)[1].click()
+        # The FSP validation warning was already accepted for this form.
+        page_targeting_create.get_criteria_dialog_save_button().click()
         page_targeting_create.get_target_population_save_button().click()
-        assert "Females Age 0 - 5: 1" in page_targeting_create.get_criteria_container().text
+        assert "Females Age 0 - 5: 0 - 1" in page_targeting_create.get_criteria_container().text
         assert "Village: Testtown" in page_targeting_create.get_criteria_container().text
         assert (
             "Does the Individual have disability?: Difficulty hearing (even if using a hearing aid), "
             "Difficulty seeing (even if wearing glasses)" in page_targeting_create.get_criteria_container().text
         )
         assert (
-            "Males age 0 - 5 with disability: 1 -10"
-            in page_targeting_create.get_elements(page_targeting_create.criteriaContainer)[1].text
+            "Males age 0 - 5 with disability: 1 - 10"
+            in page_targeting_create.get_elements(page_targeting_create.criteria_container)[1].text
         )

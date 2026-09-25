@@ -23,7 +23,7 @@ class Targeting(BaseComponents):
     rows = 'tr[role="checkbox"]'
     create_user_filters = 'div[data-cy="menu-item-filters-text"]'
     create_use_ids = 'div[data-cy="menu-item-ids-text"]'
-    button_inactive_create_new = 'a[data-cy="button-target-population-create-new"]'
+    button_inactive_create_new = '[data-cy="button-new-tp-disabled"]'
     tooltip = 'div[role="tooltip"]'
     status_container = 'div[data-cy="status-container"]'
     loading_rows = 'tr[data-cy="table-row"]'

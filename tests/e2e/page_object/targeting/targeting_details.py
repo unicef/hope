@@ -43,7 +43,6 @@ class TargetingDetails(BaseComponents):
         'span[data-cy="checkbox-exclude-people-if-active-adjudication-ticket"]'
     )
     checkbox_exclude_if_on_sanction_list = 'span[data-cy="checkbox-exclude-if-on-sanction-list"]'
-    icon_selected = '[data-testid="CheckBoxIcon"]'
     label_female_children = 'div[data-cy="label-Female Children"]'
     label_female_adults = 'div[data-cy="label-Female Adults"]'
     label_male_children = 'div[data-cy="label-Male Children"]'
@@ -156,11 +155,18 @@ class TargetingDetails(BaseComponents):
     def get_checkbox_exclude_people_if_active_adjudication_ticket(self) -> WebElement:
         return self.get(self.checkbox_exclude_people_if_active_adjudication_ticket)
 
+    # The production bundle drops MUI's icon data-testids, so read the checked state from
+    # the class MUI puts on the checkbox root instead.
+    def wait_for_checked(self, checkbox: str) -> WebElement:
+        """Wait for the checkbox to show as ticked; it renders unticked until the flag loads."""
+        return self.wait_for(f"{checkbox}.Mui-checked")
+
+    def is_checked(self, checkbox: str) -> bool:
+        """Whether the checkbox is rendered and ticked, without waiting for it."""
+        return bool(self.get_elements(f"{checkbox}.Mui-checked"))
+
     def get_checkbox_exclude_if_on_sanction_list(self) -> WebElement:
         return self.wait_for(self.checkbox_exclude_if_on_sanction_list)
-
-    def get_icon_selected(self) -> WebElement:
-        return self.wait_for(self.icon_selected)
 
     def get_label_female_children(self) -> WebElement:
         return self.wait_for(self.label_female_children)
