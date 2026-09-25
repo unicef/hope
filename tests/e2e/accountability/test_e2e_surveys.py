@@ -106,10 +106,6 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys.get_nav_accountability().click()
         page_accountability_surveys.get_nav_surveys().click()
         page_accountability_surveys.get_rows()[0].click()
-        page_accountability_surveys_details.wait_for_header_text(
-            page_accountability_surveys_details.page_header_title,
-            add_accountability_surveys_message.unicef_id,
-        )
         page_accountability_surveys_details.assert_page_header_title(add_accountability_surveys_message.unicef_id)
         assert "Survey with manual process" in page_accountability_surveys_details.get_label_category().text
         assert "Test survey" in page_accountability_surveys_details.get_label_survey_title().text

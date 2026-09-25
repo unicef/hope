@@ -18,6 +18,8 @@ from hope.models import AsyncJob, AsyncRetryJob, RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
+AUTOMATE_RDI_CREATION_LOCK_PREFIX = "automate_rdi_creation_async_task-"
+
 
 def process_flex_records_async_task_action(job: AsyncRetryJob) -> None:
     registration = Registration.objects.get(id=job.config["registration_id"])
@@ -97,7 +99,7 @@ def automate_rdi_creation_async_task_action(job: AsyncRetryJob) -> list[Any]:
     fix_tax_id = bool(job.config["fix_tax_id"])
     filters = dict(job.config.get("filters", {}))
 
-    with locked_cache(key=f"automate_rdi_creation_async_task-{registration_id}") as locked:
+    with locked_cache(key=f"{AUTOMATE_RDI_CREATION_LOCK_PREFIX}{registration_id}") as locked:
         if not locked:
             logger.info(f"Automatic creation of RDI {registration_id} already running")
             return []

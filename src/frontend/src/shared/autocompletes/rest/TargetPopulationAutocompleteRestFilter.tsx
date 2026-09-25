@@ -81,7 +81,9 @@ export const TargetPopulationAutocompleteRestFilter = ({
       RestService.restBusinessAreasProgramsTargetPopulationsList(
         targetPopulationsParams,
       ),
-    enabled: !!businessArea && !!programId,
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: !!businessArea && !!programId && (open || !!value),
   });
 
   const loadData = useCallback(() => {
@@ -159,7 +161,6 @@ export const TargetPopulationAutocompleteRestFilter = ({
         }
         return option?.name || '';
       }}
-      data={targetPopulationData}
       inputValue={inputValue}
       onInputTextChange={setInputValue}
       debouncedInputText={debouncedInputText}

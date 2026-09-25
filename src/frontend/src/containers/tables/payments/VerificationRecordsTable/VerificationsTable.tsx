@@ -8,8 +8,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
@@ -32,7 +33,7 @@ export function VerificationsTable({
   const { programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       ...filter,
       businessAreaSlug: businessArea,
@@ -42,15 +43,19 @@ export function VerificationsTable({
     [filter, businessArea, programId, paymentPlanId],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  const [page, setPage] = useState(0);
+  const table = useTableState({ resetPageOn: filterVariables });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   // Add count query for verification records, only enabled on first page
   const verificationsCountParams = {
     businessAreaSlug: businessArea,
     programCode: programId,
     paymentVerificationPk: paymentPlanId,
-    ...queryVariables,
+    ...filterVariables,
   };
   const { data: verificationCountData } = useQuery({
     queryKey: restQueryKey(
@@ -65,9 +70,6 @@ export function VerificationsTable({
   });
 
   const itemsCount = usePersistedCount(page, verificationCountData);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
 
   const verificationsListParams = createApiParams(
     {
@@ -75,8 +77,7 @@ export function VerificationsTable({
       programCode: programId,
       paymentVerificationPk: paymentPlanId,
     },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: paymentsData,
@@ -123,11 +124,8 @@ export function VerificationsTable({
       isLoading={isLoading}
       isFetching={isFetching}
       error={error}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       data={paymentsData}
-      page={page}
-      setPage={setPage}
       itemsCount={itemsCount}
       renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
