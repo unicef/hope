@@ -25,6 +25,7 @@ from hope.apps.household.const import HOST, SEEING
 from hope.models import (
     BeneficiaryGroup,
     BusinessArea,
+    Country,
     DataCollectingType,
     Individual,
     Payment,
@@ -64,7 +65,8 @@ def add_people(social_worker_program: Program) -> List:
         )
         hoh.household = household
         hoh.save()
-        DocumentFactory(individual=hoh)
+        # The grievance edit form reads document.country.name, so the document needs a country.
+        DocumentFactory(individual=hoh, country=Country.objects.get(iso_code3="AFG"))
     return [hoh, household]
 
 
@@ -223,7 +225,6 @@ class TestSmokePeople:
         assert add_people_with_payment_record.unicef_id in page_people_details.get_rows()[0].text
 
 
-@pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR", run=False)
 @pytest.mark.usefixtures("login")
 class TestPeople:
     @pytest.mark.parametrize(

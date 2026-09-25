@@ -346,6 +346,9 @@ class Common:
         timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
         item = self._find_listbox_item(name, listbox, tag_name, timeout)
+        # Long menus scroll on their own; without this an item below the fold gets
+        # clicked through to the menu backdrop.
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
         self._wait().until(expected_conditions.element_to_be_clickable(item))
         item.click()
         self.wait_for_disappear('ul[role="listbox"]')
