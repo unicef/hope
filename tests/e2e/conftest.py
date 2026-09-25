@@ -17,7 +17,7 @@ from flags.models import FlagState
 import pytest
 from pytest_html import extras
 import responses
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
@@ -82,7 +82,7 @@ from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
 from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
-from extras.test_utils.selenium import CLEAR_BROWSER_STORAGE_JS, session_cookie_for
+from extras.test_utils.selenium import CLEAR_BROWSER_STORAGE_JS, reset_browser, session_cookie_for
 from hope.apps.account.permissions import Permissions
 from hope.config.env import env
 from hope.models import (
@@ -313,26 +313,6 @@ def driver(download_path: str) -> Chrome:
     chrome.quit()
 
 
-def _reset_browser(driver: Chrome) -> None:
-    """Leave the browser as a fresh one would be, ready for the next test."""
-    with suppress(WebDriverException):
-        driver.switch_to.alert.dismiss()
-    with suppress(WebDriverException):
-        for handle in driver.window_handles[1:]:
-            driver.switch_to.window(handle)
-            driver.close()
-        driver.switch_to.window(driver.window_handles[0])
-    # A test can end inside the dashboard iframe, and storage is per document.
-    with suppress(WebDriverException):
-        driver.switch_to.default_content()
-    with suppress(WebDriverException):
-        driver.execute_script(CLEAR_BROWSER_STORAGE_JS)
-    with suppress(WebDriverException):
-        driver.delete_all_cookies()
-    with suppress(WebDriverException):
-        driver.get("about:blank")
-
-
 @pytest.fixture
 def live_server_with_static(live_server, settings):
     """
@@ -358,7 +338,7 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
         driver.live_server = live_server_with_static
         yield driver
     finally:
-        _reset_browser(driver)
+        reset_browser(driver)
 
 
 @pytest.fixture

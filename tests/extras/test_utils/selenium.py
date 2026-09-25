@@ -1,9 +1,11 @@
+from contextlib import suppress
 import time
 
 from django.conf import settings
 from django.test import Client
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webdriver import WebDriver
 from seleniumbase import BaseCase
 
 from e2e.helpers.date_picker import fill_mui_date
@@ -14,6 +16,26 @@ window.indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatab
 window.localStorage.clear();
 window.sessionStorage.clear();
 """
+
+
+def reset_browser(driver: WebDriver) -> None:
+    """Leave the browser as a fresh one would be, ready for the next test."""
+    with suppress(WebDriverException):
+        driver.switch_to.alert.dismiss()
+    with suppress(WebDriverException):
+        for handle in driver.window_handles[1:]:
+            driver.switch_to.window(handle)
+            driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+    # A test can end inside the dashboard iframe, and storage is per document.
+    with suppress(WebDriverException):
+        driver.switch_to.default_content()
+    with suppress(WebDriverException):
+        driver.execute_script(CLEAR_BROWSER_STORAGE_JS)
+    with suppress(WebDriverException):
+        driver.delete_all_cookies()
+    with suppress(WebDriverException):
+        driver.get("about:blank")
 
 
 def session_cookie_for(username: str) -> dict[str, str]:
@@ -52,7 +74,10 @@ class HopeTestBrowser(BaseCase):
         # maximize_window() is a no-op in headless Chrome, leaving the small
         # default viewport that breaks layout-sensitive click targets on CI.
         self.set_window_size(1920, 1080)
-        return super().open(f"{self.live_server_url}{url}")
+        # SeleniumBase opens about:blank itself when it reuses the browser between tests.
+        if url.startswith("/"):
+            url = f"{self.live_server_url}{url}"
+        return super().open(url)
 
     def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
         # `password` is kept for call-site readability; the session is created server side,
