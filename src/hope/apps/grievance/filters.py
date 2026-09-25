@@ -225,8 +225,8 @@ class GrievanceTicketFilter(FilterSet):
                         )
                     )
                 )
-            if search.startswith("GRV-"):
-                return qs.filter(unicef_id__istartswith=search)
+            if search.upper().startswith("GRV-"):
+                return qs.filter(unicef_id__iexact=search)
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (

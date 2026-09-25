@@ -123,6 +123,36 @@ class HopeTestBrowser(BaseCase):
         self.click(f'[data-cy="select-{field_name}"]')
         self.select_option_by_name(option_name)
 
+    def check_consent(self, timeout: int = 20) -> None:
+        """Tick the consent checkbox on a grievance/feedback form and confirm it stuck.
+
+        The Identity Verification step renders the household questionnaire above the
+        checkbox once its query resolves, which pushes the checkbox down the page; a
+        click issued during that reflow lands on the wrong node, the step then fails
+        validation and never advances. Re-click until the input reports checked.
+        """
+        selector = 'span[data-cy="input-consent"]'
+        input_selector = f"{selector} input"
+        deadline = time.monotonic() + timeout
+        while True:
+            self.click(selector)
+            if self._checkbox_checked(input_selector):
+                return
+            if time.monotonic() >= deadline:
+                raise AssertionError(f"Consent checkbox {selector} stayed unchecked after {timeout}s")
+
+    def _checkbox_checked(self, input_selector: str, timeout: int = 3) -> bool:
+        """Wait briefly for a checkbox to report checked, so a re-click cannot untick it."""
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            try:
+                if self.is_selected(input_selector):
+                    return True
+            except Exception:  # noqa: BLE001
+                pass
+            time.sleep(0.1)
+        return False
+
     def fill_date(self, selector: str, value: str, timeout: int = 10) -> None:
         """Type a yyyy-MM-dd date into a MUI X date picker located by `selector`.
 

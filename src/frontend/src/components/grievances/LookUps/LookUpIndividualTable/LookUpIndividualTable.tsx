@@ -11,7 +11,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
-import { adjustHeadCells } from '@utils/utils';
+import { adjustHeadCells, sanitizePhoneSearch } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -82,19 +82,20 @@ export function LookUpIndividualTable({
 
   const filterVariables = useMemo(
     () => ({
-      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      ageMin: filter.ageMin,
+      ageMax: filter.ageMax,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
-      admin2: [filter.admin2],
+      admin2: filter.admin2,
       flags: filter.flags,
       status: filter.status,
-      lastRegistrationDate: JSON.stringify({
-        min: filter.lastRegistrationDateMin,
-        max: filter.lastRegistrationDateMax,
-      }),
+      lastRegistrationDateAfter: filter.lastRegistrationDateMin,
+      lastRegistrationDateBefore: filter.lastRegistrationDateMax,
       orderBy: filter.orderBy,
+      birthDate: filter.birthDate ?? '',
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
       program: isAllPrograms ? filter.program : undefined,
@@ -108,6 +109,7 @@ export function LookUpIndividualTable({
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin2,
@@ -116,6 +118,7 @@ export function LookUpIndividualTable({
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
       filter.orderBy,
+      filter.birthDate,
       filter.program,
       filter.programState,
       householdId,

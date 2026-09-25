@@ -39,7 +39,7 @@ def test_create_new_ticket_referral(
 
         browser.click('button[data-cy="button-submit"]')
         browser.wait_for_ready_state_complete()
-        browser.click('[data-cy="input-consent"]')
+        browser.check_consent()
         browser.click('button[data-cy="button-submit"]')
         browser.type('textarea[name="description"]', "Happy path test 1234!")
         browser.click('button[data-cy="button-submit"]')

@@ -35,9 +35,10 @@ def test_household_data_update_admin_area_resolves_pcode_to_label(
     browser.click('button[data-cy="button-submit"]')
 
     browser.wait_for_ready_state_complete()
-    browser.click('[data-cy="input-consent"]')
+    browser.check_consent()
     browser.click('button[data-cy="button-submit"]')
 
+    browser.wait_for_element_visible('textarea[name="description"]', timeout=30)
     browser.type('textarea[name="description"]', "Admin area update regression #6006")
     browser.select_dropdown_option("householdDataUpdateFields[0].fieldName", ADMIN_AREA_FIELD_LABEL)
 

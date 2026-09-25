@@ -434,7 +434,7 @@ def test_filter_by_collector_full_name(
     )
     collector_full_name = payment_context["payment"].collector.full_name
     response = payment_context["client"].get(
-        payment_context["url_list"] + f"?collector_full_name={collector_full_name[:5]}"
+        payment_context["url_list"] + f"?collector_full_name={collector_full_name}"
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -463,12 +463,31 @@ def test_filter_by_collector_latin_full_name(
     collector.full_name_latin = "Anna Kovalska"
     collector.save(update_fields=["full_name", "full_name_latin"])
 
-    response = payment_context["client"].get(payment_context["url_list"] + "?collector_full_name=Anna Kov")
+    response = payment_context["client"].get(payment_context["url_list"] + "?collector_full_name=anna kovalska")
 
     assert response.status_code == status.HTTP_200_OK
     resp_data = response.json()
     assert len(resp_data["results"]) == 1
     assert resp_data["results"][0]["household_unicef_id"] == payment_context["payment"].household.unicef_id
+
+
+def test_filter_by_collector_full_name_prefix_returns_empty(
+    payment_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_context["business_area"],
+        payment_context["program_active"],
+    )
+    collector_full_name = payment_context["payment"].collector.full_name
+    response = payment_context["client"].get(
+        payment_context["url_list"] + f"?collector_full_name={collector_full_name[:5]}"
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"] == []
 
 
 def test_filter_by_payment_unicef_id(
