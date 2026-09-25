@@ -19,6 +19,7 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.household.const import (
     BLANK,
     NON_BENEFICIARY,
@@ -277,6 +278,8 @@ class Household(
         blank=True,
     )
     consent_sign = ImageField(
+        upload_to=upload_path,
+        max_length=255,
         validators=[validate_image_file_extension],
         blank=True,
         help_text="Household consent sign image",

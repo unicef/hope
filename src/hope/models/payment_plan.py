@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
+import os
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from dateutil.relativedelta import relativedelta
@@ -1170,7 +1171,7 @@ class PaymentPlan(
     def imported_file_name(self) -> str:
         """Get file to import entitlements."""
         try:
-            return (self.imported_file.file.name or "") if self.imported_file else ""
+            return os.path.basename(self.imported_file.file.name or "") if self.imported_file else ""
         except FileTemp.DoesNotExist:
             return ""
 
