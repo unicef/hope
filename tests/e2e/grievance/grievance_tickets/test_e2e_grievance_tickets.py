@@ -58,6 +58,48 @@ def add_grievance() -> None:
 
 
 @pytest.fixture
+def add_referral_grievance(create_programs: None, business_area: BusinessArea) -> GrievanceTicket:
+    """One user-generated referral with the values the smoke details tests check, plus one system-generated ticket."""
+    from hope.apps.grievance.constants import PRIORITY_MEDIUM, URGENCY_URGENT
+    from hope.apps.grievance.models import TicketReferralDetails
+
+    program = Program.objects.get(name="Test Programm")
+    individual = IndividualFactory(household=None, business_area=business_area, program=program)
+    household = HouseholdFactory(business_area=business_area, program=program, head_of_household=individual)
+    individual.household = household
+    individual.unicef_id = "IND-74-0000.0001"
+    individual.save()
+    household.unicef_id = "HH-20-0000.0002"
+    household.save()
+
+    referral = GrievanceTicket.objects.create(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_REFERRAL,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        priority=PRIORITY_MEDIUM,
+        urgency=URGENCY_URGENT,
+        household_unicef_id=household.unicef_id,
+        admin2=Area.objects.get(name="Shakardara"),
+        area="Village 1",
+        language="English | English",
+        description="Test 4",
+        consent=True,
+    )
+    TicketReferralDetails.objects.create(ticket=referral, household=household, individual=individual)
+    referral.programs.add(program)
+
+    system_ticket = GrievanceTicket.objects.create(
+        business_area=business_area,
+        category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        description="System flagging",
+        consent=True,
+    )
+    system_ticket.programs.add(program)
+    return referral
+
+
+@pytest.fixture
 def add_households(business_area) -> None:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=business_area
@@ -426,12 +468,9 @@ class TestSmokeGrievanceTickets:
         ]
         assert expected_labels == [i.text for i in page_grievance_tickets.get_table_label()]
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_grievance_tickets_system_generated_page(
         self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
+        add_referral_grievance: GrievanceTicket,
         page_grievance_tickets: GrievanceTickets,
     ) -> None:
         """
@@ -451,12 +490,9 @@ class TestSmokeGrievanceTickets:
         assert "ADD NOTE" in page_grievance_tickets.get_button_add_note().text
         assert "NEW TICKET" in page_grievance_tickets.get_button_new_ticket().text
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_grievance_tickets_details_page(
         self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
+        add_referral_grievance: GrievanceTicket,
         page_grievance_tickets: GrievanceTickets,
         page_grievance_details_page: GrievanceDetailsPage,
     ) -> None:
@@ -482,19 +518,16 @@ class TestSmokeGrievanceTickets:
         assert "-" in page_grievance_details_page.get_ticket_payment_label().text
         assert "-" in page_grievance_details_page.get_label_payment_plan().text
         assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
-        assert "Andarab" in page_grievance_details_page.get_administrative_level().text
+        assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
         assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
         assert "Test 4" in page_grievance_details_page.get_ticket_description().text
         assert "" in page_grievance_details_page.get_new_note_field().text
         assert "ADD NEW NOTE" in page_grievance_details_page.get_button_new_note().text
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_grievance_tickets_details_page_normal_program(
         self,
-        create_programs: None,
-        add_households: None,
-        add_grievance: None,
+        add_referral_grievance: GrievanceTicket,
         page_grievance_tickets: GrievanceTickets,
         page_grievance_details_page: GrievanceDetailsPage,
     ) -> None:
@@ -523,7 +556,7 @@ class TestSmokeGrievanceTickets:
         assert "-" in page_grievance_details_page.get_label_payment_plan_verification().text
         assert "Test Program" in page_grievance_details_page.get_label_programme().text
         assert "Shakardara" in page_grievance_details_page.get_administrative_level().text
-        assert "-" in page_grievance_details_page.get_area_village().text
+        assert "Village 1" in page_grievance_details_page.get_area_village().text
         assert "English | English" in page_grievance_details_page.get_languages_spoken().text
         assert "-" in page_grievance_details_page.get_documentation().text
         assert "Test 4" in page_grievance_details_page.get_ticket_description().text
@@ -569,9 +602,9 @@ class TestGrievanceTickets:
                 id="Sensitive Grievance Miscellaneous",
             ),
             pytest.param(
-                {"category": "Sensitive Grievance", "type": "Personal disputes"},
+                # The details page title-cases the issue type's enum name instead of using its label.
+                {"category": "Sensitive Grievance", "type": "Personal disputes", "details_type": "Personal Disputes"},
                 id="Sensitive Grievance Personal disputes",
-                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
                 {"category": "Grievance Complaint", "type": "Other Complaint"},
@@ -581,24 +614,21 @@ class TestGrievanceTickets:
                 {
                     "category": "Grievance Complaint",
                     "type": "Registration Related Complaint",
+                    "details_type": "Registration Complaint",
                 },
                 id="Grievance Complaint Registration Related Complaint",
-                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "FSP Related Complaint"},
+                {"category": "Grievance Complaint", "type": "FSP Related Complaint", "details_type": "Fsp Complaint"},
                 id="Grievance Complaint FSP Related Complaint",
-                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Individual"},
+                {"category": "Data Change", "type": "Withdraw Member"},
                 id="Data Change Withdraw Individual",
-                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Household"},
+                {"category": "Data Change", "type": "Withdraw Group"},
                 id="Data Change Withdraw Household",
-                marks=pytest.mark.xfail(reason="UNSTABLE", run=False),
             ),
         ],
     )
@@ -623,9 +653,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
         if test_data["type"] not in [
-            "Withdraw Household",
-            "Household Data Update",
-            "Add Individual",
+            "Withdraw Group",
+            "Group Data Update",
+            "Add Member",
         ]:
             page_grievance_new_ticket.get_individual_tab().click()
             page_grievance_new_ticket.get_individual_table_rows(0).click()
@@ -642,7 +672,8 @@ class TestGrievanceTickets:
         user = User.objects.get(email="test@example.com")
         assert f"{user.first_name} {user.last_name}" in page_grievance_details_page.get_label_created_by().text
         assert test_data["category"] in page_grievance_details_page.get_ticket_category().text
-        assert test_data["type"] in page_grievance_details_page.get_label_issue_type().text
+        details_type = test_data.get("details_type", test_data["type"])
+        assert details_type in page_grievance_details_page.get_label_issue_type().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
@@ -1138,7 +1169,6 @@ class TestGrievanceTickets:
         for str_row in page_grievance_tickets.get_rows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_grievance_tickets_process_tickets(
         self,
         page_grievance_tickets: GrievanceTickets,
@@ -1154,9 +1184,9 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name("Data Change")
         page_grievance_new_ticket.get_issue_type().click()
-        page_grievance_new_ticket.select_listbox_element("Household Data Update")
+        page_grievance_new_ticket.select_listbox_element("Group Data Update")
         assert "Data Change" in page_grievance_new_ticket.get_select_category().text
-        assert "Items Group Data Update" in page_grievance_new_ticket.get_issue_type().text
+        assert "Group Data Update" in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_household_tab()
         page_grievance_new_ticket.get_household_table_rows(0).click()
@@ -1176,6 +1206,8 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_button_send_for_approval().click()
         page_grievance_details_page.get_checkbox_household_data().click()
         page_grievance_details_page.get_button_approval().click()
+        # "You approved 1 change ..." warning
+        page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
         assert "Ticket ID" in page_grievance_details_page.get_title().text
@@ -1236,7 +1268,11 @@ class TestGrievanceTickets:
         assert "grievance_ticket_1" in page_admin_panel.get_unicef_id().text
         assert GrievanceTicket.objects.first().unicef_id in page_admin_panel.get_unicef_id().text
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
+    @pytest.mark.xfail(
+        reason="App bug: the approve-needs-adjudication mutation (NeedsAdjudicationActions.tsx) never refetches "
+        "the ticket, so the icons stay after Clear until the page is reloaded",
+        run=False,
+    )
     def test_grievance_tickets_needs_adjudication(
         self,
         add_grievance_needs_adjudication: None,

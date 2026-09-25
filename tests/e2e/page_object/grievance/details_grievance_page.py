@@ -23,9 +23,10 @@ class GrievanceDetailsPage(BaseComponents):
     ticket_assigment = 'div[data-cy="label-Assigned to"]'
     ticket_category = 'div[data-cy="label-Category"]'
     label_issue_type = 'div[data-cy="label-Issue Type"]'
-    ticket_household_id = 'div[data-cy="label-Household ID"]'
+    # Labelled after the programme's beneficiary group, e.g. "Items Group ID".
+    ticket_household_id = 'div[data-cy="label-{} ID"]'
     ticket_target_id = 'div[data-cy="label-Target ID"]'
-    ticket_individual_id = 'div[data-cy="label-Individual ID"]'
+    ticket_individual_id = 'div[data-cy="label-{} ID"]'
     ticket_payment_label = 'div[data-cy="label-Payment ID"]'
     label_payment_plan = 'div[data-cy="label-Payment Plan"]'
     label_payment_plan_verification = 'div[data-cy="label-Payment Plan Verification"]'
@@ -201,7 +202,7 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for_disappear(self.people_icon)
 
     def disappear_person_icon(self) -> WebElement:
-        return self.wait_for_disappear(self.people_icon)
+        return self.wait_for_disappear(self.person_icon)
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
@@ -262,14 +263,14 @@ class GrievanceDetailsPage(BaseComponents):
     def get_ticket_category(self) -> WebElement:
         return self.wait_for(self.ticket_category)
 
-    def get_ticket_household_id(self) -> WebElement:
-        return self.wait_for(self.ticket_household_id)
+    def get_ticket_household_id(self, group_label: str = "Items Group") -> WebElement:
+        return self.wait_for(self.ticket_household_id.format(group_label))
 
     def get_ticket_target_id(self) -> WebElement:
         return self.wait_for(self.ticket_target_id)
 
-    def get_ticket_individual_id(self) -> WebElement:
-        return self.wait_for(self.ticket_individual_id)
+    def get_ticket_individual_id(self, member_label: str = "Item") -> WebElement:
+        return self.wait_for(self.ticket_individual_id.format(member_label))
 
     def get_ticket_payment_label(self) -> WebElement:
         return self.wait_for(self.ticket_payment_label)
