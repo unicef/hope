@@ -3,7 +3,7 @@ import logging
 import os
 import time
 from time import sleep
-from typing import Callable, Literal, Tuple, Union
+from typing import Callable, Literal, Tuple, TypeVar, Union
 
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
@@ -15,6 +15,8 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
 
 
 def text_to_be_exact_in_element(locator: Tuple[str, str], expected: str) -> Callable:
@@ -33,9 +35,10 @@ class StaleSafeElement(WebElement):
 
     React re-renders and page navigations swap the node out between the moment
     ``wait_for`` returns an element and the moment a test reads it, which raises
-    ``StaleElementReferenceException``. Every element operation goes through
-    ``_execute``, so retrying there covers ``.text``, ``.click()``, attribute
-    reads and nested lookups alike.
+    ``StaleElementReferenceException``. Most element operations go through
+    ``_execute``, so retrying there covers ``.text``, ``.click()`` and nested
+    lookups. ``get_attribute()`` and ``is_displayed()`` hand the element to
+    ``execute_script`` instead, so they are retried separately.
     """
 
     def __init__(self, element: WebElement, relocate: Callable[[], WebElement], attempts: int = 3) -> None:
@@ -43,15 +46,26 @@ class StaleSafeElement(WebElement):
         self._relocate = relocate
         self._attempts = attempts
 
-    def _execute(self, command: str, params: dict | None = None) -> dict:
+    def _retry(self, action: Callable[[], T]) -> T:
         for attempt in range(self._attempts):
             try:
-                return super()._execute(command, params)
+                return action()
             except StaleElementReferenceException:
                 if attempt == self._attempts - 1:
                     raise
                 self._id = self._relocate().id
         raise StaleElementReferenceException(f"Element stayed stale after {self._attempts} attempts")
+
+    def _execute(self, command: str, params: dict | None = None) -> dict:
+        execute = super()._execute
+        return self._retry(lambda: execute(command, params))
+
+    def get_attribute(self, name: str) -> str | None:
+        get_attribute = super().get_attribute
+        return self._retry(lambda: get_attribute(name))
+
+    def is_displayed(self) -> bool:
+        return self._retry(super().is_displayed)
 
 
 class Common:

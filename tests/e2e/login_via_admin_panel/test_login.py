@@ -85,4 +85,4 @@ class TestAdminPanel:
         page_admin_panel.get_button_logout().click()
         # logging out navigates away, so wait for the new page's text instead of
         # reading the element the old document left behind
-        assert page_admin_panel.wait_for_text("Logged out", page_admin_panel.logged_out, By.XPATH)
+        assert page_admin_panel.wait_for_text("Logged out", page_admin_panel.logged_out)
