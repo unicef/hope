@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 
@@ -12,6 +13,11 @@ class AllowSpecificIframeDomainsMiddleware(MiddlewareMixin):
     ]
 
     def process_response(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
+        # Django's XFrameOptionsMiddleware is not used so the Dashboard can be
+        # embedded by the trusted origins below; keep the configured default for
+        # every other origin/path instead of dropping the header entirely.
+        response.setdefault("X-Frame-Options", settings.X_FRAME_OPTIONS)
+
         origin: str | None = request.META.get("HTTP_ORIGIN")
         referer: str | None = request.META.get("HTTP_REFERER")
 
