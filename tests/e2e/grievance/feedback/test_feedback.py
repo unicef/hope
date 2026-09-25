@@ -253,7 +253,6 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_optional_fields(
         self,
@@ -287,7 +286,6 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_check_feedback_filtering_by_chosen_programme(
         self,
         create_programs: None,
@@ -458,7 +456,6 @@ class TestFeedback:
         assert "English" in page_feedback_details.get_languages_spoken().text
         assert "Shakardara" in page_feedback_details.get_administrative_level2().text
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_create_linked_ticket(
         self,
         page_grievance_new_ticket: NewTicket,

@@ -1664,7 +1664,6 @@ class TestTargeting:
                 By.CSS_SELECTOR, page_targeting_details.icon_selected
             )
 
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_targeting_info_button(
         self,
         create_programs: None,

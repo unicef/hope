@@ -283,7 +283,6 @@ def create_programs(business_area: BusinessArea) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeFilters:
-    @pytest.mark.xfail(reason="UNSTABLE", run=False)
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
         filters.select_global_program_filter("Test Programm")
 
