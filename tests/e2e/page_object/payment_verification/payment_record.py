@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
@@ -43,29 +41,8 @@ class PaymentRecord(BaseComponents):
         return self.wait_for(self.page_header_container)
 
     def get_button_ed_plan(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        # First wait for the element to be present
-        element = self.wait_for(self.button_ed_plan)
-
-        # Scroll to bring element into view and away from toolbar
-        self.driver.execute_script(
-            """
-            const container = document.querySelector("div[data-cy='main-content']");
-            if (container) {
-                container.scrollBy(0, -400);
-            }
-            """
-        )
-
-        # Wait a bit for the scroll to complete
-        sleep(0.5)
-
-        # Wait for the element to be clickable
-        WebDriverWait(self.driver, 10).until(
-            expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, self.button_ed_plan))
-        )
-
-        return element
+        # The toolbar overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_ed_plan, scroll_by=-400)
 
     def get_label_status(self) -> [WebElement]:
         return self.get_elements(self.label_status)

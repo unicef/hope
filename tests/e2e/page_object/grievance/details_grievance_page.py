@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -215,36 +213,18 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.label_ticket_id)
 
     def get_button_close_ticket(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_close_ticket)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_close_ticket)
 
     def get_button_assign_to_me(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_assign_to_me)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_assign_to_me)
 
     def get_button_send_for_approval(self) -> WebElement:
         return self.wait_for(self.button_send_for_approval)
 
     def get_button_approval(self) -> WebElement:
-        button = self.wait_for(self.button_approval)
-        # Force click using JavaScript if regular click might not work
-        self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
-        sleep(1)
-        return button
+        return self.scroll_to_and_wait_for(self.button_approval)
 
     def get_button_set_in_progress(self) -> WebElement:
         return self.wait_for(self.button_set_in_progress)

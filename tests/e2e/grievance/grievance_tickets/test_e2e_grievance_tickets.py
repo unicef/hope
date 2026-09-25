@@ -674,8 +674,15 @@ class TestGrievanceTickets:
             "Update Delegate": "None",
         }
 
+        # The listbox element can show up before all of its options have rendered, so wait
+        # for the full set once instead of sleeping in front of every option.
+        for _ in range(50):
+            items = select_element.find_elements("tag name", "li")
+            if len(items) == len(check_list):
+                break
+            sleep(0.1)
+
         for item in items:
-            sleep(0.5)
             assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
 
     def test_grievance_tickets_create_new_ticket_data_change_add_individual_all_fields(

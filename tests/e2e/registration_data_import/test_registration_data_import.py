@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 
 from django.conf import settings
 from elasticsearch.dsl import connections
@@ -242,12 +241,9 @@ class TestRegistrationDataImport:
         page_details_registration_data_import.wait_for_status("IN REVIEW")
         assert "50" in page_details_registration_data_import.get_label_total_number_of_households().text
         assert "208" in page_details_registration_data_import.get_label_total_number_of_individuals().text
-        page_details_registration_data_import.element_clickable(page_details_registration_data_import.button_merge_rdi)
-        sleep(2)
-        page_details_registration_data_import.get_button_merge_rdi().click()
-        page_details_registration_data_import.element_clickable(page_details_registration_data_import.button_merge)
-        sleep(2)
-        page_details_registration_data_import.get_button_merge().click()
+        # `click` retries a click that gets intercepted, so no fixed wait is needed here.
+        page_details_registration_data_import.click(page_details_registration_data_import.button_merge_rdi)
+        page_details_registration_data_import.click(page_details_registration_data_import.button_merge)
         page_details_registration_data_import.wait_for_status("MERGED")
         page_details_registration_data_import.wait_for_text(
             "MERGED", page_details_registration_data_import.status_container

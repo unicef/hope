@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -227,10 +225,9 @@ class PaymentModuleDetails(BaseComponents):
         return self.wait_for(self.button_send_for_approval)
 
     def click_button(self, locator: str) -> None:
-        self.wait_for(locator)
-        self.element_clickable(locator)
-        sleep(5)
-        self.get(locator).click()
+        # `click` retries a click that gets intercepted, which is what the fixed sleep
+        # that used to sit here was working around.
+        self.click(locator)
 
     def click_button_send_for_approval(self) -> None:
         self.click_button(self.button_send_for_approval)

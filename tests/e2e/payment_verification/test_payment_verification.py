@@ -731,5 +731,6 @@ class TestSmokePaymentVerification:
         page_payment_verification_details.get_download_xlsx().click()
         page_payment_verification_details.get_button_mark_as_invalid().click()
 
-        sleep(2)
-        assert "INVALID" in page_payment_verification_details.get_verification_plan_status().text
+        page_payment_verification_details.wait_for_text(
+            "INVALID", page_payment_verification_details.verification_plan_status
+        )

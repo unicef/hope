@@ -233,15 +233,8 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.header_title)
 
     def get_button_new_program(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector(\"div[data-cy='main-content']\")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_new_program)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_new_program)
 
     def fill_filters_search(self, filter_text: str) -> None:
         self.wait_for(self.filters_search, By.XPATH).send_keys(filter_text)
@@ -251,15 +244,8 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.button_apply)
 
     def get_button_edit_program(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector(\"div[data-cy='main-content']\")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.wait_for(self.button_edit_program)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_edit_program)
 
     def get_select_edit_program_details(self) -> WebElement:
         return self.wait_for(self.select_edit_program_details)

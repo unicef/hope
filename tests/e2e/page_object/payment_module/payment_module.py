@@ -1,6 +1,3 @@
-from time import sleep
-
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -145,10 +142,8 @@ class PaymentModule(BaseComponents):
         return self.get_elements(self.rows)
 
     def get_row(self, number: int) -> WebElement:
-        self.wait_for(self.rows)
-        try:
-            sleep(0.5)
-            return self.get_elements(self.rows)[number]
-        except TimeoutException:
-            sleep(5)
-            return self.get_elements(self.rows)[number]
+        # Rows render one by one, so wait until the one asked for exists rather than
+        # sleeping and hoping. The old TimeoutException handler could never fire:
+        # indexing a short list raises IndexError.
+        self._wait().until(lambda _: len(self.get_elements(self.rows)) > number)
+        return self.get_elements(self.rows)[number]

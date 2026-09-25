@@ -1,5 +1,4 @@
 import random
-from time import sleep
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -702,9 +701,8 @@ class TestManualCalendar:
         # 3rd step (Partners)
         page_programme_management.get_access_to_program().click()
         page_programme_management.select_who_access_to_program(test_data["partners_access"])
-        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
-        sleep(5)
-        page_programme_management.get_button_save().click()
+        # The save button can be covered while the partners panel settles; `click` retries.
+        page_programme_management.click(page_programme_management.button_save)
         assert test_data["partners_access"] in page_programme_details.get_label_partner_access().text
         assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
 
@@ -731,10 +729,7 @@ class TestManualCalendar:
         page_programme_management.get_button_next().click()
         # 2nd step (Time Series Fields)
         page_programme_management.get_button_add_time_series_field()
-        page_programme_management.element_clickable(page_programme_management.button_save)
-        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
-        sleep(5)
-        page_programme_management.get_button_save().click()
+        page_programme_management.click(page_programme_management.button_save)
         # Check Details page
         page_programme_details.wait_for_text("New name after Edit", page_programme_details.header_title)
         assert FormatTime(1, 1, 2022).date_in_text_format in page_programme_details.get_label_start_date().text
@@ -823,8 +818,8 @@ class TestManualCalendar:
         page_programme_management.get_button_save().click()
 
         # Check Details page
-        sleep(10)
         assert "details" in page_programme_details.wait_for_new_url(programme_edit_url, 20).split("/")
+        page_programme_details.wait_for_number_of_partners(3)
 
         partner_name_elements_new = page_programme_management.driver.find_elements(
             By.CSS_SELECTOR, "[data-cy='label-partner-name']"

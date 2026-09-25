@@ -6,7 +6,11 @@ from time import sleep
 from typing import Callable, Literal, Tuple, Union
 
 from selenium.common import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -36,9 +40,12 @@ class StaleSafeElement(WebElement):
     ``StaleElementReferenceException``. Every element operation goes through
     ``_execute``, so retrying there covers ``.text``, ``.click()``, attribute
     reads and nested lookups alike.
+
+    A click that lands on something drawn over the element is retried the same way,
+    which is what the fixed sleeps in front of the old call sites were for.
     """
 
-    def __init__(self, element: WebElement, relocate: Callable[[], WebElement], attempts: int = 3) -> None:
+    def __init__(self, element: WebElement, relocate: Callable[[], WebElement], attempts: int = 5) -> None:
         super().__init__(element.parent, element.id)
         self._relocate = relocate
         self._attempts = attempts
@@ -51,6 +58,15 @@ class StaleSafeElement(WebElement):
                 if attempt == self._attempts - 1:
                     raise
                 self._id = self._relocate().id
+            except ElementClickInterceptedException:
+                # A sticky header or a MUI backdrop that is still fading out covers the
+                # element. The click did not land, so centre the element away from the
+                # sticky edges and retry once the transition has had time to finish.
+                if attempt == self._attempts - 1:
+                    raise
+                with contextlib.suppress(Exception):
+                    self.parent.execute_script("arguments[0].scrollIntoView({block: 'center'});", self)
+                sleep(0.2)
         raise StaleElementReferenceException(f"Element stayed stale after {self._attempts} attempts")
 
 
@@ -216,12 +232,12 @@ class Common:
         locator: str,
         element_type: str = By.CSS_SELECTOR,
         timeout: int = DEFAULT_TIMEOUT,
-        attempts: int = 3,
+        attempts: int = 5,
     ) -> WebElement:
         """Wait for the element to be clickable and click it, re-locating on each attempt.
 
         Re-locating makes the click resilient to the element going stale between the
-        lookup and the click.
+        lookup and the click, and to a click that lands on an overlay instead.
         """
         for attempt in range(attempts):
             try:
@@ -230,10 +246,30 @@ class Common:
                 )
                 element.click()
                 return element
-            except StaleElementReferenceException:
+            except (StaleElementReferenceException, ElementClickInterceptedException):
                 if attempt == attempts - 1:
                     raise
+                sleep(0.2)
         raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
+
+    def scroll_to_and_wait_for(
+        self,
+        locator: str,
+        element_type: str = By.CSS_SELECTOR,
+        scroll_by: int = -600,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> WebElement:
+        """Scroll the main content and return the element once it is clickable.
+
+        Page objects used to scroll and then sleep a fixed amount, because a button can be
+        covered by the sticky header or a still-animating panel even though Selenium
+        reports it visible. Waiting for it to be clickable gives the same guarantee, and
+        the returned element retries a click that gets intercepted anyway.
+        """
+        self.scroll(scroll_by)
+        element = self.wait_for(locator, element_type, timeout)
+        self._wait(timeout).until(expected_conditions.element_to_be_clickable(element))
+        return element
 
     def _find_listbox_item(
         self,
@@ -357,8 +393,8 @@ class Common:
         for _ in range(execute):
             self.driver.execute_script(
                 f"""
-                container = document.querySelector("div[data-cy='main-content']")
-                container.scrollBy(0,{scroll_by})
+                const container = document.querySelector("div[data-cy='main-content']")
+                if (container) {{ container.scrollBy(0,{scroll_by}) }}
                 """
             )
             if wait_after_start_scrolling:

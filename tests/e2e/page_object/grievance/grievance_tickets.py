@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -152,15 +150,8 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.button_clear)
 
     def get_button_new_ticket(self) -> WebElement:
-        # Workaround because elements overlapped even though Selenium saw that they were available:
-        self.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,-600)
-            """
-        )
-        sleep(2)
-        return self.get(self.button_new_ticket)
+        # The sticky header overlaps the button, so scroll it clear before returning it.
+        return self.scroll_to_and_wait_for(self.button_new_ticket)
 
     def get_ticket_id(self) -> WebElement:
         return self.wait_for(self.ticket_id)

@@ -1,3 +1,4 @@
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -148,6 +149,12 @@ class ProgrammeDetails(BaseComponents):
 
     def get_label_partner_name(self) -> WebElement:
         return self.wait_for(self.label_partner_name)
+
+    def wait_for_number_of_partners(self, number: int) -> bool:
+        """Wait until exactly ``number`` partner labels have rendered."""
+        return self._wait().until(
+            lambda driver: len(driver.find_elements(By.CSS_SELECTOR, self.label_partner_name)) == number
+        )
 
     def get_label_area_access(self) -> WebElement:
         return self.wait_for(self.label_area_access)
