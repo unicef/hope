@@ -1484,6 +1484,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._fsp_auth_code_cache: dict[int, bool] = {}
+
     class Meta:
         model = Payment
         fields: tuple[str, ...] = (
@@ -1580,15 +1584,19 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.financial_service_provider.name if obj.financial_service_provider else ""
 
     def get_fsp_auth_code(self, obj: Payment) -> str:
-        if "request" not in self.context:
-            return ""
-        user = self.context["request"].user
-        if not user.has_perm(
-            Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-            obj.program or obj.business_area,
-        ):
+        if not self._can_view_fsp_auth_code(obj.program):
             return ""
         return obj.fsp_auth_code or ""
+
+    def _can_view_fsp_auth_code(self, program: Program) -> bool:
+        if program is None:
+            return False
+        program_id = program.id
+        if program_id not in self._fsp_auth_code_cache:
+            request = self.context.get("request")
+            can_view = bool(request) and bool(request.user.has_perm(Permissions.PM_VIEW_FSP_AUTH_CODE.value, program))
+            self._fsp_auth_code_cache[program_id] = can_view
+        return self._fsp_auth_code_cache[program_id]
 
     @extend_schema_field(PaymentVerificationDetailsSerializer)
     def get_verification(self, obj: Payment) -> dict[str, Any]:
