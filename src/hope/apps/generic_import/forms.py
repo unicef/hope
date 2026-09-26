@@ -9,6 +9,9 @@ from django.db.models import Q, QuerySet
 from django.forms.widgets import Select
 from django.utils import timezone
 
+if TYPE_CHECKING:
+    from django.core.files.uploadedfile import UploadedFile
+
 from hope.models import BusinessArea, Program, RoleAssignment
 
 if TYPE_CHECKING:
@@ -194,7 +197,7 @@ class GenericImportForm(forms.Form):
 
         return program
 
-    def clean_file(self) -> Any:
+    def clean_file(self) -> UploadedFile:
         """Validate uploaded file."""
         file = self.cleaned_data.get("file")
 

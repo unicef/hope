@@ -5,6 +5,7 @@ from constance import config
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import CacheResponse
 from rest_framework_extensions.key_constructor import bits
@@ -138,7 +139,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -155,7 +156,7 @@ class RendererKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -182,7 +183,7 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -202,7 +203,7 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -219,7 +220,7 @@ class AreaLimitKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
