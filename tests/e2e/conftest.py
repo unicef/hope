@@ -5,6 +5,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import time
 from typing import Any
 
 from _pytest.fixtures import FixtureRequest
@@ -231,8 +232,34 @@ def _patch_sync_apps_for_no_migrations() -> None:
     migrate.Command.sync_apps = patched_sync_apps
 
 
+def _retry_flush_on_deadlock() -> None:
+    """Retry the teardown flush when Postgres picks it as a deadlock victim.
+
+    A request the live server is still handling when a test ends can hold locks that the
+    flush's TRUNCATE waits for. The request finishes within moments, so trying again works.
+    """
+    from django.core.management.base import CommandError
+    from django.db import OperationalError
+    from django.test import TransactionTestCase
+
+    original_fixture_teardown = TransactionTestCase._fixture_teardown
+
+    def fixture_teardown_with_retry(self):  # type: ignore
+        for _ in range(3):
+            try:
+                return original_fixture_teardown(self)
+            except CommandError as e:
+                if not (isinstance(e.__cause__, OperationalError) and "deadlock detected" in str(e.__cause__)):
+                    raise
+                time.sleep(0.5)
+        return original_fixture_teardown(self)
+
+    TransactionTestCase._fixture_teardown = fixture_teardown_with_retry
+
+
 def pytest_configure(config) -> None:  # type: ignore
     _patch_sync_apps_for_no_migrations()
+    _retry_flush_on_deadlock()
 
     config.addinivalue_line(
         "markers",
