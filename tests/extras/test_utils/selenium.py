@@ -79,10 +79,9 @@ class HopeTestBrowser(BaseCase):
             url = f"{self.live_server_url}{url}"
         return super().open(url)
 
-    def login(self, username: str = "superuser", password: str = "testtest2", *, wait_for_drawer: bool = True):
-        # `password` is kept for call-site readability; the session is created server side,
-        # which skips loading the admin login form and its heavy redirect target.
-        # _health is the cheapest same-origin page to attach the cookie to.
+    def login(self, username: str = "superuser", *, wait_for_drawer: bool = True):
+        # The session is created server side, which skips loading the admin login form and
+        # its heavy redirect target. _health is the cheapest same-origin page to attach the cookie to.
         self.open("/_health")
         self.execute_script(CLEAR_BROWSER_STORAGE_JS)
         self.add_cookie(session_cookie_for(username))
