@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from django.core.cache import cache
 from rest_framework.request import Request
@@ -13,7 +14,7 @@ def get_country_areas_version(country_id: str) -> int:
     return get_or_create_cache_key(COUNTRY_AREAS_VERSION_KEY.format(country_id), 0)
 
 
-def increment_country_areas_version(country_id: str) -> int:
+def increment_country_areas_version(country_id: UUID) -> int:
     key = COUNTRY_AREAS_VERSION_KEY.format(country_id)
     try:
         return cache.incr(key)
