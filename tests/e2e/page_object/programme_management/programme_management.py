@@ -188,9 +188,16 @@ class ProgrammeManagement(BaseComponents):
     def choose_input_start_date_via_calendar(self, day: int) -> None:
         self.get(self.label_start_date).find_element(By.TAG_NAME, "button").click()
         self.get_calendar()
-        self.wait_for_element_clickable(self.calendar_days)
-        self.get_elements(self.calendar_days, By.XPATH)[day - 1].click()
+        self._click_calendar_day(day)
         self.wait_for_disappear(self.calendar, By.XPATH)
+
+    def _click_calendar_day(self, day: int) -> None:
+        # The calendar popper animates open, so a native click can land on the day above.
+        # Pick the day by its text and click it in JS, which doesn't depend on its position.
+        # While the month slides, both months are in the DOM, so wait until only one day matches.
+        locator = f"{self.calendar_days}[not(contains(@class, 'dayOutsideMonth'))][normalize-space()='{day}']"
+        days = self._wait().until(lambda d: (found := d.find_elements(By.XPATH, locator)) and len(found) == 1 and found)
+        self.driver.execute_script("arguments[0].click();", days[0])
 
     # The open-picker (calendar) button sits inside the field; the end-date hidden
     # input is no longer visible in MUI X v9, so reach the button via its data-cy.
@@ -208,7 +215,7 @@ class ProgrammeManagement(BaseComponents):
             sleep(0.1)
             if month != next_month:
                 break
-        self.get_elements(self.calendar_days, By.XPATH)[day - 1].click()
+        self._click_calendar_day(day)
         self.wait_for_disappear(self.calendar, By.XPATH, timeout=120)
 
     def get_label_start_date(self) -> WebElement:
