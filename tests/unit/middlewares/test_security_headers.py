@@ -2,7 +2,7 @@ from django.test import Client
 from django.test.utils import modify_settings, override_settings
 import pytest
 
-URL = "/"
+URL = "/_health"
 
 HEADER_TEST_OVERRIDES = {
     "SECURE_CONTENT_TYPE_NOSNIFF": True,
