@@ -36,7 +36,6 @@ class FundsCommitmentItemSerializer(serializers.ModelSerializer):
 
 class FundsCommitmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    rec_serial_number = serializers.IntegerField(read_only=True, allow_null=True)
     funds_commitment_number = serializers.CharField()
     vendor_id = serializers.CharField(read_only=True, allow_null=True)
     posting_date = serializers.DateField(read_only=True, allow_null=True)

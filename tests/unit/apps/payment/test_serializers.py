@@ -491,7 +491,6 @@ def test_payment_plan_detail_serializer_funds_commitments_exposes_header_fields(
 
     assert data == {
         "id": data["id"],
-        "rec_serial_number": 100,
         "funds_commitment_number": "FC123",
         "vendor_id": "VENDOR-1",
         "posting_date": "2026-09-01",
@@ -515,7 +514,6 @@ def test_payment_plan_detail_serializer_available_funds_commitments_exposes_head
         data = PaymentPlanDetailSerializer().get_available_funds_commitments(payment_plan)
 
     assert len(data) == 1
-    assert data[0]["rec_serial_number"] == 100
     assert data[0]["funds_commitment_number"] == "FC123"
     assert data[0]["vendor_id"] == "VENDOR-1"
     assert data[0]["posting_date"] == "2026-09-01"

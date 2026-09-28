@@ -121,7 +121,6 @@ def funds_commitment_header_data(business_area) -> dict[str, Any]:
     header = FundsCommitmentHeader.objects.with_derived_fields().get(funds_commitment_number="FC-002")
     return {
         "id": header.pk,
-        "rec_serial_number": header.rec_serial_number,
         "funds_commitment_number": header.funds_commitment_number,
         "vendor_id": header.vendor_id,
         "posting_date": header.posting_date,
@@ -137,7 +136,6 @@ def funds_commitment_header_data(business_area) -> dict[str, Any]:
 def test_funds_commitment_serializer_exposes_derived_header_fields(funds_commitment_header_data) -> None:
     serializer = FundsCommitmentSerializer(funds_commitment_header_data)
 
-    assert serializer.data["rec_serial_number"] == 200
     assert serializer.data["funds_commitment_number"] == "FC-002"
     assert serializer.data["vendor_id"] == "VENDOR-2"
     assert serializer.data["posting_date"] == "2026-09-02"

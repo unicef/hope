@@ -40,7 +40,6 @@ class FundsCommitmentItemInline(admin.TabularInline):
 class FundsCommitmentHeaderAdmin(HOPEModelAdminBase):
     list_display = (
         "funds_commitment_number",
-        "rec_serial_number",
         "vendor_id",
         "posting_date",
         "document_reference",
@@ -50,7 +49,6 @@ class FundsCommitmentHeaderAdmin(HOPEModelAdminBase):
         "currency",
     )
     readonly_fields = (
-        "rec_serial_number",
         "vendor_id",
         "posting_date",
         "document_reference",
@@ -64,10 +62,6 @@ class FundsCommitmentHeaderAdmin(HOPEModelAdminBase):
 
     def get_queryset(self, request: HttpRequest) -> FundsCommitmentHeaderQuerySet:
         return cast("FundsCommitmentHeaderQuerySet", super().get_queryset(request)).with_derived_fields()
-
-    @admin.display(ordering="rec_serial_number", description="Record Serial Number")
-    def rec_serial_number(self, obj: FundsCommitmentHeader) -> int | None:
-        return getattr(obj, "rec_serial_number", None)
 
     @admin.display(ordering="vendor_id", description="Vendor")
     def vendor_id(self, obj: FundsCommitmentHeader) -> str | None:

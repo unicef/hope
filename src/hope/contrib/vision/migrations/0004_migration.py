@@ -14,7 +14,6 @@ BEGIN
     IF fc_header_id IS NULL THEN
         INSERT INTO vision_fundscommitmentheader (
             funds_commitment_number,
-            rec_serial_number,
             vendor_id,
             posting_date,
             document_reference,
@@ -23,7 +22,6 @@ BEGIN
         )
         VALUES (
             NEW.funds_commitment_number,
-            NEW.rec_serial_number,
             NEW.vendor_id,
             NEW.posting_date,
             NEW.document_reference,
@@ -214,7 +212,6 @@ EXECUTE FUNCTION funds_commitment_trigger_function();
 BACKFILL_HEADER_FIELDS = """
 UPDATE vision_fundscommitmentheader AS header
 SET
-    rec_serial_number = commitment.rec_serial_number,
     vendor_id = commitment.vendor_id,
     posting_date = commitment.posting_date,
     document_reference = commitment.document_reference,
@@ -223,7 +220,6 @@ SET
 FROM (
     SELECT DISTINCT ON (funds_commitment_number)
         funds_commitment_number,
-        rec_serial_number,
         vendor_id,
         posting_date,
         document_reference,
@@ -257,11 +253,6 @@ class Migration(migrations.Migration):
                 "verbose_name": "Funds Commitment Header",
                 "verbose_name_plural": "Funds Commitment Headers",
             },
-        ),
-        migrations.AddField(
-            model_name="fundscommitmentheader",
-            name="rec_serial_number",
-            field=models.IntegerField(null=True),
         ),
         migrations.AddField(
             model_name="fundscommitmentheader",

@@ -30,7 +30,6 @@ class FundsCommitmentHeaderQuerySet(models.QuerySet):
 
 class FundsCommitmentHeader(models.Model):
     funds_commitment_number = models.CharField(max_length=10)
-    rec_serial_number = models.IntegerField(null=True)
     vendor_id = models.CharField(max_length=10, blank=True, null=True)
     posting_date = models.DateField(blank=True, null=True)
     document_reference = models.CharField(max_length=16, blank=True, null=True)

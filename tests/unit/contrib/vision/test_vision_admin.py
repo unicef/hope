@@ -360,7 +360,6 @@ def test_funds_commitment_header_admin_displays_derived_fields(
 
     assert model_admin.list_display == (
         "funds_commitment_number",
-        "rec_serial_number",
         "vendor_id",
         "posting_date",
         "document_reference",
@@ -370,7 +369,6 @@ def test_funds_commitment_header_admin_displays_derived_fields(
         "currency",
     )
     assert model_admin.readonly_fields == model_admin.list_display[1:]
-    assert model_admin.rec_serial_number(header) == 100
     assert model_admin.vendor_id(header) == "VENDOR-1"
     assert model_admin.posting_date(header) == date(2026, 9, 1)
     assert model_admin.document_reference(header) == "REFERENCE-1"
