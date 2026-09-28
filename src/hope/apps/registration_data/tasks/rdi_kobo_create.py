@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 from django.db import Error, transaction
 from django_countries.fields import Country
 
+from hope.apps.core.currency_resolution import resolve_active_currency
 from hope.apps.core.kobo.api import KoboAPI
 from hope.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
@@ -138,7 +139,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 correct_value = None
             else:
                 try:
-                    correct_value = Currency.objects.get(code=value)
+                    correct_value = resolve_active_currency(str(value))
                 except Currency.DoesNotExist:
                     raise ValueError(f"Unknown currency code '{value}' on household #{self.household_count}")
         else:

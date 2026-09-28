@@ -18,6 +18,7 @@
         "total_households_count": 0,
         "total_individuals_count": 0,
         "currency": null,
+        "currency_vision_code": null,
         "excluded_ids": null,
         "total_entitled_quantity": null,
         "total_delivered_quantity": null,
