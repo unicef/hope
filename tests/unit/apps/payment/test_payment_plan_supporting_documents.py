@@ -135,7 +135,13 @@ def supporting_documents_download_url(business_area: Any, payment_plan: PaymentP
 def document(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
     return PaymentPlanSupportingDocumentFactory(
         payment_plan=payment_plan,
+        file=SimpleUploadedFile("evidence.pdf", b"abc", content_type="application/pdf"),
     )
+
+
+@pytest.fixture
+def document_without_a_file(payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
+    return PaymentPlanSupportingDocumentFactory(payment_plan=payment_plan, file=None)
 
 
 def test_validate_file_size_success(serializer_context: dict[str, Any], upload_file: SimpleUploadedFile) -> None:
@@ -187,6 +193,14 @@ def test_validate_file_limit_failure(payment_plan: PaymentPlan, serializer_conte
     )
 
 
+def test_to_representation_leaves_a_missing_file_as_none(
+    document_without_a_file: PaymentPlanSupportingDocument,
+) -> None:
+    data = PaymentPlanSupportingDocumentSerializer(document_without_a_file).data
+
+    assert data["file"] is None
+
+
 def test_post_successful_upload(
     api_client: APIClient,
     supporting_documents_list_url: str,
@@ -201,7 +215,8 @@ def test_post_successful_upload(
     assert PaymentPlanSupportingDocument.objects.count() == 1
     assert "id" in response.data
     assert "uploaded_at" in response.data
-    assert "test_file" in response.data["file"]
+    assert response.data["file"].startswith("test_file")
+    assert "/" not in response.data["file"]
     assert response.data["title"] == "Test"
     assert response.data["created_by"] == upload_user.pk
 
@@ -240,4 +255,4 @@ def test_get_document_success(
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response, FileResponse)
-    assert response["Content-Disposition"] == f"attachment; filename={document.file.name}"
+    assert response["Content-Disposition"] == "attachment; filename=evidence.pdf"

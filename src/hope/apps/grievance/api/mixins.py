@@ -545,12 +545,19 @@ class GrievanceMutationMixin:
 
     def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
         messages = []
-        self._handle_document_operations(approver, grievance_ticket, input_data)
         # Partial update: `None` is a legitimate value here (explicit unassign), so the assignment
         # may only be touched when the request actually carries the key.
         assignment_provided = "assigned_to" in input_data
         assigned_to = input_data.pop("assigned_to", None)
+        document_operations = {
+            key: input_data.pop(key)
+            for key in ("documentation_to_delete", "documentation_to_update", "documentation")
+            if key in input_data
+        }
         self._apply_ticket_field_updates(grievance_ticket, input_data, editor=approver)
+        # Documents take their upload path from the ticket's programme, so they are stored after
+        # the programme has been attached.
+        self._handle_document_operations(approver, grievance_ticket, document_operations)
         self._handle_assignment_change(
             approver, grievance_ticket, assigned_to, messages, assignment_provided=assignment_provided
         )

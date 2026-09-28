@@ -230,7 +230,7 @@ class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
             business_area=rdi.business_area,
             household=hh,
             registration_data_import=rdi,
-            program_id=rdi.program_id,
+            program=rdi.program,
             relationship=relationship,
             photo=photo_file,
             disability_certificate_picture=disability_certificate_picture_file,

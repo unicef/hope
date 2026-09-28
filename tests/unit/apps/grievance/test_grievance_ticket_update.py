@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from freezegun import freeze_time
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -434,6 +435,48 @@ def complaint_ticket_detail_url(afghanistan: BusinessArea, complaint_ticket: Gri
             "pk": str(complaint_ticket.pk),
         },
     )
+
+
+@pytest.fixture
+def complaint_ticket_without_program(complaint_ticket: GrievanceTicket) -> GrievanceTicket:
+    complaint_ticket.programs.clear()
+    return complaint_ticket
+
+
+@pytest.fixture
+def complaint_ticket_without_program_detail_url(
+    afghanistan: BusinessArea, complaint_ticket_without_program: GrievanceTicket
+) -> str:
+    return reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={
+            "business_area_slug": afghanistan.slug,
+            "pk": str(complaint_ticket_without_program.pk),
+        },
+    )
+
+
+@pytest.fixture
+def one_pixel_photo() -> SimpleUploadedFile:
+    return SimpleUploadedFile(
+        "photo.png",
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82",
+        content_type="image/png",
+    )
+
+
+@pytest.fixture
+def add_individual_ticket_without_program(add_individual_ticket: GrievanceTicket) -> GrievanceTicket:
+    add_individual_ticket.programs.clear()
+    return add_individual_ticket
+
+
+@pytest.fixture
+def individual_data_change_ticket_without_program(
+    individual_data_change_ticket: GrievanceTicket,
+) -> GrievanceTicket:
+    individual_data_change_ticket.programs.clear()
+    return individual_data_change_ticket
 
 
 @pytest.fixture
@@ -1600,6 +1643,64 @@ def test_update_grievance_ticket_add_individual_with_photo(
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")
+@freeze_time("2026-09-09 12:00:00")
+@pytest.mark.parametrize(
+    ("ticket_fixture", "extras_prefix", "details_attribute", "read_photo"),
+    [
+        pytest.param(
+            "add_individual_ticket_without_program",
+            "add_individual_issue_type_extras",
+            "add_individual_ticket_details",
+            lambda individual_data: individual_data["photo"],
+            id="add-individual",
+        ),
+        pytest.param(
+            "individual_data_change_ticket_without_program",
+            "individual_data_update_issue_type_extras",
+            "individual_data_update_ticket_details",
+            lambda individual_data: individual_data["photo"]["value"],
+            id="individual-data-update",
+        ),
+    ],
+)
+def test_update_grievance_ticket_stores_the_photo_under_the_business_area_without_a_program(
+    request: pytest.FixtureRequest,
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    one_pixel_photo: SimpleUploadedFile,
+    create_user_role_with_permissions: Callable,
+    ticket_fixture: str,
+    extras_prefix: str,
+    details_attribute: str,
+    read_photo: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    ticket = request.getfixturevalue(ticket_fixture)
+    url = reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={"business_area_slug": afghanistan.slug, "pk": str(ticket.pk)},
+    )
+
+    client = api_client(user)
+    response = client.patch(
+        url,
+        {f"extras.{extras_prefix}.individual_data.photo": one_pixel_photo},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    ticket.refresh_from_db()
+    individual_data = getattr(ticket, details_attribute).individual_data
+    assert read_photo(individual_data).startswith("2026/afghanistan/_unassigned/")
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
 def test_update_grievance_ticket_individual_data_clear_photo(
     api_client: Any,
     user: User,
@@ -1939,6 +2040,37 @@ def test_update_grievance_ticket_documentation(
     complaint_ticket_document.refresh_from_db()
     assert complaint_ticket_document.name == "new name"
     assert complaint_ticket_document.file_size == 10
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_stores_a_new_document_under_the_assigned_program(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    complaint_ticket_without_program: GrievanceTicket,
+    complaint_ticket_without_program_detail_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.GRIEVANCES_UPDATE], afghanistan, whole_business_area_access=True
+    )
+
+    client = api_client(user)
+    response = client.patch(
+        complaint_ticket_without_program_detail_url,
+        {
+            "program": str(program.id),
+            "documentation[0].name": "evidence",
+            "documentation[0].file": SimpleUploadedFile("evidence.jpg", b"evidence", content_type="image/jpeg"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    assert list(complaint_ticket_without_program.programs.all()) == [program]
+    document = complaint_ticket_without_program.support_documents.get()
+    assert document.file.name == f"{program.start_date.year}/{afghanistan.slug}/{program.code}/evidence.jpg"
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

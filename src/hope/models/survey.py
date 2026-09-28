@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.upload_paths import upload_path
 from hope.models.utils import (
     AdminUrlMixin,
     TimeStampedUUIDModel,
@@ -92,7 +93,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
 
     sampling_type = models.CharField(max_length=50, choices=get_sampling_choices, default=SAMPLING_FULL_LIST)
     sample_size = models.PositiveIntegerField(default=0)
-    sample_file = models.FileField(upload_to="", blank=True, null=True)
+    sample_file = models.FileField(upload_to=upload_path, max_length=255, blank=True, null=True)
     sample_file_generated_at = models.DateTimeField(blank=True, null=True)
 
     full_list_arguments = models.JSONField(default=dict, blank=True)

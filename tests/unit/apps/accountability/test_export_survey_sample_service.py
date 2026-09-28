@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
+from freezegun import freeze_time
 import pytest
 
 from extras.test_utils.factories import (
@@ -101,6 +102,7 @@ def test_generate_file_renders_empty_admin2_when_missing(survey: Survey, user: U
     assert row[3] == ""
 
 
+@freeze_time("2026-09-09 12:00:00")
 def test_export_sample_stores_xlsx_file(survey: Survey, user: User, recipient_household: Household) -> None:
     service = ExportSurveySampleService(survey, user)
 
@@ -109,5 +111,7 @@ def test_export_sample_stores_xlsx_file(survey: Survey, user: User, recipient_ho
     survey.refresh_from_db()
     assert survey.sample_file
     assert survey.sample_file_generated_at is not None
-    assert survey.sample_file.name.startswith(f"survey_sample_{survey.unicef_id}")
+    assert survey.sample_file.name.startswith(
+        f"2026/{survey.business_area.slug}/_unassigned/survey_sample_{survey.unicef_id}"
+    )
     assert survey.sample_file.name.endswith(".xlsx")

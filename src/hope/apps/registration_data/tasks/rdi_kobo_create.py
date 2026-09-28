@@ -16,6 +16,7 @@ from hope.apps.core.kobo.common import (
     get_field_name,
     get_submission_metadata,
 )
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.core.utils import chunks, rename_dict_keys
 from hope.apps.household.const import (
     HEAD,
@@ -96,7 +97,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         image_bytes = api.get_attached_file(download_url)
         file = File(image_bytes, name=value)
         if is_flex_field:
-            return default_storage.save(value, file)
+            return default_storage.save(upload_path(self.registration_data_import, value), file)
         logger.info(f"Image field processed: {value}")
         return file
 
