@@ -3,6 +3,7 @@ from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.db import models
+from django.http import HttpRequest
 from django.utils.encoding import smart_str
 from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication
@@ -152,5 +153,5 @@ def _humanize_members_info(members: Any) -> list | dict:
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
-    def enforce_csrf(self, request: Any) -> None:
+    def enforce_csrf(self, request: HttpRequest) -> None:
         return
