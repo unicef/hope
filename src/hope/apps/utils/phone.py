@@ -1,9 +1,12 @@
-from typing import Any, cast
+from typing import TYPE_CHECKING, cast
 
 import phonenumbers
 
+if TYPE_CHECKING:
+    from hope.models import Individual
 
-def is_valid_phone_number(phone_number: Any) -> bool:
+
+def is_valid_phone_number(phone_number: object) -> bool:
     if not isinstance(phone_number, str):
         phone_number = str(phone_number)
 
@@ -15,13 +18,13 @@ def is_valid_phone_number(phone_number: Any) -> bool:
         return phonenumbers.is_valid_number(parsed_number)
 
 
-def calculate_phone_numbers_validity(obj: Any) -> Any:
+def calculate_phone_numbers_validity(obj: "Individual") -> "Individual":
     obj.phone_no_valid = is_valid_phone_number(str(obj.phone_no))
     obj.phone_no_alternative_valid = is_valid_phone_number(str(obj.phone_no_alternative))
     return obj
 
 
-def recalculate_phone_numbers_validity(obj: Any) -> Any:
+def recalculate_phone_numbers_validity(obj: "Individual") -> "Individual":
     from hope.models import Individual
 
     if obj._state.adding is True:

@@ -58,7 +58,7 @@ class MicrosoftGraphAPI:
             raise
         return response.json()
 
-    def get_user_data(self, *, email: str | None = None, uuid: str | None = None) -> Any:
+    def get_user_data(self, *, email: str | None = None, uuid: str | None = None) -> dict[str, Any]:
         try:
             if uuid:
                 q = f"https://graph.microsoft.com/v1.0/users/{uuid}"

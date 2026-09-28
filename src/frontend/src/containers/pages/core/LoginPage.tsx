@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Logo } from '@components/core/Logo';
-import { LOGIN_URL } from '../../../config';
-import type { ReactElement } from 'react';
-import { useRef } from 'react';
+import { API_BASE_URL, LOGIN_URL } from '../../../config';
+import type { FormEvent, ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const Container = styled.div`
   width: 100vw;
@@ -38,6 +38,12 @@ const LoginButtonContainer = styled.div`
   margin-left: ${({ theme }) => theme.spacing(11)};
   margin-right: ${({ theme }) => theme.spacing(11)};
 `;
+const LoginError = styled(Typography)`
+  && {
+    color: #ffff;
+    margin-top: ${({ theme }) => theme.spacing(2)};
+  }
+`;
 const LoginButton = styled(Button)`
   && {
     margin-top: ${({ theme }) => theme.spacing(6)};
@@ -55,8 +61,19 @@ export function LoginPage(): ReactElement {
   const params = new URLSearchParams(location.search);
   const next = params.get('next');
 
+  const csrfInputRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setIsSubmitting(false);
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
 
   const handleLogoClick = () => {
     clickCountRef.current += 1;
@@ -71,6 +88,29 @@ export function LoginPage(): ReactElement {
     }
   };
 
+  // Social login only accepts a CSRF-protected POST; the CSRF cookie is HttpOnly, so fetch the token.
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setIsSubmitting(true);
+    setLoginError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/csrf-token`, {
+        credentials: 'same-origin',
+      });
+      const body = response.ok ? await response.json() : null;
+      const csrfToken = body?.csrf_token;
+      if (typeof csrfToken !== 'string' || !csrfToken) {
+        throw new Error('Missing CSRF token');
+      }
+      csrfInputRef.current.value = csrfToken;
+      form.submit();
+    } catch {
+      setLoginError(t('Could not start signing in. Please try again.'));
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Container>
       <LoginBox>
@@ -82,15 +122,23 @@ export function LoginPage(): ReactElement {
         </div>
         <SubTitle>{t('Login via Active Directory')}</SubTitle>
         <LoginButtonContainer>
-          <LoginButton
-            variant="contained"
-            size="large"
-            //@ts-ignore
-            component="a"
-            href={next ? `${LOGIN_URL}?next=${next}` : LOGIN_URL}
-          >
-            {t('Sign in')}
-          </LoginButton>
+          <form method="post" action={LOGIN_URL} onSubmit={handleLogin}>
+            <input
+              ref={csrfInputRef}
+              type="hidden"
+              name="csrfmiddlewaretoken"
+            />
+            {next && <input type="hidden" name="next" value={next} />}
+            <LoginButton
+              variant="contained"
+              size="large"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {t('Sign in')}
+            </LoginButton>
+          </form>
+          {loginError && <LoginError role="alert">{loginError}</LoginError>}
         </LoginButtonContainer>
       </LoginBox>
     </Container>
