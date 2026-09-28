@@ -3,12 +3,13 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { useQuery } from '@tanstack/react-query';
@@ -19,7 +20,6 @@ import { RegistrationDataImportStatusEnum } from '@restgenerated/models/Registra
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const { selectedProgram } = useProgramContext();
   const { programId } = useBaseUrl();
-  const [page, setPage] = useState(0);
   const notAllowedRdiShowPreviewStatuses = [
     RegistrationDataImportStatusEnum.LOADING,
     RegistrationDataImportStatusEnum.IMPORTING,
@@ -27,7 +27,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     RegistrationDataImportStatusEnum.IMPORT_ERROR,
   ];
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       rdiId: rdi.id,
       businessAreaSlug: businessArea,
@@ -36,15 +36,12 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     }),
     [rdi.id, businessArea, programId, isMerged],
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({ resetPageOn: filterVariables });
+  const { page } = table;
 
   const householdsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -97,10 +94,8 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
       )}
       query={RestService.restBusinessAreasProgramsHouseholdsList}
       headCells={isMerged ? adjustedMergedHeadCells : adjustedImportedHeadCells}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-      page={page}
-      setPage={setPage}
+      filterVariables={filterVariables}
+      tableState={table}
       itemsCount={itemsCount}
       customEnabled={!notAllowedRdiShowPreviewStatuses.includes(rdi.status)}
     />
