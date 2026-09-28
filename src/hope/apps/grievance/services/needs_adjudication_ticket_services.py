@@ -336,6 +336,31 @@ def create_needs_adjudication_tickets(
     )
 
 
+def _split_into_main_and_duplicate(
+    pair: BiometricDedupeSimilarityPair,
+    rdi: RegistrationDataImport,
+) -> tuple[Individual, Individual | None] | None:
+    ind1, ind2 = pair.individual1, pair.individual2
+
+    if ind1 is None and ind2 is None:
+        return None
+    if ind1 is None or ind2 is None:
+        # only one side exists in HOPE - it is the main individual, no duplicate
+        return ind1 or ind2, None
+
+    ind1_from_current_rdi = ind1.registration_data_import_id == rdi.id
+    ind2_from_current_rdi = ind2.registration_data_import_id == rdi.id
+
+    if ind1_from_current_rdi and ind2_from_current_rdi:
+        # order doesn't matter here
+        return ind1, ind2
+    if ind1_from_current_rdi:
+        # ind2 is from the merged population
+        return ind1, ind2
+    # ind2 is from the current RDI, ind1 is from the merged population
+    return ind2, ind1
+
+
 def create_needs_adjudication_tickets_for_biometrics(
     deduplication_pairs: QuerySet[BiometricDedupeSimilarityPair],
     rdi: RegistrationDataImport,
@@ -346,26 +371,10 @@ def create_needs_adjudication_tickets_for_biometrics(
     new_tickets = []
 
     for pair in deduplication_pairs:
-        # if only one individual exists mark it as original
-        if not (pair.individual1 and pair.individual2):
-            duplicate_individual = None
-            if pair.individual1:
-                original_individual = pair.individual1
-            elif pair.individual2 is not None:
-                original_individual = pair.individual2
-            else:
-                continue
-        # if both individuals are from the same rdi mark second as duplicate
-        # if one of individuals is in already merged population mark it as original
-        elif pair.individual1.registration_data_import in [
-            pair.individual2.registration_data_import,
-            rdi,
-        ]:
-            original_individual = pair.individual1
-            duplicate_individual = pair.individual2
-        else:
-            original_individual = pair.individual2
-            duplicate_individual = pair.individual1
+        split = _split_into_main_and_duplicate(pair, rdi)
+        if split is None:
+            continue
+        original_individual, duplicate_individual = split
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=original_individual,

@@ -149,20 +149,27 @@ class BiometricDeduplicationService:
                 id__in=rdi_individuals
             )
 
+        touches_rdi = Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals)
+
+        def _usable(side: str) -> Q:
+            return Q(**{f"{side}__isnull": True}) | Q(**{f"{side}__duplicate": False, f"{side}__withdrawn": False})
+
+        skip_where_both_inds_pending = (
+            Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
+            | Q(individual1__isnull=True)
+            | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED)
+            | Q(individual2__isnull=True)
+        )
+
         qs = BiometricDedupeSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-            (Q(individual1__duplicate=False) | Q(individual1__isnull=True))
-            & (Q(individual2__duplicate=False) | Q(individual2__isnull=True)),
-            (Q(individual1__withdrawn=False) | Q(individual1__isnull=True))
-            & (Q(individual2__withdrawn=False) | Q(individual2__isnull=True)),
-            (
-                Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-                | Q(individual1__isnull=True)
-                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED)
-                | Q(individual2__isnull=True)
-            ),
+            touches_rdi,
+            _usable("individual1"),
+            _usable("individual2"),
+            skip_where_both_inds_pending,
             program=rdi.program,
-        ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
+        ).exclude(
+            Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals)
+        )  # exclude individuals from other programmes.
 
         if exclude_not_valid:
             qs = qs.exclude(similarity_score=0)
