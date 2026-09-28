@@ -636,7 +636,7 @@ class TestSmokeTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.choose_target_populations(0).click()
-an        page_targeting_details.assert_page_header_title(create_targeting.name)
+        page_targeting_details.assert_page_header_title(create_targeting.name)
         page_targeting_details.get_button_target_population_duplicate()
         page_targeting_details.get_button_delete()
         assert "EDIT" in page_targeting_details.get_button_edit().text
