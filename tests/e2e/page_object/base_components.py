@@ -200,6 +200,8 @@ class BaseComponents(Common):
             self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
 
         self.select_listbox_element(name)
+        # Switching programmes navigates away; wait for the new page so callers don't act on the old one.
+        self.assert_page_header_title("Programme Management" if name == "All Programmes" else name)
 
     def get_drawer_inactive_subheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
         return self.wait_for(self.drawer_inactive_subheader, timeout=timeout)

@@ -317,27 +317,25 @@ class TestFeedback:
         assert "Test Programm" in page_feedback_details.get_programme().text
         assert page_feedback.global_program_filter_text in page_feedback.get_global_program_filter().text
         page_feedback.select_global_program_filter("Test Programm")
-        assert "Test Programm" in page_programme_details.get_header_title().text
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
         page_feedback.get_nav_grievance().click()
         page_feedback.get_nav_feedback().click()
-        page_feedback.disappear_table_row_loading()
+        page_feedback.get_row(0)
         assert len(page_feedback.get_rows()) == 1
         assert "Negative Feedback" in page_feedback.get_row(0).find_elements("tag name", "td")[1].text
 
         page_feedback.select_global_program_filter("Draft Program")
-        assert "Draft Program" in page_programme_details.get_header_title().text
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
         page_feedback.get_nav_grievance().click()
         page_feedback.get_nav_feedback().click()
+        page_feedback.wait_for_text("No results", page_feedback.table_row_loading)
         assert len(page_feedback.get_rows()) == 0
 
         page_feedback.select_global_program_filter("All Programmes")
-        assert "Programme Management" in page_programme_details.get_header_title().text
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
         page_feedback.get_nav_grievance().click()
         page_feedback.get_nav_feedback().click()
-        page_feedback.disappear_table_row_loading()
+        page_feedback.get_row(1)
         assert len(page_feedback.get_rows()) == 2
 
     def test_create_feedback_with_household(

@@ -473,7 +473,6 @@ class TestSmokeFilters:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         filters.select_global_program_filter("Test Programm")
-        assert "Test Programm" in page_programme_details.get_header_title().text
 
         nav, locator, value, rows_before = module
         for element in nav:
@@ -499,7 +498,6 @@ class TestSmokeFilters:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         filters.select_global_program_filter("Test Programm")
-        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         assert filters.wait_for_number_of_rows(2)
@@ -524,7 +522,6 @@ class TestSmokeFilters:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         filters.select_global_program_filter("Test Programm")
-        assert "Test Programm" in page_programme_details.get_header_title().text
         page_grievance_tickets.get_nav_payment_verification().click()
         assert filters.wait_for_number_of_rows(2)
 
