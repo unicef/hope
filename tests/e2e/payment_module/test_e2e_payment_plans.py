@@ -619,6 +619,8 @@ class TestSmokePaymentModule:
         page_payment_module_details.get_input_entitlement_formula().click()
         page_payment_module_details.select_listbox_element("Test Rule")
         page_payment_module_details.get_button_apply_steficon().click()
+        # the status is LOCKED before the formula runs too; the snackbar only shows once the apply request is done
+        page_payment_module_details.check_alert("Formula is executing, please wait until completed")
         page_payment_module_details.check_status("LOCKED")
         page_payment_module_details.click_button_lock_plan()
         page_payment_module_details.get_button_submit().click()
