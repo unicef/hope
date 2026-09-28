@@ -137,6 +137,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             self.ACTION_RESET: 0,
             self.ACTION_SKIP: 0,
         }
+        self.actual_updated_rows_count = 0
         self.required_columns: list[str] = ["payment_id", "delivered_quantity"]
         self.xlsx_headers: list[str] = []
         self.is_updated = False
@@ -488,20 +489,31 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     def _payment_changed(self, old_payment: Payment, payment: Payment) -> bool:
         return any(getattr(old_payment, field) != getattr(payment, field) for field in self.PAYMENT_UPDATE_FIELDS)
 
-    def _import_row(self, row: tuple[Cell, ...], exchange_rate: Decimal | float | None) -> None:
-        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
-        if self._should_skip_row(payment_id):
-            return
-        payment = self.payments_dict[payment_id]
+    def _get_row_delivered_quantity(self, row: tuple[Cell, ...], payment_id: str) -> Decimal | None:
         try:
-            delivered_quantity = self._parse_delivered_quantity(
-                row[self.xlsx_headers.index("delivered_quantity")].value
-            )
+            return self._parse_delivered_quantity(row[self.xlsx_headers.index("delivered_quantity")].value)
         except ValueError as error:
             raise self.XlsxPaymentPlanDeliveryImportServiceError(
                 f"Invalid delivered_quantity provided for payment_id {payment_id}"
             ) from error
+
+    def _queue_payment_change(self, payment: Payment, old_payment: Payment, action: str) -> None:
+        if not self._payment_changed(old_payment, payment):
+            return
+        if action == self.ACTION_APPLY:
+            self.actual_updated_rows_count += 1
+        self.old_payments[payment.pk] = old_payment
+        self.payments_to_save.append(payment)
+
+    def _import_row(self, row: tuple[Cell, ...], exchange_rate: Decimal | float | None) -> None:
+        payment_id = str(row[self.xlsx_headers.index("payment_id")].value)
+        if self._should_skip_row(payment_id):
+            return
+
+        payment = self.payments_dict[payment_id]
+        delivered_quantity = self._get_row_delivered_quantity(row, payment_id)
         action = self._get_row_action(payment, delivered_quantity)
+
         if action == self.ACTION_CONFLICT:
             raise self.XlsxPaymentPlanDeliveryImportServiceError(
                 f"Delivered quantity conflict for payment_id {payment_id}"
@@ -518,10 +530,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             if self.override and old_payment.delivered_quantity != payment.delivered_quantity:
                 self.payment_ids_for_verification_cleanup.add(payment.pk)
 
-        if not self._payment_changed(old_payment, payment):
-            return
-        self.old_payments[payment.pk] = old_payment
-        self.payments_to_save.append(payment)
+        self._queue_payment_change(payment, old_payment, action)
 
     def _reset_payment(self, payment: Payment) -> None:
         old_status = payment.status
