@@ -32,7 +32,6 @@ class FetchFindingsAndMergeRdi:
         biographic_findings = self._fetch_biographic_findings(rdi)
         biometric_findings = self._fetch_biometric_findings(rdi)
 
-
         try:
             with transaction.atomic():
                 locked_rdi = self._lock_rdi(registration_data_import_id)
@@ -40,7 +39,9 @@ class FetchFindingsAndMergeRdi:
                     logger.info(f"RDI:{registration_data_import_id} is locked by another worker, skipping merge.")
                     return False
                 self._transition_to_merging(locked_rdi)
-                self._store_deduplication_results(locked_rdi, deduplication_service, biometric_findings, biographic_findings)
+                self._store_deduplication_results(
+                    locked_rdi, deduplication_service, biometric_findings, biographic_findings
+                )
                 RdiMergeTask().execute(str(locked_rdi.id))
         except Exception:
             logger.exception(
@@ -99,16 +100,16 @@ class FetchFindingsAndMergeRdi:
             f"(country_workspace_id={rdi.country_workspace_id})"
         )
 
-    def _store_biometric_results(rdi, dedupe_service, biometric_findings):
+    def _store_biometric_results(self, dedupe_service, biometric_findings):
         similarity_pairs = dedupe_service.parse_findings(biometric_findings)
-        dedupe_service.store_similarity_pairs(rdi.program, similarity_pairs, id_field_name="country_workspace_id")
-        dedupe_service.store_rdi_deduplication_statistics(rdi)
+        dedupe_service.store_similarity_pairs(self.program, similarity_pairs, id_field_name="country_workspace_id")
+        dedupe_service.store_rdi_deduplication_statistics(self)
 
-    def _store_biographic_results(rdi, dedupe_service, biographic_findings):
+    def _store_biographic_results(self, dedupe_service, biographic_findings):
         similarity_pairs = dedupe_service.parse_findings(biographic_findings)
-        dedupe_service.store_similarity_pairs(rdi.program, similarity_pairs, id_field_name="country_workspace_id")
-        dedupe_service.store_rdi_deduplication_statistics(rdi)
-    
+        dedupe_service.store_similarity_pairs(self.program, similarity_pairs, id_field_name="country_workspace_id")
+        dedupe_service.store_rdi_deduplication_statistics(self)
+
     def _store_deduplication_results(
         self,
         rdi: RegistrationDataImport,
