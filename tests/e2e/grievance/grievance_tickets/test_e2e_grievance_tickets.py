@@ -689,9 +689,6 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_listbox_element("Data Change")
         page_grievance_new_ticket.get_issue_type().click()
-        select_element = page_grievance_new_ticket.wait_for('ul[role="listbox"]')
-        items = select_element.find_elements("tag name", "li")
-
         check_list = {
             "Add Individual": "true",
             "Household Data Update": "true",
@@ -701,16 +698,8 @@ class TestGrievanceTickets:
             "Update Delegate": "None",
         }
 
-        # The listbox element can show up before all of its options have rendered, so wait
-        # for the full set once instead of sleeping in front of every option.
-        for _ in range(50):
-            items = select_element.find_elements("tag name", "li")
-            if len(items) == len(check_list):
-                break
-            sleep(0.1)
-
-        for item in items:
-            assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
+        items = page_grievance_new_ticket.wait_for_count('ul[role="listbox"] li', len(check_list))
+        assert {item.text: str(item.get_attribute("aria-disabled")) for item in items} == check_list
 
     def test_grievance_tickets_create_new_ticket_data_change_add_individual_all_fields(
         self,
@@ -1397,19 +1386,10 @@ class TestGrievanceTickets:
         page_grievance_details_page.select_global_program_filter("Test Program")
         page_grievance_details_page.get_nav_programme_population().click()
         page_individuals.get_nav_individuals().click()
-        page_individuals.get_individual_table_row()
-
         # The factories add other people to the programme, so look the three up by ID.
-        def is_confirmed_duplicate(unicef_id: str) -> bool:
-            row = next(r for r in page_individuals.get_individual_table_row() if unicef_id in r.text)
-            return any(
-                "Confirmed Duplicate" in (icon.get_attribute("aria-label") or "")
-                for icon in row.find_elements(By.TAG_NAME, "svg")
-            )
-
-        assert is_confirmed_duplicate("IND-00-0000.0011")
-        assert is_confirmed_duplicate("IND-00-0000.0022")
-        assert not is_confirmed_duplicate("IND-00-0000.0033")
+        assert page_individuals.individual_has_icon("IND-00-0000.0011", "Confirmed Duplicate")
+        assert page_individuals.individual_has_icon("IND-00-0000.0022", "Confirmed Duplicate")
+        assert not page_individuals.individual_has_icon("IND-00-0000.0033", "Confirmed Duplicate")
 
     def test_grievance_tickets_create_new_error(
         self,

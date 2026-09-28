@@ -159,6 +159,21 @@ class Common:
 
         return StaleSafeElement(locate(), locate)
 
+    def wait_for_count(
+        self,
+        locator: str,
+        count: int,
+        element_type: str = By.CSS_SELECTOR,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> list[WebElement]:
+        """Wait until exactly ``count`` elements match and return them."""
+        try:
+            self._wait(timeout).until(lambda _: len(self.get_elements(locator, element_type)) == count)
+        except TimeoutException as e:
+            found = len(self.get_elements(locator, element_type))
+            raise NoSuchElementException(f"Expected {count} elements {locator}, found {found} after {timeout}s") from e
+        return self.get_elements(locator, element_type)
+
     def wait_for_header_text(self, locator: str, text: str, timeout: int = DEFAULT_TIMEOUT):
         WebDriverWait(self.driver, timeout).until(
             expected_conditions.text_to_be_present_in_element(
