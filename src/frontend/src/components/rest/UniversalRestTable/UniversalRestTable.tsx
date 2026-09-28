@@ -1,53 +1,35 @@
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import {
-  columnToOrderBy,
-  filterEmptyParams,
-  isPermissionDeniedError,
-} from '@utils/utils';
-import type { Order } from '../TableRestComponent/TableRestComponent';
+import type { TableState } from '@hooks/useTableState';
+import { isPermissionDeniedError } from '@utils/utils';
 import { TableRestComponent } from '../TableRestComponent/TableRestComponent';
-import { isEqual } from 'lodash';
 
-interface UniversalRestTableProps<T = any, K = any> {
-  page?: number;
-  setPage?: (page: number) => void;
+interface UniversalRestTableProps<T = any> {
+  tableState: TableState;
   customHeadRenderer?: ReactElement | ((props: any) => ReactElement);
-  rowsPerPageOptions?: number[];
   renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
   getTitle?: (data: any) => string;
   title?: string;
   isOnPaper?: boolean;
-  defaultOrderBy?: string;
-  defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event: any, rows: any) => void;
   numSelected?: number;
   allowSort?: boolean;
-  filterOrderBy?: string;
-  onPageChanged?: (page: number) => void;
   data: any;
   error;
   isLoading: boolean;
   isFetching?: boolean;
-  queryVariables: any;
-  setQueryVariables: (variables: K) => void;
   itemsCount?: number;
-  initialRowsPerPage?: number;
   hidePagination?: boolean;
   noEmptyMessage?: boolean;
 }
-type QueryVariables = {
-  offset: number;
-  limit: number;
-  ordering?: string;
-};
 
-export const UniversalRestTable = <T, K>({
-  rowsPerPageOptions = [5, 10, 15],
+// Stateless view: pagination and sort live in the caller's `useTableState`,
+// so the caller builds its query key from the same state in the same render.
+export function UniversalRestTable<T>({
+  tableState,
   renderRow,
   headCells,
   title,
@@ -55,80 +37,17 @@ export const UniversalRestTable = <T, K>({
   isOnPaper,
   actions,
   onSelectAllClick,
-  defaultOrderBy,
-  defaultOrderDirection = 'asc',
   numSelected = 0,
   allowSort = true,
   data,
   error,
   isLoading,
   isFetching,
-  queryVariables,
-  setQueryVariables,
   itemsCount,
-  initialRowsPerPage,
   hidePagination,
   customHeadRenderer,
   noEmptyMessage = false,
-  page: pageProp,
-  setPage: setPageProp,
-}: UniversalRestTableProps<T, K>): ReactElement => {
-  const [rowsPerPage, setRowsPerPage] = useState(
-    initialRowsPerPage || rowsPerPageOptions[0],
-  );
-  const [orderBy, setOrderBy] = useState(defaultOrderBy);
-  const [orderDirection, setOrderDirection] = useState<Order>(
-    defaultOrderDirection,
-  );
-
-  // Internal page state if not controlled
-  const [internalPage, setInternalPage] = useState(0);
-  const page = typeof pageProp === 'number' ? pageProp : internalPage;
-  const setPage =
-    typeof setPageProp === 'function' ? setPageProp : setInternalPage;
-
-  const filteredQueryVariables = useMemo(() => {
-    const filtered = filterEmptyParams(queryVariables);
-
-    return {
-      ...filtered,
-      businessAreaSlug: queryVariables.businessAreaSlug,
-      ...(queryVariables.ordering ? { ordering: queryVariables.ordering } : {}),
-    };
-  }, [queryVariables]);
-
-  useEffect(() => {
-    const newVariables: QueryVariables = {
-      ...filteredQueryVariables,
-      offset: page * rowsPerPage,
-      limit: rowsPerPage,
-    };
-
-    const ordering = orderBy
-      ? columnToOrderBy(orderBy, orderDirection)
-      : filteredQueryVariables.ordering;
-
-    if (ordering) {
-      newVariables.ordering = ordering;
-    }
-
-    // newVariables is assembled dynamically; bridge it to the caller's query
-    // variables type K.
-    const newState = newVariables as unknown as K;
-
-    if (!isEqual(newState, queryVariables)) {
-      setQueryVariables(newState);
-    }
-  }, [
-    page,
-    rowsPerPage,
-    orderBy,
-    orderDirection,
-    filteredQueryVariables,
-    setQueryVariables,
-    queryVariables,
-  ]);
-
+}: UniversalRestTableProps<T>): ReactElement {
   if (error) {
     console.error(error);
     if (isPermissionDeniedError(error))
@@ -155,29 +74,23 @@ export const UniversalRestTable = <T, K>({
       renderRow={renderRow}
       isOnPaper={isOnPaper}
       headCells={headCells}
-      rowsPerPageOptions={rowsPerPageOptions}
-      rowsPerPage={rowsPerPage}
-      page={page}
+      rowsPerPageOptions={tableState.rowsPerPageOptions}
+      rowsPerPage={tableState.rowsPerPage}
+      page={tableState.page}
       itemsCount={itemsCount}
       handleChangePage={(_event, newPage) => {
-        setPage(newPage);
+        tableState.setPage(newPage);
       }}
       handleChangeRowsPerPage={(event) => {
-        const value = parseInt(event.target.value, 10);
-        setRowsPerPage(value);
-        setPage(0);
+        tableState.setRowsPerPage(parseInt(event.target.value, 10));
       }}
       handleRequestSort={(_event, property) => {
-        const direction: Order =
-          orderBy === property && orderDirection === 'asc' ? 'desc' : 'asc';
         // `property` widens to `keyof T` for typed head cells; the ordering key
-        // goes out as a query-string param, so store it as a string.
-        setOrderBy(String(property));
-        setOrderDirection(direction);
-        setPage(0);
+        // goes out as a query-string param, so pass it on as a string.
+        tableState.requestSort(String(property));
       }}
-      orderBy={orderBy}
-      order={orderDirection}
+      orderBy={tableState.orderBy}
+      order={tableState.orderDirection}
       onSelectAllClick={onSelectAllClick}
       numSelected={numSelected}
       allowSort={allowSort}
@@ -186,4 +99,4 @@ export const UniversalRestTable = <T, K>({
       noEmptyMessage={noEmptyMessage}
     />
   );
-};
+}

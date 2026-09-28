@@ -20,8 +20,9 @@ import {
   householdStatusToColor,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -43,9 +44,7 @@ export const HouseholdTable = ({
   const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(() => {
+  const filterVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
       if (filter.withdrawn === 'true') {
         return true;
@@ -68,10 +67,8 @@ export const HouseholdTable = ({
       admin2: filter.admin2,
       residenceStatus: filter.residenceStatus,
       withdrawn: matchWithdrawnValue(),
-      ordering: filter.orderBy,
       rdiMergeStatus: 'MERGED',
       rdiId: filter.rdiId,
-      page,
     };
   }, [
     businessArea,
@@ -85,38 +82,23 @@ export const HouseholdTable = ({
     filter.admin2,
     filter.residenceStatus,
     filter.withdrawn,
-    filter.orderBy,
     filter.rdiId,
-    page,
   ]);
 
-  useEffect(() => {
-    setPage(0);
-  }, [
-    businessArea,
-    programId,
-    filter,
-    filter.householdSizeMin,
-    filter.householdSizeMax,
-    filter.search,
-    filter.documentType,
-    filter.documentNumber,
-    filter.admin1,
-    filter.admin2,
-    filter.residenceStatus,
-    filter.withdrawn,
-    filter.orderBy,
-    filter.rdiId,
-  ]);
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    defaultOrdering: filter.orderBy,
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const householdsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedHouseholdListList>({
@@ -133,7 +115,7 @@ export const HouseholdTable = ({
 
   const householdsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -252,16 +234,12 @@ export const HouseholdTable = ({
         title={`${beneficiaryGroup?.groupLabelPlural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
-        rowsPerPageOptions={[10, 15, 20]}
         data={data}
         error={error}
         isLoading={isLoading}
         isFetching={isFetching}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
       />
     </TableWrapper>
   );

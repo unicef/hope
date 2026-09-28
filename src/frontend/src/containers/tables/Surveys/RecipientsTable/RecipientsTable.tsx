@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import type { ReactElement } from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { adjustHeadCells } from '@utils/utils';
 import type { Recipient } from '@restgenerated/models/Recipient';
 import { useProgramContext } from 'src/programContext';
@@ -27,19 +28,16 @@ function RecipientsTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessAreaSlug, programCode } = useBaseUrl();
-  const initialQueryVariables = useMemo(
+  const table = useTableState({ rowsPerPageOptions: [10, 15, 20] });
+  const queryVariables = useMemo(
     () => ({
       businessAreaSlug,
       programCode,
       surveyId: id,
+      ...table.paginationParams,
     }),
-    [businessAreaSlug, programCode, id],
+    [businessAreaSlug, programCode, id, table.paginationParams],
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: restQueryKey(
@@ -67,15 +65,13 @@ function RecipientsTable({
 
   return (
     <TableWrapper>
-      <UniversalRestTable<Recipient, typeof initialQueryVariables>
+      <UniversalRestTable<Recipient>
         title={t('Recipients')}
         headCells={adjustedHeadCells}
         data={data}
         error={error}
         isLoading={isLoading}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
-        rowsPerPageOptions={[10, 15, 20]}
+        tableState={table}
         itemsCount={data?.results?.length || 0}
         renderRow={(row: Recipient) => (
           <RecipientsTableRow

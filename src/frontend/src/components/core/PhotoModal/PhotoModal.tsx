@@ -4,20 +4,21 @@ import CloseIcon from '@mui/icons-material/Close';
 import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { PhotoModalFooter } from './PhotoModalFooter';
 import { PhotoModalHeader } from './PhotoModalHeader';
 import withErrorBoundary from '../withErrorBoundary';
 
-export const StyledLink = styled(Link)`
+export const StyledLink = styled.a`
   color: #000;
   width: 200px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   display: inline-block;
+  text-decoration: underline;
+  cursor: pointer;
 `;
 
 export const StyledImage = styled.img`
@@ -98,10 +99,11 @@ function PhotoModal({
         element = (
           <StyledLink
             data-cy="link-show-photo"
+            role="button"
+            tabIndex={0}
             onClick={() => {
               setDialogOpen(true);
             }}
-            to={null}
           >
             {linkText}
           </StyledLink>

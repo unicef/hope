@@ -288,7 +288,7 @@ def get_quantity_in_usd(
     amount: Decimal | None,
     currency: "Currency | None",
     exchange_rate: None | Decimal | float,
-    currency_exchange_date: datetime.datetime,
+    currency_exchange_date: datetime.date,
     exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None,
 ) -> Decimal | None:
     if amount is None:
@@ -346,9 +346,12 @@ def get_payment_delivered_quantity_status_and_value(
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
+PREPARE_PAYMENT_PLAN_LOCK_PREFIX = "prepare_payment_plan_async_task_"
+
+
 def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
-    return hashlib.sha256(task_params_str.encode()).hexdigest()
+    return PREPARE_PAYMENT_PLAN_LOCK_PREFIX + hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
 def get_link(api_url: str) -> str:

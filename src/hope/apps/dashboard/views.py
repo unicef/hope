@@ -10,11 +10,12 @@ from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from hope.apps.account.permissions import Permissions, check_permissions
-from hope.apps.dashboard.celery_tasks import generate_dash_report_task
+from hope.apps.dashboard.celery_tasks import DASH_REPORT_LOCK_PREFIX, generate_dash_report_task
 from hope.apps.dashboard.services import (
     GLOBAL_SLUG,
     DashboardCacheBase,
@@ -36,7 +37,7 @@ class DashboardDataView(APIView):
     permission_classes = [IsAuthenticated]
 
     @sentry_tags
-    def get(self, request: Any, business_area_slug: str) -> Response:
+    def get(self, request: Request, business_area_slug: str) -> Response:
         """Retrieve dashboard data for a given business area from Redis cache.
 
         If data is not cached or needs updating, refresh it.
@@ -56,7 +57,7 @@ class DashboardDataView(APIView):
         data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
         data = data_cache.get_data(slug)
         if data is None:
-            task_lock_key = f"dash_report_task_running_{slug}"
+            task_lock_key = f"{DASH_REPORT_LOCK_PREFIX}{slug}"
             lock_timeout = 60 * 60 if is_global else 60 * 15
             if cache.add(task_lock_key, True, timeout=lock_timeout):
                 generate_dash_report_task.delay(slug)
@@ -73,7 +74,7 @@ class CreateOrUpdateDashReportView(APIView):
     permission_classes = [IsAuthenticated]
 
     @sentry_tags
-    def post(self, request: Any, business_area_slug: str) -> Response:
+    def post(self, request: Request, business_area_slug: str) -> Response:
         slug = business_area_slug.lower()
         is_global = slug == GLOBAL_SLUG
         business_area_obj = get_object_or_404(BusinessArea, slug=slug)
@@ -88,7 +89,7 @@ class CreateOrUpdateDashReportView(APIView):
             raise PermissionDenied(detail={"required_permissions": [Permissions.DASHBOARD_VIEW_COUNTRY.name]})
 
         try:
-            task_lock_key = f"dash_report_task_running_{slug}"
+            task_lock_key = f"{DASH_REPORT_LOCK_PREFIX}{slug}"
             lock_timeout = 60 * 60 if is_global else 60 * 15
             if cache.add(task_lock_key, True, timeout=lock_timeout):
                 generate_dash_report_task.delay(slug)
