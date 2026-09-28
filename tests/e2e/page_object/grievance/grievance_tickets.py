@@ -150,7 +150,6 @@ class GrievanceTickets(BaseComponents):
         return self.wait_for(self.button_clear)
 
     def get_button_new_ticket(self) -> WebElement:
-        # The sticky header overlaps the button, so scroll it clear before returning it.
         return self.scroll_to_and_wait_for(self.button_new_ticket)
 
     def get_ticket_id(self) -> WebElement:

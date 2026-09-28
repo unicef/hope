@@ -701,7 +701,6 @@ class TestManualCalendar:
         # 3rd step (Partners)
         page_programme_management.get_access_to_program().click()
         page_programme_management.select_who_access_to_program(test_data["partners_access"])
-        # The save button can be covered while the partners panel settles; `click` retries.
         page_programme_management.click(page_programme_management.button_save)
         assert test_data["partners_access"] in page_programme_details.get_label_partner_access().text
         assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text

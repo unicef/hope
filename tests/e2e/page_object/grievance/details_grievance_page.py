@@ -214,11 +214,9 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.label_ticket_id)
 
     def get_button_close_ticket(self) -> WebElement:
-        # The sticky header overlaps the button, so scroll it clear before returning it.
         return self.scroll_to_and_wait_for(self.button_close_ticket)
 
     def get_button_assign_to_me(self) -> WebElement:
-        # The sticky header overlaps the button, so scroll it clear before returning it.
         return self.scroll_to_and_wait_for(self.button_assign_to_me)
 
     def get_button_send_for_approval(self) -> WebElement:

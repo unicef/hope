@@ -30,7 +30,6 @@ class ProgramCycleDetailsPage(BaseComponents):
         return self.wait_for(self.button_finish_programme_cycle)
 
     def get_button_reactivate_programme_cycle(self) -> WebElement:
-        # The sticky header overlaps the button, so scroll it clear before returning it.
         return self.scroll_to_and_wait_for(self.button_reactivate_programme_cycle)
 
     def get_status_container(self) -> WebElement:

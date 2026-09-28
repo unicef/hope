@@ -257,7 +257,6 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.header_title)
 
     def get_button_new_program(self) -> WebElement:
-        # The sticky header overlaps the button, so scroll it clear before returning it.
         return self.scroll_to_and_wait_for(self.button_new_program)
 
     def fill_filters_search(self, filter_text: str) -> None:
@@ -268,7 +267,6 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.button_apply)
 
     def get_button_edit_program(self) -> WebElement:
-        # The sticky header overlaps the button, so scroll it clear before returning it.
         return self.scroll_to_and_wait_for(self.button_edit_program)
 
     def get_select_edit_program_details(self) -> WebElement:

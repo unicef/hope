@@ -225,8 +225,6 @@ class PaymentModuleDetails(BaseComponents):
         return self.wait_for(self.button_send_for_approval)
 
     def click_button(self, locator: str) -> None:
-        # `click` retries a click that gets intercepted, which is what the fixed sleep
-        # that used to sit here was working around.
         self.click(locator)
 
     def click_button_send_for_approval(self) -> None:
