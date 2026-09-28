@@ -771,6 +771,7 @@ class TestPaymentPlans:
             raise AssertionError("No payment plan has Open status")
         page_payment_module_details.get_delete_button().click()
         page_payment_module_details.get_button_submit().click()
+        page_payment_module.wait_for_text("Payment Plans", page_payment_module.table_title)
         page_payment_module.get_row(0)
         assert payment_plan not in page_payment_module.get_row(0).text
         assert "LOCKED" in page_payment_module.get_row(0).text
