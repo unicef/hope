@@ -116,11 +116,14 @@ class RdiMergeTask:
                 ):
                     cache.delete(key)
 
-    def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
+    def _create_adjudication_tickets_from_deduplication_engine_findings(
+            self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
+    ) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationService()
-            dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
-
+            dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
+        dedupe_service.create_grievance_tickets_for_biographic_duplicates(obj_hct)
+    
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
     ) -> None:
@@ -223,8 +226,11 @@ class RdiMergeTask:
                         .order_by("pk")
                     )
 
-                    if not obj_hct.business_area.postpone_deduplication and len(individuals):
-                        self._run_deduplication(obj_hct, individuals, registration_data_import_id)
+                    if not cw:
+                        if not obj_hct.business_area.postpone_deduplication and len(individuals):
+                            self._run_deduplication(obj_hct, individuals, registration_data_import_id)
+                    if cw:
+                        self._create_adjudication_tickets_from_deduplication_engine_findings(obj_hct, individuals, registration_data_import_id)
 
                     # SANCTION LIST CHECK
                     if obj_hct.should_check_against_sanction_list() and obj_hct.program.sanction_lists.exists():
@@ -237,7 +243,6 @@ class RdiMergeTask:
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     deduplicate_documents_for_rdi(str(obj_hct.id))
-                    self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
