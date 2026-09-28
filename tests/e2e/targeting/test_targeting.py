@@ -597,7 +597,7 @@ class TestSmokeTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
-        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        page_targeting_create.assert_page_header_title("New Target Population")
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_input_name()
         page_targeting_create.get_div_target_population_add_criteria().click()
@@ -617,7 +617,7 @@ class TestSmokeTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
-        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        page_targeting_create.assert_page_header_title("New Target Population")
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_input_name()
         page_targeting_create.get_div_target_population_add_criteria().click()
@@ -636,7 +636,7 @@ class TestSmokeTargeting:
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         page_targeting.choose_target_populations(0).click()
-        assert create_targeting.name in page_targeting_details.get_page_header_title().text
+        page_targeting_details.assert_page_header_title(create_targeting.name)
         page_targeting_details.get_button_target_population_duplicate()
         page_targeting_details.get_button_delete()
         assert "EDIT" in page_targeting_details.get_button_edit().text
@@ -1330,7 +1330,7 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
-        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        page_targeting_create.assert_page_header_title("New Target Population")
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")
@@ -1371,7 +1371,7 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
         page_targeting.wait_for_page_ready()
-        assert "New Target Population" in page_targeting_create.get_page_header_title().text
+        page_targeting_create.assert_page_header_title("New Target Population")
         assert "SAVE" in page_targeting_create.get_button_target_population_create().text
         page_targeting_create.get_filters_program_cycle_autocomplete().click()
         page_targeting_create.select_listbox_element("First Cycle In Programme")

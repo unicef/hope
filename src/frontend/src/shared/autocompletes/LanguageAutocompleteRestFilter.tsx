@@ -51,6 +51,9 @@ export function LanguageAutocompleteRestFilter({
   } = useQuery({
     queryKey: restQueryKey(RestService.restChoicesLanguagesList),
     queryFn: () => RestService.restChoicesLanguagesList(),
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: open || !!value,
   });
 
   const loadData = useCallback(() => {
@@ -122,7 +125,6 @@ export function LanguageAutocompleteRestFilter({
       }}
       handleOptionSelected={handleOptionSelected}
       handleOptionLabel={handleOptionLabel}
-      data={languageData}
       inputValue={inputValue}
       onInputTextChange={setInputValue}
       debouncedInputText={debouncedInputText}
