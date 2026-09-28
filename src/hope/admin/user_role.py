@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from django.contrib.admin.options import ActionLocation
     from django.db.models import QuerySet
+    from django.db.models.fields.related import ForeignKey
+    from django.forms import ModelChoiceField
     from django.http import HttpRequest
 
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -32,7 +34,9 @@ class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     # The autocomplete widget bypasses those querysets, so both fields must be excluded.
     autocomplete_exclude_fields = ("business_area", "role")
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         partner_id = request.resolver_match.kwargs.get("object_id")
 
         if db_field.name == "business_area":
@@ -79,7 +83,9 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "role":
             kwargs["queryset"] = Role.objects.order_by("name")
         elif db_field.name == "business_area":
@@ -141,10 +147,13 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
         return ["partner", "business_area", "program", "role", "expiry_date", "group"]
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
-            obj = self.get_object(request, request.resolver_match.kwargs.get("object_id")) if request else None
+            object_id = request.resolver_match.kwargs.get("object_id")
+            obj = self.get_object(request, cast("str", object_id)) if object_id else None
             if obj and obj.partner and obj.partner.is_unicef_subpartner:
                 field.queryset = Role.objects.order_by("name")
             else:

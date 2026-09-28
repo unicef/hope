@@ -890,7 +890,10 @@ class PaymentPlanViewSet(
         if "target_population_id" not in request.data:
             raise ValidationError("target_population_id is required")
         payment_plan = self.scoped_payment_plan(request.data.get("target_population_id"))
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        # Despite the name this updates an existing plan, so the serializer gets the instance:
+        # that is what lets the currency field keep a plan on its deprecated row when the client
+        # echoes back the code a GET handed out. The view still saves via PaymentPlanService.
+        serializer = self.get_serializer(payment_plan, data=request.data, context={"payment_plan": payment_plan})
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
 
@@ -1477,16 +1480,17 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        def _get_reject_permission(status: str) -> Any:
+        def _get_reject_permission(status: str) -> Permissions | None:
             status_to_perm_map = {
                 PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
                 PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
                 PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             }
-            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
+            return status_to_perm_map.get(status)
 
         reject_permission = _get_reject_permission(payment_plan.status)
-        request.user.has_perm(reject_permission)
+        if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan.program_cycle.program):
+            raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         data = dict(request.data)
         data["action"] = PaymentPlan.Action.REJECT
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
@@ -2224,7 +2228,7 @@ class TargetPopulationViewSet(
         url_path="pending-payments/count",
         filter_backends=[],
     )
-    def pending_payments_count(self, request: Any, *args: Any, **kwargs: Any) -> Response:
+    def pending_payments_count(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         tp = self.get_object()
         pending_payments_count = tp.payment_items.count()
         return Response({"count": pending_payments_count}, status=status.HTTP_200_OK)
@@ -2259,10 +2263,11 @@ class TargetPopulationViewSet(
     @transaction.atomic
     def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         user = request.user
-        cast("dict[str, Any]", request.data)["target_population_id"] = kwargs.get("pk")
+        data = dict(request.data)
+        data["target_population_id"] = kwargs.get("pk")
 
         serializer = self.get_serializer(
-            data=request.data,
+            data=data,
         )
         if serializer.is_valid():
             name = serializer.validated_data["name"].strip()

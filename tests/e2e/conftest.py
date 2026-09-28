@@ -85,10 +85,12 @@ from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFac
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from extras.test_utils.selenium import CLEAR_BROWSER_STORAGE_JS, reset_browser, session_cookie_for
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.management.commands.demo_data.core import CURRENCIES
 from hope.config.env import env
 from hope.models import (
     BusinessArea,
     Country,
+    Currency,
     DataCollectingType,
     DocumentType,
     Partner,
@@ -183,18 +185,16 @@ def never_answer_304(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture(autouse=True)
 def seed_currencies() -> None:
-    import importlib
-
-    from hope.models.currency import Currency
-
-    mod = importlib.import_module("hope.apps.core.migrations.0020_migration")
     Currency.objects.bulk_create(
         [
-            Currency(code=code, name=name, is_crypto=is_crypto, active=True, vision_code=code)
-            for code, name, is_crypto in mod.CURRENCIES
+            Currency(code=code, vision_code=vision_code, name=name, is_crypto=is_crypto, active=active)
+            for code, vision_code, name, is_crypto, active in CURRENCIES
         ],
         ignore_conflicts=True,
     )
+    # ignore_conflicts keeps whatever row was there first, so check the result rather than the input.
+    syp = set(Currency.objects.filter(code__in=["SYP", "SYP01"]).values_list("code", "vision_code", "active"))
+    assert syp == {("SYP", "SYP", False), ("SYP", "SYP01", True)}, f"E2E seed lost the redenominated SYP layout: {syp}"
 
 
 def _patch_sync_apps_for_no_migrations() -> None:
