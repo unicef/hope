@@ -615,6 +615,10 @@ class TestProgrammeDetails:
             page_programme_details.get_button_cancel().click()
 
         assert "Draft" in page_programme_details.get_program_cycle_status()[0].text
+        # The cycles table refetches after the end date is saved; until then it shows "-".
+        page_programme_details.wait_for_text(
+            datetime.now().strftime("%-d %b %Y"), page_programme_details.program_cycle_end_date
+        )
         assert datetime.now().strftime("%-d %b %Y") in page_programme_details.get_program_cycle_end_date()[0].text
         assert "Default Programme Cycle" in page_programme_details.get_program_cycle_title()[0].text
 
