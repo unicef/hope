@@ -1,5 +1,5 @@
 from django.test import Client
-from django.test.utils import override_settings
+from django.test.utils import modify_settings, override_settings
 import pytest
 
 URL = "/"
@@ -41,6 +41,7 @@ def test_x_frame_options_sameorigin(anon_client):
 
 
 @pytest.mark.django_db
+@modify_settings(MIDDLEWARE={"append": "csp.contrib.rate_limiting.RateLimitedCSPMiddleware"})
 @override_settings(**HEADER_TEST_OVERRIDES)
 def test_content_security_policy(anon_client):
     res = anon_client.get(URL)
@@ -49,6 +50,7 @@ def test_content_security_policy(anon_client):
     assert "default-src" in csp
     assert "object-src 'none'" in csp
     assert "base-uri 'self'" in csp
+    assert "frame-ancestors 'self'" in csp
 
 
 @pytest.mark.django_db

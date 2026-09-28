@@ -74,8 +74,7 @@ DEFAULTS = {
     "ADMIN_PANEL_URL": (str, "unicorn"),
     "SESSION_COOKIE_SECURE": (bool, True),
     "SESSION_COOKIE_HTTPONLY": (bool, True),
-    "SESSION_COOKIE_AGE": (int, 86400),
-    "SESSION_EXPIRE_AT_BROWSER_CLOSE": (bool, False),
+    "SESSION_COOKIE_AGE": (int, 43200),
     "CSRF_COOKIE_HTTPONLY": (bool, True),
     "CSRF_COOKIE_SECURE": (bool, True),
     "SECURE_CONTENT_TYPE_NOSNIFF": (bool, True),
@@ -91,7 +90,7 @@ DEFAULTS = {
     "CSP_REPORT_ONLY": (bool, False),
     "CSP_REPORT_PERCENTAGE": (float, 0.1),
     "CSP_DEFAULT_SRC": (tuple, ("'self'",)),
-    "CSP_FRAME_ANCESTORS": (tuple, ("'none'",)),
+    "CSP_FRAME_ANCESTORS": (tuple, ("'self'",)),
     "CSP_STYLE_SRC": (
         tuple,
         (
@@ -137,6 +136,7 @@ DEFAULTS = {
             "'self'",
             "gov-bam.nr-data.net",
             "cdn.jsdelivr.net",
+            "monitoring.hope.unicef.org",
         ),
     ),
     "EXCHANGE_RATES_API_KEY": (

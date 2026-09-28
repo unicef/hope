@@ -130,9 +130,7 @@ MIDDLEWARE = [] + [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hope.middlewares.sentry.SentryScopeMiddleware",
     "hope.middlewares.version.VersionMiddleware",
 ]
@@ -293,7 +291,6 @@ else:
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY")
 SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
-SESSION_EXPIRE_AT_BROWSER_CLOSE = env.bool("SESSION_EXPIRE_AT_BROWSER_CLOSE")
 SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
