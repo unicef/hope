@@ -44,3 +44,7 @@ class ProgramConfig(AppConfig):
             lambda sender, instance, **kwargs: adjust_program_size(instance.program),
             weak=False,
         )
+        grievance_signals.individual_marked_as_distinct.connect(
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program),
+            weak=False,
+        )

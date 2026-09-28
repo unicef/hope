@@ -13,6 +13,7 @@ from hope.apps.household.services.household_recalculate_data import (
     KAB_SOURCE_FIELDS,
     RECALCULATION_INDIVIDUAL_FIELDS,
 )
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.registration_data.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
@@ -465,6 +466,8 @@ class UniversalIndividualUpdateService:
         # An empty list must never reach the task — the action treats it as a no-op guard.
         if household_ids:
             recalculate_population_fields_async_task(household_ids=household_ids, program_id=str(self.program.id))
+        if "relationship" in updates_recalculation_input:
+            adjust_program_size(self.program)
 
     def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)

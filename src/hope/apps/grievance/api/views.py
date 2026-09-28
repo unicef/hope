@@ -116,7 +116,7 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.apps.household.const import HEAD
+from hope.apps.household.const import HEAD, NON_BENEFICIARY
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models import (
     DataCollectingType,
@@ -408,7 +408,8 @@ class GrievanceTicketGlobalViewSet(
             households = Household.objects.annotate(
                 active_individuals_count_annotated=Count(
                     "individuals",
-                    filter=Q(individuals__withdrawn=False, individuals__duplicate=False),
+                    filter=Q(individuals__withdrawn=False, individuals__duplicate=False)
+                    & ~Q(individuals__relationship=NON_BENEFICIARY),
                 )
             )
             annotated_paths = [

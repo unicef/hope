@@ -1086,6 +1086,33 @@ def test_schedule_population_recalculation_skips_without_recalc_fields(
     ).exists()
 
 
+def test_schedule_population_recalculation_recounts_program_when_relationship_updated(
+    individual: Individual, program: Program, django_capture_on_commit_callbacks
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["relationship"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        service.schedule_population_recalculation([str(individual.id)])
+
+    job = AsyncJob.objects.get(action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action")
+    assert job.config["program_id"] == str(program.id)
+
+
+def test_schedule_population_recalculation_skips_program_recount_without_relationship(
+    individual: Individual, program: Program, django_capture_on_commit_callbacks
+) -> None:
+    universal_update = UniversalUpdate.objects.create(program=program, individual_fields=["sex"])
+    service = UniversalIndividualUpdateService(universal_update)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        service.schedule_population_recalculation([str(individual.id)])
+
+    assert not AsyncJob.objects.filter(
+        action="hope.apps.program.celery_tasks.adjust_program_size_async_task_action"
+    ).exists()
+
+
 @pytest.fixture
 def latin_name_update(individual: Individual, program: Program) -> UniversalUpdate:
     universal_update = UniversalUpdate(program=program)

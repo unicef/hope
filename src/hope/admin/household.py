@@ -363,6 +363,8 @@ class HouseholdAdmin(
         "extra_rdis",
         "detail_id",
         "originating_id",
+        # the flag alone leaves the members active, we have Withdraw button for this change
+        "withdrawn",
         # property fields
         "geopoint",
     )

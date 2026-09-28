@@ -49,6 +49,7 @@ from hope.apps.household.api.caches import (
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.household.services.locking import lock_household_then_individual
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 from hope.models.currency import Currency
@@ -312,6 +313,15 @@ class IndividualDataUpdateService(DataChangeService):
                 area = Area.objects.filter(p_code=admin_area_title).first()
                 updated_household.set_admin_areas(area)
 
+    @staticmethod
+    def _recalculate(individual: Individual, approved_fields: dict) -> None:
+        if individual.household:
+            recalculate_data(individual.household)
+        else:
+            individual.recalculate_data()
+        if "relationship" in approved_fields:
+            adjust_program_size(individual.program)
+
     def close(self, user: AbstractUser) -> None:
         ticket_details = self.grievance_ticket.individual_data_update_ticket_details
         program_qs = self.grievance_ticket.programs.all()
@@ -383,10 +393,7 @@ class IndividualDataUpdateService(DataChangeService):
         self._process_identities(new_individual, identities, identities_to_edit, identities_to_remove)
         self._process_accounts(new_individual, accounts, accounts_to_edit)
 
-        if new_individual.household:
-            recalculate_data(new_individual.household)
-        else:
-            new_individual.recalculate_data()
+        self._recalculate(new_individual, only_approved_data)
         new_individual.refresh_from_db()
 
         log_create(
