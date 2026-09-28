@@ -346,9 +346,12 @@ def get_payment_delivered_quantity_status_and_value(
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
+PREPARE_PAYMENT_PLAN_LOCK_PREFIX = "prepare_payment_plan_async_task_"
+
+
 def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
-    return hashlib.sha256(task_params_str.encode()).hexdigest()
+    return PREPARE_PAYMENT_PLAN_LOCK_PREFIX + hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
 def get_link(api_url: str) -> str:

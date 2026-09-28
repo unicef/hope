@@ -6,7 +6,6 @@ from e2e.page_object.base_components import BaseComponents
 class AccountabilitySurveys(BaseComponents):
     # Locators
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_new_survey = 'button[data-cy="button-new-survey"]'
     filters_search = 'div[data-cy="filters-search"]'
     filters_target_population_autocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
@@ -36,9 +35,6 @@ class AccountabilitySurveys(BaseComponents):
     # Elements
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_new_survey(self) -> WebElement:
         return self.wait_for(self.button_new_survey)
