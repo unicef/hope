@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import re
 import time
-from typing import Any
+from typing import Any, Generator
 
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
@@ -135,7 +135,7 @@ def create_role_with_all_permissions() -> None:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def cache_per_xdist_worker(worker_id: str) -> None:
+def cache_per_xdist_worker(worker_id: str) -> Generator[None, None, None]:
     """Give each xdist worker its own Redis database.
 
     All workers read `CACHE_LOCATION`, so they shared one database while each ran against
@@ -314,7 +314,7 @@ def screenshot_path(worker_id: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def driver(download_path: str) -> Chrome:
+def driver(download_path: str) -> Generator[Chrome, None, None]:
     # One Chrome per xdist worker: starting and quitting it per test cost about 2s a test.
     # `browser` puts it back to a clean state between tests.
     chrome_options = Options()

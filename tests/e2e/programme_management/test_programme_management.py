@@ -800,14 +800,7 @@ class TestManualCalendar:
 
         # Partners with a role across the whole business area are always listed, and
         # TEST, Test Partner 1 and UNHCR all have one, so only the access label changes.
-        page_programme_details.wait_for_number_of_partners(3)
-        partner_names = [
-            element.text.strip()
-            for element in page_programme_management.driver.find_elements(
-                By.CSS_SELECTOR, "[data-cy='label-partner-name']"
-            )
-        ]
-        assert partner_names == ["TEST", "Test Partner 1", "UNHCR"]
+        assert page_programme_details.get_partner_names(3) == ["TEST", "Test Partner 1", "UNHCR"]
 
         # edit program
         page_programme_management.get_button_edit_program().click()
@@ -824,15 +817,7 @@ class TestManualCalendar:
         page_programme_details.wait_for_text(
             "All Current Partners within the business area", page_programme_details.label_partner_access
         )
-        page_programme_details.wait_for_number_of_partners(3)
-
-        partner_name_elements_new = page_programme_management.driver.find_elements(
-            By.CSS_SELECTOR, "[data-cy='label-partner-name']"
-        )
-        assert len(partner_name_elements_new) == 3
-        assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements_new)
-        assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
-        assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
+        assert set(page_programme_details.get_partner_names(3)) == {"TEST", "Test Partner 1", "UNHCR"}
 
     @pytest.mark.parametrize(
         "test_data",
