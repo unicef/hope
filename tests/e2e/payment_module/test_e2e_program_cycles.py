@@ -161,6 +161,9 @@ class TestSmokeProgramCycle:
         start_date = page_program_cycle.get_program_cycle_start_date_list()[1].text
         end_date = page_program_cycle.get_program_cycle_end_date_list()[1].text
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
+        page_program_cycle_details.wait_for_text(
+            "Test Programme Cycle 001", page_program_cycle_details.page_header_title
+        )
         assert "Test Programme Cycle 001" in page_program_cycle_details.get_page_header_title().text
         assert "Active" in page_program_cycle_details.get_status_container().text
         assert start_date in page_program_cycle_details.get_label_start_date().text
@@ -179,6 +182,9 @@ class TestProgramCycle:
         page_program_cycle.get_nav_payment_module().click()
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
+        page_program_cycle_details.wait_for_text(
+            "Test Programme Cycle 001", page_program_cycle_details.page_header_title
+        )
         assert "Test Programme Cycle 001" in page_program_cycle_details.get_page_header_title().text
         for _ in range(100):
             if "Active" in page_program_cycle_details.get_status_container().text:
@@ -211,6 +217,9 @@ class TestProgramCycle:
         page_program_cycle.get_nav_payment_module().click()
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
+        page_program_cycle_details.wait_for_text(
+            "Test Programme Cycle 001", page_program_cycle_details.page_header_title
+        )
         assert "Test Programme Cycle 001" in page_program_cycle_details.get_page_header_title().text
         assert "Active" in page_program_cycle_details.get_status_container().text
         page_program_cycle_details.get_button_finish_programme_cycle().click()
