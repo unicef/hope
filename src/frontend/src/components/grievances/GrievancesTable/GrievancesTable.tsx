@@ -18,9 +18,9 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { choicesToDict, columnToOrderBy } from '@utils/utils';
+import { choicesToDict } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
@@ -41,6 +41,7 @@ import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 
 interface GrievancesTableProps {
   filter;
@@ -90,9 +91,8 @@ export const GrievancesTable = ({
     [visibleColumns, isSocialDctType, isAllPrograms, beneficiaryGroup],
   );
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
-      businessArea,
       search: filter.search.trim(),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
@@ -122,16 +122,10 @@ export const GrievancesTable = ({
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
       overdue: filter.overdue,
       sensitive: filter.sensitive,
-      // Stated here, not left to the table: the reset effect below writes these variables back
-      // over the table's own first write, and as the object is the one the state started from
-      // React skips the re-render that would have let the table add the ordering again.
-      ordering: columnToOrderBy(defaultOrderBy, 'desc'),
       // Last, so a page's pinned params win over anything the filter bar set.
       ...extraQueryParams,
     }),
     [
-      businessArea,
-      defaultOrderBy,
       filter.search,
       filter.documentType,
       filter.documentNumber,
@@ -165,23 +159,34 @@ export const GrievancesTable = ({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20, 40],
+    defaultOrderBy,
+    defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
+
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
-  const [page, setPage] = useState<number>(0);
   const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
     [key: number]: GrievanceTicketList[];
   }>({ 0: [] });
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-    // A different query lists different rows, so anything still ticked is now invisible - and
-    // would silently take part in the next bulk action. Only the filter and the page's pinned
-    // params are in here; paging and ordering go through setQueryVariables, so selecting across
-    // pages still works.
+  // A different query lists different rows, so anything still ticked is now invisible - and
+  // would silently take part in the next bulk action. Only the filter and the page's pinned
+  // params are in here; paging and ordering live in the table state, so selecting across
+  // pages still works.
+  const [prevFilterVariables, setPrevFilterVariables] =
+    useState(filterVariables);
+  if (prevFilterVariables !== filterVariables) {
+    setPrevFilterVariables(filterVariables);
     setSelectedTicketsPerPage({ 0: [] });
-    setPage(0);
-  }, [initialQueryVariables]);
+  }
 
   const { data: usersListData } = useQuery<PaginatedUserList>({
     queryKey: restQueryKey(RestService.restBusinessAreasUsersList, {
@@ -210,8 +215,7 @@ export const GrievancesTable = ({
   //ALL PROGRAMS
   const allGrievanceTicketsParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: allProgramsGrievanceTicketsData,
@@ -232,14 +236,18 @@ export const GrievancesTable = ({
   });
 
   //ALL PROGRAMS COUNT
+  const allGrievanceTicketsCountParams = createApiParams(
+    { businessAreaSlug: businessArea },
+    filterVariables,
+  );
   const { data: allProgramsGrievanceTicketsCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
-      createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      allGrievanceTicketsCountParams,
     ),
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+        allGrievanceTicketsCountParams,
       ),
     enabled: isAllPrograms && page === 0,
   });
@@ -247,8 +255,7 @@ export const GrievancesTable = ({
   // SELECTED PROGRAM
   const selectedProgramGrievanceTicketsParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: selectedProgramGrievanceTicketsData,
@@ -270,7 +277,7 @@ export const GrievancesTable = ({
   //SELECTED PROGRAM COUNT
   const selectedProgramGrievanceTicketsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: selectedProgramGrievanceTicketsCount } =
     useQuery<CountResponse>({
@@ -462,7 +469,7 @@ export const GrievancesTable = ({
         <UniversalRestTable
           isOnPaper={false}
           headCells={headCells}
-          rowsPerPageOptions={[10, 15, 20, 40]}
+          tableState={table}
           onSelectAllClick={handleSelectAllCheckboxesClick}
           numSelected={currentSelectedTickets?.length || 0}
           data={
@@ -473,10 +480,6 @@ export const GrievancesTable = ({
           error={isAllPrograms ? errorAll : errorSelected}
           isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
           isFetching={isAllPrograms ? isFetchingAll : isFetchingSelected}
-          queryVariables={queryVariables}
-          setQueryVariables={setQueryVariables}
-          defaultOrderBy={defaultOrderBy}
-          defaultOrderDirection="desc"
           itemsCount={persistedCount}
           renderRow={(row: GrievanceTicketList) => (
             <GrievancesTableRow
@@ -497,8 +500,6 @@ export const GrievancesTable = ({
               columns={visibleColumns}
             />
           )}
-          page={page}
-          setPage={setPage}
         />
       </Paper>
     </TableWrapper>

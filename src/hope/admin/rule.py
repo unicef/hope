@@ -14,8 +14,10 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import messages
 from django.contrib.admin import register
 from django.db.models import QuerySet
+from django.db.models.fields import Field
 from django.db.transaction import atomic
 from django.forms import Form
+from django.forms.fields import Field as FormField
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -165,7 +167,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             )
         )
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> None:
+    def formfield_for_dbfield(self, db_field: Field, request: HttpRequest, **kwargs: Any) -> FormField | None:
         if db_field.name == "flags":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -59,6 +60,14 @@ def test_logout_view_logs_user_out_and_redirects_to_login(client: Client, user: 
     assert response.status_code == 302
     assert response.url == "/login"
     assert "_auth_user_id" not in client.session
+
+
+def test_csrf_token_view_returns_token_and_sets_csrf_cookie(client: Client) -> None:
+    response = client.get(reverse("csrf-token"))
+
+    assert response.status_code == 200
+    assert response.json()["csrf_token"]
+    assert settings.CSRF_COOKIE_NAME in response.cookies
 
 
 def test_trigger_error_raises_zero_division_error() -> None:

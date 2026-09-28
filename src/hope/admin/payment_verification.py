@@ -1,5 +1,3 @@
-from typing import Any
-
 from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
@@ -45,6 +43,15 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
     readonly_fields = ("payment", "payment_verification_plan", "status_date", "received_amount", "sent_to_rapid_pro")
     search_fields = ("payment__unicef_id",)
 
+    def frontend_url(self, obj: PaymentVerification) -> str | None:
+        plan = obj.payment_verification_plan
+        program = plan.get_program
+        return (
+            f"/{plan.business_area.slug}/programs/{program.code}"
+            f"/payment-verification/payment-plan/{plan.payment_plan.id}"
+            f"/verification/payment/{obj.payment.id}"
+        )
+
     def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
         payment_plan = obj.payment_verification_plan.payment_plan
         return getattr(payment_plan, "name", "~no name~")
@@ -68,14 +75,5 @@ class PaymentVerificationAdmin(ViewOnUiMixin, CursorPaginatorAdmin, HOPEModelAdm
             )
         )
 
-    def frontend_url(self, obj: PaymentVerification) -> str | None:
-        plan = obj.payment_verification_plan
-        program = plan.get_program
-        return (
-            f"/{plan.business_area.slug}/programs/{program.code}"
-            f"/payment-verification/payment-plan/{plan.payment_plan.id}"
-            f"/verification/payment/{obj.payment.id}"
-        )
-
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False

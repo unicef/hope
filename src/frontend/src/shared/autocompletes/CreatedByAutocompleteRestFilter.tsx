@@ -65,6 +65,9 @@ export const CreatedByAutocompleteRestFilter = ({
       queryVariables,
     ),
     queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: open || !!value,
   });
 
   useEffect(() => {
@@ -148,7 +151,6 @@ export const CreatedByAutocompleteRestFilter = ({
       }}
       handleOptionSelected={handleOptionSelected}
       handleOptionLabel={handleOptionLabel}
-      data={userData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

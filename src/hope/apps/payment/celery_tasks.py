@@ -63,6 +63,14 @@ from hope.models import (
 logger = logging.getLogger(__name__)
 
 
+EXPORT_PAYMENT_PLAN_GROUP_DELIVERY_XLSX_LOCK_PREFIX = "export_payment_plan_group_delivery_xlsx_"
+PAYMENT_PLAN_ORDER_NUMBERS_LOCK_PREFIX = "payment_plan_generate_token_and_order_numbers_"
+PAYMENT_PLAN_REBUILD_STATS_LOCK_PREFIX = "payment_plan_rebuild_stats_"
+PAYMENT_PLAN_FULL_REBUILD_LOCK_PREFIX = "payment_plan_full_rebuild_"
+SEND_WESTERN_UNION_REPORT_EMAIL_LOCK_PREFIX = "send_western_union_report_email_notifications_"
+SEND_PAYMENT_PLAN_RECONCILIATION_OVERDUE_EMAIL_LOCK_PREFIX = "send_payment_plan_reconciliation_overdue_email_"
+
+
 def get_sync_run_rapid_pro_async_task_action(job: AsyncRetryJob | None = None) -> None:
     CheckRapidProVerificationTask().execute()
 
@@ -248,7 +256,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
 
     payment_plan_group_id = job.config["payment_plan_group_id"]
     with cache.lock(
-        f"export_payment_plan_group_delivery_xlsx_{payment_plan_group_id}",
+        f"{EXPORT_PAYMENT_PLAN_GROUP_DELIVERY_XLSX_LOCK_PREFIX}{payment_plan_group_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
@@ -271,7 +279,7 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 program = payment_plan_group.cycle.program
                 with (
                     cache.lock(
-                        f"payment_plan_generate_token_and_order_numbers_{str(program.id)}",
+                        f"{PAYMENT_PLAN_ORDER_NUMBERS_LOCK_PREFIX}{str(program.id)}",
                         blocking_timeout=60 * 10,
                         timeout=60 * 20,
                     ),
@@ -1573,7 +1581,7 @@ def payment_plan_rebuild_stats_async_task_action(job: AsyncRetryJob) -> None:
 
     payment_plan_id = job.config["payment_plan_id"]
     with cache.lock(
-        f"payment_plan_rebuild_stats_{payment_plan_id}",
+        f"{PAYMENT_PLAN_REBUILD_STATS_LOCK_PREFIX}{payment_plan_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
@@ -1611,7 +1619,7 @@ def payment_plan_full_rebuild_async_task_action(job: AsyncRetryJob) -> None:
     update_money_fields = bool(job.config.get("update_money_fields", False))
 
     with cache.lock(
-        f"payment_plan_full_rebuild_{payment_plan_id}",
+        f"{PAYMENT_PLAN_FULL_REBUILD_LOCK_PREFIX}{payment_plan_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
@@ -1747,7 +1755,7 @@ def send_western_union_report_email_notifications_async_task_action(job: AsyncRe
 
     report_id = job.config.get("western_union_report_id") or job.config["qcf_report_id"]
     with cache.lock(
-        f"send_western_union_report_email_notifications_{report_id}",
+        f"{SEND_WESTERN_UNION_REPORT_EMAIL_LOCK_PREFIX}{report_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):
@@ -1805,7 +1813,7 @@ def send_payment_plan_reconciliation_overdue_email_async_task_action(job: AsyncR
 
     payment_plan_id = job.config["payment_plan_id"]
     with cache.lock(
-        f"send_payment_plan_reconciliation_overdue_email_{payment_plan_id}",
+        f"{SEND_PAYMENT_PLAN_RECONCILIATION_OVERDUE_EMAIL_LOCK_PREFIX}{payment_plan_id}",
         blocking_timeout=60 * 10,
         timeout=60 * 60 * 2,
     ):

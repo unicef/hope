@@ -72,7 +72,7 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys.get_nav_accountability().click()
         page_accountability_surveys.get_nav_surveys().click()
 
-        assert "Surveys" in page_accountability_surveys.get_page_header_title().text
+        page_accountability_surveys.assert_page_header_title("Surveys")
         assert "NEW SURVEY" in page_accountability_surveys.get_button_new_survey().text
         assert "Search" in page_accountability_surveys.get_filters_search().text
         assert "Target Population" in page_accountability_surveys.get_target_population_input().text
@@ -106,14 +106,7 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys.get_nav_accountability().click()
         page_accountability_surveys.get_nav_surveys().click()
         page_accountability_surveys.get_rows()[0].click()
-        page_accountability_surveys_details.wait_for_header_text(
-            page_accountability_surveys_details.page_header_title,
-            add_accountability_surveys_message.unicef_id,
-        )
-        assert (
-            add_accountability_surveys_message.unicef_id
-            in page_accountability_surveys_details.get_page_header_title().text
-        )
+        page_accountability_surveys_details.assert_page_header_title(add_accountability_surveys_message.unicef_id)
         assert "Survey with manual process" in page_accountability_surveys_details.get_label_category().text
         assert "Test survey" in page_accountability_surveys_details.get_label_survey_title().text
         created_by = add_accountability_surveys_message.created_by

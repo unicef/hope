@@ -1,12 +1,13 @@
 import logging
-from typing import Any
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
 from django.views.generic import View
 
 from hope.apps.core.forms import StorageFileForm
@@ -18,6 +19,11 @@ logger = logging.getLogger(__name__)
 
 def homepage(request: HttpRequest) -> HttpResponse:
     return HttpResponse("", status=200)
+
+
+@never_cache
+def csrf_token_view(request: HttpRequest) -> JsonResponse:
+    return JsonResponse({"csrf_token": get_token(request)})
 
 
 def logout_view(request: HttpRequest) -> HttpResponse:
@@ -62,5 +68,5 @@ class UploadFile(UploadFilePermissionMixin, View):
         return "core/upload_file.html"
 
     @staticmethod
-    def format_form_error(form: forms.Form) -> Any:
+    def format_form_error(form: forms.Form) -> str:
         return form.errors.get_json_data()["__all__"][0]["message"]

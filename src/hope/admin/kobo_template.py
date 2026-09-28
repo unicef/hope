@@ -70,13 +70,13 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def get_form(
+    def get_form(  # type: ignore[override]  # returns a plain Form (XLSImportForm) for add view
         self,
         request: HttpRequest,
         obj: Any | None = None,
         change: bool = False,
         **kwargs: Any,
-    ) -> Any:
+    ) -> type[forms.ModelForm] | type[forms.Form]:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)

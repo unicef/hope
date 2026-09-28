@@ -2,6 +2,8 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsHeadCells';
 import { PaymentPlanGroupTableRow } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
+import { createApiParams } from '@utils/apiUtils';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
@@ -9,9 +11,8 @@ import type { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGrou
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { createApiParams } from '@utils/apiUtils';
 import type { ReactElement } from 'react';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 interface PaymentPlanGroupsTableProps {
   filter?: { search?: string; cycle?: string };
@@ -21,26 +22,22 @@ export const PaymentPlanGroupsTable = ({
   filter,
 }: PaymentPlanGroupsTableProps): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
-  const [queryVariables, setQueryVariables] = useState({
-    businessAreaSlug: businessArea,
-    programCode: programId,
-  });
-  const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    setQueryVariables((prev) => ({
-      ...prev,
+  const filterVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programCode: programId,
       search: filter?.search || undefined,
       cycle: filter?.cycle || undefined,
-    }));
-    setPage(0);
-  }, [filter]);
+    }),
+    [businessArea, programId, filter?.search, filter?.cycle],
+  );
+  const table = useTableState({ resetPageOn: filterVariables });
+  const { page } = table;
 
-  const groupsListParams = {
-    businessAreaSlug: businessArea,
-    programCode: programId,
-    ...queryVariables,
-  };
+  const groupsListParams = createApiParams(
+    { businessAreaSlug: businessArea, programCode: programId },
+    { ...filterVariables, ...table.paginationParams },
+  );
   const { data, isLoading, error } =
     useQuery<PaginatedPaymentPlanGroupListList>({
       queryKey: restQueryKey(
@@ -54,10 +51,7 @@ export const PaymentPlanGroupsTable = ({
       enabled: !!businessArea && !!programId,
     });
 
-  const groupsCountParams = createApiParams(
-    { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-  );
+  const groupsCountParams = filterVariables;
   const { data: dataCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsPaymentPlanGroupsCountRetrieve,
@@ -76,14 +70,11 @@ export const PaymentPlanGroupsTable = ({
     <UniversalRestTable
       title="Groups"
       headCells={headCells}
-      queryVariables={queryVariables}
+      tableState={table}
       data={data}
       error={error}
       isLoading={isLoading}
-      setQueryVariables={setQueryVariables}
       itemsCount={itemsCount}
-      page={page}
-      setPage={setPage}
       renderRow={(row: PaymentPlanGroupList) => (
         <PaymentPlanGroupTableRow key={row.id} group={row} />
       )}
