@@ -21,6 +21,6 @@ class FundsCommitmentItemAdmin(HOPEModelAdminBase):
     readonly_fields = ("business_area",)
     search_fields = (
         "rec_serial_number",
-        "funds_commitment_number",
+        "funds_commitment_header__funds_commitment_number",
         "funds_commitment_item",
     )
