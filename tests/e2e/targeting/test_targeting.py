@@ -987,7 +987,7 @@ class TestCreateTargeting:
         page_targeting_create.select_option_by_name("No")
         bool_no_expected_criteria_text = "Test Bool Attribute: No\nRound 2 (Test Round Bool 2)"
 
-        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
+        page_targeting_create.get_criteria_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
         page_targeting_create.get_button_save().click()
@@ -1060,7 +1060,7 @@ class TestCreateTargeting:
         page_targeting_create.get_input_individuals_filters_blocks_value_to().send_keys("9")
         bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
-        page_targeting_create.get_elements(page_targeting_create.targeting_criteria_add_dialog_save_button)[1].click()
+        page_targeting_create.get_criteria_dialog_save_button().click()
         page_targeting_create.get_no_validation_fsp_accept().click()
 
         assert page_targeting_create.get_criteria_container().text == bool_no_expected_criteria_text
@@ -1330,7 +1330,7 @@ class TestTargeting:
         page_targeting_details.get_label_status()
         page_targeting_details.get_button_rebuild().click()
         # Celery runs eagerly here, so the rebuild is done by the time the request returns.
-        assert page_targeting_details.wait_for_text("Payment Plan has been rebuilt.", ".MuiSnackbarContent-message")
+        page_targeting_details.check_alert("Payment Plan has been rebuilt.")
         assert "OPEN" in page_targeting_details.get_label_status().text
 
     def test_targeting_mark_ready(
@@ -1532,6 +1532,8 @@ class TestTargeting:
                 {
                     "type": "SOCIAL",
                     "text": "Exclude Items with an Active Sanction Screen Flag",
+                    # People programmes only filter by individual IDs.
+                    "ids": lambda household: {"individual_ids": household.head_of_household.unicef_id},
                 },
                 id="People",
             ),
@@ -1539,6 +1541,7 @@ class TestTargeting:
                 {
                     "type": "STANDARD",
                     "text": "Exclude Items Groups with an Active Sanction Screen Flag",
+                    "ids": lambda household: {"household_ids": household.unicef_id},
                 },
                 id="Programme population",
             ),
@@ -1563,11 +1566,7 @@ class TestTargeting:
         page_targeting.get_nav_targeting().click()
         page_targeting.get_button_create_new().click()
         page_targeting_create.fill_required_fields()
-        if test_data["type"] == "SOCIAL":
-            # People programmes only filter by individual IDs.
-            page_targeting_create.add_ids_criteria(individual_ids=household_with_disability.head_of_household.unicef_id)
-        else:
-            page_targeting_create.add_ids_criteria(household_ids=household_with_disability.unicef_id)
+        page_targeting_create.add_ids_criteria(**test_data["ids"](household_with_disability))
         page_targeting_create.get_input_name().send_keys(f"Test {household_with_disability.unicef_id}")
         page_targeting_create.get_input_flag_exclude_if_on_sanction_list().click()
         page_targeting_create.click_button_target_population_create()

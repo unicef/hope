@@ -19,7 +19,6 @@ class TargetingCreate(BaseComponents):
     targeting_criteria_auto_complete = 'input[data-cy="autocomplete-target-criteria-option-{}"]'
     targeting_criteria_value = 'div[data-cy="autocomplete-target-criteria-values"]'
     targeting_criteria_add_dialog_save_button = 'button[data-cy="button-target-population-add-criteria"]'
-    targeting_criteria_add_dialog_save_button_edit = 'button[data-cy="button-target-population-add-criteria"]'
     # The edit page's "Add 'OR' filter" button shares the data-cy, so scope to the dialog.
     criteria_dialog_save_button = 'div[role="dialog"] button[data-cy="button-target-population-add-criteria"]'
     criteria_container = 'div[data-cy="criteria-container"]'
