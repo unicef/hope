@@ -1,3 +1,5 @@
+import importlib
+
 from django.test import Client
 from django.test.utils import modify_settings, override_settings
 import pytest
@@ -14,6 +16,15 @@ HEADER_TEST_OVERRIDES = {
 @pytest.fixture
 def anon_client():
     return Client()
+
+
+@pytest.fixture
+def csp_fragment(monkeypatch):
+    from hope.config.fragments import csp
+
+    yield csp
+    monkeypatch.undo()
+    importlib.reload(csp)
 
 
 @pytest.mark.django_db
@@ -103,3 +114,21 @@ def test_hsts_behind_tls_terminating_proxy():
     res = client.get(URL, HTTP_X_FORWARDED_PROTO="https")
     assert res.status_code == 200
     assert "Strict-Transport-Security" in res.headers
+
+
+def test_csp_report_uri_added_to_directives(monkeypatch, csp_fragment):
+    monkeypatch.setenv("CSP_REPORT_URI", "https://report.example.com/csp")
+
+    importlib.reload(csp_fragment)
+
+    assert csp_fragment.DIRECTIVES["report-uri"] == ("https://report.example.com/csp",)
+
+
+def test_csp_report_only_uses_report_only_setting(monkeypatch, csp_fragment):
+    monkeypatch.setenv("CSP_REPORT_ONLY", "True")
+    monkeypatch.setenv("CSP_REPORT_PERCENTAGE", "0.5")
+
+    importlib.reload(csp_fragment)
+
+    assert csp_fragment.CONTENT_SECURITY_POLICY_REPORT_ONLY["REPORT_PERCENTAGE"] == 50.0
+    assert csp_fragment.CONTENT_SECURITY_POLICY_REPORT_ONLY["DIRECTIVES"] is csp_fragment.DIRECTIVES
