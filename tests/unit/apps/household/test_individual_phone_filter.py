@@ -1,27 +1,12 @@
 from typing import Any
 
-from constance.test import override_config
-from django.conf import settings
-from elasticsearch import Elasticsearch
 import pytest
 from rest_framework import status
 
 from extras.test_utils.factories import HouseholdFactory
-from hope.apps.household.filters import IndividualFilter
-from hope.apps.utils.elasticsearch_utils import rebuild_search_index
-from hope.models import BusinessArea, Individual, Program
+from hope.models import BusinessArea, Program
 
-pytestmark = [
-    pytest.mark.usefixtures("django_elasticsearch_setup"),
-    pytest.mark.elasticsearch,
-    pytest.mark.xdist_group(name="elasticsearch"),
-    pytest.mark.django_db,
-]
-
-
-def _refresh_es_index() -> None:
-    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-    es.indices.refresh(index="_all")
+pytestmark = pytest.mark.django_db
 
 
 def _create_individual(es_program: Program, afghanistan: BusinessArea, **kwargs: Any) -> Any:
@@ -33,7 +18,6 @@ def _create_individual(es_program: Program, afghanistan: BusinessArea, **kwargs:
     return ind
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_matches_substring(
     es_client: Any,
     individuals_list_url: str,
@@ -42,8 +26,6 @@ def test_phone_filter_matches_substring(
 ) -> None:
     target = _create_individual(es_program, afghanistan, phone_no="+48123456789")
     _create_individual(es_program, afghanistan, phone_no="+19998887777")
-    rebuild_search_index()
-    _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"phone": "3456"})
     assert response.status_code == status.HTTP_200_OK
@@ -52,7 +34,6 @@ def test_phone_filter_matches_substring(
     assert results[0]["id"] == str(target.id)
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_matches_on_alternative(
     es_client: Any,
     individuals_list_url: str,
@@ -66,8 +47,6 @@ def test_phone_filter_matches_on_alternative(
         phone_no_alternative="+48999000111",
     )
     _create_individual(es_program, afghanistan, phone_no="+19998887777")
-    rebuild_search_index()
-    _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"phone": "999000"})
     assert response.status_code == status.HTTP_200_OK
@@ -76,7 +55,6 @@ def test_phone_filter_matches_on_alternative(
     assert results[0]["id"] == str(target.id)
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_matches_by_country_code(
     es_client: Any,
     individuals_list_url: str,
@@ -86,8 +64,6 @@ def test_phone_filter_matches_by_country_code(
     pl1 = _create_individual(es_program, afghanistan, phone_no="+4812123456789")
     pl2 = _create_individual(es_program, afghanistan, phone_no="+4812111222333")
     _create_individual(es_program, afghanistan, phone_no="+19998887777")
-    rebuild_search_index()
-    _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"phone": "+4812"})
     assert response.status_code == status.HTTP_200_OK
@@ -97,7 +73,6 @@ def test_phone_filter_matches_by_country_code(
     assert len(returned_ids) == 2
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_accepts_exactly_4_digits(
     es_client: Any,
     individuals_list_url: str,
@@ -105,14 +80,11 @@ def test_phone_filter_accepts_exactly_4_digits(
     afghanistan: BusinessArea,
 ) -> None:
     _create_individual(es_program, afghanistan, phone_no="+48123456789")
-    rebuild_search_index()
-    _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"phone": "1234"})
     assert response.status_code == status.HTTP_200_OK
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_ignores_non_digit_formatting(
     es_client: Any,
     individuals_list_url: str,
@@ -120,8 +92,6 @@ def test_phone_filter_ignores_non_digit_formatting(
     afghanistan: BusinessArea,
 ) -> None:
     target = _create_individual(es_program, afghanistan, phone_no="+48123456789")
-    rebuild_search_index()
-    _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"phone": "+48 123 456"})
     assert response.status_code == status.HTTP_200_OK
@@ -130,7 +100,6 @@ def test_phone_filter_ignores_non_digit_formatting(
     assert results[0]["id"] == str(target.id)
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_rejects_input_under_4_digits(
     es_client: Any,
     individuals_list_url: str,
@@ -141,7 +110,6 @@ def test_phone_filter_rejects_input_under_4_digits(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_rejects_input_of_3_digits_with_spaces(
     es_client: Any,
     individuals_list_url: str,
@@ -152,7 +120,6 @@ def test_phone_filter_rejects_input_of_3_digits_with_spaces(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_empty_value_ignored(
     es_client: Any,
     individuals_list_url: str,
@@ -161,15 +128,12 @@ def test_phone_filter_empty_value_ignored(
 ) -> None:
     _create_individual(es_program, afghanistan, phone_no="+48123456789")
     _create_individual(es_program, afghanistan, phone_no="+19998887777")
-    rebuild_search_index()
-    _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"phone": ""})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 2
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_phone_filter_query_param_name_is_phone(
     es_client: Any,
     individuals_list_url: str,
@@ -178,8 +142,6 @@ def test_phone_filter_query_param_name_is_phone(
 ) -> None:
     _create_individual(es_program, afghanistan, phone_no="+48123456789")
     _create_individual(es_program, afghanistan, phone_no="+19998887777")
-    rebuild_search_index()
-    _refresh_es_index()
 
     wrong_name = es_client.get(individuals_list_url, {"phone_number": "1234"})
     assert wrong_name.status_code == status.HTTP_200_OK
@@ -190,8 +152,7 @@ def test_phone_filter_query_param_name_is_phone(
     assert len(correct_name.json()["results"]) == 1
 
 
-@override_config(IS_ELASTICSEARCH_ENABLED=False)
-def test_phone_filter_db_fallback_query_count(
+def test_phone_filter_query_count(
     es_client: Any,
     individuals_list_url: str,
     es_program: Program,
@@ -200,15 +161,6 @@ def test_phone_filter_db_fallback_query_count(
 ) -> None:
     _create_individual(es_program, afghanistan, phone_no="+48123456789")
 
-    with django_assert_num_queries(19):
+    with django_assert_num_queries(18):
         response = es_client.get(individuals_list_url, {"phone": "1234"})
     assert response.status_code == status.HTTP_200_OK
-
-
-@pytest.mark.parametrize("empty_value", ["", None])
-def test_phone_filter_returns_queryset_untouched_for_empty_value(empty_value: Any) -> None:
-    queryset = Individual.objects.all()
-
-    result = IndividualFilter().phone_filter(queryset, "phone", empty_value)
-
-    assert result is queryset

@@ -471,7 +471,7 @@ def test_filter_by_collector_latin_full_name(
     assert resp_data["results"][0]["household_unicef_id"] == payment_context["payment"].household.unicef_id
 
 
-def test_filter_by_collector_full_name_prefix_returns_empty(
+def test_filter_by_collector_full_name_partial_match(
     payment_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -481,13 +481,16 @@ def test_filter_by_collector_full_name_prefix_returns_empty(
         payment_context["business_area"],
         payment_context["program_active"],
     )
-    collector_full_name = payment_context["payment"].collector.full_name
-    response = payment_context["client"].get(
-        payment_context["url_list"] + f"?collector_full_name={collector_full_name[:5]}"
-    )
+    collector = payment_context["payment"].collector
+    collector.full_name = "Zbigniew Brzeczyszczykiewicz"
+    collector.save(update_fields=["full_name"])
+
+    response = payment_context["client"].get(payment_context["url_list"] + "?collector_full_name=BRZECZYSZCZ")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["results"] == []
+    resp_data = response.json()
+    assert len(resp_data["results"]) == 1
+    assert resp_data["results"][0]["household_unicef_id"] == payment_context["payment"].household.unicef_id
 
 
 def test_filter_by_payment_unicef_id(

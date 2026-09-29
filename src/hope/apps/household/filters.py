@@ -453,47 +453,11 @@ class IndividualFilter(UpdatedAtFilter):
         )
 
     def phone_filter(self, qs: QuerySet[Individual], name: str, value: Any) -> QuerySet[Individual]:
-        if not value:
-            return qs
         digits = "".join(c for c in value if c.isdigit())
         if len(digits) < 4:
             raise ValidationError({"phone": "Phone search requires at least 4 digits."})
 
-        program_code = self.request.parser_context["kwargs"].get("program_code")
-        business_area_slug = self.request.parser_context["kwargs"]["business_area_slug"]
-        program = Program.objects.filter(code=program_code, business_area__slug=business_area_slug).first()
-        if config.IS_ELASTICSEARCH_ENABLED and program and program.status == Program.ACTIVE:
-            return self._phone_search_es(qs, digits, program)
         return self._phone_search_db(qs, digits)
-
-    def _phone_search_es(self, qs: QuerySet[Individual], digits: str, program: Program) -> QuerySet[Individual]:
-        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
-        query_dict = {
-            "size": 100,
-            "_source": False,
-            "query": {
-                "bool": {
-                    "filter": [
-                        {"term": {"business_area": business_area}},
-                        {"term": {"program_id": str(program.pk)}},
-                    ],
-                    "minimum_should_match": 1,
-                    "should": [
-                        {"wildcard": {"phone_no_text": f"*{digits}*"}},
-                        {"wildcard": {"phone_no_alternative_text": f"*{digits}*"}},
-                    ],
-                }
-            },
-        }
-        individual_doc_class = get_individual_doc(str(program.id))
-        es_response = (
-            individual_doc_class.search()
-            .params(search_type="dfs_query_then_fetch")
-            .update_from_dict(query_dict)
-            .execute()
-        )
-        es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(Q(id__in=es_ids)).distinct()
 
     def _phone_search_db(self, qs: QuerySet[Individual], digits: str) -> QuerySet[Individual]:
         return (

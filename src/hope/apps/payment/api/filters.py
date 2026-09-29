@@ -343,7 +343,9 @@ class BasePaymentSearchFilter(FilterSet):
         fields = []
 
     def filter_collector_full_name(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
-        return queryset.filter(Q(collector__full_name__iexact=value) | Q(collector__full_name_latin__iexact=value))
+        return queryset.filter(
+            Q(collector__full_name__icontains=value) | Q(collector__full_name_latin__icontains=value)
+        )
 
     def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":
         queryset = queryset.annotate(

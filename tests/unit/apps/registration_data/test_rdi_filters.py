@@ -38,7 +38,8 @@ def test_rdi_name_startswith_meta_lookup_still_exposed(rdi_syria_import):
 
 def test_rdi_name_exact_meta_lookup_removed():
     f = RegistrationDataImportFilter()
-    assert "name__exact" not in f.form.fields
+    assert "name" not in f.form.fields
+    assert "name__icontains" in f.form.fields
 
 
 def test_rdi_search_excludes_soft_deleted(rdi_syria_import):
