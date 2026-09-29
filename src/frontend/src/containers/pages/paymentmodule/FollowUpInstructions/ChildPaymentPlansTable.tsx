@@ -27,11 +27,12 @@ function formatInstructionAmount(
   amount: number,
   amountUsd: number,
   currency?: string | null,
+  visionCode?: string | null,
 ): string {
   if (!currency) {
     return formatCurrencyWithSymbol(amountUsd, 'USD');
   }
-  return `${formatCurrencyWithSymbol(amount, currency)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
+  return `${formatCurrencyWithSymbol(amount, currency, visionCode)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
 }
 
 export function ChildPaymentPlansTable({
@@ -84,6 +85,7 @@ export function ChildPaymentPlansTable({
                   pp.totalEntitledQuantity,
                   pp.totalEntitledQuantityUsd,
                   pp.currency,
+                  pp.currencyVisionCode,
                 )}
               </TableCell>
               <TableCell align="right" data-cy={`plan-delivered-${index}`}>
@@ -91,6 +93,7 @@ export function ChildPaymentPlansTable({
                   pp.totalDeliveredQuantity,
                   pp.totalDeliveredQuantityUsd,
                   pp.currency,
+                  pp.currencyVisionCode,
                 )}
               </TableCell>
               <TableCell align="right" data-cy={`plan-undelivered-${index}`}>
@@ -98,6 +101,7 @@ export function ChildPaymentPlansTable({
                   pp.totalUndeliveredQuantity,
                   pp.totalUndeliveredQuantityUsd,
                   pp.currency,
+                  pp.currencyVisionCode,
                 )}
               </TableCell>
             </TableRow>

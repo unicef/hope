@@ -218,6 +218,7 @@ export const HouseholdTable = ({
           {formatCurrencyWithSymbol(
             Number(household.totalCashReceived),
             household.currency?.toString(),
+            household.currencyVisionCode,
           )}
         </TableCell>
         <TableCell align="right">
