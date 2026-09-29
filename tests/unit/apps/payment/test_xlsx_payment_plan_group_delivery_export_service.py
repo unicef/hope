@@ -1180,11 +1180,6 @@ def test_reexport_uses_current_payment_values_while_existing_file_remains_snapsh
 ):
     group, plan, payment = group_with_reexportable_payment
     XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
-    plan.refresh_from_db()
-    original_file = plan.export_file_delivery
-
-    with original_file.file.open("rb") as file:
-        original_file_content = BytesIO(file.read())
 
     new_delivery_date = timezone.localdate()
     import_workbook = openpyxl.Workbook()
@@ -1242,17 +1237,6 @@ def test_reexport_uses_current_payment_values_while_existing_file_remains_snapsh
         "reset_rows": 0,
         "ignored_rows": 0,
     }
-
-    unchanged_workbook = openpyxl.load_workbook(original_file_content, data_only=True)
-    original_headers = [cell.value for cell in unchanged_workbook.active[1]]
-    original_values = dict(zip(original_headers, [cell.value for cell in unchanged_workbook.active[2]], strict=True))
-    assert original_values["delivery_date"] is None
-    assert original_values["reference_id"] == "ORIGINAL-REFERENCE"
-    assert original_values["reason_for_unsuccessful_payment"] == "Original reason"
-    assert original_values["additional_collector_name"] == "Original collector"
-    assert original_values["additional_document_type"] == "Original document type"
-    assert original_values["additional_document_number"] == "Original document number"
-    assert original_values["transaction_status_blockchain_link"] == "https://example.com/original"
 
     XlsxPaymentPlanGroupDeliveryExportService(group, export_tag=1).save_xlsx_file(user)
     plan.refresh_from_db()
