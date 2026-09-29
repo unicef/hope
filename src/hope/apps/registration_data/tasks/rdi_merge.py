@@ -25,7 +25,7 @@ from hope.apps.household.documents import (
 )
 from hope.apps.registration_data.celery_tasks import deduplicate_documents_for_rdi
 from hope.apps.registration_data.services.biometric_deduplication import (
-    BiometricDeduplicationService,
+    DeduplicationEngineService,
 )
 from hope.apps.registration_data.signals import rdi_merged
 from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
@@ -120,7 +120,7 @@ class RdiMergeTask:
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
     ) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
-            dedupe_service = BiometricDeduplicationService()
+            dedupe_service = DeduplicationEngineService()
             dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
         dedupe_service.create_grievance_tickets_for_biographic_duplicates(obj_hct)
 

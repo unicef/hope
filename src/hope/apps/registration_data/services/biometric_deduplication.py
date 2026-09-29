@@ -9,7 +9,7 @@ from hope.apps.household.const import (
     UNIQUE_IN_BATCH,
 )
 from hope.apps.registration_data.api.deduplication_engine import (
-    BiometricDeduplicationEngineAPI,
+    DeduplicationEngineAPI,
     SimilarityPair,
 )
 from hope.models import (
@@ -34,12 +34,12 @@ PERSISTED_FINDINGS_STATUS_CODES = (
 )
 
 
-class BiometricDeduplicationService:
-    class BiometricDeduplicationServiceError(Exception):
+class DeduplicationEngineService:
+    class DeduplicationEngineServiceError(Exception):
         pass
 
     def __init__(self) -> None:
-        self.api = BiometricDeduplicationEngineAPI()
+        self.api = DeduplicationEngineAPI()
 
     def parse_findings(self, findings: list[dict]) -> list[SimilarityPair]:
         similarity_pairs: list[SimilarityPair] = []

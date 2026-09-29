@@ -4,7 +4,7 @@ from typing import cast
 from django.db import transaction
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.biometric_deduplication import DeduplicationEngineService
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import (
@@ -28,7 +28,7 @@ class FetchFindingsAndMergeRdi:
         if rdi is None:
             return False
 
-        deduplication_service = DeduplicationService()  # same as BiometricDeduplicationService today
+        deduplication_service = DeduplicationEngineService()
         biographic_findings = self._fetch_biographic_findings(rdi)
         biometric_findings = self._fetch_biometric_findings(rdi)
 
@@ -68,12 +68,12 @@ class FetchFindingsAndMergeRdi:
 
     def _fetch_biographic_findings(
         self, rdi: RegistrationDataImport, dedupe_service
-    ) -> tuple[BiometricDeduplicationService | None, list[dict] | None]:
+    ) -> tuple[DeduplicationEngineService | None, list[dict] | None]:
         return dedupe_service.get_biographic_findings(cast("str", rdi.country_workspace_id))
 
     def _fetch_biometric_findings(
         self, rdi: RegistrationDataImport, dedupe_service
-    ) -> tuple[BiometricDeduplicationService | None, list[dict] | None]:
+    ) -> tuple[DeduplicationEngineService | None, list[dict] | None]:
         findings: list[dict] | None = None
         if rdi.program.biometric_deduplication_enabled:
             findings = dedupe_service.get_biometric_findings(cast("str", rdi.country_workspace_id))
@@ -113,7 +113,7 @@ class FetchFindingsAndMergeRdi:
     def _store_deduplication_results(
         self,
         rdi: RegistrationDataImport,
-        dedupe_service: BiometricDeduplicationService | None,
+        dedupe_service: DeduplicationEngineService | None,
         biometric_findings: list[dict] | None,
         biographic_findings: list[dict] | None,
     ) -> None:
