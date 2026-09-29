@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class TargetPopulationManager(SoftDeletableManager["TargetPopulation"]):
-    def get_queryset(self) -> "QuerySet[TargetPopulation, TargetPopulation]":
+    def get_queryset(self) -> "QuerySet[TargetPopulation]":
         return super().get_queryset().filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
 
 

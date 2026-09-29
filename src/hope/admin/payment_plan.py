@@ -7,6 +7,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
+from django.contrib.admin import FieldListFilter
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import QuerySet
@@ -169,7 +170,7 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "background_action_status",
         "build_status",
     )
-    list_filter: tuple[Any, ...] = (
+    list_filter: tuple[str | tuple[str, type[FieldListFilter]], ...] = (
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
@@ -261,6 +262,9 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
             new_object=obj,
         )
 
+    def frontend_url(self, obj: PaymentPlan) -> str:
+        raise NotImplementedError
+
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
@@ -280,11 +284,11 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
     exclude = ("plan_type",)
 
     @button(permission="payment.view_paymentplan")
-    def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+    def western_union_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
 
-    def frontend_url(self, obj: PaymentPlan) -> str | None:
+    def frontend_url(self, obj: PaymentPlan) -> str:
         base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
         if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
             return f"{base}/target-population/{obj.id}"
