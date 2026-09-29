@@ -278,3 +278,16 @@ def test_process_people_cell_normal_field_calls_dispatch(people_task, make_cell)
                 assert args[0] == "pp_first_name"  # header
                 assert args[1] == cell  # cell
                 assert args[2] == "John"  # cell_value (stripped)
+
+
+def test_process_admin_areas_and_country_currency_resolves_the_active_row(
+    people_task, make_cell, currency_syp, django_assert_num_queries
+):
+    obj = MagicMock()
+
+    with django_assert_num_queries(1):
+        people_task._process_admin_areas_and_country(
+            make_cell("SYP"), {"name": "currency"}, "pp_currency_i_c", obj, "SYP"
+        )
+
+    assert obj.currency == currency_syp

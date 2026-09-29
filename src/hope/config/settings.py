@@ -299,7 +299,7 @@ DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 # Social Auth settings.
 
 
-LOGIN_URL = "/api/login/azuread-tenant-oauth2/"
+LOGIN_URL = "/login"
 
 GRAPH_MODELS = {
     "all_applications": True,

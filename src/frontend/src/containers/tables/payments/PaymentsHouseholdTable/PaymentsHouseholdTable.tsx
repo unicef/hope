@@ -11,8 +11,9 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells, headCellsPeople } from './PaymentsHouseholdTableHeadCells';
@@ -32,22 +33,19 @@ function PaymentsHouseholdTable({
 }: PaymentsHouseholdTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialQueryVariables = {
-    id: household?.id,
-    businessAreaSlug: businessArea,
-    programCode: programId,
-  };
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  const [page, setPage] = useState(0);
-
-  const paymentsListParams = createApiParams(
-    {
-      businessAreaSlug: businessArea,
-      programCode: programId,
-      id: household?.id,
-    },
-    queryVariables,
-    { withPagination: true },
+  const table = useTableState();
+  const { page } = table;
+  const paymentsListParams = useMemo(
+    () =>
+      createApiParams(
+        {
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          id: household?.id,
+        },
+        table.paginationParams,
+      ),
+    [businessArea, programId, household?.id, table.paginationParams],
   );
   const {
     data: paymentsData,
@@ -67,14 +65,11 @@ function PaymentsHouseholdTable({
     placeholderData: keepPreviousData,
   });
 
-  const paymentsCountParams = createApiParams(
-    {
-      businessAreaSlug: businessArea,
-      programCode: programId,
-      id: household?.id,
-    },
-    queryVariables,
-  );
+  const paymentsCountParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+    id: household?.id,
+  };
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsHouseholdsPaymentsCountRetrieve,
@@ -111,10 +106,7 @@ function PaymentsHouseholdTable({
       error={error}
       isLoading={isLoading}
       isFetching={isFetching}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-      page={page}
-      setPage={setPage}
+      tableState={table}
       itemsCount={itemsCount}
       renderRow={(row: PaymentList) => (
         <PaymentsHouseholdTableRow

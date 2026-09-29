@@ -49,7 +49,7 @@ class TestSmokeAccountabilityCommunication:
     ) -> None:
         page_accountability_communication.select_global_program_filter("Test Program")
         page_accountability_communication.get_nav_accountability().click()
-        assert "Communication" in page_accountability_communication.get_page_header_title().text
+        page_accountability_communication.assert_page_header_title("Communication")
         assert "NEW MESSAGE" in page_accountability_communication.get_button_communication_create_new().text
         assert (
             "Target Population" in page_accountability_communication.get_filters_target_population_autocomplete().text
@@ -82,9 +82,8 @@ class TestSmokeAccountabilityCommunication:
         page_accountability_communication.select_global_program_filter("Test Program")
         page_accountability_communication.get_nav_accountability().click()
         page_accountability_communication.get_rows()[0].click()
-        assert (
+        page_accountability_communication_details.assert_page_header_title(
             add_accountability_communication_message.unicef_id
-            in page_accountability_communication_details.get_page_header_title().text
         )
         created_by = add_accountability_communication_message.created_by
         assert (

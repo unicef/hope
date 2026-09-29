@@ -7,7 +7,6 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class PaymentModule(BaseComponents):
-    page_header_title = 'h5[data-cy="page-header-title"]'
     select_filter = 'div[data-cy="select-filter"]'
     filters_total_entitled_quantity_from = 'div[data-cy="filters-total-entitled-quantity-from"]'
     filters_total_entitled_quantity_to = 'div[data-cy="filters-total-entitled-quantity-to"]'
@@ -107,13 +106,6 @@ class PaymentModule(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> str:
-        element = self.wait_for(self.page_header_title)
-        return element.text
-
-    def wait_and_get_page_header_title(self) -> WebElement:
-        return self.wait_for_header_text(self.page_header_title, "Payment Module")
 
     def get_select_filter(self) -> WebElement:
         return self.wait_for(self.select_filter)

@@ -9,6 +9,7 @@ from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     CountryFactory,
+    CurrencyFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -20,7 +21,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
 from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import ROLE_ALTERNATE
-from hope.models import Currency, IndividualRoleInHousehold, Program, User
+from hope.models import Currency, Household, IndividualRoleInHousehold, Program, User
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -729,3 +730,133 @@ def test_close_resolves_currency_from_code(all_currencies) -> None:
 
     usd_currency = Currency.objects.get(code="USD")
     assert household.currency == usd_currency
+
+
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+
+@pytest.fixture
+def household_without_currency() -> Household:
+    return HouseholdFactory(create_role=False, currency=None)
+
+
+@pytest.fixture
+def ticket_setting_currency_to_syp(household_without_currency: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_without_currency,
+        household_data={
+            "currency": {"value": "SYP", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_resolves_active_currency_for_shared_code(
+    ticket_setting_currency_to_syp: GrievanceTicket,
+    household_without_currency: Household,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    user: User,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_setting_currency_to_syp, {})
+    service.close(user)
+    household_without_currency.refresh_from_db()
+
+    assert household_without_currency.currency == current_syp
+
+
+@pytest.fixture
+def household_on_deprecated_syp(deprecated_syp: Currency) -> Household:
+    return HouseholdFactory(create_role=False, currency=deprecated_syp)
+
+
+@pytest.fixture
+def ticket_resubmitting_syp(household_on_deprecated_syp: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_on_deprecated_syp,
+        household_data={
+            "currency": {"value": "SYP", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_moves_household_off_deprecated_currency_for_same_code(
+    ticket_resubmitting_syp: GrievanceTicket,
+    household_on_deprecated_syp: Household,
+    current_syp: Currency,
+    user: User,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_resubmitting_syp, {})
+    service.close(user)
+    household_on_deprecated_syp.refresh_from_db()
+
+    assert household_on_deprecated_syp.currency == current_syp
+
+
+@pytest.fixture
+def ticket_setting_currency_to_the_syp_alias(household_without_currency: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_without_currency,
+        household_data={
+            "currency": {"value": "SYP01", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_resolves_the_vision_code_alias_to_the_active_row(
+    ticket_setting_currency_to_the_syp_alias: GrievanceTicket,
+    household_without_currency: Household,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    user: User,
+    django_assert_num_queries,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_setting_currency_to_the_syp_alias, {})
+    with django_assert_num_queries(21):
+        service.close(user)
+    household_without_currency.refresh_from_db()
+
+    assert household_without_currency.currency == current_syp
+
+
+@pytest.fixture
+def ticket_setting_a_retired_currency(household_on_deprecated_syp: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_on_deprecated_syp,
+        household_data={
+            "currency": {"value": "VEF", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_clears_the_currency_for_a_code_without_an_active_row(
+    ticket_setting_a_retired_currency: GrievanceTicket,
+    household_on_deprecated_syp: Household,
+    currency_retired: Currency,
+    user: User,
+) -> None:
+    # The ticket does not validate FK codes on entry, so close stores NULL for an unresolvable
+    # code, as it does for country.
+    service = HouseholdDataUpdateService(ticket_setting_a_retired_currency, {})
+    service.close(user)
+    household_on_deprecated_syp.refresh_from_db()
+
+    assert household_on_deprecated_syp.currency is None

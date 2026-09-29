@@ -22,7 +22,7 @@ def superuser(request, db):
 
 @frozenfixture()
 def business_area(request, db):
-    ba = BusinessAreaFactory(code="BA9000", slug="business-area-9000", name="Business Area Contract")
+    ba = BusinessAreaFactory(code="BA9000", name="Business Area Contract")
     ba.countries.add(
         CountryFactory(name="Testland", short_name="Testland", iso_code2="TL", iso_code3="TLN", iso_num="9999")
     )

@@ -16,7 +16,6 @@ class TargetingDetails(BaseComponents):
     household_table_rows = '[data-cy="target-population-household-row"]'
     people_table_rows = '[data-cy="target-population-people-row"]'
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_target_population_duplicate = 'button[data-cy="button-target-population-duplicate"]'
     input_name = 'input[data-cy="input-name"]'
     button_delete = 'button[data-cy="button-delete"]'
@@ -62,9 +61,6 @@ class TargetingDetails(BaseComponents):
 
     # Texts
     # Elements
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def wait_for_text_title_page(self, text: str) -> bool:
         return self.wait_for_text(text, self.title_page)
