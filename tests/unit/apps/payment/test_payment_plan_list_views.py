@@ -50,7 +50,7 @@ def payment_plan_list_context(
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=user,
         name="PP List",
-        currency=CurrencyFactory(code="USD", name="United States Dollar"),
+        currency=CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound"),
         excluded_ids="HH-1",
         dispersion_start_date=date(2025, 2, 1),
         dispersion_end_date=date(2025, 3, 1),
@@ -110,7 +110,7 @@ def payment_plan_detail_context(
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=user,
         name="PP Detail",
-        currency=CurrencyFactory(code="USD", name="United States Dollar"),
+        currency=CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound"),
         excluded_ids="HH-1",
         dispersion_start_date=date(2025, 2, 1),
         dispersion_end_date=date(2025, 3, 1),
@@ -242,7 +242,8 @@ def test_payment_plan_list_with_permissions(
     assert payment_plan["name"] == "PP List"
     assert payment_plan["status"] == payment_plan_list_context["pp"].status
     assert payment_plan["total_households_count"] == payment_plan_list_context["pp"].total_households_count
-    assert payment_plan["currency"] == "USD"
+    assert payment_plan["currency"] == "SYP"
+    assert payment_plan["currency_vision_code"] == "SYP01"
     assert payment_plan["excluded_ids"] == "HH-1"
     assert payment_plan["total_entitled_quantity"] == "100.00"
     assert payment_plan["total_delivered_quantity"] == "40.00"
@@ -408,7 +409,8 @@ def test_payment_plan_detail(
     assert payment_plan["name"] == "PP Detail"
     assert payment_plan["status"] == payment_plan_detail_context["pp"].status
     assert payment_plan["total_households_count"] == payment_plan_detail_context["pp"].total_households_count
-    assert payment_plan["currency"] == "USD"
+    assert payment_plan["currency"] == "SYP"
+    assert payment_plan["currency_vision_code"] == "SYP01"
     assert payment_plan["excluded_ids"] == "HH-1"
     assert payment_plan["total_entitled_quantity"] == "100.00"
     assert payment_plan["total_delivered_quantity"] == "40.00"
