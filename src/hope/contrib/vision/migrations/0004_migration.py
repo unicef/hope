@@ -1,5 +1,30 @@
 from django.db import migrations, models
 
+
+def migrate_payment_plan_assignments(apps, schema_editor):
+    database_alias = schema_editor.connection.alias
+    FundsCommitmentHeader = apps.get_model("vision", "FundsCommitmentHeader")
+    FundsCommitmentItem = apps.get_model("vision", "FundsCommitmentItem")
+    through_model = FundsCommitmentHeader.payment_plans.through
+    assignments = (
+        FundsCommitmentItem.objects.using(database_alias)
+        .exclude(payment_plan_id=None)
+        .values_list(
+            "funds_commitment_header_id",
+            "payment_plan_id",
+        )
+    )
+    through_model.objects.using(database_alias).bulk_create(
+        [
+            through_model(
+                fundscommitmentheader_id=header_id,
+                paymentplan_id=payment_plan_id,
+            )
+            for header_id, payment_plan_id in assignments.distinct()
+        ]
+    )
+
+
 TRIGGER_FUNCTION = """
 CREATE OR REPLACE FUNCTION funds_commitment_header_trigger_function()
 RETURNS TRIGGER AS $$
@@ -254,6 +279,11 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Funds Commitment Headers",
             },
         ),
+        migrations.AlterField(
+            model_name="fundscommitmentheader",
+            name="funds_commitment_number",
+            field=models.CharField(max_length=10, unique=True),
+        ),
         migrations.AddField(
             model_name="fundscommitmentheader",
             name="vendor_id",
@@ -278,6 +308,20 @@ class Migration(migrations.Migration):
             model_name="fundscommitmentheader",
             name="currency",
             field=models.CharField(blank=True, max_length=5, null=True),
+        ),
+        migrations.AddField(
+            model_name="fundscommitmentheader",
+            name="payment_plans",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="funds_commitment_headers",
+                to="payment.paymentplan",
+            ),
+        ),
+        migrations.RunPython(migrate_payment_plan_assignments, migrations.RunPython.noop),
+        migrations.RemoveField(
+            model_name="fundscommitmentitem",
+            name="payment_plan",
         ),
         migrations.RunSQL(BACKFILL_HEADER_FIELDS, migrations.RunSQL.noop),
         migrations.RunSQL(

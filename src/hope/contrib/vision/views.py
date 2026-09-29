@@ -88,7 +88,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             payment_plan,
             vision_payment_plan_id=serializer.validated_vision_payplan_sno,
             vision_result=serializer.validated_data.get("status", ""),
-            fc_num=serializer.validated_data.get("fc_num", ""),
+            fc_numbers=serializer.validated_data.get("fc_numbers", []),
         )
         response_status: int
         if fc_assignment_failed:

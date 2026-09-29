@@ -29,12 +29,17 @@ class FundsCommitmentHeaderQuerySet(models.QuerySet):
 
 
 class FundsCommitmentHeader(models.Model):
-    funds_commitment_number = models.CharField(max_length=10)
+    funds_commitment_number = models.CharField(max_length=10, unique=True)
     vendor_id = models.CharField(max_length=10, blank=True, null=True)
     posting_date = models.DateField(blank=True, null=True)
     document_reference = models.CharField(max_length=16, blank=True, null=True)
     fc_status = models.CharField(max_length=1, blank=True, null=True)
     currency = models.CharField(max_length=5, blank=True, null=True)
+    payment_plans = models.ManyToManyField(
+        PaymentPlan,
+        blank=True,
+        related_name="funds_commitment_headers",
+    )
     objects = FundsCommitmentHeaderQuerySet.as_manager()
 
     class Meta:
@@ -46,13 +51,6 @@ class FundsCommitmentHeader(models.Model):
 
 
 class FundsCommitmentItem(models.Model):
-    payment_plan = models.ForeignKey(
-        PaymentPlan,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="funds_commitments",
-    )
     funds_commitment_header = models.ForeignKey(
         FundsCommitmentHeader,
         on_delete=models.CASCADE,

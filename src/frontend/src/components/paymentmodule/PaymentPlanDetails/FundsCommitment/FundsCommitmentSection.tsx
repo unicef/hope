@@ -8,21 +8,11 @@ import {
   Autocomplete,
   TextField,
   Box,
-  Checkbox,
   FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  Select,
-  styled,
   Tooltip,
   Typography,
   Grid,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material/Select';
-import { Close } from '@mui/icons-material';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -34,14 +24,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
 
-const EndInputAdornment = styled(InputAdornment)`
-  margin-right: 10px;
-`;
-
-const XIcon = styled(Close)`
-  color: #707070;
-`;
-
 interface FundsCommitmentSectionProps {
   paymentPlan: PaymentPlanDetail;
 }
@@ -50,11 +32,10 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
   const visionManaged = paymentPlan.visionManaged;
-  const initialFundsCommitment = paymentPlan?.fundsCommitments || null;
-  const initialFundsCommitmentItems =
-    paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
-      (item) => item.recSerialNumber,
-    ) || [];
+  const initialFundsCommitments = useMemo(
+    () => paymentPlan.fundsCommitments || [],
+    [paymentPlan.fundsCommitments],
+  );
 
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
@@ -63,16 +44,16 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   const { mutateAsync: assignFundsCommitment, isPending: loadingAssign } =
     useMutation({
       mutationFn: async ({
-        fundCommitmentItemsIds,
+        fundsCommitmentNumbers,
       }: {
-        fundCommitmentItemsIds: string[];
+        fundsCommitmentNumbers: string[];
       }) => {
         return RestService.restBusinessAreasProgramsPaymentPlansAssignFundsCommitmentsCreate(
           {
             businessAreaSlug: businessArea,
             programCode: paymentPlan.program.code,
             id: paymentPlan.id,
-            requestBody: { fundCommitmentItemsIds },
+            requestBody: { fundsCommitmentNumbers },
           },
         );
       },
@@ -85,11 +66,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       },
     });
 
-  const [selectedFundsCommitment, setSelectedFundsCommitment] = useState(
-    initialFundsCommitment,
-  );
-  const [selectedItems, setSelectedItems] = useState<number[]>(
-    initialFundsCommitmentItems,
+  const [selectedFundsCommitments, setSelectedFundsCommitments] = useState(
+    initialFundsCommitments,
   );
 
   const canAssignFunds = hasPermissions(
@@ -101,44 +79,15 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     () => paymentPlan?.availableFundsCommitments || [],
     [paymentPlan],
   );
-  const selectedAvailableCommitment = useMemo(() => {
-    if (!selectedFundsCommitment) return undefined;
-    return availableFundsCommitments.find(
-      (commitment) => commitment.id === selectedFundsCommitment.id,
-    );
-  }, [availableFundsCommitments, selectedFundsCommitment]);
-
-  const handleFundsCommitmentChange = (
-    newValue: PaymentPlanDetail['fundsCommitments'],
-  ) => {
-    setSelectedFundsCommitment(newValue);
-    setSelectedItems([]);
-  };
-
-  const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
-    if (!selectedAvailableCommitment) return;
-
-    const value = event.target.value;
-    const selectedValues = typeof value === 'string' ? value.split(',') : value;
-    if (selectedValues.includes('select-all')) {
-      const allItems = selectedAvailableCommitment.fundsCommitmentItems.map(
-        (item) => item.recSerialNumber,
-      );
-      setSelectedItems(
-        selectedItems.length === allItems.length ? [] : allItems,
-      );
-      return;
-    }
-    setSelectedItems(selectedValues.map(Number));
-  };
-
   const handleSubmit = async () => {
-    if (paymentPlan && selectedFundsCommitment && selectedItems.length > 0) {
+    if (selectedFundsCommitments.length > 0) {
       try {
         await assignFundsCommitment({
-          fundCommitmentItemsIds: selectedItems.map(String),
+          fundsCommitmentNumbers: selectedFundsCommitments.map(
+            (header) => header.fundsCommitmentNumber,
+          ),
         });
-        showMessage(t('Funds commitment items assigned successfully'));
+        showMessage(t('Funds commitment headers assigned successfully'));
         await queryClient.invalidateQueries({
           queryKey: restQueryKey(
             RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
@@ -150,25 +99,17 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     }
   };
 
-  const assignedFundsCommitmentItems = useMemo(
-    () =>
-      paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
-        (item) => item.recSerialNumber,
-      ) || [],
-    [paymentPlan],
-  );
-
   const isAlreadyAssigned = useMemo(() => {
-    if (selectedItems.length !== assignedFundsCommitmentItems.length) {
+    if (selectedFundsCommitments.length !== initialFundsCommitments.length) {
       return false;
     }
-    const assignedItems = new Set(assignedFundsCommitmentItems);
-    return selectedItems.every((item) => assignedItems.has(item));
-  }, [selectedItems, assignedFundsCommitmentItems]);
-
-  const clearItems = () => {
-    setSelectedItems([]);
-  };
+    const assignedNumbers = new Set(
+      initialFundsCommitments.map((header) => header.fundsCommitmentNumber),
+    );
+    return selectedFundsCommitments.every((header) =>
+      assignedNumbers.has(header.fundsCommitmentNumber),
+    );
+  }, [initialFundsCommitments, selectedFundsCommitments]);
 
   return (
     <Box
@@ -196,16 +137,20 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               >
                 <FormControl fullWidth size="small">
                   <Autocomplete
-                    value={selectedFundsCommitment}
+                    multiple
+                    value={selectedFundsCommitments}
                     onChange={(_event, newValue) =>
-                      handleFundsCommitmentChange(newValue)
+                      setSelectedFundsCommitments(newValue)
                     }
                     options={availableFundsCommitments}
                     getOptionLabel={(option) =>
                       option?.fundsCommitmentNumber || ''
                     }
                     renderInput={(params) => (
-                      <TextField {...params} label={t('Funds Commitment')} />
+                      <TextField
+                        {...params}
+                        label={t('Funds Commitment Headers')}
+                      />
                     )}
                     renderOption={(props, option) => {
                       const { key, ...optionProps } = props;
@@ -224,74 +169,6 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   />
                 </FormControl>
               </Box>
-              {selectedAvailableCommitment && (
-                <Box sx={{ mt: 2 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>{t('Funds Commitment Items')}</InputLabel>
-                    <Select<string[]>
-                      multiple
-                      label={t('Funds Commitment Items')}
-                      value={selectedItems.map(String)}
-                      onChange={handleItemsChange}
-                      renderValue={(selected) => selected.join(', ')}
-                      endAdornment={
-                        <EndInputAdornment position="end">
-                          <IconButton
-                            size="medium"
-                            onMouseDown={(event) => {
-                              event.preventDefault();
-                              clearItems();
-                            }}
-                          >
-                            <XIcon fontSize="small" />
-                          </IconButton>
-                        </EndInputAdornment>
-                      }
-                    >
-                      <MenuItem value="select-all">
-                        <Checkbox
-                          checked={
-                            selectedAvailableCommitment.fundsCommitmentItems
-                              .length > 0 &&
-                            selectedAvailableCommitment.fundsCommitmentItems.every(
-                              (item) =>
-                                selectedItems.includes(item.recSerialNumber),
-                            )
-                          }
-                          indeterminate={
-                            selectedAvailableCommitment.fundsCommitmentItems.some(
-                              (item) =>
-                                selectedItems.includes(item.recSerialNumber),
-                            ) &&
-                            !selectedAvailableCommitment.fundsCommitmentItems.every(
-                              (item) =>
-                                selectedItems.includes(item.recSerialNumber),
-                            )
-                          }
-                        />
-                        <ListItemText primary={t('Select All')} />
-                      </MenuItem>
-                      {selectedAvailableCommitment.fundsCommitmentItems.map(
-                        (item) => (
-                          <MenuItem
-                            key={item.recSerialNumber}
-                            value={String(item.recSerialNumber)}
-                          >
-                            <Checkbox
-                              checked={selectedItems.includes(
-                                item.recSerialNumber,
-                              )}
-                            />
-                            <ListItemText
-                              primary={`${item.fundsCommitmentItem} - ${item.recSerialNumber}`}
-                            />
-                          </MenuItem>
-                        ),
-                      )}
-                    </Select>
-                  </FormControl>
-                </Box>
-              )}
               <Box
                 sx={{
                   mt: 3,
@@ -310,8 +187,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       disabled={
                         loadingAssign ||
                         !canAssignFunds ||
-                        !selectedFundsCommitment ||
-                        selectedItems.length === 0 ||
+                        selectedFundsCommitments.length === 0 ||
                         isAlreadyAssigned
                       }
                     >
@@ -322,164 +198,137 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               </Box>
             </React.Fragment>
           )}
-        {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.length > 0 && (
-          <React.Fragment>
+        {initialFundsCommitments.length > 0 ? (
+          initialFundsCommitments.map((header, headerIndex) => (
             <Box
+              key={header.id}
               sx={{
                 mt: 2,
+                borderBottom:
+                  headerIndex < initialFundsCommitments.length - 1
+                    ? '1px solid #e0e0e0'
+                    : undefined,
               }}
             >
-              {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 'bold',
-                    mb: 2,
-                  }}
-                >
-                  {t('Funds Commitment Number')}:{' '}
-                  {paymentPlan.fundsCommitments.fundsCommitmentNumber}
-                </Typography>
-              )}
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                {t('Funds Commitment Number')}: {header.fundsCommitmentNumber}
+              </Typography>
               <Grid container spacing={3} sx={{ mb: 3 }}>
                 <Grid size={3}>
-                  <LabelizedField
-                    label={t('Vendor')}
-                    value={paymentPlan.fundsCommitments.vendorId}
-                  />
+                  <LabelizedField label={t('Vendor')} value={header.vendorId} />
                 </Grid>
                 <Grid size={3}>
                   <LabelizedField
                     label={t('Posting Date')}
-                    value={paymentPlan.fundsCommitments.postingDate}
+                    value={header.postingDate}
                   />
                 </Grid>
                 <Grid size={3}>
                   <LabelizedField
                     label={t('Document Reference')}
-                    value={paymentPlan.fundsCommitments.documentReference}
+                    value={header.documentReference}
                   />
                 </Grid>
                 <Grid size={3}>
-                  <LabelizedField
-                    label={t('Status')}
-                    value={paymentPlan.fundsCommitments.fcStatus}
-                  />
+                  <LabelizedField label={t('Status')} value={header.fcStatus} />
                 </Grid>
                 <Grid size={3}>
                   <LabelizedField
                     label={t('Total Amount USD')}
-                    value={formatFigure(
-                      paymentPlan.fundsCommitments.totalAmountUsd,
-                    )}
+                    value={formatFigure(header.totalAmountUsd)}
                   />
                 </Grid>
                 <Grid size={3}>
                   <LabelizedField
                     label={t('Total Amount Local')}
-                    value={formatFigure(
-                      paymentPlan.fundsCommitments.totalAmountLocal,
-                    )}
+                    value={formatFigure(header.totalAmountLocal)}
                   />
                 </Grid>
                 <Grid size={3}>
-                  <LabelizedField
-                    label={t('Currency')}
-                    value={paymentPlan.fundsCommitments.currency}
-                  />
+                  <LabelizedField label={t('Currency')} value={header.currency} />
                 </Grid>
               </Grid>
-              {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
-                (item, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      mb: 4,
-                    }}
+              {header.fundsCommitmentItems.map((item, itemIndex) => (
+                <Box key={item.recSerialNumber} sx={{ mb: 4 }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 'bold', mb: 2 }}
                   >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 'bold',
-                        mb: 2,
-                      }}
-                    >
-                      {t('Item')} #{item.fundsCommitmentItem}
-                    </Typography>
-                    <Grid container spacing={3}>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('WBS Element')}
-                          value={item.wbsElement}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Grant Number')}
-                          value={item.grantNumber}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Currency Code')}
-                          value={item.currencyCode}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Commitment Amount Local')}
-                          value={formatFigure(item.commitmentAmountLocal)}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Commitment Amount USD')}
-                          value={formatFigure(item.commitmentAmountUsd)}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Total Open Amount Local')}
-                          value={formatFigure(item.totalOpenAmountLocal)}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Total Open Amount USD')}
-                          value={formatFigure(item.totalOpenAmountUsd)}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Sponsor')}
-                          value={`${item.sponsor ?? '-'} ${item.sponsorName ?? '-'}`}
-                        />
-                      </Grid>
-                    </Grid>
-                    {index <
-                      paymentPlan?.fundsCommitments?.fundsCommitmentItems
-                        ?.length -
-                        1 && (
-                      <Box
-                        sx={{
-                          borderBottom: '1px solid #e0e0e0',
-                          my: 3,
-                          width: '100%',
-                        }}
+                    {t('Item')} #{item.fundsCommitmentItem}
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Business Area')}
+                        value={item.businessArea}
                       />
-                    )}
-                  </Box>
-                ),
-              )}
-              {(!paymentPlan?.fundsCommitments ||
-                !paymentPlan?.fundsCommitments?.fundsCommitmentItems
-                  ?.length) && (
-                <Typography variant="body1">
-                  {t('No funds commitment items assigned')}
-                </Typography>
-              )}
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('WBS Element')}
+                        value={item.wbsElement}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Grant Number')}
+                        value={item.grantNumber}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Currency Code')}
+                        value={item.currencyCode}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Commitment Amount Local')}
+                        value={formatFigure(item.commitmentAmountLocal)}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Commitment Amount USD')}
+                        value={formatFigure(item.commitmentAmountUsd)}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Total Open Amount Local')}
+                        value={formatFigure(item.totalOpenAmountLocal)}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Total Open Amount USD')}
+                        value={formatFigure(item.totalOpenAmountUsd)}
+                      />
+                    </Grid>
+                    <Grid size={3}>
+                      <LabelizedField
+                        label={t('Sponsor')}
+                        value={`${item.sponsor ?? '-'} ${item.sponsorName ?? '-'}`}
+                      />
+                    </Grid>
+                  </Grid>
+                  {itemIndex < header.fundsCommitmentItems.length - 1 && (
+                    <Box
+                      sx={{
+                        borderBottom: '1px solid #e0e0e0',
+                        my: 3,
+                        width: '100%',
+                      }}
+                    />
+                  )}
+                </Box>
+              ))}
             </Box>
-          </React.Fragment>
+          ))
+        ) : (
+          <Typography variant="body1" sx={{ mt: 2 }}>
+            {t('No funds commitment headers assigned')}
+          </Typography>
         )}
       </ContainerColumnWithBorder>
     </Box>

@@ -938,7 +938,7 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
 class VisionStateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=[status.value for status in VisionStatus])
     vision_id = serializers.CharField(allow_null=True)
-    fc_num = serializers.CharField(allow_null=True)
+    fc_numbers = serializers.ListField(child=serializers.CharField())
     error_code = serializers.CharField(allow_null=True)
 
 
@@ -1248,49 +1248,24 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
-    @extend_schema_field(FundsCommitmentSerializer(allow_null=True))
-    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
-        assigned_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj)
-
-        header = (
-            FundsCommitmentHeader.objects.with_derived_fields()
-            .filter(
-                funds_commitment_items__in=assigned_items_qs,
-            )
-            .distinct()
-            .prefetch_related(
-                Prefetch(
-                    "funds_commitment_items",
-                    queryset=assigned_items_qs,
-                )
-            )
-            .first()
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
+            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
         )
-
-        if not header:
-            return None
-
-        return FundsCommitmentSerializer(header).data
+        return FundsCommitmentSerializer(headers, many=True).data
 
     @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         if obj.vision_managed:
             return []
 
-        available_items_qs = FundsCommitmentItem.objects.filter(
-            Q(payment_plan__isnull=True) | Q(payment_plan=obj),
-            office_id=obj.business_area_id,
-        )
-
         headers = (
             FundsCommitmentHeader.objects.with_derived_fields()
-            .filter(funds_commitment_items__in=available_items_qs)
+            .filter(funds_commitment_items__office_id=obj.business_area_id)
             .distinct()
             .prefetch_related(
-                Prefetch(
-                    "funds_commitment_items",
-                    queryset=available_items_qs,
-                )
+                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
             )
         )
 
@@ -1302,7 +1277,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return {
             "status": obj.vision_status,
             "vision_id": vision_data.get("vision_id"),
-            "fc_num": vision_data.get("fc_num"),
+            "fc_numbers": vision_data.get("fc_numbers", []),
             "error_code": vision_data.get("error_code"),
         }
 
@@ -2043,7 +2018,7 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
 
 
 class AssignFundsCommitmentsSerializer(serializers.Serializer):
-    fund_commitment_items_ids = serializers.ListSerializer(
+    funds_commitment_numbers = serializers.ListField(
         child=serializers.CharField(),
         allow_empty=False,
     )

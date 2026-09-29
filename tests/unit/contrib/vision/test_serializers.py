@@ -16,8 +16,8 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def business_area() -> None:
-    BusinessAreaFactory(
+def business_area():
+    return BusinessAreaFactory(
         code="0060",
         name="Afghanistan",
         long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
@@ -34,6 +34,7 @@ def funds_commitment_item(business_area) -> FundsCommitmentItem:
     header = FundsCommitmentHeader.objects.create(funds_commitment_number="FC-001")
     return FundsCommitmentItem.objects.create(
         funds_commitment_header=header,
+        office=business_area,
         rec_serial_number=12345,
         funds_commitment_item="001",
         wbs_element="WBS-001",
@@ -58,6 +59,7 @@ def test_funds_commitment_item_serializer(funds_commitment_item) -> None:
         "commitment_amount_usd": "1000.00",
         "total_open_amount_local": "500.00",
         "total_open_amount_usd": "500.00",
+        "business_area": "afghanistan",
         "rec_serial_number": 12345,
         "funds_commitment_item": "001",
         "sponsor": "SP-001",
@@ -153,7 +155,7 @@ def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
             "payplanSno": "PP001",
             "vision_payplanSno": "00000062",
             "status": "SUCCESS",
-            "fc_num": "FC123",
+            "fc_numbers": ["FC123", "FC456"],
         }
     )
     serializer.is_valid(raise_exception=True)
@@ -162,7 +164,7 @@ def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
         "payplan_sno": "PP001",
         "vision_payplan_sno": "00000062",
         "status": "SUCCESS",
-        "fc_num": "FC123",
+        "fc_numbers": ["FC123", "FC456"],
     }
     assert serializer.validated_message_id == "msg-001"
 
@@ -174,7 +176,7 @@ def test_payment_plan_callback_request_serializer_accepts_payment_plan_created_a
             "payplanSno": "PP-0060-24-0000002a",
             "vision_payplanSno": "00000110",
             "status": "",
-            "fc_num": "",
+            "fc_numbers": [],
         }
     )
 
@@ -185,7 +187,7 @@ def test_payment_plan_callback_request_serializer_accepts_payment_plan_created_a
         "payplan_sno": "PP-0060-24-0000002a",
         "vision_payplan_sno": "00000110",
         "status": "",
-        "fc_num": "",
+        "fc_numbers": [],
     }
 
 
@@ -196,7 +198,7 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
             "payplanSno": "PP001",
             "vision_payplanSno": "00000062",
             "status": "SUCCESS",
-            "fc_num": "FC123",
+            "fc_numbers": ["FC123"],
         }
     )
     serializer.is_valid(raise_exception=True)
@@ -205,7 +207,7 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
         "payplanSno": "PP001",
         "vision_payplanSno": "00000062",
         "status": "SUCCESS",
-        "fc_num": "FC123",
+        "fc_numbers": ["FC123"],
     }
 
 

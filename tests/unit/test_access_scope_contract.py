@@ -15,7 +15,7 @@ WRITE_METHODS = {"post", "put", "patch", "delete"}
 
 ALLOWED_UNSCOPED = {
     # the view rejects any item whose office differs from the business area of the plan
-    ("PaymentPlanViewSet", "assign_funds_commitments", "fund_commitment_items_ids.<cannot instantiate>"),
+    ("PaymentPlanViewSet", "assign_funds_commitments", "funds_commitment_numbers.<cannot instantiate>"),
 }
 
 

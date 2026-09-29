@@ -1,4 +1,5 @@
-from typing import Any, cast
+from decimal import Decimal
+from typing import cast
 
 from django.contrib import admin
 from django.http import HttpRequest
@@ -63,30 +64,10 @@ class FundsCommitmentHeaderAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> FundsCommitmentHeaderQuerySet:
         return cast("FundsCommitmentHeaderQuerySet", super().get_queryset(request)).with_derived_fields()
 
-    @admin.display(ordering="vendor_id", description="Vendor")
-    def vendor_id(self, obj: FundsCommitmentHeader) -> str | None:
-        return getattr(obj, "vendor_id", None)
-
-    @admin.display(ordering="posting_date", description="Posting Date")
-    def posting_date(self, obj: FundsCommitmentHeader) -> Any:
-        return getattr(obj, "posting_date", None)
-
-    @admin.display(ordering="document_reference", description="Document Reference")
-    def document_reference(self, obj: FundsCommitmentHeader) -> str | None:
-        return getattr(obj, "document_reference", None)
-
-    @admin.display(ordering="fc_status", description="Status")
-    def fc_status(self, obj: FundsCommitmentHeader) -> str | None:
-        return getattr(obj, "fc_status", None)
-
     @admin.display(ordering="total_amount_usd", description="Total Amount USD")
-    def total_amount_usd(self, obj: FundsCommitmentHeader) -> Any:
-        return getattr(obj, "total_amount_usd", None)
+    def total_amount_usd(self, obj: FundsCommitmentHeader) -> Decimal | None:
+        return cast("Decimal | None", getattr(obj, "total_amount_usd", None))
 
     @admin.display(ordering="total_amount_local", description="Total Amount Local")
-    def total_amount_local(self, obj: FundsCommitmentHeader) -> Any:
-        return getattr(obj, "total_amount_local", None)
-
-    @admin.display(ordering="currency", description="Currency")
-    def currency(self, obj: FundsCommitmentHeader) -> str | None:
-        return getattr(obj, "currency", None)
+    def total_amount_local(self, obj: FundsCommitmentHeader) -> Decimal | None:
+        return cast("Decimal | None", getattr(obj, "total_amount_local", None))

@@ -54,6 +54,7 @@ def test_funds_commitment_header_str(afghanistan) -> None:
 def test_funds_commitment_header_labels() -> None:
     assert FundsCommitmentHeader._meta.verbose_name == "Funds Commitment Header"
     assert FundsCommitmentHeader._meta.verbose_name_plural == "Funds Commitment Headers"
+    assert FundsCommitmentHeader._meta.get_field("funds_commitment_number").unique is True
 
 
 @pytest.fixture

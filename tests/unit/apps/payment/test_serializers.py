@@ -475,8 +475,7 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
         commitment_amount_usd=Decimal("100.50"),
     )
     item = FundsCommitmentItem.objects.get(pk=funds_commitment.pk)
-    item.payment_plan = payment_plan
-    item.save(update_fields=["payment_plan"])
+    item.funds_commitment_header.payment_plans.add(payment_plan)
     return payment_plan_detail_context
 
 
@@ -489,19 +488,22 @@ def test_payment_plan_detail_serializer_funds_commitments_exposes_header_fields(
     with django_assert_num_queries(2):
         data = PaymentPlanDetailSerializer().get_funds_commitments(payment_plan)
 
-    assert data == {
-        "id": data["id"],
-        "funds_commitment_number": "FC123",
-        "vendor_id": "VENDOR-1",
-        "posting_date": "2026-09-01",
-        "document_reference": "REFERENCE-1",
-        "fc_status": "O",
-        "total_amount_usd": "100.50",
-        "total_amount_local": "100.25",
-        "currency": "USD",
-        "funds_commitment_items": data["funds_commitment_items"],
-    }
-    assert data["funds_commitment_items"][0]["rec_serial_number"] == 100
+    assert data == [
+        {
+            "id": data[0]["id"],
+            "funds_commitment_number": "FC123",
+            "vendor_id": "VENDOR-1",
+            "posting_date": "2026-09-01",
+            "document_reference": "REFERENCE-1",
+            "fc_status": "O",
+            "total_amount_usd": "100.50",
+            "total_amount_local": "100.25",
+            "currency": "USD",
+            "funds_commitment_items": data[0]["funds_commitment_items"],
+        }
+    ]
+    assert data[0]["funds_commitment_items"][0]["business_area"] == payment_plan.business_area.slug
+    assert data[0]["funds_commitment_items"][0]["rec_serial_number"] == 100
 
 
 def test_payment_plan_detail_serializer_available_funds_commitments_exposes_header_fields(
@@ -510,7 +512,7 @@ def test_payment_plan_detail_serializer_available_funds_commitments_exposes_head
 ) -> None:
     payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
 
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(2):
         data = PaymentPlanDetailSerializer().get_available_funds_commitments(payment_plan)
 
     assert len(data) == 1
@@ -522,6 +524,7 @@ def test_payment_plan_detail_serializer_available_funds_commitments_exposes_head
     assert data[0]["total_amount_usd"] == "100.50"
     assert data[0]["total_amount_local"] == "100.25"
     assert data[0]["currency"] == "USD"
+    assert data[0]["funds_commitment_items"][0]["business_area"] == payment_plan.business_area.slug
     assert data[0]["funds_commitment_items"][0]["rec_serial_number"] == 100
 
 
@@ -554,7 +557,7 @@ def test_payment_plan_detail_serializer_vision_state(
     assert data["vision"] == {
         "status": "NOT_SENT",
         "vision_id": None,
-        "fc_num": None,
+        "fc_numbers": [],
         "error_code": None,
     }
 
