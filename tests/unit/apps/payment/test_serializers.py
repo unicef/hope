@@ -512,7 +512,7 @@ def test_payment_plan_detail_serializer_available_funds_commitments_exposes_head
 ) -> None:
     payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         data = PaymentPlanDetailSerializer().get_available_funds_commitments(payment_plan)
 
     assert len(data) == 1

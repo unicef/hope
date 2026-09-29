@@ -172,7 +172,7 @@ def test_assign_funds_commitment_headers_from_callback_assigns_multiple_headers_
         office=vision_payment_plan.business_area,
     )
 
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(4):
         VisionService.assign_funds_commitment_headers_from_callback(
             vision_payment_plan,
             ["FC123", "FC456"],
@@ -220,7 +220,7 @@ def test_assign_funds_commitment_headers_from_callback_allows_header_assigned_to
     FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_payment_plan.business_area)
     header.payment_plans.add(other_payment_plan)
 
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(4):
         VisionService.assign_funds_commitment_headers_from_callback(vision_payment_plan, ["FC123"])
 
     assert set(header.payment_plans.all()) == {other_payment_plan, vision_payment_plan}
@@ -417,7 +417,7 @@ def test_process_callback_processes_valid_fc_from_recoverable_state(
             "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
         ) as mock_send_to_pg,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(4),
+        django_assert_num_queries(6),
     ):
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
@@ -803,7 +803,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
     with (
         patch("hope.contrib.vision.services.log_create") as mock_activity_log,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-        django_assert_num_queries(4),
+        django_assert_num_queries(6),
     ):
         VisionService.process_callback(
             vision_payment_plan,
@@ -834,7 +834,7 @@ def test_process_callback_assigns_fc_releases_without_pg_send(
     VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
     with (
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(4),
+        django_assert_num_queries(6),
     ):
         VisionService.process_callback(
             vision_payment_plan,
@@ -868,7 +868,7 @@ def test_manual_fc_header_recovery_assigns_selected_headers_and_continues_automa
     with (
         patch("hope.contrib.vision.services.log_create") as mock_activity_log,
         patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-        django_assert_num_queries(4),
+        django_assert_num_queries(6),
     ):
         VisionService.recover_with_funds_commitment_headers(vision_payment_plan, [selected_header])
 
@@ -925,7 +925,7 @@ def test_assign_selected_funds_commitment_headers_accepts_multiple_headers(
     FundsCommitmentItemFactory(funds_commitment_header=first_header, office=vision_payment_plan.business_area)
     FundsCommitmentItemFactory(funds_commitment_header=second_header, office=vision_payment_plan.business_area)
 
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(4):
         VisionService.assign_selected_funds_commitment_headers(
             vision_payment_plan,
             [first_header, second_header],

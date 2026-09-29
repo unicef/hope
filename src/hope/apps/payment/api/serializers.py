@@ -1253,7 +1253,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
             Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
         )
-        return FundsCommitmentSerializer(headers, many=True).data
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
     @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
@@ -1269,7 +1269,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             )
         )
 
-        return [FundsCommitmentSerializer(header).data for header in headers]
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
     @extend_schema_field(VisionStateSerializer)
     def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:

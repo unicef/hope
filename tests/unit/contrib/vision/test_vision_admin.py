@@ -214,7 +214,7 @@ def test_manual_fc_header_recovery_shows_warning_and_available_header(
     assert change_response.status_code == 200
     assert 'id="btn-assign_vision_funds_commitment_headers"' in change_response.content.decode()
     assert action_response.status_code == 200
-    content = action_response.content.decode()
+    content = " ".join(action_response.content.decode().split())
     assert "Assigning these FC headers will automatically release the Payment Plan" in content
     assert "immediately send it to Payment Gateway if" in content
     assert "it is a PG plan" in content
