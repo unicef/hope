@@ -70,9 +70,7 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     sample_size = models.PositiveIntegerField(default=0)
     program = models.ForeignKey(
         "program.Program",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="messages",
     )
     copied_from = models.ForeignKey(
