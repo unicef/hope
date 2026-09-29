@@ -12,9 +12,8 @@ from hope.config.settings import ALLOWED_HOSTS, DEBUG, FRONTEND_HOST
 # must be done incrementally; start with CONTENT_SECURITY_POLICY in "report-only"
 # mode and monitor before enforcing a stricter policy, see
 # https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html
-CSP_REPORT_URI = env.tuple("CSP_REPORT_URI")
-CSP_REPORT_ONLY = env("CSP_REPORT_ONLY")
-CSP_REPORT_PERCENTAGE = env("CSP_REPORT_PERCENTAGE")
+_report_only = env("CSP_REPORT_ONLY")
+_report_percentage = env("CSP_REPORT_PERCENTAGE")
 
 default_src: tuple[str, ...] = env.tuple("CSP_DEFAULT_SRC")
 frame_ancestors: tuple[str, ...] = env.tuple("CSP_FRAME_ANCESTORS")
@@ -36,7 +35,7 @@ if DEBUG:
 
     ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN")])
 
-DIRECTIVES = {
+_directives = {
     "default-src": default_src,
     "frame-ancestors": frame_ancestors,
     "style-src": style_src,
@@ -49,18 +48,19 @@ DIRECTIVES = {
     "frame-src": ["'self'"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
+    "worker-src": ["'self'", "blob:"],
 }
-report_uri = tuple(uri for uri in CSP_REPORT_URI if uri)
-if report_uri:
-    DIRECTIVES["report-uri"] = report_uri
+_report_uri = tuple(uri for uri in env.tuple("CSP_REPORT_URI") if uri)
+if _report_uri:
+    _directives["report-uri"] = _report_uri
 
-if CSP_REPORT_ONLY:
+if _report_only:
     CONTENT_SECURITY_POLICY_REPORT_ONLY = {
-        "DIRECTIVES": DIRECTIVES,
-        "REPORT_PERCENTAGE": CSP_REPORT_PERCENTAGE * 100,
+        "DIRECTIVES": _directives,
+        "REPORT_PERCENTAGE": _report_percentage * 100,
     }
 else:
     CONTENT_SECURITY_POLICY = {
-        "DIRECTIVES": DIRECTIVES,
-        "REPORT_PERCENTAGE": CSP_REPORT_PERCENTAGE * 100,
+        "DIRECTIVES": _directives,
+        "REPORT_PERCENTAGE": _report_percentage * 100,
     }
