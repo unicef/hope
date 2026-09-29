@@ -4,7 +4,7 @@ requires = [ "setuptools" ]
 
 [project]
 name = "hope"
-version = "4.21.0"
+version = "4.22.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 readme = "README.md"
 license = { text = "None" }
@@ -38,7 +38,7 @@ dependencies = [
   "django-cors-headers>=3.13,<5",
   "django-countries>=7.3.2,<10",
   "django-csp>=3.7,<5",
-  "django-debug-toolbar>=6,<7",
+  "django-debug-toolbar>=6,<9",
   "django-elasticsearch-dsl>=8,<10",
   "django-environ>=0.10,<1",
   "django-extensions>=3.1.5,<5",
