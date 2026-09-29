@@ -425,6 +425,7 @@ def test_create_raises_validation_error_for_mixed_currency(
     fsp,
 ):
     group = PaymentPlanGroupFactory(cycle=cycle)
+    other_group = PaymentPlanGroupFactory(cycle=cycle)
     _create_source_payment_plan(
         cycle=cycle,
         group=group,
@@ -436,7 +437,7 @@ def test_create_raises_validation_error_for_mixed_currency(
     )
     _create_source_payment_plan(
         cycle=cycle,
-        group=group,
+        group=other_group,
         business_area=business_area,
         currency=second_currency,
         delivery_mechanism=delivery_mechanism,
@@ -447,7 +448,7 @@ def test_create_raises_validation_error_for_mixed_currency(
     with pytest.raises(ValidationError, match="must share the same Currency"):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group.id)],
+            payment_plan_group_ids=[str(group.id), str(other_group.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )

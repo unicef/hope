@@ -50,6 +50,7 @@ from hope.models.utils import (
 if TYPE_CHECKING:
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
+    from hope.models.currency import Currency
     from hope.models.payment_verification_plan import PaymentVerificationPlan
     from hope.models.program import Program
     from hope.models.user import User
@@ -91,7 +92,6 @@ class PaymentPlan(
             "steficon_rule_targeting",
             "steficon_targeting_applied_date",
             "exclusion_reason",
-            "financial_service_provider",
             "delivery_mechanism",
             "source_payment_plan",
             "currency_exchange_date",
@@ -124,7 +124,6 @@ class PaymentPlan(
             "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
-            "currency.code": "currency",
         },
     )
 
@@ -309,12 +308,6 @@ class PaymentPlan(
         help_text="Payment plan purposes",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
-        blank=True,
-        null=True,
-        on_delete=models.PROTECT,
-    )
     imported_file = models.ForeignKey(
         FileTemp,
         null=True,
@@ -438,14 +431,6 @@ class PaymentPlan(
         blank=True,
         null=True,
         help_text="Payment Plan end date",
-    )
-    currency = models.ForeignKey(
-        "core.Currency",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="payment_plans",
-        help_text="Currency",
     )
     dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
     dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
@@ -1077,6 +1062,14 @@ class PaymentPlan(
             and self.export_file_delivery is not None
             and self.background_action_status is None
         )
+
+    @property
+    def financial_service_provider(self) -> "FinancialServiceProvider | None":
+        return self.payment_plan_group.financial_service_provider if self.payment_plan_group_id else None
+
+    @property
+    def currency(self) -> "Currency | None":
+        return self.payment_plan_group.currency if self.payment_plan_group_id else None
 
     @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover

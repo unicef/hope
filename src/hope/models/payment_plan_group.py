@@ -25,10 +25,10 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "cycle",
             "status",
             "financial_service_provider",
-            "currency",
             "background_action_status",
             "delivery_import_file",
         ],
+        {"currency.code": "currency"},
     )
 
     class Status(models.TextChoices):
@@ -159,22 +159,19 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         """
         from hope.models import FinancialServiceProvider, PaymentPlan, PaymentPlanSplit
 
+        if self.financial_service_provider is None:
+            return self.payment_plans.none()
         payment_plans = self.payment_plans.annotate(
             has_unsent_splits=Exists(
                 PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=False)
             )
         ).filter(
             Q(status=PaymentPlan.Status.ACCEPTED)
-            & Q(financial_service_provider__isnull=False)
-            & (
-                Q(use_payment_gateway=True)
-                | Q(
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-                )
-            )
             & Q(has_unsent_splits=True)
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
+        if self.financial_service_provider.communication_channel != FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+            payment_plans = payment_plans.filter(use_payment_gateway=True)
         if flag_state("VISION_INTEGRATION_ACTIVE"):
             payment_plans = payment_plans.annotate(
                 # PaymentPlan.vision_status treats missing Vision data as NOT_SENT. Apply the same fallback in SQL;

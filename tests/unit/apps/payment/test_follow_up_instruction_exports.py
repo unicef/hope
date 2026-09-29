@@ -374,8 +374,8 @@ def test_delivery_export_marks_xlsx_export_error_on_exception(
 
 def test_get_source_headers_raises_when_child_plan_has_no_fsp(instruction, child_payment_plans) -> None:
     plan, _ = child_payment_plans
-    plan.financial_service_provider = None
-    plan.save(update_fields=["financial_service_provider"])
+    plan.payment_plan_group.financial_service_provider = None
+    plan.payment_plan_group.save(update_fields=["financial_service_provider"])
 
     with pytest.raises(
         ValueError, match="Child Payment Plans must define Financial Service Provider and Delivery Mechanism."

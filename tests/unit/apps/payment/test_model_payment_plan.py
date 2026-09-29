@@ -191,9 +191,10 @@ def test_payment_plan_create(user):
 
 def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gateway(payment_plan):
     PaymentFactory(parent=payment_plan)
-    payment_plan.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.use_payment_gateway = True
-    payment_plan.save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    payment_plan.save(update_fields=["use_payment_gateway"])
     payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_PG)
 
     assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is False
@@ -201,9 +202,10 @@ def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gatewa
 
 def test_is_payment_gateway_and_all_sent_to_fsp_true_for_sent_to_fsp(payment_plan):
     PaymentFactory(parent=payment_plan)
-    payment_plan.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.use_payment_gateway = True
-    payment_plan.save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    payment_plan.save(update_fields=["use_payment_gateway"])
     payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_FSP)
 
     assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is True

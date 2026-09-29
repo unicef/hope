@@ -153,11 +153,10 @@ def group_with_pending_payment_gateway_payment(program_cycle, business_area, fsp
 
 
 @pytest.fixture
-def group_one_exportable_two_skipped(
-    program_cycle, business_area, fsp, fsp_no_template, delivery_mechanism, fsp_template
-):
-    """One ACCEPTED plan whose FSP has a template (exports) plus two whose FSP has none (skipped)."""
+def group_one_exportable_two_skipped(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    """One ACCEPTED plan whose delivery mechanism has a template (exports) plus two whose has none (skipped)."""
     group = PaymentPlanGroupFactory(cycle=program_cycle)
+    delivery_mechanism_without_template = DeliveryMechanismFactory()
     exportable_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -179,14 +178,14 @@ def group_one_exportable_two_skipped(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_no_template,
-        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism_without_template,
         status=PaymentPlan.Status.ACCEPTED,
     )
     PaymentFactory(
         parent=skipped_plan_one,
-        financial_service_provider=fsp_no_template,
-        delivery_type=delivery_mechanism,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism_without_template,
         program=skipped_plan_one.program,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("10.00"),
@@ -195,14 +194,14 @@ def group_one_exportable_two_skipped(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
-        financial_service_provider=fsp_no_template,
-        delivery_mechanism=delivery_mechanism,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism_without_template,
         status=PaymentPlan.Status.ACCEPTED,
     )
     PaymentFactory(
         parent=skipped_plan_two,
-        financial_service_provider=fsp_no_template,
-        delivery_type=delivery_mechanism,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism_without_template,
         program=skipped_plan_two.program,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("10.00"),

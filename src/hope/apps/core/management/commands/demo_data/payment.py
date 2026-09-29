@@ -376,19 +376,21 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     program.payment_plan_purposes.add(purpose)
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     pp_name = "Test Payment Plan"
-    pp_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp_name} Group")
+    pp_group, _ = PaymentPlanGroup.objects.update_or_create(
+        cycle=program_cycle,
+        name=f"{pp_name} Group",
+        defaults={"currency": usd, "financial_service_provider": fsp_1},
+    )
     payment_plan = PaymentPlan.objects.update_or_create(
         name=pp_name,
         pk=payment_plan_pk,
         business_area=afghanistan,
-        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
         payment_plan_group=pp_group,
-        financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
     payment_plan.payment_plan_purposes.add(purpose)
@@ -430,19 +432,21 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     payment_plan.update_population_count_fields()
     # add one more PP
     pp2_name = "Test TP for PM (just click rebuild)"
-    pp2_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp2_name} Group")
+    pp2_group, _ = PaymentPlanGroup.objects.update_or_create(
+        cycle=program_cycle,
+        name=f"{pp2_name} Group",
+        defaults={"currency": usd, "financial_service_provider": fsp_1},
+    )
     pp2 = PaymentPlan.objects.update_or_create(
         name=pp2_name,
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
-        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
         payment_plan_group=pp2_group,
-        financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
     pp2.payment_plan_purposes.add(purpose)
@@ -530,12 +534,15 @@ def generate_reconciled_payment_plan() -> None:
     usd = CurrencyFactory(code="USD", name="United States Dollar")
     program_cycle = program.cycles.first()
     reconciled_name = "Reconciled Payment Plan"
-    reconciled_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{reconciled_name} Group")
+    reconciled_group, _ = PaymentPlanGroup.objects.update_or_create(
+        cycle=program_cycle,
+        name=f"{reconciled_name} Group",
+        defaults={"currency": usd, "financial_service_provider": fsp_1},
+    )
     payment_plan = PaymentPlan.objects.update_or_create(
         name=reconciled_name,
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        currency=usd,
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
@@ -547,7 +554,6 @@ def generate_reconciled_payment_plan() -> None:
         total_entitled_quantity=2999,
         plan_type=PaymentPlan.PlanType.REGULAR,
         exchange_rate=234.6742,
-        financial_service_provider=fsp_1,
         delivery_mechanism=dm_cash,
     )[0]
     payment_plan.payment_plan_purposes.add(purpose)
@@ -712,18 +718,21 @@ def generate_payment_plan_large() -> None:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProvider.objects.get(name="Test FSP 1")
     usd = CurrencyFactory(code="USD", name="United States Dollar")
+    large_pp_group = program_cycle.payment_plan_groups.first()
+    large_pp_group.currency = usd
+    large_pp_group.financial_service_provider = fsp
+    large_pp_group.save(update_fields=["currency", "financial_service_provider"])
     payment_plan = PaymentPlan.objects.update_or_create(
         pk=UUID("bbbbbbbb-0000-0000-0000-000000311246"),
         defaults={
             "name": "Large Payment Plan (311246)",
             "business_area": afghanistan,
-            "currency": usd,
             "dispersion_start_date": now,
             "dispersion_end_date": now + timedelta(days=14),
             "status_date": now,
             "created_by": root,
             "program_cycle": program_cycle,
-            "financial_service_provider": fsp,
+            "payment_plan_group": large_pp_group,
             "delivery_mechanism": dm_cash,
             "status": PaymentPlan.Status.LOCKED,
         },

@@ -13,7 +13,6 @@
                 "business_area": "07d51a85-9386-4166-b8f8-7f383e4efdc1",
                 "program_cycle": "8ed26d0a-b925-4020-a25c-c223999e9fcc",
                 "delivery_mechanism": null,
-                "financial_service_provider": null,
                 "imported_file": null,
                 "export_file_entitlement": null,
                 "export_file_delivery": null,
@@ -27,7 +26,6 @@
                 "name": null,
                 "start_date": null,
                 "end_date": null,
-                "currency": null,
                 "dispersion_start_date": "2025-01-01",
                 "dispersion_end_date": "2025-01-31",
                 "excluded_ids": null,
@@ -101,7 +99,6 @@
                     "rdi_import_xlsx_disabled": false,
                     "active": true,
                     "enable_email_notification": true,
-
                     "rapid_pro_host": null,
                     "rapid_pro_payment_verification_token": null,
                     "rapid_pro_messages_token": null,

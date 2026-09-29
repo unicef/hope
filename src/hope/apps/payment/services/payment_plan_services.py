@@ -310,7 +310,6 @@ class PaymentPlanService:
         payment_plan_group = self.payment_plan.payment_plan_group
         if payment_plan_group is None or payment_plan_group.currency_id is None:
             raise ValidationError("Payment Plan Group needs a Currency before a Payment Plan can be opened.")
-        self.payment_plan.currency = payment_plan_group.currency
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
         self.payment_plan.dispersion_end_date = dispersion_end_date
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
@@ -319,7 +318,6 @@ class PaymentPlanService:
             update_fields=(
                 "status_date",
                 "status",
-                "currency",
                 "dispersion_start_date",
                 "dispersion_end_date",
                 "exchange_rate",
@@ -328,8 +326,7 @@ class PaymentPlanService:
         )
         self.payment_plan.program_cycle.set_active()
 
-        # add currency
-        Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
+        Payment.objects.filter(parent=self.payment_plan).update(currency=payment_plan_group.currency)
         self.payment_plan.update_money_fields()
 
         return self.payment_plan
@@ -745,7 +742,6 @@ class PaymentPlanService:
                 created_by=user,
                 program_cycle=program_cycle,
                 payment_plan_group=payment_plan_group,
-                financial_service_provider_id=payment_plan_group.financial_service_provider_id,
                 name=input_data["name"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
@@ -849,10 +845,10 @@ class PaymentPlanService:
             name = self._validate_pp_name(name, program)
             self.payment_plan.name = name
 
-        fsp_id_before = self.payment_plan.financial_service_provider_id
+        fsp_id_before = self.payment_plan.payment_plan_group.financial_service_provider_id
         self._set_program_cycle(input_data)
         self._set_group_for_open_pp(input_data)
-        if self.payment_plan.financial_service_provider_id != fsp_id_before:
+        if self.payment_plan.payment_plan_group.financial_service_provider_id != fsp_id_before:
             should_rebuild_list = True
 
         vulnerability_filter = self._set_vulnerability_scores(input_data)
@@ -942,15 +938,17 @@ class PaymentPlanService:
         delivery_mechanism = self.payment_plan.delivery_mechanism
         if currency is not None and delivery_mechanism is not None:
             self.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
-        new_fsp_id = payment_plan_group.financial_service_provider_id
-        if new_fsp_id != self.payment_plan.financial_service_provider_id and not self.payment_plan.is_population_open():
+        current_fsp_id = self.payment_plan.payment_plan_group.financial_service_provider_id
+        if (
+            payment_plan_group.financial_service_provider_id != current_fsp_id
+            and not self.payment_plan.is_population_open()
+        ):
             # Payments carry the FSP from the build; only a TP_OPEN plan can be rebuilt.
             raise ValidationError(
                 "Target Population can be moved to a group with a different Financial Service Provider only "
                 "within Open status"
             )
         self.payment_plan.payment_plan_group = payment_plan_group
-        self.payment_plan.financial_service_provider_id = new_fsp_id
 
     def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
@@ -1111,14 +1109,12 @@ class PaymentPlanService:
             business_area=source_pp.business_area,
             created_by=user,
             program_cycle=source_pp.program_cycle,
-            currency=source_pp.currency,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
             use_payment_gateway=source_pp.use_payment_gateway,
             delivery_mechanism=source_pp.delivery_mechanism,
-            financial_service_provider=source_pp.financial_service_provider,
             payment_plan_group=source_pp.payment_plan_group,
         )
         self.copy_target_criteria(source_pp, child_pp)

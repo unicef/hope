@@ -168,7 +168,8 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         payment_gateway_id="123id",
     )
-    payment_plan.financial_service_provider = fsp_xlsx
+    payment_plan.payment_plan_group.financial_service_provider = fsp_xlsx
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.delivery_mechanism = DeliveryMechanismFactory()
     payment_plan.save()
     return {
@@ -495,10 +496,11 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.exchange_rate = 1.25
     payment_plan.custom_exchange_rate = True
-    payment_plan.save(update_fields=["status", "currency", "exchange_rate", "custom_exchange_rate"])
+    payment_plan.save(update_fields=["status", "exchange_rate", "custom_exchange_rate"])
     payment_plan.get_unore_exchange_rate = Mock(return_value=2.0)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
@@ -515,8 +517,8 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    payment_plan.save(update_fields=["currency"])
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
     with django_assert_num_queries(23):
@@ -533,8 +535,8 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.currency = None
-    payment_plan.save(update_fields=["currency"])
+    payment_plan.payment_plan_group.currency = None
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
 
     with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
@@ -551,9 +553,10 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     # get_unore_exchange_rate path through the dummy exchange rate client (no method mock).
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.currency = CurrencyFactory(code="BHD", name="Bahraini Dinar")
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="BHD", name="Bahraini Dinar")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.custom_exchange_rate = False
-    payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
+    payment_plan.save(update_fields=["custom_exchange_rate"])
 
     with django_assert_num_queries(23):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
@@ -625,8 +628,8 @@ def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_del
     assert data["volume"] is None
     assert data["volume_usd"] is None
 
-    payment_plan.financial_service_provider = volume_by_delivery_context["fsp"]
-    payment_plan.save(update_fields=["financial_service_provider"])
+    payment_plan.payment_plan_group.financial_service_provider = volume_by_delivery_context["fsp"]
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     data = VolumeByDeliveryMechanismSerializer(instance=payment_plan).data
 
     assert data["volume"] == 222

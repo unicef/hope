@@ -76,6 +76,18 @@ class PaymentPlanFactory(DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda obj: obj.program_cycle.program.business_area)
 
     @factory.post_generation
+    def currency(self, create, extracted, **kwargs):
+        if create and extracted is not None:
+            self.payment_plan_group.currency = extracted
+            self.payment_plan_group.save(update_fields=["currency"])
+
+    @factory.post_generation
+    def financial_service_provider(self, create, extracted, **kwargs):
+        if create and extracted is not None:
+            self.payment_plan_group.financial_service_provider = extracted
+            self.payment_plan_group.save(update_fields=["financial_service_provider"])
+
+    @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
             return

@@ -31,9 +31,7 @@ class PaymentPlanGroupService:
                 "Financial Service Provider can be changed only while every Target Population in the group is Open."
             )
         self.payment_plan_group.financial_service_provider = financial_service_provider
-        self.payment_plan_group.payment_plans.update(financial_service_provider=financial_service_provider)
         for payment_plan in payment_plans:
-            payment_plan.financial_service_provider = financial_service_provider
             transaction.on_commit(
                 lambda payment_plan=payment_plan: PaymentPlanService.rebuild_payment_plan_population(
                     True, False, False, payment_plan
@@ -102,10 +100,10 @@ class PaymentPlanGroupService:
 
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
-        # lock_fsp() / unlock_fsp() read both objects per plan
+        # lock_fsp() reads the delivery mechanism and, through the group, the FSP of every plan
         return list(
             payment_plan_group.payment_plans.select_related(
-                "delivery_mechanism", "financial_service_provider"
+                "delivery_mechanism", "payment_plan_group__financial_service_provider"
             ).order_by("created_at")
         )
 

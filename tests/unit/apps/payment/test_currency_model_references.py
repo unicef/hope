@@ -11,7 +11,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.models import Household, Payment, PaymentPlan
+from hope.models import Household, Payment, PaymentPlan, PaymentPlanGroup
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db
@@ -104,13 +104,16 @@ def test_payment_signature_uses_currency_code_via_dotted_path(
         assert payment_with_snapshot.signature_hash == _calculate_expected_hash(payment_with_snapshot)
 
 
-def test_payment_plan_activity_log_diff_reports_currency_code(
+def test_payment_plan_group_activity_log_diff_reports_currency_code(
     payment_plan_usd: PaymentPlan,
     payment_plan_pln: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(2):
-        diff = create_diff(payment_plan_usd, payment_plan_pln, PaymentPlan.ACTIVITY_LOG_MAPPING)
+    group_usd = payment_plan_usd.payment_plan_group
+    group_pln = payment_plan_pln.payment_plan_group
+
+    with django_assert_num_queries(0):
+        diff = create_diff(group_usd, group_pln, PaymentPlanGroup.ACTIVITY_LOG_MAPPING)
 
     assert "currency" in diff
     assert diff["currency"]["from"] == "USD"

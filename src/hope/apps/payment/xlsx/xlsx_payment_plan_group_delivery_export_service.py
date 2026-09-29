@@ -80,7 +80,9 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
                 export_tag__isnull=True,
             )
         self.payment_plans = list(
-            plan_qs.select_related("financial_service_provider", "delivery_mechanism").order_by("unicef_id")
+            plan_qs.select_related("payment_plan_group__financial_service_provider", "delivery_mechanism").order_by(
+                "unicef_id"
+            )
         )
         # in a batch all payment plans are of the same type
         self.plan_type: str | None = self.payment_plans[0].plan_type if self.payment_plans else plan_type
@@ -99,9 +101,9 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         """Resolve every plan's (fsp, delivery_mechanism) -> xlsx_template in a single query."""
         if self._template_map is None:
             pairs = {
-                (pp.financial_service_provider_id, pp.delivery_mechanism_id)
+                (pp.payment_plan_group.financial_service_provider_id, pp.delivery_mechanism_id)
                 for pp in self.payment_plans
-                if pp.financial_service_provider_id and pp.delivery_mechanism_id
+                if pp.payment_plan_group.financial_service_provider_id and pp.delivery_mechanism_id
             }
             mappings = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
                 financial_service_provider_id__in={fsp_id for fsp_id, _ in pairs},
@@ -132,11 +134,10 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     def _resolve_template(self, payment_plan: PaymentPlan) -> FinancialServiceProviderXlsxTemplate | None:
         if self.fsp_xlsx_template is not None:
             return self.fsp_xlsx_template
-        if not payment_plan.financial_service_provider_id or not payment_plan.delivery_mechanism_id:
+        fsp_id = payment_plan.payment_plan_group.financial_service_provider_id
+        if not fsp_id or not payment_plan.delivery_mechanism_id:
             return None
-        return self._get_template_map().get(
-            (payment_plan.financial_service_provider_id, payment_plan.delivery_mechanism_id)
-        )
+        return self._get_template_map().get((fsp_id, payment_plan.delivery_mechanism_id))
 
     def _skip_reason(
         self, payment_plan: PaymentPlan, template: FinancialServiceProviderXlsxTemplate | None

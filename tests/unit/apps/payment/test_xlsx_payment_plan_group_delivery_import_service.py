@@ -1003,7 +1003,7 @@ def test_normal_import_reports_finished_plan_row_as_ineligible(group_with_finish
     )
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
 
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(2):
         service.open_workbook()
     with django_assert_num_queries(0):
         service.validate()
@@ -1031,7 +1031,7 @@ def test_flagged_payment_is_not_added_to_group_payment_index(group_with_flagged_
     ctx = group_with_flagged_payment
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], BytesIO())
 
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(2):
         service._prepare_payment_data()
 
     assert str(ctx["payment_one"].unicef_id) not in service.payment_to_plan

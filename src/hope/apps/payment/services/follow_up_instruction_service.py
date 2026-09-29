@@ -51,10 +51,9 @@ class FollowUpInstructionService:
             .filter(has_follow_up_child=False)
             .select_related(
                 "business_area",
-                "currency",
                 "delivery_mechanism",
-                "financial_service_provider",
-                "payment_plan_group",
+                "payment_plan_group__currency",
+                "payment_plan_group__financial_service_provider",
                 "program_cycle",
             )
             .prefetch_related("payment_plan_purposes")
@@ -75,9 +74,9 @@ class FollowUpInstructionService:
 
     @staticmethod
     def _validate_shared_configuration(source_plans: list[PaymentPlan]) -> None:
-        fsp_ids = {payment_plan.financial_service_provider_id for payment_plan in source_plans}
+        fsp_ids = {payment_plan.payment_plan_group.financial_service_provider_id for payment_plan in source_plans}
         delivery_mechanism_ids = {payment_plan.delivery_mechanism_id for payment_plan in source_plans}
-        currency_ids = {payment_plan.currency_id for payment_plan in source_plans}
+        currency_ids = {payment_plan.payment_plan_group.currency_id for payment_plan in source_plans}
         if None in fsp_ids or len(fsp_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Financial Service Provider.")
         if None in delivery_mechanism_ids or len(delivery_mechanism_ids) != 1:

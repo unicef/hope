@@ -269,9 +269,10 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
     )
     staff_user.user_permissions.set([*base_permissions, permission])
 
-    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.save(update_fields=["currency", "exchange_rate"])
+    payment_plan.save(update_fields=["exchange_rate"])
     payment = PaymentFactory(
         parent=payment_plan,
         delivery_type=delivery_mechanism,
@@ -312,9 +313,10 @@ def test_payment_plan_post_recalculate_exchange_rate_without_permission(
     )
     staff_user.user_permissions.set(base_permissions)
 
-    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.save(update_fields=["currency", "exchange_rate"])
+    payment_plan.save(update_fields=["exchange_rate"])
     payment = PaymentFactory(
         parent=payment_plan,
         delivery_type=delivery_mechanism,

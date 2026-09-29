@@ -747,7 +747,7 @@ class PaymentGatewayService:
             PaymentPlan.objects.annotate(
                 has_eligible_payments=Exists(Payment.objects.eligible().filter(parent_id=OuterRef("pk"))),
             )
-            .select_related("currency", "financial_service_provider")
+            .select_related("payment_plan_group__currency", "payment_plan_group__financial_service_provider")
             .prefetch_related(
                 "splits",
                 Prefetch(
@@ -763,10 +763,10 @@ class PaymentGatewayService:
                 Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
                 Q(use_payment_gateway=True)
                 | Q(
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+                    payment_plan_group__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
                 ),
                 status=PaymentPlan.Status.ACCEPTED,
-                financial_service_provider__isnull=False,
+                payment_plan_group__financial_service_provider__isnull=False,
             )
         )
 

@@ -1110,9 +1110,9 @@ def test_mark_ready(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    target_population_actions_context[
-        "target_population"
-    ].financial_service_provider = FinancialServiceProviderFactory()
+    group = target_population_actions_context["target_population"].payment_plan_group
+    group.financial_service_provider = FinancialServiceProviderFactory()
+    group.save(update_fields=["financial_service_provider"])
     target_population_actions_context["target_population"].delivery_mechanism = DeliveryMechanismFactory()
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()

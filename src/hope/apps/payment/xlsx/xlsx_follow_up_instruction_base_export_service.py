@@ -34,7 +34,7 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         payment_plan = (
             self.instruction.payment_plans.select_related(
                 "delivery_mechanism",
-                "financial_service_provider",
+                "payment_plan_group__financial_service_provider",
             )
             .order_by("created_at")
             .first()

@@ -49,7 +49,7 @@ def historical_group_export():
     api_fsp = FinancialServiceProviderFactory(communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API)
     api_payment_plan = PaymentPlanFactory(
         program_cycle=group.cycle,
-        payment_plan_group=group,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=group.cycle),
         financial_service_provider=api_fsp,
         status=PaymentPlan.Status.ACCEPTED,
         use_payment_gateway=False,
@@ -63,7 +63,7 @@ def historical_group_export():
     )
     payment_plan_without_fsp = PaymentPlanFactory(
         program_cycle=group.cycle,
-        payment_plan_group=group,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=group.cycle),
         financial_service_provider=None,
         status=PaymentPlan.Status.ACCEPTED,
         use_payment_gateway=False,

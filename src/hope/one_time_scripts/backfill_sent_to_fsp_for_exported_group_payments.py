@@ -52,10 +52,10 @@ def _eligible_payment_plans() -> QuerySet[PaymentPlan]:
             payment_plan_group__isnull=False,
             export_tag__isnull=False,
             use_payment_gateway=False,
-            financial_service_provider__isnull=False,
+            payment_plan_group__financial_service_provider__isnull=False,
         )
         .exclude(
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+            payment_plan_group__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         )
         .select_related("export_file_delivery", "program_cycle")
         .order_by("business_area_id", "program_cycle__program_id", "pk")

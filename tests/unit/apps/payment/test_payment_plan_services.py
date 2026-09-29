@@ -1357,8 +1357,9 @@ def test_draft_with_invalid_pp_status(
     )
 
     payment_plan.status = PaymentPlan.Status.DRAFT
-    payment_plan.financial_service_provider = fsp
     payment_plan.save()
+    payment_plan.payment_plan_group.financial_service_provider = fsp
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
 
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan).draft()
@@ -1590,7 +1591,8 @@ def test_lock_fsp_validation(
         PaymentPlanService(payment_plan).lock_fsp()
     assert error.value.detail[0] == "Payment Plan doesn't have FSP / DeliveryMechanism assigned."
 
-    payment_plan.financial_service_provider = fsp
+    payment_plan.payment_plan_group.financial_service_provider = fsp
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.delivery_mechanism = dm_transfer_to_account
     payment.save()
 

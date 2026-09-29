@@ -249,7 +249,7 @@ class PaymentVerificationViewSet(
     payment_plan_url_kwarg = "pk"
     queryset = (
         PaymentPlan.objects.filter(status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED))
-        .select_related("currency")
+        .select_related("payment_plan_group__currency")
         .order_by("-created_at")
     )
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
@@ -799,7 +799,7 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program", "currency", "payment_plan_group")
+        .select_related("program_cycle__program", "payment_plan_group__currency")
         .prefetch_related("child_plans")
         .order_by("-created_at")
     )
@@ -1793,7 +1793,7 @@ class PaymentPlanGlobalViewSet(
 ):
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("currency", "payment_plan_group")
+        .select_related("payment_plan_group__currency")
         .prefetch_related("child_plans")
         .order_by("-created_at")
     )
@@ -1817,7 +1817,7 @@ class FollowUpInstructionViewSet(
     program_model_field = "program"
     queryset = (
         FollowUpInstruction.objects.select_related("business_area", "program", "created_by")
-        .prefetch_related("payment_plans__source_payment_plan", "payment_plans__currency")
+        .prefetch_related("payment_plans__source_payment_plan", "payment_plans__payment_plan_group__currency")
         .order_by("-created_at")
     )
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
@@ -2077,7 +2077,7 @@ class TargetPopulationViewSet(
 ):
     program_model_field = "program_cycle__program"
     queryset = (
-        PaymentPlan.objects.all().select_related("currency", "created_by", "payment_plan_group").order_by("-created_at")
+        PaymentPlan.objects.all().select_related("payment_plan_group__currency", "created_by").order_by("-created_at")
     )
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
@@ -2309,7 +2309,6 @@ class TargetPopulationViewSet(
                 steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
                 program_cycle=program_cycle,
                 payment_plan_group=payment_plan_group,
-                financial_service_provider=payment_plan.financial_service_provider,
                 delivery_mechanism=payment_plan.delivery_mechanism,
             )
             PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)

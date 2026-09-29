@@ -174,7 +174,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
-        ("currency__code", AutoCompleteFilter),
+        ("payment_plan_group__currency__code", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         "use_payment_gateway",
         ("background_action_status", ChoicesFieldComboFilter),

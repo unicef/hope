@@ -931,7 +931,8 @@ def test_pp_fsp_lock(
         payment_plan_actions_context["program_active"],
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
-    payment_plan_actions_context["pp"].financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan_actions_context["pp"].payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan_actions_context["pp"].payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan_actions_context["pp"].delivery_mechanism = DeliveryMechanismFactory()
     payment_plan_actions_context["pp"].save()
     PaymentFactory(parent=payment_plan_actions_context["pp"], entitlement_quantity=999)
@@ -1427,8 +1428,9 @@ def test_pp_send_to_payment_gateway(
     )
     PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"])
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].financial_service_provider = fsp
     payment_plan_actions_context["pp"].save()
+    payment_plan_actions_context["pp"].payment_plan_group.financial_service_provider = fsp
+    payment_plan_actions_context["pp"].payment_plan_group.save(update_fields=["financial_service_provider"])
     PaymentFactory(parent=payment_plan_actions_context["pp"])
     response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_to_payment_gate_way"])
 
@@ -1462,8 +1464,9 @@ def test_split(
     )
     split = PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"], sent_to_payment_gateway=True)
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
-    payment_plan_actions_context["pp"].financial_service_provider = fsp
     payment_plan_actions_context["pp"].save()
+    payment_plan_actions_context["pp"].payment_plan_group.financial_service_provider = fsp
+    payment_plan_actions_context["pp"].payment_plan_group.save(update_fields=["financial_service_provider"])
     data = {"payments_no": 1, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS}
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_pp_split"],
