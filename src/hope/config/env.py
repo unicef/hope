@@ -83,6 +83,7 @@ DEFAULTS = {
     "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
     "CACHE_ENABLED": (bool, True),
     "CACHE_LOCATION": (str, "redis://redis:6379/1"),
+    "SESSION_CACHE_LOCATION": (str, "redis://redis:6379/2"),
     "CSP_REPORT_URI": (tuple, ("",)),
     "CSP_REPORT_ONLY": (bool, False),
     "CSP_REPORT_PERCENTAGE": (float, 0.1),
