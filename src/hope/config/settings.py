@@ -130,9 +130,7 @@ MIDDLEWARE = [] + [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hope.middlewares.sentry.SentryScopeMiddleware",
     "hope.middlewares.version.VersionMiddleware",
 ]
@@ -280,20 +278,32 @@ if CACHE_ENABLED:
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": env("CACHE_LOCATION"),
             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-        }
+        },
+        "sessions": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": env("SESSION_CACHE_LOCATION"),
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient", "IGNORE_EXCEPTIONS": True},
+        },
     }
+    DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
 else:
     CACHES = {
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
-        }
+        },
+        "sessions": {
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
+            "LOCATION": "sessions",
+        },
     }
 
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY")
+SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
 SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME")
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_CACHE_ALIAS = "sessions"
 AUTH_USER_MODEL = "account.User"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
@@ -451,11 +461,15 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
 
-SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
-SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
+SECURE_PROXY_SSL_HEADER = env.tuple("SECURE_PROXY_SSL_HEADER")
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT")
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS")
 SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD")
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
+SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
+# The obsolete X-XSS-Protection header is deliberately NOT set, see
+# https://owasp.org/www-project-secure-headers/#x-xss-protection
 
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
