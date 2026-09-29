@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -13,7 +15,7 @@ from extras.test_utils.factories.payment import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
 )
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
-from hope.models import PaymentPlan, PaymentPlanGroup
+from hope.models import DeliveryMechanism, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -44,8 +46,13 @@ def currency():
 
 
 @pytest.fixture
-def open_group(cycle):
-    return PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.OPEN)
+def open_group(cycle, financial_service_provider, currency):
+    return PaymentPlanGroupFactory(
+        cycle=cycle,
+        status=PaymentPlanGroup.Status.OPEN,
+        financial_service_provider=financial_service_provider,
+        currency=currency,
+    )
 
 
 @pytest.fixture
@@ -130,43 +137,22 @@ def test_lock_rejects_payment_plan_that_is_not_locked(
     )
 
 
-def test_lock_rejects_payment_plans_with_different_fsps(
-    cycle, open_group, locked_payment_plan, delivery_mechanism, currency
-):
-    other_fsp = FinancialServiceProviderFactory()
-    FspXlsxTemplatePerDeliveryMechanismFactory(
-        financial_service_provider=other_fsp,
-        delivery_mechanism=delivery_mechanism,
-    )
-    PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=open_group,
-        status=PaymentPlan.Status.LOCKED,
-        financial_service_provider=other_fsp,
-        delivery_mechanism=delivery_mechanism,
-        currency=currency,
-    )
+def test_lock_rejects_group_without_fsp(open_group, locked_payment_plan):
+    open_group.financial_service_provider = None
+    open_group.save(update_fields=["financial_service_provider"])
 
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(open_group).lock()
-    assert error.value.detail[0] == "Payment Plans in the group must share the same Financial Service Provider."
+    assert error.value.detail[0] == "Payment Plan Group needs a Financial Service Provider before it can be locked."
 
 
-def test_lock_rejects_payment_plans_with_different_currencies(
-    cycle, open_group, locked_payment_plan, financial_service_provider, delivery_mechanism
-):
-    PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=open_group,
-        status=PaymentPlan.Status.LOCKED,
-        financial_service_provider=financial_service_provider,
-        delivery_mechanism=delivery_mechanism,
-        currency=CurrencyFactory(code="EUR", name="Euro"),
-    )
+def test_lock_rejects_group_without_currency(open_group, locked_payment_plan):
+    open_group.currency = None
+    open_group.save(update_fields=["currency"])
 
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(open_group).lock()
-    assert error.value.detail[0] == "Payment Plans in the group must share the same Currency."
+    assert error.value.detail[0] == "Payment Plan Group needs a Currency before it can be locked."
 
 
 def test_lock_rejects_payment_plan_without_delivery_template(
@@ -211,3 +197,100 @@ def test_unlock_rejects_group_that_is_open(open_group, locked_payment_plan):
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(open_group).unlock()
     assert error.value.detail[0] == "Unlock Payment Plan Group is possible only within Status LOCKED"
+
+
+def test_assign_fsp_copies_it_to_open_target_populations(cycle):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    target_population = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.TP_OPEN,
+        financial_service_provider=None,
+    )
+    fsp = FinancialServiceProviderFactory()
+
+    PaymentPlanGroupService(group).assign_financial_service_provider(fsp)
+    group.save()
+
+    target_population.refresh_from_db()
+    assert group.financial_service_provider == fsp
+    assert target_population.financial_service_provider == fsp
+
+
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_assign_fsp_rebuilds_every_target_population(mock_full_rebuild, cycle, django_capture_on_commit_callbacks):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    first = PaymentPlanFactory(program_cycle=cycle, payment_plan_group=group, status=PaymentPlan.Status.TP_OPEN)
+    second = PaymentPlanFactory(program_cycle=cycle, payment_plan_group=group, status=PaymentPlan.Status.TP_OPEN)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanGroupService(group).assign_financial_service_provider(FinancialServiceProviderFactory())
+
+    rebuilt = {call.args[0].pk for call in mock_full_rebuild.call_args_list}
+    assert rebuilt == {first.pk, second.pk}
+
+
+def test_assign_fsp_rejected_when_a_target_population_is_locked(cycle):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=group, status=PaymentPlan.Status.TP_LOCKED)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group).assign_financial_service_provider(FinancialServiceProviderFactory())
+    assert error.value.detail[0] == (
+        "Financial Service Provider can be changed only while every Target Population in the group is Open."
+    )
+
+
+def test_assign_currency_rejected_when_a_payment_plan_is_opened(cycle, currency):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=group, status=PaymentPlan.Status.OPEN)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group).assign_currency(currency)
+    assert error.value.detail[0] == "Currency can be changed only before any Payment Plan in the group is opened."
+
+
+def test_assign_currency_usdc_rejected_with_non_digital_delivery_mechanism(cycle, delivery_mechanism):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.TP_OPEN,
+        delivery_mechanism=delivery_mechanism,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group).assign_currency(CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True))
+    assert (
+        error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+    )
+
+
+def test_assign_currency_non_usdc_rejected_with_digital_wallet_delivery_mechanism(cycle, currency):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.TP_OPEN,
+        delivery_mechanism=DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL),
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group).assign_currency(currency)
+    assert (
+        error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+    )
+
+
+def test_assign_currency_sets_it_on_the_group(cycle, currency, delivery_mechanism):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.DRAFT,
+        delivery_mechanism=delivery_mechanism,
+    )
+
+    PaymentPlanGroupService(group).assign_currency(currency)
+
+    assert group.currency == currency

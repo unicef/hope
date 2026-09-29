@@ -55,7 +55,6 @@ from hope.models import (
     ApprovalProcess,
     Currency,
     DeliveryMechanism,
-    FinancialServiceProvider,
     Individual,
     IndividualRoleInHousehold,
     Payment,
@@ -72,8 +71,6 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
-    import uuid
-
     from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
     from django.db.models import QuerySet
@@ -295,7 +292,9 @@ class PaymentPlanService:
 
     def draft(self) -> PaymentPlan:
         if not self.payment_plan.financial_service_provider:
-            raise ValidationError("Can only promote to Payment Plan if DM/FSP is chosen.")
+            raise ValidationError(
+                "Can only promote to Payment Plan if the Payment Plan Group has a Financial Service Provider."
+            )
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_draft()
         self.payment_plan.save(update_fields=("status_date", "status", "updated_at"))
@@ -308,7 +307,10 @@ class PaymentPlanService:
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
-        self.payment_plan.currency = input_data["currency"]
+        payment_plan_group = self.payment_plan.payment_plan_group
+        if payment_plan_group is None or payment_plan_group.currency_id is None:
+            raise ValidationError("Payment Plan Group needs a Currency before a Payment Plan can be opened.")
+        self.payment_plan.currency = payment_plan_group.currency
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
         self.payment_plan.dispersion_end_date = dispersion_end_date
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
@@ -743,6 +745,7 @@ class PaymentPlanService:
                 created_by=user,
                 program_cycle=program_cycle,
                 payment_plan_group=payment_plan_group,
+                financial_service_provider_id=payment_plan_group.financial_service_provider_id,
                 name=input_data["name"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
@@ -756,16 +759,11 @@ class PaymentPlanService:
 
             payment_plan.payment_plan_purposes.set(input_data["payment_plan_purposes"])
 
-            fsp_id = input_data.get("fsp_id")
-            delivery_mechanism_code = input_data.get("delivery_mechanism_code")
-
-            if fsp_id and delivery_mechanism_code:
-                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id, allowed_business_areas=business_area)
-                PaymentPlanService._check_group_fsp_consistency(payment_plan_group, fsp)
-                delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-                payment_plan.financial_service_provider = fsp
-                payment_plan.delivery_mechanism = delivery_mechanism
-                payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism", "updated_at"])
+            if delivery_mechanism_code := input_data.get("delivery_mechanism_code"):
+                payment_plan.delivery_mechanism = PaymentPlanService._get_delivery_mechanism_for_group(
+                    payment_plan_group, delivery_mechanism_code
+                )
+                payment_plan.save(update_fields=["delivery_mechanism", "updated_at"])
 
             targeting_criteria_data = {
                 "rules": input_data["rules"],
@@ -798,30 +796,30 @@ class PaymentPlanService:
             vulnerability_score_min=vulnerability_score_min,
         )
 
-    def _update_fsp_and_delivery_mechanism(self, fsp_id: str | None, delivery_mechanism_code: str | None) -> bool:
+    def _update_delivery_mechanism(self, delivery_mechanism_code: str | None) -> bool:
         if not self.payment_plan.is_population_open():
             return False
-
-        current_fsp = self.payment_plan.financial_service_provider
-        current_dm = self.payment_plan.delivery_mechanism
-        has_current_values = current_fsp is not None or current_dm is not None
-
-        if not (fsp_id and delivery_mechanism_code) and has_current_values:
-            self.payment_plan.financial_service_provider = None
+        if not delivery_mechanism_code:
+            if self.payment_plan.delivery_mechanism_id is None:
+                return False
             self.payment_plan.delivery_mechanism = None
             return True
-        if fsp_id and delivery_mechanism_code:
-            fsp = get_object_or_404(
-                FinancialServiceProvider,
-                pk=fsp_id,
-                allowed_business_areas=self.payment_plan.business_area,
-            )
-            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-            if current_fsp != fsp or current_dm != delivery_mechanism:
-                self.payment_plan.financial_service_provider = fsp
-                self.payment_plan.delivery_mechanism = delivery_mechanism
-                return True
-        return False
+        delivery_mechanism = self._get_delivery_mechanism_for_group(
+            self.payment_plan.payment_plan_group, delivery_mechanism_code
+        )
+        if delivery_mechanism == self.payment_plan.delivery_mechanism:
+            return False
+        self.payment_plan.delivery_mechanism = delivery_mechanism
+        return True
+
+    @staticmethod
+    def _get_delivery_mechanism_for_group(
+        payment_plan_group: PaymentPlanGroup | None, delivery_mechanism_code: str
+    ) -> DeliveryMechanism:
+        delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+        if payment_plan_group is not None and (currency := payment_plan_group.currency) is not None:
+            PaymentPlanService.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
+        return delivery_mechanism
 
     def _set_vulnerability_scores(self, input_data: dict) -> bool:
         """Apply vulnerability score bounds; return whether either changed."""
@@ -838,7 +836,6 @@ class PaymentPlanService:
 
     def update(self, input_data: dict) -> PaymentPlan:
         program = self.payment_plan.program_cycle.program
-        should_update_money_stats = False
         should_rebuild_list = False
 
         self._validate_update_permissions(input_data)
@@ -847,19 +844,16 @@ class PaymentPlanService:
         rules = input_data.get("rules")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
-        fsp_id = input_data.get("fsp_id")
 
         if name:
             name = self._validate_pp_name(name, program)
             self.payment_plan.name = name
 
-        if self.payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
-            # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
-            # remove not editable fields
-            input_data.pop("currency", None)
-
+        fsp_id_before = self.payment_plan.financial_service_provider_id
         self._set_program_cycle(input_data)
         self._set_group_for_open_pp(input_data)
+        if self.payment_plan.financial_service_provider_id != fsp_id_before:
+            should_rebuild_list = True
 
         vulnerability_filter = self._set_vulnerability_scores(input_data)
 
@@ -880,21 +874,9 @@ class PaymentPlanService:
 
         self._set_dispersion_dates(dispersion_end_date, dispersion_start_date)
 
-        new_currency = input_data.get("currency")
-        if new_currency and new_currency != self.payment_plan.currency:
-            self._validate_transfer_to_digital_wallet_and_usdc(new_currency)
-            self.payment_plan.currency = new_currency
-            should_update_money_stats = True
-            Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
-
-        if self._update_fsp_and_delivery_mechanism(fsp_id, input_data.get("delivery_mechanism_code")):
+        if self._update_delivery_mechanism(input_data.get("delivery_mechanism_code")):
             should_rebuild_list = True
 
-        self._check_group_fsp_consistency(
-            self.payment_plan.payment_plan_group,
-            self.payment_plan.financial_service_provider,
-            exclude_pk=self.payment_plan.pk,
-        )
         self.payment_plan.save()
 
         self._update_purposes(input_data.get("payment_plan_purposes"))
@@ -903,7 +885,7 @@ class PaymentPlanService:
         transaction.on_commit(
             lambda: PaymentPlanService.rebuild_payment_plan_population(
                 should_rebuild_list,
-                should_update_money_stats,
+                False,
                 vulnerability_filter,
                 self.payment_plan,
                 str(self.user.pk) if self.user else None,
@@ -932,8 +914,7 @@ class PaymentPlanService:
                 ).first()
             ):
                 raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
-            self._validate_group_accepts_new_payment_plans(payment_plan_group)
-            self.payment_plan.payment_plan_group = payment_plan_group
+            self._move_to_group(payment_plan_group)
 
     def _set_group_for_open_pp(self, input_data: dict) -> None:
         """Allow reassigning the group on an open payment plan without changing its cycle."""
@@ -952,14 +933,24 @@ class PaymentPlanService:
             ).first()
         ):
             raise ValidationError("Payment Plan Group does not exist in the given Programme Cycle.")
+        self._move_to_group(payment_plan_group)
+
+    def _move_to_group(self, payment_plan_group: PaymentPlanGroup) -> None:
+        """Put the plan in the group and give it the group's FSP; currency follows when the plan is opened."""
         self._validate_group_accepts_new_payment_plans(payment_plan_group)
-        # Check FSP consistency using the current FSP before _update_fsp_and_delivery_mechanism may clear it.
-        self._check_group_fsp_consistency(
-            payment_plan_group,
-            self.payment_plan.financial_service_provider,
-            exclude_pk=self.payment_plan.pk,
-        )
+        currency = payment_plan_group.currency
+        delivery_mechanism = self.payment_plan.delivery_mechanism
+        if currency is not None and delivery_mechanism is not None:
+            self.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
+        new_fsp_id = payment_plan_group.financial_service_provider_id
+        if new_fsp_id != self.payment_plan.financial_service_provider_id and not self.payment_plan.is_population_open():
+            # Payments carry the FSP from the build; only a TP_OPEN plan can be rebuilt.
+            raise ValidationError(
+                "Target Population can be moved to a group with a different Financial Service Provider only "
+                "within Open status"
+            )
         self.payment_plan.payment_plan_group = payment_plan_group
+        self.payment_plan.financial_service_provider_id = new_fsp_id
 
     def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
         if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
@@ -989,23 +980,16 @@ class PaymentPlanService:
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
             )
 
-        if any(
-            [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
-        ) and self.payment_plan.status not in [
+        if any([dispersion_start_date, dispersion_end_date]) and self.payment_plan.status not in [
             PaymentPlan.Status.OPEN,
             PaymentPlan.Status.DRAFT,
         ]:
             raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
-    def _validate_transfer_to_digital_wallet_and_usdc(self, new_currency: Currency) -> None:
-        delivery_mechanism = self.payment_plan.delivery_mechanism
-        if (
-            new_currency.code == "USDC"
-            and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
-        ) or (
-            new_currency.code != "USDC"
-            and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
-        ):
+    @staticmethod
+    def validate_currency_for_delivery_mechanism(currency: Currency, delivery_mechanism: DeliveryMechanism) -> None:
+        is_digital = delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
+        if (currency.code == "USDC") != is_digital:
             raise ValidationError(
                 "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
             )
@@ -1030,27 +1014,6 @@ class PaymentPlanService:
             raise ValidationError(
                 f"Adding Target Population to Payment Plan Group is possible only within Status "
                 f"{PaymentPlanGroup.Status.OPEN}"
-            )
-
-    @staticmethod
-    def _check_group_fsp_consistency(
-        group: PaymentPlanGroup | None,
-        fsp: FinancialServiceProvider | None,
-        exclude_pk: "uuid.UUID | None" = None,
-    ) -> None:
-        """Raise ValidationError if fsp conflicts with another plan already in this group."""
-        if group is None or fsp is None:
-            return
-        qs = (
-            PaymentPlan.objects.filter(payment_plan_group=group)
-            .exclude(financial_service_provider__isnull=True)
-            .exclude(financial_service_provider=fsp)
-        )
-        if exclude_pk is not None:
-            qs = qs.exclude(pk=exclude_pk)
-        if existing_fsp_name := qs.values_list("financial_service_provider__name", flat=True).first():
-            raise ValidationError(
-                f"Payment plans in the same group must share the same FSP. This group uses FSP '{existing_fsp_name}'."
             )
 
     def _validate_pp_cycle(self, program_cycle: ProgramCycle) -> None:

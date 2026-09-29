@@ -80,14 +80,14 @@ from hope.models import (
 pytestmark = pytest.mark.django_db
 
 
-def test_update_fsp_returns_false_when_not_open(business_area: Any, cycle: ProgramCycle) -> None:
+def test_update_delivery_mechanism_returns_false_when_not_open(business_area: Any, cycle: ProgramCycle) -> None:
     pp = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
         status=PaymentPlan.Status.LOCKED,
     )
     service = PaymentPlanService(payment_plan=pp)
-    result = service._update_fsp_and_delivery_mechanism(fsp_id="some-id", delivery_mechanism_code="some-code")
+    result = service._update_delivery_mechanism(delivery_mechanism_code="some-code")
     assert result is False
 
 
@@ -422,8 +422,9 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
 
     purpose = PaymentPlanPurposeFactory()
     program.payment_plan_purposes.add(purpose)
+    currency_usd = CurrencyFactory(code="USD", name="United States Dollar")
     create_input_data["name"] = "TEST"
-    create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=program_cycle).id
+    create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=program_cycle, currency=currency_usd).id
     create_input_data["payment_plan_purposes"] = [purpose]
     pp = PaymentPlanService.create(
         input_data=create_input_data,
@@ -433,11 +434,9 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp.status = PaymentPlan.Status.TP_OPEN
     pp.save()
 
-    currency_usd = CurrencyFactory(code="USD", name="United States Dollar")
     open_input_data = {
         "dispersion_start_date": parse_date("2020-09-10"),
         "dispersion_end_date": parse_date("2020-09-11"),
-        "currency": currency_usd,
     }
     with pytest.raises(TransitionNotAllowed) as error:
         PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
@@ -459,6 +458,7 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp.refresh_from_db()
 
     assert pp.status == PaymentPlan.Status.OPEN
+    assert pp.currency == currency_usd
 
 
 @freeze_time("2020-10-10")
@@ -480,7 +480,7 @@ def test_create(
         end_date=timezone.datetime(2099, 10, 10, tzinfo=UTC).date(),
     )
     program_cycle = program.cycles.first()
-    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle)
+    payment_plan_group = PaymentPlanGroupFactory(cycle=program_cycle, financial_service_provider=fsp)
 
     hh1 = HouseholdFactory(program=program, business_area=business_area)
     hh2 = HouseholdFactory(program=program, business_area=business_area)
@@ -518,13 +518,12 @@ def test_create(
                 "individuals_filters_blocks": [],
             }
         ],
-        "fsp_id": fsp.id,
         "delivery_mechanism_code": dm_transfer_to_account.code,
         "payment_plan_purposes": [purpose],
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(26):
+        with django_assert_num_queries(24):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -533,6 +532,8 @@ def test_create(
         assert mock_transaction.on_commit.call_count == 1
 
     assert pp.status == PaymentPlan.Status.TP_OPEN
+    assert pp.financial_service_provider == fsp
+    assert pp.delivery_mechanism == dm_transfer_to_account
     assert pp.total_households_count == 0
     assert pp.total_individuals_count == 0
     assert pp.payment_items.count() == 0
@@ -617,7 +618,6 @@ def test_update_validation_errors(get_exchange_rate_mock: Any, payment_plan_base
     input_data = {
         "dispersion_start_date": parse_date("2020-09-10"),
         "dispersion_end_date": parse_date("2020-09-11"),
-        "currency": CurrencyFactory(code="USD", name="United States Dollar"),
     }
 
     with pytest.raises(ValidationError) as error:
@@ -898,7 +898,6 @@ def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any,
         {
             "dispersion_start_date": dispersion_start_date,
             "dispersion_end_date": dispersion_end_date,
-            "currency": CurrencyFactory(code="UAH", name="Ukrainian Hryvnia"),
         }
     )
     assert payment_plan.currency.code == "PLN"
@@ -1353,7 +1352,9 @@ def test_draft_with_invalid_pp_status(
     )
     with pytest.raises(ValidationError) as error:
         PaymentPlanService(payment_plan).draft()
-    assert "Can only promote to Payment Plan if DM/FSP is chosen." in str(error.value)
+    assert "Can only promote to Payment Plan if the Payment Plan Group has a Financial Service Provider." in str(
+        error.value
+    )
 
     payment_plan.status = PaymentPlan.Status.DRAFT
     payment_plan.financial_service_provider = fsp
@@ -1446,10 +1447,6 @@ def test_update_pp_validation_errors(user: User, business_area: Any, cycle: Prog
         error.value.detail[0]
         == "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
     )
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"currency": "test_data"})
-    assert error.value.detail[0] == f"Not Allow edit Payment Plan within status {payment_plan.status}"
 
     with pytest.raises(ValidationError) as error:
         PaymentPlanService(payment_plan).update({"name": "test_data"})
@@ -1693,7 +1690,9 @@ def test_send_for_approval_allows_retryable_background_error(
 
 def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program, title="New Cycle ABC")
-    new_group = PaymentPlanGroupFactory(cycle=new_cycle)
+    new_group = PaymentPlanGroupFactory(
+        cycle=new_cycle, financial_service_provider=payment_plan_base.financial_service_provider
+    )
 
     PaymentPlanService(payment_plan_base).update(
         {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
@@ -1706,7 +1705,9 @@ def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Progra
 
 def test_edit_cycle_requires_group_from_new_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program)
-    new_group = PaymentPlanGroupFactory(cycle=new_cycle)
+    new_group = PaymentPlanGroupFactory(
+        cycle=new_cycle, financial_service_provider=payment_plan_base.financial_service_provider
+    )
 
     PaymentPlanService(payment_plan_base).update(
         {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
@@ -1772,48 +1773,31 @@ def test_update_pp_exclude_ids(user: User, business_area: Any, cycle: ProgramCyc
     assert payment_plan.exclusion_reason == "Test text"
 
 
-def test_update_pp_currency(
+def test_open_rejects_group_without_currency(
     user: User,
     business_area: Any,
     cycle: ProgramCycle,
-    dm_transfer_to_account: Any,
     fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
         created_by=user,
         business_area=business_area,
-        status=PaymentPlan.Status.OPEN,
-        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
+        status=PaymentPlan.Status.DRAFT,
+        currency=None,
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    PaymentPlanService(payment_plan).update({"currency": CurrencyFactory(code="PLN", name="Polish Zloty")})
-    payment_plan.refresh_from_db()
-    assert payment_plan.currency.code == "PLN"
+    open_input_data = {
+        "dispersion_start_date": timezone.now().date(),
+        "dispersion_end_date": timezone.now().date() + timedelta(days=3),
+    }
 
-
-def test_update_pp_currency_validation(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-    dm_transfer_to_digital_wallet: Any,
-    fsp: FinancialServiceProvider,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.OPEN,
-        currency=CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True),
-        delivery_mechanism=dm_transfer_to_digital_wallet,
-        financial_service_provider=fsp,
-    )
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).update({"currency": CurrencyFactory(code="PLN", name="Polish Zloty")})
-    assert (
-        error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
-    )
+        PaymentPlanService(payment_plan).open(input_data=open_input_data)
+    assert error.value.detail[0] == "Payment Plan Group needs a Currency before a Payment Plan can be opened."
 
 
 def test_update_dispersion_end_date(user: User, business_area: Any, cycle: ProgramCycle) -> None:
@@ -1830,7 +1814,31 @@ def test_update_dispersion_end_date(user: User, business_area: Any, cycle: Progr
     assert payment_plan.dispersion_end_date == new_end_date
 
 
-def test_update_pp_dm_fsp(
+def test_update_pp_delivery_mechanism(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        delivery_mechanism=None,
+        financial_service_provider=fsp,
+    )
+
+    PaymentPlanService(payment_plan).update({"delivery_mechanism_code": dm_transfer_to_account.code})
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.delivery_mechanism == dm_transfer_to_account
+    assert payment_plan.financial_service_provider == fsp
+
+
+def test_update_pp_delivery_mechanism_ignored_when_not_open(
     user: User,
     business_area: Any,
     cycle: ProgramCycle,
@@ -1840,45 +1848,174 @@ def test_update_pp_dm_fsp(
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.OPEN,
+        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
+        delivery_mechanism=dm_transfer_to_account,
+        financial_service_provider=fsp,
+    )
+
+    PaymentPlanService(payment_plan).update({"delivery_mechanism_code": dm_transfer_to_digital_wallet.code})
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.delivery_mechanism == dm_transfer_to_account
+
+
+def test_update_pp_delivery_mechanism_cleared_when_code_missing(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
         created_by=user,
         business_area=business_area,
         status=PaymentPlan.Status.TP_OPEN,
-        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
+        delivery_mechanism=dm_transfer_to_account,
+        financial_service_provider=fsp,
+    )
+
+    PaymentPlanService(payment_plan).update({"delivery_mechanism_code": None})
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.delivery_mechanism is None
+    assert payment_plan.financial_service_provider == fsp
+
+
+def test_update_pp_delivery_mechanism_rejects_digital_wallet_without_usdc(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_digital_wallet: Any,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=cycle,
+            financial_service_provider=fsp,
+            currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
+        ),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
         delivery_mechanism=None,
+        financial_service_provider=fsp,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).update({"delivery_mechanism_code": dm_transfer_to_digital_wallet.code})
+    assert (
+        error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+    )
+
+
+def test_change_group_copies_group_fsp(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
         financial_service_provider=None,
     )
-    PaymentPlanService(payment_plan).update(
-        {
-            "fsp_id": str(fsp.id),
-            "delivery_mechanism_code": dm_transfer_to_account.code,
-        }
-    )
+    new_group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
+
+    PaymentPlanService(payment_plan).update({"payment_plan_group_id": str(new_group.id)})
+
     payment_plan.refresh_from_db()
-    assert payment_plan.delivery_mechanism == dm_transfer_to_account
+    assert payment_plan.payment_plan_group == new_group
     assert payment_plan.financial_service_provider == fsp
 
-    payment_plan.status = PaymentPlan.Status.OPEN
-    payment_plan.save()
 
-    PaymentPlanService(payment_plan).update(
-        {
-            "fsp_id": fsp.id,
-            "delivery_mechanism_code": dm_transfer_to_digital_wallet.code,
-        }
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_change_group_to_different_fsp_rebuilds_target_population(
+    mock_full_rebuild: mock.Mock,
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        financial_service_provider=None,
     )
-    payment_plan.refresh_from_db()
-    assert payment_plan.delivery_mechanism == dm_transfer_to_account
-    assert payment_plan.financial_service_provider == fsp
+    new_group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
 
-    PaymentPlanService(payment_plan).update(
-        {
-            "fsp_id": None,
-            "delivery_mechanism_code": None,
-        }
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).update({"payment_plan_group_id": str(new_group.id)})
+
+    mock_full_rebuild.assert_called_once_with(payment_plan)
+
+
+def test_change_cycle_rejects_group_with_different_fsp_when_not_open(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_LOCKED,
+        financial_service_provider=None,
     )
-    payment_plan.refresh_from_db()
-    assert payment_plan.delivery_mechanism == dm_transfer_to_account
-    assert payment_plan.financial_service_provider == fsp
+    other_cycle = ProgramCycleFactory(program=cycle.program)
+    new_group = PaymentPlanGroupFactory(cycle=other_cycle, financial_service_provider=fsp)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).update(
+            {"program_cycle_id": str(other_cycle.id), "payment_plan_group_id": str(new_group.id)}
+        )
+    assert error.value.detail[0] == (
+        "Target Population can be moved to a group with a different Financial Service Provider only within Open status"
+    )
+
+
+def test_change_group_rejects_group_currency_not_matching_delivery_mechanism(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_digital_wallet: Any,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp),
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        delivery_mechanism=dm_transfer_to_digital_wallet,
+        financial_service_provider=fsp,
+    )
+    new_group = PaymentPlanGroupFactory(
+        cycle=cycle,
+        financial_service_provider=fsp,
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).update({"payment_plan_group_id": str(new_group.id)})
+    assert (
+        error.value.detail[0] == "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+    )
 
 
 def test_export_xlsx(payment_plan_base: PaymentPlan, user: User, django_capture_on_commit_callbacks: Any) -> None:

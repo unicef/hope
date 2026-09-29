@@ -81,6 +81,8 @@ def payment_plan_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         currency=currency_pln,
     )
+    pp.payment_plan_group.currency = currency_pln
+    pp.payment_plan_group.save(update_fields=["currency"])
     purpose = pp.payment_plan_purposes.first()
     url_kwargs = {
         "business_area_slug": business_area.slug,
@@ -441,7 +443,6 @@ def test_create_pp(
     data = {
         "dispersion_start_date": "2025-02-01",
         "dispersion_end_date": "2099-03-01",
-        "currency": "USD",
         "target_population_id": str(payment_plan_actions_context["pp"].id),
     }
     response = payment_plan_actions_context["client"].post(
@@ -454,7 +455,7 @@ def test_create_pp(
     if expected_status == status.HTTP_201_CREATED:
         resp_data = response.json()
         assert "id" in resp_data
-        assert resp_data["currency"] == "USD"
+        assert resp_data["currency"] == "PLN"
         assert resp_data["status"] == "OPEN"
 
 
@@ -476,7 +477,6 @@ def test_create_pp_validation_errors(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "dispersion_start_date" in response.json()
     assert "dispersion_end_date" in response.json()
-    assert "currency" in response.json()
 
 
 @pytest.mark.parametrize(
@@ -2120,7 +2120,7 @@ def test_create_pp_without_target_population_id_returns_400(
     )
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
-        {"dispersion_start_date": "2025-02-01", "dispersion_end_date": "2099-03-01", "currency": "USD"},
+        {"dispersion_start_date": "2025-02-01", "dispersion_end_date": "2099-03-01"},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST

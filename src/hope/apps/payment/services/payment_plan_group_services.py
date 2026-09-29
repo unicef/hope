@@ -3,12 +3,59 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.payment.flows import PaymentPlanGroupFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import FspXlsxTemplatePerDeliveryMechanism, PaymentPlan, PaymentPlanGroup
+from hope.models import (
+    Currency,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FspXlsxTemplatePerDeliveryMechanism,
+    PaymentPlan,
+    PaymentPlanGroup,
+)
 
 
 class PaymentPlanGroupService:
     def __init__(self, payment_plan_group: PaymentPlanGroup) -> None:
         self.payment_plan_group = payment_plan_group
+
+    def assign_financial_service_provider(self, financial_service_provider: FinancialServiceProvider | None) -> None:
+        """Set the group's FSP, copy it onto its Target Populations and rebuild them; the caller saves the group.
+
+        Payments carry the FSP and the wallet validity from the build, so a change is only possible while
+        every Target Population can still be rebuilt, i.e. is TP_OPEN.
+        """
+        if financial_service_provider == self.payment_plan_group.financial_service_provider:
+            return
+        payment_plans = list(self.payment_plan_group.payment_plans.all())
+        if any(payment_plan.status != PaymentPlan.Status.TP_OPEN for payment_plan in payment_plans):
+            raise ValidationError(
+                "Financial Service Provider can be changed only while every Target Population in the group is Open."
+            )
+        self.payment_plan_group.financial_service_provider = financial_service_provider
+        self.payment_plan_group.payment_plans.update(financial_service_provider=financial_service_provider)
+        for payment_plan in payment_plans:
+            payment_plan.financial_service_provider = financial_service_provider
+            transaction.on_commit(
+                lambda payment_plan=payment_plan: PaymentPlanService.rebuild_payment_plan_population(
+                    True, False, False, payment_plan
+                )
+            )
+
+    def assign_currency(self, currency: Currency | None) -> None:
+        """Set the group's currency; the caller saves the group. Payment Plans copy it when they are opened."""
+        if currency == self.payment_plan_group.currency:
+            return
+        if self.payment_plan_group.payment_plans.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).exists():
+            raise ValidationError("Currency can be changed only before any Payment Plan in the group is opened.")
+        if currency is not None:
+            self._validate_currency_against_delivery_mechanisms(currency)
+        self.payment_plan_group.currency = currency
+
+    def _validate_currency_against_delivery_mechanisms(self, currency: Currency) -> None:
+        delivery_mechanisms = DeliveryMechanism.objects.filter(
+            paymentplan__payment_plan_group=self.payment_plan_group
+        ).distinct()
+        for delivery_mechanism in delivery_mechanisms:
+            PaymentPlanService.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
 
     @transaction.atomic
     def lock(self) -> PaymentPlanGroup:
@@ -21,8 +68,8 @@ class PaymentPlanGroupService:
 
         payment_plans = self._payment_plans(payment_plan_group)
         self._validate_payment_plans_locked(payment_plans)
-        self._validate_shared_configuration(payment_plans)
-        self._validate_delivery_templates(payment_plans)
+        self._validate_configuration(payment_plan_group)
+        self._validate_delivery_templates(payment_plan_group, payment_plans)
 
         for payment_plan in payment_plans:
             PaymentPlanService(payment_plan).lock_fsp()
@@ -55,9 +102,10 @@ class PaymentPlanGroupService:
 
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
+        # lock_fsp() / unlock_fsp() read both objects per plan
         return list(
             payment_plan_group.payment_plans.select_related(
-                "currency", "delivery_mechanism", "financial_service_provider"
+                "delivery_mechanism", "financial_service_provider"
             ).order_by("created_at")
         )
 
@@ -77,21 +125,18 @@ class PaymentPlanGroupService:
             )
 
     @staticmethod
-    def _validate_shared_configuration(payment_plans: list[PaymentPlan]) -> None:
-        fsp_ids = {payment_plan.financial_service_provider_id for payment_plan in payment_plans}
-        currency_ids = {payment_plan.currency_id for payment_plan in payment_plans}
-        if None in fsp_ids or len(fsp_ids) != 1:
-            raise ValidationError("Payment Plans in the group must share the same Financial Service Provider.")
-        if None in currency_ids or len(currency_ids) != 1:
-            raise ValidationError("Payment Plans in the group must share the same Currency.")
+    def _validate_configuration(payment_plan_group: PaymentPlanGroup) -> None:
+        if payment_plan_group.financial_service_provider_id is None:
+            raise ValidationError("Payment Plan Group needs a Financial Service Provider before it can be locked.")
+        if payment_plan_group.currency_id is None:
+            raise ValidationError("Payment Plan Group needs a Currency before it can be locked.")
 
     @staticmethod
-    def _validate_delivery_templates(payment_plans: list[PaymentPlan]) -> None:
+    def _validate_delivery_templates(payment_plan_group: PaymentPlanGroup, payment_plans: list[PaymentPlan]) -> None:
         """Reject up front what the group export would otherwise drop with only a warning."""
-        # Delivery mechanisms may differ across the group, the FSP may not, so one query covers every plan.
         mapped_delivery_mechanism_ids = set(
             FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-                financial_service_provider_id=payment_plans[0].financial_service_provider_id,
+                financial_service_provider_id=payment_plan_group.financial_service_provider_id,
                 delivery_mechanism_id__in={payment_plan.delivery_mechanism_id for payment_plan in payment_plans},
             ).values_list("delivery_mechanism_id", flat=True)
         )

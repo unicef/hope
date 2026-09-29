@@ -502,6 +502,8 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "unicef_id",
         "cycle",
         "name",
+        "financial_service_provider",
+        "currency",
     )
 
     def frontend_url(self, obj: PaymentPlanGroup) -> str | None:

@@ -613,6 +613,80 @@ def test_create_group_status_in_payload_ignored(
     assert PaymentPlanGroup.objects.get(id=response.json()["id"]).status == PaymentPlanGroup.Status.OPEN
 
 
+def test_create_group_with_fsp_and_currency(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+    fsp = FinancialServiceProviderFactory()
+    fsp.allowed_business_areas.add(business_area)
+    currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+
+    response = client.post(
+        _list_url(business_area.slug, program.code),
+        {
+            "name": "Configured Group",
+            "cycle": str(cycle.id),
+            "financial_service_provider": str(fsp.id),
+            "currency": "PLN",
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    group = PaymentPlanGroup.objects.get(id=response.json()["id"])
+    assert group.financial_service_provider == fsp
+    assert group.currency == currency
+
+
+def test_create_group_with_fsp_not_allowed_in_business_area_rejected(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+    foreign_fsp = FinancialServiceProviderFactory()
+
+    response = client.post(
+        _list_url(business_area.slug, program.code),
+        {"name": "Foreign FSP Group", "cycle": str(cycle.id), "financial_service_provider": str(foreign_fsp.id)},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "financial_service_provider" in response.json()
+    assert not PaymentPlanGroup.objects.filter(name="Foreign FSP Group").exists()
+
+
+def test_list_shows_group_fsp_and_currency(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST], business_area, program=program
+    )
+    fsp = FinancialServiceProviderFactory(name="Listed FSP")
+    group = PaymentPlanGroupFactory(
+        cycle=cycle, financial_service_provider=fsp, currency=CurrencyFactory(code="PLN", name="Polish Zloty")
+    )
+
+    response = client.get(_list_url(business_area.slug, program.code), {"cycle": str(cycle.id)})
+
+    assert response.status_code == status.HTTP_200_OK
+    listed = next(row for row in response.json()["results"] if row["id"] == str(group.id))
+    assert listed["financial_service_provider"]["name"] == "Listed FSP"
+    assert listed["currency"] == "PLN"
+
+
 def test_list_filter_by_status(
     client: Any,
     user: Any,
@@ -643,6 +717,10 @@ def group_with_lockable_plan(business_area: Any, cycle: Any) -> Any:
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
     )
+    currency = CurrencyFactory()
+    group.financial_service_provider = fsp
+    group.currency = currency
+    group.save(update_fields=["financial_service_provider", "currency"])
     PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -650,7 +728,7 @@ def group_with_lockable_plan(business_area: Any, cycle: Any) -> Any:
         status=PaymentPlan.Status.LOCKED,
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
-        currency=CurrencyFactory(),
+        currency=currency,
     )
     return group
 
@@ -1126,6 +1204,60 @@ def test_update_group_name_succeeds(
     assert response.json()["name"] == "Renamed Group"
     group.refresh_from_db()
     assert group.name == "Renamed Group"
+
+
+def test_update_group_fsp_and_currency_succeeds(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    fsp = FinancialServiceProviderFactory()
+    fsp.allowed_business_areas.add(business_area)
+    currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": group.name, "financial_service_provider": str(fsp.id), "currency": "PLN"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    group.refresh_from_db()
+    assert group.financial_service_provider == fsp
+    assert group.currency == currency
+
+
+def test_update_group_fsp_rejected_when_target_population_is_locked(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.TP_LOCKED,
+    )
+    fsp = FinancialServiceProviderFactory()
+    fsp.allowed_business_areas.add(business_area)
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": group.name, "financial_service_provider": str(fsp.id)},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    group.refresh_from_db()
+    assert group.financial_service_provider is None
 
 
 def test_update_group_name_duplicate_in_same_cycle_rejected(

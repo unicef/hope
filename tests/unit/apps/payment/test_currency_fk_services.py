@@ -139,33 +139,28 @@ def test_delivered_quantity_service_excludes_usd_from_per_currency(
     assert results[0]["currency"] == "USD"
 
 
-def test_validate_transfer_to_digital_wallet_rejects_usdc_with_non_digital(
+def test_validate_currency_rejects_usdc_with_non_digital_delivery_mechanism(
     currency_usdc: Currency, django_assert_num_queries
 ) -> None:
     dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.CASH)
-    pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
-    service = PaymentPlanService(pp)
 
     with django_assert_num_queries(0), pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
-        service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
+        PaymentPlanService.validate_currency_for_delivery_mechanism(currency_usdc, dm)
 
 
-def test_validate_transfer_to_digital_wallet_rejects_non_usdc_with_digital(
+def test_validate_currency_rejects_non_usdc_with_digital_delivery_mechanism(
     currency_pln: Currency, django_assert_num_queries
 ) -> None:
     dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
-    pp = PaymentPlanFactory(currency=currency_pln, delivery_mechanism=dm)
-    service = PaymentPlanService(pp)
 
     with django_assert_num_queries(0), pytest.raises(ValidationError, match="Transfer to Digital Wallet"):
-        service._validate_transfer_to_digital_wallet_and_usdc(currency_pln)
+        PaymentPlanService.validate_currency_for_delivery_mechanism(currency_pln, dm)
 
 
-def test_validate_transfer_to_digital_wallet_accepts_usdc_with_digital(
+def test_validate_currency_accepts_usdc_with_digital_delivery_mechanism(
     currency_usdc: Currency, django_assert_num_queries
 ) -> None:
     dm = DeliveryMechanismFactory(transfer_type=DeliveryMechanism.TransferType.DIGITAL)
-    pp = PaymentPlanFactory(currency=currency_usdc, delivery_mechanism=dm)
-    service = PaymentPlanService(pp)
+
     with django_assert_num_queries(0):
-        service._validate_transfer_to_digital_wallet_and_usdc(currency_usdc)
+        PaymentPlanService.validate_currency_for_delivery_mechanism(currency_usdc, dm)

@@ -34,6 +34,7 @@ from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -684,7 +685,6 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
-    currency = serializers.SlugRelatedField(slug_field="code", queryset=Currency.objects.all(), allow_null=True)
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
@@ -700,7 +700,6 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
             "target_population_id",
             "dispersion_start_date",
             "dispersion_end_date",
-            "currency",
             "version",
         )
 
@@ -1882,7 +1881,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     payment_plan_group_id = serializers.UUIDField()
-    fsp_id = serializers.UUIDField(required=False, allow_null=True)
     delivery_mechanism_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
@@ -1905,7 +1903,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
             "rules",
             "excluded_ids",
             "exclusion_reason",
-            "fsp_id",
             "delivery_mechanism_code",
             "vulnerability_score_min",
             "vulnerability_score_max",
@@ -2071,18 +2068,33 @@ class PaymentPlanCloseSerializer(serializers.Serializer):
 
 class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
     cycle = ProgramCycleSmallSerializer()
+    financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle", "status", "created_at"]
+        fields = ["id", "unicef_id", "name", "cycle", "status", "financial_service_provider", "currency", "created_at"]
 
 
-class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+class PaymentPlanGroupConfigurationMixin(serializers.Serializer):
+    financial_service_provider = ScopedRelatedField(
+        queryset=FinancialServiceProvider.objects.all(),
+        scope="business_area",
+        scope_path="allowed_business_areas",
+        required=False,
+        allow_null=True,
+    )
+    currency = serializers.SlugRelatedField(
+        slug_field="code", queryset=Currency.objects.all(), required=False, allow_null=True
+    )
+
+
+class PaymentPlanGroupCreateSerializer(PaymentPlanGroupConfigurationMixin, serializers.ModelSerializer):
     cycle = ScopedRelatedField(queryset=ProgramCycle.objects.all(), scope="program")
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle"]
+        fields = ["id", "unicef_id", "name", "cycle", "financial_service_provider", "currency"]
         read_only_fields = ["id", "unicef_id"]
         validators = []
 
@@ -2094,10 +2106,10 @@ class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
+class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, serializers.ModelSerializer):
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name"]
+        fields = ["id", "unicef_id", "name", "financial_service_provider", "currency"]
         read_only_fields = ["id", "unicef_id"]
 
     def validate_name(self, value: str) -> str:
@@ -2105,6 +2117,14 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
         if qs.exists():
             raise serializers.ValidationError(f"A group named '{value}' already exists in this cycle.")
         return value
+
+    def update(self, instance: PaymentPlanGroup, validated_data: dict) -> PaymentPlanGroup:
+        service = PaymentPlanGroupService(instance)
+        if "financial_service_provider" in validated_data:
+            service.assign_financial_service_provider(validated_data.pop("financial_service_provider"))
+        if "currency" in validated_data:
+            service.assign_currency(validated_data.pop("currency"))
+        return super().update(instance, validated_data)
 
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):

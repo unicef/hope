@@ -24,6 +24,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "name",
             "cycle",
             "status",
+            "financial_service_provider",
+            "currency",
             "background_action_status",
             "delivery_import_file",
         ],
@@ -69,6 +71,20 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         choices=Status.choices,
     )
     status_date = models.DateTimeField(blank=True, null=True)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider",
+        on_delete=models.PROTECT,
+        related_name="payment_plan_groups",
+        null=True,
+        blank=True,
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.PROTECT,
+        related_name="payment_plan_groups",
+        null=True,
+        blank=True,
+    )
     delivery_import_file = models.ForeignKey(
         "core.FileTemp",
         null=True,
