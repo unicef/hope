@@ -3,22 +3,11 @@ from django.test import RequestFactory
 import pytest
 
 from extras.test_utils.factories import PaymentPlanFactory, UserFactory
+from hope.admin.payment_plan import BasePaymentPlanAdmin
 from hope.admin.target_population import TargetPopulationAdmin
 from hope.models import PaymentPlan, TargetPopulation
 
 pytestmark = pytest.mark.django_db
-
-
-def test_objects_include_only_pre_payment_plan_statuses() -> None:
-    PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
-    PaymentPlanFactory(status=PaymentPlan.Status.DRAFT)
-    PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
-    PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
-
-    assert set(TargetPopulation.objects.values_list("status", flat=True)) == {
-        PaymentPlan.Status.TP_OPEN.value,
-        PaymentPlan.Status.DRAFT.value,
-    }
 
 
 def test_objects_exclude_soft_deleted() -> None:
@@ -36,6 +25,8 @@ def test_admin_registered() -> None:
 
 def test_admin_queryset_scoped_to_pre_payment_plan_statuses() -> None:
     PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
+    PaymentPlanFactory(status=PaymentPlan.Status.DRAFT)
+    PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
     PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
 
     request = RequestFactory().get("/")
@@ -44,6 +35,7 @@ def test_admin_queryset_scoped_to_pre_payment_plan_statuses() -> None:
 
     assert set(model_admin.get_queryset(request).values_list("status", flat=True)) == {
         PaymentPlan.Status.TP_OPEN.value,
+        PaymentPlan.Status.DRAFT.value,
     }
 
 
@@ -53,3 +45,8 @@ def test_admin_has_no_add_permission() -> None:
     model_admin = TargetPopulationAdmin(TargetPopulation, admin.site)
 
     assert model_admin.has_add_permission(request) is False
+
+
+def test_base_admin_frontend_url_is_not_implemented() -> None:
+    with pytest.raises(NotImplementedError):
+        BasePaymentPlanAdmin(PaymentPlan, admin.site).frontend_url(PaymentPlanFactory())

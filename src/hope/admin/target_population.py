@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from hope.admin.payment_plan import BasePaymentPlanAdmin
-from hope.models import TargetPopulation
+from hope.models import PaymentPlan, TargetPopulation
 
 
 @admin.register(TargetPopulation)
@@ -22,5 +22,5 @@ class TargetPopulationAdmin(BasePaymentPlanAdmin):
         "total_undelivered_quantity_usd",
     )
 
-    def frontend_url(self, obj: TargetPopulation) -> str:
+    def frontend_url(self, obj: PaymentPlan) -> str:
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/target-population/{obj.id}"
