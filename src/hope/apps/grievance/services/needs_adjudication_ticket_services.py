@@ -219,13 +219,13 @@ def create_grievance_ticket_with_details(
         return None, None
 
     # Let's have:
-    # - A in incoming RDI, 
-    # - {b, c, d} in approved population, 
-    # - ticket {B main, c, d}. 
-    # 
-    # I want to have ticket {A main, X duplicate} created. 
-    # 
-    # In order to do that there must be NO OPEN ticket, that has 
+    # - A in incoming RDI,
+    # - {b, c, d} in approved population,
+    # - ticket {B main, c, d}.
+    #
+    # I want to have ticket {A main, X duplicate} created.
+    #
+    # In order to do that there must be NO OPEN ticket, that has
     # (A or X as main) AND (A or X as duplicate).
 
     ticket_all_individuals = {main_individual, *(possible_duplicates or [])}
@@ -304,11 +304,10 @@ def create_needs_adjudication_tickets(
     issue_type: int,
     registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
-    """
-        individuals_queryset = Individual.objects.filter(
-            registration_data_import=obj_hct,
-            deduplication_golden_record_status=DUPLICATE
-        )
+    """individuals_queryset = Individual.objects.filter(
+        registration_data_import=obj_hct,
+        deduplication_golden_record_status=DUPLICATE
+    ).
     """
     from hope.models import Individual
 
