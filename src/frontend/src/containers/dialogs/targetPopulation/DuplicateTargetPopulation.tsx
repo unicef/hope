@@ -143,7 +143,7 @@ export const DuplicateTargetPopulation = ({
             showApiErrorMessages(
               e,
               showMessage,
-              t('Failed to finish programme.'),
+              t('Failed to duplicate Target Population.'),
             );
           }
         }}

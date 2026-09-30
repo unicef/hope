@@ -14,7 +14,7 @@ import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 
 interface PaymentPlanGroupsTableProps {
-  filter?: { search?: string; cycle?: string };
+  filter?: { search?: string; cycle?: string; status?: string[] };
 }
 
 export const PaymentPlanGroupsTable = ({
@@ -32,6 +32,7 @@ export const PaymentPlanGroupsTable = ({
       ...prev,
       search: filter?.search || undefined,
       cycle: filter?.cycle || undefined,
+      status: filter?.status?.length ? filter.status : undefined,
     }));
     setPage(0);
   }, [filter]);

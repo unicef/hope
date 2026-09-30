@@ -7,6 +7,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import EditIcon from '@mui/icons-material/EditRounded';
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -22,19 +23,24 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { showApiErrorMessages } from '@utils/utils';
+import type { PaymentPlanGroupSettings } from '@components/paymentmodule/PaymentPlanGroupSettingsFields';
+import { PaymentPlanGroupSettingsFields } from '@components/paymentmodule/PaymentPlanGroupSettingsFields';
 import type { PaymentPlanGroupDetail } from '../types';
 
-interface EditGroupNameProps {
+interface EditGroupProps {
   group: PaymentPlanGroupDetail | null | undefined;
+}
+
+interface EditGroupValues extends PaymentPlanGroupSettings {
+  name: string;
 }
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required').max(255),
 });
 
-export function EditGroupName({
-  group,
-}: EditGroupNameProps): ReactElement | null {
+export function EditGroup({ group }: EditGroupProps): ReactElement | null {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
@@ -42,7 +48,7 @@ export function EditGroupName({
   const queryClient = useQueryClient();
   const permissions = usePermissions();
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (name: string) =>
+    mutationFn: async (values: EditGroupValues) =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsUpdate({
         businessAreaSlug: businessArea,
         programCode: programId,
@@ -50,7 +56,9 @@ export function EditGroupName({
         requestBody: {
           id: group?.id ?? '',
           unicefId: group?.unicefId ?? null,
-          name,
+          name: values.name,
+          financialServiceProvider: values.financialServiceProvider,
+          currency: values.currency,
         },
       }),
     onSuccess: async () => {
@@ -59,11 +67,16 @@ export function EditGroupName({
           RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
         ),
       });
+      await queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+        ),
+      });
       setOpen(false);
-      showMessage(t('Group name updated'));
+      showMessage(t('Group updated'));
     },
-    onError: () => {
-      showMessage(t('Failed to update group name'));
+    onError: (error) => {
+      showApiErrorMessages(error, showMessage);
     },
   });
 
@@ -91,20 +104,25 @@ export function EditGroupName({
         fullWidth
       >
         <Formik
-          initialValues={{ name: group.name ?? '' }}
+          initialValues={{
+            name: group.name ?? '',
+            financialServiceProvider:
+              group.financialServiceProvider?.id ?? null,
+            currency: group.currency ?? null,
+          }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
             try {
-              await mutateAsync(values.name);
+              await mutateAsync(values);
             } catch {
               // handled in onError
             }
           }}
         >
-          {({ submitForm }) => (
+          {({ submitForm, values, setValues }) => (
             <>
               <DialogTitleWrapper>
-                <DialogTitle>{t('Edit Group Name')}</DialogTitle>
+                <DialogTitle>{t('Edit Group')}</DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <Field
@@ -114,6 +132,14 @@ export function EditGroupName({
                   fullWidth
                   required
                 />
+                <Box sx={{ mt: 2 }}>
+                  <PaymentPlanGroupSettingsFields
+                    value={values}
+                    onChange={(settings) =>
+                      setValues({ ...values, ...settings })
+                    }
+                  />
+                </Box>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>

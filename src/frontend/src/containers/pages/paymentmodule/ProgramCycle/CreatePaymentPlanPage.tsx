@@ -86,7 +86,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
-    currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -107,7 +106,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const initialValues = {
     paymentPlanId: '',
-    currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
   };
@@ -125,7 +123,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         targetPopulationId: values.paymentPlanId,
         dispersionStartDate,
         dispersionEndDate,
-        currency: values.currency,
       };
 
       const res = await createPaymentPlan({
@@ -161,7 +158,14 @@ export const CreatePaymentPlanPage = (): ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters
+            values={values}
+            paymentPlanGroupId={
+              allTargetPopulationsData.results.find(
+                (tp) => tp.id === values.paymentPlanId,
+              )?.paymentPlanGroup?.id
+            }
+          />
         </Form>
       )}
     </Formik>

@@ -17,6 +17,8 @@ import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
+import type { PaymentPlanGroupSettings } from './PaymentPlanGroupSettingsFields';
+import { PaymentPlanGroupSettingsFields } from './PaymentPlanGroupSettingsFields';
 import { useTranslation } from 'react-i18next';
 
 interface CreatePaymentPlanGroupModalProps {
@@ -26,6 +28,11 @@ interface CreatePaymentPlanGroupModalProps {
   cycleTitle: string;
   onSuccess: (group: { id: string; name: string }) => void;
 }
+
+const emptySettings: PaymentPlanGroupSettings = {
+  financialServiceProvider: null,
+  currency: null,
+};
 
 export const CreatePaymentPlanGroupModal = ({
   open,
@@ -39,6 +46,8 @@ export const CreatePaymentPlanGroupModal = ({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
   const [groupName, setGroupName] = useState('');
+  const [settings, setSettings] =
+    useState<PaymentPlanGroupSettings>(emptySettings);
 
   const { mutateAsync: createGroup, isPending: creatingGroup } = useMutation({
     mutationFn: (name: string) =>
@@ -46,12 +55,12 @@ export const CreatePaymentPlanGroupModal = ({
         businessAreaSlug: businessArea,
         programCode: programId,
         // Generated PaymentPlanGroupCreate marks readonly id/unicefId as
-        // required; only name + cycle are accepted on create.
-        // The generated PaymentPlanGroupCreate model doesn't match the actual
-        // create payload ({ name, cycle }); cast until codegen is corrected.
+        // required; the endpoint doesn't accept them.
         requestBody: {
           name,
           cycle: cycleId,
+          financialServiceProvider: settings.financialServiceProvider,
+          currency: settings.currency,
         } as unknown as PaymentPlanGroupCreate,
       }),
     onSuccess: () => {
@@ -65,6 +74,7 @@ export const CreatePaymentPlanGroupModal = ({
 
   const handleClose = () => {
     setGroupName('');
+    setSettings(emptySettings);
     onClose();
   };
 
@@ -74,6 +84,7 @@ export const CreatePaymentPlanGroupModal = ({
       showMessage(t('Payment Plan Group created'));
       onSuccess({ id: result.id, name: result.name ?? groupName.trim() });
       setGroupName('');
+      setSettings(emptySettings);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
@@ -102,6 +113,12 @@ export const CreatePaymentPlanGroupModal = ({
           onChange={(e) => setGroupName(e.target.value)}
           data-cy="input-create-group-name"
         />
+        <Box sx={{ mt: 2 }}>
+          <PaymentPlanGroupSettingsFields
+            value={settings}
+            onChange={setSettings}
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>{t('Cancel')}</Button>

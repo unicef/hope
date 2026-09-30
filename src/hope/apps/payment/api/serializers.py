@@ -2068,7 +2068,7 @@ class PaymentPlanCloseSerializer(serializers.Serializer):
 
 class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
     cycle = ProgramCycleSmallSerializer()
-    financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
+    financial_service_provider = FinancialServiceProviderSerializer(read_only=True, allow_null=True)
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
 
     class Meta:

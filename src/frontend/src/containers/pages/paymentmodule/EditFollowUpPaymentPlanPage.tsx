@@ -97,17 +97,12 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
 
   const initialValues = {
     paymentPlanId: paymentPlan.id,
-    currency: {
-      name: paymentPlan.currency,
-      value: paymentPlan.currency,
-    },
     dispersionStartDate: paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlan.dispersionEndDate,
   };
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
-    currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -132,9 +127,6 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
     const requestBody = {
       dispersionStartDate: values.dispersionStartDate,
       dispersionEndDate: values.dispersionEndDate,
-      currency: values.currency?.value
-        ? values.currency.value
-        : values.currency,
     };
     try {
       const res = await updatePaymentPlan({
@@ -171,7 +163,10 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
             loading={loadingTargetPopulations}
             disabled
           />
-          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
+          <PaymentPlanParameters
+            values={values}
+            paymentPlanGroupId={paymentPlan.paymentPlanGroup?.id}
+          />
         </Form>
       )}
     </Formik>

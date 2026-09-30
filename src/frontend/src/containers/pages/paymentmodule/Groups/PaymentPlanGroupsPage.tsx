@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { getFilterFromQueryParams } from '@utils/utils';
 
-const initialFilter = { search: '', cycle: '' };
+const initialFilter = { search: '', cycle: '', status: [] };
 
 const PaymentPlanGroupsPage = (): ReactElement => {
   const { t } = useTranslation();

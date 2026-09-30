@@ -188,6 +188,7 @@ def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
         status=PaymentPlan.Status.DRAFT,
         build_status="OK",
         financial_service_provider=fsp_1,
+        currency=Currency.objects.get(code="AFN"),
         delivery_mechanism=dm_cash,
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
@@ -514,7 +515,7 @@ class TestSmokePaymentModule:
         assert "New Payment Plan" in page_new_payment_plan.get_page_header_title().text
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
-        assert "Currency" in page_new_payment_plan.get_input_currency().text
+        assert "Currency" in page_new_payment_plan.get_label_group_currency().text
         # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
         # strip the thin space so the bare-asterisk assertion still matches.
         assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(
@@ -598,11 +599,9 @@ class TestSmokePaymentModule:
         page_program_cycle_details.get_button_create_payment_plan().click()
         page_new_payment_plan.get_input_target_population().click()
         page_new_payment_plan.select_listbox_element(payment_plan.name)
-        page_new_payment_plan.get_input_currency().click()
-        page_new_payment_plan.select_listbox_element("Afghan afghani")
+        assert "AFN" in page_new_payment_plan.get_label_group_currency().text
         page_new_payment_plan.fill_input_dispersion_start_date(FormatTime(22, 1, 2026).numerically_formatted_date)
         page_new_payment_plan.fill_input_dispersion_end_date(FormatTime(30, 6, 2030).numerically_formatted_date)
-        page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.get_button_save_payment_plan().click()
         assert "OPEN" in page_payment_module_details.get_status_container().text
         assert "AFN" in page_payment_module_details.get_label_currency().text
@@ -801,7 +800,6 @@ class TestPaymentPlans:
         assert "Target Population is required" in page_new_payment_plan.get_input_target_population().text
         assert "Dispersion Start Date is required" in page_new_payment_plan.get_input_start_date_error().text
         assert "Dispersion End Date is required" in page_new_payment_plan.get_input_end_date_error().text
-        assert "Currency is required" in page_new_payment_plan.get_input_currency().text
 
     def test_payment_plan_supporting_documents(
         self,

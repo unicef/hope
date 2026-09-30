@@ -115,6 +115,16 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('FSP')}>
+                  {group?.financialServiceProvider?.name ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Currency')}>
+                  {group?.currency ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Entitled (USD)')}>
                   {group?.totalEntitledQuantityUsd ?? '-'}
                 </LabelizedField>

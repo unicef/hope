@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from 'src/testUtils/testProviders';
 import { PaymentPlanGroupDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanGroupDetailBackgroundActionStatusEnum';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { PaymentPlanGroupDetailsHeader } from './PaymentPlanGroupDetailsHeader';
 import type { PaymentPlanGroupDetail } from './types';
@@ -25,8 +27,13 @@ vi.mock('@hooks/usePermissions', () => ({
   usePermissions: mockUsePermissions,
 }));
 
+vi.mock('@components/core/ConfirmationDialog/useConfirmation', () => ({
+  useConfirmation: () => () => Promise.resolve(),
+}));
+
 const renderHeader = (
   backgroundActionStatus: PaymentPlanGroupDetailBackgroundActionStatusEnum | null,
+  status: PaymentPlanGroupStatusEnum = PaymentPlanGroupStatusEnum.OPEN,
 ) =>
   render(
     <MemoryRouter>
@@ -37,6 +44,7 @@ const renderHeader = (
             name: 'North Group',
             unicefId: 'PPG-0001',
             backgroundActionStatus,
+            status,
           } as PaymentPlanGroupDetail
         }
       />
@@ -108,5 +116,62 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     expect(
       screen.queryByLabelText('This upload will overwrite existing matches'),
     ).toBeNull();
+  });
+
+  it('shows the group status', () => {
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+
+    expect(screen.getByTestId('group-status').textContent).toBe('LOCKED');
+  });
+
+  it('shows Lock for an open group to users who can lock', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.OPEN);
+
+    expect(screen.getByTestId('button-lock-group')).not.toBeNull();
+    expect(screen.queryByTestId('button-unlock-group')).toBeNull();
+  });
+
+  it('shows Unlock for a locked group to users who can lock', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+
+    expect(screen.getByTestId('button-unlock-group')).not.toBeNull();
+    expect(screen.queryByTestId('button-lock-group')).toBeNull();
+  });
+
+  it('hides Lock without the lock permission', () => {
+    renderHeader(null, PaymentPlanGroupStatusEnum.OPEN);
+
+    expect(screen.queryByTestId('button-lock-group')).toBeNull();
+  });
+
+  it('hides Lock and Unlock once the group is past locking', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.IN_APPROVAL);
+
+    expect(screen.queryByTestId('button-lock-group')).toBeNull();
+    expect(screen.queryByTestId('button-unlock-group')).toBeNull();
+  });
+
+  it('locks the group after confirmation', async () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]);
+    const lockSpy = vi
+      .spyOn(
+        RestService,
+        'restBusinessAreasProgramsPaymentPlanGroupsLockCreate',
+      )
+      .mockResolvedValue({} as never);
+    renderHeader(null, PaymentPlanGroupStatusEnum.OPEN);
+
+    fireEvent.click(screen.getByTestId('button-lock-group'));
+
+    await waitFor(() =>
+      expect(lockSpy).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        programCode: 'test-program',
+        id: 'group-1',
+      }),
+    );
   });
 });

@@ -480,7 +480,7 @@ def test_edit_payment_plan_group(
         browser.type('input[name="name"]', "Updated Group Name")
         browser.click('[data-cy="button-submit"]')
 
-        browser.wait_for_text("Group name updated")
+        browser.wait_for_text("Group updated")
         browser.assert_text("Updated Group Name")
 
 

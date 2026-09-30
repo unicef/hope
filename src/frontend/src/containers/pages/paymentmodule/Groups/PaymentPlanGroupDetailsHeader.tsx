@@ -4,14 +4,18 @@ import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
-import { paymentPlanBackgroundActionStatusToColor } from '@utils/utils';
+import {
+  paymentPlanBackgroundActionStatusToColor,
+  paymentPlanStatusToColor,
+} from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
-import { EditGroupName } from './actions/EditGroupName';
+import { EditGroup } from './actions/EditGroup';
 import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
 import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExportXlsxWithAuthCodeGroupButton';
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
+import { LockUnlockGroupButton } from './actions/LockUnlockGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import type { PaymentPlanGroupDetail } from './types';
 
@@ -57,6 +61,15 @@ export function PaymentPlanGroupDetailsHeader({
               {group.unicefId}
             </Box>
           )}
+          {group?.status && (
+            <Box>
+              <StatusBox
+                status={group.status}
+                statusToColor={paymentPlanStatusToColor}
+                dataCy="group-status"
+              />
+            </Box>
+          )}
           {group?.backgroundActionStatus && (
             <Box>
               <StatusBox
@@ -77,7 +90,8 @@ export function PaymentPlanGroupDetailsHeader({
           alignItems: 'center',
         }}
       >
-        <EditGroupName group={group} />
+        <EditGroup group={group} />
+        <LockUnlockGroupButton group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
