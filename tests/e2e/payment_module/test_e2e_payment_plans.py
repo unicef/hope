@@ -192,12 +192,13 @@ def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
     rule = RuleFactory(
+        name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
         deprecated=False,
         enabled=True,
     )
     rule.allowed_business_areas.add(business_area)
-    RuleCommitFactory(rule=rule, version=2)
+    RuleCommitFactory(rule=rule, version=2, is_release=True, enabled=True)
     # create payments
     PaymentPlanService.create_payments(payment_plan)
 
@@ -570,7 +571,6 @@ class TestSmokePaymentModule:
         assert "FSP Auth Code" in page_payment_module_details.get_table_label()[10].text
         assert "Reconciliation" in page_payment_module_details.get_table_label()[11].text
 
-    @pytest.mark.xfail(reason="psycopg.errors.DeadlockDetected: deadlock detected")
     def test_payment_plan_happy_path(
         self,
         clear_downloaded_files: None,
@@ -619,6 +619,8 @@ class TestSmokePaymentModule:
         page_payment_module_details.get_input_entitlement_formula().click()
         page_payment_module_details.select_listbox_element("Test Rule")
         page_payment_module_details.get_button_apply_steficon().click()
+        # the status is LOCKED before the formula runs too; the snackbar only shows once the apply request is done
+        page_payment_module_details.check_alert("Formula is executing, please wait until completed")
         page_payment_module_details.check_status("LOCKED")
         page_payment_module_details.click_button_lock_plan()
         page_payment_module_details.get_button_submit().click()
@@ -769,6 +771,7 @@ class TestPaymentPlans:
             raise AssertionError("No payment plan has Open status")
         page_payment_module_details.get_delete_button().click()
         page_payment_module_details.get_button_submit().click()
+        page_payment_module.wait_for_text("Payment Plans", page_payment_module.table_title)
         page_payment_module.get_row(0)
         assert payment_plan not in page_payment_module.get_row(0).text
         assert "LOCKED" in page_payment_module.get_row(0).text

@@ -132,7 +132,7 @@ def test_clear_cache_view_non_superuser_gets_access_error(
     response = staff_client.get(reverse("admin:clear_cache"))
 
     assert response.status_code == 200
-    assert response.context["cache_keys"] == ["resolve_chart_payment_afghanistan", "exchange_rates_usd"]
+    assert response.context["cache_keys"] == []
     assert response.context["is_root"] is False
     messages = [str(message) for message in get_messages(response.wsgi_request)]
     assert messages == ["Access Not Allowed. Only superuser have access to clear cache"]

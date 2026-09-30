@@ -7,7 +7,7 @@ import pytest
 from seleniumbase import config as sb_config
 
 from extras.test_utils.factories import PartnerFactory
-from extras.test_utils.selenium import HopeTestBrowser
+from extras.test_utils.selenium import HopeTestBrowser, reset_browser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Role, RoleAssignment, User
 
@@ -59,6 +59,19 @@ def celery_always_eager() -> Generator[None, None, None]:
     app.conf.task_always_eager = prev
 
 
+@pytest.fixture(scope="session", autouse=True)
+def reuse_browser_session() -> Generator[None, None, None]:
+    # One Chrome per xdist worker: setUp() takes sb_config.shared_driver instead of launching
+    # a browser, and the SeleniumBase plugin quits it at the end of the session. Starting and
+    # quitting Chrome per test cost about 3s a test. crumbs only deletes cookies, so `browser`
+    # also runs reset_browser() to clear storage, extra tabs and alerts.
+    prev = sb_config.reuse_session, sb_config.crumbs
+    sb_config.reuse_session = True
+    sb_config.crumbs = True
+    yield
+    sb_config.reuse_session, sb_config.crumbs = prev
+
+
 @pytest.fixture
 def browser(live_server_with_static, request) -> Generator[HopeTestBrowser, None, None]:
     sb = HopeTestBrowser("base_method")
@@ -67,8 +80,16 @@ def browser(live_server_with_static, request) -> Generator[HopeTestBrowser, None
     sb._using_sb_fixture = True
     sb._using_sb_fixture_no_class = True
     sb_config._sb_node[request.node.nodeid] = sb
-    yield sb
-    sb.tearDown()
+    driver = sb.driver
+    try:
+        yield sb
+    finally:
+        # tearDown() takes the failure screenshot, so reset only after it. It also sets
+        # sb.driver to None, so reset the reference taken above.
+        try:
+            sb.tearDown()
+        finally:
+            reset_browser(driver)
 
 
 @pytest.fixture

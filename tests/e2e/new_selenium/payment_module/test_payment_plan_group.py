@@ -433,7 +433,7 @@ def test_create_payment_plan_group(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/program-cycles")
 
         browser.click('[data-cy="program-cycle-title"] a')
@@ -469,7 +469,7 @@ def test_edit_payment_plan_group(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{payment_plan_group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-edit-group-name"]')
@@ -503,7 +503,7 @@ def test_delete_payment_plan_group(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_DELETE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{payment_plan_group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-delete-group"]')
@@ -535,7 +535,7 @@ def test_export_payment_plan_group(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]')
@@ -572,7 +572,7 @@ def test_export_payment_plan_group_with_auth_code(
         Permissions.PM_EXPORT_XLSX_FOR_FSP,
         Permissions.PM_DOWNLOAD_FSP_AUTH_CODE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
@@ -618,7 +618,7 @@ def test_import_payment_plan_group_reconciliation(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group"]')
@@ -680,7 +680,7 @@ def test_override_reconciliation_resets_payment_for_empty_quantity(
         Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
         Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         _open_group_reconciliation_dialog(browser, reconciliation_file_path)
@@ -728,7 +728,7 @@ def test_override_reconciliation_ignores_payment_for_empty_quantity(
         Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
         Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         _open_group_reconciliation_dialog(browser, reconciliation_file_path)
@@ -772,7 +772,7 @@ def test_group_reconciliation_preserves_closed_plan_and_aborts_when_closed_quant
         Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
         Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
@@ -848,7 +848,7 @@ def test_send_payment_plan_group_to_payment_gateway(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-send-to-payment-gateway-group"]')
@@ -877,7 +877,7 @@ def test_group_shows_batch_with_download_link(
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_text("Batch #1")
@@ -901,7 +901,7 @@ def test_group_payment_plan_list_export_tag_links_to_batch(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_text("Export Batch")
@@ -928,7 +928,7 @@ def test_batch_detail_shows_download_button_when_file_present(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}/batches/1")
 
         browser.wait_for_element_visible('[data-cy="button-download-batch"]')
@@ -952,7 +952,7 @@ def test_batch_detail_shows_reexport_button_when_file_missing(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}/batches/1")
 
         browser.wait_for_element_visible('[data-cy="button-export-batch"]')
@@ -977,7 +977,7 @@ def test_linked_payment_plans_modal_on_cycle_details(
         Permissions.PM_VIEW_DETAILS,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/program-cycles/{cycle.id}")
 
         _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
@@ -999,7 +999,7 @@ def test_linked_payment_plans_modal_on_payment_plans_list(
         Permissions.PM_VIEW_LIST,
         Permissions.PM_VIEW_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans")
 
         _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
@@ -1033,7 +1033,7 @@ def test_group_details_action_buttons_follow_group_state(
         Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY,
         Permissions.PM_DOWNLOAD_FSP_AUTH_CODE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
         browser.wait_for_element_visible('[data-cy="button-edit-group-name"]')
@@ -1070,7 +1070,7 @@ def test_group_details_actions_are_pinned_to_their_permissions(
         Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
         Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(group_url)
 
         browser.wait_for_element_visible('[data-cy="button-delivery-export-xlsx-group"]')
@@ -1116,7 +1116,7 @@ def test_group_details_xlsx_buttons_disabled_while_background_action_busy(
         Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX,
         Permissions.PM_DOWNLOAD_FSP_AUTH_CODE,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(group_url)
 
         browser.wait_for_element_visible('[data-cy="button-delivery-export-xlsx-group"]:disabled')
@@ -1150,7 +1150,7 @@ def test_group_details_shows_background_action_status_while_busy(
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(group_url)
 
         browser.wait_for_element_visible('[data-cy="group-background-action-status"]')
@@ -1174,7 +1174,7 @@ def test_group_details_overview_shows_totals_and_links_to_cycle(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group_with_totals.id}")
 
         # The serializer sums the plan totals and DRF encodes the Decimal as a float.
@@ -1207,7 +1207,7 @@ def test_group_details_batches_section_reflects_export_state(
         Permissions.PM_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{payment_plan_group.id}")
         browser.wait_for_text(payment_plan_group.name, 'h5[data-cy="page-header-title"]')
@@ -1237,7 +1237,7 @@ def test_group_details_export_dialog_selects_plan_type_when_group_has_several(
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         browser.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]').click()

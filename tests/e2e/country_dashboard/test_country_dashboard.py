@@ -45,13 +45,14 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
     Fixture to create a household and associated payments within the same BusinessArea as the dashboard.
     """
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    program = ProgramFactory(
+        business_area=business_area,
+        status="Active",
+        beneficiary_group=beneficiary_group,
+    )
     household_args = {
         "business_area": business_area,
-        "program": ProgramFactory(
-            business_area=business_area,
-            status="Active",
-            beneficiary_group=beneficiary_group,
-        ),
+        "program": program,
         "size": 5,
         "children_count": 2,
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
@@ -60,6 +61,9 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
 
     payments = ModifiedPaymentFactory.create_batch(
         2,
+        # The dashboard only counts payments of a visible programme in its business area.
+        parent__program_cycle__program=program,
+        program=program,
         household=household,
         delivered_quantity_usd=100,
         delivered_quantity=230,
@@ -69,7 +73,6 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
     return household, payments
 
 
-@pytest.mark.xfail(reason="UNSTABLE")
 @pytest.mark.django_db(databases=["default", "read_only"])
 @pytest.mark.usefixtures("login", "setup_household_and_payments")
 class TestSmokeCountryDashboard:
@@ -89,8 +92,8 @@ class TestSmokeCountryDashboard:
         )
 
         assert page_country_dashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
-        assert page_country_dashboard.get_total_amount_paid_local().text != "", (
-            "Expected total amount in local paid to be populated."
+        assert page_country_dashboard.get_total_disbursed_payments().text != "", (
+            "Expected total disbursed payments (local currency) to be populated."
         )
         assert int(page_country_dashboard.get_number_of_payments().text) > 0, (
             "Expected number of payments to be greater than zero."

@@ -13,6 +13,11 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute=0, hour=0),
         "options": periodic_queue_options(),
     },
+    "clear_expired_sessions_async_task": {
+        "task": "hope.apps.core.celery_tasks.clear_expired_sessions_async_task",
+        "schedule": crontab(minute=0, hour=1),
+        "options": periodic_queue_options(),
+    },
     "get_sync_run_rapid_pro_async_task": {
         "task": "hope.apps.payment.celery_tasks.get_sync_run_rapid_pro_async_task",
         "schedule": crontab(minute="*/20"),

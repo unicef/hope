@@ -113,6 +113,9 @@ class TestSmokeAccountabilityCommunication:
         assert "Administrative Level 2" in page_accountability_communication_details.get_household_location().text
         assert "Residence Status" in page_accountability_communication_details.get_household_residence_status().text
         assert "Registration Date" in page_accountability_communication_details.get_household_registration_date().text
+        page_accountability_communication_details.wait_for_text(
+            "No results", page_accountability_communication_details.table_row
+        )
         assert (
             "No results Try adjusting your search or your filters to find what you are looking for."
             in page_accountability_communication_details.get_table_row().text.replace("\n", " ")

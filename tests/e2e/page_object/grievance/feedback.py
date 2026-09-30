@@ -1,5 +1,3 @@
-from time import sleep
-
 from selenium.webdriver.remote.webelement import WebElement
 
 from e2e.page_object.base_components import BaseComponents
@@ -95,11 +93,7 @@ class Feedback(BaseComponents):
         return self.get_elements(self.table_row)
 
     def get_row(self, number: int) -> WebElement:
-        for _ in range(10):
-            if len(self.get_elements(self.table_row)) == number + 1:
-                break
-            sleep(1)
-        return self.get_elements(self.table_row)[number]
+        return self.wait_for_nth(self.table_row, number)
 
     def get_days_filter_popup(self) -> WebElement:
         return self.wait_for(self.days_filter_popup)

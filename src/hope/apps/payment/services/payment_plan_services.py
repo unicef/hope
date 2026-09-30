@@ -385,6 +385,12 @@ class PaymentPlanService:
         fsp = getattr(self.payment_plan, "financial_service_provider", None)
         if not dm or not fsp:
             raise ValidationError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
 
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
             self.payment_plan.eligible_payments.update(

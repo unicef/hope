@@ -23,7 +23,7 @@ class Targeting(BaseComponents):
     rows = 'tr[role="checkbox"]'
     create_user_filters = 'div[data-cy="menu-item-filters-text"]'
     create_use_ids = 'div[data-cy="menu-item-ids-text"]'
-    button_inactive_create_new = 'a[data-cy="button-target-population-create-new"]'
+    button_inactive_create_new = '[data-cy="button-new-tp-disabled"]'
     tooltip = 'div[role="tooltip"]'
     status_container = 'div[data-cy="status-container"]'
     loading_rows = 'tr[data-cy="table-row"]'
@@ -167,8 +167,10 @@ class Targeting(BaseComponents):
         return self.wait_for(self.created_by).find_element(By.CSS_SELECTOR, self.tab_column_label)
 
     def disappear_loading_rows(self) -> WebElement:
+        # The loading row is often gone before we look; a short wait for it to appear
+        # keeps the "loading has started" guard without burning the full timeout.
         try:
-            self.get_loading_rows()
+            self.wait_for(self.loading_rows, timeout=2)
         except (TimeoutException, NoSuchElementException):
             self.get_status_container()
         return self.wait_for_disappear(self.loading_rows)

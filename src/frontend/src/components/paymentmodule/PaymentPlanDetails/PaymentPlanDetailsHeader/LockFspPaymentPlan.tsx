@@ -78,6 +78,10 @@ export function LockFspPaymentPlan({
     PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP,
     permissions,
   );
+  // the backend rejects the lock while a background action (e.g. the entitlement formula) runs; failed ones end in _ERROR
+  const backgroundActionRunning =
+    !!paymentPlan.backgroundActionStatus &&
+    !paymentPlan.backgroundActionStatus.endsWith('_ERROR');
 
   return (
     <>
@@ -91,7 +95,7 @@ export function LockFspPaymentPlan({
           variant="contained"
           onClick={() => setLockDialogOpen(true)}
           data-cy="button-lock-plan"
-          disabled={!canLockFsp || !isActiveProgram}
+          disabled={!canLockFsp || !isActiveProgram || backgroundActionRunning}
           data-perm={PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP}
         >
           {t('Lock FSP')}
