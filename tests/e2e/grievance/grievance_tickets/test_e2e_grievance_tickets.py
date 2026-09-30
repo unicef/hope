@@ -941,7 +941,7 @@ class TestGrievanceTickets:
         assert "Grievance Complaint" in page_grievance_new_ticket.get_select_category().text
         assert "Partner Related Complaint" in page_grievance_new_ticket.get_issue_type().text
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.wait_for_household_table()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
@@ -997,7 +997,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name("Referral")
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.wait_for_household_table()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
@@ -1031,7 +1031,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name("Referral")
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.wait_for_household_table()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()

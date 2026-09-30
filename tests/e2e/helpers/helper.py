@@ -307,6 +307,25 @@ class Common:
                 sleep(0.2)
         raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
 
+    def check_checkbox(self, locator: str, attempts: int = 3) -> None:
+        """Tick a MUI checkbox, retrying when the click does not register.
+
+        Content loading above the checkbox can push it down while the click is on
+        its way, so the click lands elsewhere and the box stays unticked.
+        """
+        for _ in range(attempts):
+            checkbox = self.wait_for(locator, timeout=30)
+            checkbox_input = checkbox.find_element(By.CSS_SELECTOR, "input")
+            if checkbox_input.is_selected():
+                return
+            self.click(locator)
+            try:
+                self._wait(5).until(expected_conditions.element_to_be_selected(checkbox_input))
+                return
+            except TimeoutException:
+                continue
+        raise AssertionError(f"Checkbox {locator} could not be ticked")
+
     def scroll_to_and_wait_for(
         self,
         locator: str,

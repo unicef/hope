@@ -4,11 +4,9 @@ from time import sleep
 from selenium.common.exceptions import (
     NoSuchElementException,
     StaleElementReferenceException,
-    TimeoutException,
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions
 
 from e2e.page_object.base_components import BaseComponents
 
@@ -223,6 +221,11 @@ class NewTicket(BaseComponents):
     def get_household_tab(self) -> WebElement:
         return self.wait_for(self.look_up_household_tab)
 
+    def wait_for_household_table(self) -> None:
+        # The table loads after the tab and pushes the Next button down; a click caught
+        # mid-shift gets its mousedown and mouseup on different elements and is lost.
+        self.wait_for(self.household_table_row)
+
     def get_individual_tab(self) -> WebElement:
         return self.wait_for(self.look_up_individual_tab)
 
@@ -238,18 +241,7 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.received_consent, timeout=100)
 
     def check_received_consent(self) -> None:
-        for _ in range(3):
-            consent = self.wait_for(self.received_consent, timeout=30)
-            consent_input = consent.find_element(By.CSS_SELECTOR, "input")
-            if consent_input.is_selected():
-                return
-            self.click(self.received_consent)
-            try:
-                self._wait(5).until(expected_conditions.element_to_be_selected(consent_input))
-                return
-            except TimeoutException:
-                continue
-        raise AssertionError("Received consent checkbox could not be selected")
+        self.check_checkbox(self.received_consent)
 
     def get_description(self) -> WebElement:
         return self.wait_for(self.description)
