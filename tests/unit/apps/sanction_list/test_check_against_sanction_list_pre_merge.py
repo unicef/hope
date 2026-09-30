@@ -22,6 +22,7 @@ from extras.test_utils.factories import (
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
 from hope.apps.household.const import HEAD, IDENTIFICATION_TYPE_NATIONAL_ID
+from hope.apps.household.documents import get_individual_doc
 from hope.apps.household.services.index_management import rebuild_program_indexes
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.apps.sanction_list.strategies.un import UNSanctionList
@@ -169,6 +170,14 @@ def stale_flagged_individual(household_with_individuals):
     individual.sanction_list_possible_match = True
     individual.save()
     return individual
+
+
+@pytest.fixture
+def index_with_max_terms_count_1(program, household_with_individuals, national_id_document):
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        rebuild_program_indexes(str(program.id))
+    # production AFG program has 226k individuals vs the default limit of 65536
+    get_individual_doc(str(program.id))._index.put_settings(settings={"index.max_terms_count": 1})
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
@@ -335,3 +344,29 @@ def test_create_system_flag_tickets_during_cw_auto_merge(
         ticket=ticket,
         golden_records_individual=merged_individual,
     ).exists()
+
+
+@override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_full_run_with_more_individuals_than_max_terms_count(program, index_with_max_terms_count_1):
+    check_against_sanction_list_pre_merge(program_id=program.id)
+
+    assert list(Individual.objects.filter(sanction_list_possible_match=True).values_list("full_name", flat=True)) == [
+        "Alias Name2"
+    ]
+
+
+@override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_rdi_run_with_more_individuals_than_max_terms_count(
+    program, registration_data_import, index_with_max_terms_count_1
+):
+    check_against_sanction_list_pre_merge(
+        program_id=program.id,
+        individuals_ids=[str(pk) for pk in Individual.objects.values_list("id", flat=True)],
+        registration_data_import=registration_data_import,
+    )
+
+    assert list(Individual.objects.filter(sanction_list_possible_match=True).values_list("full_name", flat=True)) == [
+        "Alias Name2"
+    ]
