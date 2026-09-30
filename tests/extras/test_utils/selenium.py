@@ -158,6 +158,24 @@ class HopeTestBrowser(BaseCase):
         self.click(f'[data-cy="select-{field_name}"]')
         self.select_option_by_name(option_name)
 
+    def check_checkbox(self, selector: str, attempts: int = 3) -> None:
+        """Tick the MUI checkbox matching `selector`, clicking again if the click was dropped.
+
+        Content loading above the checkbox can push it down mid-click, so the click misses.
+        """
+        checkbox_input = f"{selector} input"
+        self.wait_for_element_visible(selector)
+        for _ in range(attempts):
+            if self.is_selected(checkbox_input):
+                return
+            self.click(selector)
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline:
+                if self.is_selected(checkbox_input):
+                    return
+                time.sleep(0.1)
+        raise AssertionError(f"Checkbox {selector} could not be ticked")
+
     def fill_date(self, selector: str, value: str, timeout: int = 10) -> None:
         """Type a yyyy-MM-dd date into a MUI X date picker located by `selector`.
 

@@ -326,6 +326,20 @@ class Common:
                 continue
         raise AssertionError(f"Checkbox {locator} could not be ticked")
 
+    def wait_for_table_loaded(self, row_locator: str, timeout: int = DEFAULT_TIMEOUT) -> None:
+        """Wait until the table shows rows matching ``row_locator`` or its "No results" message."""
+
+        def loaded(driver: Chrome) -> bool:
+            if driver.find_elements(By.CSS_SELECTOR, row_locator):
+                return True
+            try:
+                rows = driver.find_elements(By.CSS_SELECTOR, 'tr[data-cy="table-row"]')
+                return any("No results" in row.text for row in rows)
+            except StaleElementReferenceException:
+                return False
+
+        self._wait(timeout).until(loaded)
+
     def scroll_to_and_wait_for(
         self,
         locator: str,

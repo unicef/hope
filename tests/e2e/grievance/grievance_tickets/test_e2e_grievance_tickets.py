@@ -699,7 +699,9 @@ class TestGrievanceTickets:
         }
 
         items = page_grievance_new_ticket.wait_for_count('ul[role="listbox"] li', len(check_list))
-        assert {item.text: str(item.get_attribute("aria-disabled")) for item in items} == check_list
+        # textContent, because .text is empty while the menu is still fading in.
+        labels = {item.get_attribute("textContent"): str(item.get_attribute("aria-disabled")) for item in items}
+        assert labels == check_list
 
     def test_grievance_tickets_create_new_ticket_data_change_add_individual_all_fields(
         self,

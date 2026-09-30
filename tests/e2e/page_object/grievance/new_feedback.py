@@ -105,6 +105,11 @@ class NewFeedback(BaseComponents):
         assert self.text_look_up_household.format(tab_name) in household_tab.text, household_tab.text
         return household_tab
 
+    def wait_for_household_table(self) -> None:
+        # The table loads after the tab and pushes the Next button down; a click caught
+        # mid-shift gets its mousedown and mouseup on different elements and is lost.
+        self.wait_for_table_loaded(self.household_table_row)
+
     def get_individual_tab(self, tab_name: str = "MEMBER") -> WebElement:
         try:
             individual_tab = self.get_elements(self.look_up_tabs_individual, attempts=5)[1]

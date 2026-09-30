@@ -224,7 +224,7 @@ class NewTicket(BaseComponents):
     def wait_for_household_table(self) -> None:
         # The table loads after the tab and pushes the Next button down; a click caught
         # mid-shift gets its mousedown and mouseup on different elements and is lost.
-        self.wait_for(self.household_table_row)
+        self.wait_for_table_loaded(self.household_table_row)
 
     def get_individual_tab(self) -> WebElement:
         return self.wait_for(self.look_up_individual_tab)
