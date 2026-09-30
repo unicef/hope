@@ -1,10 +1,18 @@
+from unittest.mock import MagicMock
+
 from django.contrib import admin
 from django.test import RequestFactory
 import pytest
 
-from extras.test_utils.factories import PaymentPlanFactory, UserFactory
+from extras.test_utils.factories import (
+    PaymentPlanFactory,
+    PaymentPlanPurposeFactory,
+    ProgramFactory,
+    TargetPopulationFactory,
+    UserFactory,
+)
 from hope.admin.payment_plan import BasePaymentPlanAdmin
-from hope.admin.target_population import TargetPopulationAdmin
+from hope.admin.target_population import HIDDEN_FIELDS, TargetPopulationAdmin
 from hope.models import PaymentPlan, TargetPopulation
 
 pytestmark = pytest.mark.django_db
@@ -50,3 +58,32 @@ def test_admin_has_no_add_permission() -> None:
 def test_base_admin_frontend_url_is_not_implemented() -> None:
     with pytest.raises(NotImplementedError):
         BasePaymentPlanAdmin(PaymentPlan, admin.site).frontend_url(PaymentPlanFactory())
+
+
+def test_admin_form_hides_payment_plan_only_fields() -> None:
+    target_population = TargetPopulationFactory()
+    request = RequestFactory().get("/")
+    request.user = UserFactory(is_superuser=True)
+    model_admin = TargetPopulationAdmin(TargetPopulation, admin.site)
+
+    form = model_admin.get_form(request, target_population, change=True)()
+    shown_fields = set(form.fields) | set(model_admin.get_readonly_fields(request, target_population))
+
+    assert shown_fields.isdisjoint(HIDDEN_FIELDS + ("plan_type",))
+
+
+def test_admin_form_scopes_payment_plan_purposes_to_program() -> None:
+    target_population = TargetPopulationFactory()
+    purpose = target_population.program_cycle.program.payment_plan_purposes.get()
+    other_program = ProgramFactory()
+    other_purpose = PaymentPlanPurposeFactory()
+    other_program.payment_plan_purposes.add(other_purpose)
+    request = RequestFactory().get("/")
+    request.resolver_match = MagicMock()
+    request.resolver_match.kwargs = {"object_id": str(target_population.pk)}
+    request.user = UserFactory(is_superuser=True)
+    model_admin = TargetPopulationAdmin(TargetPopulation, admin.site)
+
+    form = model_admin.get_form(request, target_population, change=True)()
+
+    assert list(form.fields["payment_plan_purposes"].queryset) == [purpose]

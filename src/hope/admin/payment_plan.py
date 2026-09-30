@@ -233,13 +233,14 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    filter_horizontal = ("payment_plan_purposes",)
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
         "export_pdf_file_summary",
         "reconciliation_import_file",
     )
-    readonly_fields = (
+    readonly_fields: tuple[str, ...] = (
         "is_removed",
         "id",
         "created_at",
@@ -298,6 +299,15 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         request._payment_plan_obj = obj
         return super().get_form(request, obj, change, **kwargs)
 
+    def formfield_for_manytomany(
+        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
+    ) -> ModelMultipleChoiceField | None:
+        if db_field.name == "payment_plan_purposes":
+            obj = getattr(request, "_payment_plan_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
     def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
         old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
         super().save_model(request, obj, form, change)
@@ -325,14 +335,13 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
 
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
-    list_display = BasePaymentPlanAdmin.list_display + ("use_payment_gateway",)
+    list_display = BasePaymentPlanAdmin.list_display + ("use_payment_gateway", "plan_type")
     list_filter = BasePaymentPlanAdmin.list_filter + (
         "use_payment_gateway",
         ("plan_type", ChoicesFieldComboFilter),
     )
-    filter_horizontal = ("payment_plan_purposes",)
+    readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type",)
     inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
-    exclude = ("plan_type",)
 
     @button(permission="payment.view_paymentplan")
     def western_union_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -348,15 +357,6 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
         if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
             return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
         return f"{base}/payment-module/payment-plans/{obj.id}"
-
-    def formfield_for_manytomany(
-        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
-    ) -> ModelMultipleChoiceField | None:
-        if db_field.name == "payment_plan_purposes":
-            obj = getattr(request, "_payment_plan_obj", None)
-            if obj is not None:
-                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     @button(
         visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
@@ -548,9 +548,6 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
             action=self.retry_payment_gateway_send,
             message="Do you confirm retrying the Payment Gateway send for this Payment Plan?",
         )
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
 
 
 @admin.register(PaymentPlanGroup)
