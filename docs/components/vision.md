@@ -96,10 +96,13 @@ effects.
 | The FC conflicts with another assignment | `CALLBACK_FAILED` with `FC_CONFLICT` | Remains `IN_REVIEW`; no FC changes |
 | FC assignment succeeds | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
 
-An FC assignment failure returns HTTP `400`, status `KO`, and message `FC not found`. A later callback retries
-processing from `SEND_FAILED`, `CALLBACK_FAILED`, `FC_MISSING`, or `FC_NOT_FOUND`. A successful callback with a valid
-FC can therefore recover the workflow without admin intervention. Callbacks that still cannot assign an FC return the
-same `KO` response.
+The callback response includes `status`, `messageId`, `payplanSno`, and `message`. An accepted callback returns HTTP
+`200`, status `OK`, and message `Callback received`, including when Vision reports a failed Payment Plan status.
+An invalid callback returns HTTP `400` with a reason in `message`; an unknown `payplanSno` returns HTTP `404` and
+`Payment plan not found`. An FC assignment failure returns HTTP `400`, status `KO`, and a message describing the
+missing, unknown, ambiguous, or conflicting FC. A later callback retries processing from `SEND_FAILED`, `PP_CREATED`,
+`CALLBACK_FAILED`, `FC_MISSING`, or `FC_NOT_FOUND`. A successful callback with a valid FC can therefore recover the
+workflow without admin intervention.
 
 ## Funds Commitment Assignment
 

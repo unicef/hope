@@ -82,23 +82,21 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
             vision_callback_external_field_name(field_name): value for field_name, value in self.validated_data.items()
         }
 
-    def ack_payload(self, status: str, *, message: str | None = None) -> dict[str, Any]:
+    def ack_payload(self, status: str, *, message: str) -> dict[str, Any]:
         validated_data = getattr(self, "_validated_data", {})
-        payload = {
+        return {
             "status": status,
             "message_id": validated_data.get("message_id") or self.initial_message_id,
             "payplan_sno": validated_data.get("payplan_sno") or self.initial_payplan_sno,
+            "message": message,
         }
-        if message is not None:
-            payload["message"] = message
-        return payload
 
 
 class PaymentPlanCallbackAckSerializer(serializers.Serializer):
     status = serializers.CharField()
     message_id = serializers.CharField(allow_blank=True)
     payplan_sno = serializers.CharField(allow_blank=True)
-    message = serializers.CharField(required=False)
+    message = serializers.CharField()
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)

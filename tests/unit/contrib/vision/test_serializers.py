@@ -134,10 +134,11 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
 
 def test_payment_plan_callback_request_serializer_ack_payload_uses_initial_data_before_validation() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(data={"messageId": "msg-001", "payplanSno": "PP001"})
-    assert serializer.ack_payload("KO") == {
+    assert serializer.ack_payload("KO", message="Invalid callback payload") == {
         "status": "KO",
         "message_id": "msg-001",
         "payplan_sno": "PP001",
+        "message": "Invalid callback payload",
     }
 
 
@@ -157,12 +158,14 @@ def test_payment_plan_callback_ack_serializer_to_representation() -> None:
             "status": "OK",
             "message_id": "msg-001",
             "payplan_sno": "PP001",
+            "message": "Callback received",
         }
     )
     assert serializer.data == {
         "status": "OK",
         "messageId": "msg-001",
         "payplanSno": "PP001",
+        "message": "Callback received",
     }
 
 
