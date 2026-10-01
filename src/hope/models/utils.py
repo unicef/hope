@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class LongNameIndex(models.Index):
+    max_name_length = 63  # PostgreSQL NAMEDATALEN - 1
+
+
 class BulkSignalsManagerMixin:
     def bulk_create(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> list[Any]:
         val = super().bulk_create(objs, *args, **kwargs)
