@@ -9,5 +9,6 @@ class AuroraProcessor:
 registry = Registry(AuroraProcessor)
 
 
+# Looks unused, but Registration.rdi_parser may store this class by dotted path.
 class DefaultProcessor(AuroraProcessor):
     pass

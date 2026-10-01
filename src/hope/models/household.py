@@ -779,6 +779,7 @@ class Household(
     def alternate_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
+    # Looks unused, but Steficon rules get household in their context and may read it.
     @property
     def flex_registrations_record(self) -> "Record" | None:
         from hope.contrib.aurora.models import Record

@@ -1109,6 +1109,7 @@ class PaymentPlan(
             query &= Q(size__gt=0)
         return query
 
+    # Looks unused, but Steficon rules get payment_plan in their context and may read it.
     @property
     def has_empty_criteria(self) -> bool:
         return self.rules.count() == 0

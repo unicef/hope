@@ -45,6 +45,7 @@ from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssi
 if TYPE_CHECKING:
     from uuid import UUID
 
+    # Looks unused, but it's needed for the string annotation on get_deleted_objects.
     from django.db.models.query import _QuerySet
     from django.utils.datastructures import _ListOrTuple
 

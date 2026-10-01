@@ -44,6 +44,7 @@ class _SanitizedValue:
         return safe_log(repr(self._value))
 
 
+# Looks unused, but LOGGING wires it by dotted path in config/fragments/loggers.py.
 class LogForgingFilter(logging.Filter):
     """Defense-in-depth filter that strips CR/LF from interpolated log args.
 

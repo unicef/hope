@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class CustomModelEntry(ModelEntry):
     """Don't update existing tasks."""
 
+    # Looks unused, but celery beat calls it for every scheduled entry because our scheduler uses CustomModelEntry.
     @classmethod
     def from_entry(cls, name: str, app: str | None = None, **entry: Any) -> "CustomModelEntry":
         obj, _ = PeriodicTask._default_manager.get_or_create(
