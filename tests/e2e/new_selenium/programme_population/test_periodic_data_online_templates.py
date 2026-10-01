@@ -24,7 +24,7 @@ def test_create_online_template(
     # Step 0 (Filter) - keep the whole population, just continue.
     login.wait_for_element_clickable('button[data-cy="next-button"]').click()
     # Step 1 (Fields to Update) - select the periodic field to update.
-    login.wait_for_element_clickable(f'[data-cy="checkbox-{string_attribute.name}"]').click()
+    login.check_checkbox(f'[data-cy="checkbox-{string_attribute.name}"]')
     login.click('button[data-cy="next-button"]')
     # Step 2 (Authorized Users) - optional, skip.
     login.wait_for_element_clickable('button[data-cy="next-button"]').click()
@@ -87,7 +87,7 @@ def test_edit_authorized_users(
         f"/{ba_slug}/programs/{program.code}/population/individuals/"
         f"online-templates/{online_edit.id}/edit-authorised-users"
     )
-    login.wait_for_element_clickable(f'[data-cy="checkbox-authorized-user-{create_super_user.id}"]').click()
+    login.check_checkbox(f'[data-cy="checkbox-authorized-user-{create_super_user.id}"]')
     login.wait_for_element_clickable('button[data-cy="button-save-authorized-users"]').click()
 
     # Saving redirects back to the template details page.

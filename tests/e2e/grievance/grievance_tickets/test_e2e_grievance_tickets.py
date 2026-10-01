@@ -443,7 +443,7 @@ class TestSmokeGrievanceTickets:
         # Go to Grievance Tickets
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
-        page_grievance_tickets.get_select_all().click()
+        page_grievance_tickets.check_checkbox(page_grievance_tickets.select_all)
         assert "NEW TICKET" in page_grievance_tickets.get_button_new_ticket().text
         assert "ASSIGN" in page_grievance_tickets.get_button_assign().text
         assert "SET PRIORITY" in page_grievance_tickets.get_button_set_priority().text
@@ -482,7 +482,7 @@ class TestSmokeGrievanceTickets:
         page_grievance_tickets.get_ticket_list_row()
         page_grievance_tickets.get_tab_system_generated().click()
         assert len(page_grievance_tickets.get_ticket_list_row()) == 1
-        page_grievance_tickets.get_select_all().click()
+        page_grievance_tickets.check_checkbox(page_grievance_tickets.select_all)
         assert "ASSIGN" in page_grievance_tickets.get_button_assign().text
         assert "SET PRIORITY" in page_grievance_tickets.get_button_set_priority().text
         assert "SET URGENCY" in page_grievance_tickets.get_button_set_urgency().text
@@ -978,7 +978,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("TEST Payment Related Complaint")
         page_grievance_new_ticket.get_look_up_payment_record().click()
-        page_grievance_new_ticket.get_checkbox_select_all().click()
+        page_grievance_new_ticket.check_checkbox(page_grievance_new_ticket.checkbox_select_all)
         page_grievance_new_ticket.get_button_submit().click()
         assert hh_with_payment_record.unicef_id in page_grievance_details_page.get_payment_record().text
         page_grievance_new_ticket.get_button_next().click()
@@ -1005,7 +1005,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.get_description().send_keys("TEST Linked Ticket")
         page_grievance_new_ticket.get_look_up_button().click()
-        page_grievance_new_ticket.get_checkbox_select_all().click()
+        page_grievance_new_ticket.check_checkbox(page_grievance_new_ticket.checkbox_select_all)
         page_grievance_new_ticket.get_button_submit().click()
         assert linked_ticket in page_grievance_new_ticket.get_linked_ticket_id().text
         page_grievance_new_ticket.get_button_edit().click()
@@ -1014,7 +1014,7 @@ class TestGrievanceTickets:
         with pytest.raises(NoSuchElementException):
             page_grievance_new_ticket.get_linked_ticket_id()
         page_grievance_new_ticket.get_look_up_button().click()
-        page_grievance_new_ticket.get_checkbox_select_all().click()
+        page_grievance_new_ticket.check_checkbox(page_grievance_new_ticket.checkbox_select_all)
         page_grievance_new_ticket.get_button_submit().click()
         assert linked_ticket in page_grievance_new_ticket.get_linked_ticket_id().text
         page_grievance_new_ticket.get_button_next().click()
@@ -1120,7 +1120,7 @@ class TestGrievanceTickets:
     ) -> None:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
-        page_grievance_tickets.get_select_all().click()
+        page_grievance_tickets.check_checkbox(page_grievance_tickets.select_all)
         page_grievance_tickets.get_button_assign().click()
         page_grievance_tickets.get_dropdown().click()
         page_grievance_tickets.select_listbox_element("test@example.com")
@@ -1135,7 +1135,7 @@ class TestGrievanceTickets:
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[1] in "Assigned"
 
-        page_grievance_tickets.get_select_all().click()
+        page_grievance_tickets.check_checkbox(page_grievance_tickets.select_all)
         page_grievance_tickets.get_button_set_priority().click()
         page_grievance_tickets.get_dropdown().click()
         page_grievance_tickets.select_listbox_element("Medium")
@@ -1145,7 +1145,7 @@ class TestGrievanceTickets:
         page_grievance_tickets.check_if_text_exist_in_a_row(0, "Medium")
         for str_row in page_grievance_tickets.get_rows():
             assert "Medium" in str_row.text.replace("\n", " ").split(" ")
-        page_grievance_tickets.get_select_all().click()
+        page_grievance_tickets.check_checkbox(page_grievance_tickets.select_all)
         page_grievance_tickets.get_button_set_urgency().click()
         page_grievance_tickets.get_dropdown().click()
         page_grievance_tickets.select_listbox_element("Urgent")
@@ -1191,7 +1191,7 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_button_assign_to_me().click()
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.get_button_send_for_approval().click()
-        page_grievance_details_page.get_checkbox_household_data().click()
+        page_grievance_details_page.check_checkbox(page_grievance_details_page.checkbox_household_data)
         page_grievance_details_page.get_button_approval().click()
         # "You approved 1 change ..." warning
         page_grievance_details_page.get_button_confirm().click()
@@ -1266,7 +1266,7 @@ class TestGrievanceTickets:
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         page_grievance_tickets.get_tab_system_generated().click()
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_select_all_checkbox().click()
+        page_grievance_details_page.check_checkbox(page_grievance_details_page.select_all_checkbox)
         page_grievance_details_page.get_person_icon()
         assert "person-icon" in [
             ii.get_attribute("data-cy")

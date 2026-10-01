@@ -506,9 +506,6 @@ class NewTicket(BaseComponents):
     def get_input_individual_data(self, typology: str) -> WebElement:
         return self.wait_for(self.input_individual_data.format(typology))
 
-    def get_checkbox_select_all(self) -> WebElement:
-        return self.wait_for(self.checkbox_select_all)
-
     def get_button_submit(self) -> WebElement:
         return self.get_elements(self.button_submit)[1]
 

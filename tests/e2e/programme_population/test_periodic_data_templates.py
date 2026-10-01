@@ -287,7 +287,9 @@ class TestPeriodicDataTemplates:
 
         page_pdu_xlsx_templates_details.select_listbox_element(individual.registration_data_import.name)
         page_pdu_xlsx_templates_details.get_submit_button().click()
-        page_pdu_xlsx_templates_details.get_checkbox(string_attribute.name).click()
+        page_pdu_xlsx_templates_details.check_checkbox(
+            page_pdu_xlsx_templates_details.checkbox.format(string_attribute.name)
+        )
         page_pdu_xlsx_templates_details.get_submit_button().click()
         page_pdu_xlsx_templates_details.get_submit_button().click()  # skip optional name
         page_pdu_xlsx_templates.get_new_template_button()  # wait for the page to load
