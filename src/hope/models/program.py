@@ -33,6 +33,7 @@ from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,
+    LongNameIndex,
     SoftDeletableIsVisibleManager,
     TimeStampedUUIDModel,
 )
@@ -177,26 +178,24 @@ class Program(
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
         ],
-        db_index=True,
         help_text="Program name",
         db_collation="und-ci-det",
     )
-    code = models.CharField(max_length=4, db_index=True, help_text="Program code")
-    status = models.CharField(max_length=10, choices=get_status_choices, db_index=True, help_text="Program status")
+    code = models.CharField(max_length=4, help_text="Program code")
+    status = models.CharField(max_length=10, choices=get_status_choices, help_text="Program status")
     description = models.CharField(
         blank=True,
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
         help_text="Program description",
     )
-    start_date = models.DateField(db_index=True, help_text="Program start date")
-    end_date = models.DateField(null=True, blank=True, db_index=True, help_text="Program end date")
-    sector = models.CharField(max_length=50, choices=get_sector_choices, db_index=True, help_text="Program sector")
+    start_date = models.DateField(help_text="Program start date")
+    end_date = models.DateField(null=True, blank=True, help_text="Program end date")
+    sector = models.CharField(max_length=50, choices=get_sector_choices, help_text="Program sector")
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
         validators=[MinValueValidator(Decimal("0.00"))],
-        db_index=True,
         help_text="Program budget",
     )
     frequency_of_payments = models.CharField(
@@ -373,6 +372,27 @@ class Program(
     class Meta:
         app_label = "program"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["name"], name="program_program_name_2670ab01"),
+            LongNameIndex(
+                fields=["name"], opclasses=["varchar_pattern_ops"], name="program_program_name_2670ab01_like"
+            ),
+            LongNameIndex(fields=["code"], name="program_program_code_b7abf396"),
+            LongNameIndex(
+                fields=["code"], opclasses=["varchar_pattern_ops"], name="program_program_code_b7abf396_like"
+            ),
+            LongNameIndex(fields=["status"], name="program_program_status_d116e0a6"),
+            LongNameIndex(
+                fields=["status"], opclasses=["varchar_pattern_ops"], name="program_program_status_d116e0a6_like"
+            ),
+            LongNameIndex(fields=["start_date"], name="program_program_start_date_f53642aa"),
+            LongNameIndex(fields=["end_date"], name="program_program_end_date_449c52ec"),
+            LongNameIndex(fields=["sector"], name="program_program_sector_2fb1058e"),
+            LongNameIndex(
+                fields=["sector"], opclasses=["varchar_pattern_ops"], name="program_program_sector_2fb1058e_like"
+            ),
+            LongNameIndex(fields=["budget"], name="program_program_budget_3757bcc6"),
+        ]
         constraints = [
             UniqueConstraint(
                 fields=["name", "business_area", "is_removed"],

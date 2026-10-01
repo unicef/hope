@@ -12,7 +12,13 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.program import Program
-from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import (
+    AdminUrlMixin,
+    ConcurrencyModel,
+    LongNameIndex,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 
 def get_program_cycle_status_choices() -> tuple:
@@ -45,7 +51,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         default="Default Programme Cycle",
     )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
-    status = models.CharField(max_length=10, choices=get_program_cycle_status_choices, db_index=True, default=DRAFT)
+    status = models.CharField(max_length=10, choices=get_program_cycle_status_choices, default=DRAFT)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
     created_by = models.ForeignKey(
@@ -63,6 +69,12 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             UniqueConstraint(
                 fields=["title", "program"],
                 name="program_cycle_title_unique_per_program",
+            ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["status"], name="program_programcycle_status_c6ee3e75"),
+            LongNameIndex(
+                fields=["status"], opclasses=["varchar_pattern_ops"], name="program_programcycle_status_c6ee3e75_like"
             ),
         ]
         ordering = ["start_date"]
