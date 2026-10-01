@@ -78,9 +78,7 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
 
     @property
     def external_payload(self) -> dict[str, Any]:
-        return {
-            vision_callback_external_field_name(field_name): value for field_name, value in self.validated_data.items()
-        }
+        return dict(self.initial_data)
 
     def ack_payload(self, status: str, *, message: str) -> dict[str, Any]:
         validated_data = getattr(self, "_validated_data", {})

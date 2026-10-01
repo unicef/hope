@@ -23,7 +23,6 @@ VISION_CALLBACK_RECEIVED_MESSAGE = "Callback received"
 VISION_INVALID_CALLBACK_MESSAGE = "Invalid callback payload"
 VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE = "Payment plan not found"
 VISION_PAYPLAN_ID_MISSING_MESSAGE = "vision_payplanSno is required"
-VISION_FC_MISSING_MESSAGE = "FC number is missing"
 VISION_FC_NOT_FOUND_MESSAGE = "FC not found"
 VISION_FC_AMBIGUOUS_MESSAGE = "Multiple FC groups found"
 VISION_FC_CONFLICT_MESSAGE = "FC assignment conflict"
@@ -58,8 +57,6 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
     @staticmethod
     def _fc_failure_message(payment_plan: PaymentPlan) -> str:
         vision_data = payment_plan.internal_data["vision"]
-        if vision_data.get("status") == VisionStatus.FC_MISSING.value:
-            return VISION_FC_MISSING_MESSAGE
         if vision_data.get("status") == VisionStatus.FC_NOT_FOUND.value:
             return VISION_FC_NOT_FOUND_MESSAGE
         if vision_data.get("error_code") == VisionErrorCode.FC_AMBIGUOUS.value:
@@ -110,9 +107,14 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
                 message=VISION_PAYPLAN_ID_MISSING_MESSAGE,
             )
             self._append_log(payment_plan, serializer.external_payload, response_data)
+            missing_id_failure_statuses = {
+                VisionStatus.WAITING_FOR_CALLBACK.value,
+                VisionStatus.PP_CREATED.value,
+            }
             if (
-                payment_plan.vision_integration_enabled
-                and payment_plan.vision_status == VisionStatus.WAITING_FOR_CALLBACK.value
+                payment_plan.status == PaymentPlan.Status.IN_REVIEW
+                and payment_plan.vision_integration_enabled
+                and payment_plan.vision_status in missing_id_failure_statuses
             ):
                 VisionService.set_status(payment_plan, VisionStatus.CALLBACK_FAILED)
             payment_plan.save(update_fields=["internal_data"])

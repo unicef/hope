@@ -120,6 +120,9 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
             "vision_payplanSno": "00000062",
             "status": "SUCCESS",
             "fc_num": "FC123",
+            "error_message": "SUCCESS",
+            "timestamp": "20261001133415",
+            "extra_field": {"key": "value"},
         }
     )
     serializer.is_valid(raise_exception=True)
@@ -129,6 +132,9 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
         "vision_payplanSno": "00000062",
         "status": "SUCCESS",
         "fc_num": "FC123",
+        "error_message": "SUCCESS",
+        "timestamp": "20261001133415",
+        "extra_field": {"key": "value"},
     }
 
 

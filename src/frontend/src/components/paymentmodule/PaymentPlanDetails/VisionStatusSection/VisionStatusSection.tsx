@@ -13,7 +13,6 @@ interface VisionStatusSectionProps {
 const errorStatuses = new Set([
   'SEND_FAILED',
   'CALLBACK_FAILED',
-  'FC_MISSING',
   'FC_NOT_FOUND',
 ]);
 

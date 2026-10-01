@@ -256,7 +256,7 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
     payment_plan.internal_data = {
         "vision": {
             "sent": True,
-            "status": VisionStatus.FC_MISSING.value,
+            "status": VisionStatus.FC_NOT_FOUND.value,
         }
     }
     payment_plan.save(update_fields=["internal_data"])
