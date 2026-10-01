@@ -11,6 +11,7 @@ register = template.Library()
 
 
 class HtmlDiff(difflib.HtmlDiff):
+    # Looks unused, but difflib's _collect_lines calls it when make_table renders the rule diff.
     def _format_line(self, side: Any, flag: Any, linenum: int, text: str) -> str:
         try:
             line_number: str = f"{linenum}"

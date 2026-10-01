@@ -29,6 +29,7 @@ if TYPE_CHECKING:  # pragma: no cover
         version_num: str
         country_of_birth: None
 
+    # Looks unused, but it's needed for the string annotation on EUParser.__iter__.
     class Entry(TypedDict):
         id: int
         aliases: list[Alias]
