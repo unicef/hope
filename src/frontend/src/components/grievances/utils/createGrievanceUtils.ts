@@ -46,13 +46,25 @@ export function isSystemGenerated(category: any, issueType?: number): boolean {
     cat === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   );
 }
-export const getIssueTypeToDisplay = (issueType: number): string =>
-  (issueType &&
+// The label comes from the issue type choices ({category, label, subCategories: {value: name}});
+// the title-cased constant name is only a fallback while choices are missing.
+export const getIssueTypeToDisplay = (
+  issueType: number,
+  issueTypeChoices?: Array<Record<string, any>>,
+): string => {
+  if (!issueType) return '';
+  const label = issueTypeChoices
+    ?.map((category) => category.subCategories?.[issueType])
+    .find(Boolean);
+  return (
+    label ||
     GRIEVANCE_ISSUE_TYPES_NAMES[issueType]
       ?.toLowerCase()
       ?.replace(/_/g, ' ')
-      ?.replace(/\b\w/g, (char) => char.toUpperCase())) ||
-  '';
+      ?.replace(/\b\w/g, (char) => char.toUpperCase()) ||
+    ''
+  );
+};
 
 export const selectedIssueType = (formValues, issueTypeDict): string => {
   const subCategoriesObj =

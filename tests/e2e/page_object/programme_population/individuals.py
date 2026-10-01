@@ -128,6 +128,10 @@ class Individuals(BaseComponents):
         self.wait_for(self.individual_table_row)
         return self.get_elements(self.individual_table_row)
 
+    def individual_has_icon(self, unicef_id: str, label: str) -> bool:
+        row = next(row for row in self.get_individual_table_row() if unicef_id in row.text)
+        return any(label in (icon.get_attribute("aria-label") or "") for icon in row.find_elements("tag name", "svg"))
+
     def get_table_pagination(self) -> WebElement:
         return self.wait_for(self.table_pagination)
 
