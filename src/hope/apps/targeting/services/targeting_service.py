@@ -287,21 +287,26 @@ class TargetingCriteriaFilterBase:
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
-            logger.warning(f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments")
+            logger.warning(
+                "%s %s filter query expect %s arguments", self.field_name, self.comparison_method, args_count
+            )
             raise ValidationError(
                 f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
-                logger.warning(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
+                logger.warning("%s SELECT MULTIPLE CONTAINS filter query expect at least 1 argument", self.field_name)
                 raise ValidationError(
                     f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
                 )
         elif args_count != args_input_count:
             logger.warning(
-                f"{self.field_name} {self.comparison_method} filter query expect {args_count} "
-                f"arguments gets {args_input_count}"
+                "%s %s filter query expect %s arguments gets %s",
+                self.field_name,
+                self.comparison_method,
+                args_count,
+                args_input_count,
             )
             raise ValidationError(
                 f"{self.field_name} {self.comparison_method} filter query expect {args_count} "

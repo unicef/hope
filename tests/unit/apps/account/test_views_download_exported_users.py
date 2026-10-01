@@ -45,6 +45,6 @@ def test_download_exported_users_returns_xlsx_when_users_exist(client: Client, b
 
     assert response.status_code == 200
     assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert response["Content-Disposition"].startswith(f"attachment; filename=exported_users_{business_area.slug}_")
-    assert response["Content-Disposition"].endswith(".xlsx")
+    assert response["Content-Disposition"].startswith(f'attachment; filename="exported_users_{business_area.slug}_')
+    assert response["Content-Disposition"].endswith('.xlsx"')
     assert len(response.content) > 0
