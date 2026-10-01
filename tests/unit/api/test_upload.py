@@ -174,7 +174,7 @@ def test_upload_with_documents(
 
     hoh = PendingIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
     assert hoh
-    hh = hoh.pending_household
+    hh = PendingHousehold.objects.get(pk=hoh.household_id)
     assert hh.village == "village1"
     assert hh.primary_collector != hoh
     assert hh.alternate_collector is None

@@ -10,11 +10,15 @@ from django.urls import reverse
 from flags.models import FlagState
 import pytest
 
-from extras.test_utils.factories import ApprovalProcessFactory, FundsCommitmentHeaderFactory, FundsCommitmentItemFactory
+from extras.test_utils.factories import (
+    ApprovalProcessFactory,
+    FundsCommitmentFactory,
+    FundsCommitmentHeaderFactory,
+    FundsCommitmentItemFactory,
+)
 from hope.admin.funds_commitment_header import FundsCommitmentHeaderAdmin, FundsCommitmentItemInline
 from hope.admin.payment_plan import FundsCommitmentHeaderInline as PaymentPlanFundsCommitmentHeaderInline
 from hope.contrib.vision.choices import VisionStatus
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import PaymentPlan
 
