@@ -445,7 +445,7 @@ def test_create_payment_plan_group(
         browser.click('[data-cy="button-create-group-submit"]')
         browser.wait_for_text("Payment Plan Group created")
 
-        browser.click('[data-cy="nav-Payment Module"]')
+        browser.open_nav_section("Payment Module")
         browser.wait_for_element_clickable('a[data-cy="nav-Groups"]')
         browser.click('a[data-cy="nav-Groups"]')
 

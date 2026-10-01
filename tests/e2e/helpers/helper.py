@@ -393,13 +393,21 @@ class Common:
         tag_name: str = "li",
         timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
-        item = self._find_listbox_item(name, listbox, tag_name, timeout)
-        # Long menus scroll on their own; without this an item below the fold gets
-        # clicked through to the menu backdrop.
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
-        self._wait().until(expected_conditions.element_to_be_clickable(item))
-        item.click()
-        self.wait_for_disappear('ul[role="listbox"]')
+        # A click can be dropped while the menu is still opening; if the listbox
+        # stays open after the pick, click the option once more.
+        for attempt in range(2):
+            item = self._find_listbox_item(name, listbox, tag_name, timeout)
+            # Long menus scroll on their own; without this an item below the fold gets
+            # clicked through to the menu backdrop.
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
+            self._wait().until(expected_conditions.element_to_be_clickable(item))
+            item.click()
+            try:
+                self.wait_for_disappear(listbox, timeout=5)
+                return
+            except TimeoutException:
+                if attempt == 1:
+                    raise
 
     def get_listbox_element(
         self,

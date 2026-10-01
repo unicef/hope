@@ -158,6 +158,16 @@ class HopeTestBrowser(BaseCase):
         self.click(f'[data-cy="select-{field_name}"]')
         self.select_option_by_name(option_name)
 
+    def open_nav_section(self, name: str) -> None:
+        """Expand the side-nav section `name`, leaving it alone if it is already open.
+
+        Clicking an open section collapses it, so a blind click can hide the link the test wants next.
+        """
+        selector = f'a[data-cy="nav-{name}"]'
+        self.wait_for_element_visible(selector)
+        if self.get_attribute(selector, "aria-expanded") != "true":
+            self.click(selector)
+
     def check_checkbox(self, selector: str, attempts: int = 3) -> None:
         """Tick the MUI checkbox matching `selector`, clicking again if the click was dropped.
 

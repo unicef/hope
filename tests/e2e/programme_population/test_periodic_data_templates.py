@@ -145,7 +145,7 @@ class TestPeriodicDataTemplates:
             ],
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         status = page_individuals.get_template_status(periodic_data_update_template.pk).text
@@ -194,7 +194,7 @@ class TestPeriodicDataTemplates:
         index = periodic_data_update_template.id
 
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
 
@@ -245,7 +245,7 @@ class TestPeriodicDataTemplates:
         index = periodic_data_update_template.id
 
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
 
@@ -278,7 +278,7 @@ class TestPeriodicDataTemplates:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
 

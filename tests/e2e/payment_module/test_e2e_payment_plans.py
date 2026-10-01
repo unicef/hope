@@ -469,7 +469,7 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
 class TestSmokePaymentModule:
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, page_payment_module: PaymentModule) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.wait_for_page_ready()
         page_payment_module.assert_page_header_title("Payment Module")
@@ -505,7 +505,7 @@ class TestSmokePaymentModule:
         page_new_payment_plan: NewPaymentPlan,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[0].find_element(
             By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
@@ -532,7 +532,7 @@ class TestSmokePaymentModule:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         assert "ACCEPTED" in page_payment_module_details.get_status_container().text
@@ -584,7 +584,7 @@ class TestSmokePaymentModule:
     ) -> None:
         payment_plan = PaymentPlan.objects.first()
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         assert (
             "Draft"
@@ -668,7 +668,7 @@ class TestPaymentPlans:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         with pytest.raises(ElementClickInterceptedException):
@@ -681,7 +681,7 @@ class TestPaymentPlans:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_button_create_exclusions()
@@ -718,7 +718,7 @@ class TestPaymentPlans:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_button_create_exclusions()
@@ -759,7 +759,7 @@ class TestPaymentPlans:
         page_new_payment_plan: NewPaymentPlan,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_rows()
         for i in range(len(page_payment_module.get_rows())):
@@ -786,7 +786,7 @@ class TestPaymentPlans:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         assert (
             "Draft"
@@ -813,7 +813,7 @@ class TestPaymentPlans:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_upload_file_button().click()

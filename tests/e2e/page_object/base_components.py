@@ -97,6 +97,16 @@ class BaseComponents(Common):
     def get_side_nav(self) -> WebElement:
         return self.wait_for(self.side_nav)
 
+    def open_nav_section(self, name: str) -> None:
+        """Expand the side-nav section ``name``, leaving it alone if it is already open.
+
+        Clicking an open section collapses it. aria-expanded flips as soon as the
+        section opens, unlike the items inside, which appear only after the animation.
+        """
+        parent = self.wait_for(f'a[data-cy="nav-{name}"]')
+        if parent.get_attribute("aria-expanded") != "true":
+            parent.click()
+
     def get_nav_country_dashboard(self) -> WebElement:
         return self.wait_for(self.nav_country_dashboard)
 

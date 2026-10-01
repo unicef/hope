@@ -1386,7 +1386,7 @@ class TestGrievanceTickets:
         page_grievance_details_page.disappear_button_close_ticket()
 
         page_grievance_details_page.select_global_program_filter("Test Program")
-        page_grievance_details_page.get_nav_programme_population().click()
+        page_grievance_details_page.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         # The factories add other people to the programme, so look the three up by ID.
         assert page_individuals.individual_has_icon("IND-00-0000.0011", "Confirmed Duplicate")

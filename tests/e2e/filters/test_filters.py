@@ -419,15 +419,10 @@ class TestSmokeFilters:
             "Payment Plans": "Payment Module",
         }
         for nav_menu, locators in programs.items():
-            nav_item = f'[data-cy="nav-{nav_menu}"]'
             if nav_menu in parents:
-                # Clicking a parent toggles its submenu, so only click it while closed. aria-expanded flips
-                # as soon as the submenu opens, unlike the items inside, which appear only after the animation.
-                parent = filters.wait_for(f'[data-cy="nav-{parents[nav_menu]}"]')
-                if parent.get_attribute("aria-expanded") != "true":
-                    parent.click()
+                filters.open_nav_section(parents[nav_menu])
 
-            filters.wait_for(nav_item).click()
+            filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
 
             for locator in locators:
                 try:
