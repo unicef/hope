@@ -1,5 +1,8 @@
 from django.db import connection, models
+from django.db.migrations import Migration
+from django.db.migrations.operations import AddIndex, SeparateDatabaseAndState
 from django.db.migrations.state import ModelState, ProjectState
+from django.db.migrations.writer import OperationWriter
 import pytest
 
 from hope.apps.core.migration_operations import RenameDbIndex
@@ -18,6 +21,7 @@ def project_state() -> ProjectState:
                 ("id", models.AutoField(primary_key=True)),
                 ("created_at", models.DateTimeField()),
                 ("name", models.CharField(max_length=100)),
+                ("timestamp", models.DateTimeField()),
             ],
         )
     )
@@ -28,6 +32,11 @@ def project_state() -> ProjectState:
 def hope_table(project_state: ProjectState) -> None:
     with connection.schema_editor() as editor:
         editor.create_model(project_state.apps.get_model("migration_operations", "Hope"))
+
+
+@pytest.fixture
+def hope_app_routed_to_other_database(settings) -> None:
+    settings.DATABASE_APPS_MAPPING = {"migration_operations": "other"}
 
 
 @pytest.fixture
@@ -53,6 +62,13 @@ def drifted_name_index(hope_table: None, index_oid) -> int:
     with connection.cursor() as cursor:
         cursor.execute('CREATE INDEX "legacy_hope_name_5e6f7a8b" ON "migration_operations_hope" ("name")')
     return index_oid("legacy_hope_name_5e6f7a8b")
+
+
+@pytest.fixture
+def drifted_timestamp_index(hope_table: None, index_oid) -> int:
+    with connection.cursor() as cursor:
+        cursor.execute('CREATE INDEX "legacy_hope_timestamp_9c0d1e2f" ON "migration_operations_hope" ("timestamp")')
+    return index_oid("legacy_hope_timestamp_9c0d1e2f")
 
 
 @pytest.fixture
@@ -452,3 +468,227 @@ def test_forwards_raises_when_column_has_no_btree(project_state: ProjectState, h
 def test_init_rejects_unknown_suffix() -> None:
     with pytest.raises(ValueError, match=r"suffix must be '' or '_like', got '_lk'"):
         RenameDbIndex(model_name="hope", column="name", new_name="migration_name_lk", suffix="_lk")
+
+
+def test_backwards_renames_target_to_canonical_name(
+    project_state: ProjectState, target_created_at_index: int, index_oid
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor() as editor:
+        operation.database_backwards("migration_operations", editor, project_state, project_state)
+        canonical_name = editor._create_index_name("migration_operations_hope", ["created_at"])
+
+    assert index_oid(canonical_name) == target_created_at_index
+    assert index_oid("migration_created_idx") is None
+
+
+@pytest.mark.parametrize(
+    "target_name_index",
+    [
+        pytest.param(
+            ['CREATE INDEX "migration_name_lk" ON "migration_operations_hope" ("name" varchar_pattern_ops)'],
+            id="varchar-pattern-opclass",
+        ),
+    ],
+    indirect=True,
+)
+def test_backwards_with_like_suffix_renames_target_to_canonical_like_name(
+    project_state: ProjectState, target_name_index: None, index_oid
+) -> None:
+    target_oid = index_oid("migration_name_lk")
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_lk", suffix="_like")
+
+    with connection.schema_editor() as editor:
+        operation.database_backwards("migration_operations", editor, project_state, project_state)
+        canonical_name = editor._create_index_name("migration_operations_hope", ["name"], "_like")
+
+    assert index_oid(canonical_name) == target_oid
+
+
+def test_backwards_with_like_suffix_is_noop_when_target_is_missing(
+    project_state: ProjectState, drifted_name_index: int, index_oid
+) -> None:
+    """Forwards skipped the missing twin, so backwards finds nothing under the target name either."""
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_lk", suffix="_like")
+
+    with connection.schema_editor(collect_sql=True) as editor:
+        operation.database_backwards("migration_operations", editor, project_state, project_state)
+
+    assert editor.collected_sql == []
+
+
+@pytest.mark.parametrize(
+    "target_name_index",
+    [
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("created_at")'], id="other-column"
+        ),
+    ],
+    indirect=True,
+)
+def test_backwards_raises_when_target_has_other_definition(
+    project_state: ProjectState, target_name_index: None
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_idx")
+
+    with (
+        connection.schema_editor() as editor,
+        pytest.raises(
+            ValueError,
+            match=(
+                r"Index migration_name_idx already exists but is not the btree index on "
+                r"migration_operations_hope\(name\)"
+            ),
+        ),
+    ):
+        operation.database_backwards("migration_operations", editor, project_state, project_state)
+
+
+def test_forwards_sets_lock_timeout_before_rename(project_state: ProjectState, drifted_created_at_index: int) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor(collect_sql=True) as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert editor.collected_sql == [
+        "SET LOCAL lock_timeout = '5s';",
+        'ALTER INDEX "legacy_hope_created_at_1a2b3c4d" RENAME TO "migration_created_idx";',
+    ]
+
+
+def test_backwards_sets_lock_timeout_before_rename(project_state: ProjectState, target_created_at_index: int) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor(collect_sql=True) as editor:
+        operation.database_backwards("migration_operations", editor, project_state, project_state)
+        canonical_name = editor._create_index_name("migration_operations_hope", ["created_at"])
+
+    assert editor.collected_sql == [
+        "SET LOCAL lock_timeout = '5s';",
+        f'ALTER INDEX "migration_created_idx" RENAME TO "{canonical_name}";',
+    ]
+
+
+def test_forwards_is_noop_when_router_disallows_migrating_model(
+    project_state: ProjectState, drifted_created_at_index: int, hope_app_routed_to_other_database: None
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor(collect_sql=True) as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert editor.collected_sql == []
+
+
+def test_backwards_is_noop_when_router_disallows_migrating_model(
+    project_state: ProjectState, target_created_at_index: int, hope_app_routed_to_other_database: None
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor(collect_sql=True) as editor:
+        operation.database_backwards("migration_operations", editor, project_state, project_state)
+
+    assert editor.collected_sql == []
+
+
+def test_forwards_renames_btree_on_column_named_after_sql_keyword(
+    project_state: ProjectState, drifted_timestamp_index: int, index_oid
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="timestamp", new_name="migration_timestamp_idx")
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert index_oid("migration_timestamp_idx") == drifted_timestamp_index
+
+
+def test_writer_serializes_operation_with_its_module_path() -> None:
+    """Migrations import the operation by this path forever, so moving or renaming it breaks them."""
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_lk", suffix="_like")
+
+    serialized = OperationWriter(operation, indentation=0).serialize()
+
+    assert serialized == (
+        "hope.apps.core.migration_operations.RenameDbIndex(\n"
+        "    model_name='hope',\n"
+        "    column='name',\n"
+        "    new_name='migration_name_lk',\n"
+        "    suffix='_like',\n"
+        "),",
+        {"import hope.apps.core.migration_operations"},
+    )
+
+
+@pytest.mark.parametrize(
+    ("suffix", "description"),
+    [
+        pytest.param("", "Rename btree index on hope.name to migration_name_idx", id="btree"),
+        pytest.param("_like", "Rename varchar_pattern_ops btree index on hope.name to migration_name_idx", id="like"),
+    ],
+)
+def test_describe_names_index_kind_column_and_target(suffix: str, description: str) -> None:
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_idx", suffix=suffix)
+
+    assert operation.describe() == description
+
+
+def test_separate_database_and_state_backwards_restores_canonical_name_and_keeps_duplicate(
+    project_state: ProjectState, canonical_created_at_index: int, duplicate_created_at_index: int, index_oid
+) -> None:
+    operation = SeparateDatabaseAndState(
+        state_operations=[AddIndex("hope", models.Index(fields=["created_at"], name="migration_created_idx"))],
+        database_operations=[RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")],
+    )
+    new_state = project_state.clone()
+    operation.state_forwards("migration_operations", new_state)
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, new_state)
+        operation.database_backwards("migration_operations", editor, new_state, project_state)
+        canonical_name = editor._create_index_name("migration_operations_hope", ["created_at"])
+
+    assert index_oid(canonical_name) == canonical_created_at_index
+    assert index_oid("manual_created_at_idx") == duplicate_created_at_index
+    assert index_oid("migration_created_idx") is None
+
+
+def test_separate_database_and_state_forwards_again_after_backwards_picks_canonical_btree(
+    project_state: ProjectState, canonical_created_at_index: int, duplicate_created_at_index: int, index_oid
+) -> None:
+    """Backwards must leave a name the tie-breaker accepts, or reapplying the migration fails on the duplicate."""
+    operation = SeparateDatabaseAndState(
+        state_operations=[AddIndex("hope", models.Index(fields=["created_at"], name="migration_created_idx"))],
+        database_operations=[RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")],
+    )
+    new_state = project_state.clone()
+    operation.state_forwards("migration_operations", new_state)
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, new_state)
+        operation.database_backwards("migration_operations", editor, new_state, project_state)
+        operation.database_forwards("migration_operations", editor, project_state, new_state)
+
+    assert index_oid("migration_created_idx") == canonical_created_at_index
+    assert index_oid("manual_created_at_idx") == duplicate_created_at_index
+
+
+def test_separate_database_and_state_rename_is_rolled_back_when_later_operation_fails(
+    project_state: ProjectState, drifted_created_at_index: int, index_oid
+) -> None:
+    migration = Migration("0001_rename_db_indexes", "migration_operations")
+    migration.operations = [
+        SeparateDatabaseAndState(
+            state_operations=[AddIndex("hope", models.Index(fields=["created_at"], name="migration_created_idx"))],
+            database_operations=[
+                RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+            ],
+        ),
+        RenameDbIndex(model_name="hope", column="name", new_name="migration_name_idx"),
+    ]
+
+    with pytest.raises(ValueError, match="Found no btree index"), connection.schema_editor() as editor:
+        migration.apply(project_state, editor)
+
+    assert index_oid("legacy_hope_created_at_1a2b3c4d") == drifted_created_at_index
+    assert index_oid("migration_created_idx") is None

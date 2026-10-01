@@ -28,10 +28,20 @@ class RenameDbIndex(Operation):
     def kind(self) -> str:
         return "varchar_pattern_ops btree" if self.is_like else "btree"
 
+    def state_forwards(self, app_label: str, state: ProjectState) -> None:
+        # The index enters the state through AddIndex in the state_operations of SeparateDatabaseAndState.
+        pass
+
+    def describe(self) -> str:
+        return f"Rename {self.kind} index on {self.model_name}.{self.column} to {self.new_name}"
+
     def database_forwards(
         self, app_label: str, schema_editor: BaseDatabaseSchemaEditor, from_state: ProjectState, to_state: ProjectState
     ) -> None:
-        db_table = from_state.apps.get_model(app_label, self.model_name)._meta.db_table
+        model = from_state.apps.get_model(app_label, self.model_name)
+        if not self.allow_migrate_model(schema_editor.connection.alias, model):
+            return
+        db_table = model._meta.db_table
 
         if self._target_exists(schema_editor, db_table):
             return
@@ -51,9 +61,30 @@ class RenameDbIndex(Operation):
                     f"Found {len(candidates)} {self.kind} indexes on {db_table}({self.column}) and none is named "
                     f"{old_name}: {', '.join(candidates)}."
                 )
+        self._rename(schema_editor, old_name, self.new_name)
+
+    def database_backwards(
+        self, app_label: str, schema_editor: BaseDatabaseSchemaEditor, from_state: ProjectState, to_state: ProjectState
+    ) -> None:
+        model = from_state.apps.get_model(app_label, self.model_name)
+        if not self.allow_migrate_model(schema_editor.connection.alias, model):
+            return
+        db_table = model._meta.db_table
+
+        if not self._target_exists(schema_editor, db_table):
+            return
+
+        # The drifted name cannot be restored; the canonical one is what a fresh migrate gives the old code.
+        canonical_name = schema_editor._create_index_name(db_table, [self.column], self.suffix)
+        self._rename(schema_editor, self.new_name, canonical_name)
+
+    def _rename(self, schema_editor: BaseDatabaseSchemaEditor, old_name: str, new_name: str) -> None:
+        # A rename normally waits for nothing; behind a REINDEX or DROP of the index, fail the migration instead of
+        # hanging the deploy. Set here, not in a RunSQL, so it also precedes the renames when migrating backwards.
+        schema_editor.execute("SET LOCAL lock_timeout = '5s'", params=None)
         schema_editor.execute(
             schema_editor.sql_rename_index
-            % {"old_name": schema_editor.quote_name(old_name), "new_name": schema_editor.quote_name(self.new_name)},
+            % {"old_name": schema_editor.quote_name(old_name), "new_name": schema_editor.quote_name(new_name)},
             params=None,
         )
 
