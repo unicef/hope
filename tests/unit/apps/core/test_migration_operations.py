@@ -73,6 +73,30 @@ def drifted_name_like_index(hope_table: None, index_oid) -> int:
 
 
 @pytest.fixture
+def canonical_created_at_index(hope_table: None, index_oid) -> int:
+    """The btree under the name a fresh ``migrate`` gives it, next to a duplicate added by hand under another name."""
+    with connection.schema_editor() as editor:
+        name = editor._create_index_name("migration_operations_hope", ["created_at"])
+        editor.execute(f'CREATE INDEX "{name}" ON "migration_operations_hope" ("created_at")')
+    return index_oid(name)
+
+
+@pytest.fixture
+def duplicate_created_at_index(hope_table: None, index_oid) -> int:
+    with connection.cursor() as cursor:
+        cursor.execute('CREATE INDEX "manual_created_at_idx" ON "migration_operations_hope" ("created_at")')
+    return index_oid("manual_created_at_idx")
+
+
+@pytest.fixture
+def canonical_name_like_index(hope_table: None, index_oid) -> int:
+    with connection.schema_editor() as editor:
+        name = editor._create_index_name("migration_operations_hope", ["name"], "_like")
+        editor.execute(f'CREATE INDEX "{name}" ON "migration_operations_hope" ("name" varchar_pattern_ops)')
+    return index_oid(name)
+
+
+@pytest.fixture
 def target_created_at_index(hope_table: None, index_oid) -> int:
     """A btree that already has the target name, as after a previous run of the migration."""
     with connection.cursor() as cursor:
@@ -106,6 +130,48 @@ def test_forwards_renames_btree_found_by_column_despite_drifted_name(
 
     assert index_oid("migration_created_idx") == drifted_created_at_index
     assert index_oid("legacy_hope_created_at_1a2b3c4d") is None
+
+
+def test_forwards_renames_canonically_named_btree_and_keeps_duplicate(
+    project_state: ProjectState, canonical_created_at_index: int, drifted_created_at_index: int, index_oid
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert index_oid("migration_created_idx") == canonical_created_at_index
+    assert index_oid("legacy_hope_created_at_1a2b3c4d") == drifted_created_at_index
+
+
+def test_forwards_with_like_suffix_renames_canonically_named_twin_and_keeps_duplicate(
+    project_state: ProjectState, canonical_name_like_index: int, drifted_name_like_index: int, index_oid
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_lk", suffix="_like")
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert index_oid("migration_name_lk") == canonical_name_like_index
+    assert index_oid("legacy_hope_name_5e6f7a8b_like") == drifted_name_like_index
+
+
+def test_forwards_raises_when_no_duplicate_btree_has_canonical_name(
+    project_state: ProjectState, drifted_created_at_index: int, duplicate_created_at_index: int
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with (
+        connection.schema_editor() as editor,
+        pytest.raises(
+            ValueError,
+            match=(
+                r"Found 2 btree indexes on migration_operations_hope\(created_at\) and none is named "
+                r"migration_operations_hope_created_at_\w+: legacy_hope_created_at_1a2b3c4d, manual_created_at_idx"
+            ),
+        ),
+    ):
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
 
 
 def test_forwards_is_noop_when_target_name_exists_with_expected_definition(

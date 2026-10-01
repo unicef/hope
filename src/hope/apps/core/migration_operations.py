@@ -24,6 +24,10 @@ class RenameDbIndex(Operation):
     def is_like(self) -> bool:
         return self.suffix == "_like"
 
+    @property
+    def kind(self) -> str:
+        return "varchar_pattern_ops btree" if self.is_like else "btree"
+
     def database_forwards(
         self, app_label: str, schema_editor: BaseDatabaseSchemaEditor, from_state: ProjectState, to_state: ProjectState
     ) -> None:
@@ -38,7 +42,15 @@ class RenameDbIndex(Operation):
             if self.is_like:
                 return
             raise ValueError(f"Found no btree index on {db_table}({self.column}) to rename to {self.new_name}.")
-        (old_name,) = candidates
+        if len(candidates) == 1:
+            (old_name,) = candidates
+        else:
+            old_name = schema_editor._create_index_name(db_table, [self.column], self.suffix)
+            if old_name not in candidates:
+                raise ValueError(
+                    f"Found {len(candidates)} {self.kind} indexes on {db_table}({self.column}) and none is named "
+                    f"{old_name}: {', '.join(candidates)}."
+                )
         schema_editor.execute(
             schema_editor.sql_rename_index
             % {"old_name": schema_editor.quote_name(old_name), "new_name": schema_editor.quote_name(self.new_name)},
@@ -85,9 +97,8 @@ class RenameDbIndex(Operation):
 
         matches, definition = target
         if not matches:
-            kind = "varchar_pattern_ops btree" if self.is_like else "btree"
             raise ValueError(
-                f"Index {self.new_name} already exists but is not the {kind} index on {db_table}({self.column}): "
+                f"Index {self.new_name} already exists but is not the {self.kind} index on {db_table}({self.column}): "
                 f"{definition}"
             )
         return True
@@ -112,6 +123,7 @@ class RenameDbIndex(Operation):
                   AND idx.indoption[0] = 0
                   AND idx.indpred IS NULL
                   AND NOT idx.indisunique
+                ORDER BY index_class.relname
                 """,
                 {"table": schema_editor.quote_name(db_table), "column": self.column, "is_like": self.is_like},
             )
