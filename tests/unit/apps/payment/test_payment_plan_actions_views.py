@@ -2473,7 +2473,6 @@ def test_mark_as_released_is_allowed_after_vision_flags_are_disabled(
         VisionStatus.WAITING_FOR_CALLBACK,
         VisionStatus.SEND_FAILED,
         VisionStatus.CALLBACK_FAILED,
-        VisionStatus.FC_MISSING,
         VisionStatus.FC_NOT_FOUND,
     ],
 )

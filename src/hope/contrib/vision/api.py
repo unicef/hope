@@ -106,7 +106,7 @@ class VisionAPI(BaseAPI):
                 send_result_updates_status
                 # A late HTTP response must not change an aborted, rejected, or released plan.
                 and plan_is_still_in_review
-                # Preserve a newer callback status such as FC_NOT_FOUND, FC_MISSING, or CALLBACK_FAILED.
+                # Preserve a newer callback status such as PP_CREATED, FC_NOT_FOUND, or CALLBACK_FAILED.
                 and current_status_can_be_changed_by_send_result
             ):
                 VisionService.set_status(locked_payment_plan, cast("VisionStatus", vision_status))
