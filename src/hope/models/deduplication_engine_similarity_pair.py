@@ -14,41 +14,26 @@ if TYPE_CHECKING:
 IndividualIdField = Literal["country_workspace_id", "id"]
 
 
-class BiometricDedupeSimilarityPair(models.Model):
-    class StatusCode(models.TextChoices):
-        STATUS_200 = "200", "Deduplication success"
-        STATUS_404 = "404", "No file found"
-        STATUS_412 = "412", "No face detected"
-        STATUS_416 = "416", "Face below confidence"
-        STATUS_418 = "418", "Image quality below threshold"
-        STATUS_429 = "429", "Multiple faces detected"
-        STATUS_500 = "500", "Generic error"
-
-        @staticmethod
-        def _status_code_choices() -> list[tuple[str, str]]:
-            return BiometricDedupeSimilarityPair.StatusCode.choices
-
-        @classmethod
-        def photo_error_codes(cls) -> tuple[str, ...]:
-            # The photo was unusable, so no valid biometric comparison was possible
-            # (score 0). These pairs are rerouted to a photo-fix Data Change ticket.
-            return (cls.STATUS_412.value, cls.STATUS_416.value, cls.STATUS_418.value, cls.STATUS_429.value)
+class DedupEngineSimilarityPair(models.Model):
+    """
+    Let's have one base class
+    """
 
     program = models.ForeignKey(
         "program.Program",
-        related_name="deduplication_engine_similarity_pairs",
+        related_name="%(class)s_pairs",
         on_delete=models.CASCADE,
     )
     individual1 = models.ForeignKey(
         "household.Individual",
-        related_name="biometric_duplicates_1",
+        related_name="%(class)s_duplicates_1",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
     individual2 = models.ForeignKey(
         "household.Individual",
-        related_name="biometric_duplicates_2",
+        related_name="%(class)s_duplicates_2",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -57,20 +42,13 @@ class BiometricDedupeSimilarityPair(models.Model):
         max_digits=5,
         decimal_places=2,
     )  # 0 represents invalid pair (ex. multiple faces detected)
-    status_code = models.CharField(max_length=20, choices=StatusCode._status_code_choices)
+    status_code: models.CharField
 
     class Meta:
+        abstract = True
         app_label = "registration_data"
         ordering = ("id",)
         unique_together = ("individual1", "individual2")
-        constraints = [
-            # Prevent an Individual from being marked as a duplicate of itself
-            # Enforce a consistent ordering to avoid duplicate entries in reverse
-            models.CheckConstraint(
-                condition=models.Q(individual1__lt=models.F("individual2")),
-                name="individual1_lt_individual2",
-            ),
-        ]
 
     def __str__(self) -> str:
         return f"{self.program} - {self.individual1} / {self.individual2}"
@@ -88,7 +66,7 @@ class BiometricDedupeSimilarityPair(models.Model):
         all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
         id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_field_name, program)
 
-        duplicates: list[BiometricDedupeSimilarityPair] = []
+        duplicates: list[DedupEngineSimilarityPair] = []
         for pair in duplicates_data:
             if not (pair.first or pair.second):
                 logger.warning("Dedup Engine Findings, both Individuals empty")
@@ -161,20 +139,22 @@ class BiometricDedupeSimilarityPair(models.Model):
             "status_code": self.get_status_code_display(),
         }
         for i, ind in enumerate([self.individual1, self.individual2]):
-            results[f"individual{i + 1}"] = {
-                "id": str(ind.id) if ind else "",
-                "unicef_id": str(ind.unicef_id) if ind else "",
-                "full_name": ind.full_name if ind else "",
-                "photo_name": str(ind.photo.name) if ind and ind.photo else None,
-            }
+            results[f"individual{i + 1}"] = self._serialize_individual_for_ticket(ind)
 
         return results
+
+    def _serialize_individual_for_ticket(self, ind: Individual | None) -> dict[str, Any]:
+        return {
+            "id": str(ind.id) if ind else "",
+            "unicef_id": str(ind.unicef_id) if ind else "",
+            "full_name": ind.full_name if ind else "",
+        }
 
     @classmethod
     def serialize_for_individual(
         cls,
         individual: Individual,
-        similarity_pairs: QuerySet["BiometricDedupeSimilarityPair"],
+        similarity_pairs: QuerySet["DedupEngineSimilarityPair"],
     ) -> list:
         duplicates = []
         for pair in similarity_pairs:
@@ -194,3 +174,58 @@ class BiometricDedupeSimilarityPair(models.Model):
             )
 
         return duplicates
+
+
+class BiometricDedupeSimilarityPair(DedupEngineSimilarityPair):
+    class StatusCode(models.TextChoices):
+        STATUS_200 = "200", "Deduplication success"
+        STATUS_404 = "404", "No file found"
+        STATUS_412 = "412", "No face detected"
+        STATUS_416 = "416", "Face below confidence"
+        STATUS_418 = "418", "Image quality below threshold"
+        STATUS_429 = "429", "Multiple faces detected"
+        STATUS_500 = "500", "Generic error"
+
+        @staticmethod
+        def _status_code_choices() -> list[tuple[str, str]]:
+            return BiometricDedupeSimilarityPair.StatusCode.choices
+
+        @classmethod
+        def photo_error_codes(cls) -> tuple[str, ...]:
+            # The photo was unusable, so no valid biometric comparison was possible
+            # (score 0). These pairs are rerouted to a photo-fix Data Change ticket.
+            return (cls.STATUS_412.value, cls.STATUS_416.value, cls.STATUS_418.value, cls.STATUS_429.value)
+
+    status_code = models.CharField(max_length=20, choices=StatusCode._status_code_choices)
+
+    class Meta(DedupEngineSimilarityPair.Meta):
+        constraints = [
+            # Prevent an Individual from being marked as a duplicate of itself
+            # Enforce a consistent ordering to avoid duplicate entries in reverse
+            models.CheckConstraint(
+                condition=models.Q(individual1__lt=models.F("individual2")),
+                name="individual1_lt_individual2",
+            ),
+        ]
+
+    def _serialize_individual_for_ticket(self, ind: Individual | None) -> dict[str, Any]:
+        return {
+            **super()._serialize_individual_for_ticket(ind),
+            "photo_name": str(ind.photo.name) if ind and ind.photo else None,
+        }
+
+
+class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
+    class StatusCode(models.TextChoices):
+        # TODO: fill with biographic status codes agreed with DE (see DECISIONS.md)
+        STATUS_200 = "200", "Deduplication success"
+
+    status_code = models.CharField(max_length=20, choices=StatusCode.choices)
+
+    class Meta(DedupEngineSimilarityPair.Meta):
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(individual1__lt=models.F("individual2")),
+                name="biographic_individual1_lt_individual2",
+            ),
+        ]
