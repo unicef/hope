@@ -65,6 +65,22 @@ def drifted_name_like_index(hope_table: None, index_oid) -> int:
     return index_oid("legacy_hope_name_5e6f7a8b_like")
 
 
+@pytest.fixture
+def target_created_at_index(hope_table: None, index_oid) -> int:
+    """A btree that already has the target name, as after a previous run of the migration."""
+    with connection.cursor() as cursor:
+        cursor.execute('CREATE INDEX "migration_created_idx" ON "migration_operations_hope" ("created_at")')
+    return index_oid("migration_created_idx")
+
+
+@pytest.fixture
+def target_name_index(request: pytest.FixtureRequest, hope_table: None) -> None:
+    """Statements that leave an index named ``migration_name_idx`` behind, with the definition under test."""
+    with connection.cursor() as cursor:
+        for statement in request.param:
+            cursor.execute(statement)
+
+
 def test_forwards_renames_btree_found_by_column_despite_drifted_name(
     project_state: ProjectState, drifted_created_at_index: int, index_oid
 ) -> None:
@@ -75,6 +91,155 @@ def test_forwards_renames_btree_found_by_column_despite_drifted_name(
 
     assert index_oid("migration_created_idx") == drifted_created_at_index
     assert index_oid("legacy_hope_created_at_1a2b3c4d") is None
+
+
+def test_forwards_is_noop_when_target_name_exists_with_expected_definition(
+    project_state: ProjectState, target_created_at_index: int, drifted_created_at_index: int, index_oid
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="created_at", new_name="migration_created_idx")
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert index_oid("migration_created_idx") == target_created_at_index
+    assert index_oid("legacy_hope_created_at_1a2b3c4d") == drifted_created_at_index
+
+
+@pytest.mark.parametrize(
+    "target_name_index",
+    [
+        pytest.param(
+            [
+                'CREATE TABLE "migration_operations_other" ("name" varchar(100))',
+                'CREATE INDEX "migration_name_idx" ON "migration_operations_other" ("name")',
+            ],
+            id="other-table",
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("created_at")'], id="other-column"
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name", "created_at")'],
+            id="multi-column",
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" (lower("name"))'], id="expression"
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" USING hash ("name")'], id="hash"
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name" varchar_pattern_ops)'],
+            id="pattern-opclass",
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name" COLLATE "C")'], id="collation"
+        ),
+        pytest.param(['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name" DESC)'], id="desc"),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name" NULLS FIRST)'], id="nulls-first"
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name") INCLUDE ("created_at")'],
+            id="include",
+        ),
+        pytest.param(
+            [
+                (
+                    'CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name") '
+                    'WHERE "created_at" IS NOT NULL'
+                )
+            ],
+            id="partial",
+        ),
+        pytest.param(['CREATE UNIQUE INDEX "migration_name_idx" ON "migration_operations_hope" ("name")'], id="unique"),
+        pytest.param(
+            [
+                'CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name")',
+                "UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'migration_name_idx'::regclass",
+            ],
+            id="invalid",
+        ),
+        pytest.param(
+            [
+                'CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name")',
+                "UPDATE pg_index SET indisready = false WHERE indexrelid = 'migration_name_idx'::regclass",
+            ],
+            id="not-ready",
+        ),
+    ],
+    indirect=True,
+)
+def test_forwards_raises_when_target_name_exists_with_other_definition(
+    project_state: ProjectState, target_name_index: None
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_idx")
+
+    with (
+        connection.schema_editor() as editor,
+        pytest.raises(
+            ValueError,
+            match=(
+                r"Index migration_name_idx already exists but is not the btree index on "
+                r"migration_operations_hope\(name\)"
+            ),
+        ),
+    ):
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+
+@pytest.mark.parametrize(
+    "target_name_index",
+    [
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name" varchar_pattern_ops)'],
+            id="varchar-pattern-opclass",
+        ),
+    ],
+    indirect=True,
+)
+def test_forwards_with_like_suffix_is_noop_when_target_name_exists_with_expected_definition(
+    project_state: ProjectState, target_name_index: None, drifted_name_like_index: int, index_oid
+) -> None:
+    target_oid = index_oid("migration_name_idx")
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_idx", suffix="_like")
+
+    with connection.schema_editor() as editor:
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
+
+    assert index_oid("migration_name_idx") == target_oid
+    assert index_oid("legacy_hope_name_5e6f7a8b_like") == drifted_name_like_index
+
+
+@pytest.mark.parametrize(
+    "target_name_index",
+    [
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name")'], id="default-opclass"
+        ),
+        pytest.param(
+            ['CREATE INDEX "migration_name_idx" ON "migration_operations_hope" ("name" text_pattern_ops)'],
+            id="text-pattern-opclass",
+        ),
+    ],
+    indirect=True,
+)
+def test_forwards_with_like_suffix_raises_when_target_name_exists_with_other_opclass(
+    project_state: ProjectState, target_name_index: None
+) -> None:
+    operation = RenameDbIndex(model_name="hope", column="name", new_name="migration_name_idx", suffix="_like")
+
+    with (
+        connection.schema_editor() as editor,
+        pytest.raises(
+            ValueError,
+            match=(
+                r"Index migration_name_idx already exists but is not the varchar_pattern_ops btree index on "
+                r"migration_operations_hope\(name\)"
+            ),
+        ),
+    ):
+        operation.database_forwards("migration_operations", editor, project_state, project_state)
 
 
 def test_forwards_with_like_suffix_renames_like_twin_and_keeps_btree(
