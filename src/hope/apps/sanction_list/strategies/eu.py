@@ -1,7 +1,6 @@
 from datetime import datetime
 import io
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from xml.etree.ElementTree import Element
 
@@ -103,11 +102,6 @@ class EUParser:
 
 
 class EUSanctionList(BaseSanctionList):
-    def load_from_file(self, file_path: str | Path) -> None:
-        tree = ElementTree.parse(str(file_path))
-        root = tree.getroot()
-        self.parse(root)
-
     def load_from_url(self) -> None:
         response = requests.get(self.context.config["url"], timeout=10)
         tree = ElementTree.parse(io.BytesIO(response.content))

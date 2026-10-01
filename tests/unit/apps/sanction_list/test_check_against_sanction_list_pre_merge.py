@@ -2,7 +2,6 @@ from datetime import date
 from typing import TYPE_CHECKING, Any
 
 from constance.test import override_config
-from django.conf import settings
 from django.core.cache import cache
 import pytest
 from strategy_field.utils import fqn
@@ -19,6 +18,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from extras.test_utils.sanction_list import load_sanction_list_xml
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.grievance.models import GrievanceTicket, TicketSystemFlaggingDetails
 from hope.apps.household.const import HEAD, IDENTIFICATION_TYPE_NATIONAL_ID
@@ -47,10 +47,7 @@ def sanction_list(db: Any) -> "SanctionList":
     from extras.test_utils.factories import SanctionListFactory
 
     sanction_list = SanctionListFactory(strategy=fqn(UNSanctionList))
-    full_path = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files/full_sanction_list.xml"
-
-    task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(full_path)
+    load_sanction_list_xml(LoadSanctionListXMLTask(sanction_list), "full_sanction_list.xml")
 
     return sanction_list
 
