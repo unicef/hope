@@ -40,7 +40,6 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             LongNameIndex(fields=["created_at"], name="geo_areatype_created_at_7ce454f0"),
             LongNameIndex(fields=["updated_at"], name="geo_areatype_updated_at_6c355284"),
             LongNameIndex(fields=["name"], name="geo_areatype_name_b20b6ba6"),
-            LongNameIndex(fields=["name"], opclasses=["varchar_pattern_ops"], name="geo_areatype_name_b20b6ba6_like"),
         ]
 
     def __str__(self) -> str:

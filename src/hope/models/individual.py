@@ -640,29 +640,9 @@ class Individual(
                 name="household_individual_unicef_id_421e2ff2_like",
             ),
             LongNameIndex(fields=["full_name"], name="household_individual_full_name_8fa0162b"),
-            LongNameIndex(
-                fields=["full_name"],
-                opclasses=["varchar_pattern_ops"],
-                name="household_individual_full_name_8fa0162b_like",
-            ),
             LongNameIndex(fields=["given_name"], name="household_individual_given_name_1ebbded2"),
-            LongNameIndex(
-                fields=["given_name"],
-                opclasses=["varchar_pattern_ops"],
-                name="household_individual_given_name_1ebbded2_like",
-            ),
             LongNameIndex(fields=["middle_name"], name="household_individual_middle_name_1dfbf837"),
-            LongNameIndex(
-                fields=["middle_name"],
-                opclasses=["varchar_pattern_ops"],
-                name="household_individual_middle_name_1dfbf837_like",
-            ),
             LongNameIndex(fields=["family_name"], name="household_individual_family_name_4d6db55f"),
-            LongNameIndex(
-                fields=["family_name"],
-                opclasses=["varchar_pattern_ops"],
-                name="household_individual_family_name_4d6db55f_like",
-            ),
             LongNameIndex(fields=["full_name_latin"], name="household_individual_full_name_latin_b6e0eb4e"),
             LongNameIndex(
                 fields=["full_name_latin"],

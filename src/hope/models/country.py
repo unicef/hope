@@ -79,11 +79,7 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             LongNameIndex(fields=["created_at"], name="geo_country_created_at_afcd5bea"),
             LongNameIndex(fields=["updated_at"], name="geo_country_updated_at_daf4b47f"),
             LongNameIndex(fields=["name"], name="geo_country_name_01731269"),
-            LongNameIndex(fields=["name"], opclasses=["varchar_pattern_ops"], name="geo_country_name_01731269_like"),
             LongNameIndex(fields=["short_name"], name="geo_country_short_name_00190511"),
-            LongNameIndex(
-                fields=["short_name"], opclasses=["varchar_pattern_ops"], name="geo_country_short_name_00190511_like"
-            ),
         ]
 
     def __str__(self) -> str:

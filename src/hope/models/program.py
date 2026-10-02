@@ -376,9 +376,6 @@ class Program(
             LongNameIndex(fields=["created_at"], name="program_program_created_at_0fb0bad5"),
             LongNameIndex(fields=["updated_at"], name="program_program_updated_at_244df9de"),
             LongNameIndex(fields=["name"], name="program_program_name_2670ab01"),
-            LongNameIndex(
-                fields=["name"], opclasses=["varchar_pattern_ops"], name="program_program_name_2670ab01_like"
-            ),
             LongNameIndex(fields=["code"], name="program_program_code_b7abf396"),
             LongNameIndex(
                 fields=["code"], opclasses=["varchar_pattern_ops"], name="program_program_code_b7abf396_like"
