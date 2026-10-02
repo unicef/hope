@@ -1,0 +1,56 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "2fafa6a54b25589ecbd7995b177ac37a",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "916"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/4zlq/payment-plans/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "cb13e8a9-6d3b-415f-8964-24001fcbc65e",
+                "unicef_id": "PP-BA0000-25-00000001",
+                "name": null,
+                "status": "OPEN",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "currency": null,
+                "excluded_ids": null,
+                "total_entitled_quantity": null,
+                "total_delivered_quantity": null,
+                "total_undelivered_quantity": null,
+                "dispersion_start_date": "2025-01-01",
+                "dispersion_end_date": "2025-01-31",
+                "plan_type": "REGULAR",
+                "follow_ups": [],
+                "top_ups": [],
+                "created_by": " ",
+                "created_at": "2025-01-01T00:00:00Z",
+                "updated_at": "2025-01-01T00:00:00Z",
+                "program": {
+                    "id": "dab4d3f7-d80b-4f8a-9d96-0178ba307064",
+                    "code": "4zlq",
+                    "name": "Program 0",
+                    "status": "ACTIVE",
+                    "screen_beneficiary": false
+                },
+                "payment_plan_group": {
+                    "id": "4de68a9d-e8c7-4024-92d2-4d7de8007ea1",
+                    "unicef_id": "PPG-5",
+                    "name": "Default Group"
+                },
+                "export_tag": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

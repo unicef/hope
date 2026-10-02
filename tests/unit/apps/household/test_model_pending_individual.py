@@ -14,6 +14,7 @@ from extras.test_utils.factories.household import (
     IndividualRoleInHouseholdFactory,
     PendingHouseholdFactory,
 )
+from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.sanction_list import SanctionListFactory
 from hope.apps.household.const import (
     CANNOT_DO,
@@ -143,9 +144,16 @@ def test_sanction_list_last_check_none_when_program_has_no_lists(individual: Ind
 
 def test_sanction_list_last_check_returns_cached_value(individual: Individual) -> None:
     individual.program.sanction_lists.add(SanctionListFactory())
-    cache.set("sanction_list_last_check", "2026-01-01")
+    cache.set(f"sanction_list_last_check:{individual.program_id}", "2026-01-01")
 
     assert individual.sanction_list_last_check == "2026-01-01"
+
+
+def test_sanction_list_last_check_none_when_only_other_program_was_checked(individual: Individual) -> None:
+    individual.program.sanction_lists.add(SanctionListFactory())
+    cache.set(f"sanction_list_last_check:{ProgramFactory().id}", "2026-01-01")
+
+    assert individual.sanction_list_last_check is None
 
 
 def test_withdraw_sets_flags_and_notifies(mocker: "MockerFixture", individual: Individual) -> None:

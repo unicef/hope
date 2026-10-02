@@ -17,6 +17,7 @@ class FileTemp(TimeStampedModel):
     was_downloaded = models.BooleanField(default=False)
     password = EncryptedTextField(max_length=255, null=True, blank=True)
     xlsx_password = EncryptedTextField(max_length=255, null=True, blank=True)
+    extras = models.JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
         return f"{self.file.name} - {self.created}"

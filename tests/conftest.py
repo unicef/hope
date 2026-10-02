@@ -1,6 +1,7 @@
 import os
 
 from _pytest.config import Config
+import freezegun
 import pytest
 
 COMMON_SETTINGS = {
@@ -43,6 +44,8 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
 def pytest_configure(config: Config) -> None:
     from django.conf import settings  # noqa
+
+    freezegun.configure(extend_ignore_list=["psycopg"])
 
     for setting_name, value in COMMON_SETTINGS.items():
         setattr(settings, setting_name, value)

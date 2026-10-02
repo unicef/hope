@@ -43,7 +43,15 @@ class Migration(migrations.Migration):
             name="deduplication_engine_status",
             field=models.CharField(
                 blank=True,
-                choices=hope.models.registration_data_import.get_dedup_engine_status_choices,
+                choices=[
+                    ("PENDING", "Pending"),
+                    ("UPLOADED", "Uploaded"),
+                    ("IN_PROGRESS", "Started"),
+                    ("PROCESSING", "Processing"),
+                    ("FINISHED", "Finished"),
+                    ("ERROR", "Error"),
+                    ("UPLOAD_ERROR", "Upload Error"),
+                ],
                 default=None,
                 max_length=255,
                 null=True,

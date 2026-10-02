@@ -126,18 +126,24 @@ def test_fetch_metadata_logs_when_no_codec_available(mock_aurora_client: Any, mo
     mock_logger.exception.assert_called_once()
 
 
+@pytest.mark.parametrize(
+    "record_url",
+    [
+        pytest.param("https://aurora.test/api/records/", id="record_url_with_trailing_slash"),
+        pytest.param("https://aurora.test/api/records", id="record_url_without_trailing_slash"),
+    ],
+)
 @override_config(AURORA_SERVER="https://aurora.test/api/")
-def test_get_metadata_returns_record_metadata(mock_aurora_client: Any) -> None:
-    schema = {"record": "https://aurora.test/api/records/"}
+def test_get_metadata_returns_record_metadata(mock_aurora_client: Any, record_url: str) -> None:
     metadata_dict = {"definition": [1, 2, 3]}
-    mock_aurora_client.get.side_effect = _mock_responses(schema, metadata_dict)
+    mock_aurora_client.get.side_effect = _mock_responses({"record": record_url}, metadata_dict)
 
     result = get_metadata("test-token")
 
     assert result == metadata_dict
     assert mock_aurora_client.get.call_count == 2
     second_call_url = mock_aurora_client.get.call_args_list[1].args[0]
-    assert second_call_url.startswith(schema["record"] + "metadata/?")
+    assert second_call_url.startswith("https://aurora.test/api/records/metadata/?")
 
 
 @override_config(AURORA_SERVER="https://aurora.test/api/")

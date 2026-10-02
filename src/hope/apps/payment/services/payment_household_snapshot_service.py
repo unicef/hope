@@ -19,6 +19,7 @@ from hope.models import (
     Document,
     Household,
     Individual,
+    IndividualIdentity,
     IndividualRoleInHousehold,
     Payment,
     PaymentDataCollector,
@@ -89,7 +90,11 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
                         Prefetch(
                             "documents",
                             queryset=Document.objects.select_related("type", "country", "cleared_by"),
-                        )
+                        ),
+                        Prefetch(
+                            "identities",
+                            queryset=IndividualIdentity.objects.select_related("partner", "country"),
+                        ),
                     ),
                 ),
                 Prefetch(
@@ -100,7 +105,11 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
                         Prefetch(
                             "individual__documents",
                             queryset=Document.objects.select_related("type", "country", "cleared_by"),
-                        )
+                        ),
+                        Prefetch(
+                            "individual__identities",
+                            queryset=IndividualIdentity.objects.select_related("partner", "country"),
+                        ),
                     ),
                 ),
             )
@@ -260,6 +269,15 @@ def get_individual_snapshot(
             "photo": document.photo.name if document.photo else "",
         }
         individual_data["documents"].append(document_data)
+
+    individual_data["identities"] = []
+    for identity in individual.identities.all():
+        identity_data = {
+            "partner": identity.partner.name if identity.partner else "",
+            "number": identity.number,
+            "country": handle_type_mapping(identity.country),
+        }
+        individual_data["identities"].append(identity_data)
 
     if (
         payment

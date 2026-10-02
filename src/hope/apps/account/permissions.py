@@ -27,7 +27,6 @@ class Permissions(Enum):
     RDI_RERUN_DEDUPE = auto()
     RDI_MERGE_IMPORT = auto()
     RDI_REFUSE_IMPORT = auto()
-    RDI_WEBHOOK_DEDUPLICATION = auto()
 
     # Generic Import
     GENERIC_IMPORT_DATA = auto()
@@ -129,6 +128,7 @@ class Permissions(Enum):
     PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY = auto()
     PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX = auto()
     PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX = auto()
+    PM_IMPORT_XLSX_WITH_RECONCILIATION_OVERRIDE = auto()
 
     # PaymentPlanPurpose
     PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST = auto()

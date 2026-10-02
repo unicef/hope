@@ -160,7 +160,8 @@ def test_create_tickets_with_admin2_same_as_in_household(
     assert household.admin2_id is not None
     assert ticket.admin2_id == household.admin2_id
 
-    assert mocked_requests_post.call_count == len(payment_verification_records)
+    # creating a ticket sends nothing; the daily needs-assignment email covers it
+    assert mocked_requests_post.call_count == 0
 
 
 def test_finish_verification_if_pp_not_finished_yet(payment_verification_plan, payment_verification_records):

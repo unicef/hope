@@ -218,31 +218,6 @@ class TestSmokeFeedback:
         page_feedback_details.get_administrative_level2()
 
 
-@pytest.mark.skip(reason="ToDo: Filters")
-@pytest.mark.usefixtures("login")
-class TestFeedbackFilters:
-    def feedback_search_filter(self) -> None:
-        pass
-
-    def feedback_programme_filter(self) -> None:
-        pass
-
-    def feedback_issue_type_filter(self) -> None:
-        pass
-
-    def feedback_created_by_filter(self) -> None:
-        pass
-
-    def feedback_creation_date_filter(self) -> None:
-        pass
-
-    def feedback_programme_state_filter(self) -> None:
-        pass
-
-    def feedback_clear_button(self) -> None:
-        pass
-
-
 @pytest.mark.usefixtures("login")
 class TestFeedback:
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])

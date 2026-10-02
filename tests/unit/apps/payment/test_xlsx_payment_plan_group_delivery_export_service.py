@@ -1,8 +1,12 @@
 from decimal import Decimal
+from io import BytesIO
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils import timezone
+import openpyxl
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
@@ -24,10 +28,14 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service impo
     EmptyDeliveryExportError,
     XlsxPaymentPlanGroupDeliveryExportService,
 )
+from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
+    XlsxPaymentPlanGroupDeliveryImportService,
+)
 from hope.models import (
     DataCollectingType,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    LogEntry,
     Payment,
     PaymentPlan,
 )
@@ -93,6 +101,56 @@ def group_with_one_accepted_plan(program_cycle, business_area, fsp, delivery_mec
 
 
 @pytest.fixture
+def group_with_reexportable_payment(program_cycle, business_area, fsp, delivery_mechanism):
+    template = FinancialServiceProviderXlsxTemplateFactory(
+        columns=[
+            "payment_id",
+            "delivered_quantity",
+            "delivery_date",
+            "reference_id",
+            "reason_for_unsuccessful_payment",
+            "additional_collector_name",
+            "additional_document_type",
+            "additional_document_number",
+            "transaction_status_blockchain_link",
+        ]
+    )
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    payment = PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plan.program,
+        entitlement_quantity=Decimal("100.00"),
+        delivered_quantity=Decimal("100.00"),
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+        transaction_reference_id="ORIGINAL-REFERENCE",
+        reason_for_unsuccessful_payment="Original reason",
+        additional_collector_name="Original collector",
+        additional_document_type="Original document type",
+        additional_document_number="Original document number",
+        transaction_status_blockchain_link="https://example.com/original",
+    )
+    payment.set_extra_fields({"custom_reconciliation_field": "ORIGINAL-EXTRA"})
+    payment.save(update_fields=["extras"])
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group, plan, payment
+
+
+@pytest.fixture
 def fsp_no_template():
     return FinancialServiceProviderFactory(
         name="Test FSP No Template",
@@ -119,6 +177,35 @@ def auth_code_template(payment_gateway_fsp, delivery_mechanism):
         xlsx_template=template,
     )
     return template
+
+
+@pytest.fixture
+def group_with_pending_payment_gateway_payment(program_cycle, business_area, fsp, delivery_mechanism):
+    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id"])
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        xlsx_template=template,
+    )
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+        use_payment_gateway=True,
+    )
+    payment = PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plan.program,
+        status=Payment.STATUS_PENDING,
+    )
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    return group, payment
 
 
 @pytest.fixture
@@ -519,6 +606,34 @@ def make_auth_code_group_with_typed_plan(
     return build_group
 
 
+@pytest.fixture
+def group_with_registration_token_in_snapshot(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    plan = PaymentPlanFactory(
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        business_area=business_area,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    payment = PaymentFactory(
+        parent=plan,
+        financial_service_provider=fsp,
+        delivery_type=delivery_mechanism,
+        program=plan.program,
+    )
+    PaymentHouseholdSnapshotFactory(
+        payment=payment,
+        snapshot_data={
+            "primary_collector": {
+                "documents": [{"type": "registration_token", "document_number": "REG-TOKEN-001"}],
+            }
+        },
+    )
+    return group
+
+
 def test_workbook_has_single_sheet_with_group_title(group_with_one_accepted_plan):
     wb = XlsxPaymentPlanGroupDeliveryExportService(
         group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
@@ -603,6 +718,19 @@ def test_payment_row_contains_snapshot_household_data(group_with_payment_and_ful
     assert ws.cell(row=2, column=household_id_col).value == "HH-SNAP-001"
     assert ws.cell(row=2, column=household_size_col).value == 5
     assert ws.cell(row=2, column=collector_name_col).value == "Jan Kowalski"
+
+
+def test_registration_token_column_holds_document_number_without_document_type_row(
+    group_with_registration_token_in_snapshot,
+):
+    wb = XlsxPaymentPlanGroupDeliveryExportService(
+        group_with_registration_token_in_snapshot, plan_type=PaymentPlan.PlanType.REGULAR
+    ).generate_workbook()
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    registration_token_col = headers.index("registration_token") + 1
+
+    assert ws.cell(row=2, column=registration_token_col).value == "REG-TOKEN-001"
 
 
 def test_account_values_are_omitted_when_group_template_excludes_account_data(
@@ -874,6 +1002,73 @@ def test_save_xlsx_file_exports_mapped_plan_and_leaves_skipped_untouched(group_o
     assert skipped_plan_two.export_file_delivery is None
 
 
+def test_save_xlsx_file_marks_exported_manual_payments_as_sent_to_fsp(
+    group_one_exportable_two_skipped,
+    user,
+):
+    group, exportable_plan, skipped_plan_one, _skipped_plan_two = group_one_exportable_two_skipped
+    exported_payment = exportable_plan.payment_items.get()
+    skipped_payment = skipped_plan_one.payment_items.get()
+    old_status_date = exported_payment.status_date
+    old_signature = exported_payment.signature_hash
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+
+    exported_payment.refresh_from_db()
+    skipped_payment.refresh_from_db()
+    stored_signature = exported_payment.signature_hash
+    exported_payment.update_signature_hash()
+    payment_log = LogEntry.objects.get(
+        content_type=ContentType.objects.get_for_model(Payment),
+        object_id=exported_payment.pk,
+    )
+    assert exported_payment.status == Payment.STATUS_SENT_TO_FSP
+    assert exported_payment.status_date > old_status_date
+    assert exported_payment.sent_to_fsp_date == exported_payment.status_date
+    assert stored_signature != old_signature
+    assert exported_payment.signature_hash == stored_signature
+    assert payment_log.user == user
+    assert payment_log.changes["status"] == {"from": Payment.STATUS_PENDING, "to": Payment.STATUS_SENT_TO_FSP}
+    assert skipped_payment.status == Payment.STATUS_PENDING
+
+
+def test_save_xlsx_file_does_not_change_payment_gateway_payment(
+    group_with_pending_payment_gateway_payment,
+    user,
+):
+    group, payment = group_with_pending_payment_gateway_payment
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+
+    payment.refresh_from_db()
+    assert payment.status == Payment.STATUS_PENDING
+    assert not LogEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(Payment),
+        object_id=payment.pk,
+    ).exists()
+
+
+def test_reexport_keeps_sent_to_fsp_payment_unchanged(group_one_exportable_two_skipped, user):
+    group, exportable_plan, _skipped_plan_one, _skipped_plan_two = group_one_exportable_two_skipped
+    payment = exportable_plan.payment_items.get()
+    content_type = ContentType.objects.get_for_model(Payment)
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    payment.refresh_from_db()
+    first_status_date = payment.status_date
+    first_sent_to_fsp_date = payment.sent_to_fsp_date
+    first_signature = payment.signature_hash
+    first_log_count = LogEntry.objects.filter(content_type=content_type, object_id=payment.pk).count()
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, export_tag=1).save_xlsx_file(user)
+
+    payment.refresh_from_db()
+    assert payment.status == Payment.STATUS_SENT_TO_FSP
+    assert payment.status_date == first_status_date
+    assert payment.sent_to_fsp_date == first_sent_to_fsp_date
+    assert payment.signature_hash == first_signature
+    assert LogEntry.objects.filter(content_type=content_type, object_id=payment.pk).count() == first_log_count
+
+
 def test_save_xlsx_file_multiple_plans_all_skipped_raises_with_all_reasons(group_with_two_plans_without_template, user):
     service = XlsxPaymentPlanGroupDeliveryExportService(
         group_with_two_plans_without_template, plan_type=PaymentPlan.PlanType.REGULAR
@@ -977,6 +1172,88 @@ def test_save_xlsx_file_reexport_with_export_tag_replaces_file_and_keeps_tag(gro
     plan.refresh_from_db()
     assert plan.export_tag == 1
     assert plan.export_file_delivery_id != first_file_id
+
+
+def test_reexport_uses_current_payment_values_while_existing_file_remains_snapshot(
+    group_with_reexportable_payment,
+    user,
+):
+    group, plan, payment = group_with_reexportable_payment
+    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+
+    new_delivery_date = timezone.localdate()
+    import_workbook = openpyxl.Workbook()
+    import_workbook.active.append(
+        [
+            "payment_id",
+            "delivered_quantity",
+            "delivery_date",
+            "reference_id",
+            "reason_for_unsuccessful_payment",
+            "additional_collector_name",
+            "additional_document_type",
+            "additional_document_number",
+            "transaction_status_blockchain_link",
+            "custom_reconciliation_field",
+        ]
+    )
+    import_workbook.active.append(
+        [
+            payment.unicef_id,
+            Decimal("100.00"),
+            new_delivery_date,
+            "UPDATED-REFERENCE",
+            "Updated reason",
+            "Updated collector",
+            "Updated document type",
+            "Updated document number",
+            "https://example.com/updated",
+            "UPDATED-EXTRA",
+        ]
+    )
+    import_file = BytesIO()
+    import_workbook.save(import_file)
+    import_file.seek(0)
+    import_service = XlsxPaymentPlanGroupDeliveryImportService(group, import_file, override=True)
+    import_service.open_workbook()
+
+    import_service.import_payment_list()
+
+    payment.refresh_from_db()
+    plan.refresh_from_db()
+    assert payment.delivered_quantity == Decimal("100.00")
+    assert payment.delivery_date.date() == new_delivery_date
+    assert payment.transaction_reference_id == "UPDATED-REFERENCE"
+    assert payment.reason_for_unsuccessful_payment == "Updated reason"
+    assert payment.additional_collector_name == "Updated collector"
+    assert payment.additional_document_type == "Updated document type"
+    assert payment.additional_document_number == "Updated document number"
+    assert payment.transaction_status_blockchain_link == "https://example.com/updated"
+    assert payment.extra_fields == {"custom_reconciliation_field": "UPDATED-EXTRA"}
+    assert plan.export_file_delivery_id is None
+    assert import_service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 1,
+        "reset_rows": 0,
+        "ignored_rows": 0,
+    }
+
+    XlsxPaymentPlanGroupDeliveryExportService(group, export_tag=1).save_xlsx_file(user)
+    plan.refresh_from_db()
+
+    with plan.export_file_delivery.file.open("rb") as file:
+        reexported_workbook = openpyxl.load_workbook(file, data_only=True)
+    reexported_headers = [cell.value for cell in reexported_workbook.active[1]]
+    reexported_values = dict(
+        zip(reexported_headers, [cell.value for cell in reexported_workbook.active[2]], strict=True)
+    )
+    assert reexported_values["delivery_date"] == new_delivery_date.isoformat()
+    assert reexported_values["reference_id"] == "UPDATED-REFERENCE"
+    assert reexported_values["reason_for_unsuccessful_payment"] == "Updated reason"
+    assert reexported_values["additional_collector_name"] == "Updated collector"
+    assert reexported_values["additional_document_type"] == "Updated document type"
+    assert reexported_values["additional_document_number"] == "Updated document number"
+    assert reexported_values["transaction_status_blockchain_link"] == "https://example.com/updated"
 
 
 def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_plan_without_template, user):

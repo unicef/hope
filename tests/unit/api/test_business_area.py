@@ -94,6 +94,7 @@ def test_list_business_area_returns_all_areas(
         "is_accountability_applicable": ba_base.is_accountability_applicable,
         "rdi_import_xlsx_disabled": ba_base.rdi_import_xlsx_disabled,
         "countries": [],
+        "is_manual_ingest": True,
     } in results
     assert {
         "id": str(ba_ukraine.id),
@@ -108,6 +109,7 @@ def test_list_business_area_returns_all_areas(
         "is_accountability_applicable": ba_ukraine.is_accountability_applicable,
         "rdi_import_xlsx_disabled": ba_ukraine.rdi_import_xlsx_disabled,
         "countries": [],
+        "is_manual_ingest": True,
     } in results
     assert {
         "id": str(ba_child.id),
@@ -122,4 +124,5 @@ def test_list_business_area_returns_all_areas(
         "is_accountability_applicable": ba_child.is_accountability_applicable,
         "rdi_import_xlsx_disabled": ba_child.rdi_import_xlsx_disabled,
         "countries": [],
+        "is_manual_ingest": True,
     } in results

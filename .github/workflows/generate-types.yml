@@ -41,7 +41,6 @@ jobs:
             libjpeg-dev \
             zlib1g-dev \
             libpq-dev \
-            python3-psycopg2 \
             python3-gdal \
             gdal-bin \
             libcairo2 \

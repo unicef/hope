@@ -8,7 +8,7 @@ from uuid import UUID
 from constance import config
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import (
     BooleanField,
     Case,
@@ -23,7 +23,6 @@ from django.db.models import (
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
-from psycopg2._psycopg import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
@@ -246,7 +245,7 @@ class PaymentPlanService:
             self.payment_plan,
             PaymentPlan.Action.REVIEW.value,
             release_user_id,
-            f"{timezone.now():%-d %B %Y}",
+            timezone.now().isoformat(),
         )
         return self.payment_plan
 

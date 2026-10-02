@@ -173,6 +173,11 @@ urlpatterns = [
                     name="rdi-complete",
                 ),
                 path(
+                    "rdi/<uuid:rdi>/reset/",
+                    endpoints.rdi.ResetRDIView().as_view(),
+                    name="rdi-reset",
+                ),
+                path(
                     "rdi/<uuid:rdi>/delegate/people/",
                     endpoints.rdi.DelegatePeopleRDIView().as_view(),
                     name="rdi-delegate-people",

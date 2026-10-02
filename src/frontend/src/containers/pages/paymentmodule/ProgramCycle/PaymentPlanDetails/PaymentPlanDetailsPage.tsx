@@ -62,11 +62,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         return 60000;
       }
       if (
-        data?.status === PaymentPlanStatusEnum.PREPARING ||
-        (data?.backgroundActionStatus !== null &&
-          !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
-            data?.backgroundActionStatus,
-          ))
+        data?.backgroundActionStatus !== null &&
+        !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+          data?.backgroundActionStatus,
+        )
       ) {
         return 3000;
       }
@@ -116,42 +115,32 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <VisionStatusSection paymentPlan={paymentPlan} />
-      {status !== PaymentPlanStatusEnum.PREPARING && (
-        <>
-          <AcceptanceProcess paymentPlan={paymentPlan} />
-          {shouldDisplayVerificationSummary && (
-            <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
-          )}
-          {shouldDisplayFundsCommitment && (
-            <FundsCommitmentSection paymentPlan={paymentPlan} />
-          )}
-          {shouldDisplayEntitlement && (
-            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-          )}
-          {status === PaymentPlanStatusEnum.LOCKED_FSP &&
-            !paymentPlan.isInstructionManaged && (
-              <FspExtraFields
-                paymentPlan={paymentPlan}
-                permissions={permissions}
-              />
-            )}
-          <ExcludeSection paymentPlan={paymentPlan} />
-          <SupportingDocumentsSection paymentPlan={paymentPlan} />
-          <ConversionToUsd
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-          />
-          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-          <PaymentsTable
-            businessArea={businessArea}
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-            canViewDetails
-          />
-          {shouldDisplayReconciliationSummary && (
-            <ReconciliationSummary paymentPlan={paymentPlan} />
-          )}
-        </>
+      <AcceptanceProcess paymentPlan={paymentPlan} />
+      {shouldDisplayVerificationSummary && (
+        <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
+      )}
+      {shouldDisplayFundsCommitment && (
+        <FundsCommitmentSection paymentPlan={paymentPlan} />
+      )}
+      {shouldDisplayEntitlement && (
+        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+      )}
+      {status === PaymentPlanStatusEnum.LOCKED_FSP &&
+        !paymentPlan.isInstructionManaged && (
+          <FspExtraFields paymentPlan={paymentPlan} permissions={permissions} />
+        )}
+      <ExcludeSection paymentPlan={paymentPlan} />
+      <SupportingDocumentsSection paymentPlan={paymentPlan} />
+      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
+      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+      <PaymentsTable
+        businessArea={businessArea}
+        paymentPlan={paymentPlan}
+        permissions={permissions}
+        canViewDetails
+      />
+      {shouldDisplayReconciliationSummary && (
+        <ReconciliationSummary paymentPlan={paymentPlan} />
       )}
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan?.id} />
