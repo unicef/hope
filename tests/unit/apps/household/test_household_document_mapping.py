@@ -5,101 +5,106 @@ import pytest
 
 from extras.test_utils.factories import HouseholdFactory, IndividualFactory, ProgramFactory
 from hope.apps.household.documents import IndividualDocument, get_individual_doc
-from hope.models import Program
+from hope.models import BusinessArea, Household, Individual, Program
 
 pytestmark = pytest.mark.django_db
 
 
-class TestMappingIntrospection:
-    """Tests 4.1-4.4: verify the document class mapping without needing ES."""
-
-    def test_individual_document_has_unicef_id_keyword_subfield(self):
-        mapping = IndividualDocument._doc_type.mapping.to_dict()
-        unicef_id_props = mapping["properties"]["unicef_id"]
-        assert "fields" in unicef_id_props, "unicef_id should have multi-fields"
-        keyword_field = unicef_id_props["fields"]["keyword"]
-        assert keyword_field["type"] == "keyword"
-        assert keyword_field["normalizer"] == "lowercase_normalizer"
-
-    def test_household_object_has_unicef_id_keyword_subfield(self):
-        mapping = IndividualDocument._doc_type.mapping.to_dict()
-        hh_props = mapping["properties"]["household"]["properties"]
-        unicef_id_props = hh_props["unicef_id"]
-        assert "fields" in unicef_id_props, "household.unicef_id should have multi-fields"
-        keyword_field = unicef_id_props["fields"]["keyword"]
-        assert keyword_field["type"] == "keyword"
-        assert keyword_field["normalizer"] == "lowercase_normalizer"
-
-    def test_household_object_has_address_keyword_field(self):
-        mapping = IndividualDocument._doc_type.mapping.to_dict()
-        hh_props = mapping["properties"]["household"]["properties"]
-        assert "address" in hh_props, "household should have an address field"
-        address_props = hh_props["address"]
-        assert address_props["type"] == "keyword"
-        assert address_props["normalizer"] == "lowercase_normalizer"
-
-    def test_lowercase_normalizer_is_registered(self):
-        from hope.apps.core.es_analyzers import lowercase_normalizer
-
-        normalizer_dict = lowercase_normalizer.get_definition()
-        assert "lowercase" in normalizer_dict.get("filter", [])
+# Data fixtures depend on es_enabled so that factory post_save signals fire with
+# IS_ELASTICSEARCH_ENABLED=True — otherwise the program activation signal won't
+# create the ES index and individual saves won't sync to ES.
+@pytest.fixture
+def es_enabled(django_elasticsearch_setup):
+    with override_config(IS_ELASTICSEARCH_ENABLED=True):
+        yield
 
 
-@pytest.mark.usefixtures("django_elasticsearch_setup")
+@pytest.fixture
+def es_program(es_enabled, afghanistan: BusinessArea) -> Program:
+    program = ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
+    program.status = Program.ACTIVE
+    program.save()
+    return program
+
+
+@pytest.fixture
+def individual_john_smith(es_program: Program) -> Individual:
+    individual = IndividualFactory(program=es_program, full_name="John Smith")
+    individual.unicef_id = "IND-0000001"
+    individual.save(update_fields=["unicef_id"])
+    return individual
+
+
+@pytest.fixture
+def household_with_address(es_program: Program) -> Household:
+    return HouseholdFactory(program=es_program, address="Main Street 5, Aleppo")
+
+
+@pytest.fixture
+def individual_in_addressed_household(es_program: Program, household_with_address: Household) -> Individual:
+    return IndividualFactory(program=es_program, household=household_with_address, full_name="Alice Aleppan")
+
+
+def test_individual_document_has_unicef_id_keyword_subfield():
+    mapping = IndividualDocument._doc_type.mapping.to_dict()
+    unicef_id_props = mapping["properties"]["unicef_id"]
+    assert "fields" in unicef_id_props, "unicef_id should have multi-fields"
+    keyword_field = unicef_id_props["fields"]["keyword"]
+    assert keyword_field["type"] == "keyword"
+    assert keyword_field["normalizer"] == "lowercase_normalizer"
+
+
+def test_household_object_has_unicef_id_keyword_subfield():
+    mapping = IndividualDocument._doc_type.mapping.to_dict()
+    hh_props = mapping["properties"]["household"]["properties"]
+    unicef_id_props = hh_props["unicef_id"]
+    assert "fields" in unicef_id_props, "household.unicef_id should have multi-fields"
+    keyword_field = unicef_id_props["fields"]["keyword"]
+    assert keyword_field["type"] == "keyword"
+    assert keyword_field["normalizer"] == "lowercase_normalizer"
+
+
+def test_household_object_has_address_keyword_field():
+    mapping = IndividualDocument._doc_type.mapping.to_dict()
+    hh_props = mapping["properties"]["household"]["properties"]
+    assert "address" in hh_props, "household should have an address field"
+    address_props = hh_props["address"]
+    assert address_props["type"] == "keyword"
+    assert address_props["normalizer"] == "lowercase_normalizer"
+
+
+def test_lowercase_normalizer_is_registered():
+    from hope.apps.core.es_analyzers import lowercase_normalizer
+
+    normalizer_dict = lowercase_normalizer.get_definition()
+    assert "lowercase" in normalizer_dict.get("filter", [])
+
+
 @pytest.mark.elasticsearch
 @pytest.mark.xdist_group(name="elasticsearch")
-class TestMappingIndexing:
-    """Tests 4.5-4.6: verify new subfields are populated after indexing.
+def test_indexed_document_populates_unicef_id_keyword(es_program, individual_john_smith):
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+    index_name = get_individual_doc(str(es_program.id))._index._name
+    es.indices.refresh(index=index_name)
 
-    Data is created inline (not via fixtures) so that factory post_save signals
-    fire inside the @override_config(IS_ELASTICSEARCH_ENABLED=True) context —
-    otherwise the program activation signal won't create the ES index and
-    individual saves won't sync to ES.
-    """
+    result = es.search(
+        index=index_name,
+        body={"query": {"term": {"unicef_id.keyword": "ind-0000001"}}},
+    )
+    assert result["hits"]["total"]["value"] == 1
+    assert result["hits"]["hits"][0]["_id"] == str(individual_john_smith.id)
 
-    @override_config(IS_ELASTICSEARCH_ENABLED=True)
-    def test_indexed_document_populates_unicef_id_keyword(self, afghanistan):
-        program = ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
-        program.status = Program.ACTIVE
-        program.save()
 
-        individual = IndividualFactory(program=program, full_name="John Smith")
-        individual.unicef_id = "IND-0000001"
-        individual.save(update_fields=["unicef_id"])
+@pytest.mark.elasticsearch
+@pytest.mark.xdist_group(name="elasticsearch")
+def test_indexed_document_populates_household_address(es_program, individual_in_addressed_household):
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+    index_name = get_individual_doc(str(es_program.id))._index._name
+    es.indices.refresh(index=index_name)
 
-        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-        doc_class = get_individual_doc(str(program.id))
-        index_name = doc_class._index._name
-        es.indices.refresh(index=index_name)
-
-        result = es.search(
-            index=index_name,
-            body={"query": {"term": {"unicef_id.keyword": "ind-0000001"}}},
-        )
-        assert result["hits"]["total"]["value"] == 1
-        assert result["hits"]["hits"][0]["_id"] == str(individual.id)
-
-    @override_config(IS_ELASTICSEARCH_ENABLED=True)
-    def test_indexed_document_populates_household_address(self, afghanistan):
-        program = ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
-        program.status = Program.ACTIVE
-        program.save()
-
-        household = HouseholdFactory(program=program, address="Main Street 5, Aleppo")
-        individual = IndividualFactory(
-            program=program,
-            household=household,
-            full_name="Alice Aleppan",
-        )
-
-        es = Elasticsearch(settings.ELASTICSEARCH_HOST)
-        doc_class = get_individual_doc(str(program.id))
-        index_name = doc_class._index._name
-        es.indices.refresh(index=index_name)
-
-        result = es.search(
-            index=index_name,
-            body={"query": {"term": {"household.address": "main street 5, aleppo"}}},
-        )
-        hit_ids = {hit["_id"] for hit in result["hits"]["hits"]}
-        assert str(individual.id) in hit_ids
+    result = es.search(
+        index=index_name,
+        body={"query": {"term": {"household.address": "main street 5, aleppo"}}},
+    )
+    hit_ids = {hit["_id"] for hit in result["hits"]["hits"]}
+    assert str(individual_in_addressed_household.id) in hit_ids

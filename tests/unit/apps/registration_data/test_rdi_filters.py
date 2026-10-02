@@ -7,6 +7,21 @@ from hope.models import RegistrationDataImport
 pytestmark = pytest.mark.django_db
 
 
+@pytest.fixture
+def rdi_syria_import(db):
+    return RegistrationDataImportFactory(name="June 2026 Syria import")
+
+
+@pytest.fixture
+def rdi_afghanistan_import(db):
+    return RegistrationDataImportFactory(name="Afghanistan baseline")
+
+
+@pytest.fixture
+def rdi_syria_lowercase(db):
+    return RegistrationDataImportFactory(name="syria lowercase")
+
+
 def _filtered_qs(data):
     """Apply RegistrationDataImportFilter to the full RDI queryset."""
     return RegistrationDataImportFilter(data=data, queryset=RegistrationDataImport.objects.all()).qs
