@@ -291,7 +291,8 @@ class TestPeople:
         page_grievance_details_page.get_checkbox_requested_data_change()
         page_grievance_details_page.get_checkbox_requested_data_change()[0].find_element(By.TAG_NAME, "input").click()
         page_grievance_details_page.get_checkbox_requested_data_change()[1].find_element(By.TAG_NAME, "input").click()
-        page_grievance_details_page.approve_and_confirm()
+        page_grievance_details_page.get_button_approval().click()
+        page_grievance_details_page.get_button_confirm().click()
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
         assert "Ticket ID" in page_grievance_details_page.get_title().text
