@@ -1,7 +1,13 @@
 from django.db import models
 
 from hope.apps.household.const import get_role_choices
-from hope.models.utils import AbstractSyncable, PendingManager, SoftDeletableMergeStatusModel, TimeStampedUUIDModel
+from hope.models.utils import (
+    AbstractSyncable,
+    LongNameIndex,
+    PendingManager,
+    SoftDeletableMergeStatusModel,
+    TimeStampedUUIDModel,
+)
 
 
 class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
@@ -34,6 +40,11 @@ class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDMo
         unique_together = [("role", "household"), ("household", "individual")]
         ordering = ("-role", "id")
         permissions = (("reset_sync_date", "Can reset sync date"),)
+        indexes = [
+            LongNameIndex(fields=["is_removed"], name="household_individualroleinhousehold_is_removed_cee8311f"),
+            LongNameIndex(fields=["created_at"], name="household_individualroleinhousehold_created_at_b1ebdac5"),
+            LongNameIndex(fields=["updated_at"], name="household_individualroleinhousehold_updated_at_3834d2ec"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"

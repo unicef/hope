@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class LongNameIndex(models.Index):
+    max_name_length = 63  # PostgreSQL NAMEDATALEN - 1
+
+
 class BulkSignalsManagerMixin:
     def bulk_create(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> list[Any]:
         val = super().bulk_create(objs, *args, **kwargs)
@@ -105,7 +109,7 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     anymore, but are kept in db for any reason.
     """
 
-    is_removed = models.BooleanField(default=False, db_index=True)
+    is_removed = models.BooleanField(default=False)
     removed_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -148,16 +152,16 @@ class AdminUrlMixin:
 
 
 class TimeStampedModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
 
 
 class TimeStampedUUIDModel(UUIDModel):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
@@ -250,7 +254,7 @@ class ConcurrencyModel(models.Model):
 
 
 class UnicefIdentifiedModel(models.Model):
-    unicef_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    unicef_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True

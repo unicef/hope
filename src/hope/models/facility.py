@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import UniqueConstraint
 
 from hope.models.utils import (
+    LongNameIndex,
     TimeStampedUUIDModel,
 )
 
@@ -37,3 +38,7 @@ class Facility(TimeStampedUUIDModel):
         ]
         ordering = ("business_area", "name")
         verbose_name_plural = "Facilities"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="household_facility_created_at_de99b22d"),
+            LongNameIndex(fields=["updated_at"], name="household_facility_updated_at_37444619"),
+        ]

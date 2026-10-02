@@ -11,6 +11,7 @@ from timezone_field import TimeZoneField
 from hope.apps.core.timezones import get_country_timezone_name
 from hope.apps.core.utils import unique_slugify
 from hope.models.utils import (
+    LongNameIndex,
     TimeStampedUUIDModel,
 )
 
@@ -46,7 +47,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     slug = models.CharField(
         max_length=250,
         unique=True,
-        db_index=True,
     )
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
@@ -169,6 +169,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             models.Index(fields=["active"], name="idx_ba_active"),
             # Optimize queries by slug (already has db_index but adding compound index for performance)
             models.Index(fields=["slug", "active"], name="idx_ba_slug_active"),
+            LongNameIndex(fields=["created_at"], name="core_businessarea_created_at_a213ff21"),
+            LongNameIndex(fields=["updated_at"], name="core_businessarea_updated_at_84b3ece5"),
         ]
 
     def __str__(self) -> str:

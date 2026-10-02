@@ -29,6 +29,7 @@ from hope.models.payment_verification import get_status_choices as get_payment_v
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
+    LongNameIndex,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -362,7 +363,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         through="GrievanceTicketThrough",
         symmetrical=True,
     )
-    household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
+    household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
     priority = models.IntegerField(verbose_name=_("Priority"), choices=get_priority_choices, default=PRIORITY_NOT_SET)
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=get_urgency_choices, default=URGENCY_NOT_SET)
     category = models.IntegerField(verbose_name=_("Category"), choices=get_grievance_category_choices)
@@ -384,7 +385,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
-    ignored = models.BooleanField(default=False, db_index=True)
+    ignored = models.BooleanField(default=False)
     extras = JSONField(blank=True, default=dict)
     comments = models.TextField(blank=True, null=True)
     copied_from = models.ForeignKey(
@@ -401,14 +402,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
-        db_index=True,
     )
     last_notification_sent = models.DateTimeField(
         verbose_name=_("Modified"),
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
-        db_index=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -575,6 +574,27 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             # recipient_timezone_names(): one EXISTS per user, for tickets they own or created
             models.Index(fields=["assigned_to", "business_area"], name="idx_gt_assigned_to_ba"),
             models.Index(fields=["created_by", "business_area"], name="idx_gt_created_by_ba"),
+            LongNameIndex(fields=["created_at"], name="grievance_grievanceticket_created_at_4ec795a8"),
+            LongNameIndex(fields=["updated_at"], name="grievance_grievanceticket_updated_at_b9d0c59c"),
+            LongNameIndex(fields=["unicef_id"], name="grievance_grievanceticket_unicef_id_a00a5537"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="grievance_grievanceticket_unicef_id_a00a5537_like",
+            ),
+            LongNameIndex(
+                fields=["household_unicef_id"], name="grievance_grievanceticket_household_unicef_id_853987ce"
+            ),
+            LongNameIndex(
+                fields=["household_unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="grievance_grievanceticket_household_unicef_id_853987ce_like",
+            ),
+            LongNameIndex(fields=["ignored"], name="grievance_grievanceticket_ignored_9bb17664"),
+            LongNameIndex(fields=["user_modified"], name="grievance_grievanceticket_user_modified_ee994ac6"),
+            LongNameIndex(
+                fields=["last_notification_sent"], name="grievance_grievanceticket_last_notification_sent_9ea770a0"
+            ),
         ]
 
     def clean(self) -> None:
@@ -639,6 +659,10 @@ class GrievanceTicketThrough(TimeStampedUUIDModel):
                 name="unique_main_linked_ticket",
             )
         ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_grievanceticketthrough_created_at_89054936"),
+            LongNameIndex(fields=["updated_at"], name="grievance_grievanceticketthrough_updated_at_8d9392fc"),
+        ]
 
 
 class TicketNote(TimeStampedUUIDModel):
@@ -659,6 +683,12 @@ class TicketNote(TimeStampedUUIDModel):
         null=True,
         verbose_name=_("Created by"),
     )
+
+    class Meta:
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketnote_created_at_233d0bae"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketnote_updated_at_7222cd6e"),
+        ]
 
 
 GENERAL_STATUS_FLOW = {
@@ -751,6 +781,10 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Complaint Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketcomplaintdetails_created_at_daaa13c7"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketcomplaintdetails_updated_at_240e39e9"),
+        ]
 
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
@@ -785,6 +819,10 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Sensitive Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketsensitivedetails_created_at_20187250"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketsensitivedetails_updated_at_a73b4994"),
+        ]
 
 
 class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
@@ -804,6 +842,10 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Household Data Update Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_tickethouseholddataupdatedetails_created_at_62b1387a"),
+            LongNameIndex(fields=["updated_at"], name="grievance_tickethouseholddataupdatedetails_updated_at_0434e634"),
+        ]
 
 
 @receiver(post_delete, sender=TicketHouseholdDataUpdateDetails)
@@ -837,6 +879,14 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Individual Data Update Details"
+        indexes = [
+            LongNameIndex(
+                fields=["created_at"], name="grievance_ticketindividualdataupdatedetails_created_at_9fa6001c"
+            ),
+            LongNameIndex(
+                fields=["updated_at"], name="grievance_ticketindividualdataupdatedetails_updated_at_c25ab7bf"
+            ),
+        ]
 
 
 @receiver(post_delete, sender=TicketIndividualDataUpdateDetails)
@@ -869,6 +919,10 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Add Individual Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketaddindividualdetails_created_at_c438acb2"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketaddindividualdetails_updated_at_c639e54e"),
+        ]
 
 
 class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
@@ -895,6 +949,10 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Delete Individual Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketdeleteindividualdetails_created_at_cb54cb91"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketdeleteindividualdetails_updated_at_1a0923df"),
+        ]
 
 
 class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
@@ -925,6 +983,10 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Delete Household Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketdeletehouseholddetails_created_at_88b411a2"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketdeletehouseholddetails_updated_at_e31a23fe"),
+        ]
 
 
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
@@ -954,6 +1016,10 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket System Flagging Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketsystemflaggingdetails_created_at_2dd2dc58"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketsystemflaggingdetails_updated_at_a7735dc7"),
+        ]
 
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
@@ -1072,6 +1138,10 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Needs Adjudication Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketneedsadjudicationdetails_created_at_52b3c323"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketneedsadjudicationdetails_updated_at_5bac228b"),
+        ]
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
@@ -1136,6 +1206,10 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Payment Verification Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketpaymentverificationdetails_created_at_7513a4dc"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketpaymentverificationdetails_updated_at_8cb00f17"),
+        ]
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
@@ -1163,6 +1237,10 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Positive Feedback Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketpositivefeedbackdetails_created_at_807a0099"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketpositivefeedbackdetails_updated_at_caa21246"),
+        ]
 
 
 class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
@@ -1190,6 +1268,10 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Negative Feedback Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketnegativefeedbackdetails_created_at_d63cf3cb"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketnegativefeedbackdetails_updated_at_f79c102f"),
+        ]
 
 
 class TicketReferralDetails(TimeStampedUUIDModel):
@@ -1217,6 +1299,10 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Referral Details"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="grievance_ticketreferraldetails_created_at_b09bd247"),
+            LongNameIndex(fields=["updated_at"], name="grievance_ticketreferraldetails_updated_at_f5f6c734"),
+        ]
 
 
 class GrievanceDocument(UUIDModel):

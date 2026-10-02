@@ -22,6 +22,7 @@ from hope.models.individual import Individual
 from hope.models.utils import (
     AdminUrlMixin,
     InternalDataFieldModel,
+    LongNameIndex,
     SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -237,7 +238,6 @@ class Payment(
         decimal_places=3,
         max_digits=6,
         help_text="Written by Steficon",
-        db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
     sent_to_fsp_date = models.DateTimeField(
@@ -269,6 +269,15 @@ class Payment(
             ),
         ]
         ordering = ("-created_at",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_payment_created_at_537eadaf"),
+            LongNameIndex(fields=["updated_at"], name="payment_payment_updated_at_89699d7d"),
+            LongNameIndex(fields=["unicef_id"], name="payment_payment_unicef_id_07f610de"),
+            LongNameIndex(
+                fields=["unicef_id"], opclasses=["varchar_pattern_ops"], name="payment_payment_unicef_id_07f610de_like"
+            ),
+            LongNameIndex(fields=["vulnerability_score"], name="payment_payment_vulnerability_score_e91d7c15"),
+        ]
 
     signature_fields = (
         "parent_id",

@@ -23,7 +23,7 @@ from hope.models.household import (
     PendingHousehold,
 )
 from hope.models.individual import Individual, PendingIndividual
-from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
+from hope.models.utils import AdminUrlMixin, ConcurrencyModel, LongNameIndex, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +124,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     name = models.CharField(
         max_length=255,
         unique=True,
-        db_index=True,
         validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
@@ -134,15 +133,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         ],
         db_collation="und-ci-det",
     )
-    status = models.CharField(max_length=255, choices=get_status_choices, default=IN_REVIEW, db_index=True)
+    status = models.CharField(max_length=255, choices=get_status_choices, default=IN_REVIEW)
     business_area = models.ForeignKey(BusinessArea, null=True, blank=True, on_delete=models.CASCADE)
     program = models.ForeignKey(
         "program.Program",
-        db_index=True,
         related_name="registration_imports",
         on_delete=models.PROTECT,
     )
-    import_date = models.DateTimeField(auto_now_add=True, db_index=True)
+    import_date = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="registration_data_imports",
@@ -174,8 +172,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     error_message = models.TextField(blank=True)
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
 
-    number_of_individuals = models.PositiveIntegerField(db_index=True)
-    number_of_households = models.PositiveIntegerField(db_index=True)
+    number_of_individuals = models.PositiveIntegerField()
+    number_of_households = models.PositiveIntegerField()
 
     batch_duplicates = models.PositiveIntegerField(default=0)
     batch_possible_duplicates = models.PositiveIntegerField(default=0)
@@ -207,6 +205,23 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
                 fields=["country_workspace_id"],
                 condition=Q(country_workspace_id__isnull=False),
                 name="unique_rdi_country_workspace_id",
+            ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="registration_data_registrationdataimport_created_at_d8c2eb4f"),
+            LongNameIndex(fields=["updated_at"], name="registration_data_registrationdataimport_updated_at_442895a8"),
+            LongNameIndex(fields=["status"], name="registration_data_registrationdataimport_status_e9087d0c"),
+            LongNameIndex(
+                fields=["status"],
+                opclasses=["varchar_pattern_ops"],
+                name="registration_data_registrationdataimport_status_e9087d0c_like",
+            ),
+            LongNameIndex(fields=["import_date"], name="registration_data_registrationdataimport_import_date_1ef9a06e"),
+            LongNameIndex(
+                fields=["number_of_individuals"], name="registration_data_registra_number_of_individuals_51a4efa0"
+            ),
+            LongNameIndex(
+                fields=["number_of_households"], name="registration_data_registra_number_of_households_4ad75097"
             ),
         ]
 
