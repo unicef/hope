@@ -6,7 +6,7 @@ from mptt.models import MPTTModel
 from natural_keys import NaturalKeyModel
 
 from hope.models.country import Country, UpgradeModel, ValidityManager
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class AreaTypeManager(ValidityManager):
@@ -37,6 +37,10 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         verbose_name_plural = "Area Types"
         unique_together = ("country", "area_level", "name")
         ordering = ("name",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="geo_areatype_created_at_7ce454f0"),
+            LongNameIndex(fields=["updated_at"], name="geo_areatype_updated_at_6c355284"),
+        ]
 
     def __str__(self) -> str:
         return self.name

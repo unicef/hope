@@ -10,7 +10,7 @@ from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
-from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -72,6 +72,16 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         verbose_name = "Payment Plan Group"
         unique_together = ("cycle", "name")
         ordering = ["created_at"]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentplangroup_created_at_14a802c0"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentplangroup_updated_at_b23558fe"),
+            LongNameIndex(fields=["unicef_id"], name="payment_paymentplangroup_unicef_id_3fb17c90"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_unicef_id_3fb17c90_like",
+            ),
+        ]
 
     def delete(self, *args: object, **kwargs: object) -> tuple[int, dict]:
         with transaction.atomic():

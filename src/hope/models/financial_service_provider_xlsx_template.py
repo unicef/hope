@@ -20,7 +20,7 @@ from hope.models.country import Country
 from hope.models.document_type import DocumentType
 from hope.models.flexible_attribute import FlexibleAttribute
 from hope.models.payment import Payment, logger
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 @dataclass
@@ -139,6 +139,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_financialservicepr_created_at_5fa42339"),
+            LongNameIndex(fields=["updated_at"], name="payment_financialservicepr_updated_at_eb878d36"),
+        ]
 
     @staticmethod
     def _resolve_snapshot_field(

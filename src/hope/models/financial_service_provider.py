@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.core.mixins import LimitBusinessAreaModelMixin
 from hope.models.financial_service_provider_xlsx_template import FinancialServiceProviderXlsxTemplate
-from hope.models.utils import InternalDataFieldModel, TimeStampedUUIDModel
+from hope.models.utils import InternalDataFieldModel, LongNameIndex, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from hope.models import DeliveryMechanism
@@ -78,3 +78,7 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_financialserviceprovider_created_at_7ca1152c"),
+            LongNameIndex(fields=["updated_at"], name="payment_financialserviceprovider_updated_at_89400a76"),
+        ]

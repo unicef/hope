@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from hope.models.feedback import Feedback
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class FeedbackMessage(TimeStampedUUIDModel):
@@ -29,3 +29,7 @@ class FeedbackMessage(TimeStampedUUIDModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Feedback message")
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="accountability_feedbackmessage_created_at_c0d52383"),
+            LongNameIndex(fields=["updated_at"], name="accountability_feedbackmessage_updated_at_3e2b51d8"),
+        ]

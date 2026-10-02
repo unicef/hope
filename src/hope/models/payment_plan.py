@@ -43,6 +43,7 @@ from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     InternalDataFieldModel,
+    LongNameIndex,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -663,6 +664,16 @@ class PaymentPlan(
             models.CheckConstraint(
                 condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
                 name="payment_plan_group_required_unless_removed",
+            ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentplan_created_at_029b4d04"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentplan_updated_at_4f87ddb1"),
+            LongNameIndex(fields=["unicef_id"], name="payment_paymentplan_unicef_id_ba96bd54"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplan_unicef_id_ba96bd54_like",
             ),
         ]
 

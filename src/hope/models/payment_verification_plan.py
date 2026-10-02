@@ -16,6 +16,7 @@ from hope.models.payment_verification_summary import build_summary
 from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
+    LongNameIndex,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -121,6 +122,16 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     class Meta:
         app_label = "payment"
         ordering = ("created_at",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentverificationplan_created_at_ccfa9990"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentverificationplan_updated_at_eece3840"),
+            LongNameIndex(fields=["unicef_id"], name="payment_paymentverificationplan_unicef_id_87e4384b"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentverificationplan_unicef_id_87e4384b_like",
+            ),
+        ]
 
     @property
     def business_area(self) -> BusinessArea:

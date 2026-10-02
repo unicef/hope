@@ -72,6 +72,14 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             ),
         ]
         indexes = [
+            LongNameIndex(fields=["created_at"], name="program_programcycle_created_at_f18c5d99"),
+            LongNameIndex(fields=["updated_at"], name="program_programcycle_updated_at_89ffd4dc"),
+            LongNameIndex(fields=["unicef_id"], name="program_programcycle_unicef_id_65638c2c"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="program_programcycle_unicef_id_65638c2c_like",
+            ),
             LongNameIndex(fields=["status"], name="program_programcycle_status_c6ee3e75"),
             LongNameIndex(
                 fields=["status"], opclasses=["varchar_pattern_ops"], name="program_programcycle_status_c6ee3e75_like"

@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from hope.models import PaymentPlan
@@ -66,6 +66,10 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentverificationsummary_created_at_290679bf"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentverificationsummary_updated_at_92a7bfc0"),
+        ]
 
     def mark_as_active(self) -> None:
         self.status = self.STATUS_ACTIVE

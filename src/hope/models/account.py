@@ -8,7 +8,14 @@ from django.db import IntegrityError, models, transaction
 from django.db.models import JSONField, Q, QuerySet
 
 from hope.models.financial_institution import FinancialInstitution
-from hope.models.utils import MergedManager, MergeStatusModel, PendingManager, SignatureMixin, TimeStampedUUIDModel
+from hope.models.utils import (
+    LongNameIndex,
+    MergedManager,
+    MergeStatusModel,
+    PendingManager,
+    SignatureMixin,
+    TimeStampedUUIDModel,
+)
 
 
 class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
@@ -67,6 +74,10 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
                 condition=Q(active=True) & Q(unique_key__isnull=False) & Q(is_unique=True),
                 name="unique_active_wallet",
             ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_account_created_at_06eee052"),
+            LongNameIndex(fields=["updated_at"], name="payment_account_updated_at_cd04ae57"),
         ]
 
     def __str__(self) -> str:

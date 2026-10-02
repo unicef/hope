@@ -23,7 +23,7 @@ from hope.models.household import (
     PendingHousehold,
 )
 from hope.models.individual import Individual, PendingIndividual
-from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
+from hope.models.utils import AdminUrlMixin, ConcurrencyModel, LongNameIndex, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +208,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
                 condition=Q(country_workspace_id__isnull=False),
                 name="unique_rdi_country_workspace_id",
             ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="registration_data_registrationdataimport_created_at_d8c2eb4f"),
+            LongNameIndex(fields=["updated_at"], name="registration_data_registrationdataimport_updated_at_442895a8"),
         ]
 
     def should_check_against_sanction_list(self) -> bool:

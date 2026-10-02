@@ -3,7 +3,7 @@ import logging
 from django.db import models
 
 from hope.models.country import Country
-from hope.models.utils import TimeStampedModel
+from hope.models.utils import LongNameIndex, TimeStampedModel
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,10 @@ class FinancialInstitution(TimeStampedModel):
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_financialinstitution_created_at_c2d484cd"),
+            LongNameIndex(fields=["updated_at"], name="payment_financialinstitution_updated_at_fb0812ed"),
+        ]
 
     @classmethod
     def get_rdi_template_choices(cls) -> dict:

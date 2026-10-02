@@ -13,7 +13,7 @@ from mptt.querysets import TreeQuerySet
 from natural_keys import NaturalKeyModel
 
 from hope.models.currency import Currency
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class ValidityQuerySet(TreeQuerySet):
@@ -78,6 +78,10 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         app_label = "geo"
         verbose_name_plural = "Countries"
         ordering = ("name",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="geo_country_created_at_afcd5bea"),
+            LongNameIndex(fields=["updated_at"], name="geo_country_updated_at_daf4b47f"),
+        ]
 
     def __str__(self) -> str:
         return self.name

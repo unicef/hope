@@ -373,6 +373,8 @@ class Program(
         app_label = "program"
         ordering = ("id",)
         indexes = [
+            LongNameIndex(fields=["created_at"], name="program_program_created_at_0fb0bad5"),
+            LongNameIndex(fields=["updated_at"], name="program_program_updated_at_244df9de"),
             LongNameIndex(fields=["name"], name="program_program_name_2670ab01"),
             LongNameIndex(
                 fields=["name"], opclasses=["varchar_pattern_ops"], name="program_program_name_2670ab01_like"

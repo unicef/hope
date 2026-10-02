@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from hope.models.household import logger
 from hope.models.utils import (
     AbstractSyncable,
+    LongNameIndex,
     MergeStatusModel,
     PendingManager,
     SoftDeletableMergeStatusModel,
@@ -22,6 +23,10 @@ class DocumentValidator(TimeStampedUUIDModel):
     class Meta:
         app_label = "household"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="household_documentvalidator_created_at_114c7571"),
+            LongNameIndex(fields=["updated_at"], name="household_documentvalidator_updated_at_e5956004"),
+        ]
 
 
 def get_document_status_choices() -> tuple:
@@ -79,6 +84,9 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
                 fields=["type", "individual"],
                 name="doc_type_individual_idx",
             ),
+            LongNameIndex(fields=["is_removed"], name="household_document_is_removed_ef7efe5b"),
+            LongNameIndex(fields=["created_at"], name="household_document_created_at_3bc5e22a"),
+            LongNameIndex(fields=["updated_at"], name="household_document_updated_at_f16babb8"),
         ]
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual

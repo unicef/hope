@@ -57,6 +57,7 @@ from hope.models.utils import (
     AdminUrlMixin,
     ConcurrencyModel,
     InternalDataFieldModel,
+    LongNameIndex,
     PendingManager,
     SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
@@ -100,6 +101,14 @@ class IndividualCollection(UnicefIdentifiedModel):
     class Meta:
         app_label = "household"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["unicef_id"], name="household_individualcollection_unicef_id_9c88d31d"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individualcollection_unicef_id_9c88d31d_like",
+            ),
+        ]
 
 
 class Individual(
@@ -643,6 +652,15 @@ class Individual(
                 name="idx_hi_prog_rdi_status",
                 fields=["program", "rdi_merge_status"],
                 condition=Q(is_removed=False),
+            ),
+            LongNameIndex(fields=["is_removed"], name="household_individual_is_removed_d56b6e0f"),
+            LongNameIndex(fields=["created_at"], name="household_individual_created_at_c3242865"),
+            LongNameIndex(fields=["updated_at"], name="household_individual_updated_at_45b7c40d"),
+            LongNameIndex(fields=["unicef_id"], name="household_individual_unicef_id_421e2ff2"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_unicef_id_421e2ff2_like",
             ),
         )
         constraints = [

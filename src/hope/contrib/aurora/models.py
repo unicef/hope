@@ -7,7 +7,7 @@ import swapper
 
 from hope.apps.registration_data.utils import combine_collections
 from hope.contrib.aurora.rdi import registry
-from hope.models.utils import TimeStampedModel
+from hope.models.utils import LongNameIndex, TimeStampedModel
 
 
 class AuroraModel(TimeStampedModel):
@@ -22,6 +22,12 @@ class Organization(AuroraModel):
     slug = models.SlugField(max_length=1000)
     business_area = models.ForeignKey("core.BusinessArea", null=True, blank=True, on_delete=models.CASCADE)
 
+    class Meta:
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="aurora_organization_created_at_4f7b8b55"),
+            LongNameIndex(fields=["updated_at"], name="aurora_organization_updated_at_b65df51b"),
+        ]
+
     def __str__(self) -> str:
         return self.name
 
@@ -30,6 +36,12 @@ class Project(AuroraModel):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=100)
+
+    class Meta:
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="aurora_project_created_at_58878624"),
+            LongNameIndex(fields=["updated_at"], name="aurora_project_updated_at_9b17f827"),
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -61,6 +73,12 @@ class Registration(AuroraModel):
     steficon_rule = models.ForeignKey("steficon.RuleCommit", blank=True, null=True, on_delete=models.SET_NULL)
     mapping = models.JSONField(blank=True, null=True)
     private_key = models.TextField(blank=True, null=True, editable=False)
+
+    class Meta:
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="aurora_registration_created_at_2c5ed126"),
+            LongNameIndex(fields=["updated_at"], name="aurora_registration_updated_at_4dbeb556"),
+        ]
 
     def __str__(self) -> str:
         return self.name
