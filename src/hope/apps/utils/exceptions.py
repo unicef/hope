@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def log_and_raise(txt: str, error: Exception | None = None, error_type: Callable = ValidationError) -> NoReturn:
-    logger.warning(txt)
+    logger.warning("%s", txt)
     if error is not None:
         raise error_type(txt) from error
     raise error_type(txt)

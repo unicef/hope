@@ -21,6 +21,7 @@ from django.forms.fields import Field as FormField
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.http import content_disposition_header
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -266,7 +267,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
                         response = HttpResponse(
                             content_type="text/csv",
                             headers={
-                                "Content-Disposition": 'attachment; filename="{}"'.format(form.cleaned_data["filename"])
+                                "Content-Disposition": content_disposition_header(True, form.cleaned_data["filename"])
                             },
                         )
 
