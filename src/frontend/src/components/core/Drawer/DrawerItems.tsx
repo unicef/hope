@@ -211,6 +211,7 @@ export const DrawerItems = ({
                 component={NavLink}
                 data-cy={`nav-${item?.name}`}
                 to={`/${baseUrl}${hrefForCollapsibleItem}`}
+                aria-expanded={expandedItem === index}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);

@@ -412,15 +412,15 @@ class TestSmokeFilters:
             ],
         }
 
+        parents = {
+            "Feedback": "Grievance",
+            "Items": "Main Menu",
+            "Surveys": "Accountability",
+            "Payment Plans": "Payment Module",
+        }
         for nav_menu, locators in programs.items():
-            if nav_menu == "Feedback":
-                filters.wait_for('[data-cy="nav-Grievance"]').click()
-            if nav_menu == "Items":
-                filters.wait_for('[data-cy="nav-Main Menu"]').click()
-            if nav_menu == "Surveys":
-                filters.wait_for('[data-cy="nav-Accountability"]').click()
-            if nav_menu == "Payment Plans":
-                filters.wait_for('[data-cy="nav-Payment Module"]').click()
+            if nav_menu in parents:
+                filters.open_nav_section(parents[nav_menu])
 
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
 
