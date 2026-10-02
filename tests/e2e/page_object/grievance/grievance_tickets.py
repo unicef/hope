@@ -219,9 +219,6 @@ class GrievanceTickets(BaseComponents):
     def get_options(self) -> WebElement:
         return self.wait_for(self.status_options)
 
-    def get_select_all(self) -> WebElement:
-        return self.wait_for(self.select_all)
-
     def get_button_assign(self) -> WebElement:
         return self.wait_for(self.button_assign)
 
