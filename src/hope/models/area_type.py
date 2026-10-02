@@ -40,6 +40,9 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             LongNameIndex(fields=["created_at"], name="geo_areatype_created_at_7ce454f0"),
             LongNameIndex(fields=["updated_at"], name="geo_areatype_updated_at_6c355284"),
             LongNameIndex(fields=["name"], name="geo_areatype_name_b20b6ba6"),
+            # django-mptt appends this index on its own unless Meta declares it. It is in the migration
+            # state only: migrated databases do not have it.
+            models.Index(fields=["tree_id", "lft"], name="geo_areatype_tree_id_lft_idx"),
         ]
 
     def __str__(self) -> str:

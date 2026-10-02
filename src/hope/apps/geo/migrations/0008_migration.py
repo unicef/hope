@@ -7,134 +7,126 @@ import hope.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0040_migration"),
         ("geo", "0007_migration"),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="area",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="area",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="areatype",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="areatype",
-            name="name",
-            field=models.CharField(db_collation="und-ci-det", max_length=255),
-        ),
-        migrations.AlterField(
-            model_name="areatype",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="country",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="country",
-            name="name",
-            field=models.CharField(
-                db_collation="und-ci-det",
-                help_text="The full name of the country",
-                max_length=255,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="country",
-            name="short_name",
-            field=models.CharField(
-                db_collation="und-ci-det",
-                help_text="The short name of the country",
-                max_length=255,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="country",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AddIndex(
-            model_name="area",
-            index=hope.models.utils.LongNameIndex(fields=["created_at"], name="geo_area_created_at_3f07c235"),
-        ),
-        migrations.AddIndex(
-            model_name="area",
-            index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="geo_area_updated_at_7ec5b7d0"),
-        ),
-        migrations.AddIndex(
-            model_name="area",
-            index=models.Index(fields=["tree_id", "lft"], name="geo_area_tree_id_lft_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="areatype",
-            index=hope.models.utils.LongNameIndex(fields=["created_at"], name="geo_areatype_created_at_7ce454f0"),
-        ),
-        migrations.AddIndex(
-            model_name="areatype",
-            index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="geo_areatype_updated_at_6c355284"),
-        ),
-        migrations.AddIndex(
-            model_name="areatype",
-            index=hope.models.utils.LongNameIndex(fields=["name"], name="geo_areatype_name_b20b6ba6"),
-        ),
-        migrations.AddIndex(
-            model_name="areatype",
-            index=hope.models.utils.LongNameIndex(
-                fields=["name"],
-                name="geo_areatype_name_b20b6ba6_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="areatype",
-            index=models.Index(fields=["tree_id", "lft"], name="geo_areatype_tree_id_lft_idx"),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=hope.models.utils.LongNameIndex(fields=["created_at"], name="geo_country_created_at_afcd5bea"),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="geo_country_updated_at_daf4b47f"),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=hope.models.utils.LongNameIndex(fields=["name"], name="geo_country_name_01731269"),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=hope.models.utils.LongNameIndex(
-                fields=["name"],
-                name="geo_country_name_01731269_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=hope.models.utils.LongNameIndex(fields=["short_name"], name="geo_country_short_name_00190511"),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=hope.models.utils.LongNameIndex(
-                fields=["short_name"],
-                name="geo_country_short_name_00190511_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="country",
-            index=models.Index(fields=["tree_id", "lft"], name="geo_country_tree_id_lft_idx"),
+        # State only: the indexes already exist under these names, db_index=True created them.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name="area",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="area",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="areatype",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="areatype",
+                    name="name",
+                    field=models.CharField(db_collation="und-ci-det", max_length=255),
+                ),
+                migrations.AlterField(
+                    model_name="areatype",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="country",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="country",
+                    name="name",
+                    field=models.CharField(
+                        db_collation="und-ci-det",
+                        help_text="The full name of the country",
+                        max_length=255,
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="country",
+                    name="short_name",
+                    field=models.CharField(
+                        db_collation="und-ci-det",
+                        help_text="The short name of the country",
+                        max_length=255,
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="country",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AddIndex(
+                    model_name="area",
+                    index=hope.models.utils.LongNameIndex(fields=["created_at"], name="geo_area_created_at_3f07c235"),
+                ),
+                migrations.AddIndex(
+                    model_name="area",
+                    index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="geo_area_updated_at_7ec5b7d0"),
+                ),
+                migrations.AddIndex(
+                    model_name="areatype",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="geo_areatype_created_at_7ce454f0"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="areatype",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="geo_areatype_updated_at_6c355284"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="areatype",
+                    index=hope.models.utils.LongNameIndex(fields=["name"], name="geo_areatype_name_b20b6ba6"),
+                ),
+                migrations.AddIndex(
+                    model_name="country",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="geo_country_created_at_afcd5bea"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="country",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="geo_country_updated_at_daf4b47f"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="country",
+                    index=hope.models.utils.LongNameIndex(fields=["name"], name="geo_country_name_01731269"),
+                ),
+                migrations.AddIndex(
+                    model_name="country",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["short_name"], name="geo_country_short_name_00190511"
+                    ),
+                ),
+                # The (tree_id, lft) indexes are the exception: they are not in the database. django-mptt
+                # creates them only where tables are built straight from the models.
+                migrations.AddIndex(
+                    model_name="area",
+                    index=models.Index(fields=["tree_id", "lft"], name="geo_area_tree_id_lft_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="areatype",
+                    index=models.Index(fields=["tree_id", "lft"], name="geo_areatype_tree_id_lft_idx"),
+                ),
+                migrations.AddIndex(
+                    model_name="country",
+                    index=models.Index(fields=["tree_id", "lft"], name="geo_country_tree_id_lft_idx"),
+                ),
+            ],
         ),
     ]

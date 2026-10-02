@@ -80,6 +80,9 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             LongNameIndex(fields=["updated_at"], name="geo_country_updated_at_daf4b47f"),
             LongNameIndex(fields=["name"], name="geo_country_name_01731269"),
             LongNameIndex(fields=["short_name"], name="geo_country_short_name_00190511"),
+            # django-mptt appends this index on its own unless Meta declares it. It is in the migration
+            # state only: migrated databases do not have it.
+            models.Index(fields=["tree_id", "lft"], name="geo_country_tree_id_lft_idx"),
         ]
 
     def __str__(self) -> str:

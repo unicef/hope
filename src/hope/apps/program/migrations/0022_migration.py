@@ -165,14 +165,6 @@ class Migration(migrations.Migration):
                 ),
                 migrations.AddIndex(
                     model_name="program",
-                    index=hope.models.utils.LongNameIndex(
-                        fields=["name"],
-                        name="program_program_name_2670ab01_like",
-                        opclasses=["varchar_pattern_ops"],
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="program",
                     index=hope.models.utils.LongNameIndex(fields=["code"], name="program_program_code_b7abf396"),
                 ),
                 migrations.AddIndex(

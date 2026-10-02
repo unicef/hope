@@ -687,23 +687,7 @@ class Migration(migrations.Migration):
                 migrations.AddIndex(
                     model_name="individual",
                     index=hope.models.utils.LongNameIndex(
-                        fields=["full_name"],
-                        name="household_individual_full_name_8fa0162b_like",
-                        opclasses=["varchar_pattern_ops"],
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="individual",
-                    index=hope.models.utils.LongNameIndex(
                         fields=["given_name"], name="household_individual_given_name_1ebbded2"
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="individual",
-                    index=hope.models.utils.LongNameIndex(
-                        fields=["given_name"],
-                        name="household_individual_given_name_1ebbded2_like",
-                        opclasses=["varchar_pattern_ops"],
                     ),
                 ),
                 migrations.AddIndex(
@@ -715,23 +699,7 @@ class Migration(migrations.Migration):
                 migrations.AddIndex(
                     model_name="individual",
                     index=hope.models.utils.LongNameIndex(
-                        fields=["middle_name"],
-                        name="household_individual_middle_name_1dfbf837_like",
-                        opclasses=["varchar_pattern_ops"],
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="individual",
-                    index=hope.models.utils.LongNameIndex(
                         fields=["family_name"], name="household_individual_family_name_4d6db55f"
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="individual",
-                    index=hope.models.utils.LongNameIndex(
-                        fields=["family_name"],
-                        name="household_individual_family_name_4d6db55f_like",
-                        opclasses=["varchar_pattern_ops"],
                     ),
                 ),
                 migrations.AddIndex(
