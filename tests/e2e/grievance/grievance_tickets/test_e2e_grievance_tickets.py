@@ -1192,8 +1192,7 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.get_button_send_for_approval().click()
         page_grievance_details_page.check_checkbox(page_grievance_details_page.checkbox_household_data)
-        # "You approved 1 change ..." warning
-        page_grievance_details_page.approve_and_confirm()
+        page_grievance_details_page.get_button_approval().click()
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
         assert "Ticket ID" in page_grievance_details_page.get_title().text

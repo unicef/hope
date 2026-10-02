@@ -1,4 +1,3 @@
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -225,18 +224,6 @@ class GrievanceDetailsPage(BaseComponents):
 
     def get_button_approval(self) -> WebElement:
         return self.scroll_to_and_wait_for(self.button_approval)
-
-    def approve_and_confirm(self) -> None:
-        # The ticket refetches after "Send for approval", so the Approve click can be
-        # dropped by the re-render; click again if the warning dialog does not open.
-        for attempt in range(2):
-            self.get_button_approval().click()
-            try:
-                self.wait_for(self.button_confirm, timeout=5).click()
-                return
-            except NoSuchElementException:
-                if attempt == 1:
-                    raise
 
     def get_button_set_in_progress(self) -> WebElement:
         return self.wait_for(self.button_set_in_progress)
