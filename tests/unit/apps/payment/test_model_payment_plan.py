@@ -53,7 +53,7 @@ def test_get_last_approval_process_date_in_approval(user, program_cycle):
     sent_for_approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_APPROVAL)
     ApprovalProcessFactory(
-        payment_plan=payment_plan,
+        payment_plan_group=payment_plan.payment_plan_group,
         sent_for_approval_date=sent_for_approval_date,
         sent_for_approval_by=user,
     )
@@ -72,7 +72,7 @@ def test_get_last_approval_process_date_in_approval_without_process(user, progra
 
 def test_get_last_approval_process_date_in_authorization_with_approval(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_AUTHORIZATION)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     approval = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.APPROVAL,
@@ -88,7 +88,7 @@ def test_get_last_approval_process_date_in_authorization_with_approval(user, pro
 
 def test_get_last_approval_process_date_in_authorization_without_approval(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_AUTHORIZATION)
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == payment_plan.updated_at
@@ -97,7 +97,7 @@ def test_get_last_approval_process_date_in_authorization_without_approval(user, 
 
 def test_get_last_approval_process_date_in_review_with_authorizations(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_REVIEW)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     first_authorization = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.AUTHORIZATION,
@@ -120,7 +120,7 @@ def test_get_last_approval_process_date_in_review_with_authorizations(user, prog
 
 def test_get_last_approval_process_date_in_review_without_authorization(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_REVIEW)
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == payment_plan.updated_at
@@ -129,7 +129,7 @@ def test_get_last_approval_process_date_in_review_without_authorization(user, pr
 
 def test_get_last_approval_process_date_accepted_with_finance_release(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.ACCEPTED)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     finance_release = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
@@ -145,7 +145,7 @@ def test_get_last_approval_process_date_accepted_with_finance_release(user, prog
 
 def test_get_last_approval_process_date_accepted_without_finance_release(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.ACCEPTED)
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == payment_plan.updated_at
@@ -154,7 +154,7 @@ def test_get_last_approval_process_date_accepted_without_finance_release(user, p
 
 def test_get_last_approval_process_date_other_status_fallback(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.LOCKED)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     approval = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
@@ -179,7 +179,7 @@ def test_currency_exchange_date():
     payment_plan.status = PaymentPlan.Status.ACCEPTED
     payment_plan.save()
 
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     approval = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
     assert str(payment_plan.currency_exchange_date) == str(approval.created_at.date())
 

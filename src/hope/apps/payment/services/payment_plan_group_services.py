@@ -1,9 +1,23 @@
+from typing import TYPE_CHECKING
+
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.payment.celery_tasks import send_payment_plan_group_notification_emails_async_task
 from hope.apps.payment.flows import PaymentPlanGroupFlow
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.services.payment_plan_services import (
+    ACTION_TO_APPROVAL_TYPE,
+    STAGE_REACHED_NOTIFICATION,
+    PaymentPlanService,
+    record_stage_reached,
+    required_number_for,
+    validate_approval_count,
+)
+from hope.apps.payment.utils import log_payment_plan_approval
 from hope.models import (
+    Approval,
+    ApprovalProcess,
     Currency,
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -11,6 +25,20 @@ from hope.models import (
     PaymentPlan,
     PaymentPlanGroup,
 )
+
+if TYPE_CHECKING:
+    from hope.models import User
+
+ACTION_TO_STATUSES = {
+    PaymentPlan.Action.APPROVE.value: (PaymentPlanGroup.Status.IN_APPROVAL,),
+    PaymentPlan.Action.AUTHORIZE.value: (PaymentPlanGroup.Status.IN_AUTHORIZATION,),
+    PaymentPlan.Action.REVIEW.value: (PaymentPlanGroup.Status.IN_REVIEW,),
+    PaymentPlan.Action.REJECT.value: (
+        PaymentPlanGroup.Status.IN_APPROVAL,
+        PaymentPlanGroup.Status.IN_AUTHORIZATION,
+        PaymentPlanGroup.Status.IN_REVIEW,
+    ),
+}
 
 
 class PaymentPlanGroupService:
@@ -80,6 +108,88 @@ class PaymentPlanGroupService:
         return payment_plan_group
 
     @transaction.atomic
+    def send_for_approval(self, user: "User") -> PaymentPlanGroup:
+        """Send the group and every plan in it for approval; one approval process, on the group."""
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.LOCKED:
+            raise ValidationError(f"Send for Approval is possible only within Status {PaymentPlanGroup.Status.LOCKED}")
+        for payment_plan in self._payment_plans(payment_plan_group):
+            PaymentPlanService(payment_plan).transition_send_for_approval()
+
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_send_for_approval()
+        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        ApprovalProcess.objects.create(
+            payment_plan_group=payment_plan_group,
+            sent_for_approval_by=user,
+            sent_for_approval_date=timezone.now(),
+            approval_number_required=payment_plan_group.approval_number_required,
+            authorization_number_required=payment_plan_group.authorization_number_required,
+            finance_release_number_required=payment_plan_group.finance_release_number_required,
+        )
+        send_payment_plan_group_notification_emails_async_task(
+            payment_plan_group,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.value,
+            str(user.pk),
+            timezone.now().isoformat(),
+        )
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def acceptance_process(self, action: str, user: "User", comment: str | None = None) -> PaymentPlanGroup:
+        """Record one approve / authorize / release / reject on the group.
+
+        When the required count is reached the group moves to the next stage and the new status is
+        mirrored onto every plan (plan status is read by eligibility, conflicts, verification and exports).
+        """
+        approval_type = ACTION_TO_APPROVAL_TYPE[action]
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status not in ACTION_TO_STATUSES[action]:
+            raise ValidationError(
+                f"Not possible to create {action} for Payment Plan Group within status {payment_plan_group.status}"
+            )
+        approval_process = payment_plan_group.approval_process.first()
+        if approval_process is None:
+            raise ValidationError(f"Approval Process object not found for Payment Plan Group {payment_plan_group.pk}")
+        payment_plans = self._payment_plans(payment_plan_group)
+        if action == PaymentPlan.Action.REVIEW.value and any(
+            payment_plan.vision_managed for payment_plan in payment_plans
+        ):
+            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
+        required_number = required_number_for(approval_process, approval_type)
+        validate_approval_count(approval_process, approval_type, required_number, payment_plan_group.status, user)
+
+        Approval.objects.create(approval_process=approval_process, created_by=user, type=approval_type, comment=comment)
+        log_payment_plan_approval(payment_plan_group, user, approval_type, comment)
+
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:
+            record_stage_reached(approval_process, approval_type, user)
+            self._transition_stage(payment_plan_group, approval_type)
+            for payment_plan in payment_plans:
+                PaymentPlanService(payment_plan).apply_acceptance_stage(approval_type, user)
+            if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
+                send_payment_plan_group_notification_emails_async_task(
+                    payment_plan_group, notification_action.value, str(user.pk), timezone.now().isoformat()
+                )
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @staticmethod
+    def _transition_stage(payment_plan_group: PaymentPlanGroup, approval_type: str) -> None:
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        {
+            Approval.APPROVAL: flow.status_approve,
+            Approval.AUTHORIZATION: flow.status_authorize,
+            Approval.FINANCE_RELEASE: flow.status_mark_as_reviewed,
+            Approval.REJECT: flow.status_reject,
+        }[approval_type]()
+        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+
+    def _locked_for_update(self) -> PaymentPlanGroup:
+        return PaymentPlanGroup.objects.select_for_update().get(pk=self.payment_plan_group.pk)
+
+    @transaction.atomic
     def unlock(self) -> PaymentPlanGroup:
         """Reopen the group for new Payment Plans and release the FSP lock on every one it holds."""
         payment_plan_group = PaymentPlanGroup.objects.select_for_update().get(pk=self.payment_plan_group.pk)
@@ -100,10 +210,9 @@ class PaymentPlanGroupService:
 
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
-        # lock_fsp() reads the delivery mechanism and, through the group, the FSP of every plan
         return list(
             payment_plan_group.payment_plans.select_related(
-                "delivery_mechanism", "payment_plan_group__financial_service_provider"
+                "business_area", "delivery_mechanism", "payment_plan_group__financial_service_provider"
             ).order_by("created_at")
         )
 

@@ -784,11 +784,6 @@ class PaymentPlanViewSet(
         "unlock",
         "lock_fsp",
         "unlock_fsp",
-        "send_for_approval",
-        "reject",
-        "approve",
-        "authorize",
-        "mark_as_released",
         "send_to_payment_gateway",
         "fsp_extra_fields_import_xlsx",
         "split",
@@ -818,10 +813,6 @@ class PaymentPlanViewSet(
         "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_extra_fields_import_xlsx": PaymentPlanImportFileSerializer,
-        "reject": AcceptanceProcessSerializer,
-        "approve": AcceptanceProcessSerializer,
-        "authorize": AcceptanceProcessSerializer,
-        "mark_as_released": AcceptanceProcessSerializer,
         "split": SplitPaymentPlanSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
@@ -857,10 +848,6 @@ class PaymentPlanViewSet(
             Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
-        "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
-        "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
-        "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
-        "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         "split": [Permissions.PM_SPLIT],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
@@ -1444,129 +1431,6 @@ class PaymentPlanViewSet(
         response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
         return Response(
             data=response_serializer.data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="send-for-approval",
-    )
-    @transaction.atomic
-    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_FOR_APPROVAL},
-            user=request.user,
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["post"])
-    @transaction.atomic
-    def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-
-        def _get_reject_permission(status: str) -> Any:
-            status_to_perm_map = {
-                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            }
-            return status_to_perm_map.get(status, list(status_to_perm_map.values()))
-
-        reject_permission = _get_reject_permission(payment_plan.status)
-        request.user.has_perm(reject_permission)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.REJECT
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["post"])
-    @transaction.atomic
-    def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.APPROVE
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["post"])
-    @transaction.atomic
-    def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.AUTHORIZE
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["post"], url_path="mark-as-released")
-    @transaction.atomic
-    def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.vision_managed:
-            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
-        old_payment_plan = copy_model_object(payment_plan)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.REVIEW
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
 
@@ -2839,6 +2703,10 @@ class PaymentPlanGroupViewSet(
         "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
         "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
         "delivery_import_xlsx": PaymentPlanGroupReconciliationImportSerializer,
+        "approve": AcceptanceProcessSerializer,
+        "authorize": AcceptanceProcessSerializer,
+        "reject": AcceptanceProcessSerializer,
+        "mark_as_released": AcceptanceProcessSerializer,
     }
 
     permissions_by_action = {
@@ -2849,6 +2717,15 @@ class PaymentPlanGroupViewSet(
         "destroy": [Permissions.PM_PAYMENT_PLAN_GROUP_DELETE],
         "lock": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "unlock": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        "send_for_approval": [Permissions.PM_SEND_FOR_APPROVAL],
+        "approve": [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+        "authorize": [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
+        "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
+        "reject": [
+            Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+            Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+            Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+        ],
         "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
         "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
@@ -2862,7 +2739,7 @@ class PaymentPlanGroupViewSet(
 
     @transaction.atomic
     def perform_create(self, serializer: Any) -> None:
-        payment_plan_group = serializer.save()
+        payment_plan_group = serializer.save(created_by=self.request.user)
         log_create(
             mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
             business_area_field="cycle.program.business_area",
@@ -3108,6 +2985,39 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"], url_path="unlock")
     def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._run_status_action(request, PaymentPlanGroupService.unlock)
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="send-for-approval")
+    def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_status_action(request, lambda service: service.send_for_approval(request.user))
+
+    @extend_schema(request=AcceptanceProcessSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"])
+    def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_acceptance_action(request, PaymentPlan.Action.APPROVE)
+
+    @extend_schema(request=AcceptanceProcessSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"])
+    def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_acceptance_action(request, PaymentPlan.Action.AUTHORIZE)
+
+    @extend_schema(request=AcceptanceProcessSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"])
+    def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_acceptance_action(request, PaymentPlan.Action.REJECT)
+
+    @extend_schema(request=AcceptanceProcessSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="mark-as-released")
+    def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_acceptance_action(request, PaymentPlan.Action.REVIEW)
+
+    def _run_acceptance_action(self, request: Request, plan_action: "PaymentPlan.Action") -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        comment = serializer.validated_data.get("comment")
+        return self._run_status_action(
+            request, lambda service: service.acceptance_process(plan_action.value, request.user, comment)
+        )
 
     def _run_status_action(self, request: Request, action_method: Callable) -> Response:
         payment_plan_group = self.get_object()

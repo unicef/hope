@@ -260,7 +260,7 @@ def test_manual_fc_item_recovery_assigns_items_and_releases_plan(
         }
     }
     payment_plan.save(update_fields=["internal_data"])
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     funds_commitment_group = FundsCommitmentGroupFactory(funds_commitment_number="FC123")
     funds_commitment_item = FundsCommitmentItemFactory(
         funds_commitment_group=funds_commitment_group,

@@ -201,7 +201,7 @@ def test_list_payment_plans_approval_process_data(
     create_user_role_with_permissions: Any,
 ) -> None:
     approval_process = ApprovalProcessFactory(
-        payment_plan=managerial_context["payment_plan1"],
+        payment_plan_group=managerial_context["payment_plan1"].payment_plan_group,
         sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc),
         sent_for_approval_by=managerial_context["user"],
     )

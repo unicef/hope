@@ -43,6 +43,7 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_group_delivery_from_xlsx_async_task,
     notify_payment_plan_group_reconciliation_import_failure,
 )
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import AsyncRetryJob, LogEntry, Payment, PaymentPlan, PaymentPlanGroup, User
 
@@ -3734,3 +3735,133 @@ def test_export_for_batch_permissions(
         )
 
     assert response.status_code == expected_status
+
+
+def _group_action_url(ba_slug: str, program_code: str, group_id: Any, action: str) -> str:
+    return reverse(
+        f"api:payments:payment-plan-groups-{action}",
+        kwargs={"business_area_slug": ba_slug, "program_code": program_code, "pk": group_id},
+    )
+
+
+@pytest.fixture
+def locked_group_with_plan(group_with_lockable_plan: Any) -> Any:
+    PaymentPlanGroupService(group_with_lockable_plan).lock()
+    group_with_lockable_plan.refresh_from_db()
+    return group_with_lockable_plan
+
+
+@pytest.fixture
+def group_in_approval_with_plan(locked_group_with_plan: Any, user: Any) -> Any:
+    PaymentPlanGroupService(locked_group_with_plan).send_for_approval(user)
+    locked_group_with_plan.refresh_from_db()
+    return locked_group_with_plan
+
+
+def test_send_group_for_approval_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_SEND_FOR_APPROVAL], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, locked_group_with_plan.id, "send-for-approval")
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.IN_APPROVAL
+    assert len(response.json()["approval_process"]) == 1
+
+
+def test_send_group_for_approval_without_permission_returns_403(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    locked_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_LOCK_AND_UNLOCK_FSP], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, locked_group_with_plan.id, "send-for-approval")
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_approve_group_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "approve"),
+        {"comment": "looks right"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.IN_AUTHORIZATION
+    assert response.json()["approval_process"][0]["actions"]["approval"][0]["comment"] == "looks right"
+
+
+def test_reject_group_with_any_acceptance_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE], business_area, program=program
+    )
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "reject")
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.LOCKED
+
+
+def test_mark_group_as_released_without_permission_returns_403(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "mark-as-released")
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_create_group_records_creator(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+
+    response = client.post(_list_url(business_area.slug, program.code), {"name": "Mine", "cycle": str(cycle.id)})
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert PaymentPlanGroup.objects.get(id=response.json()["id"]).created_by == user

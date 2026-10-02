@@ -55,7 +55,7 @@ class PaymentPlanPDFExportService:
         fsp = self.payment_plan.financial_service_provider
         delivery_mechanism = self.payment_plan.delivery_mechanism
 
-        approval_process = self.payment_plan.approval_process.first()
+        approval_process = self.payment_plan.payment_plan_group.approval_process.first()
         approval = approval_process.approvals.filter(type=Approval.APPROVAL).first()
         authorization = approval_process.approvals.filter(type=Approval.AUTHORIZATION).first()
         release = approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
@@ -93,7 +93,7 @@ class PaymentPlanPDFExportService:
             "is_social_worker_program": self.is_social_worker_program,
             "fsp": fsp,
             "delivery_mechanism_per_payment_plan": delivery_mechanism,
-            "approval_process": self.payment_plan.approval_process.first(),
+            "approval_process": self.payment_plan.payment_plan_group.approval_process.first(),
             "payment_plan_link": self.payment_plan_link,
             "approval": approval,
             "authorization": authorization,

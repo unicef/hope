@@ -904,7 +904,7 @@ class PaymentPlan(
         return self.eligible_payments_for_top_up()
 
     def _get_last_approval_process_data(self) -> ModifiedData:
-        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
+        approval_process = self.payment_plan_group.approval_process.first() if self.payment_plan_group_id else None
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return ModifiedData(
@@ -1131,7 +1131,8 @@ class PaymentPlan(
                 PaymentPlan.Status.READY_FOR_CLOSURE,
                 PaymentPlan.Status.CLOSED,
             ]
-            and (process := self.approval_process.first())
+            and self.payment_plan_group_id
+            and (process := self.payment_plan_group.approval_process.first())
             and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
         ):
             return approval.created_at.date()

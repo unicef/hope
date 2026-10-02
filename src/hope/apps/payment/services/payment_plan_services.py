@@ -80,6 +80,66 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+ACTION_TO_APPROVAL_TYPE = {
+    PaymentPlan.Action.APPROVE.value: Approval.APPROVAL,
+    PaymentPlan.Action.AUTHORIZE.value: Approval.AUTHORIZATION,
+    PaymentPlan.Action.REVIEW.value: Approval.FINANCE_RELEASE,
+    PaymentPlan.Action.REJECT.value: Approval.REJECT,
+}
+APPROVAL_TYPE_FOR_STATUS = {
+    "IN_APPROVAL": Approval.APPROVAL,
+    "IN_AUTHORIZATION": Approval.AUTHORIZATION,
+    "IN_REVIEW": Approval.FINANCE_RELEASE,
+}
+STAGE_REACHED_NOTIFICATION = {
+    Approval.APPROVAL: PaymentPlan.Action.APPROVE,
+    Approval.AUTHORIZATION: PaymentPlan.Action.AUTHORIZE,
+    Approval.FINANCE_RELEASE: PaymentPlan.Action.REVIEW,
+}
+
+
+def required_number_for(approval_process: ApprovalProcess, approval_type: str) -> int:
+    return {
+        Approval.APPROVAL: approval_process.approval_number_required,
+        Approval.AUTHORIZATION: approval_process.authorization_number_required,
+        Approval.FINANCE_RELEASE: approval_process.finance_release_number_required,
+        Approval.REJECT: 1,  # only one Reject per Acceptance Process object
+    }[approval_type]
+
+
+def validate_approval_count(
+    approval_process: ApprovalProcess,
+    approval_type: str,
+    required_number: int,
+    current_status: str,
+    user: "User | None",
+) -> None:
+    if approval_process.approvals.filter(type=approval_type).count() >= required_number:
+        raise ValidationError(
+            f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
+        )
+    if config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS:
+        return
+    approvals_by_user = approval_process.approvals.filter(created_by=user)
+    if approval_type == Approval.REJECT:
+        created_approval_type = APPROVAL_TYPE_FOR_STATUS[current_status]
+        if approvals_by_user.filter(type=created_approval_type).exists():
+            raise ValidationError(f"Can't create {approval_type}. User have already created {created_approval_type}")
+    elif approvals_by_user.filter(type=approval_type).exists():
+        raise ValidationError(f"Can't create new {approval_type}. User have already created {approval_type}")
+
+
+def record_stage_reached(approval_process: ApprovalProcess, approval_type: str, user: "User | None") -> None:
+    if approval_type == Approval.APPROVAL:
+        approval_process.sent_for_authorization_by = user
+        approval_process.sent_for_authorization_date = timezone.now()
+        approval_process.save()
+    if approval_type == Approval.AUTHORIZATION:
+        approval_process.sent_for_finance_release_by = user
+        approval_process.sent_for_finance_release_date = timezone.now()
+        approval_process.save()
+
+
 class PaymentPlanService:
     def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
@@ -110,26 +170,13 @@ class PaymentPlanService:
             PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
         }
 
-    def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> int | None:
-        approval_count_map = {
-            Approval.APPROVAL: approval_process.approval_number_required,
-            Approval.AUTHORIZATION: approval_process.authorization_number_required,
-            Approval.FINANCE_RELEASE: approval_process.finance_release_number_required,
-            Approval.REJECT: 1,  # be default only one Reject per Acceptance Process object
-        }
-        return approval_count_map.get(self.get_approval_type_by_action())
+    def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> int:
+        return required_number_for(approval_process, self.get_approval_type_by_action())
 
     def get_approval_type_by_action(self) -> str:
         if not self.action:
             raise ValueError("Action cannot be None")
-
-        actions_to_approval_type_map = {
-            PaymentPlan.Action.APPROVE.value: Approval.APPROVAL,
-            PaymentPlan.Action.AUTHORIZE.value: Approval.AUTHORIZATION,
-            PaymentPlan.Action.REVIEW.value: Approval.FINANCE_RELEASE,
-            PaymentPlan.Action.REJECT.value: Approval.REJECT,
-        }
-        return actions_to_approval_type_map[self.action]
+        return ACTION_TO_APPROVAL_TYPE[self.action]
 
     def execute_update_status_action(
         self,
@@ -140,6 +187,9 @@ class PaymentPlanService:
         """Get function from get_action_function and execute it return PaymentPlan object."""
         if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
             raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
+        payment_plan_group = self.payment_plan.payment_plan_group
+        if payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
+            raise ValidationError("This Payment Plan is managed by its Payment Plan Group.")
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = cast("User", user)
@@ -156,7 +206,8 @@ class PaymentPlanService:
     def get_action_function(self) -> Callable | None:
         return self.actions_map.get(self.action)
 
-    def send_for_approval(self) -> PaymentPlan:
+    def transition_send_for_approval(self) -> None:
+        """Move the plan to IN_APPROVAL; the approval process and the notification belong to the caller."""
         background_action_status = self.payment_plan.background_action_status
         if (
             background_action_status is not None
@@ -168,6 +219,9 @@ class PaymentPlanService:
             flow.background_action_status_none()
         flow.status_send_to_approval()
         self.payment_plan.save()
+
+    def send_for_approval(self) -> PaymentPlan:
+        self.transition_send_for_approval()
         # create new ApprovalProcess
         ApprovalProcess.objects.create(
             payment_plan=self.payment_plan,
@@ -208,7 +262,7 @@ class PaymentPlanService:
             raise ValidationError("Only an in-review Payment Plan can be released by Vision")
 
         old_payment_plan = copy_model_object(self.payment_plan)
-        approval_process = self.payment_plan.approval_process.first()
+        approval_process = self.payment_plan.payment_plan_group.approval_process.first()
         if not approval_process:
             raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
 
@@ -469,110 +523,74 @@ class PaymentPlanService:
             )
 
     def validate_acceptance_process_approval_count(self, approval_process: ApprovalProcess) -> None:
-        approval_type = self.get_approval_type_by_action()
-        required_number = self.get_required_number_by_approval_type(approval_process)
-        if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
-            raise ValidationError(
-                f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
-            )
-        # validate if the user can create approval
-        # for test purposes this validation can be skipped
-        if not config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS:
-            approvals_by_user = approval_process.approvals.filter(created_by=self.user)
-
-            # validate REJECT based on status payment plan
-            if approval_type == Approval.REJECT:
-                status_to_approval_type_map = {
-                    PaymentPlan.Status.IN_APPROVAL: Approval.APPROVAL,
-                    PaymentPlan.Status.IN_AUTHORIZATION.name: Approval.AUTHORIZATION,
-                    PaymentPlan.Status.IN_REVIEW.name: Approval.FINANCE_RELEASE,
-                }
-
-                created_approval_type = status_to_approval_type_map[self.payment_plan.status]
-                if approvals_by_user.filter(type=created_approval_type).exists():
-                    raise ValidationError(
-                        f"Can't create {approval_type}. User have already created {created_approval_type}"
-                    )
-            # validate other approval types
-            elif approvals_by_user.filter(type=approval_type).exists():
-                raise ValidationError(f"Can't create new {approval_type}. User have already created {approval_type}")
+        validate_approval_count(
+            approval_process,
+            self.get_approval_type_by_action(),
+            self.get_required_number_by_approval_type(approval_process),
+            self.payment_plan.status,
+            self.user,
+        )
 
     def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
+        if approval_process.approvals.filter(type=approval_type).count() < required_number:
+            return
+        user = cast("User", self.user)
+        record_stage_reached(approval_process, approval_type, user)
+        self.apply_acceptance_stage(approval_type, user)
+        if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
+            send_payment_notification_emails_async_task(
+                self.payment_plan, notification_action.value, str(user.id), timezone.now().isoformat()
+            )
 
-        if approval_process.approvals.filter(type=approval_type).count() >= required_number:  # type: ignore[operator]
-            notification_action = None
-            should_notify_vision_of_rejection = False
-            if approval_type == Approval.APPROVAL:
-                flow = PaymentPlanFlow(self.payment_plan)
-                flow.status_approve()
-                approval_process.sent_for_authorization_by = self.user
-                approval_process.sent_for_authorization_date = timezone.now()
-                approval_process.save()
-                notification_action = PaymentPlan.Action.APPROVE
+    def apply_acceptance_stage(self, approval_type: str, user: "User") -> None:
+        """Move the plan to the stage whose approval count was just reached, with the per-plan side effects.
 
-            send_to_vision = False
-            if approval_type == Approval.AUTHORIZATION:
-                flow = PaymentPlanFlow(self.payment_plan)
-                flow.status_authorize()
-                approval_process.sent_for_finance_release_by = self.user
-                approval_process.sent_for_finance_release_date = timezone.now()
-                approval_process.save()
-                notification_action = PaymentPlan.Action.AUTHORIZE
-                send_to_vision = self.payment_plan.vision_integration_enabled
+        Shared by the plan's own acceptance process and by the group's, which walks every plan through it.
+        """
+        flow = PaymentPlanFlow(self.payment_plan)
+        send_to_vision = False
+        should_notify_vision_of_rejection = False
+        if approval_type == Approval.APPROVAL:
+            flow.status_approve()
+        if approval_type == Approval.AUTHORIZATION:
+            flow.status_authorize()
+            send_to_vision = self.payment_plan.vision_integration_enabled
+        if approval_type == Approval.FINANCE_RELEASE:
+            self._invalidate_vision_attempt_before_manual_release()
+            flow.status_mark_as_reviewed()
+            # AB#272790
+            release_user_id = str(user.pk)
+            transaction.on_commit(
+                lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
+            )
+        if approval_type == Approval.REJECT:
+            should_notify_vision_of_rejection = self.payment_plan.sent_to_vision
+            # Reset every started attempt, including local SEND_FAILED state that Vision never received, so a
+            # later authorization starts a clean workflow.
+            if should_notify_vision_of_rejection or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
+                from hope.contrib.vision.services import VisionService
 
-            if approval_type == Approval.FINANCE_RELEASE:
-                self._invalidate_vision_attempt_before_manual_release()
-                flow = PaymentPlanFlow(self.payment_plan)
-                flow.status_mark_as_reviewed()
-                notification_action = PaymentPlan.Action.REVIEW
-                # AB#272790
-                release_user_id = str(self.user.pk) if self.user else None
-                transaction.on_commit(
-                    lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
-                )
+                VisionService.invalidate_attempt(self.payment_plan)
+            flow.status_reject()
 
-            if approval_type == Approval.REJECT:
-                should_notify_vision_of_rejection = self.payment_plan.sent_to_vision
+        self.payment_plan.save()
+        if should_notify_vision_of_rejection:
+            from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
 
-                # Reset every started attempt, including local SEND_FAILED state that Vision never received, so a
-                # later authorization starts a clean workflow.
-                if should_notify_vision_of_rejection or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
-                    from hope.contrib.vision.services import VisionService
+            payment_plan = self.payment_plan
+            user_id = str(user.pk)
+            transaction.on_commit(
+                lambda: notify_payment_plan_status_to_vision_async_task(payment_plan, user_id, "REJECTED"),
+                robust=True,
+            )
+        if send_to_vision:
+            from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 
-                    VisionService.invalidate_attempt(self.payment_plan)
-                flow = PaymentPlanFlow(self.payment_plan)
-                flow.status_reject()
-
-            if notification_action:
-                send_payment_notification_emails_async_task(
-                    self.payment_plan,
-                    notification_action.value,
-                    str(self.user.id),
-                    timezone.now().isoformat(),
-                )
-
-            self.payment_plan.save()
-            if should_notify_vision_of_rejection:
-                from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
-
-                payment_plan = self.payment_plan
-                user_id = str(self.user.pk)
-                transaction.on_commit(
-                    lambda: notify_payment_plan_status_to_vision_async_task(
-                        payment_plan,
-                        user_id,
-                        "REJECTED",
-                    ),
-                    robust=True,
-                )
-            if send_to_vision:
-                from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
-
-                payment_plan = self.payment_plan
-                user_id = str(payment_plan.created_by_id)
-                transaction.on_commit(lambda: send_payment_plan_to_vision_async_task(payment_plan, user_id))
+            payment_plan = self.payment_plan
+            creator_id = str(payment_plan.created_by_id)
+            transaction.on_commit(lambda: send_payment_plan_to_vision_async_task(payment_plan, creator_id))
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
@@ -932,7 +950,7 @@ class PaymentPlanService:
         self._move_to_group(payment_plan_group)
 
     def _move_to_group(self, payment_plan_group: PaymentPlanGroup) -> None:
-        """Put the plan in the group and give it the group's FSP; currency follows when the plan is opened."""
+        """Put the plan in the group; it takes the group's FSP now and its currency when it is opened."""
         self._validate_group_accepts_new_payment_plans(payment_plan_group)
         currency = payment_plan_group.currency
         delivery_mechanism = self.payment_plan.delivery_mechanism

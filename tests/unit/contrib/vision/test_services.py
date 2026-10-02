@@ -42,7 +42,7 @@ def vision_payment_plan() -> PaymentPlan:
         program_cycle__program__business_area=business_area,
         status=PaymentPlan.Status.IN_REVIEW,
     )
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     return payment_plan
 
 
@@ -146,7 +146,7 @@ def accepted_vision_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPla
 
 @pytest.fixture
 def vision_payment_plan_without_approval(vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    vision_payment_plan.approval_process.all().delete()
+    vision_payment_plan.payment_plan_group.approval_process.all().delete()
     return vision_payment_plan
 
 
@@ -728,7 +728,8 @@ def test_release_from_vision_uses_payment_plan_creator(
     PaymentPlanService(vision_payment_plan).release_from_vision()
 
     vision_payment_plan.refresh_from_db()
-    release = vision_payment_plan.approval_process.first().approvals.get(type=Approval.FINANCE_RELEASE)
+    approval_process = vision_payment_plan.payment_plan_group.approval_process.first()
+    release = approval_process.approvals.get(type=Approval.FINANCE_RELEASE)
     assert vision_payment_plan.status == PaymentPlan.Status.ACCEPTED
     assert release.created_by == vision_payment_plan.created_by
     assert release.comment is None

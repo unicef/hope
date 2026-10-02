@@ -88,7 +88,7 @@ def payment_plan(
     payment_plan.unicef_id = "PP-0060-24-00000007"
     payment_plan.save()
     payment_plan.refresh_from_db()
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     ApprovalFactory(type=Approval.APPROVAL, approval_process=approval_process)
     return payment_plan
 

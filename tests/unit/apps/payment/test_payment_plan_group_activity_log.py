@@ -11,6 +11,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from extras.test_utils.factories.core import CurrencyFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.utils import nested_getattr
@@ -37,7 +38,10 @@ def cycle(program: Any) -> Any:
 
 @pytest.fixture
 def group(cycle: Any) -> Any:
-    return cycle.payment_plan_groups.first()
+    group = cycle.payment_plan_groups.first()
+    group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    group.save(update_fields=["currency"])
+    return group
 
 
 @pytest.fixture

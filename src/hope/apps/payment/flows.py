@@ -542,6 +542,45 @@ class PaymentPlanGroupFlow:
     def status_unlock(self) -> None:
         self.payment_plan_group.status_date = timezone.now()
 
+    @status.transition(
+        source=PaymentPlanGroup.Status.LOCKED,
+        target=PaymentPlanGroup.Status.IN_APPROVAL,
+    )
+    def status_send_for_approval(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_APPROVAL,
+        target=PaymentPlanGroup.Status.IN_AUTHORIZATION,
+    )
+    def status_approve(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_AUTHORIZATION,
+        target=PaymentPlanGroup.Status.IN_REVIEW,
+    )
+    def status_authorize(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_REVIEW,
+        target=PaymentPlanGroup.Status.ACCEPTED,
+    )
+    def status_mark_as_reviewed(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ],
+        target=PaymentPlanGroup.Status.LOCKED,
+    )
+    def status_reject(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
 
 class FollowUpInstructionFlow:
     background_action_status = fsm.State(FollowUpInstruction.BackgroundActionStatus)

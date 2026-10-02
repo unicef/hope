@@ -117,7 +117,8 @@ class ApprovalProcessFactory(DjangoModelFactory):
     class Meta:
         model = ApprovalProcess
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    payment_plan_group = None
+    payment_plan = factory.LazyAttribute(lambda obj: None if obj.payment_plan_group else PaymentPlanFactory())
 
 
 class ApprovalFactory(DjangoModelFactory):

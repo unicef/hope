@@ -124,7 +124,6 @@
         "can_export_xlsx": false,
         "can_download_xlsx": false,
         "can_send_xlsx_password": false,
-        "approval_process": [],
         "total_entitled_quantity_usd": null,
         "total_entitled_quantity_revised_usd": null,
         "total_delivered_quantity_usd": null,

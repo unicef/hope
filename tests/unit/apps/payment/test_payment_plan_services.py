@@ -2719,3 +2719,18 @@ def test_split_removes_existing_export_file_delivery(
 
     pp.refresh_from_db()
     assert pp.export_file_delivery is None
+
+
+def test_status_action_rejected_when_group_is_not_open(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.LOCKED),
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED_FSP,
+    )
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.UNLOCK_FSP}, user=user
+        )
+    assert error.value.detail[0] == "This Payment Plan is managed by its Payment Plan Group."

@@ -1,8 +1,12 @@
+from decimal import Decimal
+from functools import cached_property
 from typing import TYPE_CHECKING
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Exists, OuterRef, Q, TextField, Value
+from django.db.backends.postgresql.psycopg_any import NumericRange
+from django.db.models import Exists, OuterRef, Q, Sum, TextField, Value
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
@@ -15,7 +19,7 @@ from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentif
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hope.models import PaymentPlan
+    from hope.models import AcceptanceProcessThreshold, BusinessArea, PaymentPlan, Program
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
@@ -85,6 +89,13 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         null=True,
         blank=True,
     )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
     delivery_import_file = models.ForeignKey(
         "core.FileTemp",
         null=True,
@@ -120,6 +131,41 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
 
     def __str__(self) -> str:
         return f"{self.name} for {self.cycle}"
+
+    @property
+    def program(self) -> "Program":
+        return self.cycle.program
+
+    @property
+    def business_area(self) -> "BusinessArea":
+        return self.cycle.program.business_area
+
+    @property
+    def total_entitled_quantity_usd(self) -> Decimal:
+        return self.payment_plans.aggregate(total=Coalesce(Sum("total_entitled_quantity_usd"), Decimal(0)))["total"]
+
+    @cached_property
+    def acceptance_process_threshold(self) -> "AcceptanceProcessThreshold | None":
+        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd)
+        return self.business_area.acceptance_process_thresholds.filter(
+            payments_range_usd__contains=NumericRange(
+                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
+            )
+        ).first()
+
+    @property
+    def approval_number_required(self) -> int:
+        return self.acceptance_process_threshold.approval_number_required if self.acceptance_process_threshold else 1
+
+    @property
+    def authorization_number_required(self) -> int:
+        threshold = self.acceptance_process_threshold
+        return threshold.authorization_number_required if threshold else 1
+
+    @property
+    def finance_release_number_required(self) -> int:
+        threshold = self.acceptance_process_threshold
+        return threshold.finance_release_number_required if threshold else 1
 
     @property
     def can_start_background_action(self) -> bool:

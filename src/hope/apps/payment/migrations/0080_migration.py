@@ -4,21 +4,11 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    """Payment plans read FSP and currency from their group; the plan columns stay for one release.
-
-    State-only removal: the columns are dropped in the next release, so a rollback still has the data.
-    """
-
     dependencies = [
         ("payment", "0079_migration"),
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            state_operations=[
-                migrations.RemoveField(model_name="paymentplan", name="currency"),
-                migrations.RemoveField(model_name="paymentplan", name="financial_service_provider"),
-            ],
-            database_operations=[],
-        ),
+        migrations.RemoveField(model_name="paymentplan", name="currency"),
+        migrations.RemoveField(model_name="paymentplan", name="financial_service_provider"),
     ]

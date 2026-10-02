@@ -972,7 +972,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
-    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
@@ -1025,7 +1024,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
-            "approval_process",
             "total_entitled_quantity_usd",
             "total_entitled_quantity_revised_usd",
             "total_delivered_quantity_usd",
@@ -2135,6 +2133,7 @@ class PaymentPlanGroupBatchSerializer(serializers.Serializer):
 
 
 class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
@@ -2151,6 +2150,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
             "admin_url",
             "background_action_status",
+            "approval_process",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
