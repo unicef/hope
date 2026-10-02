@@ -224,23 +224,21 @@ class Individual(
     full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],
-        db_index=True,
         help_text="Full Name of the Beneficiary",
         db_collation="und-ci-det",
     )
     given_name = models.CharField(
-        max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary", db_collation="und-ci-det"
+        max_length=85, blank=True, help_text="First name of the Beneficiary", db_collation="und-ci-det"
     )
     middle_name = models.CharField(
-        max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary", db_collation="und-ci-det"
+        max_length=85, blank=True, help_text="Middle name of the Beneficiary", db_collation="und-ci-det"
     )
     family_name = models.CharField(
-        max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
+        max_length=85, blank=True, help_text="Last name of the Beneficiary", db_collation="und-ci-det"
     )
     full_name_latin = models.CharField(
         max_length=500,
         validators=[MinLengthValidator(2), ascii_name_validator],
-        db_index=True,
         help_text="Full name of the Beneficiary Latin",
         db_collation="und-ci-det",
         blank=True,
@@ -249,7 +247,6 @@ class Individual(
     given_name_latin = models.CharField(
         max_length=150,
         blank=True,
-        db_index=True,
         help_text="First name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
@@ -258,7 +255,6 @@ class Individual(
     middle_name_latin = models.CharField(
         max_length=150,
         blank=True,
-        db_index=True,
         help_text="Middle name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
@@ -267,7 +263,6 @@ class Individual(
     family_name_latin = models.CharField(
         max_length=150,
         blank=True,
-        db_index=True,
         help_text="Last name of the Beneficiary Latin",
         db_collation="und-ci-det",
         null=True,
@@ -276,22 +271,20 @@ class Individual(
     sex = models.CharField(
         max_length=255,
         choices=get_sex_choices,
-        db_index=True,
         help_text="Beneficiary gender",
     )
-    birth_date = models.DateField(db_index=True, help_text="Beneficiary date of birth")
+    birth_date = models.DateField(help_text="Beneficiary date of birth")
     estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date flag")
     marital_status = models.CharField(
         max_length=255,
         choices=get_marital_status_choices,
         default=BLANK,
         blank=True,
-        db_index=True,
         help_text="Beneficiary marital status",
     )
 
-    phone_no = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number")
-    phone_no_alternative = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number alternative")
+    phone_no = PhoneNumberField(blank=True, help_text="Beneficiary phone number")
+    phone_no_alternative = PhoneNumberField(blank=True, help_text="Beneficiary phone number alternative")
     email = models.CharField(max_length=255, blank=True, help_text="Beneficiary email address")
     payment_delivery_phone_no = PhoneNumberField(blank=True, null=True, help_text="Beneficiary contact phone number")
     relationship = models.CharField(
@@ -376,9 +369,9 @@ class Individual(
     relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
 
     # System fields
-    duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
+    duplicate = models.BooleanField(default=False, help_text="Duplicate status [sys]")
     duplicate_date = models.DateTimeField(null=True, blank=True, help_text="Duplicate date [sys]")
-    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
+    withdrawn = models.BooleanField(default=False, help_text="Withdrawn status [sys]")
     withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Withdrawn date [sys]")
     flex_fields = JSONField(
         default=dict,
@@ -386,13 +379,10 @@ class Individual(
         encoder=FlexFieldsEncoder,
         help_text="FlexFields JSON representation [sys]",
     )
-    phone_no_valid = models.BooleanField(
-        null=True, blank=True, db_index=True, help_text="Beneficiary phone number valid [sys]"
-    )
+    phone_no_valid = models.BooleanField(null=True, blank=True, help_text="Beneficiary phone number valid [sys]")
     phone_no_alternative_valid = models.BooleanField(
         null=True,
         blank=True,
-        db_index=True,
         help_text="Beneficiary phone number alternative valid [sys]",
     )
     first_registration_date = models.DateField(help_text="First registration date [sys]")
@@ -404,14 +394,12 @@ class Individual(
         max_length=50,
         default=UNIQUE,
         choices=get_deduplication_golden_record_status_choices,
-        db_index=True,
         help_text="Deduplication golden record status [sys]",
     )
     deduplication_batch_status = models.CharField(
         max_length=50,
         default=UNIQUE_IN_BATCH,
         choices=get_deduplication_batch_status_choices,
-        db_index=True,
         help_text="Deduplication batch status [sys]",
     )
     deduplication_golden_record_results = JSONField(
@@ -422,14 +410,12 @@ class Individual(
         max_length=50,
         default=NOT_PROCESSED,
         choices=get_deduplication_golden_record_status_choices,
-        db_index=True,
         help_text="Deduplication golden record status [sys]",
     )
     biometric_deduplication_batch_status = models.CharField(
         max_length=50,
         default=NOT_PROCESSED,
         choices=get_deduplication_batch_status_choices,
-        db_index=True,
         help_text="Deduplication batch status [sys]",
     )
     biometric_deduplication_golden_record_results = JSONField(
@@ -439,12 +425,8 @@ class Individual(
         default=list, blank=True, help_text="Deduplication batch results [sys]"
     )
     imported_individual_id = models.UUIDField(null=True, blank=True, help_text="Imported individual ID [sys]")
-    sanction_list_possible_match = models.BooleanField(
-        default=False, db_index=True, help_text="Sanction list possible match [sys]"
-    )
-    sanction_list_confirmed_match = models.BooleanField(
-        default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
-    )
+    sanction_list_possible_match = models.BooleanField(default=False, help_text="Sanction list possible match [sys]")
+    sanction_list_confirmed_match = models.BooleanField(default=False, help_text="Sanction list confirmed match [sys]")
     # TODO: detail_id is deprecated, will be removed soon. It was replaced with originating_id
     detail_id = models.CharField(
         max_length=150,
@@ -464,7 +446,6 @@ class Individual(
         max_length=150,
         blank=True,
         null=True,
-        db_index=True,
         help_text="Primary key of the Individual on the originating Country Workspace system. "
         "Used as the reference key when communicating with the Deduplication Engine.",
     )
@@ -472,7 +453,6 @@ class Individual(
         max_length=100,
         blank=True,
         null=True,
-        db_index=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration ID [sys]",
         db_collation="und-ci-det",
@@ -485,7 +465,6 @@ class Individual(
         null=True,
         blank=True,
         max_length=255,
-        db_index=True,
         help_text="Key used to identify Collisions in the system",
     )
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
@@ -661,6 +640,146 @@ class Individual(
                 fields=["unicef_id"],
                 opclasses=["varchar_pattern_ops"],
                 name="household_individual_unicef_id_421e2ff2_like",
+            ),
+            LongNameIndex(fields=["full_name"], name="household_individual_full_name_8fa0162b"),
+            LongNameIndex(
+                fields=["full_name"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_full_name_8fa0162b_like",
+            ),
+            LongNameIndex(fields=["given_name"], name="household_individual_given_name_1ebbded2"),
+            LongNameIndex(
+                fields=["given_name"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_given_name_1ebbded2_like",
+            ),
+            LongNameIndex(fields=["middle_name"], name="household_individual_middle_name_1dfbf837"),
+            LongNameIndex(
+                fields=["middle_name"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_middle_name_1dfbf837_like",
+            ),
+            LongNameIndex(fields=["family_name"], name="household_individual_family_name_4d6db55f"),
+            LongNameIndex(
+                fields=["family_name"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_family_name_4d6db55f_like",
+            ),
+            LongNameIndex(fields=["full_name_latin"], name="household_individual_full_name_latin_b6e0eb4e"),
+            LongNameIndex(
+                fields=["full_name_latin"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_full_name_latin_b6e0eb4e_like",
+            ),
+            LongNameIndex(fields=["given_name_latin"], name="household_individual_given_name_latin_e45772ab"),
+            LongNameIndex(
+                fields=["given_name_latin"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_given_name_latin_e45772ab_like",
+            ),
+            LongNameIndex(fields=["middle_name_latin"], name="household_individual_middle_name_latin_8fd36185"),
+            LongNameIndex(
+                fields=["middle_name_latin"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_middle_name_latin_8fd36185_like",
+            ),
+            LongNameIndex(fields=["family_name_latin"], name="household_individual_family_name_latin_e490d2fa"),
+            LongNameIndex(
+                fields=["family_name_latin"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_family_name_latin_e490d2fa_like",
+            ),
+            LongNameIndex(fields=["sex"], name="household_individual_sex_7bf88507"),
+            LongNameIndex(
+                fields=["sex"], opclasses=["varchar_pattern_ops"], name="household_individual_sex_7bf88507_like"
+            ),
+            LongNameIndex(fields=["birth_date"], name="household_individual_birth_date_91e492ed"),
+            LongNameIndex(fields=["marital_status"], name="household_individual_marital_status_4f815fd6"),
+            LongNameIndex(
+                fields=["marital_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_marital_status_4f815fd6_like",
+            ),
+            LongNameIndex(fields=["phone_no"], name="household_individual_phone_no_6323ce96"),
+            LongNameIndex(
+                fields=["phone_no"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_phone_no_6323ce96_like",
+            ),
+            LongNameIndex(fields=["phone_no_alternative"], name="household_individual_phone_no_alternative_0c2ca589"),
+            LongNameIndex(
+                fields=["phone_no_alternative"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_phone_no_alternative_0c2ca589_like",
+            ),
+            LongNameIndex(fields=["duplicate"], name="household_individual_duplicate_d00a5ad9"),
+            LongNameIndex(fields=["withdrawn"], name="household_individual_withdrawn_c679bc74"),
+            LongNameIndex(fields=["phone_no_valid"], name="household_individual_phone_no_valid_60285604"),
+            LongNameIndex(
+                fields=["phone_no_alternative_valid"], name="household_individual_phone_no_alternative_valid_2982c955"
+            ),
+            LongNameIndex(
+                fields=["deduplication_golden_record_status"],
+                name="household_individual_deduplication_golden_recor_f1abf0b2",
+            ),
+            LongNameIndex(
+                fields=["deduplication_golden_record_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_deduplication_golden_rec_f1abf0b2_like",
+            ),
+            LongNameIndex(
+                fields=["deduplication_batch_status"], name="household_individual_deduplication_batch_status_c60a6481"
+            ),
+            LongNameIndex(
+                fields=["deduplication_batch_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_deduplication_batch_status_c60a6481_like",
+            ),
+            LongNameIndex(
+                fields=["biometric_deduplication_golden_record_status"],
+                name="household_individual_biometric_deduplication_go_b0296575",
+            ),
+            LongNameIndex(
+                fields=["biometric_deduplication_golden_record_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_biometric_deduplication__b0296575_like",
+            ),
+            LongNameIndex(
+                fields=["biometric_deduplication_batch_status"],
+                name="household_individual_biometric_deduplication_ba_6e4e48dd",
+            ),
+            LongNameIndex(
+                fields=["biometric_deduplication_batch_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_biometric_deduplication__6e4e48dd_like",
+            ),
+            LongNameIndex(
+                fields=["sanction_list_possible_match"],
+                name="household_individual_sanction_list_possible_match_d2ac3d70",
+            ),
+            LongNameIndex(
+                fields=["sanction_list_confirmed_match"],
+                name="household_individual_sanction_list_confirmed_match_62471337",
+            ),
+            LongNameIndex(fields=["country_workspace_id"], name="household_individual_country_workspace_id_37efac44"),
+            LongNameIndex(
+                fields=["country_workspace_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_country_workspace_id_37efac44_like",
+            ),
+            LongNameIndex(
+                fields=["program_registration_id"], name="household_individual_program_registration_id_598b7aa7"
+            ),
+            LongNameIndex(
+                fields=["program_registration_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_program_registration_id_598b7aa7_like",
+            ),
+            LongNameIndex(fields=["identification_key"], name="household_individual_identification_key_3da15310"),
+            LongNameIndex(
+                fields=["identification_key"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_individual_identification_key_3da15310_like",
             ),
         )
         constraints = [

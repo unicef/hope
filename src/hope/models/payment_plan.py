@@ -430,13 +430,11 @@ class PaymentPlan(
         help_text="Name",
     )
     start_date = models.DateTimeField(
-        db_index=True,
         blank=True,
         null=True,
         help_text="Payment Plan start date",
     )
     end_date = models.DateTimeField(
-        db_index=True,
         blank=True,
         null=True,
         help_text="Payment Plan end date",
@@ -484,14 +482,12 @@ class PaymentPlan(
     status = models.CharField(
         max_length=50,
         default=Status.TP_OPEN,
-        db_index=True,
         choices=Status.get_choices,
         help_text="Status [sys]",
     )
     background_action_status = models.CharField(
         max_length=50,
         default=None,
-        db_index=True,
         blank=True,
         null=True,
         choices=BackgroundActionStatus.get_choices,
@@ -501,7 +497,6 @@ class PaymentPlan(
         max_length=50,
         choices=BuildStatus.get_choices,
         default=None,
-        db_index=True,
         null=True,
         blank=True,
         help_text="Build Status for celery task [sys]",
@@ -541,7 +536,6 @@ class PaymentPlan(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
-        db_index=True,
         null=True,
         blank=True,
         help_text="Total Entitled Quantity [sys]",
@@ -558,7 +552,6 @@ class PaymentPlan(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
-        db_index=True,
         null=True,
         blank=True,
         help_text="Total Entitled Quantity Revised [sys]",
@@ -575,7 +568,6 @@ class PaymentPlan(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
-        db_index=True,
         null=True,
         blank=True,
         help_text="Total Delivered Quantity [sys]",
@@ -592,7 +584,6 @@ class PaymentPlan(
         decimal_places=2,
         max_digits=15,
         validators=[MinValueValidator(Decimal(0))],
-        db_index=True,
         null=True,
         blank=True,
         help_text="Total Undelivered Quantity [sys]",
@@ -615,13 +606,11 @@ class PaymentPlan(
         max_length=20,
         choices=PlanType.choices,
         default=PlanType.REGULAR,
-        db_index=True,
         help_text="Payment Plan type [sys]",
     )
     export_tag = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
-        db_index=True,
         help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
     )
     exclude_household_error = models.TextField(
@@ -675,6 +664,46 @@ class PaymentPlan(
                 opclasses=["varchar_pattern_ops"],
                 name="payment_paymentplan_unicef_id_ba96bd54_like",
             ),
+            LongNameIndex(fields=["start_date"], name="payment_paymentplan_start_date_2c9849e2"),
+            LongNameIndex(fields=["end_date"], name="payment_paymentplan_end_date_04e45bb0"),
+            LongNameIndex(fields=["status"], name="payment_paymentplan_status_864b68ea"),
+            LongNameIndex(
+                fields=["status"], opclasses=["varchar_pattern_ops"], name="payment_paymentplan_status_864b68ea_like"
+            ),
+            LongNameIndex(
+                fields=["background_action_status"], name="payment_paymentplan_background_action_status_0334335b"
+            ),
+            LongNameIndex(
+                fields=["background_action_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplan_background_action_status_0334335b_like",
+            ),
+            LongNameIndex(fields=["build_status"], name="payment_paymentplan_build_status_d3880ed4"),
+            LongNameIndex(
+                fields=["build_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplan_build_status_d3880ed4_like",
+            ),
+            LongNameIndex(
+                fields=["total_entitled_quantity"], name="payment_paymentplan_total_entitled_quantity_4edacc55"
+            ),
+            LongNameIndex(
+                fields=["total_entitled_quantity_revised"],
+                name="payment_paymentplan_total_entitled_quantity_revised_be7a6766",
+            ),
+            LongNameIndex(
+                fields=["total_delivered_quantity"], name="payment_paymentplan_total_delivered_quantity_fd076625"
+            ),
+            LongNameIndex(
+                fields=["total_undelivered_quantity"], name="payment_paymentplan_total_undelivered_quantity_2652642a"
+            ),
+            LongNameIndex(fields=["plan_type"], name="payment_paymentplan_plan_type_b827c7b8"),
+            LongNameIndex(
+                fields=["plan_type"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplan_plan_type_b827c7b8_like",
+            ),
+            LongNameIndex(fields=["export_tag"], name="payment_paymentplan_export_tag_ff34093c"),
         ]
 
     def __str__(self) -> str:
