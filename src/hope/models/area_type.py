@@ -21,7 +21,6 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     parent = TreeForeignKey(
         "self",
         blank=True,
-        db_index=True,
         null=True,
         on_delete=models.CASCADE,
         verbose_name=_("Parent"),

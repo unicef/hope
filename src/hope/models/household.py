@@ -178,7 +178,6 @@ class Household(
     )
     program = models.ForeignKey(
         "program.Program",
-        db_index=True,
         on_delete=models.PROTECT,
         related_name="households",
         help_text="Household program",

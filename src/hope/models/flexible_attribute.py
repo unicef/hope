@@ -142,7 +142,6 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         null=True,
         blank=True,
         related_name="children",
-        db_index=True,
         on_delete=models.CASCADE,
     )
     objects = FlexibleAttributeGroupManager()

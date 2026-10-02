@@ -60,7 +60,6 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
         related_name="children",
-        db_index=True,
         on_delete=models.CASCADE,
         help_text=_("The parent area in the hierarchy"),
     )

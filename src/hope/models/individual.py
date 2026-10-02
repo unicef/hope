@@ -179,7 +179,6 @@ class Individual(
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
     program = models.ForeignKey(
         "program.Program",
-        db_index=True,
         related_name="individuals",
         on_delete=models.PROTECT,
         help_text="Program",
@@ -212,7 +211,6 @@ class Individual(
         "self",
         null=True,
         blank=True,
-        db_index=True,
         related_name="copied_to",
         on_delete=models.SET_NULL,
         help_text="If this individual was copied from another individual, "
