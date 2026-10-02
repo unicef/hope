@@ -38,10 +38,11 @@ When either flag is disabled:
 1. Authorization moves the Payment Plan to `IN_REVIEW`.
 2. HOPE queues the Vision request after the database transaction commits.
 3. A successful request sets the Vision state to `WAITING_FOR_CALLBACK`.
-4. The Vision callback provides the Vision Payment Plan identifier and FC group number.
-5. HOPE validates and assigns the FC group.
-6. Successful assignment releases the Payment Plan automatically and moves it to `ACCEPTED`.
-7. A Payment Gateway plan is sent to Payment Gateway automatically. A non-Payment Gateway plan becomes available for
+4. The first callback confirms that Vision created the Payment Plan and sets `PP_CREATED`.
+5. The second successful callback provides the FC group number.
+6. HOPE validates and assigns the FC group.
+7. Successful assignment releases the Payment Plan automatically and moves it to `ACCEPTED`.
+8. A Payment Gateway plan is sent to Payment Gateway automatically. A non-Payment Gateway plan becomes available for
    the standard XLSX export flow.
 
 While a Vision-managed plan is in `IN_REVIEW`, the regular UI and API block manual FC assignment, manual release, and
@@ -59,7 +60,7 @@ Each request and response is recorded in `payment_plan.internal_data["vision"]["
 - A failed request sets `SEND_FAILED` and stores a sanitized error.
 - A failed request can be retried from Django admin or recovered by assigning FC items manually in Django admin.
 - The React UI does not provide a Vision send or retry action.
-- A request cannot be resent while the plan is in `WAITING_FOR_CALLBACK`.
+- A request cannot be resent while the plan is in `WAITING_FOR_CALLBACK` or `PP_CREATED`.
 
 Request scheduling and processing are idempotent. Concurrent send responses and callbacks merge their Vision data
 under a database lock so that one response does not overwrite the other.
@@ -201,6 +202,7 @@ Vision workflow data is stored under `payment_plan.internal_data["vision"]`. Sup
 - `NOT_SENT`
 - `SEND_FAILED`
 - `WAITING_FOR_CALLBACK`
+- `PP_CREATED`
 - `CALLBACK_FAILED`
 - `FC_NOT_FOUND`
 - `FC_ASSOCIATED`

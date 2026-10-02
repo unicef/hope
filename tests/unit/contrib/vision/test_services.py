@@ -465,6 +465,7 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
     ("vision_status", "error_code"),
     [
         (VisionStatus.SEND_FAILED, None),
+        (VisionStatus.PP_CREATED, None),
         (VisionStatus.CALLBACK_FAILED, VisionErrorCode.VISION_STATUS_FAILED),
         (VisionStatus.FC_NOT_FOUND, None),
     ],
@@ -794,6 +795,18 @@ def test_manual_fc_recovery_is_available_when_waiting_without_send_confirmation(
         can_recover = VisionService.can_recover_with_funds_commitment_items(vision_payment_plan)
 
     assert vision_payment_plan.sent_to_vision is False
+    assert can_recover is True
+
+
+def test_manual_fc_recovery_is_available_after_payment_plan_created_acknowledgement(
+    vision_payment_plan: PaymentPlan,
+    django_assert_num_queries,
+) -> None:
+    VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
+
+    with django_assert_num_queries(1):
+        can_recover = VisionService.can_recover_with_funds_commitment_items(vision_payment_plan)
+
     assert can_recover is True
 
 
