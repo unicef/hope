@@ -8,176 +8,190 @@ import hope.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("aurora", "0005_migration"),
-        ("core", "0039_migration"),
-        ("program", "0021_disable_biometric_dedup_for_non_cw"),
-        ("steficon", "0006_migration"),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="organization",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="organization",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="project",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="project",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="ignored",
-            field=models.BooleanField(blank=True, default=False, null=True),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="index1",
-            field=models.CharField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="index2",
-            field=models.CharField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="index3",
-            field=models.CharField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="registration",
-            field=models.IntegerField(),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="source_id",
-            field=models.IntegerField(),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="timestamp",
-            field=models.DateTimeField(),
-        ),
-        migrations.AlterField(
-            model_name="record",
-            name="unique_field",
-            field=models.CharField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AlterField(
-            model_name="registration",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="registration",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AddIndex(
-            model_name="organization",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"], name="aurora_organization_created_at_4f7b8b55"
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="organization",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"], name="aurora_organization_updated_at_b65df51b"
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="project",
-            index=hope.models.utils.LongNameIndex(fields=["created_at"], name="aurora_project_created_at_58878624"),
-        ),
-        migrations.AddIndex(
-            model_name="project",
-            index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="aurora_project_updated_at_9b17f827"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["registration"], name="aurora_record_registration_18c617c1"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["timestamp"], name="aurora_record_timestamp_d68c0d5a"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["ignored"], name="aurora_record_ignored_1640d007"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["source_id"], name="aurora_record_source_id_e66ff785"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["unique_field"], name="aurora_record_unique_field_903b6acc"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(
-                fields=["unique_field"],
-                name="aurora_record_unique_field_903b6acc_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["index1"], name="aurora_record_index1_359087d6"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(
-                fields=["index1"],
-                name="aurora_record_index1_359087d6_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["index2"], name="aurora_record_index2_cfcbc3b9"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(
-                fields=["index2"],
-                name="aurora_record_index2_cfcbc3b9_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(fields=["index3"], name="aurora_record_index3_21b563c6"),
-        ),
-        migrations.AddIndex(
-            model_name="record",
-            index=hope.models.utils.LongNameIndex(
-                fields=["index3"],
-                name="aurora_record_index3_21b563c6_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="registration",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"], name="aurora_registration_created_at_2c5ed126"
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="registration",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"], name="aurora_registration_updated_at_4dbeb556"
-            ),
+        # State only: the indexes already exist under these names, db_index=True created them.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name="organization",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="organization",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="project",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="project",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="ignored",
+                    field=models.BooleanField(blank=True, default=False, null=True),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="index1",
+                    field=models.CharField(blank=True, max_length=255, null=True),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="index2",
+                    field=models.CharField(blank=True, max_length=255, null=True),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="index3",
+                    field=models.CharField(blank=True, max_length=255, null=True),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="registration",
+                    field=models.IntegerField(),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="source_id",
+                    field=models.IntegerField(),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="timestamp",
+                    field=models.DateTimeField(),
+                ),
+                migrations.AlterField(
+                    model_name="record",
+                    name="unique_field",
+                    field=models.CharField(blank=True, max_length=255, null=True),
+                ),
+                migrations.AlterField(
+                    model_name="registration",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="registration",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AddIndex(
+                    model_name="organization",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="aurora_organization_created_at_4f7b8b55"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="organization",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="aurora_organization_updated_at_b65df51b"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="project",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="aurora_project_created_at_58878624"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="project",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="aurora_project_updated_at_9b17f827"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["registration"], name="aurora_record_registration_18c617c1"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["timestamp"], name="aurora_record_timestamp_d68c0d5a"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(fields=["ignored"], name="aurora_record_ignored_1640d007"),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["source_id"], name="aurora_record_source_id_e66ff785"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["unique_field"], name="aurora_record_unique_field_903b6acc"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["unique_field"],
+                        name="aurora_record_unique_field_903b6acc_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(fields=["index1"], name="aurora_record_index1_359087d6"),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["index1"],
+                        name="aurora_record_index1_359087d6_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(fields=["index2"], name="aurora_record_index2_cfcbc3b9"),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["index2"],
+                        name="aurora_record_index2_cfcbc3b9_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(fields=["index3"], name="aurora_record_index3_21b563c6"),
+                ),
+                migrations.AddIndex(
+                    model_name="record",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["index3"],
+                        name="aurora_record_index3_21b563c6_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="registration",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="aurora_registration_created_at_2c5ed126"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="registration",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="aurora_registration_updated_at_4dbeb556"
+                    ),
+                ),
+            ],
         ),
     ]

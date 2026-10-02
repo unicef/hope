@@ -7,30 +7,33 @@ import hope.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0040_migration"),
-        ("payment", "0078_migration"),
         ("vision", "0003_migration"),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="fundscommitmentitem",
-            name="funds_commitment_item",
-            field=models.CharField(max_length=3),
-        ),
-        migrations.AddIndex(
-            model_name="fundscommitmentitem",
-            index=hope.models.utils.LongNameIndex(
-                fields=["funds_commitment_item"],
-                name="vision_fundscommitmentitem_funds_commitment_item_ab1d46fb",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="fundscommitmentitem",
-            index=hope.models.utils.LongNameIndex(
-                fields=["funds_commitment_item"],
-                name="vision_fundscommitmentitem_funds_commitment_item_ab1d46fb_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
+        # State only: the indexes already exist under these names, db_index=True created them.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name="fundscommitmentitem",
+                    name="funds_commitment_item",
+                    field=models.CharField(max_length=3),
+                ),
+                migrations.AddIndex(
+                    model_name="fundscommitmentitem",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["funds_commitment_item"],
+                        name="vision_fundscommitmentitem_funds_commitment_item_ab1d46fb",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="fundscommitmentitem",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["funds_commitment_item"],
+                        name="vision_fundscommitmentitem_funds_commitment_item_ab1d46fb_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+            ],
         ),
     ]

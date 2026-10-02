@@ -8,99 +8,116 @@ import hope.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("account", "0034_migration"),
-        ("auth", "0012_alter_user_first_name_max_length"),
-        ("core", "0039_migration"),
-        ("geo", "0007_migration"),
-        ("program", "0021_disable_biometric_dedup_for_non_cw"),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="adminarealimitedto",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="adminarealimitedto",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="incompatibleroles",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="incompatibleroles",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="role",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="role",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="roleassignment",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="roleassignment",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AddIndex(
-            model_name="adminarealimitedto",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"],
-                name="account_adminarealimitedto_created_at_06b87506",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="adminarealimitedto",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"],
-                name="account_adminarealimitedto_updated_at_1c1ce965",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="incompatibleroles",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"],
-                name="account_incompatibleroles_created_at_7a423961",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="incompatibleroles",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"],
-                name="account_incompatibleroles_updated_at_aae9f2fb",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="role",
-            index=hope.models.utils.LongNameIndex(fields=["created_at"], name="account_role_created_at_1453ec3c"),
-        ),
-        migrations.AddIndex(
-            model_name="role",
-            index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="account_role_updated_at_d4087b83"),
-        ),
-        migrations.AddIndex(
-            model_name="roleassignment",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"], name="account_roleassignment_created_at_78cf0c2d"
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="roleassignment",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"], name="account_roleassignment_updated_at_4738f268"
-            ),
+        # db_index=True already created these indexes, so the state just takes them over. RenameModel left
+        # some under the old table's name: those are renamed, IF EXISTS because not every database has them.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name="adminarealimitedto",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="adminarealimitedto",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="incompatibleroles",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="incompatibleroles",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="role",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="role",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="roleassignment",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="roleassignment",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AddIndex(
+                    model_name="adminarealimitedto",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"],
+                        name="account_adminarealimitedto_created_at_06b87506",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="adminarealimitedto",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"],
+                        name="account_adminarealimitedto_updated_at_1c1ce965",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="incompatibleroles",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"],
+                        name="account_incompatibleroles_created_at_7a423961",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="incompatibleroles",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"],
+                        name="account_incompatibleroles_updated_at_aae9f2fb",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="role",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="account_role_created_at_1453ec3c"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="role",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="account_role_updated_at_d4087b83"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="roleassignment",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="account_roleassignment_created_at_78cf0c2d"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="roleassignment",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="account_roleassignment_updated_at_4738f268"
+                    ),
+                ),
+            ],
+            database_operations=[
+                migrations.RunSQL(
+                    sql=[
+                        "SET LOCAL lock_timeout = '5s'",
+                        'ALTER INDEX IF EXISTS "account_userrole_created_at_65ae195d" RENAME TO "account_roleassignment_created_at_78cf0c2d"',
+                        'ALTER INDEX IF EXISTS "account_userrole_updated_at_bb93d084" RENAME TO "account_roleassignment_updated_at_4738f268"',
+                    ],
+                    # The old code expects the canonical names as well, so there is nothing to rename back.
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
+            ],
         ),
     ]

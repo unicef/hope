@@ -7,35 +7,37 @@ import hope.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("household", "0051_migration"),
-        ("payment", "0078_migration"),
-        ("program", "0022_migration"),
         ("universal_update_script", "0006_migration"),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="universalupdate",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="universalupdate",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AddIndex(
-            model_name="universalupdate",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"],
-                name="universal_update_script_universalupdate_created_at_827043a2",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="universalupdate",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"],
-                name="universal_update_script_universalupdate_updated_at_fc896500",
-            ),
+        # State only: the indexes already exist under these names, db_index=True created them.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name="universalupdate",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="universalupdate",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AddIndex(
+                    model_name="universalupdate",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"],
+                        name="universal_update_script_universalupdate_created_at_827043a2",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="universalupdate",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"],
+                        name="universal_update_script_universalupdate_updated_at_fc896500",
+                    ),
+                ),
+            ],
         ),
     ]

@@ -2,7 +2,6 @@
 
 from decimal import Decimal
 
-from django.conf import settings
 import django.core.validators
 from django.db import migrations, models
 
@@ -13,244 +12,268 @@ import hope.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0040_migration"),
-        ("geo", "0008_migration"),
-        ("payment", "0078_migration"),
         ("program", "0021_disable_biometric_dedup_for_non_cw"),
-        ("sanction_list", "0008_migration"),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="beneficiarygroup",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="beneficiarygroup",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="budget",
-            field=models.DecimalField(
-                decimal_places=2,
-                help_text="Program budget",
-                max_digits=11,
-                validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
-            ),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="code",
-            field=models.CharField(help_text="Program code", max_length=4),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="end_date",
-            field=models.DateField(blank=True, help_text="Program end date", null=True),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="name",
-            field=models.CharField(
-                db_collation="und-ci-det",
-                help_text="Program name",
-                max_length=255,
-                validators=[
-                    django.core.validators.MinLengthValidator(3),
-                    django.core.validators.MaxLengthValidator(255),
-                    django.core.validators.RegexValidator(
-                        "\\s{2,}",
-                        "Double spaces characters are not allowed.",
-                        code="double_spaces_characters_not_allowed",
-                        inverse_match=True,
+        # The indexes already exist, db_index=True created them: the state takes them over and the database
+        # only renames the ones that kept the name of the column they were created on.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AlterField(
+                    model_name="beneficiarygroup",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="beneficiarygroup",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="budget",
+                    field=models.DecimalField(
+                        decimal_places=2,
+                        help_text="Program budget",
+                        max_digits=11,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
                     ),
-                    django.core.validators.RegexValidator(
-                        "(^\\s+)|(\\s+$)",
-                        "Leading or trailing spaces characters are not allowed.",
-                        code="leading_trailing_spaces_characters_not_allowed",
-                        inverse_match=True,
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="code",
+                    field=models.CharField(help_text="Program code", max_length=4),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="end_date",
+                    field=models.DateField(blank=True, help_text="Program end date", null=True),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="name",
+                    field=models.CharField(
+                        db_collation="und-ci-det",
+                        help_text="Program name",
+                        max_length=255,
+                        validators=[
+                            django.core.validators.MinLengthValidator(3),
+                            django.core.validators.MaxLengthValidator(255),
+                            django.core.validators.RegexValidator(
+                                "\\s{2,}",
+                                "Double spaces characters are not allowed.",
+                                code="double_spaces_characters_not_allowed",
+                                inverse_match=True,
+                            ),
+                            django.core.validators.RegexValidator(
+                                "(^\\s+)|(\\s+$)",
+                                "Leading or trailing spaces characters are not allowed.",
+                                code="leading_trailing_spaces_characters_not_allowed",
+                                inverse_match=True,
+                            ),
+                            django.core.validators.ProhibitNullCharactersValidator(),
+                        ],
                     ),
-                    django.core.validators.ProhibitNullCharactersValidator(),
-                ],
-            ),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="sector",
-            field=models.CharField(
-                choices=hope.models.program.get_sector_choices,
-                help_text="Program sector",
-                max_length=50,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="start_date",
-            field=models.DateField(help_text="Program start date"),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="status",
-            field=models.CharField(
-                choices=hope.models.program.get_status_choices,
-                help_text="Program status",
-                max_length=10,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="program",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AlterField(
-            model_name="programcycle",
-            name="created_at",
-            field=models.DateTimeField(auto_now_add=True),
-        ),
-        migrations.AlterField(
-            model_name="programcycle",
-            name="status",
-            field=models.CharField(
-                choices=hope.models.program_cycle.get_program_cycle_status_choices,
-                default="DRAFT",
-                max_length=10,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="programcycle",
-            name="unicef_id",
-            field=models.CharField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AlterField(
-            model_name="programcycle",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-        migrations.AddIndex(
-            model_name="beneficiarygroup",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"],
-                name="program_beneficiarygroup_created_at_b78ee65a",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="beneficiarygroup",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"],
-                name="program_beneficiarygroup_updated_at_c80e3d34",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["created_at"], name="program_program_created_at_0fb0bad5"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["updated_at"], name="program_program_updated_at_244df9de"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["name"], name="program_program_name_2670ab01"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(
-                fields=["name"],
-                name="program_program_name_2670ab01_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["code"], name="program_program_code_b7abf396"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(
-                fields=["code"],
-                name="program_program_code_b7abf396_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["status"], name="program_program_status_d116e0a6"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(
-                fields=["status"],
-                name="program_program_status_d116e0a6_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["start_date"], name="program_program_start_date_f53642aa"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["end_date"], name="program_program_end_date_449c52ec"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["sector"], name="program_program_sector_2fb1058e"),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(
-                fields=["sector"],
-                name="program_program_sector_2fb1058e_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="program",
-            index=hope.models.utils.LongNameIndex(fields=["budget"], name="program_program_budget_3757bcc6"),
-        ),
-        migrations.AddIndex(
-            model_name="programcycle",
-            index=hope.models.utils.LongNameIndex(
-                fields=["created_at"], name="program_programcycle_created_at_f18c5d99"
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="programcycle",
-            index=hope.models.utils.LongNameIndex(
-                fields=["updated_at"], name="program_programcycle_updated_at_89ffd4dc"
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="programcycle",
-            index=hope.models.utils.LongNameIndex(fields=["unicef_id"], name="program_programcycle_unicef_id_65638c2c"),
-        ),
-        migrations.AddIndex(
-            model_name="programcycle",
-            index=hope.models.utils.LongNameIndex(
-                fields=["unicef_id"],
-                name="program_programcycle_unicef_id_65638c2c_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="programcycle",
-            index=hope.models.utils.LongNameIndex(fields=["status"], name="program_programcycle_status_c6ee3e75"),
-        ),
-        migrations.AddIndex(
-            model_name="programcycle",
-            index=hope.models.utils.LongNameIndex(
-                fields=["status"],
-                name="program_programcycle_status_c6ee3e75_like",
-                opclasses=["varchar_pattern_ops"],
-            ),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="sector",
+                    field=models.CharField(
+                        choices=hope.models.program.get_sector_choices,
+                        help_text="Program sector",
+                        max_length=50,
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="start_date",
+                    field=models.DateField(help_text="Program start date"),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="status",
+                    field=models.CharField(
+                        choices=hope.models.program.get_status_choices,
+                        help_text="Program status",
+                        max_length=10,
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="program",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AlterField(
+                    model_name="programcycle",
+                    name="created_at",
+                    field=models.DateTimeField(auto_now_add=True),
+                ),
+                migrations.AlterField(
+                    model_name="programcycle",
+                    name="status",
+                    field=models.CharField(
+                        choices=hope.models.program_cycle.get_program_cycle_status_choices,
+                        default="DRAFT",
+                        max_length=10,
+                    ),
+                ),
+                migrations.AlterField(
+                    model_name="programcycle",
+                    name="unicef_id",
+                    field=models.CharField(blank=True, max_length=255, null=True),
+                ),
+                migrations.AlterField(
+                    model_name="programcycle",
+                    name="updated_at",
+                    field=models.DateTimeField(auto_now=True),
+                ),
+                migrations.AddIndex(
+                    model_name="beneficiarygroup",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"],
+                        name="program_beneficiarygroup_created_at_b78ee65a",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="beneficiarygroup",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"],
+                        name="program_beneficiarygroup_updated_at_c80e3d34",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="program_program_created_at_0fb0bad5"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="program_program_updated_at_244df9de"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(fields=["name"], name="program_program_name_2670ab01"),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["name"],
+                        name="program_program_name_2670ab01_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(fields=["code"], name="program_program_code_b7abf396"),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["code"],
+                        name="program_program_code_b7abf396_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(fields=["status"], name="program_program_status_d116e0a6"),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["status"],
+                        name="program_program_status_d116e0a6_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["start_date"], name="program_program_start_date_f53642aa"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["end_date"], name="program_program_end_date_449c52ec"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(fields=["sector"], name="program_program_sector_2fb1058e"),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["sector"],
+                        name="program_program_sector_2fb1058e_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="program",
+                    index=hope.models.utils.LongNameIndex(fields=["budget"], name="program_program_budget_3757bcc6"),
+                ),
+                migrations.AddIndex(
+                    model_name="programcycle",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["created_at"], name="program_programcycle_created_at_f18c5d99"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="programcycle",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["updated_at"], name="program_programcycle_updated_at_89ffd4dc"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="programcycle",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["unicef_id"], name="program_programcycle_unicef_id_65638c2c"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="programcycle",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["unicef_id"],
+                        name="program_programcycle_unicef_id_65638c2c_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="programcycle",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["status"], name="program_programcycle_status_c6ee3e75"
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="programcycle",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["status"],
+                        name="program_programcycle_status_c6ee3e75_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
+                ),
+            ],
+            database_operations=[
+                migrations.RunSQL(
+                    sql=[
+                        "SET LOCAL lock_timeout = '5s'",
+                        'ALTER INDEX IF EXISTS "program_program_slug_4d0bd7bd" RENAME TO "program_program_code_b7abf396"',
+                        'ALTER INDEX IF EXISTS "program_program_slug_4d0bd7bd_like" RENAME TO "program_program_code_b7abf396_like"',
+                    ],
+                    # The old code expects the canonical names as well, so there is nothing to rename back.
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
+            ],
         ),
     ]
