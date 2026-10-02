@@ -307,6 +307,39 @@ class Common:
                 sleep(0.2)
         raise StaleElementReferenceException(f"Element {locator} stayed stale after {attempts} attempts")
 
+    def check_checkbox(self, locator: str, attempts: int = 3) -> None:
+        """Tick a MUI checkbox, retrying when the click does not register.
+
+        Content loading above the checkbox can push it down while the click is on
+        its way, so the click lands elsewhere and the box stays unticked.
+        """
+        for _ in range(attempts):
+            checkbox = self.wait_for(locator, timeout=30)
+            checkbox_input = checkbox.find_element(By.CSS_SELECTOR, "input")
+            if checkbox_input.is_selected():
+                return
+            self.click(locator)
+            try:
+                self._wait(5).until(expected_conditions.element_to_be_selected(checkbox_input))
+                return
+            except TimeoutException:
+                continue
+        raise AssertionError(f"Checkbox {locator} could not be ticked")
+
+    def wait_for_table_loaded(self, row_locator: str, timeout: int = DEFAULT_TIMEOUT) -> None:
+        """Wait until the table shows rows matching ``row_locator`` or its "No results" message."""
+
+        def loaded(driver: Chrome) -> bool:
+            if driver.find_elements(By.CSS_SELECTOR, row_locator):
+                return True
+            try:
+                rows = driver.find_elements(By.CSS_SELECTOR, 'tr[data-cy="table-row"]')
+                return any("No results" in row.text for row in rows)
+            except StaleElementReferenceException:
+                return False
+
+        self._wait(timeout).until(loaded)
+
     def scroll_to_and_wait_for(
         self,
         locator: str,
@@ -360,13 +393,21 @@ class Common:
         tag_name: str = "li",
         timeout: int = DEFAULT_TIMEOUT,
     ) -> None:
-        item = self._find_listbox_item(name, listbox, tag_name, timeout)
-        # Long menus scroll on their own; without this an item below the fold gets
-        # clicked through to the menu backdrop.
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
-        self._wait().until(expected_conditions.element_to_be_clickable(item))
-        item.click()
-        self.wait_for_disappear('ul[role="listbox"]')
+        # A click can be dropped while the menu is still opening; if the listbox
+        # stays open after the pick, click the option once more.
+        for attempt in range(2):
+            item = self._find_listbox_item(name, listbox, tag_name, timeout)
+            # Long menus scroll on their own; without this an item below the fold gets
+            # clicked through to the menu backdrop.
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
+            self._wait().until(expected_conditions.element_to_be_clickable(item))
+            item.click()
+            try:
+                self.wait_for_disappear(listbox, timeout=5)
+                return
+            except TimeoutException:
+                if attempt == 1:
+                    raise
 
     def get_listbox_element(
         self,
