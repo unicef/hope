@@ -15,14 +15,12 @@ import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/P
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
-  canSendForApproval: boolean;
   canAbort: boolean;
 }
 
 export function LockedFspPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
-  canSendForApproval,
   canAbort,
 }: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
@@ -57,35 +55,6 @@ export function LockedFspPaymentPlanHeaderButtons({
     },
   });
 
-  const { mutate: sendForApproval, isPending: loadingSendForApproval } =
-    useMutation({
-      mutationFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlansSendForApprovalRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: paymentPlan.id,
-          },
-        ),
-      onSuccess: async () => {
-        showMessage(t('Payment Plan has been sent for approval.'));
-        await queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
-          ),
-          exact: false,
-        });
-        queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansList,
-          ),
-        });
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    });
-
   return (
     <Box
       sx={{
@@ -108,24 +77,6 @@ export function LockedFspPaymentPlanHeaderButtons({
             data-cy="button-unlock-fsp"
           >
             {t('Unlock FSP')}
-          </LoadingButton>
-        </Box>
-      )}
-      {canSendForApproval && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
-          <LoadingButton
-            loading={loadingSendForApproval}
-            variant="contained"
-            color="primary"
-            onClick={() => sendForApproval()}
-            data-cy="button-send-for-approval"
-            disabled={!isActiveProgram}
-          >
-            {t('Send For Approval')}
           </LoadingButton>
         </Box>
       )}

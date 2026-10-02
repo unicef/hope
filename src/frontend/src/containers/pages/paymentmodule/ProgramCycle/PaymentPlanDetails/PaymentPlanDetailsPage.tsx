@@ -24,7 +24,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
-import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/PaymentPlanAcceptanceProcess';
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
@@ -115,7 +115,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <VisionStatusSection paymentPlan={paymentPlan} />
-      <AcceptanceProcess paymentPlan={paymentPlan} />
+      <PaymentPlanAcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayVerificationSummary && (
         <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
       )}

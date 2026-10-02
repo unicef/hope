@@ -1,5 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, renderWithProviders, screen, waitFor } from 'src/testUtils/testUtils';
+import {
+  fireEvent,
+  renderWithProviders,
+  screen,
+  waitFor,
+} from 'src/testUtils/testUtils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
@@ -56,7 +61,10 @@ const basePaymentPlan = {
   backgroundActionStatusDisplay: '',
 } as const;
 
-function renderComponent(overrides = {}, permissions = [PERMISSIONS.PM_CUSTOM_EXCHANGE_RATE]) {
+function renderComponent(
+  overrides = {},
+  permissions = [PERMISSIONS.PM_CUSTOM_EXCHANGE_RATE],
+) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -85,7 +93,9 @@ describe('ConversionToUsd', () => {
 
     const input = screen.getByRole('spinbutton') as HTMLInputElement;
 
-    expect(screen.getByText('Enter the amount of local currency against 1 USD')).toBeTruthy();
+    expect(
+      screen.getByText('Enter the amount of local currency against 1 USD'),
+    ).toBeTruthy();
     expect(input.value).toBe('1.25000000');
   });
 
@@ -93,9 +103,15 @@ describe('ConversionToUsd', () => {
     renderComponent({ status: PaymentPlanStatusEnum.LOCKED });
 
     const input = screen.getByRole('spinbutton') as HTMLInputElement;
-    const applyButton = screen.getByRole('button', { name: 'Apply' }) as HTMLButtonElement;
-    const unoreRadio = screen.getByRole('radio', { name: 'Use UNORE exchange rate' }) as HTMLInputElement;
-    const customRadio = screen.getByRole('radio', { name: 'Custom exchange rate' }) as HTMLInputElement;
+    const applyButton = screen.getByRole('button', {
+      name: 'Apply',
+    }) as HTMLButtonElement;
+    const unoreRadio = screen.getByRole('radio', {
+      name: 'Use UNORE exchange rate',
+    }) as HTMLInputElement;
+    const customRadio = screen.getByRole('radio', {
+      name: 'Custom exchange rate',
+    }) as HTMLInputElement;
 
     expect(input.disabled).toBe(true);
     expect(applyButton.disabled).toBe(true);
@@ -134,7 +150,9 @@ describe('ConversionToUsd', () => {
   it('sends only the UNORE exchange rate when unore option is selected', async () => {
     renderComponent();
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Use UNORE exchange rate' }));
+    fireEvent.click(
+      screen.getByRole('radio', { name: 'Use UNORE exchange rate' }),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
 
     await waitFor(() => {

@@ -34,6 +34,7 @@ vi.mock('@components/core/ConfirmationDialog/useConfirmation', () => ({
 const renderHeader = (
   backgroundActionStatus: PaymentPlanGroupDetailBackgroundActionStatusEnum | null,
   status: PaymentPlanGroupStatusEnum = PaymentPlanGroupStatusEnum.OPEN,
+  approvalProcess: PaymentPlanGroupDetail['approvalProcess'] = [],
 ) =>
   render(
     <MemoryRouter>
@@ -45,6 +46,7 @@ const renderHeader = (
             unicefId: 'PPG-0001',
             backgroundActionStatus,
             status,
+            approvalProcess,
           } as PaymentPlanGroupDetail
         }
       />
@@ -171,6 +173,142 @@ describe('PaymentPlanGroupDetailsHeader', () => {
         businessAreaSlug: 'afghanistan',
         programCode: 'test-program',
         id: 'group-1',
+      }),
+    );
+  });
+
+  it('shows Send For Approval for a locked group to users who can send it', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_SEND_FOR_APPROVAL]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+
+    expect(screen.getByTestId('button-send-for-approval')).not.toBeNull();
+  });
+
+  it('hides Send For Approval without the permission', () => {
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+
+    expect(screen.queryByTestId('button-send-for-approval')).toBeNull();
+  });
+
+  it('sends the group for approval', async () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_SEND_FOR_APPROVAL]);
+    const sendSpy = vi
+      .spyOn(
+        RestService,
+        'restBusinessAreasProgramsPaymentPlanGroupsSendForApprovalCreate',
+      )
+      .mockResolvedValue({} as never);
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+
+    fireEvent.click(screen.getByTestId('button-send-for-approval'));
+
+    await waitFor(() =>
+      expect(sendSpy).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        programCode: 'test-program',
+        id: 'group-1',
+      }),
+    );
+  });
+
+  it.each([
+    [
+      PaymentPlanGroupStatusEnum.IN_APPROVAL,
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
+      'button-approve',
+    ],
+    [
+      PaymentPlanGroupStatusEnum.IN_AUTHORIZATION,
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+      'button-authorize',
+    ],
+    [
+      PaymentPlanGroupStatusEnum.IN_REVIEW,
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+      'button-mark-as-released',
+    ],
+  ])(
+    'shows Reject and the stage action in %s',
+    (status, permission, buttonId) => {
+      mockUsePermissions.mockReturnValue([permission]);
+      renderHeader(null, status);
+
+      expect(screen.getByTestId(buttonId)).not.toBeNull();
+      expect(screen.getByTestId('button-reject')).not.toBeNull();
+      expect(screen.queryByTestId('button-send-for-approval')).toBeNull();
+    },
+  );
+
+  it('hides stage actions without the stage permission', () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
+    ]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.IN_AUTHORIZATION);
+
+    expect(screen.queryByTestId('button-authorize')).toBeNull();
+    expect(screen.queryByTestId('button-reject')).toBeNull();
+  });
+
+  it('approves the group with a comment and warns the last approver', async () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
+    ]);
+    const approveSpy = vi
+      .spyOn(
+        RestService,
+        'restBusinessAreasProgramsPaymentPlanGroupsApproveCreate',
+      )
+      .mockResolvedValue({} as never);
+    renderHeader(null, PaymentPlanGroupStatusEnum.IN_APPROVAL, [
+      {
+        approvalNumberRequired: 1,
+        actions: {
+          approval: [],
+          authorization: [],
+          financeRelease: [],
+          reject: [],
+        },
+      } as unknown as PaymentPlanGroupDetail['approvalProcess'][number],
+    ]);
+
+    fireEvent.click(screen.getByTestId('button-approve'));
+    expect(screen.getByText(/You are the last approver/)).not.toBeNull();
+    fireEvent.change(screen.getByLabelText('Comment (optional)'), {
+      target: { value: 'looks good' },
+    });
+    fireEvent.click(screen.getByTestId('button-submit'));
+
+    await waitFor(() =>
+      expect(approveSpy).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        programCode: 'test-program',
+        id: 'group-1',
+        requestBody: { comment: 'looks good' },
+      }),
+    );
+  });
+
+  it('rejects without a comment by leaving the comment out', async () => {
+    mockUsePermissions.mockReturnValue([
+      PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+    ]);
+    const rejectSpy = vi
+      .spyOn(
+        RestService,
+        'restBusinessAreasProgramsPaymentPlanGroupsRejectCreate',
+      )
+      .mockResolvedValue({} as never);
+    renderHeader(null, PaymentPlanGroupStatusEnum.IN_AUTHORIZATION);
+
+    fireEvent.click(screen.getByTestId('button-reject'));
+    fireEvent.click(screen.getByTestId('button-submit'));
+
+    await waitFor(() =>
+      expect(rejectSpy).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        programCode: 'test-program',
+        id: 'group-1',
+        requestBody: {},
       }),
     );
   });
