@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from django.utils import timezone
@@ -7,6 +6,7 @@ import pytest
 from strategy_field.utils import fqn
 
 from extras.test_utils.factories import BusinessAreaFactory, CountryFactory
+from extras.test_utils.sanction_list import load_sanction_list_xml
 from hope.apps.sanction_list.strategies.un import UNSanctionList
 from hope.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hope.models import SanctionListIndividual, SanctionListIndividualDateOfBirth
@@ -48,10 +48,9 @@ def program(db: Any, sanction_list: "SanctionList", business_area) -> "Program":
 
 @pytest.mark.elasticsearch
 def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
-    main_test_files_path = Path(__file__).parent / "test_files"
     # Test #1
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(main_test_files_path / "original-consolidated.xml")
+    load_sanction_list_xml(task, "original-consolidated.xml")
 
     individuals = SanctionListIndividual.all_objects.all()
     assert individuals.count() == 1
@@ -61,7 +60,7 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
     # Test #2
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(file_path=main_test_files_path / "updated-consolidated.xml")
+    load_sanction_list_xml(task, "updated-consolidated.xml")
 
     all_individuals = SanctionListIndividual.all_objects.all()
     assert all_individuals.count() == 1
@@ -79,7 +78,7 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 
     # Test #3
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(file_path=main_test_files_path / "updated2-consolidated.xml")
+    load_sanction_list_xml(task, "updated2-consolidated.xml")
 
     all_individuals = SanctionListIndividual.all_objects.all()
     assert all_individuals.count() == 1
@@ -95,11 +94,9 @@ def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
 def test_invalid_dates_of_birth_are_recorded_in_internal_data(
     sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
 ) -> None:
-    main_test_files_path = Path(__file__).parent / "test_files"
-
     task = LoadSanctionListXMLTask(sanction_list)
     with django_assert_num_queries(25):
-        task.load_from_file(main_test_files_path / "broken-dob-consolidated.xml")
+        load_sanction_list_xml(task, "broken-dob-consolidated.xml")
 
     assert SanctionListIndividual.all_objects.count() == 1
     individual = SanctionListIndividual.all_objects.get(reference_number="KPi.111")
@@ -119,11 +116,9 @@ def test_invalid_dates_of_birth_are_recorded_in_internal_data(
 def test_bad_dob_does_not_poison_other_individuals(
     sanction_list: "SanctionList", program: "Program", django_assert_num_queries: Any
 ) -> None:
-    main_test_files_path = Path(__file__).parent / "test_files"
-
     task = LoadSanctionListXMLTask(sanction_list)
     with django_assert_num_queries(27):
-        task.load_from_file(main_test_files_path / "broken-dob-multi-consolidated.xml")
+        load_sanction_list_xml(task, "broken-dob-multi-consolidated.xml")
 
     assert SanctionListIndividual.all_objects.count() == 2
 

@@ -1,7 +1,7 @@
 import pytest
 
 from extras.test_utils.factories.account import UserFactory
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
+from extras.test_utils.factories.vision import FundsCommitmentFactory
 from hope.contrib.vision.models import (
     DownPayment,
     FundsCommitment,
