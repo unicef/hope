@@ -13,6 +13,7 @@ from zipfile import BadZipfile
 from dateutil import parser
 from django.core import validators as django_core_validators
 from django.core.exceptions import ValidationError
+from django_countries.fields import Country
 import openpyxl
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
@@ -44,7 +45,15 @@ from hope.apps.registration_data.utils import (
     collectors_str_ids_to_list,
     find_attachment_in_kobo,
 )
-from hope.models import Area, BusinessArea, FlexibleAttribute, KoboImportedSubmission, PeriodicFieldData, Program
+from hope.models import (
+    Area,
+    BusinessArea,
+    Country as GeoCountry,
+    FlexibleAttribute,
+    KoboImportedSubmission,
+    PeriodicFieldData,
+    Program,
+)
 from hope.models.individual import LATIN_NAME_FIELDS, ascii_name_validator, normalize_latin_name
 
 logger = logging.getLogger(__name__)
@@ -309,13 +318,23 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
+    COUNTRY_COLUMNS = frozenset(
+        (
+            "country_h_c",
+            "country_origin_h_c",
+            "pp_country_i_c",
+            "pp_country_origin_i_c",
+        )
+    )
     ADMIN_COLUMNS_ALL = (
         "pp_admin1_i_c",
         "pp_admin2_i_c",
         "pp_admin3_i_c",
+        "pp_admin4_i_c",
         "admin1_h_c",
         "admin2_h_c",
         "admin3_h_c",
+        "admin4_h_c",
         "facility_admin_area_h_c",
         "pp_facility_admin_area_h_c",
     )
@@ -594,6 +613,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     ) -> list:
         errors = []
         for cell, header in zip(row, first_row, strict=True):
+            admin_error = self._validate_admin_column(header.value, cell.value, cell.row, admin_area_code_tuples)
+            if admin_error:
+                errors.append(admin_error)
+
             current_field = combined_fields.get(header.value)
             if not current_field:
                 continue
@@ -603,10 +626,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 value = int(value)
 
             household_id_can_be_empty = header.value == "household_id" and self.sheet_title != "Households"
-
-            admin_error = self._validate_admin_column(header.value, cell.value, cell.row, admin_area_code_tuples)
-            if admin_error:
-                errors.append(admin_error)
 
             field_type = current_field["type"]
             type_error = self._validate_field_type(value, header.value, cell, field_type, household_id_can_be_empty)
@@ -655,6 +674,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             self._identities_numbers, self._documents_numbers = self._init_doc_identity_dicts()
 
             admin_area_code_tuples = []
+            country_cells = []
 
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
@@ -670,6 +690,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 row_number = row[0].row
                 invalid_rows.extend(self._validate_row_cells(row, first_row, combined_fields, admin_area_code_tuples))
+                country_cells.extend(
+                    (row_number, header.value, cell.value)
+                    for cell, header in zip(row, first_row, strict=True)
+                    if cell.value and (header.value in self.COUNTRY_COLUMNS or header.value.endswith("_issuer_i_c"))
+                )
 
                 household_ref_error = self._validate_row_household_reference(current_household_id, row_number)
                 if household_ref_error:
@@ -702,10 +727,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if self.sheet_title == "Individuals":
                 invalid_rows.extend(self._validate_head_of_household())
 
-            if self.sheet_title in ("Households", "People"):
-                admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
-                if admin_area_invalid_rows:
-                    invalid_rows.extend(admin_area_invalid_rows)
+            invalid_rows.extend(self.validate_admin_areas(admin_area_code_tuples, business_area_slug))
+            invalid_rows.extend(self.validate_countries(country_cells))
 
             invalid_doc_rows, invalid_ident_rows = self._run_document_identity_validation(sheet.title)  # type: ignore[arg-type]
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
@@ -818,7 +841,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             elif not cell_value and header_value not in (
                 "admin3_h_c",
                 "pp_admin3_i_c",
+                "admin4_h_c",
+                "pp_admin4_i_c",
                 "facility_admin_area_h_c",
+                "pp_facility_admin_area_h_c",
             ):
                 return {
                     "row_number": row_number,
@@ -946,10 +972,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 row_number, header_name, p_code = code_tuple
                 area = queryset.filter(p_code=p_code).first()
                 if not area:
-                    message = f"Sheet: 'Households': Area with code: {p_code} does not exist"
+                    message = f"Sheet: {self.sheet_title!r}: Area with code: {p_code} does not exist"
                 elif area.area_type.country not in business_area_countries:
                     message = (
-                        f"Sheet: 'Households': Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
+                        f"Sheet: {self.sheet_title!r}: Admin Area: {p_code} "
+                        f"unavailable in Business Area: {business_area_slug}"
                     )
                 if message:
                     invalid_rows.append(
@@ -960,6 +987,33 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         }
                     )
         return invalid_rows
+
+    def validate_countries(self, cells: list[tuple[int, str, Any]]) -> list[dict[str, Any]]:
+        issuer_codes = {
+            Country(str(value).strip()).code for _, header, value in cells if header.endswith("_issuer_i_c")
+        }
+        country_codes = {str(value).strip() for _, header, value in cells if header in self.COUNTRY_COLUMNS}
+        existing_issuer_codes = set(
+            GeoCountry.objects.filter(iso_code2__in=issuer_codes).values_list("iso_code2", flat=True)
+        )
+        existing_country_codes = set(
+            GeoCountry.objects.filter(iso_code3__in=country_codes).values_list("iso_code3", flat=True)
+        )
+        errors = []
+        for row_number, header, value in cells:
+            is_issuer = header.endswith("_issuer_i_c")
+            code = Country(str(value).strip()).code if is_issuer else str(value).strip()
+            existing_codes = existing_issuer_codes if is_issuer else existing_country_codes
+            if code not in existing_codes:
+                country_label = "Issuing country" if is_issuer else "Country"
+                errors.append(
+                    {
+                        "row_number": row_number,
+                        "header": header,
+                        "message": f"Sheet: {self.sheet_title!r}: {country_label} {value!r} does not exist",
+                    }
+                )
+        return errors
 
     def validate_file_with_template(self, wb: Workbook) -> None:
         try:
@@ -1063,7 +1117,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 self.image_loader = SheetImageLoader(household_sheet)
                 self.rows_validator(household_sheet, business_area_slug)
                 self.image_loader = SheetImageLoader(individuals_sheet)
-                self.rows_validator(individuals_sheet)
+                self.rows_validator(individuals_sheet, business_area_slug)
 
             return self.errors
         except Exception as e:  # pragma: no cover
