@@ -26,6 +26,7 @@ class _ConstanceTTLCacheResponse(CacheResponse):
     ) -> None:
         super().__init__(timeout=0, key_func=key_func, cache=cache, cache_errors=cache_errors)
 
+    # Looks unused, but rest_framework_extensions calls it on every @cache_response request.
     def calculate_timeout(self, view_instance: Any, **_: Any) -> int:
         return config.REST_API_TTL
 

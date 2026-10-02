@@ -13,10 +13,12 @@ class PeriodicFieldListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "periodic_field_list"
 
 
+# Looks unused, but the commented-out cache decorators in api/views.py need it once that cache is back on.
 class PDUTemplateKeyConstructor(KeyConstructorMixin):
     periodic_data_update_template_list_version = PDUTemplateListVersionsKeyBit()
 
 
+# Looks unused, but the commented-out cache decorators in api/views.py need it once that cache is back on.
 class PDUUpdateKeyConstructor(KeyConstructorMixin):
     periodic_data_update_upload_list_version = PDUUploadListVersionsKeyBit()
 

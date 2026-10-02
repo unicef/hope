@@ -1780,6 +1780,7 @@ def send_western_union_report_email_notifications_async_task(report_id: str) -> 
     )
 
 
+# Looks unused, but AsyncJob rows queued by release 4.15 still point here by dotted path.
 def send_qcf_report_email_notifications_async_task_action(job: AsyncRetryJob) -> None:
     send_western_union_report_email_notifications_async_task_action(job)
 
