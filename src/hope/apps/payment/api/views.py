@@ -222,15 +222,9 @@ class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
     filter_backends = (
         filters.DjangoFilterBackend,
-        SearchFilter,
         OrderingFilter,
     )
     filterset_class = PaymentPlanFilter
-    search_fields = (
-        "unicef_id",
-        "id",
-        "^name",
-    )
 
 
 class PaymentVerificationViewSet(
