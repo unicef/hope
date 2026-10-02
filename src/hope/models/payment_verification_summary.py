@@ -50,7 +50,6 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
         choices=get_status_choices,
         default=STATUS_PENDING,
         verbose_name="Verification status",
-        db_index=True,
     )
     activation_date = models.DateTimeField(null=True, blank=True)
     completion_date = models.DateTimeField(null=True, blank=True)
@@ -69,6 +68,12 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
         indexes = [
             LongNameIndex(fields=["created_at"], name="payment_paymentverificationsummary_created_at_290679bf"),
             LongNameIndex(fields=["updated_at"], name="payment_paymentverificationsummary_updated_at_92a7bfc0"),
+            LongNameIndex(fields=["status"], name="payment_paymentverificationsummary_status_245e2017"),
+            LongNameIndex(
+                fields=["status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentverificationsummary_status_245e2017_like",
+            ),
         ]
 
     def mark_as_active(self) -> None:

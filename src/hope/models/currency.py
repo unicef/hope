@@ -5,6 +5,8 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 
+from hope.models.utils import LongNameIndex
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,6 @@ class Currency(models.Model):
 
     code = models.CharField(
         max_length=5,
-        db_index=True,
         help_text=_("The currency code following the ISO 4217 standard (e.g. USD, EUR)"),
     )
     name = models.CharField(max_length=255, help_text=_("The full name of the currency"))
@@ -75,6 +76,10 @@ class Currency(models.Model):
         constraints = [
             models.UniqueConstraint(Lower("code"), condition=models.Q(active=True), name="unique_code_active"),
             models.UniqueConstraint(Lower("vision_code"), name="unique_vision_code"),
+        ]
+        indexes = [
+            LongNameIndex(fields=["code"], name="core_currency_code_0c3ee469"),
+            LongNameIndex(fields=["code"], opclasses=["varchar_pattern_ops"], name="core_currency_code_0c3ee469_like"),
         ]
 
     def __str__(self) -> str:

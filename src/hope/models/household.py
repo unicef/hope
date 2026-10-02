@@ -308,7 +308,7 @@ class Household(
     address = models.CharField(max_length=1024, blank=True, help_text="Household address", db_collation="und-ci-det")
     zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
 
-    size = models.PositiveIntegerField(db_index=True, null=True, blank=True, help_text="Household size")
+    size = models.PositiveIntegerField(null=True, blank=True, help_text="Household size")
     female_age_group_0_5_count = models.PositiveIntegerField(
         default=None, null=True, blank=True, help_text="Household female age group 0-5"
     )
@@ -529,7 +529,6 @@ class Household(
         max_length=250,
         blank=True,
         default=BLANK,
-        db_index=True,
         help_text="Household unhcr id",
     )
     # TODO: detail_id is deprecated, will be removed soon. It was replaced with originating_id
@@ -582,7 +581,6 @@ class Household(
         max_length=100,
         blank=True,
         null=True,
-        db_index=True,
         unique=True,
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration id [sys]",
@@ -606,10 +604,8 @@ class Household(
     flex_fields = JSONField(default=dict, blank=True, help_text="Household flex fields [sys]")
     first_registration_date = models.DateTimeField(help_text="Household first registration date [sys]")
     last_registration_date = models.DateTimeField(help_text="Household last registration date [sys]")
-    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Household withdrawn [sys]")
-    withdrawn_date = models.DateTimeField(
-        null=True, blank=True, db_index=True, help_text="Household withdrawn date [sys]"
-    )
+    withdrawn = models.BooleanField(default=False, help_text="Household withdrawn [sys]")
+    withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Household withdrawn date [sys]")
     longitude = models.FloatField(blank=True, null=True, help_text="Household longitude [sys]")
     latitude = models.FloatField(blank=True, null=True, help_text="Household latitude [sys]")
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household deviceid [sys]")
@@ -659,7 +655,6 @@ class Household(
         null=True,
         blank=True,
         max_length=255,
-        db_index=True,
         help_text="Key used to identify Collisions in the system",
     )
 
@@ -709,6 +704,21 @@ class Household(
                 fields=["unicef_id"],
                 opclasses=["varchar_pattern_ops"],
                 name="household_household_unicef_id_6f025c4d_like",
+            ),
+            LongNameIndex(fields=["size"], name="household_household_size_72609b19"),
+            LongNameIndex(fields=["unhcr_id"], name="household_household_unhcr_id_71c2d7ae"),
+            LongNameIndex(
+                fields=["unhcr_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_household_unhcr_id_71c2d7ae_like",
+            ),
+            LongNameIndex(fields=["withdrawn"], name="household_household_withdrawn_75f31056"),
+            LongNameIndex(fields=["withdrawn_date"], name="household_household_withdrawn_date_45bc87bc"),
+            LongNameIndex(fields=["identification_key"], name="household_household_identification_key_0b623912"),
+            LongNameIndex(
+                fields=["identification_key"],
+                opclasses=["varchar_pattern_ops"],
+                name="household_household_identification_key_0b623912_like",
             ),
         ]
         constraints = [

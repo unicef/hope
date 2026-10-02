@@ -98,25 +98,25 @@ class Record(models.Model):
         (STATUS_ERROR, "Error"),
     )
 
-    registration = models.IntegerField(db_index=True)
-    timestamp = models.DateTimeField(db_index=True)
+    registration = models.IntegerField()
+    timestamp = models.DateTimeField()
     storage = models.BinaryField(null=True, blank=True)
-    ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
-    source_id = models.IntegerField(db_index=True)
+    ignored = models.BooleanField(default=False, blank=True, null=True)
+    source_id = models.IntegerField()
     data = models.JSONField(default=dict, blank=True, null=True)
     error_message = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=get_record_status_choices, null=True, blank=True)
 
-    unique_field = models.CharField(blank=True, null=True, max_length=255, db_index=True)
+    unique_field = models.CharField(blank=True, null=True, max_length=255)
     size = models.IntegerField(blank=True, null=True)
     counters = models.JSONField(blank=True, null=True)
 
     fields = models.JSONField(null=True, blank=True)
     files = models.BinaryField(null=True, blank=True)
 
-    index1 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
-    index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
-    index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+    index1 = models.CharField(null=True, blank=True, max_length=255)
+    index2 = models.CharField(null=True, blank=True, max_length=255)
+    index3 = models.CharField(null=True, blank=True, max_length=255)
 
     class Meta:
         swappable = swapper.swappable_setting("aurora", "Record")
@@ -124,6 +124,30 @@ class Record(models.Model):
             ("can_fetch_data", "Can fetch data from aurora"),
             ("can_add_records", "Can add records"),
         )
+        indexes = [
+            LongNameIndex(fields=["registration"], name="aurora_record_registration_18c617c1"),
+            LongNameIndex(fields=["timestamp"], name="aurora_record_timestamp_d68c0d5a"),
+            LongNameIndex(fields=["ignored"], name="aurora_record_ignored_1640d007"),
+            LongNameIndex(fields=["source_id"], name="aurora_record_source_id_e66ff785"),
+            LongNameIndex(fields=["unique_field"], name="aurora_record_unique_field_903b6acc"),
+            LongNameIndex(
+                fields=["unique_field"],
+                opclasses=["varchar_pattern_ops"],
+                name="aurora_record_unique_field_903b6acc_like",
+            ),
+            LongNameIndex(fields=["index1"], name="aurora_record_index1_359087d6"),
+            LongNameIndex(
+                fields=["index1"], opclasses=["varchar_pattern_ops"], name="aurora_record_index1_359087d6_like"
+            ),
+            LongNameIndex(fields=["index2"], name="aurora_record_index2_cfcbc3b9"),
+            LongNameIndex(
+                fields=["index2"], opclasses=["varchar_pattern_ops"], name="aurora_record_index2_cfcbc3b9_like"
+            ),
+            LongNameIndex(fields=["index3"], name="aurora_record_index3_21b563c6"),
+            LongNameIndex(
+                fields=["index3"], opclasses=["varchar_pattern_ops"], name="aurora_record_index3_21b563c6_like"
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.registration} - {self.source_id}"

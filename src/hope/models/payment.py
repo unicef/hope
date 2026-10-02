@@ -238,7 +238,6 @@ class Payment(
         decimal_places=3,
         max_digits=6,
         help_text="Written by Steficon",
-        db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
     sent_to_fsp_date = models.DateTimeField(
@@ -277,6 +276,7 @@ class Payment(
             LongNameIndex(
                 fields=["unicef_id"], opclasses=["varchar_pattern_ops"], name="payment_payment_unicef_id_07f610de_like"
             ),
+            LongNameIndex(fields=["vulnerability_score"], name="payment_payment_vulnerability_score_e91d7c15"),
         ]
 
     signature_fields = (

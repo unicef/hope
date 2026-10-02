@@ -60,7 +60,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     background_action_status = models.CharField(
         max_length=50,
         default=None,
-        db_index=True,
         blank=True,
         null=True,
         choices=BackgroundActionStatus.choices,
@@ -80,6 +79,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
                 fields=["unicef_id"],
                 opclasses=["varchar_pattern_ops"],
                 name="payment_paymentplangroup_unicef_id_3fb17c90_like",
+            ),
+            LongNameIndex(
+                fields=["background_action_status"], name="payment_paymentplangroup_background_action_status_2aeaeb44"
+            ),
+            LongNameIndex(
+                fields=["background_action_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_background_action_status_2aeaeb44_like",
             ),
         ]
 

@@ -94,7 +94,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         on_delete=models.CASCADE,
         related_name="payment_verification_plans",
     )
-    status = models.CharField(max_length=50, choices=get_status_choices, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(max_length=50, choices=get_status_choices, default=STATUS_PENDING)
     verification_channel = models.CharField(max_length=50, choices=get_verification_channel_choices)
 
     sampling = models.CharField(max_length=50, choices=get_sampling_choices)
@@ -130,6 +130,12 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
                 fields=["unicef_id"],
                 opclasses=["varchar_pattern_ops"],
                 name="payment_paymentverificationplan_unicef_id_87e4384b_like",
+            ),
+            LongNameIndex(fields=["status"], name="payment_paymentverificationplan_status_d41cb725"),
+            LongNameIndex(
+                fields=["status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentverificationplan_status_d41cb725_like",
             ),
         ]
 

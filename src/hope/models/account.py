@@ -44,7 +44,6 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         max_length=256,
         blank=True,
         null=True,
-        db_index=True,
         help_text="The account number or wallet identifier",
     )
     data = JSONField(
@@ -54,8 +53,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         help_text="Additional account-specific fields",
     )
     unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)
-    is_unique = models.BooleanField(default=True, db_index=True)
-    active = models.BooleanField(default=True, db_index=True)  # False for duplicated/withdrawn individual
+    is_unique = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
@@ -78,6 +77,12 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         indexes = [
             LongNameIndex(fields=["created_at"], name="payment_account_created_at_06eee052"),
             LongNameIndex(fields=["updated_at"], name="payment_account_updated_at_cd04ae57"),
+            LongNameIndex(fields=["number"], name="payment_account_number_ab8231a5"),
+            LongNameIndex(
+                fields=["number"], opclasses=["varchar_pattern_ops"], name="payment_account_number_ab8231a5_like"
+            ),
+            LongNameIndex(fields=["is_unique"], name="payment_account_is_unique_183d0bc1"),
+            LongNameIndex(fields=["active"], name="payment_account_active_3b740582"),
         ]
 
     def __str__(self) -> str:

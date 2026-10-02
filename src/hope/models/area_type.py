@@ -15,7 +15,7 @@ class AreaTypeManager(ValidityManager):
 
 
 class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
-    name = models.CharField(max_length=255, db_index=True, db_collation="und-ci-det")
+    name = models.CharField(max_length=255, db_collation="und-ci-det")
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     area_level = models.PositiveIntegerField(default=1)
     parent = TreeForeignKey(
@@ -40,6 +40,8 @@ class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         indexes = [
             LongNameIndex(fields=["created_at"], name="geo_areatype_created_at_7ce454f0"),
             LongNameIndex(fields=["updated_at"], name="geo_areatype_updated_at_6c355284"),
+            LongNameIndex(fields=["name"], name="geo_areatype_name_b20b6ba6"),
+            LongNameIndex(fields=["name"], opclasses=["varchar_pattern_ops"], name="geo_areatype_name_b20b6ba6_like"),
         ]
 
     def __str__(self) -> str:

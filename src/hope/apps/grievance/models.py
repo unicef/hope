@@ -363,7 +363,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         through="GrievanceTicketThrough",
         symmetrical=True,
     )
-    household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
+    household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
     priority = models.IntegerField(verbose_name=_("Priority"), choices=get_priority_choices, default=PRIORITY_NOT_SET)
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=get_urgency_choices, default=URGENCY_NOT_SET)
     category = models.IntegerField(verbose_name=_("Category"), choices=get_grievance_category_choices)
@@ -385,7 +385,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
-    ignored = models.BooleanField(default=False, db_index=True)
+    ignored = models.BooleanField(default=False)
     extras = JSONField(blank=True, default=dict)
     comments = models.TextField(blank=True, null=True)
     copied_from = models.ForeignKey(
@@ -402,14 +402,12 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
-        db_index=True,
     )
     last_notification_sent = models.DateTimeField(
         verbose_name=_("Modified"),
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
-        db_index=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -583,6 +581,19 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 fields=["unicef_id"],
                 opclasses=["varchar_pattern_ops"],
                 name="grievance_grievanceticket_unicef_id_a00a5537_like",
+            ),
+            LongNameIndex(
+                fields=["household_unicef_id"], name="grievance_grievanceticket_household_unicef_id_853987ce"
+            ),
+            LongNameIndex(
+                fields=["household_unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="grievance_grievanceticket_household_unicef_id_853987ce_like",
+            ),
+            LongNameIndex(fields=["ignored"], name="grievance_grievanceticket_ignored_9bb17664"),
+            LongNameIndex(fields=["user_modified"], name="grievance_grievanceticket_user_modified_ee994ac6"),
+            LongNameIndex(
+                fields=["last_notification_sent"], name="grievance_grievanceticket_last_notification_sent_9ea770a0"
             ),
         ]
 

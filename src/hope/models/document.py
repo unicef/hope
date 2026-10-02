@@ -47,7 +47,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     program = models.ForeignKey("program.Program", null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
+    document_number = models.CharField(max_length=255, blank=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=get_document_status_choices, default=STATUS_PENDING, blank=True)
@@ -56,7 +56,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     cleared_date = models.DateTimeField(default=timezone.now, blank=True)
     cleared_by = models.ForeignKey("account.User", null=True, blank=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
-    expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -87,6 +87,8 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
             LongNameIndex(fields=["is_removed"], name="household_document_is_removed_ef7efe5b"),
             LongNameIndex(fields=["created_at"], name="household_document_created_at_3bc5e22a"),
             LongNameIndex(fields=["updated_at"], name="household_document_updated_at_f16babb8"),
+            LongNameIndex(fields=["document_number"], name="household_document_document_number_43773c34"),
+            LongNameIndex(fields=["expiry_date"], name="household_document_expiry_date_623fe225"),
         ]
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual

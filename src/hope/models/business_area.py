@@ -47,7 +47,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     slug = models.CharField(
         max_length=250,
         unique=True,
-        db_index=True,
     )
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)

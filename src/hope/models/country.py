@@ -38,11 +38,9 @@ class CountryManager(ValidityManager):
 
 
 class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
-    name = models.CharField(
-        max_length=255, db_index=True, db_collation="und-ci-det", help_text=_("The full name of the country")
-    )
+    name = models.CharField(max_length=255, db_collation="und-ci-det", help_text=_("The full name of the country"))
     short_name = models.CharField(
-        max_length=255, db_index=True, db_collation="und-ci-det", help_text=_("The short name of the country")
+        max_length=255, db_collation="und-ci-det", help_text=_("The short name of the country")
     )
     iso_code2 = models.CharField(max_length=2, unique=True, help_text=_("The ISO 3166-1 alpha-2 code"))
     iso_code3 = models.CharField(max_length=3, unique=True, help_text=_("The ISO 3166-1 alpha-3 code"))
@@ -81,6 +79,12 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         indexes = [
             LongNameIndex(fields=["created_at"], name="geo_country_created_at_afcd5bea"),
             LongNameIndex(fields=["updated_at"], name="geo_country_updated_at_daf4b47f"),
+            LongNameIndex(fields=["name"], name="geo_country_name_01731269"),
+            LongNameIndex(fields=["name"], opclasses=["varchar_pattern_ops"], name="geo_country_name_01731269_like"),
+            LongNameIndex(fields=["short_name"], name="geo_country_short_name_00190511"),
+            LongNameIndex(
+                fields=["short_name"], opclasses=["varchar_pattern_ops"], name="geo_country_short_name_00190511_like"
+            ),
         ]
 
     def __str__(self) -> str:

@@ -17,6 +17,7 @@ from hope.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
 from hope.apps.steficon.interpreters import Interpreter, interpreters, mapping
 from hope.apps.steficon.result import Result
 from hope.apps.steficon.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hope.models.utils import LongNameIndex
 
 
 def get_rule_type_choices() -> tuple:
@@ -74,8 +75,8 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="+", null=True, blank=True, on_delete=models.PROTECT
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     type = models.CharField(
         choices=get_rule_type_choices,
         max_length=50,
@@ -93,6 +94,10 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
             ("rerun_rule", "Can Rerun Rule"),
         )
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="steficon_rule_created_at_80077537"),
+            LongNameIndex(fields=["updated_at"], name="steficon_rule_updated_at_8183c1cf"),
+        ]
 
     def __str__(self) -> str:
         return self.name
