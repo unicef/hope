@@ -13,7 +13,6 @@ class VisionStatus(StrEnum):
     WAITING_FOR_CALLBACK = "WAITING_FOR_CALLBACK"
     PP_CREATED = "PP_CREATED"
     CALLBACK_FAILED = "CALLBACK_FAILED"
-    FC_MISSING = "FC_MISSING"
     FC_NOT_FOUND = "FC_NOT_FOUND"
     FC_ASSOCIATED = "FC_ASSOCIATED"
     RELEASED = "RELEASED"
@@ -25,7 +24,6 @@ VISION_RECOVERABLE_STATUSES = frozenset(
         VisionStatus.WAITING_FOR_CALLBACK.value,
         VisionStatus.PP_CREATED.value,
         VisionStatus.CALLBACK_FAILED.value,
-        VisionStatus.FC_MISSING.value,
         VisionStatus.FC_NOT_FOUND.value,
     }
 )
