@@ -6,6 +6,8 @@ import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory
 from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.factories.household import DocumentTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_data.validators import (
     ImportDataInstanceValidator,
     KoboProjectImportDataInstanceValidator,
@@ -258,6 +260,58 @@ def test_validate_row_cells_collects_people_area_outside_individual_fields(peopl
 
 
 @pytest.fixture
+def people_row_with_unlabeled_columns():
+    sheet = Workbook().active
+    sheet["B1"] = 123
+    sheet["C1"] = "pp_country_i_c"
+    sheet["D1"] = "pp_birth_certificate_issuer_i_c"
+    sheet["E1"] = "unrelated_issuer_i_c"
+    sheet["A3"] = "extra under blank header"
+    sheet["B3"] = "extra under numeric header"
+    sheet["C3"] = "AFG"
+    sheet["D3"] = "AF"
+    sheet["E3"] = "ZZ"
+    return sheet[3], sheet[1]
+
+
+@pytest.fixture
+def people_country_validator():
+    validator = object.__new__(UploadXLSXInstanceValidator)
+    validator.sheet_title = "People"
+    validator.country_columns = validator.COUNTRY_COLUMNS
+    return validator
+
+
+def test_country_cell_scan_skips_unrecognized_headers(people_row_with_unlabeled_columns, people_country_validator):
+    row, headers = people_row_with_unlabeled_columns
+
+    cells = people_country_validator._country_cells_in_row(row, headers)
+
+    assert cells == [(3, "pp_country_i_c", "AFG"), (3, "pp_birth_certificate_issuer_i_c", "AF")]
+
+
+@pytest.fixture
+def program_with_custom_document_type():
+    DocumentTypeFactory(key="custom_document")
+    return ProgramFactory()
+
+
+@pytest.fixture
+def custom_document_country_row():
+    sheet = Workbook().active
+    sheet["A1"] = "custom_document_issuer_i_c"
+    sheet["A3"] = "ZZ"
+    return sheet[3], sheet[1]
+
+
+@pytest.mark.django_db
+def test_validator_collects_configured_document_issuer(program_with_custom_document_type, custom_document_country_row):
+    validator = UploadXLSXInstanceValidator(program_with_custom_document_type)
+
+    assert validator._country_cells_in_row(*custom_document_country_row) == [(3, "custom_document_issuer_i_c", "ZZ")]
+
+
+@pytest.fixture
 def afghanistan_country():
     return CountryFactory(iso_code2="AF", iso_code3="AFG")
 
@@ -287,25 +341,25 @@ def test_validate_admin_areas_reports_missing_people_area(afghanistan_business_a
 
 
 @pytest.mark.django_db
-def test_validate_issuing_countries_accepts_existing_country(afghanistan_country, django_assert_num_queries):
-    validator = object.__new__(UploadXLSXInstanceValidator)
-    validator.sheet_title = "People"
+def test_validate_issuing_countries_accepts_existing_country(
+    afghanistan_country, people_country_validator, django_assert_num_queries
+):
     cells = [(4, "pp_birth_certificate_issuer_i_c", "AFG"), (5, "pp_unhcr_id_issuer_i_c", "AF")]
 
     with django_assert_num_queries(1):
-        errors = validator.validate_countries(cells)
+        errors = people_country_validator.validate_countries(cells)
 
     assert errors == []
 
 
 @pytest.mark.django_db
-def test_validate_issuing_countries_reports_missing_country(afghanistan_country, django_assert_num_queries):
-    validator = object.__new__(UploadXLSXInstanceValidator)
-    validator.sheet_title = "People"
+def test_validate_issuing_countries_reports_missing_country(
+    afghanistan_country, people_country_validator, django_assert_num_queries
+):
     cells = [(4, "pp_birth_certificate_issuer_i_c", "AFG"), (5, "pp_unhcr_id_issuer_i_c", "ZZ")]
 
     with django_assert_num_queries(1):
-        errors = validator.validate_countries(cells)
+        errors = people_country_validator.validate_countries(cells)
 
     assert errors == [
         {
@@ -317,23 +371,21 @@ def test_validate_issuing_countries_reports_missing_country(afghanistan_country,
 
 
 @pytest.mark.django_db
-def test_validate_countries_accepts_existing_people_country(afghanistan_country, django_assert_num_queries):
-    validator = object.__new__(UploadXLSXInstanceValidator)
-    validator.sheet_title = "People"
-
+def test_validate_countries_accepts_existing_people_country(
+    afghanistan_country, people_country_validator, django_assert_num_queries
+):
     with django_assert_num_queries(1):
-        errors = validator.validate_countries([(4, "pp_country_i_c", "AFG")])
+        errors = people_country_validator.validate_countries([(4, "pp_country_i_c", "AFG")])
 
     assert errors == []
 
 
 @pytest.mark.django_db
-def test_validate_countries_reports_missing_people_country(afghanistan_country, django_assert_num_queries):
-    validator = object.__new__(UploadXLSXInstanceValidator)
-    validator.sheet_title = "People"
-
+def test_validate_countries_reports_missing_people_country(
+    afghanistan_country, people_country_validator, django_assert_num_queries
+):
     with django_assert_num_queries(1):
-        errors = validator.validate_countries([(4, "pp_country_origin_i_c", "ZZZ")])
+        errors = people_country_validator.validate_countries([(4, "pp_country_origin_i_c", "ZZZ")])
 
     assert errors == [
         {

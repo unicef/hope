@@ -49,6 +49,7 @@ from hope.models import (
     Area,
     BusinessArea,
     Country as GeoCountry,
+    DocumentType,
     FlexibleAttribute,
     KoboImportedSubmission,
     PeriodicFieldData,
@@ -318,14 +319,17 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    COUNTRY_COLUMNS = frozenset(
-        (
-            "country_h_c",
-            "country_origin_h_c",
-            "pp_country_i_c",
-            "pp_country_origin_i_c",
-        )
-    )
+    COUNTRY_COLUMNS = {
+        "country_h_c": "iso_code3",
+        "country_origin_h_c": "iso_code3",
+        "pp_country_i_c": "iso_code3",
+        "pp_country_origin_i_c": "iso_code3",
+        **{
+            f"{prefix}{header}": "iso_code2"
+            for prefix in ("", "pp_")
+            for header in ImportDataInstanceValidator.DOCUMENTS_ISSUING_COUNTRIES_MAPPING
+        },
+    }
     ADMIN_COLUMNS_ALL = (
         "pp_admin1_i_c",
         "pp_admin2_i_c",
@@ -355,6 +359,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             "pp_facility_admin_area_h_c" if self.is_social_worker_program else "facility_admin_area_h_c"
         )
         prefix = "pp_" if self.is_social_worker_program else ""
+        self.country_columns = self.COUNTRY_COLUMNS | {
+            f"{prefix}{key}_issuer_i_c": "iso_code2" for key in DocumentType.objects.values_list("key", flat=True)
+        }
         self.latin_name_headers = [f"{prefix}{latin}_i_c" for latin in LATIN_NAME_FIELDS]
 
     def get_combined_fields(self) -> dict:
@@ -604,6 +611,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             return cell.value.strip() != ""
         return True
 
+    def _country_cells_in_row(self, row: tuple, first_row: tuple) -> list[tuple[int, str, Any]]:
+        return [
+            (cell.row, header.value, cell.value)
+            for cell, header in zip(row, first_row, strict=True)
+            if cell.value and isinstance(header.value, str) and header.value in self.country_columns
+        ]
+
     def _validate_row_cells(
         self,
         row: tuple,
@@ -690,11 +704,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 row_number = row[0].row
                 invalid_rows.extend(self._validate_row_cells(row, first_row, combined_fields, admin_area_code_tuples))
-                country_cells.extend(
-                    (row_number, header.value, cell.value)
-                    for cell, header in zip(row, first_row, strict=True)
-                    if cell.value and (header.value in self.COUNTRY_COLUMNS or header.value.endswith("_issuer_i_c"))
-                )
+                country_cells.extend(self._country_cells_in_row(row, first_row))
 
                 household_ref_error = self._validate_row_household_reference(current_household_id, row_number)
                 if household_ref_error:
@@ -989,21 +999,23 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         return invalid_rows
 
     def validate_countries(self, cells: list[tuple[int, str, Any]]) -> list[dict[str, Any]]:
-        issuer_codes = {
-            Country(str(value).strip()).code for _, header, value in cells if header.endswith("_issuer_i_c")
+        iso2_codes = {
+            Country(str(value).strip()).code
+            for _, header, value in cells
+            if self.country_columns[header] == "iso_code2"
         }
-        country_codes = {str(value).strip() for _, header, value in cells if header in self.COUNTRY_COLUMNS}
-        existing_issuer_codes = set(
-            GeoCountry.objects.filter(iso_code2__in=issuer_codes).values_list("iso_code2", flat=True)
+        iso3_codes = {str(value).strip() for _, header, value in cells if self.country_columns[header] == "iso_code3"}
+        existing_iso2_codes = set(
+            GeoCountry.objects.filter(iso_code2__in=iso2_codes).values_list("iso_code2", flat=True)
         )
-        existing_country_codes = set(
-            GeoCountry.objects.filter(iso_code3__in=country_codes).values_list("iso_code3", flat=True)
+        existing_iso3_codes = set(
+            GeoCountry.objects.filter(iso_code3__in=iso3_codes).values_list("iso_code3", flat=True)
         )
         errors = []
         for row_number, header, value in cells:
-            is_issuer = header.endswith("_issuer_i_c")
+            is_issuer = self.country_columns[header] == "iso_code2"
             code = Country(str(value).strip()).code if is_issuer else str(value).strip()
-            existing_codes = existing_issuer_codes if is_issuer else existing_country_codes
+            existing_codes = existing_iso2_codes if is_issuer else existing_iso3_codes
             if code not in existing_codes:
                 country_label = "Issuing country" if is_issuer else "Country"
                 errors.append(
