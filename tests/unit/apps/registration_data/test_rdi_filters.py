@@ -23,7 +23,6 @@ def rdi_syria_lowercase(db):
 
 
 def _filtered_qs(data):
-    """Apply RegistrationDataImportFilter to the full RDI queryset."""
     return RegistrationDataImportFilter(data=data, queryset=RegistrationDataImport.objects.all()).qs
 
 

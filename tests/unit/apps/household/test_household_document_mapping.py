@@ -10,9 +10,6 @@ from hope.models import BusinessArea, Household, Individual, Program
 pytestmark = pytest.mark.django_db
 
 
-# Data fixtures depend on es_enabled so that factory post_save signals fire with
-# IS_ELASTICSEARCH_ENABLED=True — otherwise the program activation signal won't
-# create the ES index and individual saves won't sync to ES.
 @pytest.fixture
 def es_enabled(django_elasticsearch_setup):
     with override_config(IS_ELASTICSEARCH_ENABLED=True):
