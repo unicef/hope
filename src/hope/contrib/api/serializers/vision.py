@@ -8,7 +8,7 @@ from hope.contrib.vision.models import FundsCommitmentItem
 VISION_CALLBACK_FIELD_OVERRIDES = {
     "vision_payplanSno": "vision_payplan_sno",
     "vision_payplan_sno": "vision_payplanSno",
-    "fc_num": "fc_num",
+    "fc_numbers": "fc_numbers",
 }
 
 
@@ -17,6 +17,8 @@ def vision_callback_external_field_name(field_name: str) -> str:
 
 
 class FundsCommitmentItemSerializer(serializers.ModelSerializer):
+    business_area = serializers.CharField(source="office.slug", read_only=True, allow_null=True)
+
     class Meta:
         model = FundsCommitmentItem
         fields = [
@@ -27,6 +29,7 @@ class FundsCommitmentItemSerializer(serializers.ModelSerializer):
             "commitment_amount_usd",
             "total_open_amount_local",
             "total_open_amount_usd",
+            "business_area",
             "rec_serial_number",
             "funds_commitment_item",
             "sponsor",
@@ -37,6 +40,23 @@ class FundsCommitmentItemSerializer(serializers.ModelSerializer):
 class FundsCommitmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     funds_commitment_number = serializers.CharField()
+    vendor_id = serializers.CharField(read_only=True, allow_null=True)
+    posting_date = serializers.DateField(read_only=True, allow_null=True)
+    document_reference = serializers.CharField(read_only=True, allow_null=True)
+    fc_status = serializers.CharField(read_only=True, allow_null=True)
+    total_amount_usd = serializers.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+    )
+    total_amount_local = serializers.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+    )
+    currency = serializers.CharField(read_only=True, allow_null=True)
     funds_commitment_items = FundsCommitmentItemSerializer(many=True)
 
 
@@ -45,12 +65,22 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
     payplan_sno = serializers.CharField()
     vision_payplan_sno = serializers.CharField(required=False, allow_blank=True)
     status = serializers.CharField(required=False, allow_blank=True)
-    fc_num = serializers.CharField(required=False, allow_blank=True)
+    fc_numbers = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list,
+    )
 
     def to_internal_value(self, data: dict) -> dict[str, Any]:
         field_names: tuple[str, ...] = tuple(self.fields.keys())
         return super().to_internal_value(
-            {field_name: data.get(vision_callback_external_field_name(field_name), "") for field_name in field_names}
+            {
+                field_name: data.get(
+                    vision_callback_external_field_name(field_name),
+                    [] if field_name == "fc_numbers" else "",
+                )
+                for field_name in field_names
+            }
         )
 
     def initial_value(self, field_name: str) -> Any:
