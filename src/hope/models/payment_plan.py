@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
 import os
@@ -126,6 +126,7 @@ class PaymentPlan(
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
             "currency.code": "currency",
+            "currency.vision_code": "currency_vision_code",
         },
     )
 
@@ -970,7 +971,7 @@ class PaymentPlan(
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(
-            self.currency.code, self.currency_exchange_date
+            self.currency.vision_code, self.currency_exchange_date
         )
 
     def available_payment_records(
@@ -1134,7 +1135,7 @@ class PaymentPlan(
         )
 
     @property
-    def currency_exchange_date(self) -> Any:
+    def currency_exchange_date(self) -> date:
         if (
             self.status
             in [

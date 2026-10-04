@@ -572,7 +572,7 @@ def test_user_without_assign_permission_only_gets_assigned_to_me(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
     ):
-        browser.login(username="noperm_user", password="testtest2", wait_for_drawer=False)
+        browser.login(username="noperm_user", wait_for_drawer=False)
         _open(browser, business_area)
 
         browser.wait_for_element_visible(TAB_MINE)
@@ -591,7 +591,7 @@ def test_user_with_no_my_tasks_permissions_is_denied(
     # A user who can open the app but holds neither My Tasks grant. (With no permissions at all the
     # page never leaves its loading state, and without the programme grant the shell itself 403s.)
     with grant_permission(user_with_no_permissions, business_area, Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS):
-        browser.login(username="noperm_user", password="testtest2", wait_for_drawer=False)
+        browser.login(username="noperm_user", wait_for_drawer=False)
         browser.open(f"/{business_area.slug}/programs/all/grievance/my-tasks")
 
         browser.wait_for_text("Permission Denied", timeout=60)

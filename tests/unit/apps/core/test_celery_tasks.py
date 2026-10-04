@@ -2,6 +2,7 @@ from datetime import timedelta
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from celery.exceptions import Retry
+from django.contrib.sessions.models import Session
 from django.utils import timezone
 import pytest
 
@@ -15,6 +16,8 @@ from hope.apps.core.celery_tasks import (
     async_retry_job_task,
     cleanup_old_periodic_async_jobs_async_task,
     cleanup_old_periodic_async_jobs_async_task_action,
+    clear_expired_sessions_async_task,
+    clear_expired_sessions_async_task_action,
     recover_missing_async_jobs_async_task,
     recover_missing_async_jobs_async_task_action,
     set_async_job_sentry_tags,
@@ -38,6 +41,20 @@ def fake_async_retry_job_failure_action(job: AsyncRetryJob) -> None:
 
 def fake_async_retry_job_non_retriable_action(job: AsyncRetryJob) -> None:
     raise NonRetriableTaskError("permanent failure")
+
+
+@pytest.fixture
+def expired_and_live_sessions() -> None:
+    Session.objects.create(
+        session_key="expired-session",
+        session_data="",
+        expire_date=timezone.now() - timedelta(days=1),
+    )
+    Session.objects.create(
+        session_key="live-session",
+        session_data="",
+        expire_date=timezone.now() + timedelta(days=1),
+    )
 
 
 ON_FAILURE_ACTION = "unit.apps.core.on_failure_handlers.record_failure"
@@ -475,6 +492,20 @@ def test_cleanup_old_periodic_async_jobs_task_calls_action() -> None:
 
     assert result == 7
     mock_action.assert_called_once_with(retention_days=45)
+
+
+@pytest.mark.django_db
+def test_clear_expired_sessions_action_deletes_only_expired_sessions(expired_and_live_sessions: None) -> None:
+    clear_expired_sessions_async_task_action()
+
+    assert list(Session.objects.values_list("session_key", flat=True)) == ["live-session"]
+
+
+def test_clear_expired_sessions_task_calls_action() -> None:
+    with patch("hope.apps.core.celery_tasks.clear_expired_sessions_async_task_action") as mock_action:
+        clear_expired_sessions_async_task.run()
+
+    mock_action.assert_called_once_with()
 
 
 @pytest.mark.django_db

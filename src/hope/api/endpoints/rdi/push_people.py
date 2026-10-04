@@ -22,6 +22,7 @@ from hope.api.endpoints.rdi.upload import (
     BirthDateValidator,
     DocumentSerializerUpload,
 )
+from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.household.const import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -43,7 +44,6 @@ from hope.models import (
     PendingIndividual,
     RegistrationDataImport,
 )
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -108,11 +108,10 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     country = NullableChoiceField(choices=Countries(), required=False, allow_blank=True, allow_null=True)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE, required=False, allow_blank=True)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    currency = serializers.SlugRelatedField(
-        slug_field="code",
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE,
         required=False,
         allow_null=True,
-        queryset=Currency.objects.all(),
     )
 
     phone_no = serializers.CharField(allow_null=True, allow_blank=True, required=False)
@@ -133,7 +132,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         self.fields["admin3"].choices = Area.objects.filter(area_type__area_level=3).values_list("p_code", "name")
         self.fields["admin4"].choices = Area.objects.filter(area_type__area_level=4).values_list("p_code", "name")
 
-    def validate_disability(self, value: Any) -> Any:
+    def validate_disability(self, value: str) -> str:
         if value == "":
             return NOT_DISABLED
         return value

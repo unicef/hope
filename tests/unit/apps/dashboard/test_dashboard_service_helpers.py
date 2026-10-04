@@ -14,6 +14,7 @@ def make_country_summary_key(
     delivery_type: str = "D",
     status: str = "St",
     currency: str = "C",
+    currency_vision_code: str = "C",
 ) -> CountrySummaryKey:
     return CountrySummaryKey(
         year=year,
@@ -25,6 +26,7 @@ def make_country_summary_key(
         delivery_type=delivery_type,
         status=status,
         currency=currency,
+        currency_vision_code=currency_vision_code,
     )
 
 

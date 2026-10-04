@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from django.db import transaction
 import openpyxl
 
+from hope.apps.core.currency_resolution import resolve_active_currency
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
@@ -36,7 +37,6 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from openpyxl.cell import Cell
@@ -260,7 +260,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             setattr(
                 obj_to_create,
                 current_field["name"],
-                Currency.objects.get(code=value),
+                resolve_active_currency(value),
             )
         else:
             setattr(

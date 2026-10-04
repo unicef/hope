@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+    from django.core.files.uploadedfile import UploadedFile
 import zipfile
 
 from admin_extra_buttons.buttons import StandardButton
@@ -21,7 +23,9 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
-from django.forms import CheckboxSelectMultiple, formset_factory
+from django.db.models.fields.related import ForeignKey
+from django.forms import CheckboxSelectMultiple, ModelChoiceField, formset_factory
+from django.forms.models import BaseInlineFormSet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -104,11 +108,13 @@ class PaymentPlanPurposeInline(admin.TabularInline):
     verbose_name = "Payment Plan Purpose"
     verbose_name_plural = "Payment Plan Purposes"
 
-    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> Any:
+    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> type[BaseInlineFormSet]:
         request._program_obj = obj
         return super().get_formset(request, obj, **kwargs)
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "paymentplanpurpose":
             obj = getattr(request, "_program_obj", None)
             if obj is not None:
@@ -130,7 +136,7 @@ class PartnerAreaLimitForm(forms.Form):
 class BulkUploadIndividualsPhotosForm(forms.Form):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
 
-    def clean_file(self) -> Any:
+    def clean_file(self) -> "UploadedFile":
         file = self.cleaned_data["file"]
 
         if not file.name.lower().endswith(".zip"):

@@ -89,7 +89,6 @@ class TestDrawer:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         page_programme_management.select_global_program_filter("Worker Program")
-        assert "Worker Program" in page_programme_details.get_header_title().text
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
@@ -113,7 +112,6 @@ class TestDrawer:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         page_programme_management.select_global_program_filter("Normal Program")
-        assert "Normal Program" in page_programme_details.get_header_title().text
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",

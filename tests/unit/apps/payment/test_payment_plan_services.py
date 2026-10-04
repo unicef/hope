@@ -1588,6 +1588,29 @@ def test_lock_fsp_validation(
     assert payment.financial_service_provider == fsp
 
 
+def test_lock_fsp_rejects_running_rule_engine(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED,
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_transfer_to_account,
+        background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
+    )
+
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(payment_plan).lock_fsp()
+    payment_plan.refresh_from_db(fields=("status",))
+    assert payment_plan.status == PaymentPlan.Status.LOCKED
+
+
 def test_unlock_fsp(user: User, business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,

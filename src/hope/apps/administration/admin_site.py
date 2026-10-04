@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from constance import config
 from django.contrib import messages
@@ -21,7 +21,7 @@ def clean(v: str) -> str:
     return v.replace(r"\n", "").strip()
 
 
-def get_bookmarks(request: Any) -> list:
+def get_bookmarks(request: "HttpRequest") -> list:
     quick_links = []
     for entry in config.QUICK_LINKS.split("\n"):
         if entry := clean(entry):
@@ -59,11 +59,10 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
     }
 
     if hasattr(dj_cache, "keys"):
-        # skip name started with numbers
-        ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
-
         if request.user.is_superuser:
             ctx["is_root"] = True
+            # skip name started with numbers
+            ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
             if request.POST:
                 form = ClearCacheForm(request.POST)
                 if form.is_valid():

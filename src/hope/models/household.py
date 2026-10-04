@@ -160,6 +160,7 @@ class Household(
         ],
         {
             "currency.code": "currency",
+            "currency.vision_code": "currency_vision_code",
         },
     )
     business_area = models.ForeignKey(

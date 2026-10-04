@@ -1,5 +1,6 @@
 from typing import Any
 
+from rest_framework.request import Request
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import KeyConstructorMixin, get_or_create_cache_key
@@ -14,7 +15,7 @@ class OrganizationListVersionsKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -35,7 +36,7 @@ class ProjectListVersionsKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -56,7 +57,7 @@ class RegistrationListVersionsKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:

@@ -3,6 +3,7 @@ from typing import Any
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
+from django.forms.fields import Field as FormField
 
 
 class DynamicChoiceField(forms.MultipleChoiceField):
@@ -29,7 +30,7 @@ class DynamicChoiceArrayField(ArrayField):
         form_class: type[forms.Field] | None = None,
         choices_form_class: type[forms.ChoiceField] | None = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> FormField | None:
         kwargs["choices_callable"] = self.choices_callable
         widget = FilteredSelectMultiple(self.verbose_name, False)
         return super().formfield(
