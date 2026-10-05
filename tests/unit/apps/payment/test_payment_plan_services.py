@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from datetime import UTC, timedelta
 from decimal import Decimal
 from typing import Any
@@ -15,6 +16,7 @@ from django.utils.timezone import now
 from flags.models import FlagState
 from freezegun import freeze_time
 import pytest
+import requests_mock as requests_mock_lib
 from rest_framework.exceptions import ValidationError
 from viewflow.fsm import TransitionNotAllowed
 
@@ -545,6 +547,43 @@ def test_create(
     assert pp.total_households_count == 2
     assert pp.total_individuals_count == 6
     assert pp.payment_items.count() == 2
+
+
+@pytest.fixture
+def draft_payment_plan(payment_plan_base: PaymentPlan) -> PaymentPlan:
+    payment_plan_base.status = PaymentPlan.Status.DRAFT
+    payment_plan_base.exchange_rate = None
+    payment_plan_base.save(update_fields=["status", "exchange_rate"])
+    return payment_plan_base
+
+
+@pytest.fixture
+def unore_unavailable(settings: Any) -> Generator[requests_mock_lib.Mocker, None, None]:
+    settings.USE_DUMMY_EXCHANGE_RATES = False
+    settings.EXCHANGE_RATES_API_KEY = "TEST_API_KEY"
+    settings.EXCHANGE_RATE_CACHE_EXPIRY = 60 * 60 * 24
+    with requests_mock_lib.Mocker() as adapter:
+        adapter.get(settings.EXCHANGE_RATES_API_URL, status_code=500)
+        yield adapter
+
+
+@freeze_time("2026-10-05")
+def test_open_arrange_unore_unavailable_and_cache_empty_act_open_assert_payment_plan_opened_without_exchange_rate(
+    draft_payment_plan: PaymentPlan,
+    unore_unavailable: requests_mock_lib.Mocker,
+) -> None:
+    open_input_data = {
+        "dispersion_start_date": parse_date("2026-10-05"),
+        "dispersion_end_date": parse_date("2026-10-31"),
+        "currency": CurrencyFactory(code="SDG", name="Sudanese pound"),
+    }
+
+    PaymentPlanService(payment_plan=draft_payment_plan).open(input_data=open_input_data)
+
+    draft_payment_plan.refresh_from_db()
+    assert unore_unavailable.called is True
+    assert draft_payment_plan.status == PaymentPlan.Status.OPEN
+    assert draft_payment_plan.exchange_rate is None
 
 
 def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: User, business_area: Any) -> None:
