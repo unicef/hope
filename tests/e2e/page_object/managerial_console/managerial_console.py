@@ -4,7 +4,6 @@ from e2e.page_object.base_components import BaseComponents
 
 
 class ManagerialConsole(BaseComponents):
-    page_header_title = 'h5[data-cy="page-header-title"]'
     title = 'h6[data-cy="title"]'
     approve_button = 'button[data-cy="approve-button"]'
     select_all_approval = 'span[data-cy="select-all-approval"]'
@@ -29,9 +28,6 @@ class ManagerialConsole(BaseComponents):
     button_save = 'button[data-cy="button-save"]'
     comment_approve = 'div[data-cy="comment-approve"]'
 
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
-
     def get_title(self) -> WebElement:
         return self.wait_for(self.title)
 
@@ -53,9 +49,6 @@ class ManagerialConsole(BaseComponents):
     def get_authorize_button(self) -> WebElement:
         return self.wait_for(self.authorize_button)
 
-    def get_select_all_authorization(self) -> WebElement:
-        return self.wait_for(self.select_all_authorization)
-
     def get_program_select_authorization(self) -> WebElement:
         return self.wait_for(self.program_select_authorization)
 
@@ -67,9 +60,6 @@ class ManagerialConsole(BaseComponents):
 
     def get_release_button(self) -> WebElement:
         return self.wait_for(self.release_button)
-
-    def get_select_all_release(self) -> WebElement:
-        return self.wait_for(self.select_all_release)
 
     def get_program_select_release(self) -> WebElement:
         return self.wait_for(self.program_select_release)

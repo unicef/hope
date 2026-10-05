@@ -7,6 +7,7 @@ import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
+    PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
     ProgramCycleFactory,
@@ -17,9 +18,18 @@ from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentVerificationPlanFactory,
 )
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
-from hope.models import AcceptanceProcessThreshold, Approval, DeliveryMechanism, LogEntry, PaymentPlan, PaymentPlanGroup
+from hope.models import (
+    AcceptanceProcessThreshold,
+    Approval,
+    DeliveryMechanism,
+    LogEntry,
+    Payment,
+    PaymentPlan,
+    PaymentPlanGroup,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -538,3 +548,199 @@ def test_approve_logs_event_on_group(mock_notify, group_in_approval, user):
     assert log.user == user
     assert log.changes["acceptance_process"] == {"from": None, "to": Approval.APPROVAL}
     assert log.changes["comment"] == {"from": None, "to": "fine"}
+
+
+@pytest.fixture
+def accepted_group(group_in_review, user):
+    with patch(
+        "hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task"
+    ):
+        PaymentPlanGroupService(group_in_review).acceptance_process(PaymentPlan.Action.REVIEW.value, user)
+    group_in_review.refresh_from_db()
+    return group_in_review
+
+
+@pytest.fixture
+def delivered_payment(locked_payment_plan):
+    return PaymentFactory(parent=locked_payment_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+
+@pytest.fixture
+def finished_group(accepted_group, delivered_payment):
+    PaymentPlanGroupService(accepted_group).sync_finished()
+    accepted_group.refresh_from_db()
+    return accepted_group
+
+
+@pytest.fixture
+def ready_group(finished_group, user):
+    with patch(
+        "hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task"
+    ):
+        PaymentPlanGroupService(finished_group).ready_for_closure(user)
+    finished_group.refresh_from_db()
+    return finished_group
+
+
+def test_sync_finished_moves_group_and_plans_when_every_payment_is_reconciled(
+    accepted_group, locked_payment_plan, delivered_payment
+):
+    PaymentPlanGroupService(accepted_group).sync_finished()
+
+    accepted_group.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert accepted_group.status == PaymentPlanGroup.Status.FINISHED
+    assert locked_payment_plan.status == PaymentPlan.Status.FINISHED
+
+
+def test_sync_finished_waits_for_every_payment_in_the_group(
+    cycle, accepted_group, locked_payment_plan, delivered_payment, delivery_mechanism
+):
+    second_payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=accepted_group,
+        status=PaymentPlan.Status.ACCEPTED,
+        delivery_mechanism=delivery_mechanism,
+    )
+    PaymentFactory(parent=second_payment_plan, status=Payment.STATUS_PENDING)
+
+    PaymentPlanGroupService(accepted_group).sync_finished()
+
+    accepted_group.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert accepted_group.status == PaymentPlanGroup.Status.ACCEPTED
+    assert locked_payment_plan.status == PaymentPlan.Status.ACCEPTED
+
+
+def test_sync_finished_reopens_group_and_plans_when_a_payment_is_pending_again(
+    finished_group, locked_payment_plan, delivered_payment
+):
+    delivered_payment.status = Payment.STATUS_PENDING
+    delivered_payment.save(update_fields=["status"])
+
+    PaymentPlanGroupService(finished_group).sync_finished()
+
+    finished_group.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert finished_group.status == PaymentPlanGroup.Status.ACCEPTED
+    assert locked_payment_plan.status == PaymentPlan.Status.ACCEPTED
+
+
+@pytest.fixture
+def follow_up_payment_plan(cycle, finished_group, locked_payment_plan, delivery_mechanism):
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=finished_group,
+        source_payment_plan=locked_payment_plan,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.OPEN,
+        delivery_mechanism=delivery_mechanism,
+    )
+    PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING)
+    return payment_plan
+
+
+def test_sync_finished_ignores_pending_payment_of_follow_up_plan(finished_group, follow_up_payment_plan):
+    PaymentPlanGroupService(finished_group).sync_finished()
+
+    finished_group.refresh_from_db()
+    follow_up_payment_plan.refresh_from_db()
+    assert finished_group.status == PaymentPlanGroup.Status.FINISHED
+    assert follow_up_payment_plan.status == PaymentPlan.Status.OPEN
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_ready_for_closure_leaves_follow_up_plan_untouched(mock_notify, finished_group, follow_up_payment_plan, user):
+    PaymentPlanGroupService(finished_group).ready_for_closure(user)
+
+    finished_group.refresh_from_db()
+    follow_up_payment_plan.refresh_from_db()
+    assert finished_group.status == PaymentPlanGroup.Status.READY_FOR_CLOSURE
+    assert follow_up_payment_plan.status == PaymentPlan.Status.OPEN
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_ready_for_closure_moves_group_and_plans(mock_notify, finished_group, locked_payment_plan, user):
+    PaymentPlanGroupService(finished_group).ready_for_closure(user)
+
+    finished_group.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert finished_group.status == PaymentPlanGroup.Status.READY_FOR_CLOSURE
+    assert locked_payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
+    mock_notify.assert_called_once()
+    assert mock_notify.call_args.args[1] == PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value
+
+
+def test_ready_for_closure_rejects_group_not_finished(accepted_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(accepted_group).ready_for_closure(user)
+    assert error.value.detail[0] == "Mark as Ready for Closure is possible only within Status FINISHED"
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_send_back_to_finished_moves_group_and_plans(mock_notify, ready_group, locked_payment_plan, user):
+    PaymentPlanGroupService(ready_group).send_back_to_finished(user)
+
+    ready_group.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert ready_group.status == PaymentPlanGroup.Status.FINISHED
+    assert locked_payment_plan.status == PaymentPlan.Status.FINISHED
+    assert mock_notify.call_args.args[1] == PaymentPlan.Action.SEND_BACK_TO_FINISHED.value
+
+
+def test_close_requires_comment_when_no_plan_was_verified(ready_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(ready_group).close(None, user)
+    assert error.value.detail[0] == "Closure comment is required when no payment verification was carried out."
+
+
+def test_close_with_comment_closes_group_and_plans(ready_group, locked_payment_plan, user):
+    PaymentPlanGroupService(ready_group).close("all paid", user)
+
+    ready_group.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert ready_group.status == PaymentPlanGroup.Status.CLOSED
+    assert ready_group.closure_comment == "all paid"
+    assert ready_group.closed_by == user
+    assert locked_payment_plan.status == PaymentPlan.Status.CLOSED
+
+
+def test_close_without_comment_allowed_when_every_plan_was_verified(ready_group, locked_payment_plan, user):
+    PaymentVerificationPlanFactory(payment_plan=locked_payment_plan, responded_count=1)
+
+    PaymentPlanGroupService(ready_group).close(None, user)
+
+    ready_group.refresh_from_db()
+    assert ready_group.status == PaymentPlanGroup.Status.CLOSED
+
+
+def test_abort_moves_group_and_plans(group_in_approval, locked_payment_plan, user):
+    PaymentPlanGroupService(group_in_approval).abort("wrong amounts", user)
+
+    group_in_approval.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert group_in_approval.status == PaymentPlanGroup.Status.ABORTED
+    assert group_in_approval.abort_comment == "wrong amounts"
+    assert locked_payment_plan.status == PaymentPlan.Status.ABORTED
+
+
+def test_abort_rejects_open_group(open_group, locked_payment_plan, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(open_group).abort(None, user)
+    assert error.value.detail[0] == "Abort Payment Plan Group is not possible within Status OPEN"
+
+
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
+def test_reactivate_abort_reopens_group_and_plans(
+    mock_rebuild, group_in_approval, locked_payment_plan, user, django_capture_on_commit_callbacks
+):
+    PaymentPlanGroupService(group_in_approval).abort(None, user)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanGroupService(group_in_approval).reactivate_abort()
+
+    group_in_approval.refresh_from_db()
+    locked_payment_plan.refresh_from_db()
+    assert group_in_approval.status == PaymentPlanGroup.Status.OPEN
+    assert locked_payment_plan.status == PaymentPlan.Status.OPEN
+    mock_rebuild.assert_called_once_with(locked_payment_plan, True)

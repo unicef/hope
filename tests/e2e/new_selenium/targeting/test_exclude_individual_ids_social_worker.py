@@ -121,7 +121,7 @@ def test_exclude_individual_id_removes_person_in_social_program(
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
 
         # Baseline: both people appear in the target population
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/{social_tp.id}")

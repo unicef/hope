@@ -28,7 +28,7 @@ from extras.test_utils.factories import (
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.individual_data_update_service import IndividualDataUpdateService
 from hope.apps.household.api.caches import get_household_list_program_key, get_individual_list_program_key
-from hope.models import Document
+from hope.models import Currency, Document
 
 pytestmark = [
     pytest.mark.usefixtures("mock_elasticsearch"),
@@ -81,6 +81,15 @@ def update_context() -> dict[str, Any]:
         "account_type_bank": account_type_bank,
         "account_type_mobile": account_type_mobile,
     }
+
+
+@pytest.fixture
+def individual_with_identification_key(update_context: dict[str, Any]) -> Any:
+    return IndividualFactory(
+        business_area=update_context["business_area"],
+        program=update_context["program"],
+        identification_key="IND-KEY-1",
+    )
 
 
 def test_add_document_of_same_type_not_unique_per_individual_valid(update_context: dict[str, Any]) -> None:
@@ -612,6 +621,75 @@ def test_update_people_individual_hh_currency_field(
         _assert_fields_updated(hh, fields, new_values, extract=lambda v: v.code)
 
 
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+
+def test_update_people_individual_hh_currency_field_resolves_active_row_for_shared_code(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_moves_household_off_deprecated_row_for_same_code(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+) -> None:
+    hh = update_context["household"]
+    hh.currency = deprecated_syp
+    hh.save(update_fields=["currency"])
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_resolves_the_vision_code_alias_to_the_active_row(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    django_assert_num_queries,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "SYP01"}, extract=lambda v: v.code)
+
+    with django_assert_num_queries(31):
+        _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency == current_syp
+
+
+def test_update_people_individual_hh_currency_field_clears_a_code_without_an_active_row(
+    update_context: dict[str, Any],
+    hh_field_reference_data: None,
+    currency_retired: Currency,
+) -> None:
+    hh = update_context["household"]
+    ind_data = _build_ind_data(hh, ["currency"], {"currency": "VEF"}, extract=lambda v: v.code)
+
+    _close_ticket_and_refresh(update_context, ind_data, hh)
+
+    assert hh.currency is None
+
+
 def test_update_people_individual_hh_admin_area(
     update_context: dict[str, Any], hh_field_reference_data: None, django_assert_num_queries
 ) -> None:
@@ -632,6 +710,67 @@ def test_update_people_individual_hh_admin_area(
     assert hh.admin3 is None
     assert hh.admin1 is not None
     assert hh.admin2.parent == hh.admin1
+
+
+def test_close_individual_update_applies_approved_identification_key(update_context: dict[str, Any]) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "ind_identification_key": {"value": "IND-KEY-1", "previous_value": None, "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+    service.close(update_context["user"])
+
+    individual = update_context["individual"]
+    individual.refresh_from_db()
+    assert individual.identification_key == "IND-KEY-1"
+
+
+@pytest.mark.usefixtures("individual_with_identification_key")
+def test_close_individual_update_rejects_identification_key_used_in_the_programme(
+    update_context: dict[str, Any],
+) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "ind_identification_key": {"value": "IND-KEY-1", "previous_value": None, "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+
+    with pytest.raises(DRFValidationError, match="is already used in this programme"):
+        service.close(update_context["user"])
+
+
+def test_close_people_update_applies_approved_household_identification_key(update_context: dict[str, Any]) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "hh_identification_key": {"value": "HH-KEY-1", "previous_value": None, "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+    service.close(update_context["user"])
+
+    household = update_context["household"]
+    household.refresh_from_db()
+    assert household.identification_key == "HH-KEY-1"
+
+
+def test_close_people_update_applies_approved_consent_sign(update_context: dict[str, Any]) -> None:
+    ticket_details = update_context["ticket"].individual_data_update_ticket_details
+    ticket_details.individual_data = {
+        "consent_sign": {"value": "consent/signature.jpg", "previous_value": "", "approve_status": True}
+    }
+    ticket_details.save()
+
+    service = IndividualDataUpdateService(update_context["ticket"], ticket_details)
+    service.close(update_context["user"])
+
+    household = update_context["household"]
+    household.refresh_from_db()
+    assert household.consent_sign.name == "consent/signature.jpg"
 
 
 def test_update_phone_no_data(update_context: dict[str, Any]) -> None:

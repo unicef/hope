@@ -40,6 +40,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     ProgramCycle,
@@ -90,7 +91,7 @@ def template(fsp, delivery_mechanism):
 
 @pytest.fixture
 def group_two_plans_one_fsp(program_cycle, business_area, fsp, delivery_mechanism, template):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.ACCEPTED)
     plan_one = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -311,12 +312,6 @@ def test_validate_succeeds_for_correct_header_and_rows(group_two_plans_one_fsp):
     service.validate()
 
     assert service.errors == []
-    assert service.get_result_counts() == {
-        "total_rows": 2,
-        "updated_rows": 2,
-        "reset_rows": 0,
-        "ignored_rows": 0,
-    }
 
 
 def test_group_reconciliation_uses_group_wide_fsp_header_ownership(
@@ -851,7 +846,7 @@ def group_with_closed_plan(program_cycle, business_area, fsp, delivery_mechanism
 @pytest.fixture
 def group_with_finished_usd_plan(program_cycle, business_area, fsp, delivery_mechanism, template):
     currency = CurrencyFactory(code="USD", name="US Dollar")
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.FINISHED)
     payment_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -1147,7 +1142,7 @@ def test_minus_one_sets_error_and_stores_no_quantity(group_two_plans_one_fsp):
     assert payment.delivered_quantity is None
     assert payment.delivered_quantity_usd is None
     assert payment.status == Payment.STATUS_ERROR
-    assert ctx["plan_one"].status == PaymentPlan.Status.FINISHED
+    assert ctx["plan_one"].status == PaymentPlan.Status.ACCEPTED
 
 
 @pytest.mark.enable_activity_log
@@ -1434,6 +1429,41 @@ def test_override_equal_quantity_applies_other_present_fields(group_two_plans_on
     payment.refresh_from_db()
     assert payment.transaction_reference_id == "NEW"
     assert payment.status_date == old_status_date
+    assert service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 1,
+        "reset_rows": 0,
+        "ignored_rows": 0,
+    }
+
+
+def test_override_equal_quantity_and_fields_counts_row_as_ignored(
+    group_two_plans_one_fsp,
+    django_assert_num_queries,
+):
+    ctx = group_two_plans_one_fsp
+    payment = ctx["payment_one"]
+    payment.delivered_quantity = Decimal("100.00")
+    payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    payment.transaction_reference_id = "UNCHANGED"
+    payment.save(update_fields=["delivered_quantity", "status", "transaction_reference_id"])
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "reference_id"],
+        [[str(payment.unicef_id), Decimal("100.00"), "UNCHANGED"]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=True)
+    service.open_workbook()
+
+    ContentType.objects.clear_cache()
+    with django_assert_num_queries(12):
+        service.import_payment_list()
+
+    assert service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 0,
+        "reset_rows": 0,
+        "ignored_rows": 1,
+    }
 
 
 def test_first_reconciliation_updates_status_date_when_status_changes(group_two_plans_one_fsp):
@@ -1624,16 +1654,6 @@ def mixed_group_with_closed_plan(group_two_plans_one_fsp):
     return ctx
 
 
-@pytest.fixture
-def mixed_group_with_reconciled_closed_plan(mixed_group_with_closed_plan):
-    ctx = mixed_group_with_closed_plan
-    ctx["payment_two"].delivered_quantity = Decimal("75.00")
-    ctx["payment_two"].status = Payment.STATUS_DISTRIBUTION_PARTIAL
-    ctx["payment_two"].transaction_reference_id = "CLOSED-REFERENCE"
-    ctx["payment_two"].save(update_fields=["delivered_quantity", "status", "transaction_reference_id"])
-    return ctx
-
-
 @pytest.mark.parametrize("override", [False, True])
 def test_mixed_group_rejects_file_containing_closed_plan_row(
     mixed_group_with_closed_plan, override, django_assert_num_queries
@@ -1660,37 +1680,6 @@ def test_mixed_group_rejects_file_containing_closed_plan_row(
     assert len(service.errors) == 1
     assert service.errors[0].coordinates == "A3"
     assert "CLOSED Payment Plan" in service.errors[0].message
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_mixed_group_imports_open_plan_when_closed_plan_row_matches(
-    mixed_group_with_reconciled_closed_plan, override, django_assert_num_queries
-):
-    ctx = mixed_group_with_reconciled_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity", "reference_id"],
-        [
-            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "OPEN-REFERENCE"],
-            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "MUST-NOT-CHANGE"],
-        ],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    service.import_payment_list()
-
-    with django_assert_num_queries(3):
-        ctx["payment_one"].refresh_from_db()
-        ctx["payment_two"].refresh_from_db()
-        ctx["plan_two"].refresh_from_db()
-    assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
-    assert ctx["payment_one"].transaction_reference_id == "OPEN-REFERENCE"
-    assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
-    assert ctx["payment_two"].status == Payment.STATUS_DISTRIBUTION_PARTIAL
-    assert ctx["payment_two"].transaction_reference_id == "CLOSED-REFERENCE"
-    assert ctx["plan_two"].status == PaymentPlan.Status.CLOSED
-    assert service.errors == []
-    assert len(service.skipped_rows) == 1
 
 
 @pytest.mark.parametrize("override", [False, True])
@@ -1899,6 +1888,8 @@ def test_usd_reconciliation_saves_both_quantity_fields(group_with_finished_usd_p
     payment.save(update_fields=["delivered_quantity", "delivered_quantity_usd", "status"])
     ctx["payment_plan"].status = PaymentPlan.Status.ACCEPTED
     ctx["payment_plan"].save(update_fields=["status"])
+    ctx["group"].status = PaymentPlanGroup.Status.ACCEPTED
+    ctx["group"].save(update_fields=["status"])
     file = _make_workbook(
         ["payment_id", "delivered_quantity"],
         [[str(payment.unicef_id), Decimal("75.00")]],

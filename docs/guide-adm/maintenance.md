@@ -20,6 +20,19 @@ In a containerised deployment the same command is run inside the backend contain
 docker compose run --rm backend python manage.py <command>
 ```
 
+## Recount programme size
+
+`recount_program_size` refreshes `household_count` and `individual_count` on every programme.
+
+The counters are kept up to date as households and individuals change, so a programme nobody
+touches keeps whatever it last recorded. Run this when the stored numbers no longer match the data.
+
+```bash
+python manage.py recount_program_size
+```
+
+Safe to re-run.
+
 ## Backfill KAB
 
 `backfill_kab` populates the [known affected beneficiaries](../guide-user/known-affected-beneficiaries.md)
@@ -89,3 +102,30 @@ they still have no KAB stored.
 
 The `backfill_kab` command was introduced by
 [AB#326718: Calculate Gender and Age disaggregated group ALSO for Partial Data collecting Type](https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/326718).
+
+## Celery locks
+
+Celery tasks that must not run twice (payment plan rebuilds, RDI import and merge, PDU merge, universal
+update, dashboard reports) hold a lock in the Redis cache for the whole task, with a TTL of hours. A worker
+pod killed on deploy leaves its locks behind, and the redelivered job then fails or skips its work until
+the TTL runs out.
+
+`clear_celery_locks` removes every celery task lock and nothing else from the cache.
+
+!!! danger "Run it only while no celery worker is running"
+    A running worker may hold a live lock. Removing it lets a second instance of the same task start.
+
+Deployment order:
+
+1. Stop all old worker pods.
+2. Run the command once, with the same environment as the workers (it needs `CACHE_LOCATION`):
+
+    ```bash
+    python manage.py clear_celery_locks
+    ```
+
+3. Start the new worker pods.
+
+The command matches keys by prefix. Each prefix is a constant next to the task that takes the lock, and the list in
+`src/hope/apps/core/management/commands/clear_celery_locks.py` must be extended when a task gets a
+lock with a new key.

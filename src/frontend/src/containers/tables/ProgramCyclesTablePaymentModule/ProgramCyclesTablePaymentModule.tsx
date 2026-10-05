@@ -4,6 +4,7 @@ import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
@@ -28,7 +29,7 @@ import {
   formatFigure,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTranslation } from 'react-i18next';
 import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
@@ -46,16 +47,19 @@ export const ProgramCyclesTablePaymentModule = ({
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
-  // Controlled pagination state
-  const [page, setPage] = useState(0);
-  const [queryVariables, setQueryVariables] = useState({
-    offset: 0,
-    limit: 5,
-    ordering: 'created_at',
-    businessAreaSlug: businessArea,
-    programCode: programId,
-    ...filters,
+  const filterVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programCode: programId,
+      ...filters,
+    }),
+    [businessArea, programId, filters],
+  );
+  const table = useTableState({
+    defaultOrdering: 'created_at',
+    resetPageOn: filterVariables,
   });
+  const { page } = table;
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -63,16 +67,11 @@ export const ProgramCyclesTablePaymentModule = ({
   // Don't fetch data when viewing "all programs"
   const shouldFetchData = Boolean(!isAllPrograms && program?.id);
 
-  const rowsPerPage =
-    queryVariables && typeof queryVariables.limit === 'number'
-      ? queryVariables.limit
-      : 5;
   const programCyclesListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    { ...queryVariables, offset: page * rowsPerPage },
-    { withPagination: true },
+    { ...filterVariables, ...table.paginationParams },
   );
-  const { data, refetch, error, isLoading, isFetching } =
+  const { data, error, isLoading, isFetching } =
     useQuery<PaginatedProgramCycleListList>({
       queryKey: restQueryKey(
         RestService.restBusinessAreasProgramsCyclesList,
@@ -89,7 +88,7 @@ export const ProgramCyclesTablePaymentModule = ({
 
   const programCyclesCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -158,14 +157,6 @@ export const ProgramCyclesTablePaymentModule = ({
       },
       mutationKey: ['reactivateProgramCycle', businessArea, program?.id],
     });
-
-  useEffect(() => {
-    setQueryVariables((oldVariables) => ({ ...oldVariables, ...filters }));
-  }, [filters]);
-
-  useEffect(() => {
-    void refetch();
-  }, [queryVariables, refetch]);
 
   const finishAction = async (programCycle: ProgramCycleList) => {
     try {
@@ -252,10 +243,7 @@ export const ProgramCyclesTablePaymentModule = ({
       error={error}
       isLoading={isLoading}
       isFetching={isFetching}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
-      page={page}
-      setPage={setPage}
+      tableState={table}
     />
   );
 };

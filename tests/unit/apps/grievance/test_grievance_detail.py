@@ -58,6 +58,7 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hope.apps.household.const import (
     DUPLICATE,
+    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
@@ -302,6 +303,55 @@ def detail_url_name() -> str:
     return "api:grievance:grievance-tickets-global-detail"
 
 
+@pytest.fixture
+def household_data_update_ticket_with_consent_sign(
+    grievance_ticket_base_data: dict, program: Program, household1: Household
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        **grievance_ticket_base_data,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        household_unicef_id=household1.unicef_id,
+    )
+    ticket.programs.add(program)
+    TicketHouseholdDataUpdateDetailsFactory(
+        ticket=ticket,
+        household=household1,
+        household_data={
+            "consent_sign": {
+                "value": "consent/new-signature.jpg",
+                "previous_value": "consent/old-signature.jpg",
+                "approve_status": False,
+            },
+        },
+    )
+    return ticket
+
+
+@pytest.fixture
+def individual_data_update_ticket_with_consent_sign(
+    grievance_ticket_base_data: dict, program: Program, individuals1: list[Individual]
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        **grievance_ticket_base_data,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+    )
+    ticket.programs.add(program)
+    TicketIndividualDataUpdateDetailsFactory(
+        ticket=ticket,
+        individual=individuals1[0],
+        individual_data={
+            "consent_sign": {
+                "value": "consent/new-signature.jpg",
+                "previous_value": "consent/old-signature.jpg",
+                "approve_status": False,
+            },
+        },
+    )
+    return ticket
+
+
 def assert_base_grievance_data(
     data: dict,
     grievance_ticket: GrievanceTicket,
@@ -455,7 +505,7 @@ def assert_base_grievance_data(
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
                 "delivered_quantities": delivered_quantities
-                or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                or [{"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}],
                 "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ")
                 if individual.household.start
                 else None,
@@ -495,7 +545,7 @@ def assert_base_grievance_data(
                         "total_cash_received": role.household.total_cash_received,
                         "total_cash_received_usd": role.household.total_cash_received_usd,
                         "delivered_quantities": delivered_quantities
-                        or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                        or [{"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}],
                         "start": f"{role.household.start:%Y-%m-%dT%H:%M:%SZ}" if role.household.start else None,
                         "zip_code": role.household.zip_code,
                         "residence_status": role.household.get_residence_status_display(),
@@ -936,6 +986,72 @@ def test_grievance_detail_household_data_update(
     }
 
 
+def test_grievance_detail_household_data_update_returns_consent_sign_as_urls(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    household_data_update_ticket_with_consent_sign: GrievanceTicket,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(household_data_update_ticket_with_consent_sign.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["household_data"]["consent_sign"] == {
+        "value": "/api/uploads/consent/new-signature.jpg",
+        "previous_value": "/api/uploads/consent/old-signature.jpg",
+        "approve_status": False,
+    }
+
+
+def test_grievance_detail_individual_data_update_returns_consent_sign_as_urls(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    individual_data_update_ticket_with_consent_sign: GrievanceTicket,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(individual_data_update_ticket_with_consent_sign.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["individual_data"]["consent_sign"] == {
+        "value": "/api/uploads/consent/new-signature.jpg",
+        "previous_value": "/api/uploads/consent/old-signature.jpg",
+        "approve_status": False,
+    }
+
+
 def test_grievance_detail_individual_data_update(
     authenticated_client: Any,
     afghanistan: BusinessArea,
@@ -1229,7 +1345,9 @@ def test_grievance_detail_delete_household(
             "last_registration_date": ticket_details.reason_household.last_registration_date.strftime("%Y-%m-%d"),
             "total_cash_received": None,
             "total_cash_received_usd": None,
-            "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+            "delivered_quantities": [
+                {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "0.00"}
+            ],
             "start": ticket_details.reason_household.start.strftime("%Y-%m-%dT%H:%M:%SZ")
             if ticket_details.reason_household.start
             else None,
@@ -1373,6 +1491,7 @@ def test_grievance_detail_system_flagging(
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00",
                 }
             ],
@@ -1516,8 +1635,8 @@ def test_grievance_detail_payment_verification(
         linked_ticket=linked_ticket,
         existing_ticket=existing_ticket,
         delivered_quantities=[
-            {"currency": "USD", "total_delivered_quantity": "50.00"},
-            {"currency": "PLN", "total_delivered_quantity": "100.00"},
+            {"currency": "USD", "currency_vision_code": "USD", "total_delivered_quantity": "50.00"},
+            {"currency": "PLN", "currency_vision_code": "PLN", "total_delivered_quantity": "100.00"},
         ],
     )
 
@@ -1729,6 +1848,7 @@ def test_grievance_detail_needs_adjudication(
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00",
                 }
             ],
@@ -1838,6 +1958,7 @@ def test_grievance_detail_needs_adjudication(
             "delivered_quantities": [
                 {
                     "currency": "USD",
+                    "currency_vision_code": "USD",
                     "total_delivered_quantity": "0.00",
                 }
             ],
@@ -1919,6 +2040,7 @@ def test_grievance_detail_needs_adjudication(
                 "delivered_quantities": [
                     {
                         "currency": "USD",
+                        "currency_vision_code": "USD",
                         "total_delivered_quantity": "0.00",
                     }
                 ],
@@ -2012,6 +2134,7 @@ def test_grievance_detail_needs_adjudication(
         "delivered_quantities": [
             {
                 "currency": "USD",
+                "currency_vision_code": "USD",
                 "total_delivered_quantity": "0.00",
             }
         ],
@@ -2984,16 +3107,18 @@ def test_needs_adjudication_comparison_query_count_for_three_duplicates(
 def na_ticket_duplicate_in_mixed_household(
     afghanistan: BusinessArea, program: Program, na_grievance: GrievanceTicket, na_golden_record: Individual
 ) -> TicketNeedsAdjudicationDetails:
-    """Four members in the candidate's household, of which only two are active.
+    """Five members in the candidate's household, of which only two are active.
 
-    Active are the head, which HouseholdFactory creates, and the candidate itself.
-    The withdrawn member and the one an earlier adjudication already marked duplicate do not count.
+    Active are the head, which HouseholdFactory creates, and the candidate itself. The withdrawn
+    member, the one an earlier adjudication already marked duplicate, and the non-beneficiary
+    collector do not count.
     """
     household = HouseholdFactory(program=program, business_area=afghanistan, create_role=False)
     candidate = IndividualFactory(household=household, program=program, business_area=afghanistan)
     IndividualRoleInHouseholdFactory(individual=candidate, household=household, role=ROLE_ALTERNATE)
     IndividualFactory(household=household, program=program, business_area=afghanistan, withdrawn=True)
     IndividualFactory(household=household, program=program, business_area=afghanistan, duplicate=True)
+    IndividualFactory(household=household, program=program, business_area=afghanistan, relationship=NON_BENEFICIARY)
     ticket_details = TicketNeedsAdjudicationDetailsFactory(
         ticket=na_grievance,
         golden_records_individual=na_golden_record,

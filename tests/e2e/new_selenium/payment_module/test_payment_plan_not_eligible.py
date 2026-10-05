@@ -108,7 +108,7 @@ def test_not_eligible_table_status_filter_and_pending_breakdown(
     login.assert_element_absent('li[data-value="Not Eligible"]')
     login.assert_element_absent('li[data-value="Transaction Successful"]')
     login.wait_for_element_visible('li[data-value="Distribution Successful"]')
-    login.wait_for_element_clickable('li[data-value="Pending"]').click()
+    login.select_option_by_name("Pending", selector='li[data-value="Pending"]')
     login.find_elements('button[data-cy="button-filters-apply"]')[0].click()
 
     login.wait_for_element_absent(

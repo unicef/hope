@@ -47,6 +47,7 @@ from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PeriodicAsyncRetryJob,
 )
@@ -167,7 +168,7 @@ def uba_fsp():
 
 @pytest.fixture
 def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
-    return PaymentPlanFactory(
+    payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
         financial_service_provider=pg_fsp,
@@ -176,6 +177,9 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd)
         exchange_rate=Decimal("2.0"),
         currency=currency_usd,
     )
+    payment_plan.payment_plan_group.status = PaymentPlanGroup.Status.ACCEPTED
+    payment_plan.payment_plan_group.save(update_fields=["status"])
+    return payment_plan
 
 
 @pytest.fixture
@@ -364,6 +368,16 @@ def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
             )
         ],
     }
+
+
+@pytest.fixture
+def payment_gateway_setup_in_inactive_currency(payment_gateway_setup, currency_syp_deprecated):
+    """The plan's group and its payments priced in a currency deactivated after they were created."""
+    payment_plan = payment_gateway_setup["payment_plan"]
+    PaymentPlanGroup.objects.filter(pk=payment_plan.payment_plan_group_id).update(currency=currency_syp_deprecated)
+    Payment.objects.filter(parent=payment_plan).update(currency=currency_syp_deprecated)
+    payment_plan.refresh_from_db()
+    return payment_gateway_setup
 
 
 def test_sync_records_batches_updates_and_uses_prefetched_reconciliation(error_records_by_payment_instruction) -> None:
@@ -754,6 +768,10 @@ def test_sync_payment_plan(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
+    assert payment_plan.total_delivered_quantity == Decimal("100.00")
+    assert payment_plan.total_delivered_quantity_usd == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
 
 
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -919,6 +937,10 @@ def test_sync_record(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
+    assert payment_plan.total_delivered_quantity == Decimal("100.00")
+    assert payment_plan.total_delivered_quantity_usd == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
     assert change_payment_instruction_status_mock.call_count == 2
 
 
@@ -1144,6 +1166,50 @@ def test_add_records_to_payment_instructions_for_split_error(
     assert payments[1].status == Payment.STATUS_ERROR
     assert payments[0].reason_for_unsuccessful_payment == "Error"
     assert payments[1].reason_for_unsuccessful_payment == "Error"
+
+
+def test_create_payment_instructions_refuses_plan_in_inactive_currency(
+    payment_gateway_setup_in_inactive_currency: dict,
+) -> None:
+    payment_plan = payment_gateway_setup_in_inactive_currency["payment_plan"]
+    pg_service = PaymentGatewayService()
+    pg_service.api.create_payment_instruction = Mock()
+
+    with pytest.raises(ValueError, match=r"currency SYP - Syrian Pound \(old\) is inactive"):
+        pg_service.create_payment_instructions(payment_plan, "user@example.com")
+
+    pg_service.api.create_payment_instruction.assert_not_called()
+
+
+def test_add_records_to_payment_instructions_refuses_plan_in_inactive_currency(
+    payment_gateway_setup_in_inactive_currency: dict,
+) -> None:
+    payment_plan = payment_gateway_setup_in_inactive_currency["payment_plan"]
+    pg_service = PaymentGatewayService()
+    pg_service.api.add_records_to_payment_instruction = Mock()
+
+    with pytest.raises(ValueError, match=r"currency SYP - Syrian Pound \(old\) is inactive"):
+        pg_service.add_records_to_payment_instructions(payment_plan)
+
+    pg_service.api.add_records_to_payment_instruction.assert_not_called()
+    assert set(payment_plan.payment_items.values_list("status", flat=True)) == {Payment.STATUS_PENDING}
+
+
+def test_sync_records_updates_payments_of_plan_in_inactive_currency(
+    error_records_by_payment_instruction: dict,
+    payment_gateway_setup_in_inactive_currency: dict,
+) -> None:
+    # Payments sent before the currency was deactivated must still get their final status.
+    payment_plan = payment_gateway_setup_in_inactive_currency["payment_plan"]
+    pg_service = PaymentGatewayService()
+    pg_service.api.get_records_for_payment_instruction = Mock(
+        side_effect=error_records_by_payment_instruction.__getitem__
+    )
+
+    with mock.patch.object(pg_service, "change_payment_instruction_status"):
+        pg_service.sync_records()
+
+    assert set(payment_plan.payment_items.values_list("status", flat=True)) == {Payment.STATUS_ERROR}
 
 
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")

@@ -94,10 +94,10 @@ class TestSmokeProgramCycle:
         self, create_program_cycle: ProgramCycle, page_program_cycle: ProgramCyclePage
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         assert "Payment Module" in page_program_cycle.get_page_header_container().text
-        assert "Payment Module" in page_program_cycle.get_page_header_title().text
+        page_program_cycle.assert_page_header_title("Payment Module")
         assert "Status" in page_program_cycle.get_select_filter().text
         assert "" in page_program_cycle.get_date_picker_filter().text
         assert "CLEAR" in page_program_cycle.get_button_filters_clear().text
@@ -156,12 +156,12 @@ class TestSmokeProgramCycle:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         start_date = page_program_cycle.get_program_cycle_start_date_list()[1].text
         end_date = page_program_cycle.get_program_cycle_end_date_list()[1].text
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
-        assert "Test Programme Cycle 001" in page_program_cycle_details.get_page_header_title().text
+        page_program_cycle_details.assert_page_header_title("Test Programme Cycle 001")
         assert "Active" in page_program_cycle_details.get_status_container().text
         assert start_date in page_program_cycle_details.get_label_start_date().text
         assert end_date in page_program_cycle_details.get_label_end_date().text
@@ -176,10 +176,10 @@ class TestProgramCycle:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
-        assert "Test Programme Cycle 001" in page_program_cycle_details.get_page_header_title().text
+        page_program_cycle_details.assert_page_header_title("Test Programme Cycle 001")
         for _ in range(100):
             if "Active" in page_program_cycle_details.get_status_container().text:
                 break
@@ -208,10 +208,10 @@ class TestProgramCycle:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
-        assert "Test Programme Cycle 001" in page_program_cycle_details.get_page_header_title().text
+        page_program_cycle_details.assert_page_header_title("Test Programme Cycle 001")
         assert "Active" in page_program_cycle_details.get_status_container().text
         page_program_cycle_details.get_button_finish_programme_cycle().click()
         page_program_cycle_details.check_alert("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")

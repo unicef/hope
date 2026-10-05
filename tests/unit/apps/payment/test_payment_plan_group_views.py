@@ -3814,7 +3814,25 @@ def test_approve_group_with_permission_returns_200(
     assert response.json()["approval_process"][0]["actions"]["approval"][0]["comment"] == "looks right"
 
 
-def test_reject_group_with_any_acceptance_permission_returns_200(
+def test_reject_group_in_approval_with_approve_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "reject")
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.LOCKED
+
+
+def test_reject_group_in_approval_with_only_authorize_permission_returns_403(
     client: Any,
     user: Any,
     business_area: Any,
@@ -3830,8 +3848,10 @@ def test_reject_group_with_any_acceptance_permission_returns_200(
         _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "reject")
     )
 
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["status"] == PaymentPlanGroup.Status.LOCKED
+    group_in_approval_with_plan.refresh_from_db()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["required_permissions"] == [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.value]
+    assert group_in_approval_with_plan.status == PaymentPlanGroup.Status.IN_APPROVAL
 
 
 def test_mark_group_as_released_without_permission_returns_403(
@@ -3865,3 +3885,149 @@ def test_create_group_records_creator(
 
     assert response.status_code == status.HTTP_201_CREATED
     assert PaymentPlanGroup.objects.get(id=response.json()["id"]).created_by == user
+
+
+@pytest.fixture
+def finished_group_with_plan(business_area: Any, cycle: Any) -> Any:
+    group = PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.FINISHED)
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.FINISHED,
+    )
+    return group
+
+
+@pytest.fixture
+def ready_group_with_plan(business_area: Any, cycle: Any) -> Any:
+    group = PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.READY_FOR_CLOSURE)
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+    )
+    return group
+
+
+@pytest.fixture
+def aborted_group_with_plan(business_area: Any, cycle: Any) -> Any:
+    group = PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.ABORTED)
+    PaymentPlanFactory(
+        business_area=business_area,
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ABORTED,
+    )
+    return group
+
+
+def test_mark_group_ready_for_closure_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    finished_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_MARK_READY_FOR_CLOSURE], business_area, program=program)
+    url = _group_action_url(business_area.slug, program.code, finished_group_with_plan.id, "ready-for-closure")
+
+    response = client.post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.READY_FOR_CLOSURE
+
+
+def test_send_group_back_to_finished_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    ready_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_MARK_READY_FOR_CLOSURE], business_area, program=program)
+    url = _group_action_url(business_area.slug, program.code, ready_group_with_plan.id, "send-back-to-finished")
+
+    response = client.post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.FINISHED
+
+
+def test_close_group_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    ready_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_CLOSE_FINISHED], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, ready_group_with_plan.id, "close"),
+        {"closure_comment": "done"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.CLOSED
+    assert response.json()["closure_comment"] == "done"
+    assert response.json()["closed_by"] == f"{user.first_name} {user.last_name}"
+
+
+def test_close_group_without_permission_returns_403(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    ready_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_MARK_READY_FOR_CLOSURE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, ready_group_with_plan.id, "close"),
+        {"closure_comment": "done"},
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_abort_group_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ABORT], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "abort"),
+        {"abort_comment": "wrong list"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.ABORTED
+    assert response.json()["abort_comment"] == "wrong list"
+
+
+def test_reactivate_aborted_group_with_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    aborted_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_REACTIVATE_ABORT], business_area, program=program)
+    url = _group_action_url(business_area.slug, program.code, aborted_group_with_plan.id, "reactivate-abort")
+
+    response = client.post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.OPEN

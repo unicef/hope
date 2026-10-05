@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list]:
+    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list, list]:
         collision_detector = obj_hct.program.collision_detector
 
         household_ids_to_exclude = []
@@ -79,7 +79,7 @@ class RdiMergeTask:
         obj_hct.extra_hh_rdis.add(*collided_ids)
 
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
-        return households_to_merge_ids, household_ids_to_exclude
+        return households_to_merge_ids, household_ids_to_exclude, list(collided_ids)
 
     def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
         dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids).select_related(
@@ -178,7 +178,9 @@ class RdiMergeTask:
 
             try:
                 with transaction.atomic():
-                    households_to_merge_ids, household_ids_to_exclude = self._process_collisions(obj_hct, household_ids)
+                    households_to_merge_ids, household_ids_to_exclude, collided_ids = self._process_collisions(
+                        obj_hct, household_ids
+                    )
                     individuals_to_merge_ids = list(
                         Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
                         .exclude(household__in=household_ids_to_exclude)
@@ -189,7 +191,7 @@ class RdiMergeTask:
 
                     transaction.on_commit(
                         lambda: recalculate_population_fields_async_task(
-                            [str(household_id) for household_id in households_to_merge_ids],
+                            [str(household_id) for household_id in households_to_merge_ids + collided_ids],
                             str(obj_hct.program_id),
                         )
                     )

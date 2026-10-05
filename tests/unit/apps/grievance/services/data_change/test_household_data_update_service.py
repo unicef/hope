@@ -4,11 +4,15 @@ from typing import Any
 from django.test import TestCase
 from django.utils import timezone
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
     CountryFactory,
+    CurrencyFactory,
+    FacilityFactory,
+    FlexibleAttributeFactory,
     GrievanceTicketFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -20,7 +24,7 @@ from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.data_change.household_data_update_service import HouseholdDataUpdateService
 from hope.apps.household.api.caches import get_household_list_program_key
 from hope.apps.household.const import ROLE_ALTERNATE
-from hope.models import Currency, IndividualRoleInHousehold, Program, User
+from hope.models import Currency, FlexibleAttribute, Household, IndividualRoleInHousehold, Program, User
 from hope.models.utils import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -70,6 +74,10 @@ def household_with_previous_values(program: Program) -> Any:
         start=timezone.make_aware(datetime.datetime(2022, 1, 1)),
         country=CountryFactory(iso_code3="POL"),
         admin1=AreaFactory(p_code="AF9999"),
+        facility=FacilityFactory(
+            name="Old Clinic", business_area=program.business_area, admin_area=AreaFactory(p_code="AF0001")
+        ),
+        consent_sign="consent/old-signature.jpg",
     )
 
 
@@ -97,6 +105,107 @@ def ticket_details_with_requested_data(data_change_ticket: Any, household_with_p
         ticket=data_change_ticket,
         household=household_with_previous_values,
         household_data={"village": {"value": "Test Village", "approve_status": False}},
+    )
+
+
+@pytest.fixture
+def household(program: Program) -> Any:
+    return HouseholdFactory(program=program, business_area=program.business_area, create_role=False)
+
+
+@pytest.fixture
+def household_ticket_details(program: Program, household: Any) -> Any:
+    return TicketHouseholdDataUpdateDetailsFactory(
+        household=household,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={},
+    )
+
+
+@pytest.fixture
+def kabul_clinic(program: Program) -> Any:
+    return FacilityFactory(
+        name="Kabul Clinic", business_area=program.business_area, admin_area=AreaFactory(p_code="AF01")
+    )
+
+
+@pytest.fixture
+def kabul_clinic_in_other_area(program: Program) -> Any:
+    # FacilityFactory get_or_creates on (name, business_area), so a same-named facility is built and saved directly
+    facility = FacilityFactory.build(
+        name="Kabul Clinic", business_area=program.business_area, admin_area=AreaFactory(p_code="AF02")
+    )
+    facility.save()
+    return facility
+
+
+@pytest.fixture
+def household_at_kabul_clinic(household: Any, kabul_clinic: Any) -> Any:
+    household.facility = kabul_clinic
+    household.save(update_fields=["facility"])
+    return household
+
+
+@pytest.fixture
+def household_with_flex_fields(program: Program) -> Any:
+    FlexibleAttributeFactory(
+        name="hh_total_eligible_ind_h_f",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    FlexibleAttributeFactory(
+        name="total_dwellers_h_f",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    return HouseholdFactory(
+        program=program,
+        business_area=program.business_area,
+        create_role=False,
+        flex_fields={"hh_total_eligible_ind_h_f": 1, "total_dwellers_h_f": 3, "living_situation_h_f": "renter"},
+    )
+
+
+@pytest.fixture
+def flex_fields_ticket_details(program: Program, household_with_flex_fields: Any) -> Any:
+    return TicketHouseholdDataUpdateDetailsFactory(
+        household=household_with_flex_fields,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={
+            "flex_fields": {
+                # the value is stored as a string when it comes from the API form
+                "hh_total_eligible_ind_h_f": {"value": "2", "previous_value": 1, "approve_status": True},
+                "total_dwellers_h_f": {"value": 5, "previous_value": 3, "approve_status": False},
+            },
+        },
+    )
+
+
+@pytest.fixture
+def household_with_image_flex_field(program: Program) -> Any:
+    FlexibleAttributeFactory(
+        name="hh_photo_h_f",
+        type=FlexibleAttribute.IMAGE,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    return HouseholdFactory(program=program, business_area=program.business_area, create_role=False, flex_fields={})
+
+
+@pytest.fixture
+def image_flex_field_ticket_details(program: Program, household_with_image_flex_field: Any) -> Any:
+    return TicketHouseholdDataUpdateDetailsFactory(
+        household=household_with_image_flex_field,
+        ticket__business_area=program.business_area,
+        ticket__category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        ticket__issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        ticket__status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        household_data={},
     )
 
 
@@ -209,6 +318,98 @@ def test_update_admin_area_title_strips_p_code_from_label(
     assert details.household_data == {
         "admin_area_title": {"value": "AF0101", "approve_status": False, "previous_value": "AF9999"},
         "flex_fields": {},
+    }
+
+
+def test_save_records_previous_facility_and_consent_sign(
+    household_with_previous_values: Any, data_change_ticket: Any
+) -> None:
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household_with_previous_values,
+                "household_data": {
+                    "facility": "Kabul Clinic",
+                    "facility_admin_area": "AF0002",
+                    "consent_sign": None,
+                },
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=data_change_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "facility": {"value": "Kabul Clinic", "approve_status": False, "previous_value": "OLD CLINIC"},
+        "facility_admin_area": {"value": "AF0002", "approve_status": False, "previous_value": "AF0001"},
+        "consent_sign": {"value": "", "approve_status": False, "previous_value": "consent/old-signature.jpg"},
+        "flex_fields": {},
+    }
+
+
+def test_update_records_previous_facility_and_consent_sign(
+    household_with_previous_values: Any, empty_ticket_details: Any
+) -> None:
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household_with_previous_values,
+            "household_data": {
+                "facility": "Kabul Clinic",
+                "facility_admin_area": "AF0002",
+                "consent_sign": None,
+            },
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=empty_ticket_details.ticket, extras=update_extras)
+    ticket = service.update()
+
+    details = ticket.ticket_details
+    assert details.household_data == {
+        "facility": {"value": "Kabul Clinic", "approve_status": False, "previous_value": "OLD CLINIC"},
+        "facility_admin_area": {"value": "AF0002", "approve_status": False, "previous_value": "AF0001"},
+        "consent_sign": {"value": "", "approve_status": False, "previous_value": "consent/old-signature.jpg"},
+        "flex_fields": {},
+    }
+
+
+def test_save_stores_household_image_flex_field_under_its_storage_name(
+    household_with_image_flex_field: Any, data_change_ticket: Any
+) -> None:
+    extras = {
+        "issue_type": {
+            "household_data_update_issue_type_extras": {
+                "household": household_with_image_flex_field,
+                "household_data": {"flex_fields": {"hh_photo_h_f": "/api/uploads/house%20front.jpg"}},
+            }
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=data_change_ticket, extras=extras)
+    ticket = service.save()[0]
+
+    assert ticket.ticket_details.household_data == {
+        "flex_fields": {"hh_photo_h_f": {"value": "house front.jpg", "approve_status": False, "previous_value": None}},
+    }
+
+
+def test_update_stores_household_image_flex_field_under_its_storage_name(
+    household_with_image_flex_field: Any, image_flex_field_ticket_details: Any
+) -> None:
+    update_extras = {
+        "household_data_update_issue_type_extras": {
+            "household": household_with_image_flex_field,
+            "household_data": {"flex_fields": {"hh_photo_h_f": "/api/uploads/house%20front.jpg"}},
+        }
+    }
+
+    service = HouseholdDataUpdateService(grievance_ticket=image_flex_field_ticket_details.ticket, extras=update_extras)
+    ticket = service.update()
+
+    assert ticket.ticket_details.household_data == {
+        "flex_fields": {"hh_photo_h_f": {"value": "house front.jpg", "approve_status": False, "previous_value": None}},
     }
 
 
@@ -569,6 +770,143 @@ def test_close_household_update_invalidates_cache(program: Program, user: User) 
     assert get_household_list_program_key(program.id) > hh_cache_before
 
 
+def test_close_household_update_applies_only_approved_flex_fields(
+    household_with_flex_fields: Any, flex_fields_ticket_details: Any, user: User
+) -> None:
+    service = HouseholdDataUpdateService(grievance_ticket=flex_fields_ticket_details.ticket, extras={})
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        service.close(user)
+
+    household_with_flex_fields.refresh_from_db()
+    assert household_with_flex_fields.flex_fields == {
+        "hh_total_eligible_ind_h_f": 2,
+        "total_dwellers_h_f": 3,
+        "living_situation_h_f": "renter",
+    }
+
+
+def test_close_household_update_applies_approved_facility(
+    household: Any, household_ticket_details: Any, kabul_clinic: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility": {"value": "Kabul Clinic", "previous_value": None, "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+    service.close(user)
+
+    household.refresh_from_db()
+    assert household.facility == kabul_clinic
+
+
+def test_close_household_update_resolves_facility_by_name_and_admin_area(
+    household: Any,
+    household_ticket_details: Any,
+    kabul_clinic: Any,
+    kabul_clinic_in_other_area: Any,
+    user: User,
+) -> None:
+    household_ticket_details.household_data = {
+        "facility": {"value": "Kabul Clinic", "previous_value": None, "approve_status": True},
+        "facility_admin_area": {"value": "AF02", "previous_value": None, "approve_status": True},
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+    service.close(user)
+
+    household.refresh_from_db()
+    assert household.facility == kabul_clinic_in_other_area
+
+
+def test_close_household_update_rejects_ambiguous_facility_name(
+    household_ticket_details: Any, kabul_clinic: Any, kabul_clinic_in_other_area: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility": {"value": "Kabul Clinic", "previous_value": None, "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+
+    with pytest.raises(ValidationError, match="Kabul Clinic does not match exactly one facility"):
+        service.close(user)
+
+
+def test_close_household_update_moves_facility_to_approved_admin_area(
+    household_at_kabul_clinic: Any, household_ticket_details: Any, kabul_clinic_in_other_area: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility_admin_area": {"value": "AF02", "previous_value": "AF01", "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+    service.close(user)
+
+    household_at_kabul_clinic.refresh_from_db()
+    assert household_at_kabul_clinic.facility == kabul_clinic_in_other_area
+
+
+def test_close_household_update_rejects_admin_area_without_facility(
+    household_ticket_details: Any, kabul_clinic: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility_admin_area": {"value": "AF01", "previous_value": None, "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+
+    with pytest.raises(ValidationError, match="has no facility to move"):
+        service.close(user)
+
+
+def test_close_household_update_rejects_facility_name_without_a_match(
+    household_ticket_details: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility": {"value": "No Such Place", "previous_value": None, "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+
+    with pytest.raises(ValidationError, match="does not match exactly one facility"):
+        service.close(user)
+
+
+def test_close_household_update_clears_facility_when_approved_value_is_blank(
+    household_at_kabul_clinic: Any, household_ticket_details: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "facility": {"value": "", "previous_value": "Kabul Clinic", "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+    service.close(user)
+
+    household_at_kabul_clinic.refresh_from_db()
+    assert household_at_kabul_clinic.facility is None
+
+
+def test_close_household_update_applies_approved_consent_sign(
+    household: Any, household_ticket_details: Any, user: User
+) -> None:
+    household_ticket_details.household_data = {
+        "consent_sign": {"value": "consent/signature.jpg", "previous_value": "", "approve_status": True}
+    }
+    household_ticket_details.save()
+
+    service = HouseholdDataUpdateService(household_ticket_details.ticket, {})
+    service.close(user)
+
+    household.refresh_from_db()
+    assert household.consent_sign.name == "consent/signature.jpg"
+
+
 def test_save_currency_change_records_previous_value_as_code(all_currencies: None) -> None:
     usd_currency = Currency.objects.get(code="USD")
     household = HouseholdFactory(create_role=False, currency=usd_currency)
@@ -729,3 +1067,133 @@ def test_close_resolves_currency_from_code(all_currencies) -> None:
 
     usd_currency = Currency.objects.get(code="USD")
     assert household.currency == usd_currency
+
+
+@pytest.fixture
+def deprecated_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound Old", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def current_syp() -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian pound", vision_code="SYP01", active=True)
+
+
+@pytest.fixture
+def household_without_currency() -> Household:
+    return HouseholdFactory(create_role=False, currency=None)
+
+
+@pytest.fixture
+def ticket_setting_currency_to_syp(household_without_currency: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_without_currency,
+        household_data={
+            "currency": {"value": "SYP", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_resolves_active_currency_for_shared_code(
+    ticket_setting_currency_to_syp: GrievanceTicket,
+    household_without_currency: Household,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    user: User,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_setting_currency_to_syp, {})
+    service.close(user)
+    household_without_currency.refresh_from_db()
+
+    assert household_without_currency.currency == current_syp
+
+
+@pytest.fixture
+def household_on_deprecated_syp(deprecated_syp: Currency) -> Household:
+    return HouseholdFactory(create_role=False, currency=deprecated_syp)
+
+
+@pytest.fixture
+def ticket_resubmitting_syp(household_on_deprecated_syp: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_on_deprecated_syp,
+        household_data={
+            "currency": {"value": "SYP", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_moves_household_off_deprecated_currency_for_same_code(
+    ticket_resubmitting_syp: GrievanceTicket,
+    household_on_deprecated_syp: Household,
+    current_syp: Currency,
+    user: User,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_resubmitting_syp, {})
+    service.close(user)
+    household_on_deprecated_syp.refresh_from_db()
+
+    assert household_on_deprecated_syp.currency == current_syp
+
+
+@pytest.fixture
+def ticket_setting_currency_to_the_syp_alias(household_without_currency: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_without_currency,
+        household_data={
+            "currency": {"value": "SYP01", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_resolves_the_vision_code_alias_to_the_active_row(
+    ticket_setting_currency_to_the_syp_alias: GrievanceTicket,
+    household_without_currency: Household,
+    deprecated_syp: Currency,
+    current_syp: Currency,
+    user: User,
+    django_assert_num_queries,
+) -> None:
+    service = HouseholdDataUpdateService(ticket_setting_currency_to_the_syp_alias, {})
+    with django_assert_num_queries(21):
+        service.close(user)
+    household_without_currency.refresh_from_db()
+
+    assert household_without_currency.currency == current_syp
+
+
+@pytest.fixture
+def ticket_setting_a_retired_currency(household_on_deprecated_syp: Household) -> GrievanceTicket:
+    ticket_details = TicketHouseholdDataUpdateDetailsFactory(
+        household=household_on_deprecated_syp,
+        household_data={
+            "currency": {"value": "VEF", "approve_status": True},
+        },
+    )
+    ticket = ticket_details.ticket
+    ticket.save()
+    return ticket
+
+
+def test_close_clears_the_currency_for_a_code_without_an_active_row(
+    ticket_setting_a_retired_currency: GrievanceTicket,
+    household_on_deprecated_syp: Household,
+    currency_retired: Currency,
+    user: User,
+) -> None:
+    # The ticket does not validate FK codes on entry, so close stores NULL for an unresolvable
+    # code, as it does for country.
+    service = HouseholdDataUpdateService(ticket_setting_a_retired_currency, {})
+    service.close(user)
+    household_on_deprecated_syp.refresh_from_db()
+
+    assert household_on_deprecated_syp.currency is None

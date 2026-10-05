@@ -66,7 +66,9 @@ export function RdiAutocompleteRestFilter({
       RestService.restBusinessAreasProgramsRegistrationDataImportsList(
         queryVariables,
       ),
-    enabled: !!programId && !!businessArea,
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: !!programId && !!businessArea && (open || !!value),
   });
 
   useEffect(() => {
@@ -164,7 +166,6 @@ export function RdiAutocompleteRestFilter({
       }}
       handleOptionSelected={handleOptionSelected}
       handleOptionLabel={handleOptionLabel}
-      data={rdiData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

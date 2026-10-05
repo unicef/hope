@@ -185,10 +185,11 @@ class PaymentPlanService:
         allow_instruction_managed: bool = False,
     ) -> PaymentPlan:
         """Get function from get_action_function and execute it return PaymentPlan object."""
-        if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
-            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         payment_plan_group = self.payment_plan.payment_plan_group
-        if payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
+        if self.payment_plan.is_instruction_managed:
+            if not allow_instruction_managed:
+                raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
+        elif payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
             raise ValidationError("This Payment Plan is managed by its Payment Plan Group.")
         self.action = input_data.get("action")
         self.input_data = input_data
@@ -438,6 +439,12 @@ class PaymentPlanService:
         fsp = getattr(self.payment_plan, "financial_service_provider", None)
         if not dm or not fsp:
             raise ValidationError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
 
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
             self.payment_plan.eligible_payments.update(
@@ -1586,7 +1593,7 @@ class PaymentPlanService:
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
 
-    def ready_for_closure(self, user: "User", *, notify: bool = True) -> PaymentPlan:
+    def ready_for_closure(self) -> PaymentPlan:
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
             if payment_plan.status != PaymentPlan.Status.FINISHED:
@@ -1597,18 +1604,11 @@ class PaymentPlanService:
             flow.status_ready_for_closure()
             payment_plan.save(update_fields=("status", "status_date", "updated_at"))
             payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
-            if notify:
-                send_payment_notification_emails_async_task(
-                    payment_plan,
-                    PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
-                    str(user.pk),
-                    timezone.now().isoformat(),
-                )
 
         self.payment_plan = payment_plan
         return self.payment_plan
 
-    def send_back_to_finished(self, user: "User") -> PaymentPlan:
+    def send_back_to_finished(self) -> PaymentPlan:
         with transaction.atomic():
             payment_plan = PaymentPlan.objects.select_for_update().get(pk=self.payment_plan.pk)
             if payment_plan.status != PaymentPlan.Status.READY_FOR_CLOSURE:
@@ -1619,12 +1619,6 @@ class PaymentPlanService:
             flow.status_finished()
             payment_plan.save(update_fields=("status", "status_date", "updated_at"))
             payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
-            send_payment_notification_emails_async_task(
-                payment_plan,
-                PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
-                str(user.pk),
-                timezone.now().isoformat(),
-            )
 
         self.payment_plan = payment_plan
         return self.payment_plan

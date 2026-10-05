@@ -847,3 +847,9 @@ def test_single_unwithdraw_button_requires_withdrawn_permission(withdrawn_househ
     response = client.post(url, {"tag": "", "reason": ""})
 
     assert response.status_code == 403
+
+
+def test_household_admin_withdrawn_is_read_only() -> None:
+    household_admin = HouseholdAdmin(Household, AdminSite())
+
+    assert "withdrawn" in household_admin.readonly_fields

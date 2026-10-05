@@ -16,11 +16,12 @@ function formatInstructionAmount(
   amount: number,
   amountUsd: number,
   currency?: string | null,
+  visionCode?: string | null,
 ): string {
   if (!currency) {
     return formatCurrencyWithSymbol(amountUsd, 'USD');
   }
-  return `${formatCurrencyWithSymbol(amount, currency)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
+  return `${formatCurrencyWithSymbol(amount, currency, visionCode)} (${formatCurrencyWithSymbol(amountUsd, 'USD')})`;
 }
 
 export function FollowUpInstructionSummary({
@@ -51,6 +52,7 @@ export function FollowUpInstructionSummary({
                 instruction.totalEntitledQuantity,
                 instruction.totalEntitledQuantityUsd,
                 instruction.currency,
+                instruction.currencyVisionCode,
               )}
             </LabelizedField>
           </Grid>
@@ -60,6 +62,7 @@ export function FollowUpInstructionSummary({
                 instruction.totalDeliveredQuantity,
                 instruction.totalDeliveredQuantityUsd,
                 instruction.currency,
+                instruction.currencyVisionCode,
               )}
             </LabelizedField>
           </Grid>
@@ -69,6 +72,7 @@ export function FollowUpInstructionSummary({
                 instruction.totalUndeliveredQuantity,
                 instruction.totalUndeliveredQuantityUsd,
                 instruction.currency,
+                instruction.currencyVisionCode,
               )}
             </LabelizedField>
           </Grid>

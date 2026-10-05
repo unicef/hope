@@ -13,6 +13,7 @@ from hope.apps.payment.celery_tasks import (
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.apps.payment.utils import inactive_currency_reason
 from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup, log_create
 
 if TYPE_CHECKING:
@@ -82,7 +83,11 @@ class FollowUpInstructionService:
         if None in delivery_mechanism_ids or len(delivery_mechanism_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Delivery Mechanism.")
         if None in currency_ids or len(currency_ids) != 1:
-            raise ValidationError("Applicable Payment Plans must share the same Currency.")
+            # Variants of one redenominated currency share `code`; str() carries `vision_code` to tell them apart.
+            found = sorted(
+                {str(payment_plan.currency) if payment_plan.currency else "none" for payment_plan in source_plans}
+            )
+            raise ValidationError(f"Applicable Payment Plans must share the same Currency. Found: {', '.join(found)}.")
 
     @transaction.atomic
     def create(
@@ -117,7 +122,11 @@ class FollowUpInstructionService:
 
     def _get_child_payment_plans(self) -> list[PaymentPlan]:
         instruction = self._require_instruction()
-        return list(instruction.payment_plans.select_related("program_cycle__program").order_by("created_at"))
+        return list(
+            instruction.payment_plans.select_related("program_cycle__program", "payment_plan_group__currency").order_by(
+                "created_at"
+            )
+        )
 
     def _require_instruction(self) -> FollowUpInstruction:
         if self.instruction is None:
@@ -157,6 +166,11 @@ class FollowUpInstructionService:
                 "Instruction delivery export requires an FSP XLSX Template for the shared Financial Service Provider "
                 "and Delivery Mechanism."
             )
+
+    def _validate_currency_is_active(self) -> None:
+        # Child plans share one currency (_validate_shared_configuration), so the first one speaks for all.
+        if reason := inactive_currency_reason(self._get_child_payment_plans()[0]):
+            raise ValidationError(reason)
 
     def _validate_no_background_action_in_progress(self, action_label: str) -> None:
         instruction = self._require_instruction()
@@ -210,9 +224,7 @@ class FollowUpInstructionService:
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             service = PaymentPlanService(payment_plan)
-            # Bulk close auto-advances FINISHED → READY_FOR_CLOSURE → CLOSED with no manual pause,
-            # so suppress the "ready for closure" email.
-            service.ready_for_closure(user, notify=False)
+            service.ready_for_closure()
             updated_payment_plan = service.close(
                 closure_comment="Comment",
                 user_id=str(user.pk),
@@ -251,6 +263,7 @@ class FollowUpInstructionService:
         self._validate_no_background_action_in_progress("Instruction reconciliation export")
         self._validate_instruction_has_eligible_payments()
         self._validate_delivery_template_exists()
+        self._validate_currency_is_active()
         flow = FollowUpInstructionFlow(instruction)
         flow.background_action_status_xlsx_exporting()
         instruction.save(update_fields=["background_action_status", "updated_at"])

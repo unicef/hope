@@ -9,7 +9,7 @@ from _pytest.config.argparsing import Parser
 from constance import config as constance_config
 from constance.backends.memory import MemoryBackend
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch import Elasticsearch
 from elasticsearch.dsl import connections
@@ -71,6 +71,28 @@ def currency_usd(db: Any) -> Currency:
 @pytest.fixture
 def currency_usdc(db: Any) -> Currency:
     return CurrencyFactory(code="USDC", name="USD Coin", is_crypto=True)
+
+
+@pytest.fixture
+def currency_syp_deprecated(db: Any) -> Currency:
+    return CurrencyFactory(code="SYP", name="Syrian Pound (old)", vision_code="SYP", active=False)
+
+
+@pytest.fixture
+def currency_syp(currency_syp_deprecated: Currency) -> Currency:
+    """The active SYP after the redenomination, always beside the deprecated row sharing its ``code``.
+
+    ``Meta.ordering`` sorts the deprecated row first, so a lookup relying on ``.first()`` picks it.
+    ``SYP01`` is its ``vision_code``, which inputs accept as a transitional alias. Do not combine
+    with ``all_currencies``: it seeds the pre-redenomination rows, which collide with these.
+    """
+    return CurrencyFactory(code="SYP", name="Syrian Pound", vision_code="SYP01", active=True)
+
+
+@pytest.fixture
+def currency_retired(db: Any) -> Currency:
+    """A currency withdrawn without a successor: its code has only an inactive row."""
+    return CurrencyFactory(code="VEF", name="Venezuelan Bolivar", vision_code="VEF", active=False)
 
 
 @pytest.fixture
@@ -158,7 +180,11 @@ def pytest_configure(config: Config) -> None:
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
-        }
+        },
+        "sessions": {
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
+            "LOCATION": "sessions",
+        },
     }
     settings.ELASTICSEARCH_DSL_AUTOSYNC = False
     logging.disable(logging.CRITICAL)
@@ -312,6 +338,7 @@ def register_custom_sql_signal(django_db_setup: Any, django_db_blocker: Any) -> 
 @pytest.fixture(autouse=True)
 def clear_cache_before_each_test() -> None:
     cache.clear()
+    caches["sessions"].clear()
 
 
 @pytest.fixture(autouse=True)

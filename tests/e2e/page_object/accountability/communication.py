@@ -6,7 +6,6 @@ from e2e.page_object.base_components import BaseComponents
 class AccountabilityCommunication(BaseComponents):
     # Locators
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_communication_create_new = 'a[data-cy="button-communication-create-new"]'
     filters_target_population_autocomplete = 'div[data-cy="filters-target-population-autocomplete"]'
     target_population_input = 'div[data-cy="Target Population-input"]'
@@ -23,9 +22,6 @@ class AccountabilityCommunication(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_communication_create_new(self) -> WebElement:
         return self.wait_for(self.button_communication_create_new)

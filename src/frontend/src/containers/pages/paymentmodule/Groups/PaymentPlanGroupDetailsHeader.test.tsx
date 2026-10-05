@@ -116,6 +116,11 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     expect(
       screen.getByText('Reset rows with empty/null delivered_quantity'),
     ).not.toBeNull();
+    expect(
+      screen.getByText(
+        'Any non-empty delivered quantity in this upload will replace the existing reconciliation result. The selected option only controls rows with an empty delivered quantity.',
+      ),
+    ).not.toBeNull();
   });
 
   it('hides override controls without the override permission', () => {
