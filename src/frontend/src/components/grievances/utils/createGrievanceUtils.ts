@@ -46,13 +46,25 @@ export function isSystemGenerated(category: any, issueType?: number): boolean {
     cat === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   );
 }
-export const getIssueTypeToDisplay = (issueType: number): string =>
-  (issueType &&
+// The label comes from the issue type choices ({category, label, subCategories: {value: name}});
+// the title-cased constant name is only a fallback while choices are missing.
+export const getIssueTypeToDisplay = (
+  issueType: number,
+  issueTypeChoices?: Array<Record<string, any>>,
+): string => {
+  if (!issueType) return '';
+  const label = issueTypeChoices
+    ?.map((category) => category.subCategories?.[issueType])
+    .find(Boolean);
+  return (
+    label ||
     GRIEVANCE_ISSUE_TYPES_NAMES[issueType]
       ?.toLowerCase()
       ?.replace(/_/g, ' ')
-      ?.replace(/\b\w/g, (char) => char.toUpperCase())) ||
-  '';
+      ?.replace(/\b\w/g, (char) => char.toUpperCase()) ||
+    ''
+  );
+};
 
 export const selectedIssueType = (formValues, issueTypeDict): string => {
   const subCategoriesObj =
@@ -442,10 +454,10 @@ export const categoriesAndColors = [
   { category: 'Grievance Complaint', color: '#023E90' },
   { category: 'Needs Adjudication', color: '#05C9B7' },
   { category: 'Negative Feedback', color: '#FF0200' },
-  { category: 'Payment Verification', color: '#FFE399' },
+  { category: 'Payment Verification', color: '#8D6E63' },
   { category: 'Positive Feedback', color: '#13CB17' },
-  { category: 'Referral', color: '#FFAA20' },
-  { category: 'Sensitive Grievance', color: '#7FCB28' },
+  { category: 'Referral', color: '#D63384' },
+  { category: 'Sensitive Grievance', color: '#910813' },
   { category: 'System Flagging', color: '#00867B' },
   { category: 'Beneficiary', color: '#8B5CF6' },
 ];

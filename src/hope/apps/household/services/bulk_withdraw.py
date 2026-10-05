@@ -8,6 +8,7 @@ from hope.apps.core.utils import JSONBSet
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.signals import increment_grievance_ticket_version_cache_for_ticket_ids
 from hope.apps.household.api.caches import invalidate_household_and_individual_list_cache
+from hope.apps.household.celery_tasks import recalculate_population_fields_async_task
 from hope.apps.program.signals import adjust_program_size
 from hope.models import Document, Individual, Program
 
@@ -19,6 +20,7 @@ class HouseholdBulkWithdrawService:
     @transaction.atomic
     def withdraw(self, households_qs: QuerySet, tag: str = "", processed_ticket_id: int | None = None) -> int:
         households = households_qs.filter(withdrawn=False)
+        household_ids = [str(household_id) for household_id in households.values_list("id", flat=True)]
         individuals = Individual.objects.filter(household__in=households, withdrawn=False, duplicate=False)
 
         tickets = GrievanceTicket.objects.belong_households_individuals(households, individuals)
@@ -48,12 +50,14 @@ class HouseholdBulkWithdrawService:
 
         invalidate_household_and_individual_list_cache(self.program.id)
         adjust_program_size(self.program)
+        self._schedule_recalculation(household_ids)
 
         return count
 
     @transaction.atomic
     def unwithdraw(self, households_qs: QuerySet, reopen_tickets: bool = True) -> int:
         households = households_qs.filter(withdrawn=True)
+        household_ids = [str(household_id) for household_id in households.values_list("id", flat=True)]
         individuals = Individual.objects.filter(household__in=households, duplicate=False)
 
         if reopen_tickets:
@@ -80,5 +84,19 @@ class HouseholdBulkWithdrawService:
 
         invalidate_household_and_individual_list_cache(self.program.id)
         adjust_program_size(self.program)
+        self._schedule_recalculation(household_ids)
 
         return count
+
+    def _schedule_recalculation(self, household_ids: list[str]) -> None:
+        """Refresh composition and KAB counters for the affected households.
+
+        Bulk .update() bypasses signals, so the counters would otherwise keep their pre-withdrawal
+        values.
+        """
+        if not household_ids:
+            return
+        program_id = str(self.program.id)
+        transaction.on_commit(
+            lambda: recalculate_population_fields_async_task(household_ids=household_ids, program_id=program_id)
+        )

@@ -162,20 +162,25 @@ class TicketsByChoice(DashboardDataset):
         return transform_to_chart_dataset(sorted(self.counts.items(), key=lambda item: (-item[1], item[0] or "")))
 
 
+NO_LOCATION_LABEL = "No Location"
+
+
 @dataclass
 class TicketsByLocationAndCategory(DashboardDataset):
-    """Per-admin2 category breakdown, one row per area name and one series per category."""
+    """Per-admin2 category breakdown, one row per area name and one series per category.
 
-    per_area: dict[Any, list[int]] = field(default_factory=lambda: defaultdict(lambda: [0] * len(TICKET_SERIES)))
+    Tickets without an admin2 go to a trailing "No Location" row, so every category sums to the
+    same total as in `tickets_by_category`.
+    """
+
+    per_area: dict[UUID, list[int]] = field(default_factory=lambda: defaultdict(lambda: [0] * len(TICKET_SERIES)))
+    no_location: list[int] = field(default_factory=lambda: [0] * len(TICKET_SERIES))
 
     def add(self, group: TicketGroup) -> None:
         admin2, category = group["admin2"], group["category"]
-
-        if admin2 is None:
-            return
-
+        row = self.no_location if admin2 is None else self.per_area[admin2]
         category_index = TICKET_SERIES[category]["index"]
-        self.per_area[admin2][category_index] += group["ticket_count"]
+        row[category_index] += group["ticket_count"]
 
     def result(self) -> dict[str, Any]:
         rows: dict[str, list[int]] = {}
@@ -184,12 +189,18 @@ class TicketsByLocationAndCategory(DashboardDataset):
             for index, count in enumerate(self.per_area[area_id]):
                 row[index] += count
 
-        if not rows:
+        # Kept apart from `rows`, which merges by name: an area called "No Location" must not absorb it.
+        labels, values = list(rows), list(rows.values())
+        if any(self.no_location):
+            labels.append(NO_LOCATION_LABEL)
+            values.append(self.no_location)
+
+        if not values:
             return {"labels": [], "datasets": []}
 
-        columns = zip(*rows.values(), strict=True)
+        columns = zip(*values, strict=True)
         return {
-            "labels": list(rows),
+            "labels": labels,
             "datasets": [
                 {"label": series["label"], "data": list(column)}
                 for series, column in zip(TICKET_SERIES.values(), columns, strict=True)

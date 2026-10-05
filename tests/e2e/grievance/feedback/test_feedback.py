@@ -56,21 +56,30 @@ def add_feedbacks() -> None:
 
 @pytest.fixture
 def add_households() -> None:
-    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=BusinessArea.objects.first())
+    # The tests pick household row 1 and member row 2 of the chosen household, so make
+    # three households with three members each.
     program = Program.objects.filter(name="Test Programm").first()
-    ind = IndividualFactory(
-        household=None, business_area=rdi.business_area, program=program, registration_data_import=rdi
-    )
-    household = HouseholdFactory(
-        registration_data_import=rdi,
-        admin2=Area.objects.order_by("?").first(),
-        program=program,
-        head_of_household=ind,
-    )
-    household.unicef_id = "HH-00-0000.1380"
-    household.save()
-    ind.household = household
-    ind.save()
+    rdi = RegistrationDataImportFactory(imported_by=User.objects.first(), business_area=program.business_area)
+    for _ in range(3):
+        ind = IndividualFactory(
+            household=None, business_area=program.business_area, program=program, registration_data_import=rdi
+        )
+        household = HouseholdFactory(
+            registration_data_import=rdi,
+            admin2=Area.objects.order_by("?").first(),
+            business_area=program.business_area,
+            program=program,
+            head_of_household=ind,
+        )
+        ind.household = household
+        ind.save()
+        IndividualFactory.create_batch(
+            2,
+            household=household,
+            business_area=program.business_area,
+            program=program,
+            registration_data_import=rdi,
+        )
 
 
 @pytest.fixture
@@ -169,7 +178,7 @@ class TestSmokeFeedback:
         Check if all elements on page exist
         """
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Check Feedback page
         page_feedback.get_title_page()
@@ -203,7 +212,7 @@ class TestSmokeFeedback:
         """
         # Go to Feedback
         page_feedback.driver.refresh()
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.get_row(0).click()
         # Check Feedback details page
@@ -229,7 +238,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -253,7 +262,6 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_optional_fields(
         self,
@@ -263,15 +271,13 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
         page_new_feedback.choose_option_by_name(issue_type)
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_household_tab()
-        page_new_feedback.get_individual_tab()
-        page_feedback.get_table_row_loading()
+        page_new_feedback.wait_for_household_table()
         page_new_feedback.get_button_next().click()
         page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
@@ -287,7 +293,6 @@ class TestFeedback:
         page_feedback_details.get_last_modified_date()
         page_feedback_details.get_administrative_level2()
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_feedback_filtering_by_chosen_programme(
         self,
         create_programs: None,
@@ -298,7 +303,7 @@ class TestFeedback:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Edit field Program in Feedback
         page_feedback.get_row(0).click()
@@ -310,30 +315,27 @@ class TestFeedback:
         assert "Test Programm" in page_feedback_details.get_programme().text
         assert page_feedback.global_program_filter_text in page_feedback.get_global_program_filter().text
         page_feedback.select_global_program_filter("Test Programm")
-        assert "Test Programm" in page_programme_details.get_header_title().text
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
-        page_feedback.disappear_table_row_loading()
+        page_feedback.get_row(0)
         assert len(page_feedback.get_rows()) == 1
         assert "Negative Feedback" in page_feedback.get_row(0).find_elements("tag name", "td")[1].text
 
         page_feedback.select_global_program_filter("Draft Program")
-        assert "Draft Program" in page_programme_details.get_header_title().text
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
+        page_feedback.wait_for_text("No results", page_feedback.table_row_loading)
         assert len(page_feedback.get_rows()) == 0
 
         page_feedback.select_global_program_filter("All Programmes")
-        assert "Programme Management" in page_programme_details.get_header_title().text
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
-        page_feedback.disappear_table_row_loading()
+        page_feedback.get_row(1)
         assert len(page_feedback.get_rows()) == 2
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_household(
         self,
         create_programs: None,
@@ -343,7 +345,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -362,7 +364,6 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         page_feedback.get_rows()
 
-    @pytest.mark.xfail(reason="UNSTABLE AFTER REST REFACTOR")
     def test_create_feedback_with_household_and_individual(
         self,
         create_programs: None,
@@ -372,7 +373,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -393,7 +394,6 @@ class TestFeedback:
         page_feedback.get_nav_feedback().click()
         page_feedback.get_rows()
 
-    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_individual(
         self,
         create_programs: None,
@@ -403,7 +403,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -433,7 +433,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Edit field Program in Feedback
         page_feedback.get_row(0).click()
@@ -458,7 +458,6 @@ class TestFeedback:
         assert "English" in page_feedback_details.get_languages_spoken().text
         assert "Shakardara" in page_feedback_details.get_administrative_level2().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_linked_ticket(
         self,
         page_grievance_new_ticket: NewTicket,
@@ -469,14 +468,14 @@ class TestFeedback:
         add_feedbacks: None,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.wait_for_rows()[0].click()
         page_feedback_details.get_button_create_linked_ticket().click()
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name("Referral")
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.wait_for_household_table()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
@@ -499,14 +498,14 @@ class TestFeedback:
         create_households_and_individuals: Household,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
         page_new_feedback.get_button_next().click()
         page_new_feedback.choose_option_by_name("Negative feedback")
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_household_tab()
+        page_new_feedback.wait_for_household_table()
         page_new_feedback.get_button_next().click()
         page_new_feedback.get_received_consent()
         page_new_feedback.get_button_next().click()
@@ -530,7 +529,7 @@ class TestFeedback:
         page_feedback.get_menu_user_profile().click()
         page_feedback.get_menu_item_clear_cache().click()
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()

@@ -76,10 +76,10 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
         if not serializer.validated_vision_payplan_sno:
             response_data = self._build_response(VISION_RESPONSE_KO, serializer)
             self._append_log(payment_plan, serializer.external_payload, response_data)
-            if (
-                payment_plan.vision_integration_enabled
-                and payment_plan.vision_status == VisionStatus.WAITING_FOR_CALLBACK.value
-            ):
+            if payment_plan.vision_integration_enabled and payment_plan.vision_status in {
+                VisionStatus.WAITING_FOR_CALLBACK.value,
+                VisionStatus.PP_CREATED.value,
+            }:
                 VisionService.set_status(payment_plan, VisionStatus.CALLBACK_FAILED)
             payment_plan.save(update_fields=["internal_data"])
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)

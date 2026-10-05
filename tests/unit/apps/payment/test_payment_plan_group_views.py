@@ -3814,7 +3814,25 @@ def test_approve_group_with_permission_returns_200(
     assert response.json()["approval_process"][0]["actions"]["approval"][0]["comment"] == "looks right"
 
 
-def test_reject_group_with_any_acceptance_permission_returns_200(
+def test_reject_group_in_approval_with_approve_permission_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "reject")
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.LOCKED
+
+
+def test_reject_group_in_approval_with_only_authorize_permission_returns_403(
     client: Any,
     user: Any,
     business_area: Any,
@@ -3830,8 +3848,10 @@ def test_reject_group_with_any_acceptance_permission_returns_200(
         _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "reject")
     )
 
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["status"] == PaymentPlanGroup.Status.LOCKED
+    group_in_approval_with_plan.refresh_from_db()
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["required_permissions"] == [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.value]
+    assert group_in_approval_with_plan.status == PaymentPlanGroup.Status.IN_APPROVAL
 
 
 def test_mark_group_as_released_without_permission_returns_403(

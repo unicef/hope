@@ -34,11 +34,12 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
         *,
         unicef_id: str = "PP001",
         currency_code: str = "USD",
+        currency_vision_code: str | None = None,
         created_at: datetime = datetime(2025, 1, 1),
         exchange_rate: Decimal | None = Decimal("1.25000000"),
     ) -> PaymentPlan:
         business_area = BusinessAreaFactory(code="FI01")
-        currency = CurrencyFactory(code=currency_code)
+        currency = CurrencyFactory(code=currency_code, vision_code=currency_vision_code or currency_code)
         financial_service_provider = FinancialServiceProviderFactory(
             name="Head Vendor Name",
             vision_vendor_number="V100004",
@@ -155,6 +156,7 @@ def _make_mock_payment_plan(**overrides) -> MagicMock:
         setattr(pp, k, v)
     pp.business_area.code = fields.get("_business_area_code", "FI01")
     pp.currency.code = fields.get("_currency_code", "USD")
+    pp.currency.vision_code = fields.get("_currency_vision_code", pp.currency.code)
     pp.financial_service_provider.name = fields.get("_fsp_name", "Head Vendor Name")
     pp.financial_service_provider.vision_vendor_number = fields.get("_vision_vendor_number", "V100004")
     pp.internal_data = {}
@@ -226,6 +228,25 @@ def test_send_payment_plan_with_different_currency(
             "headVendor": "Head Vendor Name",
         },
     )
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_send_payment_plan_sends_vision_code_not_code(
+    mock_post, mock_acquire_token, vision_api_payment_plan_factory
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    api = VisionAPI()
+    pp = vision_api_payment_plan_factory(
+        unicef_id="PP004",
+        currency_code="SYP",
+        currency_vision_code="SYP01",
+        created_at=datetime(2025, 3, 1),
+    )
+    result = api.send_payment_plan(pp)
+    assert result == {"status": "ok"}
+    sent_payload = mock_post.call_args[0][1]
+    assert sent_payload["currency"] == "SYP01"
 
 
 def test_vision_api_error_is_raised(vision_api_payment_plan_factory) -> None:
@@ -466,6 +487,56 @@ def test_callback_view_missing_fc_returns_ko(mock_get, mock_log_entry) -> None:
 
 @patch("hope.models.APILogEntry.objects.create")
 @patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+def test_callback_view_records_payment_plan_created_acknowledgement(mock_get, mock_log_entry) -> None:
+    from rest_framework.test import APIRequestFactory, force_authenticate
+
+    from hope.contrib.vision.views import PaymentPlanCallbackView
+
+    mock_pp = _make_mock_payment_plan(unicef_id="PP-0060-24-0000002a")
+    mock_get.return_value = mock_pp
+    mock_user = MagicMock()
+    mock_token = MagicMock()
+    mock_token.grants = ["API_VISION_PP_CREATE"]
+    request = APIRequestFactory().post(
+        "/api/rest/systems/vision/payment-plan-callback/",
+        {
+            "messageId": "msg-created",
+            "payplanSno": "PP-0060-24-0000002a",
+            "vision_payplanSno": "00000110",
+            "status": "",
+            "fc_num": "",
+        },
+        format="json",
+    )
+    force_authenticate(request, user=mock_user, token=mock_token)
+
+    response = PaymentPlanCallbackView.as_view()(request)
+
+    assert response.status_code == 200
+    assert response.data == {
+        "status": "OK",
+        "messageId": "msg-created",
+        "payplanSno": "PP-0060-24-0000002a",
+    }
+    vision_data = mock_pp.internal_data["vision"]
+    assert vision_data["sent"] is True
+    assert vision_data["vision_id"] == "00000110"
+    assert vision_data["status"] == VisionStatus.PP_CREATED.value
+    entry = vision_data["log"][0]
+    assert entry["payload"] == {
+        "messageId": "msg-created",
+        "payplanSno": "PP-0060-24-0000002a",
+        "vision_payplanSno": "00000110",
+        "status": "",
+        "fc_num": "",
+    }
+    assert entry["response"] == response.data
+    assert datetime.fromisoformat(entry["timestamp"])
+    mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
+
+
+@patch("hope.models.APILogEntry.objects.create")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
 def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -514,14 +585,19 @@ def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
 
 
+@pytest.mark.parametrize(
+    "current_status",
+    [VisionStatus.WAITING_FOR_CALLBACK, VisionStatus.PP_CREATED],
+)
 @patch("hope.models.APILogEntry.objects.create")
 @patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
-def test_callback_view_success_missing_vision_payplan_sno(mock_get, mock_log_entry) -> None:
+def test_callback_view_success_missing_vision_payplan_sno(mock_get, mock_log_entry, current_status) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
     mock_pp = _make_mock_payment_plan(unicef_id="PP045")
+    mock_pp.vision_status = current_status.value
     mock_get.return_value = mock_pp
     mock_user = MagicMock()
     mock_token = MagicMock()

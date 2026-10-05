@@ -8,6 +8,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
@@ -49,9 +50,9 @@ from hope.apps.household.api.caches import (
 from hope.apps.household.const import HEAD
 from hope.apps.household.services.household_recalculate_data import recalculate_data
 from hope.apps.household.services.locking import lock_household_then_individual
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
-from hope.models.currency import Currency
 
 
 @dataclasses.dataclass
@@ -302,7 +303,7 @@ class IndividualDataUpdateService(DataChangeService):
             if hh_country := hh_approved_data.get("country"):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
             if hh_currency := hh_approved_data.get("currency"):
-                hh_approved_data["currency"] = Currency.objects.filter(code=hh_currency).first()
+                hh_approved_data["currency"] = resolve_active_currency_or_none(hh_currency)
             admin_area_title = hh_approved_data.pop("admin_area_title", None)
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
 
@@ -311,6 +312,15 @@ class IndividualDataUpdateService(DataChangeService):
             if admin_area_title:
                 area = Area.objects.filter(p_code=admin_area_title).first()
                 updated_household.set_admin_areas(area)
+
+    @staticmethod
+    def _recalculate(individual: Individual, approved_fields: dict) -> None:
+        if individual.household:
+            recalculate_data(individual.household)
+        else:
+            individual.recalculate_data()
+        if "relationship" in approved_fields:
+            adjust_program_size(individual.program)
 
     def close(self, user: AbstractUser) -> None:
         ticket_details = self.grievance_ticket.individual_data_update_ticket_details
@@ -383,10 +393,7 @@ class IndividualDataUpdateService(DataChangeService):
         self._process_identities(new_individual, identities, identities_to_edit, identities_to_remove)
         self._process_accounts(new_individual, accounts, accounts_to_edit)
 
-        if new_individual.household:
-            recalculate_data(new_individual.household)
-        else:
-            new_individual.recalculate_data()
+        self._recalculate(new_individual, only_approved_data)
         new_individual.refresh_from_db()
 
         log_create(

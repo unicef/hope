@@ -35,7 +35,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "closure_comment",
             "closed_by",
         ],
-        {"currency.code": "currency"},
+        {"currency.code": "currency", "currency.vision_code": "currency_vision_code"},
     )
 
     class Status(models.TextChoices):
