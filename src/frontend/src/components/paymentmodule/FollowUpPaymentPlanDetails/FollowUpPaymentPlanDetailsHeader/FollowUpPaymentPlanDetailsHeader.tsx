@@ -11,8 +11,6 @@ import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
 import { AcceptedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 import { FinishedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
-import { ReadyForClosurePaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
-import { InAcceptancePaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAcceptancePaymentPlanHeaderButtons';
 import { LockedFspPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
@@ -50,12 +48,6 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
 
-  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
-  const canMarkReadyForClosure = hasPermissions(
-    PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
-    permissions,
-  );
-
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway &&
@@ -63,7 +55,6 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -83,7 +74,6 @@ export function FollowUpPaymentPlanDetailsHeader({
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
           permissions={permissions}
-          canAbort={canAbort}
         />
       );
       break;
@@ -92,17 +82,6 @@ export function FollowUpPaymentPlanDetailsHeader({
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case 'IN_APPROVAL':
-    case 'IN_AUTHORIZATION':
-    case 'IN_REVIEW':
-      buttons = (
-        <InAcceptancePaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canAbort={canAbort}
         />
       );
       break;
@@ -120,16 +99,6 @@ export function FollowUpPaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
-          canMarkReadyForClosure={canMarkReadyForClosure}
-        />
-      );
-      break;
-    case 'READY_FOR_CLOSURE':
-      buttons = (
-        <ReadyForClosurePaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canSendBack={canMarkReadyForClosure}
-          canClose={canClose}
         />
       );
       break;

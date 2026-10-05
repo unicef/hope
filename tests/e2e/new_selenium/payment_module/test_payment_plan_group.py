@@ -122,7 +122,9 @@ def exportable_group(
     group_delivery_mechanism: DeliveryMechanism,
     group_fsp_template: FinancialServiceProviderXlsxTemplate,
 ) -> tuple[PaymentPlanGroup, Payment]:
-    group = PaymentPlanGroupFactory(cycle=program_cycle, name="Exportable Group")
+    group = PaymentPlanGroupFactory(
+        cycle=program_cycle, name="Exportable Group", status=PaymentPlanGroup.Status.ACCEPTED
+    )
     plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -246,6 +248,8 @@ def finished_group_with_empty_reconciliation_file(
     PaymentPlanFlow(payment_plan).status_finished()
     payment_plan.update_money_fields()
     payment_plan.save()
+    group.status = PaymentPlanGroup.Status.FINISHED
+    group.save(update_fields=["status"])
     return group, payment, str(file_path)
 
 

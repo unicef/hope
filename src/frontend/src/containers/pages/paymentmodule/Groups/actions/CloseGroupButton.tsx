@@ -4,6 +4,7 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { GreyText } from '@core/GreyText';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
@@ -18,6 +19,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
@@ -41,6 +43,7 @@ export function CloseGroupButton({
   group,
 }: CloseGroupButtonProps): ReactElement {
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -48,14 +51,14 @@ export function CloseGroupButton({
   // TODO: read from the group once it exposes its verification plans.
   const hasVerification = false;
 
-  const { mutate: closeGroup, isPending } = useMutation<
-    void,
-    Error,
-    string | null
-  >({
-    // TODO: call RestService.restBusinessAreasProgramsPaymentPlanGroupsCloseCreate
-    // with { id: group.id, requestBody: { closureComment } } once the backend adds it.
-    mutationFn: () => Promise.reject(new Error(t('Not available yet'))),
+  const { mutate: closeGroup, isPending } = useMutation({
+    mutationFn: (closureComment: string | null) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsCloseCreate({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group.id,
+        requestBody: { closureComment },
+      }),
     onSuccess: async () => {
       showMessage(t('Payment Plan Group has been closed.'));
       setDialogOpen(false);
@@ -69,7 +72,7 @@ export function CloseGroupButton({
         ),
       );
     },
-    onError: (error) => showMessage(error.message),
+    onError: (error) => showApiErrorMessages(error, showMessage),
   });
 
   const validationSchema = Yup.object().shape({

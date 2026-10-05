@@ -2197,6 +2197,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "abort_comment",
             "closure_comment",
             "closed_by",
+            "status_date",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",

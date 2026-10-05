@@ -36,44 +36,42 @@ from hope.models import (
 )
 
 
-@pytest.fixture
-def finished_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    return PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.FINISHED,
+def _group_with_plan(
+    program_cycle: ProgramCycle, group_status: str, plan_status: str, **group_fields: Any
+) -> PaymentPlanGroup:
+    group = PaymentPlanGroupFactory(cycle=program_cycle, status=group_status, **group_fields)
+    PaymentPlanFactory(
+        business_area=program_cycle.program.business_area,
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        status=plan_status,
         financial_service_provider=FinancialServiceProviderFactory(),
         delivery_mechanism=DeliveryMechanismFactory(),
     )
+    return group
 
 
 @pytest.fixture
-def ready_for_closure_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    return PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
-        financial_service_provider=FinancialServiceProviderFactory(),
-        delivery_mechanism=DeliveryMechanismFactory(),
-    )
+def finished_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
+    return _group_with_plan(program_cycle, PaymentPlanGroup.Status.FINISHED, PaymentPlan.Status.FINISHED)
 
 
 @pytest.fixture
-def closed_payment_plan(business_area: BusinessArea, create_super_user: Any) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    pp = PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.CLOSED,
-        financial_service_provider=FinancialServiceProviderFactory(),
-        delivery_mechanism=DeliveryMechanismFactory(),
+def locked_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
+    return _group_with_plan(program_cycle, PaymentPlanGroup.Status.LOCKED, PaymentPlan.Status.LOCKED)
+
+
+@pytest.fixture
+def closed_group(program_cycle: ProgramCycle, create_super_user: Any) -> PaymentPlanGroup:
+    group = _group_with_plan(
+        program_cycle,
+        PaymentPlanGroup.Status.CLOSED,
+        PaymentPlan.Status.CLOSED,
+        closed_by=create_super_user,
+        status_date=timezone.now(),
     )
-    pp.closed_by = create_super_user
-    pp.save(update_fields=["closed_by"])
-    ApprovalProcessFactory(payment_plan=pp)
-    return pp
+    ApprovalProcessFactory(payment_plan_group=group)
+    return group
 
 
 @pytest.fixture

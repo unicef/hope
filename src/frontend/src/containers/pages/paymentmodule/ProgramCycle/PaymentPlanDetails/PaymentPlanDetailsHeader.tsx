@@ -1,7 +1,5 @@
 import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 import { FinishedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
-import { ReadyForClosurePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
-import { InAcceptancePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAcceptancePaymentPlanHeaderButtons';
 import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
@@ -24,7 +22,6 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -88,17 +85,6 @@ export const PaymentPlanDetailsHeader = ({
     paymentPlan.canSendToPaymentGateway &&
     !visionManaged;
 
-  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
-  const canMarkReadyForClosure = hasPermissions(
-    PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
-    permissions,
-  );
-  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
-  const canReactivate = hasPermissions(
-    PERMISSIONS.PM_REACTIVATE_ABORT,
-    permissions,
-  );
-
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case PaymentPlanStatusEnum.OPEN:
@@ -117,7 +103,6 @@ export const PaymentPlanDetailsHeader = ({
           paymentPlan={paymentPlan}
           canUnlock={canLock}
           permissions={permissions}
-          canAbort={canAbort}
         />
       );
       break;
@@ -126,17 +111,6 @@ export const PaymentPlanDetailsHeader = ({
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.IN_APPROVAL:
-    case PaymentPlanStatusEnum.IN_AUTHORIZATION:
-    case PaymentPlanStatusEnum.IN_REVIEW:
-      buttons = (
-        <InAcceptancePaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canAbort={canAbort}
         />
       );
       break;
@@ -154,29 +128,11 @@ export const PaymentPlanDetailsHeader = ({
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
-          canMarkReadyForClosure={canMarkReadyForClosure}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.READY_FOR_CLOSURE:
-      buttons = (
-        <ReadyForClosurePaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canSendBack={canMarkReadyForClosure}
-          canClose={canClose}
         />
       );
       break;
     case PaymentPlanStatusEnum.CLOSED:
       buttons = null;
-      break;
-    case PaymentPlanStatusEnum.ABORTED:
-      buttons = (
-        <AbortedPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReactivate={canReactivate}
-        />
-      );
       break;
     default:
       break;

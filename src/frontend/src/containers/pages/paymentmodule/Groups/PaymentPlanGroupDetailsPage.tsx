@@ -11,6 +11,7 @@ import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -144,8 +145,14 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
-      {/* TODO: pass closure once the group exposes closed-by / closed date */}
-      <AcceptanceProcess approvalProcess={group?.approvalProcess} />
+      <AcceptanceProcess
+        approvalProcess={group?.approvalProcess}
+        closure={
+          group?.status === PaymentPlanGroupStatusEnum.CLOSED
+            ? { closedBy: group.closedBy, closedDate: group.statusDate }
+            : null
+        }
+      />
       {group?.batches && group.batches.length > 0 && (
         <Grid size={{ xs: 12 }} data-cy="batches-section">
           <ContainerColumnWithBorder>

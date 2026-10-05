@@ -2,7 +2,6 @@ import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateChildPaymentPlan } from '../../../CreateChildPaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,47 +16,17 @@ export interface FinishedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
-  canMarkReadyForClosure: boolean;
 }
 
 export function FinishedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
-  canMarkReadyForClosure,
 }: FinishedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
-
-  const { mutate: markReadyForClosure, isPending: loadingReadyForClosure } =
-    useMutation({
-      mutationFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlansReadyForClosureRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: paymentPlan.id,
-          },
-        ),
-      onSuccess: () => {
-        showMessage(t('Payment Plan marked as ready for closure.'));
-        queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
-          ),
-        });
-        queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansList,
-          ),
-        });
-      },
-      onError: (error: any) => {
-        showApiErrorMessages(error, showMessage);
-      },
-    });
 
   const {
     mutate: sendToPaymentGateway,
@@ -157,25 +126,6 @@ export function FinishedPaymentPlanHeaderButtons({
             >
               {t('Send to FSP')}
             </Button>
-          </Box>
-        )}
-
-        {canMarkReadyForClosure && (
-          <Box
-            sx={{
-              m: 2,
-            }}
-          >
-            <LoadingButton
-              color="primary"
-              variant="contained"
-              data-cy="button-set-ready-for-closure"
-              onClick={() => markReadyForClosure()}
-              loading={loadingReadyForClosure}
-              data-perm={PERMISSIONS.PM_MARK_READY_FOR_CLOSURE}
-            >
-              {t('Set Ready for Closure')}
-            </LoadingButton>
           </Box>
         )}
       </>

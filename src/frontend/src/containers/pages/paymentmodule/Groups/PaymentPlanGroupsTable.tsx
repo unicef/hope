@@ -8,6 +8,7 @@ import { usePersistedCount } from '@hooks/usePersistedCount';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import type { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
+import type { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -28,7 +29,9 @@ export const PaymentPlanGroupsTable = ({
       programCode: programId,
       search: filter?.search || undefined,
       cycle: filter?.cycle || undefined,
-      status: filter?.status?.length ? filter.status : undefined,
+      status: filter?.status?.length
+        ? (filter.status as PaymentPlanGroupStatusEnum[])
+        : undefined,
     }),
     [businessArea, programId, filter?.search, filter?.cycle, filter?.status],
   );

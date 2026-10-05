@@ -354,12 +354,18 @@ describe('PaymentPlanGroupDetailsHeader', () => {
 
   it('asks for an abort reason before aborting', async () => {
     mockUsePermissions.mockReturnValue([PERMISSIONS.PM_ABORT]);
+    const abortSpy = vi
+      .spyOn(
+        RestService,
+        'restBusinessAreasProgramsPaymentPlanGroupsAbortCreate',
+      )
+      .mockResolvedValue({} as never);
     renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
 
     fireEvent.click(screen.getByTestId('button-abort'));
     fireEvent.click(screen.getByTestId('button-submit-abort'));
     expect(await screen.findByText('Abort Reason is required')).not.toBeNull();
-    expect(mockShowMessage).not.toHaveBeenCalled();
+    expect(abortSpy).not.toHaveBeenCalled();
 
     fireEvent.change(screen.getByLabelText(/Abort Reason/), {
       target: { value: 'wrong cycle' },
@@ -367,7 +373,17 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     fireEvent.click(screen.getByTestId('button-submit-abort'));
 
     await waitFor(() =>
-      expect(mockShowMessage).toHaveBeenCalledWith('Not available yet'),
+      expect(abortSpy).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        programCode: 'test-program',
+        id: 'group-1',
+        requestBody: { abortComment: 'wrong cycle' },
+      }),
+    );
+    await waitFor(() =>
+      expect(mockShowMessage).toHaveBeenCalledWith(
+        'Payment Plan Group has been aborted.',
+      ),
     );
   });
 
@@ -376,27 +392,40 @@ describe('PaymentPlanGroupDetailsHeader', () => {
       PaymentPlanGroupStatusEnum.ABORTED,
       PERMISSIONS.PM_REACTIVATE_ABORT,
       'button-reactivate-payment-plan-group',
+      'restBusinessAreasProgramsPaymentPlanGroupsReactivateAbortCreate',
     ],
     [
       PaymentPlanGroupStatusEnum.FINISHED,
       PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
       'button-set-ready-for-closure',
+      'restBusinessAreasProgramsPaymentPlanGroupsReadyForClosureCreate',
     ],
     [
       PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE,
       PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
       'button-send-back',
+      'restBusinessAreasProgramsPaymentPlanGroupsSendBackToFinishedCreate',
     ],
-  ])('shows the closure action in %s', async (status, permission, buttonId) => {
-    mockUsePermissions.mockReturnValue([permission]);
-    renderHeader(null, status);
+  ] as const)(
+    'runs the closure action in %s',
+    async (status, permission, buttonId, endpoint) => {
+      mockUsePermissions.mockReturnValue([permission]);
+      const spy = vi
+        .spyOn(RestService, endpoint)
+        .mockResolvedValue({} as never);
+      renderHeader(null, status);
 
-    fireEvent.click(screen.getByTestId(buttonId));
+      fireEvent.click(screen.getByTestId(buttonId));
 
-    await waitFor(() =>
-      expect(mockShowMessage).toHaveBeenCalledWith('Not available yet'),
-    );
-  });
+      await waitFor(() =>
+        expect(spy).toHaveBeenCalledWith({
+          businessAreaSlug: 'afghanistan',
+          programCode: 'test-program',
+          id: 'group-1',
+        }),
+      );
+    },
+  );
 
   it('hides closure actions without the permissions', () => {
     renderHeader(null, PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE);
@@ -407,6 +436,12 @@ describe('PaymentPlanGroupDetailsHeader', () => {
 
   it('closes the group only with a justification', async () => {
     mockUsePermissions.mockReturnValue([PERMISSIONS.PM_CLOSE_FINISHED]);
+    const closeSpy = vi
+      .spyOn(
+        RestService,
+        'restBusinessAreasProgramsPaymentPlanGroupsCloseCreate',
+      )
+      .mockResolvedValue({} as never);
     renderHeader(null, PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE);
     expect(screen.queryByTestId('button-send-back')).toBeNull();
 
@@ -422,7 +457,12 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     fireEvent.click(submit);
 
     await waitFor(() =>
-      expect(mockShowMessage).toHaveBeenCalledWith('Not available yet'),
+      expect(closeSpy).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        programCode: 'test-program',
+        id: 'group-1',
+        requestBody: { closureComment: 'no verification needed' },
+      }),
     );
   });
 });

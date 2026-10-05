@@ -3976,6 +3976,7 @@ def test_close_group_with_permission_returns_200(
     assert response.json()["status"] == PaymentPlanGroup.Status.CLOSED
     assert response.json()["closure_comment"] == "done"
     assert response.json()["closed_by"] == f"{user.first_name} {user.last_name}"
+    assert response.json()["status_date"] is not None
 
 
 def test_close_group_without_permission_returns_403(

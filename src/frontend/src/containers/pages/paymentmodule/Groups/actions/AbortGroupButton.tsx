@@ -3,6 +3,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
@@ -16,6 +17,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
@@ -34,15 +36,19 @@ export function AbortGroupButton({
 }: AbortGroupButtonProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { mutate: abort, isPending } = useMutation<void, Error, string>({
-    mutationKey: ['abortPaymentPlanGroup', group.id],
-    // TODO: call RestService.restBusinessAreasProgramsPaymentPlanGroupsAbortCreate
-    // with { id: group.id, requestBody: { abortComment } } once the backend adds it.
-    mutationFn: () => Promise.reject(new Error(t('Not available yet'))),
+  const { mutate: abort, isPending } = useMutation({
+    mutationFn: (abortComment: string) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsAbortCreate({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group.id,
+        requestBody: { abortComment },
+      }),
     onSuccess: async () => {
       showMessage(t('Payment Plan Group has been aborted.'));
       setDialogOpen(false);
@@ -56,7 +62,7 @@ export function AbortGroupButton({
         ),
       );
     },
-    onError: (error) => showMessage(error.message),
+    onError: (error) => showApiErrorMessages(error, showMessage),
   });
 
   const validationSchema = Yup.object().shape({

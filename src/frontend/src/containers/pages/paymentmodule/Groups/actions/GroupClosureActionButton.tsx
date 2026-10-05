@@ -1,9 +1,11 @@
 import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from 'src/config/permissions';
@@ -12,7 +14,12 @@ import type { PaymentPlanGroupDetail } from '../types';
 
 export type GroupClosureAction = 'reactivate' | 'readyForClosure' | 'sendBack';
 
+type GroupRequestParams = Parameters<
+  typeof RestService.restBusinessAreasProgramsPaymentPlanGroupsReactivateAbortCreate
+>[0];
+
 interface ActionConfig {
+  request: (params: GroupRequestParams) => Promise<unknown>;
   label: string;
   successMessage: string;
   dataCy: string;
@@ -21,18 +28,30 @@ interface ActionConfig {
 
 const ACTIONS: Record<GroupClosureAction, ActionConfig> = {
   reactivate: {
+    request: (params) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsReactivateAbortCreate(
+        params,
+      ),
     label: 'Reactivate',
     successMessage: 'Payment Plan Group has been reactivated.',
     dataCy: 'button-reactivate-payment-plan-group',
     permission: PERMISSIONS.PM_REACTIVATE_ABORT,
   },
   readyForClosure: {
+    request: (params) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsReadyForClosureCreate(
+        params,
+      ),
     label: 'Set Ready for Closure',
     successMessage: 'Payment Plan Group marked as ready for closure.',
     dataCy: 'button-set-ready-for-closure',
     permission: PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
   },
   sendBack: {
+    request: (params) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsSendBackToFinishedCreate(
+        params,
+      ),
     label: 'Send Back',
     successMessage: 'Payment Plan Group has been sent back.',
     dataCy: 'button-send-back',
@@ -46,18 +65,23 @@ interface GroupClosureActionButtonProps {
 }
 
 export function GroupClosureActionButton({
+  group,
   action,
 }: GroupClosureActionButtonProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const config = ACTIONS[action];
 
   const { mutate, isPending } = useMutation({
-    // TODO: call the group endpoint for this action (reactivate-abort,
-    // ready-for-closure, send-back-to-finished) with id: group.id once the backend adds it.
-    mutationFn: () => Promise.reject(new Error(t('Not available yet'))),
+    mutationFn: () =>
+      config.request({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group.id,
+      }),
     onSuccess: async () => {
       showMessage(t(config.successMessage));
       await Promise.all(
@@ -70,7 +94,7 @@ export function GroupClosureActionButton({
         ),
       );
     },
-    onError: (error) => showMessage(error.message),
+    onError: (error) => showApiErrorMessages(error, showMessage),
   });
 
   return (

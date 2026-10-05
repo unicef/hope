@@ -10,18 +10,15 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
-  canAbort: boolean;
 }
 
 export function LockedFspPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
-  canAbort,
 }: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -78,15 +75,6 @@ export function LockedFspPaymentPlanHeaderButtons({
           >
             {t('Unlock FSP')}
           </LoadingButton>
-        </Box>
-      )}
-      {canAbort && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
-          <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
     </Box>
