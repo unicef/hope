@@ -204,7 +204,7 @@ class PaymentPlanGroupService:
                 f"Mark as Ready for Closure is possible only within Status {PaymentPlanGroup.Status.FINISHED}"
             )
         for payment_plan in self._payment_plans(payment_plan_group):
-            PaymentPlanService(payment_plan).ready_for_closure(user, notify=False)
+            PaymentPlanService(payment_plan).ready_for_closure()
         flow = PaymentPlanGroupFlow(payment_plan_group)
         flow.status_ready_for_closure()
         payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
@@ -225,7 +225,7 @@ class PaymentPlanGroupService:
                 f"Send Back is possible only within Status {PaymentPlanGroup.Status.READY_FOR_CLOSURE}"
             )
         for payment_plan in self._payment_plans(payment_plan_group):
-            PaymentPlanService(payment_plan).send_back_to_finished(user, notify=False)
+            PaymentPlanService(payment_plan).send_back_to_finished()
         flow = PaymentPlanGroupFlow(payment_plan_group)
         flow.status_finished()
         payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))

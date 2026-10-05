@@ -2470,9 +2470,8 @@ def test_authorization_queues_vision_send_after_commit(
     mock_send_to_vision.assert_called_once_with(payment_plan, str(payment_plan.created_by_id))
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_ready_for_closure_sends_notification(
-    mock_notify, user: User, business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
+def test_ready_for_closure_moves_plan_to_ready_for_closure(
+    business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2481,38 +2480,14 @@ def test_ready_for_closure_sends_notification(
     )
 
     with django_assert_num_queries(12):
-        PaymentPlanService(payment_plan).ready_for_closure(user=user)
+        PaymentPlanService(payment_plan).ready_for_closure()
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
-    mock_notify.assert_called_once_with(
-        payment_plan,
-        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
-        str(user.pk),
-        mock.ANY,
-    )
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_ready_for_closure_suppresses_notification_when_notify_false(
-    mock_notify, user: User, business_area: Any, cycle: ProgramCycle
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        business_area=business_area,
-        status=PaymentPlan.Status.FINISHED,
-    )
-
-    PaymentPlanService(payment_plan).ready_for_closure(user, notify=False)
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.READY_FOR_CLOSURE
-    mock_notify.assert_not_called()
-
-
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_send_back_to_finished_sends_notification(
-    mock_notify, user: User, business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
+def test_send_back_to_finished_moves_plan_to_finished(
+    business_area: Any, cycle: ProgramCycle, django_assert_num_queries: Any
 ) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
@@ -2521,19 +2496,13 @@ def test_send_back_to_finished_sends_notification(
     )
 
     with django_assert_num_queries(12):
-        PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+        PaymentPlanService(payment_plan).send_back_to_finished()
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
-    mock_notify.assert_called_once_with(
-        payment_plan,
-        PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
-        str(user.pk),
-        mock.ANY,
-    )
 
 
-def test_ready_for_closure_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_ready_for_closure_rejects_stale_status(business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -2542,12 +2511,12 @@ def test_ready_for_closure_rejects_stale_status(user: User, business_area: Any, 
     PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.READY_FOR_CLOSURE)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).ready_for_closure(user=user)
+        PaymentPlanService(payment_plan).ready_for_closure()
 
     assert "Mark as Ready for Closure is possible only within Status FINISHED" in str(error.value)
 
 
-def test_send_back_to_finished_rejects_stale_status(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_send_back_to_finished_rejects_stale_status(business_area: Any, cycle: ProgramCycle) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         business_area=business_area,
@@ -2556,7 +2525,7 @@ def test_send_back_to_finished_rejects_stale_status(user: User, business_area: A
     PaymentPlan.objects.filter(pk=payment_plan.pk).update(status=PaymentPlan.Status.FINISHED)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).send_back_to_finished(user=user)
+        PaymentPlanService(payment_plan).send_back_to_finished()
 
     assert "Send Back is possible only within Status READY_FOR_CLOSURE" in str(error.value)
 
