@@ -10,6 +10,7 @@ import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDat
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import { getTicketData, getTicketFlexFields } from './ticketData';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -128,23 +129,14 @@ function prepareInitialValueEditHousehold(
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
-  const householdData = {
-    ...((ticket.ticketDetails && ticket.ticketDetails.householdData) || {}),
-  };
-  const flexFields = householdData.flexFields || {};
-  delete householdData.flexFields;
-  const householdDataArray = Object.entries(
-    (householdData || {}) as Record<string, { value: string }>,
-  ).map((entry) => ({
-    fieldName: entry[0],
-    fieldValue: entry[1]?.value,
-  }));
-  const flexFieldsArray = Object.entries(
-    (flexFields || {}) as Record<string, { value: string }>,
-  ).map((entry) => ({
-    fieldName: entry[0],
-    fieldValue: entry[1]?.value,
-  }));
+  // mapFieldsToObjects keeps only entries holding a value, which leaves out
+  // flex_fields and roles - they are not single fields and are handled apart
+  const householdDataArray = mapFieldsToObjects(
+    getTicketData(ticket.ticketDetails),
+  );
+  const flexFieldsArray = mapFieldsToObjects(
+    getTicketFlexFields(ticket.ticketDetails),
+  );
   initialValues.householdDataUpdateFields = [
     ...householdDataArray,
     ...flexFieldsArray,
