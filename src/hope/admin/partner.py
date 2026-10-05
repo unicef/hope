@@ -1,23 +1,15 @@
 from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from django import forms
 from django.contrib import admin
-from django.forms import CheckboxSelectMultiple, ModelForm
+from django.forms import ModelForm
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
-from mptt.forms import TreeNodeMultipleChoiceField
 
 from hope.admin.user_role import RoleAssignmentInline
 from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
-from hope.models import Area, BusinessArea, Partner, Program
-
-
-class ProgramAreaForm(forms.Form):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), required=True)
-    program = forms.ModelChoiceField(queryset=Program.objects.all(), required=True)
-    areas = TreeNodeMultipleChoiceField(queryset=Area.objects.all(), widget=CheckboxSelectMultiple(), required=False)
+from hope.models import Partner
 
 
 @admin.register(Partner)
