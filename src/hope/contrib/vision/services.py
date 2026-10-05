@@ -121,11 +121,11 @@ class VisionService:
             return False
 
         normalized_fc_numbers = list(dict.fromkeys(fc_numbers))
-        is_payment_plan_created_acknowledgement = not vision_result and not normalized_fc_numbers
+        # Any callback for the active request confirms that Vision received the Payment Plan.
+        vision_data["sent"] = True
+        is_payment_plan_created_acknowledgement = vision_result == "SUCCESS" and not normalized_fc_numbers
         fc_assignment_failed = False
         if is_payment_plan_created_acknowledgement:
-            # The acknowledgement confirms receipt even if HOPE did not record the original POST response.
-            vision_data["sent"] = True
             # A repeated creation acknowledgement must not replace a later FC result or failure.
             if payment_plan.vision_status in VISION_CREATION_ACKNOWLEDGEMENT_MUTABLE_STATUSES:
                 vision_data["vision_id"] = vision_payment_plan_id
@@ -144,9 +144,6 @@ class VisionService:
                     VisionStatus.CALLBACK_FAILED,
                     error_code=VisionErrorCode.VISION_STATUS_FAILED,
                 )
-            elif not normalized_fc_numbers:
-                cls.set_status(payment_plan, VisionStatus.FC_MISSING)
-                fc_assignment_failed = True
             else:
                 try:
                     cls.assign_funds_commitment_headers_from_callback(payment_plan, normalized_fc_numbers)
@@ -156,7 +153,6 @@ class VisionService:
                 else:
                     # Successful assignment completes release and continues to PG or XLSX delivery.
                     cls.complete_funds_commitment_assignment(payment_plan)
-
         return fc_assignment_failed
 
     @classmethod

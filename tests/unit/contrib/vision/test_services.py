@@ -113,7 +113,6 @@ def vision_payment_plan_without_approval(vision_payment_plan: PaymentPlan) -> Pa
 
 @pytest.fixture(
     params=[
-        (VisionStatus.FC_MISSING, None),
         (VisionStatus.FC_NOT_FOUND, None),
         (VisionStatus.CALLBACK_FAILED, VisionErrorCode.FC_AMBIGUOUS),
         (VisionStatus.CALLBACK_FAILED, VisionErrorCode.FC_CONFLICT),
@@ -226,11 +225,13 @@ def test_assign_funds_commitment_headers_from_callback_allows_header_assigned_to
     assert set(header.payment_plans.all()) == {other_payment_plan, vision_payment_plan}
 
 
-def test_process_callback_without_fc_keeps_plan_blocked(
+@pytest.mark.parametrize("current_status", [VisionStatus.WAITING_FOR_CALLBACK, VisionStatus.PP_CREATED])
+def test_process_callback_success_without_fc_records_creation_acknowledgement(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
+    current_status: VisionStatus,
 ) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
+    VisionService.set_status(vision_payment_plan, current_status)
     with django_assert_num_queries(1):
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
@@ -239,15 +240,16 @@ def test_process_callback_without_fc_keeps_plan_blocked(
             fc_numbers=[],
         )
 
-    assert fc_assignment_failed is True
+    assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "VISION-1",
-        "status": VisionStatus.FC_MISSING.value,
+        "status": VisionStatus.PP_CREATED.value,
     }
 
 
-def test_process_callback_records_payment_plan_created_acknowledgement(
+def test_process_callback_empty_status_does_not_confirm_plan_creation(
     vision_payment_plan: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
@@ -266,7 +268,8 @@ def test_process_callback_records_payment_plan_created_acknowledgement(
     assert vision_payment_plan.vision_data == {
         "sent": True,
         "vision_id": "00000110",
-        "status": VisionStatus.PP_CREATED.value,
+        "status": VisionStatus.CALLBACK_FAILED.value,
+        "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
     }
 
 
@@ -286,7 +289,7 @@ def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
         fc_assignment_failed = VisionService.process_callback(
             vision_payment_plan,
             vision_payment_plan_id="VISION-1",
-            vision_result="",
+            vision_result="SUCCESS",
             fc_numbers=[],
         )
 
@@ -316,10 +319,12 @@ def test_process_callback_records_fc_assignment_failure(
     assert fc_assignment_failed is True
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "VISION-1",
         "fc_numbers": ["UNKNOWN"],
         "status": VisionStatus.FC_NOT_FOUND.value,
     }
+    assert vision_payment_plan.sent_to_vision is True
 
 
 def test_process_callback_failure_stores_returned_fc_numbers(
@@ -338,6 +343,7 @@ def test_process_callback_failure_stores_returned_fc_numbers(
     assert fc_assignment_failed is False
     assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
     assert vision_payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "VISION-1",
         "fc_numbers": ["FC123"],
         "status": VisionStatus.CALLBACK_FAILED.value,
@@ -361,6 +367,7 @@ def test_process_callback_records_failure_when_fc_callback_has_no_success_status
 
     assert fc_assignment_failed is False
     assert vision_payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "VISION-1",
         "fc_numbers": ["FC123"],
         "status": VisionStatus.CALLBACK_FAILED.value,
@@ -384,6 +391,7 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
 
     assert fc_assignment_failed is True
     assert payment_plan.vision_data == {
+        "sent": True,
         "vision_id": "VISION-RETRY",
         "fc_numbers": ["FC123"],
         "status": VisionStatus.FC_NOT_FOUND.value,
@@ -396,11 +404,10 @@ def test_process_callback_reprocesses_existing_fc_assignment_failure(
         (VisionStatus.SEND_FAILED, None),
         (VisionStatus.PP_CREATED, None),
         (VisionStatus.CALLBACK_FAILED, VisionErrorCode.VISION_STATUS_FAILED),
-        (VisionStatus.FC_MISSING, None),
         (VisionStatus.FC_NOT_FOUND, None),
     ],
 )
-def test_process_callback_processes_valid_fc_from_recoverable_state(
+def test_process_callback_recovers_failed_state_with_valid_fc(
     vision_payment_plan: PaymentPlan,
     matching_fc_items: list,
     vision_status: VisionStatus,
@@ -428,6 +435,7 @@ def test_process_callback_processes_valid_fc_from_recoverable_state(
 
     assert fc_assignment_failed is False
     assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
+    assert vision_payment_plan.sent_to_vision is True
     assert list(vision_payment_plan.funds_commitment_headers.all()) == [matching_fc_items[0].funds_commitment_header]
     mock_release.assert_called_once_with()
     mock_send_to_pg.assert_not_called()

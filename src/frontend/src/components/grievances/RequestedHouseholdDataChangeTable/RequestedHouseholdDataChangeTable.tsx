@@ -20,6 +20,7 @@ import { roleDisplayMap } from '../utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
+import { getTicketData, getTicketFlexFields } from '../utils/ticketData';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -63,7 +64,7 @@ function RequestedHouseholdDataChangeTable(
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
   const householdData = {
-    ...ticket.ticketDetails.householdData,
+    ...getTicketData(ticket.ticketDetails),
   };
   const isSelected = (name: string): boolean => selectedBioData.includes(name);
   const isSelectedFlexfields = (name: string): boolean =>
@@ -73,7 +74,7 @@ function RequestedHouseholdDataChangeTable(
     handleSelected(individualId, 'selectedRoles', selectedRoles, setFieldValue);
   };
 
-  const flexFields = householdData.flex_fields || {};
+  const flexFields = getTicketFlexFields(ticket.ticketDetails);
   delete householdData.flex_fields;
   const entries = Object.entries(householdData).filter(
     ([key]) => key !== 'roles',
@@ -95,9 +96,11 @@ function RequestedHouseholdDataChangeTable(
     enabled: Boolean(businessArea),
   });
 
+  // No `?? []` fallback: a fresh array on every render re-triggers the effect
+  // inside useArrayToDict (it already handles undefined).
   const fieldsDict = useArrayToDict(
     //@ts-ignore
-    allEditHouseholdFieldsData ?? [],
+    allEditHouseholdFieldsData,
     'name',
     '*',
   );
@@ -120,7 +123,7 @@ function RequestedHouseholdDataChangeTable(
   const handleSelectBioData = (name): void => {
     handleSelected(snakeCase(name), 'selected', selectedBioData, setFieldValue);
   };
-  const roles = ticket.ticketDetails.householdData.roles || [];
+  const roles = getTicketData(ticket.ticketDetails).roles || [];
 
   if (householdLoading) {
     return <div>{t('Loading household details...')}</div>;

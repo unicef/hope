@@ -149,6 +149,10 @@ class ProgrammeDetails(BaseComponents):
     def get_label_partner_name(self) -> WebElement:
         return self.wait_for(self.label_partner_name)
 
+    def get_partner_names(self, number: int) -> list[str]:
+        """Wait until exactly ``number`` partners are listed and return their names."""
+        return [element.text.strip() for element in self.wait_for_count(self.label_partner_name, number)]
+
     def get_label_area_access(self) -> WebElement:
         return self.wait_for(self.label_area_access)
 

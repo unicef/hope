@@ -374,7 +374,7 @@ class XlsxPaymentPlanGroupDeliveryImportService:
     def get_result_counts(self) -> dict[str, int]:
         if self.ws is None:
             raise RuntimeError("open_workbook() must be called before reading import results")
-        updated_rows = sum(service.action_counts[service.ACTION_APPLY] for service in self.per_plan_services.values())
+        updated_rows = sum(service.actual_updated_rows_count for service in self.per_plan_services.values())
         reset_rows = sum(service.action_counts[service.ACTION_RESET] for service in self.per_plan_services.values())
         total_rows = sum(1 for row in self.ws.iter_rows(min_row=2) if any(cell.value for cell in row))
         return {

@@ -97,6 +97,16 @@ class BaseComponents(Common):
     def get_side_nav(self) -> WebElement:
         return self.wait_for(self.side_nav)
 
+    def open_nav_section(self, name: str) -> None:
+        """Expand the side-nav section ``name``, leaving it alone if it is already open.
+
+        Clicking an open section collapses it. aria-expanded flips as soon as the
+        section opens, unlike the items inside, which appear only after the animation.
+        """
+        parent = self.wait_for(f'a[data-cy="nav-{name}"]')
+        if parent.get_attribute("aria-expanded") != "true":
+            parent.click()
+
     def get_nav_country_dashboard(self) -> WebElement:
         return self.wait_for(self.nav_country_dashboard)
 
@@ -200,6 +210,8 @@ class BaseComponents(Common):
             self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
 
         self.select_listbox_element(name)
+        # Switching programmes navigates away; wait for the new page so callers don't act on the old one.
+        self.assert_page_header_title("Programme Management" if name == "All Programmes" else name)
 
     def get_drawer_inactive_subheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
         return self.wait_for(self.drawer_inactive_subheader, timeout=timeout)
@@ -237,7 +249,7 @@ class BaseComponents(Common):
             time.sleep(0.01)
             if text in self.wait_for(self.row_index_template.format(index + 1)).text:
                 return
-        assert text in self.wait_for(self.row_index_.format(index + 1)).text
+        assert text in self.wait_for(self.row_index_template.format(index + 1)).text
 
     def get_rows(self) -> [WebElement]:
         return self.get_elements(self.rows)
@@ -254,10 +266,10 @@ class BaseComponents(Common):
         assert text in self.get_alert().text
 
     def wait_for_number_of_rows(self, number: int) -> bool:
-        for _ in range(5):
+        for _ in range(50):
             if len(self.get_rows()) == number:
                 return True
-            sleep(1)
+            sleep(0.1)
         return False
 
     def clear_input(self, element: WebElement) -> None:
