@@ -154,7 +154,7 @@ DEFAULTS = {
     ),
     "MATOMO_TRACKER_URL": (
         str,
-        "https://unisitetracker.unicef.io/",
+        "https://observa.unicef.org/",
     ),
     "MATOMO_SCRIPT_URL": (
         str,
