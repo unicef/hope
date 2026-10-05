@@ -850,6 +850,7 @@ class PaymentGatewayService:
             if update_fields:
                 self._bulk_update_payments({update_fields: [payment]})
             bulk_log_payment_changes(payment_log_pairs, self.user)
+            payment_plan.update_money_fields()
 
             if payment_plan.is_reconciled:
                 self._mark_reconciled(payment_plan, old_payment_plan)
@@ -894,6 +895,7 @@ class PaymentGatewayService:
             self._bulk_update_payments(payments_by_update_fields)
             bulk_log_payment_changes(instruction_log_pairs, self.user)
 
+        payment_plan.update_money_fields()
         if payment_plan.is_reconciled:
             self._mark_reconciled(payment_plan, old_payment_plan)
             for instruction in payment_instructions:

@@ -8,6 +8,10 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
+import {
+  getTicketFieldChange,
+  normalizeTicketFieldChange,
+} from '../utils/ticketData';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
   flexField: any;
@@ -45,15 +49,11 @@ export function GrievanceFlexFieldPhotoModalEditable({
     return null;
   }
 
-  const flexFields = isIndividual
-    ? data.ticketDetails?.individualDataUpdateTicketDetails?.individualData
-        ?.flexFields
-    : data.ticketDetails?.householdDataUpdateTicketDetails?.householdData
-        ?.flexFields;
-
-  const picUrl: string = isCurrent
-    ? flexFields[flexField.name]?.previousValue
-    : flexFields[flexField.name]?.value;
+  const { value, previousValue } = normalizeTicketFieldChange(
+    getTicketFieldChange(data.ticketDetails, flexField.name, isIndividual),
+    isIndividual,
+  );
+  const picUrl: string = isCurrent ? previousValue : value;
 
   return (
     <Box
