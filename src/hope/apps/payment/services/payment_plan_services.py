@@ -24,7 +24,9 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from psycopg2._psycopg import IntegrityError
+from requests import RequestException
 from rest_framework.exceptions import ValidationError
+from rest_framework.status import is_client_error
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
@@ -312,7 +314,14 @@ class PaymentPlanService:
         self.payment_plan.currency = input_data["currency"]
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
         self.payment_plan.dispersion_end_date = dispersion_end_date
-        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        try:
+            self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        except RequestException as e:
+            if e.response is not None and is_client_error(e.response.status_code):
+                logger.error("UNORE rejected exchange rate request for PaymentPlan %s: %s", self.payment_plan.pk, e)
+            else:
+                logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", self.payment_plan.pk, e)
+            self.payment_plan.exchange_rate = None
 
         self.payment_plan.save(
             update_fields=(
