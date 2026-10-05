@@ -50,6 +50,7 @@ from hope.models.utils import (
 if TYPE_CHECKING:
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
+    from hope.models.approval_process import ApprovalProcess
     from hope.models.currency import Currency
     from hope.models.payment_verification_plan import PaymentVerificationPlan
     from hope.models.program import Program
@@ -645,8 +646,10 @@ class PaymentPlan(
         )
         constraints = [
             models.CheckConstraint(
-                condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
-                name="payment_plan_group_required_unless_removed",
+                condition=Q(is_removed=True)
+                | Q(payment_plan_group__isnull=False, follow_up_instruction__isnull=True)
+                | Q(payment_plan_group__isnull=True, follow_up_instruction__isnull=False),
+                name="payment_plan_in_group_or_instruction_unless_removed",
             ),
         ]
 
@@ -865,22 +868,6 @@ class PaymentPlan(
         return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
 
     @property
-    def can_create_top_up(self) -> bool:
-        return (
-            self.plan_type == PaymentPlan.PlanType.REGULAR
-            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
-            and self.eligible_payments_for_top_up().exists()
-        )
-
-    @property
-    def can_create_top_up_amendment(self) -> bool:
-        return (
-            self.plan_type == PaymentPlan.PlanType.TOP_UP
-            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
-            and self.eligible_payments_for_top_up_amendment().exists()
-        )
-
-    @property
     def has_newer_sibling_plan(self) -> bool:
         return PaymentPlan.objects.filter(
             source_payment_plan=self.source_payment_plan,
@@ -907,8 +894,15 @@ class PaymentPlan(
             return self.eligible_payments_for_top_up_amendment()
         return self.eligible_payments_for_top_up()
 
+    @property
+    def last_approval_process(self) -> "ApprovalProcess | None":
+        """The approval process of the plan's group, or the plan's own when a Follow-Up Instruction runs it."""
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.approval_process.first()
+        return self.approval_process.first()
+
     def _get_last_approval_process_data(self) -> ModifiedData:
-        approval_process = self.payment_plan_group.approval_process.first() if self.payment_plan_group_id else None
+        approval_process = self.last_approval_process
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return ModifiedData(
@@ -1069,11 +1063,15 @@ class PaymentPlan(
 
     @property
     def financial_service_provider(self) -> "FinancialServiceProvider | None":
-        return self.payment_plan_group.financial_service_provider if self.payment_plan_group_id else None
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.financial_service_provider
+        return self.follow_up_instruction.financial_service_provider if self.follow_up_instruction_id else None
 
     @property
     def currency(self) -> "Currency | None":
-        return self.payment_plan_group.currency if self.payment_plan_group_id else None
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.currency
+        return self.follow_up_instruction.currency if self.follow_up_instruction_id else None
 
     @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
@@ -1135,8 +1133,7 @@ class PaymentPlan(
                 PaymentPlan.Status.READY_FOR_CLOSURE,
                 PaymentPlan.Status.CLOSED,
             ]
-            and self.payment_plan_group_id
-            and (process := self.payment_plan_group.approval_process.first())
+            and (process := self.last_approval_process)
             and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
         ):
             return approval.created_at.date()

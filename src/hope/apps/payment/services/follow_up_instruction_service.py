@@ -98,10 +98,13 @@ class FollowUpInstructionService:
         dispersion_end_date: datetime.date,
     ) -> FollowUpInstruction:
         source_plans = self._get_applicable_source_payment_plans(payment_plan_group_ids)
+        source_group = source_plans[0].payment_plan_group
         instruction = FollowUpInstruction.objects.create(
             business_area=self.program.business_area,
             program=self.program,
             created_by=user,
+            financial_service_provider=source_group.financial_service_provider,
+            currency=source_group.currency,
         )
         for source_plan in source_plans:
             follow_up_payment_plan = PaymentPlanService(source_plan).create_follow_up(
@@ -122,11 +125,7 @@ class FollowUpInstructionService:
 
     def _get_child_payment_plans(self) -> list[PaymentPlan]:
         instruction = self._require_instruction()
-        return list(
-            instruction.payment_plans.select_related("program_cycle__program", "payment_plan_group__currency").order_by(
-                "created_at"
-            )
-        )
+        return list(instruction.payment_plans.select_related("program_cycle__program").order_by("created_at"))
 
     def _require_instruction(self) -> FollowUpInstruction:
         if self.instruction is None:

@@ -15,7 +15,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -36,16 +36,19 @@ def accepted_pp_context(api_client: Callable, create_user_role_with_permissions:
         currency=currency,
     )
     payment_plan.payment_plan_purposes.add(PaymentPlanPurposeFactory())
-    create_user_role_with_permissions(user, [Permissions.PM_VIEW_DETAILS], business_area, program)
+    payment_plan_group = payment_plan.payment_plan_group
+    payment_plan_group.status = PaymentPlanGroup.Status.ACCEPTED
+    payment_plan_group.save(update_fields=["status"])
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program)
     return {
         "payment_plan": payment_plan,
         "client": api_client(user),
         "url": reverse(
-            "api:payments:payment-plans-detail",
+            "api:payments:payment-plan-groups-detail",
             kwargs={
                 "business_area_slug": business_area.slug,
                 "program_code": program.code,
-                "pk": payment_plan.pk,
+                "pk": payment_plan_group.pk,
             },
         ),
     }
@@ -55,7 +58,7 @@ def accepted_pp_context(api_client: Callable, create_user_role_with_permissions:
     "payment_status",
     [Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG, Payment.STATUS_SENT_TO_FSP],
 )
-def test_can_create_top_up_arrange_only_pending_payments_act_get_detail_assert_true(
+def test_can_create_top_up_arrange_only_pending_payments_act_get_group_detail_assert_true(
     accepted_pp_context: dict[str, Any],
     payment_status: str,
 ) -> None:

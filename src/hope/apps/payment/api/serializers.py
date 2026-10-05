@@ -59,7 +59,6 @@ from hope.models import (
     AccountAttachment,
     Approval,
     ApprovalProcess,
-    Currency,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialServiceProvider,
@@ -488,6 +487,12 @@ class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
         fields = ["id", "unicef_id", "name"]
 
 
+class PaymentPlanGroupLinkedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "plan_type", "status"]
+
+
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
@@ -495,7 +500,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlan
@@ -749,7 +754,10 @@ class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
         if (fixed_amount is None) == (file is None):
             raise serializers.ValidationError("Provide either a fixed amount or an amount file, not both.")
         if file is not None:
-            attrs["amounts"] = parse_top_up_amount_file(self.context["payment_plan"], file)
+            source_payment_plans = self.context["payment_plan_group"].plans_qualifying_for_linked_group(
+                self.context["plan_type"]
+            )
+            attrs["amounts"] = parse_top_up_amount_file(source_payment_plans, file)
         return attrs
 
 
@@ -865,8 +873,8 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     status = serializers.CharField(read_only=True)
     background_action_status = serializers.CharField(read_only=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
-    currency = serializers.SerializerMethodField()
-    currency_vision_code = serializers.SerializerMethodField()
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
     child_payment_plans_count = serializers.SerializerMethodField()
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
@@ -911,21 +919,6 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
 
     def get_child_payment_plans_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["child_payment_plans_count"]
-
-    @staticmethod
-    def _currency(obj: FollowUpInstruction) -> Currency | None:
-        if not hasattr(obj, "_currency_cache"):
-            payment_plan = obj.payment_plans.first()
-            obj._currency_cache = payment_plan.currency if payment_plan else None
-        return obj._currency_cache
-
-    def get_currency(self, obj: FollowUpInstruction) -> str | None:
-        currency = self._currency(obj)
-        return currency.code if currency else None
-
-    def get_currency_vision_code(self, obj: FollowUpInstruction) -> str | None:
-        currency = self._currency(obj)
-        return currency.vision_code if currency else None
 
     def get_households_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["households_count"]
@@ -983,9 +976,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     reconciliation_summary = serializers.SerializerMethodField()
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
-    can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.BooleanField()
-    can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
@@ -1035,9 +1025,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "reconciliation_summary",
             "excluded_households",
             "excluded_individuals",
-            "can_create_follow_up",
-            "can_create_top_up",
-            "can_create_top_up_amendment",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_send_to_payment_gateway",
@@ -1208,20 +1195,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return IndividualSmallSerializer(qs, many=True).data
 
-    def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
-        # Check there are payments in error/not distributed status and excluded withdrawn households
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP or obj.is_instruction_managed:
-            return False
-
-        qs = obj.unsuccessful_payments_for_follow_up()
-
-        # Check if all payments are used in FPPs
-        follow_up_payment = obj.payments_used_in_follow_payment_plans()
-
-        return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
-            qs.values_list("id", flat=True)
-        )
-
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(
             is_follow_up=True,
@@ -1367,7 +1340,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
     is_purposes_editable = serializers.SerializerMethodField()
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True, allow_null=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -2096,6 +2069,7 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True, allow_null=True)
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    source_group = PaymentPlanGroupSmallSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlanGroup
@@ -2105,6 +2079,8 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
             "name",
             "cycle",
             "status",
+            "plan_type",
+            "source_group",
             "financial_service_provider",
             "currency",
             "currency_vision_code",
@@ -2188,6 +2164,10 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     can_export_follow_up = serializers.SerializerMethodField()
     can_export_top_up = serializers.SerializerMethodField()
     can_export_top_up_amendment = serializers.SerializerMethodField()
+    linked_groups = PaymentPlanGroupLinkedSerializer(read_only=True, many=True)
+    can_create_follow_up = serializers.SerializerMethodField()
+    can_create_top_up = serializers.SerializerMethodField()
+    can_create_top_up_amendment = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
@@ -2209,7 +2189,23 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_export_follow_up",
             "can_export_top_up",
             "can_export_top_up_amendment",
+            "linked_groups",
+            "can_create_follow_up",
+            "can_create_top_up",
+            "can_create_top_up_amendment",
         ]
+
+    @staticmethod
+    def get_can_create_follow_up(obj: PaymentPlanGroup) -> bool:
+        return bool(obj.plans_qualifying_for_linked_group(PaymentPlan.PlanType.FOLLOW_UP))
+
+    @staticmethod
+    def get_can_create_top_up(obj: PaymentPlanGroup) -> bool:
+        return bool(obj.plans_qualifying_for_linked_group(PaymentPlan.PlanType.TOP_UP))
+
+    @staticmethod
+    def get_can_create_top_up_amendment(obj: PaymentPlanGroup) -> bool:
+        return bool(obj.plans_qualifying_for_linked_group(PaymentPlan.PlanType.TOP_UP_AMENDMENT))
 
     @staticmethod
     def get_closed_by(obj: PaymentPlanGroup) -> str | None:

@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from io import BytesIO
 from typing import Any, Callable
@@ -4032,3 +4033,109 @@ def test_reactivate_aborted_group_with_permission_returns_200(
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["status"] == PaymentPlanGroup.Status.OPEN
+
+
+@pytest.fixture
+def accepted_group_with_failed_payment(cycle: Any) -> Any:
+    group = PaymentPlanGroupFactory(
+        name="Main Group",
+        cycle=cycle,
+        status=PaymentPlanGroup.Status.ACCEPTED,
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
+    )
+    payment_plan = PaymentPlanFactory(
+        name="Main Plan",
+        program_cycle=cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(parent=payment_plan, status=Payment.STATUS_ERROR)
+    return group
+
+
+def test_create_follow_up_on_group_with_permission_returns_linked_group(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    accepted_group_with_failed_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, accepted_group_with_failed_payment.id, "create-follow-up"),
+        {"dispersion_start_date": "2099-01-01", "dispersion_end_date": "2099-12-31"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    data = response.json()
+    assert data["name"] == "Main Group Follow Up 1"
+    assert data["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
+    assert data["status"] == PaymentPlanGroup.Status.OPEN
+    assert data["source_group"]["id"] == str(accepted_group_with_failed_payment.id)
+    assert data["currency"] == "PLN"
+    assert data["payment_plans_count"] == 1
+
+
+def test_create_follow_up_on_group_without_permission_returns_403(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    accepted_group_with_failed_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, accepted_group_with_failed_payment.id, "create-follow-up"),
+        {"dispersion_start_date": "2099-01-01", "dispersion_end_date": "2099-12-31"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert not accepted_group_with_failed_payment.linked_groups.exists()
+
+
+@pytest.fixture
+def follow_up_group_of_source(accepted_group_with_failed_payment: Any, user: Any) -> Any:
+    return PaymentPlanGroupService(accepted_group_with_failed_payment).create_linked_group(
+        PaymentPlan.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+    )
+
+
+def test_group_detail_lists_linked_groups_and_what_can_be_created(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    accepted_group_with_failed_payment: Any,
+    follow_up_group_of_source: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
+    )
+
+    response = client.get(_detail_url(business_area.slug, program.code, accepted_group_with_failed_payment.id))
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["plan_type"] == PaymentPlan.PlanType.REGULAR
+    assert data["source_group"] is None
+    assert data["linked_groups"] == [
+        {
+            "id": str(follow_up_group_of_source.id),
+            "unicef_id": follow_up_group_of_source.unicef_id,
+            "name": "Main Group Follow Up 1",
+            "plan_type": PaymentPlan.PlanType.FOLLOW_UP,
+            "status": PaymentPlanGroup.Status.OPEN,
+        }
+    ]
+    assert data["can_create_follow_up"] is True
+    assert data["can_create_top_up"] is True
+    assert data["can_create_top_up_amendment"] is False

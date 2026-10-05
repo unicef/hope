@@ -9,13 +9,14 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -38,6 +39,14 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         status=PaymentPlan.Status.ACCEPTED,
         currency=currency,
     )
+    top_up_group = PaymentPlanGroupFactory(
+        name="Standard Group Top Up 1",
+        cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_group=regular_pp.payment_plan_group,
+        status=PaymentPlanGroup.Status.ACCEPTED,
+        currency=currency,
+    )
     top_up_pp = PaymentPlanFactory(
         name="Standard PP Top Up",
         business_area=business_area,
@@ -45,17 +54,18 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         plan_type=PaymentPlan.PlanType.TOP_UP,
         status=PaymentPlan.Status.ACCEPTED,
         source_payment_plan=regular_pp,
-        currency=currency,
+        payment_plan_group=top_up_group,
     )
     purpose = PaymentPlanPurposeFactory()
+    program.payment_plan_purposes.add(purpose)
     top_up_pp.payment_plan_purposes.add(purpose)
     PaymentFactory(parent=top_up_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     url = reverse(
-        "api:payments:payment-plans-create-top-up-amendment",
+        "api:payments:payment-plan-groups-create-top-up-amendment",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "pk": top_up_pp.pk,
+            "pk": top_up_group.pk,
         },
     )
     return {
@@ -63,6 +73,7 @@ def amendment_view_context(api_client: Callable, business_area: Any) -> dict[str
         "user": user,
         "program": program,
         "top_up_pp": top_up_pp,
+        "top_up_group": top_up_group,
         "client": api_client(user),
         "url": url,
     }
@@ -97,7 +108,7 @@ def test_create_top_up_amendment_view_arrange_permissions_act_post_assert_status
     assert response.status_code == expected_status
 
 
-def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_amendment_payload(
+def test_create_top_up_amendment_view_arrange_eligible_top_up_group_act_post_assert_linked_group_payload(
     amendment_view_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -117,8 +128,11 @@ def test_create_top_up_amendment_view_arrange_eligible_top_up_act_post_assert_am
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
     assert data["plan_type"] == PaymentPlan.PlanType.TOP_UP_AMENDMENT
-    assert data["name"] == "Standard PP Top Up Amendment"
-    assert "id" in data["source_payment_plan"]
+    assert data["name"] == "Standard Group Top Up 1 Top Up Amendment 1"
+    assert data["source_group"]["id"] == str(amendment_view_context["top_up_group"].id)
+    amendment_pp = PaymentPlan.objects.get(payment_plan_group_id=data["id"])
+    assert amendment_pp.name == "Standard PP Top Up Amendment"
+    assert amendment_pp.source_payment_plan == amendment_view_context["top_up_pp"]
 
 
 def test_create_top_up_amendment_view_arrange_missing_dispersion_dates_act_post_assert_400(

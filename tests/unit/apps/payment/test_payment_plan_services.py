@@ -649,6 +649,13 @@ def test_create_follow_up_pp(
         program_cycle=cycle,
         name="Test Payment Plan",
     )
+    follow_up_group = PaymentPlanGroupFactory(
+        cycle=cycle,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_group=pp.payment_plan_group,
+        currency=pp.currency,
+        financial_service_provider=pp.financial_service_provider,
+    )
     program = pp.program_cycle.program
     purpose = pp.payment_plan_purposes.first()
     payments = []
@@ -672,7 +679,9 @@ def test_create_follow_up_pp(
     dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
+        PaymentPlanService(pp).create_follow_up(
+            user, dispersion_start_date, dispersion_end_date, payment_plan_group=follow_up_group
+        )
     assert error.value.detail[0] == "Cannot create a follow-up for a payment plan with no unsuccessful payments"
 
     for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
@@ -688,7 +697,9 @@ def test_create_follow_up_pp(
     p_manually_cancelled = payments[3]
 
     with django_assert_num_queries(11):
-        follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
+        follow_up_pp = PaymentPlanService(pp).create_follow_up(
+            user, dispersion_start_date, dispersion_end_date, payment_plan_group=follow_up_group
+        )
 
     follow_up_pp.refresh_from_db()
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -704,7 +715,7 @@ def test_create_follow_up_pp(
     assert follow_up_pp.total_households_count == 0
     assert follow_up_pp.total_individuals_count == 0
     assert follow_up_pp.payment_items.count() == 0
-    assert follow_up_pp.payment_plan_group == pp.payment_plan_group
+    assert follow_up_pp.payment_plan_group == follow_up_group
     assert list(follow_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
 
     assert pp.child_plans.count() == 1
@@ -739,7 +750,9 @@ def test_create_follow_up_pp(
     follow_up_payment.save()
 
     with django_assert_num_queries(11):
-        follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
+        follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
+            user, dispersion_start_date, dispersion_end_date, payment_plan_group=follow_up_group
+        )
 
     assert pp.child_plans.count() == 2
 
@@ -800,16 +813,23 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
     dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
     dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
 
+    linked_group = PaymentPlanGroupFactory(
+        cycle=cycle, plan_type=plan_type, source_group=payment_plan.payment_plan_group
+    )
+
     with mock.patch.object(PaymentPlanService, method_name, return_value=expected_child_plan) as service_method:
         result = PaymentPlanService(payment_plan).create_child_plan(
             plan_type=plan_type,
             user=user,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
+            payment_plan_group=linked_group,
         )
 
     assert result == expected_child_plan
-    service_method.assert_called_once_with(user, dispersion_start_date, dispersion_end_date, **expected_kwargs)
+    service_method.assert_called_once_with(
+        user, dispersion_start_date, dispersion_end_date, payment_plan_group=linked_group, **expected_kwargs
+    )
 
 
 def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -829,6 +849,7 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
             user=user,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
+            payment_plan_group=payment_plan.payment_plan_group,
         )
 
     assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
@@ -2621,7 +2642,8 @@ def test_execute_update_status_action_raises_when_instruction_managed(
         created_by=user,
     )
     payment_plan_base.follow_up_instruction = instruction
-    payment_plan_base.save(update_fields=["follow_up_instruction"])
+    payment_plan_base.payment_plan_group = None
+    payment_plan_base.save(update_fields=["follow_up_instruction", "payment_plan_group"])
 
     with pytest.raises(ValidationError, match="This Payment Plan is managed by a Follow Up Instruction."):
         PaymentPlanService(payment_plan_base).execute_update_status_action(input_data={"action": "LOCK"}, user=user)
@@ -2726,25 +2748,3 @@ def test_status_action_rejected_when_group_is_not_open(user: User, business_area
             input_data={"action": PaymentPlan.Action.UNLOCK_FSP}, user=user
         )
     assert error.value.detail[0] == "This Payment Plan is managed by its Payment Plan Group."
-
-
-def test_instruction_status_action_allowed_when_group_is_not_open(
-    user: User, business_area: Any, cycle: ProgramCycle
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.ACCEPTED),
-        follow_up_instruction=FollowUpInstructionFactory(
-            business_area=business_area, program=cycle.program, created_by=user
-        ),
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        business_area=business_area,
-        status=PaymentPlan.Status.LOCKED,
-    )
-
-    PaymentPlanService(payment_plan).execute_update_status_action(
-        input_data={"action": PaymentPlan.Action.UNLOCK}, user=user, allow_instruction_managed=True
-    )
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.OPEN

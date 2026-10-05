@@ -32,12 +32,7 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
 
     def _get_representative_payment_plan(self) -> PaymentPlan:
         payment_plan = (
-            self.instruction.payment_plans.select_related(
-                "delivery_mechanism",
-                "payment_plan_group__financial_service_provider",
-            )
-            .order_by("created_at")
-            .first()
+            self.instruction.payment_plans.select_related("delivery_mechanism").order_by("created_at").first()
         )
         if payment_plan is None:
             raise ValueError("Follow Up Instruction has no child Payment Plans.")

@@ -28,7 +28,7 @@ class PaymentPlanFilter(FilterSet):
     payment_plan_group = django_filters.UUIDFilter(field_name="payment_plan_group__id")
     export_tag = django_filters.NumberFilter(field_name="export_tag")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
-    fsp = django_filters.CharFilter(field_name="payment_plan_group__financial_service_provider__name")
+    fsp = django_filters.CharFilter(method="filter_by_fsp")
     delivery_mechanism = django_filters.ModelMultipleChoiceFilter(
         field_name="delivery_mechanism__code",
         queryset=DeliveryMechanism.objects.all(),
@@ -62,6 +62,12 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_cycle_id=value)
+
+    def filter_by_fsp(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(
+            Q(payment_plan_group__financial_service_provider__name=value)
+            | Q(follow_up_instruction__financial_service_provider__name=value)
+        )
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
@@ -220,6 +226,7 @@ class PaymentPlanGroupFilter(FilterSet):
     cycle = django_filters.UUIDFilter(field_name="cycle__id")
     search = django_filters.CharFilter(method="search_filter")
     status = django_filters.MultipleChoiceFilter(choices=PaymentPlanGroup.Status.choices)
+    plan_type = django_filters.ChoiceFilter(choices=PaymentPlan.PlanType.choices)
     ordering = OrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
@@ -232,7 +239,7 @@ class PaymentPlanGroupFilter(FilterSet):
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["cycle", "status"]
+        fields = ["cycle", "status", "plan_type"]
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))

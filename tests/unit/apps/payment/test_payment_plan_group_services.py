@@ -1,3 +1,5 @@
+from datetime import date
+from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.contenttypes.models import ContentType
@@ -21,6 +23,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
 )
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     AcceptanceProcessThreshold,
     Approval,
@@ -72,6 +75,7 @@ def open_group(cycle, financial_service_provider, currency):
 @pytest.fixture
 def locked_payment_plan(cycle, open_group, financial_service_provider, delivery_mechanism, currency):
     return PaymentPlanFactory(
+        name="First Plan",
         program_cycle=cycle,
         payment_plan_group=open_group,
         status=PaymentPlan.Status.LOCKED,
@@ -626,39 +630,6 @@ def test_sync_finished_reopens_group_and_plans_when_a_payment_is_pending_again(
     assert locked_payment_plan.status == PaymentPlan.Status.ACCEPTED
 
 
-@pytest.fixture
-def follow_up_payment_plan(cycle, finished_group, locked_payment_plan, delivery_mechanism):
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=finished_group,
-        source_payment_plan=locked_payment_plan,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        status=PaymentPlan.Status.OPEN,
-        delivery_mechanism=delivery_mechanism,
-    )
-    PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING)
-    return payment_plan
-
-
-def test_sync_finished_ignores_pending_payment_of_follow_up_plan(finished_group, follow_up_payment_plan):
-    PaymentPlanGroupService(finished_group).sync_finished()
-
-    finished_group.refresh_from_db()
-    follow_up_payment_plan.refresh_from_db()
-    assert finished_group.status == PaymentPlanGroup.Status.FINISHED
-    assert follow_up_payment_plan.status == PaymentPlan.Status.OPEN
-
-
-@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
-def test_ready_for_closure_leaves_follow_up_plan_untouched(mock_notify, finished_group, follow_up_payment_plan, user):
-    PaymentPlanGroupService(finished_group).ready_for_closure(user)
-
-    finished_group.refresh_from_db()
-    follow_up_payment_plan.refresh_from_db()
-    assert finished_group.status == PaymentPlanGroup.Status.READY_FOR_CLOSURE
-    assert follow_up_payment_plan.status == PaymentPlan.Status.OPEN
-
-
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
 def test_ready_for_closure_moves_group_and_plans(mock_notify, finished_group, locked_payment_plan, user):
     PaymentPlanGroupService(finished_group).ready_for_closure(user)
@@ -744,3 +715,156 @@ def test_reactivate_abort_reopens_group_and_plans(
     assert group_in_approval.status == PaymentPlanGroup.Status.OPEN
     assert locked_payment_plan.status == PaymentPlan.Status.OPEN
     mock_rebuild.assert_called_once_with(locked_payment_plan, True)
+
+
+@pytest.fixture
+def failed_payment(locked_payment_plan):
+    return PaymentFactory(parent=locked_payment_plan, status=Payment.STATUS_ERROR)
+
+
+@pytest.fixture
+def follow_up_group(accepted_group, failed_payment, user):
+    return PaymentPlanGroupService(accepted_group).create_linked_group(
+        PaymentPlan.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+    )
+
+
+def test_create_follow_up_creates_linked_group_from_source(
+    accepted_group, follow_up_group, financial_service_provider, currency
+):
+    assert follow_up_group.plan_type == PaymentPlan.PlanType.FOLLOW_UP
+    assert follow_up_group.source_group == accepted_group
+    assert follow_up_group.status == PaymentPlanGroup.Status.OPEN
+    assert follow_up_group.cycle == accepted_group.cycle
+    assert follow_up_group.financial_service_provider == financial_service_provider
+    assert follow_up_group.currency == currency
+    assert follow_up_group.name == f"{accepted_group.name} Follow Up 1"
+
+
+def test_create_follow_up_puts_one_child_per_source_plan_in_linked_group(follow_up_group, locked_payment_plan):
+    child_plan = follow_up_group.payment_plans.get()
+
+    assert child_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP
+    assert child_plan.source_payment_plan == locked_payment_plan
+    assert child_plan.status == PaymentPlan.Status.OPEN
+
+
+def test_create_second_follow_up_numbers_the_name(accepted_group, follow_up_group, user):
+    second_follow_up_group = PaymentPlanGroupService(accepted_group).create_linked_group(
+        PaymentPlan.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+    )
+
+    assert second_follow_up_group.name == f"{accepted_group.name} Follow Up 2"
+
+
+def test_create_follow_up_rejected_without_unsuccessful_payments(accepted_group, delivered_payment, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(accepted_group).create_linked_group(
+            PaymentPlan.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+        )
+    assert error.value.detail[0] == "No Payment Plan in this group qualifies for a Follow Up."
+
+
+def test_create_follow_up_rejected_from_follow_up_group(follow_up_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(follow_up_group).create_linked_group(
+            PaymentPlan.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+        )
+    assert error.value.detail[0] == "A Follow Up cannot be created from a Follow Up group."
+
+
+def test_create_top_up_rejected_from_locked_group(locked_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(locked_group).create_linked_group(
+            PaymentPlan.PlanType.TOP_UP, user, date(2099, 1, 1), date(2099, 12, 31), Decimal("10.00")
+        )
+    assert error.value.detail[0] == "A Top Up can only be created from an Accepted or Finished group, got LOCKED"
+
+
+@pytest.fixture
+def second_accepted_payment_plan(cycle, accepted_group, financial_service_provider, delivery_mechanism):
+    return PaymentPlanFactory(
+        name="Second Plan",
+        program_cycle=cycle,
+        payment_plan_group=accepted_group,
+        status=PaymentPlan.Status.ACCEPTED,
+        delivery_mechanism=delivery_mechanism,
+    )
+
+
+@pytest.fixture
+def second_plan_payment(second_accepted_payment_plan):
+    return PaymentFactory(parent=second_accepted_payment_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+
+def test_create_top_up_from_amount_file_only_creates_children_for_funded_plans(
+    accepted_group, locked_payment_plan, delivered_payment, second_plan_payment, user
+):
+    top_up_group = PaymentPlanGroupService(accepted_group).create_linked_group(
+        PaymentPlan.PlanType.TOP_UP,
+        user,
+        date(2099, 1, 1),
+        date(2099, 12, 31),
+        {delivered_payment.unicef_id: Decimal("40.00")},
+    )
+
+    child_plan = top_up_group.payment_plans.get()
+    assert child_plan.source_payment_plan == locked_payment_plan
+
+
+def test_create_top_up_with_fixed_amount_creates_child_for_every_eligible_plan(
+    accepted_group, delivered_payment, second_plan_payment, user
+):
+    top_up_group = PaymentPlanGroupService(accepted_group).create_linked_group(
+        PaymentPlan.PlanType.TOP_UP, user, date(2099, 1, 1), date(2099, 12, 31), Decimal("10.00")
+    )
+
+    assert top_up_group.payment_plans.count() == 2
+
+
+def test_linked_group_rejects_currency_change(follow_up_group):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(follow_up_group).assign_currency(CurrencyFactory(code="EUR", name="Euro"))
+    assert error.value.detail[0] == "Currency of a Follow-Up / Top-Up / Amendment group is taken from its source group."
+
+
+def test_linked_group_rejects_new_target_population(follow_up_group):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService._validate_group_accepts_new_payment_plans(follow_up_group)
+    assert error.value.detail[0] == (
+        "Adding Target Population to a Follow-Up / Top-Up / Amendment Payment Plan Group is not possible"
+    )
+
+
+@pytest.fixture
+def accepted_top_up_group(cycle, accepted_group, currency):
+    return PaymentPlanGroupFactory(
+        cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_group=accepted_group,
+        status=PaymentPlanGroup.Status.ACCEPTED,
+        currency=currency,
+    )
+
+
+@pytest.fixture
+def accepted_top_up_plan(cycle, accepted_top_up_group, locked_payment_plan, delivery_mechanism):
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=accepted_top_up_group,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_payment_plan=locked_payment_plan,
+        status=PaymentPlan.Status.ACCEPTED,
+        delivery_mechanism=delivery_mechanism,
+    )
+
+
+def test_sync_finished_moves_top_up_group_with_its_top_up_plans(accepted_top_up_group, accepted_top_up_plan):
+    PaymentFactory(parent=accepted_top_up_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    PaymentPlanGroupService(accepted_top_up_group).sync_finished()
+
+    accepted_top_up_group.refresh_from_db()
+    accepted_top_up_plan.refresh_from_db()
+    assert accepted_top_up_group.status == PaymentPlanGroup.Status.FINISHED
+    assert accepted_top_up_plan.status == PaymentPlan.Status.FINISHED

@@ -121,7 +121,6 @@ def payment_plan_actions_context(
             "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
         ),
         "url_pp_split": reverse("api:payments:payment-plans-split", kwargs=url_kwargs),
-        "url_create_follow_up": reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs),
         "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
     }
 
@@ -1385,50 +1384,6 @@ def test_export_pdf_payment_plan_summary(
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
-        ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_create_follow_up(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_FORCE_FAILED)
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_create_follow_up"],
-        {
-            "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2099-12-31",
-        },
-        format="json",
-    )
-    assert response.status_code == expected_status
-
-    if expected_status == status.HTTP_201_CREATED:
-        data = response.json()
-        assert "id" in data
-        assert data["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
-        assert "id" in data["source_payment_plan"]
-        assert data["name"] == "DRAFT PP Follow Up"
-        assert data["dispersion_start_date"] == "2024-01-01"
-        assert data["dispersion_end_date"] == "2099-12-31"
-        assert data["currency"] == "PLN"
-        purpose = payment_plan_actions_context["purpose"]
-        assert data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
         ([Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], status.HTTP_200_OK),
         ([], status.HTTP_403_FORBIDDEN),
     ],
@@ -1904,7 +1859,8 @@ def test_get_object_raises_for_instruction_managed_blocked_action(
     )
     pp = payment_plan_actions_context["pp"]
     pp.follow_up_instruction = instruction
-    pp.save(update_fields=["follow_up_instruction"])
+    pp.payment_plan_group = None
+    pp.save(update_fields=["follow_up_instruction", "payment_plan_group"])
 
     response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_lock"])
 

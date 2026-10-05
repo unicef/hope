@@ -249,7 +249,7 @@ class PaymentVerificationViewSet(
     payment_plan_url_kwarg = "pk"
     queryset = (
         PaymentPlan.objects.filter(status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED))
-        .select_related("payment_plan_group__currency")
+        .select_related("payment_plan_group__currency", "follow_up_instruction__currency")
         .order_by("-created_at")
     )
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
@@ -791,7 +791,7 @@ class PaymentPlanViewSet(
     program_model_field = "program_cycle__program"
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("program_cycle__program", "payment_plan_group__currency")
+        .select_related("program_cycle__program", "payment_plan_group__currency", "follow_up_instruction__currency")
         .prefetch_related("child_plans")
         .order_by("-created_at")
     )
@@ -801,9 +801,6 @@ class PaymentPlanViewSet(
         "list": PaymentPlanListSerializer,
         "retrieve": PaymentPlanDetailSerializer,
         "create": PaymentPlanCreateUpdateSerializer,
-        "create_follow_up": PaymentPlanCreateFollowUpSerializer,
-        "create_top_up": PaymentPlanCreateTopUpSerializer,
-        "create_top_up_amendment": PaymentPlanCreateTopUpSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
@@ -823,10 +820,6 @@ class PaymentPlanViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
         "create": [Permissions.PM_CREATE],
-        "create_follow_up": [Permissions.PM_CREATE],
-        "create_top_up": [Permissions.PM_CREATE],
-        "top_up_amount_template": [Permissions.PM_CREATE],
-        "create_top_up_amendment": [Permissions.PM_CREATE],
         "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
@@ -890,93 +883,6 @@ class PaymentPlanViewSet(
             data=response_serializer.data,
             status=status.HTTP_201_CREATED,
         )
-
-    def _create_child_plan_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
-        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
-        payment_plan = self.get_object()
-        user = request.user
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        serializer.is_valid(raise_exception=True)
-        child_pp = PaymentPlanService(payment_plan).create_child_plan(
-            plan_type=plan_type,
-            user=user,
-            dispersion_start_date=serializer.validated_data["dispersion_start_date"],
-            dispersion_end_date=serializer.validated_data["dispersion_end_date"],
-            top_up_amount=serializer.validated_data.get("amounts") or serializer.validated_data.get("fixed_amount"),
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=user,
-            programs=child_pp.program,
-            old_object=None,
-            new_object=child_pp,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(child_pp, context={"request": request}).data,
-            status=status.HTTP_201_CREATED,
-        )
-
-    @extend_schema(
-        request=PaymentPlanCreateFollowUpSerializer,
-        responses={201: PaymentPlanDetailSerializer},
-    )
-    @action(detail=True, methods=["post"], url_path="create-follow-up")
-    @transaction.atomic
-    def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._create_child_plan_response(request, PaymentPlan.PlanType.FOLLOW_UP)
-
-    @extend_schema(
-        request=PaymentPlanCreateTopUpSerializer,
-        responses={201: PaymentPlanDetailSerializer},
-    )
-    @action(detail=True, methods=["post"], url_path="create-top-up", parser_classes=[MultiPartParser, JSONParser])
-    @transaction.atomic
-    def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP)
-
-    @extend_schema(responses={(200, XLSX_CONTENT_TYPE): OpenApiTypes.BINARY})
-    @action(detail=True, methods=["get"], url_path="top-up-amount-template")
-    def top_up_amount_template(self, request: Request, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Blank per-beneficiary amount template for the child plan this plan can spawn.
-
-        A Standard plan gets the Top-Up template, a Top-Up gets the Amendment one; the sheet is
-        identical either way, only the row set differs. Served straight back rather than through
-        the async FileTemp route the entitlement export uses: the sheet is built from rows that
-        already exist, so there is nothing to wait for.
-        """
-        payment_plan = self.get_object()
-        if payment_plan.plan_type not in (PaymentPlan.PlanType.REGULAR, PaymentPlan.PlanType.TOP_UP):
-            raise ValidationError(f"No amount template exists for a {payment_plan.plan_type} plan")
-        if payment_plan.status not in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES:
-            raise ValidationError(
-                f"The amount template is only available for an Accepted or Finished plan, got {payment_plan.status}"
-            )
-        if not payment_plan.eligible_payments_for_child_plan().exists():
-            child_plan = "top-up amendment" if payment_plan.plan_type == PaymentPlan.PlanType.TOP_UP else "top-up"
-            raise ValidationError(f"Cannot create a {child_plan} for a payment plan with no eligible payments")
-
-        workbook = TopUpAmountTemplateService(payment_plan).generate_workbook()
-        buffer = BytesIO()
-        workbook.save(buffer)
-        filename = f"top_up_amount_template_{payment_plan.unicef_id or payment_plan.id}.xlsx"
-        response = HttpResponse(buffer.getvalue(), content_type=XLSX_CONTENT_TYPE)
-        response["Content-Disposition"] = f"attachment; filename={filename}"
-        return response
-
-    @extend_schema(
-        request=PaymentPlanCreateTopUpSerializer,
-        responses={201: PaymentPlanDetailSerializer},
-    )
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="create-top-up-amendment",
-        parser_classes=[MultiPartParser, JSONParser],
-    )
-    @transaction.atomic
-    def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._create_child_plan_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -1561,7 +1467,7 @@ class PaymentPlanGlobalViewSet(
 ):
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-        .select_related("payment_plan_group__currency")
+        .select_related("payment_plan_group__currency", "follow_up_instruction__currency")
         .prefetch_related("child_plans")
         .order_by("-created_at")
     )
@@ -1584,8 +1490,8 @@ class FollowUpInstructionViewSet(
 ):
     program_model_field = "program"
     queryset = (
-        FollowUpInstruction.objects.select_related("business_area", "program", "created_by")
-        .prefetch_related("payment_plans__source_payment_plan", "payment_plans__payment_plan_group__currency")
+        FollowUpInstruction.objects.select_related("business_area", "program", "created_by", "currency")
+        .prefetch_related("payment_plans__source_payment_plan")
         .order_by("-created_at")
     )
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
@@ -2593,9 +2499,9 @@ class PaymentPlanGroupViewSet(
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlanGroup.objects.select_related("cycle", "financial_service_provider", "currency").order_by(
-        "cycle__title", "created_at"
-    )
+    queryset = PaymentPlanGroup.objects.select_related(
+        "cycle", "financial_service_provider", "currency", "source_group"
+    ).order_by("cycle__title", "created_at")
     program_model_field = "cycle__program"
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PaymentPlanGroupFilter
@@ -2614,6 +2520,9 @@ class PaymentPlanGroupViewSet(
         "mark_as_released": AcceptanceProcessSerializer,
         "close": PaymentPlanCloseSerializer,
         "abort": PaymentPlanAbortSerializer,
+        "create_follow_up": PaymentPlanCreateFollowUpSerializer,
+        "create_top_up": PaymentPlanCreateTopUpSerializer,
+        "create_top_up_amendment": PaymentPlanCreateTopUpSerializer,
     }
 
     permissions_by_action = {
@@ -2642,6 +2551,10 @@ class PaymentPlanGroupViewSet(
         "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
         "delivery_import_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_IMPORT_XLSX],
+        "create_follow_up": [Permissions.PM_CREATE],
+        "create_top_up": [Permissions.PM_CREATE],
+        "top_up_amount_template": [Permissions.PM_CREATE],
+        "create_top_up_amendment": [Permissions.PM_CREATE],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2660,6 +2573,82 @@ class PaymentPlanGroupViewSet(
             old_object=None,
             new_object=payment_plan_group,
         )
+
+    def _create_linked_group_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
+        """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
+        payment_plan_group = self.get_object()
+        serializer = self.get_serializer(
+            data=request.data, context={"payment_plan_group": payment_plan_group, "plan_type": plan_type}
+        )
+        serializer.is_valid(raise_exception=True)
+        linked_group = PaymentPlanGroupService(payment_plan_group).create_linked_group(
+            plan_type=plan_type,
+            user=cast("User", request.user),
+            dispersion_start_date=serializer.validated_data["dispersion_start_date"],
+            dispersion_end_date=serializer.validated_data["dispersion_end_date"],
+            top_up_amount=serializer.validated_data.get("amounts") or serializer.validated_data.get("fixed_amount"),
+        )
+        log_create(
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
+            user=request.user,
+            programs=linked_group.cycle.program.pk,
+            old_object=None,
+            new_object=linked_group,
+        )
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(linked_group, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(request=PaymentPlanCreateFollowUpSerializer, responses={201: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="create-follow-up")
+    @transaction.atomic
+    def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_linked_group_response(request, PaymentPlan.PlanType.FOLLOW_UP)
+
+    @extend_schema(request=PaymentPlanCreateTopUpSerializer, responses={201: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="create-top-up", parser_classes=[MultiPartParser, JSONParser])
+    @transaction.atomic
+    def create_top_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_linked_group_response(request, PaymentPlan.PlanType.TOP_UP)
+
+    @extend_schema(request=PaymentPlanCreateTopUpSerializer, responses={201: PaymentPlanGroupDetailSerializer})
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="create-top-up-amendment",
+        parser_classes=[MultiPartParser, JSONParser],
+    )
+    @transaction.atomic
+    def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._create_linked_group_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
+
+    @extend_schema(responses={(200, XLSX_CONTENT_TYPE): OpenApiTypes.BINARY})
+    @action(detail=True, methods=["get"], url_path="top-up-amount-template")
+    def top_up_amount_template(self, request: Request, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Blank per-beneficiary amount template for the Top-Up or Amendment that can be created from this group.
+
+        A Standard group gets the Top-Up template, a Top-Up group gets the Amendment one. Built
+        synchronously: the sheet only lists existing payments.
+        """
+        payment_plan_group = self.get_object()
+        plan_type = (
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT
+            if payment_plan_group.plan_type == PaymentPlan.PlanType.TOP_UP
+            else PaymentPlan.PlanType.TOP_UP
+        )
+        source_payment_plans = payment_plan_group.plans_qualifying_for_linked_group(plan_type)
+        if not source_payment_plans:
+            raise ValidationError(f"No Payment Plan in this group qualifies for a {plan_type.label}.")
+
+        workbook = TopUpAmountTemplateService(source_payment_plans).generate_workbook()
+        buffer = BytesIO()
+        workbook.save(buffer)
+        filename = f"top_up_amount_template_{payment_plan_group.unicef_id or payment_plan_group.id}.xlsx"
+        response = HttpResponse(buffer.getvalue(), content_type=XLSX_CONTENT_TYPE)
+        response["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
 
     @transaction.atomic
     def perform_update(self, serializer: Any) -> None:

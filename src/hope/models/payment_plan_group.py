@@ -14,12 +14,13 @@ from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
+from hope.models.payment_plan import PaymentPlan
 from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hope.models import AcceptanceProcessThreshold, BusinessArea, PaymentPlan, Program
+    from hope.models import AcceptanceProcessThreshold, BusinessArea, Program
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
@@ -28,6 +29,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "name",
             "cycle",
             "status",
+            "plan_type",
+            "source_group",
             "financial_service_provider",
             "background_action_status",
             "delivery_import_file",
@@ -63,6 +66,17 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
     ]
+
+    CHILD_GROUP_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+    LINKED_GROUP_SOURCE_PLAN_TYPES = {
+        PaymentPlan.PlanType.FOLLOW_UP: (
+            PaymentPlan.PlanType.REGULAR,
+            PaymentPlan.PlanType.TOP_UP,
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+        ),
+        PaymentPlan.PlanType.TOP_UP: (PaymentPlan.PlanType.REGULAR,),
+        PaymentPlan.PlanType.TOP_UP_AMENDMENT: (PaymentPlan.PlanType.TOP_UP,),
+    }
 
     cycle = models.ForeignKey(
         "program.ProgramCycle",
@@ -125,12 +139,34 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         choices=BackgroundActionStatus.choices,
         help_text="Background Action Status for celery export/import task [sys]",
     )
+    plan_type = models.CharField(
+        max_length=20,
+        choices=PaymentPlan.PlanType.choices,
+        default=PaymentPlan.PlanType.REGULAR,
+        db_index=True,
+        help_text="Type of the Payment Plans the group runs; a Follow-Up / Top-Up / Amendment group is linked [sys]",
+    )
+    source_group = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        related_name="linked_groups",
+        null=True,
+        blank=True,
+        help_text="The group this Follow-Up / Top-Up / Amendment group was created from [sys]",
+    )
 
     class Meta:
         app_label = "payment"
         verbose_name = "Payment Plan Group"
         unique_together = ("cycle", "name")
         ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(plan_type=PaymentPlan.PlanType.REGULAR, source_group__isnull=True)
+                | (~Q(plan_type=PaymentPlan.PlanType.REGULAR) & Q(source_group__isnull=False)),
+                name="payment_plan_group_source_group_only_on_linked",
+            ),
+        ]
 
     def delete(self, *args: object, **kwargs: object) -> tuple[int, dict]:
         with transaction.atomic():
@@ -152,13 +188,22 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def business_area(self) -> "BusinessArea":
         return self.cycle.program.business_area
 
+    def plans_qualifying_for_linked_group(self, plan_type: "PaymentPlan.PlanType") -> list[PaymentPlan]:
+        """Plans of this group that a linked Follow-Up / Top-Up / Amendment group would get a child plan for."""
+        if self.plan_type not in self.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]:
+            return []
+        payment_plans = list(self.payment_plans.order_by("created_at"))
+        if plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return [plan for plan in payment_plans if plan.unsuccessful_payments_for_follow_up().exists()]
+        if self.status not in self.CHILD_GROUP_SOURCE_STATUSES:
+            return []
+        return [plan for plan in payment_plans if plan.eligible_payments_for_child_plan().exists()]
+
     @property
     def is_reconciled(self) -> bool:
-        from hope.models import Payment, PaymentPlan
+        from hope.models import Payment
 
-        eligible_payments = Payment.objects.filter(
-            parent__payment_plan_group=self, parent__plan_type=PaymentPlan.PlanType.REGULAR
-        ).eligible()
+        eligible_payments = Payment.objects.filter(parent__payment_plan_group=self).eligible()
         return eligible_payments.exists() and not eligible_payments.filter(status__in=Payment.PENDING_STATUSES).exists()
 
     @property
@@ -224,7 +269,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         not yet sent to the gateway, and is not already being sent. When both Vision feature flags
         are active, plans already managed by Vision are also excluded.
         """
-        from hope.models import FinancialServiceProvider, PaymentPlan, PaymentPlanSplit
+        from hope.models import FinancialServiceProvider, PaymentPlanSplit
 
         if self.financial_service_provider is None:
             return self.payment_plans.none()

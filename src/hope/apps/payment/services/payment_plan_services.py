@@ -185,11 +185,10 @@ class PaymentPlanService:
         allow_instruction_managed: bool = False,
     ) -> PaymentPlan:
         """Get function from get_action_function and execute it return PaymentPlan object."""
+        if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
+            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
         payment_plan_group = self.payment_plan.payment_plan_group
-        if self.payment_plan.is_instruction_managed:
-            if not allow_instruction_managed:
-                raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
-        elif payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
+        if payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
             raise ValidationError("This Payment Plan is managed by its Payment Plan Group.")
         self.action = input_data.get("action")
         self.input_data = input_data
@@ -1033,6 +1032,10 @@ class PaymentPlanService:
 
     @staticmethod
     def _validate_group_accepts_new_payment_plans(payment_plan_group: PaymentPlanGroup) -> None:
+        if payment_plan_group.source_group_id is not None:
+            raise ValidationError(
+                "Adding Target Population to a Follow-Up / Top-Up / Amendment Payment Plan Group is not possible"
+            )
         if payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
             raise ValidationError(
                 f"Adding Target Population to Payment Plan Group is possible only within Status "
@@ -1109,22 +1112,31 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
-    def _create_child_payment_plan(
+    CHILD_PLAN_NAME_SUFFIX = {
+        PaymentPlan.PlanType.FOLLOW_UP: " Follow Up",
+        PaymentPlan.PlanType.TOP_UP: " Top Up",
+        PaymentPlan.PlanType.TOP_UP_AMENDMENT: " Amendment",
+    }
+
+    def _create_child_payment_plan(  # noqa: PLR0913
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
-        plan_type: str,
-        name_suffix: str,
+        plan_type: "PaymentPlan.PlanType",
+        *,
+        payment_plan_group: PaymentPlanGroup | None,
+        follow_up_instruction: "FollowUpInstruction | None" = None,
     ) -> PaymentPlan:
         """Create a child Payment Plan (follow-up / top-up / top-up amendment) of the current plan.
 
-        Shared core for all three flows: the child inherits the source plan's group,
-        purposes, currency, dates, delivery mechanism and FSP, and is created OPEN.
+        Shared core for all three flows: the child inherits the source plan's purposes, dates and
+        delivery mechanism and is created OPEN, in the linked group it was created for or, for a
+        Follow-Up Instruction child, under the instruction with no group.
         """
         source_pp = self.payment_plan
         child_pp = PaymentPlan.objects.create(
-            name=source_pp.name + name_suffix,  # type: ignore[operator]
+            name=source_pp.name + self.CHILD_PLAN_NAME_SUFFIX[plan_type],  # type: ignore[operator]
             status=PaymentPlan.Status.OPEN,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
@@ -1140,7 +1152,8 @@ class PaymentPlanService:
             end_date=source_pp.end_date,
             use_payment_gateway=source_pp.use_payment_gateway,
             delivery_mechanism=source_pp.delivery_mechanism,
-            payment_plan_group=source_pp.payment_plan_group,
+            payment_plan_group=payment_plan_group,
+            follow_up_instruction=follow_up_instruction,
         )
         self.copy_target_criteria(source_pp, child_pp)
         child_pp.payment_plan_purposes.set(source_pp.payment_plan_purposes.all())
@@ -1279,8 +1292,11 @@ class PaymentPlanService:
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
+        *,
+        payment_plan_group: PaymentPlanGroup | None = None,
         follow_up_instruction: "FollowUpInstruction | None" = None,
     ) -> PaymentPlan:
+        """Create a Follow-Up of this plan in a linked group or, for an instruction, under it with no group."""
         source_pp = self.payment_plan
 
         if source_pp.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
@@ -1290,20 +1306,24 @@ class PaymentPlanService:
             raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = self._create_child_payment_plan(
-            user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.FOLLOW_UP, " Follow Up"
+            user,
+            dispersion_start_date,
+            dispersion_end_date,
+            PaymentPlan.PlanType.FOLLOW_UP,
+            payment_plan_group=payment_plan_group,
+            follow_up_instruction=follow_up_instruction,
         )
-        if follow_up_instruction is not None:
-            follow_up_pp.follow_up_instruction = follow_up_instruction
-            follow_up_pp.save(update_fields=["follow_up_instruction", "updated_at"])
         transaction.on_commit(lambda: prepare_child_payment_plan_async_task(follow_up_pp))
         return follow_up_pp
 
     @transaction.atomic
-    def create_top_up(
+    def create_top_up(  # noqa: PLR0913
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
+        *,
+        payment_plan_group: PaymentPlanGroup,
         fixed_amount: Decimal | None = None,
         amounts: dict[str, Decimal] | None = None,
     ) -> PaymentPlan:
@@ -1329,17 +1349,23 @@ class PaymentPlanService:
             raise ValidationError("Cannot create a top-up for a payment plan with no eligible payments")
 
         top_up_pp = self._create_child_payment_plan(
-            user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP, " Top Up"
+            user,
+            dispersion_start_date,
+            dispersion_end_date,
+            PaymentPlan.PlanType.TOP_UP,
+            payment_plan_group=payment_plan_group,
         )
         self._queue_child_payment_copy(top_up_pp, fixed_amount=fixed_amount, amounts=amounts)
         return top_up_pp
 
     @transaction.atomic
-    def create_top_up_amendment(
+    def create_top_up_amendment(  # noqa: PLR0913
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
+        *,
+        payment_plan_group: PaymentPlanGroup,
         fixed_amount: Decimal | None = None,
         amounts: dict[str, Decimal] | None = None,
     ) -> PaymentPlan:
@@ -1362,7 +1388,11 @@ class PaymentPlanService:
             raise ValidationError("Cannot create a top-up amendment for a payment plan with no eligible payments")
 
         amendment_pp = self._create_child_payment_plan(
-            user, dispersion_start_date, dispersion_end_date, PaymentPlan.PlanType.TOP_UP_AMENDMENT, " Amendment"
+            user,
+            dispersion_start_date,
+            dispersion_end_date,
+            PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            payment_plan_group=payment_plan_group,
         )
         self._queue_child_payment_copy(amendment_pp, fixed_amount=fixed_amount, amounts=amounts)
         return amendment_pp
@@ -1387,16 +1417,17 @@ class PaymentPlanService:
             extra_config["fixed_amount"] = str(fixed_amount)
         transaction.on_commit(lambda: prepare_child_payment_plan_async_task(child_pp, extra_config=extra_config))
 
-    def create_child_plan(
+    def create_child_plan(  # noqa: PLR0913
         self,
         *,
         plan_type: "PaymentPlan.PlanType",
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
         dispersion_start_date: datetime.date,
         dispersion_end_date: datetime.date,
+        payment_plan_group: PaymentPlanGroup,
         top_up_amount: "Decimal | dict[str, Decimal] | None" = None,
     ) -> PaymentPlan:
-        """Create a child plan of the requested type.
+        """Create a child plan of the requested type in ``payment_plan_group``, the linked group of its source.
 
         ``top_up_amount`` applies to Top-Ups and their Amendments: a ``Decimal`` funds every
         eligible beneficiary with that flat amount, a mapping of source payment unicef_id to
@@ -1406,12 +1437,15 @@ class PaymentPlanService:
         fixed_amount = top_up_amount if isinstance(top_up_amount, Decimal) else None
         match plan_type:
             case PaymentPlan.PlanType.FOLLOW_UP:
-                return self.create_follow_up(user, dispersion_start_date, dispersion_end_date)
+                return self.create_follow_up(
+                    user, dispersion_start_date, dispersion_end_date, payment_plan_group=payment_plan_group
+                )
             case PaymentPlan.PlanType.TOP_UP:
                 return self.create_top_up(
                     user,
                     dispersion_start_date,
                     dispersion_end_date,
+                    payment_plan_group=payment_plan_group,
                     fixed_amount=fixed_amount,
                     amounts=amounts,
                 )
@@ -1420,6 +1454,7 @@ class PaymentPlanService:
                     user,
                     dispersion_start_date,
                     dispersion_end_date,
+                    payment_plan_group=payment_plan_group,
                     fixed_amount=fixed_amount,
                     amounts=amounts,
                 )

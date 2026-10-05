@@ -1070,7 +1070,53 @@ def removed_payment_plan_without_group(program_cycle):
 def test_live_payment_plan_without_group_violates_constraint(payment_plan):
     payment_plan.payment_plan_group = None
 
-    with pytest.raises(IntegrityError, match="payment_plan_group_required_unless_removed"):
+    with pytest.raises(IntegrityError, match="payment_plan_in_group_or_instruction_unless_removed"):
+        payment_plan.save()
+
+
+@pytest.fixture
+def follow_up_instruction(program_cycle):
+    return FollowUpInstructionFactory(program=program_cycle.program)
+
+
+@pytest.fixture
+def instruction_child_payment_plan(program_cycle, follow_up_instruction):
+    return PaymentPlanFactory(
+        program_cycle=program_cycle,
+        follow_up_instruction=follow_up_instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        currency=CurrencyFactory(code="EUR", name="Euro"),
+        financial_service_provider=FinancialServiceProviderFactory(),
+    )
+
+
+def test_follow_up_instruction_child_has_no_group(instruction_child_payment_plan):
+    assert instruction_child_payment_plan.payment_plan_group_id is None
+
+
+def test_follow_up_instruction_child_reads_currency_and_fsp_from_instruction(
+    instruction_child_payment_plan, follow_up_instruction
+):
+    assert instruction_child_payment_plan.currency == follow_up_instruction.currency
+    assert instruction_child_payment_plan.currency.code == "EUR"
+    assert instruction_child_payment_plan.financial_service_provider == follow_up_instruction.financial_service_provider
+
+
+@pytest.fixture
+def instruction_child_approval_process(instruction_child_payment_plan):
+    return ApprovalProcessFactory(payment_plan=instruction_child_payment_plan)
+
+
+def test_follow_up_instruction_child_last_approval_process_is_its_own(
+    instruction_child_payment_plan, instruction_child_approval_process
+):
+    assert instruction_child_payment_plan.last_approval_process == instruction_child_approval_process
+
+
+def test_payment_plan_in_group_and_instruction_violates_constraint(payment_plan, follow_up_instruction):
+    payment_plan.follow_up_instruction = follow_up_instruction
+
+    with pytest.raises(IntegrityError, match="payment_plan_in_group_or_instruction_unless_removed"):
         payment_plan.save()
 
 

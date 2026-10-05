@@ -75,7 +75,8 @@ def instruction_managed_payment_plan(vision_enabled_payment_plan: PaymentPlan) -
     )
     vision_enabled_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
     vision_enabled_payment_plan.follow_up_instruction = instruction
-    vision_enabled_payment_plan.save(update_fields=["plan_type", "follow_up_instruction"])
+    vision_enabled_payment_plan.payment_plan_group = None
+    vision_enabled_payment_plan.save(update_fields=["plan_type", "follow_up_instruction", "payment_plan_group"])
     return vision_enabled_payment_plan
 
 

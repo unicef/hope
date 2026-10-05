@@ -52,7 +52,7 @@ def source_pp(db: Any) -> PaymentPlan:
 
 
 def _template(source_pp: PaymentPlan) -> Any:
-    return TopUpAmountTemplateService(source_pp).generate_workbook()
+    return TopUpAmountTemplateService([source_pp]).generate_workbook()
 
 
 def _as_file(workbook: Any) -> BytesIO:
@@ -74,7 +74,7 @@ def test_parse_top_up_amount_file_arrange_funded_row_act_parse_assert_amount_ret
     _set_cell(workbook.active, 2, AMOUNT_COLUMN, 12.5)
     funded_id = workbook.active.cell(row=2, column=1).value
 
-    amounts = parse_top_up_amount_file(source_pp, _as_file(workbook))
+    amounts = parse_top_up_amount_file([source_pp], _as_file(workbook))
 
     assert amounts == {funded_id: Decimal("12.50")}
 
@@ -83,7 +83,7 @@ def test_parse_top_up_amount_file_arrange_not_a_workbook_act_parse_assert_raises
     source_pp: PaymentPlan,
 ) -> None:
     with pytest.raises(ValidationError, match="could not be read"):
-        parse_top_up_amount_file(source_pp, BytesIO(b"definitely not an xlsx"))
+        parse_top_up_amount_file([source_pp], BytesIO(b"definitely not an xlsx"))
 
 
 def test_parse_top_up_amount_file_arrange_wrong_sheet_name_act_parse_assert_raises(
@@ -93,7 +93,7 @@ def test_parse_top_up_amount_file_arrange_wrong_sheet_name_act_parse_assert_rais
     workbook.active.title = "Some Other Sheet"
 
     with pytest.raises(ValidationError, match="not found in the uploaded file"):
-        parse_top_up_amount_file(source_pp, _as_file(workbook))
+        parse_top_up_amount_file([source_pp], _as_file(workbook))
 
 
 def test_parse_top_up_amount_file_arrange_missing_amount_column_act_parse_assert_raises(
@@ -105,7 +105,7 @@ def test_parse_top_up_amount_file_arrange_missing_amount_column_act_parse_assert
     worksheet.cell(row=1, column=headers.index(AMOUNT_COLUMN) + 1).value = "something_else"
 
     with pytest.raises(ValidationError, match=f"Column '{AMOUNT_COLUMN}' is required"):
-        parse_top_up_amount_file(source_pp, _as_file(workbook))
+        parse_top_up_amount_file([source_pp], _as_file(workbook))
 
 
 def test_parse_top_up_amount_file_arrange_non_numeric_amount_act_parse_assert_raises(
@@ -115,7 +115,7 @@ def test_parse_top_up_amount_file_arrange_non_numeric_amount_act_parse_assert_ra
     _set_cell(workbook.active, 2, AMOUNT_COLUMN, "not a number")
 
     with pytest.raises(ValidationError, match="Invalid amount"):
-        parse_top_up_amount_file(source_pp, _as_file(workbook))
+        parse_top_up_amount_file([source_pp], _as_file(workbook))
 
 
 def test_parse_top_up_amount_file_arrange_duplicate_payment_row_act_parse_assert_raises(
@@ -129,7 +129,7 @@ def test_parse_top_up_amount_file_arrange_duplicate_payment_row_act_parse_assert
     _set_cell(worksheet, 3, AMOUNT_COLUMN, 20)
 
     with pytest.raises(ValidationError, match="appears more than once"):
-        parse_top_up_amount_file(source_pp, _as_file(workbook))
+        parse_top_up_amount_file([source_pp], _as_file(workbook))
 
 
 def test_parse_top_up_amount_file_arrange_duplicate_with_blank_row_first_act_parse_assert_raises(
@@ -144,7 +144,7 @@ def test_parse_top_up_amount_file_arrange_duplicate_with_blank_row_first_act_par
     _set_cell(worksheet, 3, AMOUNT_COLUMN, 20)
 
     with pytest.raises(ValidationError, match="appears more than once"):
-        parse_top_up_amount_file(source_pp, _as_file(workbook))
+        parse_top_up_amount_file([source_pp], _as_file(workbook))
 
 
 def test_parse_top_up_amount_file_arrange_blank_payment_id_row_act_parse_assert_row_skipped(
@@ -157,6 +157,6 @@ def test_parse_top_up_amount_file_arrange_blank_payment_id_row_act_parse_assert_
     _set_cell(worksheet, 3, PAYMENT_ID_COLUMN, None)
     _set_cell(worksheet, 3, AMOUNT_COLUMN, 99)
 
-    amounts = parse_top_up_amount_file(source_pp, _as_file(workbook))
+    amounts = parse_top_up_amount_file([source_pp], _as_file(workbook))
 
     assert amounts == {worksheet.cell(row=2, column=1).value: Decimal("10.00")}

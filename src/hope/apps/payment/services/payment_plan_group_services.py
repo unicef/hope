@@ -1,3 +1,5 @@
+import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING, cast
 
 from django.db import transaction
@@ -23,6 +25,7 @@ from hope.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     FspXlsxTemplatePerDeliveryMechanism,
+    Payment,
     PaymentPlan,
     PaymentPlanGroup,
 )
@@ -46,6 +49,86 @@ class PaymentPlanGroupService:
     def __init__(self, payment_plan_group: PaymentPlanGroup) -> None:
         self.payment_plan_group = payment_plan_group
 
+    @transaction.atomic
+    def create_linked_group(
+        self,
+        plan_type: "PaymentPlan.PlanType",
+        user: "User",
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
+        top_up_amount: Decimal | dict[str, Decimal] | None = None,
+    ) -> PaymentPlanGroup:
+        """Create a Follow-Up / Top-Up / Amendment of this group as a new linked group.
+
+        The linked group holds one child plan per plan of this group that qualifies for it, takes this
+        group's FSP and currency, and starts OPEN. ``top_up_amount`` funds a Top-Up or Amendment:
+        a ``Decimal`` for every eligible beneficiary, or ``{payment unicef_id: amount}`` from the
+        group's amount file, split here per source plan.
+        """
+        source_group = self._locked_for_update()
+        if source_group.plan_type not in PaymentPlanGroup.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]:
+            raise ValidationError(
+                f"A {plan_type.label} cannot be created from a {source_group.get_plan_type_display()} group."
+            )
+        if (
+            plan_type != PaymentPlan.PlanType.FOLLOW_UP
+            and source_group.status not in PaymentPlanGroup.CHILD_GROUP_SOURCE_STATUSES
+        ):
+            raise ValidationError(
+                f"A {plan_type.label} can only be created from an Accepted or Finished group, got {source_group.status}"
+            )
+        qualifying_plans = source_group.plans_qualifying_for_linked_group(plan_type)
+        amounts_by_plan = self._amounts_by_plan(qualifying_plans, top_up_amount)
+        source_plans = (
+            [plan for plan in qualifying_plans if amounts_by_plan[plan.id]]
+            if isinstance(top_up_amount, dict)
+            else qualifying_plans
+        )
+        if not source_plans:
+            raise ValidationError(f"No Payment Plan in this group qualifies for a {plan_type.label}.")
+
+        linked_group = PaymentPlanGroup.objects.create(
+            cycle=source_group.cycle,
+            name=self._linked_group_name(source_group, plan_type),
+            plan_type=plan_type,
+            source_group=source_group,
+            financial_service_provider=source_group.financial_service_provider,
+            currency=source_group.currency,
+            created_by=user,
+            status_date=timezone.now(),
+        )
+        for source_plan in source_plans:
+            PaymentPlanService(source_plan).create_child_plan(
+                plan_type=plan_type,
+                user=user,
+                dispersion_start_date=dispersion_start_date,
+                dispersion_end_date=dispersion_end_date,
+                payment_plan_group=linked_group,
+                top_up_amount=amounts_by_plan.get(source_plan.id, top_up_amount),
+            )
+        return linked_group
+
+    @staticmethod
+    def _amounts_by_plan(payment_plans: list[PaymentPlan], top_up_amount: Decimal | dict[str, Decimal] | None) -> dict:
+        """Split the group's amount file per plan: ``{plan id: {payment unicef_id: amount}}``."""
+        if not isinstance(top_up_amount, dict):
+            return {}
+        amounts_by_plan: dict = {plan.id: {} for plan in payment_plans}
+        payment_parents = Payment.objects.filter(
+            parent__in=payment_plans, unicef_id__in=top_up_amount.keys()
+        ).values_list("unicef_id", "parent_id")
+        for unicef_id, parent_id in payment_parents:
+            amounts_by_plan[parent_id][unicef_id] = top_up_amount[cast("str", unicef_id)]
+        return amounts_by_plan
+
+    @staticmethod
+    def _linked_group_name(source_group: PaymentPlanGroup, plan_type: "PaymentPlan.PlanType") -> str:
+        sequence_number = source_group.linked_groups.filter(plan_type=plan_type).count() + 1
+        name = f"{source_group.name} {plan_type.label} {sequence_number}"
+        if PaymentPlanGroup.objects.filter(cycle_id=source_group.cycle_id, name=name).exists():
+            raise ValidationError(f"A group named '{name}' already exists in this cycle.")
+        return name
+
     def assign_financial_service_provider(self, financial_service_provider: FinancialServiceProvider | None) -> None:
         """Set the group's FSP, copy it onto its Target Populations and rebuild them; the caller saves the group.
 
@@ -54,6 +137,7 @@ class PaymentPlanGroupService:
         """
         if financial_service_provider == self.payment_plan_group.financial_service_provider:
             return
+        self._validate_not_linked("Financial Service Provider")
         payment_plans = list(self.payment_plan_group.payment_plans.all())
         if any(payment_plan.status != PaymentPlan.Status.TP_OPEN for payment_plan in payment_plans):
             raise ValidationError(
@@ -71,11 +155,18 @@ class PaymentPlanGroupService:
         """Set the group's currency; the caller saves the group. Payment Plans copy it when they are opened."""
         if currency == self.payment_plan_group.currency:
             return
+        self._validate_not_linked("Currency")
         if self.payment_plan_group.payment_plans.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).exists():
             raise ValidationError("Currency can be changed only before any Payment Plan in the group is opened.")
         if currency is not None:
             self._validate_currency_against_delivery_mechanisms(currency)
         self.payment_plan_group.currency = currency
+
+    def _validate_not_linked(self, field_label: str) -> None:
+        if self.payment_plan_group.source_group_id is not None:
+            raise ValidationError(
+                f"{field_label} of a Follow-Up / Top-Up / Amendment group is taken from its source group."
+            )
 
     def _validate_currency_against_delivery_mechanisms(self, currency: Currency) -> None:
         delivery_mechanisms = DeliveryMechanism.objects.filter(
@@ -333,9 +424,9 @@ class PaymentPlanGroupService:
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
         return list(
-            payment_plan_group.payment_plans.filter(plan_type=PaymentPlan.PlanType.REGULAR)
-            .select_related("business_area", "delivery_mechanism", "payment_plan_group__financial_service_provider")
-            .order_by("created_at")
+            payment_plan_group.payment_plans.select_related(
+                "business_area", "delivery_mechanism", "payment_plan_group__financial_service_provider"
+            ).order_by("created_at")
         )
 
     @staticmethod

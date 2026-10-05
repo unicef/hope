@@ -69,8 +69,13 @@ class PaymentPlanFactory(DjangoModelFactory):
     dispersion_start_date = factory.LazyFunction(date.today)
     dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     program_cycle = factory.SubFactory(ProgramCycleFactory)
+    follow_up_instruction = None
     payment_plan_group = factory.LazyAttribute(
-        lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+        lambda obj: (
+            None
+            if obj.follow_up_instruction
+            else obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+        )
     )
     created_by = factory.SubFactory(UserFactory)
     business_area = factory.LazyAttribute(lambda obj: obj.program_cycle.program.business_area)
@@ -78,14 +83,16 @@ class PaymentPlanFactory(DjangoModelFactory):
     @factory.post_generation
     def currency(self, create, extracted, **kwargs):
         if create and extracted is not None:
-            self.payment_plan_group.currency = extracted
-            self.payment_plan_group.save(update_fields=["currency"])
+            owner = self.payment_plan_group or self.follow_up_instruction
+            owner.currency = extracted
+            owner.save(update_fields=["currency"])
 
     @factory.post_generation
     def financial_service_provider(self, create, extracted, **kwargs):
         if create and extracted is not None:
-            self.payment_plan_group.financial_service_provider = extracted
-            self.payment_plan_group.save(update_fields=["financial_service_provider"])
+            owner = self.payment_plan_group or self.follow_up_instruction
+            owner.financial_service_provider = extracted
+            owner.save(update_fields=["financial_service_provider"])
 
     @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):

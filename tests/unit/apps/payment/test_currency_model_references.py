@@ -199,10 +199,14 @@ def payment_plan_deprecated_syp(deprecated_syp: Currency) -> PaymentPlan:
     return PaymentPlanFactory(currency=deprecated_syp)
 
 
-def test_payment_plan_activity_log_diff_reports_variant_change_within_the_same_code(
+def test_payment_plan_group_activity_log_diff_reports_variant_change_within_the_same_code(
     payment_plan_deprecated_syp: PaymentPlan, payment_plan_syp: PaymentPlan
 ) -> None:
-    diff = create_diff(payment_plan_deprecated_syp, payment_plan_syp, PaymentPlan.ACTIVITY_LOG_MAPPING)
+    diff = create_diff(
+        payment_plan_deprecated_syp.payment_plan_group,
+        payment_plan_syp.payment_plan_group,
+        PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+    )
 
     assert "currency" not in diff
     assert diff["currency_vision_code"] == {"from": "SYP", "to": "SYP01"}

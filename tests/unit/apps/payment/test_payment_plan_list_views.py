@@ -16,7 +16,6 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     FollowUpInstructionFactory,
     PartnerFactory,
-    PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
     PaymentPlanSplitFactory,
@@ -24,8 +23,9 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
+from extras.test_utils.factories.payment import FinancialServiceProviderFactory
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -434,7 +434,6 @@ def test_payment_plan_detail(
     assert payment_plan["bank_reconciliation_error"] == 0
     assert payment_plan["can_create_payment_verification_plan"] is False
     assert payment_plan["available_payment_records_count"] == 0
-    assert payment_plan["can_create_follow_up"] is False
     assert payment_plan["total_withdrawn_households_count"] == 0
     assert payment_plan["unsuccessful_payments_count"] == 0
     assert payment_plan["can_send_to_payment_gateway"] is False
@@ -484,103 +483,6 @@ def test_follow_ups_and_top_ups_return_correct_children(
     assert follow_up_ids == [str(follow_up.id)]
 
 
-def test_can_create_follow_up(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    payment_plan_detail_context["pp"].plan_type = PaymentPlan.PlanType.FOLLOW_UP
-    payment_plan_detail_context["pp"].save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan = response.json()
-    assert payment_plan["can_create_follow_up"] is False
-
-
-def test_can_create_top_up_returns_true_when_has_delivered_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save(update_fields=["status"])
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is True
-
-
-def test_can_create_top_up_returns_false_when_no_delivered_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is False
-
-
-def test_can_create_top_up_returns_false_when_only_failed_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    PaymentFactory(parent=payment_plan_detail_context["pp"], status=Payment.STATUS_ERROR)
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is False
-
-
-def test_can_create_top_up_returns_false_when_plan_is_top_up(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.plan_type = PaymentPlan.PlanType.TOP_UP
-    pp.save()
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is False
-
-
 def test_get_can_split(
     payment_plan_detail_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -617,6 +519,7 @@ def test_get_can_split_returns_false_when_instruction_managed(
     )
     pp = payment_plan_detail_context["pp"]
     pp.follow_up_instruction = instruction
+    pp.payment_plan_group = None
     pp.status = PaymentPlan.Status.ACCEPTED
     pp.save()
 
@@ -909,3 +812,38 @@ def test_filter_by_payment_plan_group(
     returned_ids = {r["id"] for r in results}
     assert str(payment_plan_filter_context["pp"].id) in returned_ids
     assert str(payment_plan_filter_context["pp_finished"].id) in returned_ids
+
+
+@pytest.fixture
+def instruction_child_with_fsp(payment_plan_list_context: dict[str, Any]) -> PaymentPlan:
+    program = payment_plan_list_context["program_active"]
+    return PaymentPlanFactory(
+        business_area=payment_plan_list_context["business_area"],
+        program_cycle=program.cycles.first(),
+        follow_up_instruction=FollowUpInstructionFactory(program=program),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.OPEN,
+        financial_service_provider=FinancialServiceProviderFactory(name="Instruction FSP"),
+    )
+
+
+def test_list_filtered_by_fsp_returns_follow_up_instruction_child(
+    payment_plan_list_context: dict[str, Any],
+    instruction_child_with_fsp: PaymentPlan,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_list_context["user"],
+        [Permissions.PM_VIEW_LIST],
+        payment_plan_list_context["business_area"],
+        payment_plan_list_context["program_active"],
+    )
+
+    response = payment_plan_list_context["client"].get(
+        payment_plan_list_context["pp_list_url"], {"fsp": "Instruction FSP"}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert [plan["id"] for plan in results] == [str(instruction_child_with_fsp.id)]
+    assert results[0]["payment_plan_group"] is None

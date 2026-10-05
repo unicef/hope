@@ -374,7 +374,8 @@ def test_bulk_action_raises_for_instruction_managed(
     )
     pp = managerial_context["payment_plan1"]
     pp.follow_up_instruction = instruction
-    pp.save(update_fields=["follow_up_instruction"])
+    pp.payment_plan_group = None
+    pp.save(update_fields=["follow_up_instruction", "payment_plan_group"])
 
     response = managerial_context["client"].post(
         managerial_context["bulk_url"],
