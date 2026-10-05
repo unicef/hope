@@ -2134,6 +2134,7 @@ class PaymentPlanGroupBatchSerializer(serializers.Serializer):
 
 class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    closed_by = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
@@ -2151,6 +2152,9 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "admin_url",
             "background_action_status",
             "approval_process",
+            "abort_comment",
+            "closure_comment",
+            "closed_by",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
@@ -2163,6 +2167,10 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_export_top_up",
             "can_export_top_up_amendment",
         ]
+
+    @staticmethod
+    def get_closed_by(obj: PaymentPlanGroup) -> str | None:
+        return f"{obj.closed_by.first_name} {obj.closed_by.last_name}" if obj.closed_by_id else None
 
     @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
     def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:

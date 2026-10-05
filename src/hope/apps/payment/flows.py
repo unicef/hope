@@ -581,6 +581,57 @@ class PaymentPlanGroupFlow:
     def status_reject(self) -> None:
         self.payment_plan_group.status_date = timezone.now()
 
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.ACCEPTED,
+            PaymentPlanGroup.Status.FINISHED,
+            PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+        ],
+        target=PaymentPlanGroup.Status.FINISHED,
+    )
+    def status_finished(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.FINISHED,
+        target=PaymentPlanGroup.Status.ACCEPTED,
+    )
+    def status_reopen_for_reconciliation(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.FINISHED,
+        target=PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+    )
+    def status_ready_for_closure(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+        target=PaymentPlanGroup.Status.CLOSED,
+    )
+    def status_close(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.LOCKED,
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ],
+        target=PaymentPlanGroup.Status.ABORTED,
+    )
+    def status_abort(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.ABORTED,
+        target=PaymentPlanGroup.Status.OPEN,
+    )
+    def status_reactivate_abort(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
 
 class FollowUpInstructionFlow:
     background_action_status = fsm.State(FollowUpInstruction.BackgroundActionStatus)

@@ -1,11 +1,12 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import send_payment_plan_group_notification_emails_async_task
-from hope.apps.payment.flows import PaymentPlanGroupFlow
+from hope.apps.payment.flows import PaymentPlanFlow, PaymentPlanGroupFlow
 from hope.apps.payment.services.payment_plan_services import (
     ACTION_TO_APPROVAL_TYPE,
     STAGE_REACHED_NOTIFICATION,
@@ -14,7 +15,7 @@ from hope.apps.payment.services.payment_plan_services import (
     required_number_for,
     validate_approval_count,
 )
-from hope.apps.payment.utils import log_payment_plan_approval
+from hope.apps.payment.utils import log_payment_plan_approval, log_payment_plan_group_change
 from hope.models import (
     Approval,
     ApprovalProcess,
@@ -175,6 +176,127 @@ class PaymentPlanGroupService:
         self.payment_plan_group = payment_plan_group
         return payment_plan_group
 
+    @transaction.atomic
+    def sync_finished(self, user_id: str | None = None) -> PaymentPlanGroup:
+        """Follow the reconciliation of the payments: FINISHED once all are reconciled, ACCEPTED again if not."""
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status == PaymentPlanGroup.Status.ACCEPTED and payment_plan_group.is_reconciled:
+            transition = "status_finished"
+        elif payment_plan_group.status == PaymentPlanGroup.Status.FINISHED and not payment_plan_group.is_reconciled:
+            transition = "status_reopen_for_reconciliation"
+        else:
+            return payment_plan_group
+        old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
+        getattr(PaymentPlanGroupFlow(payment_plan_group), transition)()
+        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        for payment_plan in self._payment_plans(payment_plan_group):
+            getattr(PaymentPlanFlow(payment_plan), transition)()
+            payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, user_id)
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def ready_for_closure(self, user: "User") -> PaymentPlanGroup:
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.FINISHED:
+            raise ValidationError(
+                f"Mark as Ready for Closure is possible only within Status {PaymentPlanGroup.Status.FINISHED}"
+            )
+        for payment_plan in self._payment_plans(payment_plan_group):
+            PaymentPlanService(payment_plan).ready_for_closure(user, notify=False)
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_ready_for_closure()
+        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        send_payment_plan_group_notification_emails_async_task(
+            payment_plan_group,
+            PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+            str(user.pk),
+            timezone.now().isoformat(),
+        )
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def send_back_to_finished(self, user: "User") -> PaymentPlanGroup:
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.READY_FOR_CLOSURE:
+            raise ValidationError(
+                f"Send Back is possible only within Status {PaymentPlanGroup.Status.READY_FOR_CLOSURE}"
+            )
+        for payment_plan in self._payment_plans(payment_plan_group):
+            PaymentPlanService(payment_plan).send_back_to_finished(user, notify=False)
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_finished()
+        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        send_payment_plan_group_notification_emails_async_task(
+            payment_plan_group,
+            PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+            str(user.pk),
+            timezone.now().isoformat(),
+        )
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def close(self, closure_comment: str | None, user: "User") -> PaymentPlanGroup:
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.READY_FOR_CLOSURE:
+            raise ValidationError(
+                f"Close Payment Plan Group is possible only within Status {PaymentPlanGroup.Status.READY_FOR_CLOSURE}"
+            )
+        payment_plans = self._payment_plans(payment_plan_group)
+        every_plan_verified = all(
+            payment_plan.payment_verification_plans.filter(responded_count__gt=0).exists()
+            for payment_plan in payment_plans
+        )
+        if not every_plan_verified and not closure_comment:
+            raise ValidationError("Closure comment is required when no payment verification was carried out.")
+        for payment_plan in payment_plans:
+            PaymentPlanService(payment_plan).close(closure_comment=closure_comment, user_id=str(user.pk))
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_close()
+        payment_plan_group.closure_comment = closure_comment
+        payment_plan_group.closed_by = user
+        payment_plan_group.save(update_fields=("status", "status_date", "closure_comment", "closed_by", "updated_at"))
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def abort(self, abort_comment: str | None, user: "User") -> PaymentPlanGroup:
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status not in (
+            PaymentPlanGroup.Status.LOCKED,
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ):
+            raise ValidationError(f"Abort Payment Plan Group is not possible within Status {payment_plan_group.status}")
+        for payment_plan in self._payment_plans(payment_plan_group):
+            PaymentPlanService(payment_plan).abort(abort_comment, user_id=str(user.pk))
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_abort()
+        payment_plan_group.abort_comment = abort_comment or ""
+        payment_plan_group.save(update_fields=("status", "status_date", "abort_comment", "updated_at"))
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def reactivate_abort(self) -> PaymentPlanGroup:
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.ABORTED:
+            raise ValidationError(
+                "Reactivate Aborted Payment Plan Group is possible only within Status "
+                f"{PaymentPlanGroup.Status.ABORTED}"
+            )
+        for payment_plan in self._payment_plans(payment_plan_group):
+            PaymentPlanService(payment_plan).reactivate_abort()
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_reactivate_abort()
+        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
     @staticmethod
     def _transition_stage(payment_plan_group: PaymentPlanGroup, approval_type: str) -> None:
         flow = PaymentPlanGroupFlow(payment_plan_group)
@@ -211,9 +333,9 @@ class PaymentPlanGroupService:
     @staticmethod
     def _payment_plans(payment_plan_group: PaymentPlanGroup) -> list[PaymentPlan]:
         return list(
-            payment_plan_group.payment_plans.select_related(
-                "business_area", "delivery_mechanism", "payment_plan_group__financial_service_provider"
-            ).order_by("created_at")
+            payment_plan_group.payment_plans.filter(plan_type=PaymentPlan.PlanType.REGULAR)
+            .select_related("business_area", "delivery_mechanism", "payment_plan_group__financial_service_provider")
+            .order_by("created_at")
         )
 
     @staticmethod

@@ -47,6 +47,7 @@ from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PeriodicAsyncRetryJob,
 )
@@ -167,7 +168,7 @@ def uba_fsp():
 
 @pytest.fixture
 def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
-    return PaymentPlanFactory(
+    payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
         financial_service_provider=pg_fsp,
@@ -176,6 +177,9 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd)
         exchange_rate=Decimal("2.0"),
         currency=currency_usd,
     )
+    payment_plan.payment_plan_group.status = PaymentPlanGroup.Status.ACCEPTED
+    payment_plan.payment_plan_group.save(update_fields=["status"])
+    return payment_plan
 
 
 @pytest.fixture

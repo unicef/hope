@@ -15,6 +15,7 @@ from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.core.utils import chunks
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     get_payment_delivered_quantity_status_and_value,
@@ -452,6 +453,15 @@ class PaymentGatewayService:
         self.user_id = user_id
         self.user = User.objects.filter(pk=user_id).first() if user_id else None
 
+    def _mark_reconciled(self, payment_plan: PaymentPlan, old_payment_plan: PaymentPlan) -> None:
+        if payment_plan.is_instruction_managed or payment_plan.payment_plan_group is None:
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_finished()
+            payment_plan.save()
+            log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+            return
+        PaymentPlanGroupService(payment_plan.payment_plan_group).sync_finished(self.user_id)
+
     def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
@@ -807,10 +817,7 @@ class PaymentGatewayService:
                 if has_eligible_payments and all(
                     payment.status not in Payment.PENDING_STATUSES for payment in pending_payments
                 ):
-                    flow = PaymentPlanFlow(payment_plan)
-                    flow.status_finished()
-                    payment_plan.save()
-                    log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+                    self._mark_reconciled(payment_plan, old_payment_plan)
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
@@ -836,10 +843,7 @@ class PaymentGatewayService:
             bulk_log_payment_changes(payment_log_pairs, self.user)
 
             if payment_plan.is_reconciled:
-                flow = PaymentPlanFlow(payment_plan)
-                flow.status_finished()
-                payment_plan.save()
-                log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+                self._mark_reconciled(payment_plan, old_payment_plan)
                 for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
                         PaymentInstructionStatus.FINALIZED,
@@ -882,10 +886,7 @@ class PaymentGatewayService:
             bulk_log_payment_changes(instruction_log_pairs, self.user)
 
         if payment_plan.is_reconciled:
-            flow = PaymentPlanFlow(payment_plan)
-            flow.status_finished()
-            payment_plan.save()
-            log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+            self._mark_reconciled(payment_plan, old_payment_plan)
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(
                     PaymentInstructionStatus.FINALIZED,

@@ -787,9 +787,6 @@ class PaymentPlanViewSet(
         "send_to_payment_gateway",
         "fsp_extra_fields_import_xlsx",
         "split",
-        "close",
-        "abort",
-        "reactivate_abort",
     }
     program_model_field = "program_cycle__program"
     queryset = (
@@ -816,8 +813,6 @@ class PaymentPlanViewSet(
         "split": SplitPaymentPlanSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
-        "abort": PaymentPlanAbortSerializer,
-        "close": PaymentPlanCloseSerializer,
         "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
@@ -853,11 +848,6 @@ class PaymentPlanViewSet(
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
-        "ready_for_closure": [Permissions.PM_MARK_READY_FOR_CLOSURE],
-        "send_back_to_finished": [Permissions.PM_MARK_READY_FOR_CLOSURE],
-        "close": [Permissions.PM_CLOSE_FINISHED],
-        "abort": [Permissions.PM_ABORT],
-        "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
         "custom_exchange_rate": [
             Permissions.PM_CUSTOM_EXCHANGE_RATE,
         ],
@@ -1556,95 +1546,6 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
-
-    @action(detail=True, methods=["get"], url_path="ready-for-closure")
-    @transaction.atomic
-    def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).ready_for_closure(user=cast("User", request.user))
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan marked as ready for closure"})
-
-    @action(detail=True, methods=["get"], url_path="send-back-to-finished")
-    @transaction.atomic
-    def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).send_back_to_finished(user=cast("User", request.user))
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan sent back to finished"})
-
-    @action(detail=True, methods=["post"])
-    @transaction.atomic
-    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        closure_comment = serializer.validated_data.get("closure_comment")
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).close(
-            closure_comment=closure_comment, user_id=str(request.user.pk)
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan closed"})
-
-    @action(detail=True, methods=["post"])
-    @transaction.atomic
-    def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        abort_comment = serializer.validated_data.get("abort_comment")
-
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).abort(abort_comment, user_id=str(request.user.pk))
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan aborted"})
-
-    @action(detail=True, methods=["get"], url_path="reactivate-abort")
-    @transaction.atomic
-    def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).reactivate_abort()
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan reactivate abort"})
 
 
 class PaymentPlanGlobalViewSet(
@@ -2707,6 +2608,8 @@ class PaymentPlanGroupViewSet(
         "authorize": AcceptanceProcessSerializer,
         "reject": AcceptanceProcessSerializer,
         "mark_as_released": AcceptanceProcessSerializer,
+        "close": PaymentPlanCloseSerializer,
+        "abort": PaymentPlanAbortSerializer,
     }
 
     permissions_by_action = {
@@ -2726,6 +2629,11 @@ class PaymentPlanGroupViewSet(
             Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
         ],
+        "ready_for_closure": [Permissions.PM_MARK_READY_FOR_CLOSURE],
+        "send_back_to_finished": [Permissions.PM_MARK_READY_FOR_CLOSURE],
+        "close": [Permissions.PM_CLOSE_FINISHED],
+        "abort": [Permissions.PM_ABORT],
+        "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
         "send_to_payment_gateway": [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY],
         "delivery_export_xlsx": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         "send_xlsx_password": [Permissions.PM_SEND_XLSX_PASSWORD],
@@ -3010,6 +2918,37 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"], url_path="mark-as-released")
     def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._run_acceptance_action(request, PaymentPlan.Action.REVIEW)
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="ready-for-closure")
+    def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_status_action(request, lambda service: service.ready_for_closure(request.user))
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="send-back-to-finished")
+    def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_status_action(request, lambda service: service.send_back_to_finished(request.user))
+
+    @extend_schema(request=PaymentPlanCloseSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"])
+    def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        closure_comment = serializer.validated_data.get("closure_comment")
+        return self._run_status_action(request, lambda service: service.close(closure_comment, request.user))
+
+    @extend_schema(request=PaymentPlanAbortSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"])
+    def abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        abort_comment = serializer.validated_data.get("abort_comment")
+        return self._run_status_action(request, lambda service: service.abort(abort_comment, request.user))
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="reactivate-abort")
+    def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._run_status_action(request, lambda service: service.reactivate_abort())
 
     def _run_acceptance_action(self, request: Request, plan_action: "PaymentPlan.Action") -> Response:
         serializer = self.get_serializer(data=request.data)

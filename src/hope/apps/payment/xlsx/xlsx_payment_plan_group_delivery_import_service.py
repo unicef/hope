@@ -9,6 +9,7 @@ import openpyxl
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import log_payment_plan_change
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -358,13 +359,15 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_none()
                 payment_plan.update_money_fields()
-                if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
-                    flow.status_finished()
-                elif not payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.FINISHED:
-                    flow.status_reopen_for_reconciliation()
+                if payment_plan.is_instruction_managed:
+                    if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
+                        flow.status_finished()
+                    elif not payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.FINISHED:
+                        flow.status_reopen_for_reconciliation()
                 payment_plan.save()
                 log_payment_plan_change(payment_plan, old_payment_plan, user_id)
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
+            PaymentPlanGroupService(self.payment_plan_group).sync_finished(user_id)
 
             if affected_plan_ids:
                 logger.info(f"Imported reconciliation for Payment Plans: {affected_plan_ids}")

@@ -2734,3 +2734,25 @@ def test_status_action_rejected_when_group_is_not_open(user: User, business_area
             input_data={"action": PaymentPlan.Action.UNLOCK_FSP}, user=user
         )
     assert error.value.detail[0] == "This Payment Plan is managed by its Payment Plan Group."
+
+
+def test_instruction_status_action_allowed_when_group_is_not_open(
+    user: User, business_area: Any, cycle: ProgramCycle
+) -> None:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.ACCEPTED),
+        follow_up_instruction=FollowUpInstructionFactory(
+            business_area=business_area, program=cycle.program, created_by=user
+        ),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        business_area=business_area,
+        status=PaymentPlan.Status.LOCKED,
+    )
+
+    PaymentPlanService(payment_plan).execute_update_status_action(
+        input_data={"action": PaymentPlan.Action.UNLOCK}, user=user, allow_instruction_managed=True
+    )
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.OPEN

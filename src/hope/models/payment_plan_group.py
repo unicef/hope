@@ -31,6 +31,9 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "financial_service_provider",
             "background_action_status",
             "delivery_import_file",
+            "abort_comment",
+            "closure_comment",
+            "closed_by",
         ],
         {"currency.code": "currency"},
     )
@@ -96,6 +99,15 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         null=True,
         blank=True,
     )
+    abort_comment = models.CharField(max_length=255, blank=True)
+    closure_comment = models.TextField(null=True, blank=True)
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
     delivery_import_file = models.ForeignKey(
         "core.FileTemp",
         null=True,
@@ -139,6 +151,15 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     @property
     def business_area(self) -> "BusinessArea":
         return self.cycle.program.business_area
+
+    @property
+    def is_reconciled(self) -> bool:
+        from hope.models import Payment, PaymentPlan
+
+        eligible_payments = Payment.objects.filter(
+            parent__payment_plan_group=self, parent__plan_type=PaymentPlan.PlanType.REGULAR
+        ).eligible()
+        return eligible_payments.exists() and not eligible_payments.filter(status__in=Payment.PENDING_STATUSES).exists()
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
