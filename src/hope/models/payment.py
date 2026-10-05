@@ -273,9 +273,6 @@ class Payment(
             LongNameIndex(fields=["created_at"], name="payment_payment_created_at_537eadaf"),
             LongNameIndex(fields=["updated_at"], name="payment_payment_updated_at_89699d7d"),
             LongNameIndex(fields=["unicef_id"], name="payment_payment_unicef_id_07f610de"),
-            LongNameIndex(
-                fields=["unicef_id"], opclasses=["varchar_pattern_ops"], name="payment_payment_unicef_id_07f610de_like"
-            ),
             LongNameIndex(fields=["vulnerability_score"], name="payment_payment_vulnerability_score_e91d7c15"),
         ]
 

@@ -718,14 +718,6 @@ class Migration(migrations.Migration):
                 migrations.AddIndex(
                     model_name="payment",
                     index=hope.models.utils.LongNameIndex(
-                        fields=["unicef_id"],
-                        name="payment_payment_unicef_id_07f610de_like",
-                        opclasses=["varchar_pattern_ops"],
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="payment",
-                    index=hope.models.utils.LongNameIndex(
                         fields=["vulnerability_score"],
                         name="payment_payment_vulnerability_score_e91d7c15",
                     ),
@@ -760,14 +752,6 @@ class Migration(migrations.Migration):
                     model_name="paymentplan",
                     index=hope.models.utils.LongNameIndex(
                         fields=["unicef_id"], name="payment_paymentplan_unicef_id_ba96bd54"
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="paymentplan",
-                    index=hope.models.utils.LongNameIndex(
-                        fields=["unicef_id"],
-                        name="payment_paymentplan_unicef_id_ba96bd54_like",
-                        opclasses=["varchar_pattern_ops"],
                     ),
                 ),
                 migrations.AddIndex(

@@ -579,14 +579,6 @@ class Migration(migrations.Migration):
                 ),
                 migrations.AddIndex(
                     model_name="household",
-                    index=hope.models.utils.LongNameIndex(
-                        fields=["unicef_id"],
-                        name="household_household_unicef_id_6f025c4d_like",
-                        opclasses=["varchar_pattern_ops"],
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="household",
                     index=hope.models.utils.LongNameIndex(fields=["size"], name="household_household_size_72609b19"),
                 ),
                 migrations.AddIndex(
@@ -668,14 +660,6 @@ class Migration(migrations.Migration):
                     model_name="individual",
                     index=hope.models.utils.LongNameIndex(
                         fields=["unicef_id"], name="household_individual_unicef_id_421e2ff2"
-                    ),
-                ),
-                migrations.AddIndex(
-                    model_name="individual",
-                    index=hope.models.utils.LongNameIndex(
-                        fields=["unicef_id"],
-                        name="household_individual_unicef_id_421e2ff2_like",
-                        opclasses=["varchar_pattern_ops"],
                     ),
                 ),
                 migrations.AddIndex(

@@ -659,11 +659,6 @@ class PaymentPlan(
             LongNameIndex(fields=["created_at"], name="payment_paymentplan_created_at_029b4d04"),
             LongNameIndex(fields=["updated_at"], name="payment_paymentplan_updated_at_4f87ddb1"),
             LongNameIndex(fields=["unicef_id"], name="payment_paymentplan_unicef_id_ba96bd54"),
-            LongNameIndex(
-                fields=["unicef_id"],
-                opclasses=["varchar_pattern_ops"],
-                name="payment_paymentplan_unicef_id_ba96bd54_like",
-            ),
             LongNameIndex(fields=["start_date"], name="payment_paymentplan_start_date_2c9849e2"),
             LongNameIndex(fields=["end_date"], name="payment_paymentplan_end_date_04e45bb0"),
             LongNameIndex(fields=["status"], name="payment_paymentplan_status_864b68ea"),

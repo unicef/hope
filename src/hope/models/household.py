@@ -699,11 +699,6 @@ class Household(
             LongNameIndex(fields=["created_at"], name="household_household_created_at_c3191316"),
             LongNameIndex(fields=["updated_at"], name="household_household_updated_at_299c6681"),
             LongNameIndex(fields=["unicef_id"], name="household_household_unicef_id_6f025c4d"),
-            LongNameIndex(
-                fields=["unicef_id"],
-                opclasses=["varchar_pattern_ops"],
-                name="household_household_unicef_id_6f025c4d_like",
-            ),
             LongNameIndex(fields=["size"], name="household_household_size_72609b19"),
             LongNameIndex(fields=["unhcr_id"], name="household_household_unhcr_id_71c2d7ae"),
             LongNameIndex(

@@ -28,4 +28,13 @@ class Migration(migrations.Migration):
             ],
             reverse_sql=migrations.RunSQL.noop,
         ),
+        # Long-lived databases have no varchar_pattern_ops twin of unicef_id; only db_index=True on a
+        # database built from scratch creates one.
+        migrations.RunSQL(
+            sql=[
+                'DROP INDEX CONCURRENTLY IF EXISTS "household_household_unicef_id_6f025c4d_like"',
+                'DROP INDEX CONCURRENTLY IF EXISTS "household_individual_unicef_id_421e2ff2_like"',
+            ],
+            reverse_sql=migrations.RunSQL.noop,
+        ),
     ]
