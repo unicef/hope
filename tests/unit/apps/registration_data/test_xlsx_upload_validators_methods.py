@@ -437,6 +437,164 @@ def test_rows_validator_too_many_head_of_households(
     assert expected == validator.errors
 
 
+@pytest.fixture
+def sheet_with_invalid_country_choice():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "Households"
+    sheet["A1"] = "country_h_c"
+    sheet["A3"] = "ZZZ"
+    return sheet
+
+
+def test_rows_validator_reports_invalid_household_country_once(program: Any, sheet_with_invalid_country_choice) -> None:
+    validator = UploadXLSXInstanceValidator(program)
+
+    validator.rows_validator(sheet_with_invalid_country_choice)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "country_h_c",
+            "message": "Sheet: 'Households', Unexpected value: ZZZ for type select one of field country_h_c",
+        }
+    ]
+
+
+@pytest.fixture
+def sheet_with_missing_people_admin_area():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "People"
+    sheet["A1"] = "pp_admin1_i_c"
+    sheet["A3"] = "MISSING"
+    return sheet
+
+
+def test_rows_validator_reports_missing_people_admin_area_once(
+    social_worker_program: Any, business_area: Any, sheet_with_missing_people_admin_area
+) -> None:
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+
+    validator.rows_validator(sheet_with_missing_people_admin_area, business_area.slug)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "pp_admin1_i_c",
+            "message": "Sheet: 'People': Area with code: MISSING does not exist",
+        }
+    ]
+
+
+@pytest.fixture
+def sheet_with_invalid_people_country_choice():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "People"
+    sheet["A1"] = "pp_country_i_c"
+    sheet["B1"] = "pp_country_origin_i_c"
+    sheet["B3"] = "ZZZ"
+    return sheet
+
+
+def test_rows_validator_checks_people_country_choices_without_requiring_blank_country(
+    social_worker_program: Any, sheet_with_invalid_people_country_choice
+) -> None:
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+
+    validator.rows_validator(sheet_with_invalid_people_country_choice)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "pp_country_origin_i_c",
+            "message": "Sheet: 'People', Unexpected value: ZZZ for type select one of field pp_country_origin_i_c",
+        }
+    ]
+
+
+@pytest.fixture
+def sheet_with_invalid_people_registration_country():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "People"
+    sheet["A1"] = "pp_country_i_c"
+    sheet["A3"] = "ZZZ"
+    return sheet
+
+
+def test_rows_validator_reports_invalid_people_registration_country_once(
+    social_worker_program: Any, sheet_with_invalid_people_registration_country
+) -> None:
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+
+    validator.rows_validator(sheet_with_invalid_people_registration_country)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "pp_country_i_c",
+            "message": "Sheet: 'People', Unexpected value: ZZZ for type select one of field pp_country_i_c",
+        }
+    ]
+
+
+@pytest.fixture
+def sheet_with_invalid_issuer_choice():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "Individuals"
+    sheet["A1"] = "birth_certificate_issuer_i_c"
+    sheet["B1"] = "birth_certificate_no_i_c"
+    sheet["A3"] = "ZZZ"
+    sheet["B3"] = "ABC123"
+    return sheet
+
+
+def test_rows_validator_reports_invalid_issuer_choice_once(program: Any, sheet_with_invalid_issuer_choice) -> None:
+    validator = UploadXLSXInstanceValidator(program)
+
+    validator.rows_validator(sheet_with_invalid_issuer_choice)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "birth_certificate_issuer_i_c",
+            "message": "Sheet: 'Individuals', Unexpected value: ZZZ "
+            "for type select one of field birth_certificate_issuer_i_c",
+        }
+    ]
+
+
+@pytest.fixture
+def program_with_unmapped_issuer_country():
+    CountryFactory(iso_code2="ZZ", iso_code3="AFG")
+    return ProgramFactory()
+
+
+@pytest.fixture
+def sheet_with_unmapped_issuer_country():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "Individuals"
+    sheet["A1"] = "birth_certificate_issuer_i_c"
+    sheet["B1"] = "birth_certificate_no_i_c"
+    sheet["A3"] = "AFG"
+    sheet["B3"] = "ABC123"
+    return sheet
+
+
+def test_rows_validator_reports_issuer_mapping_gap_once(
+    program_with_unmapped_issuer_country, sheet_with_unmapped_issuer_country
+) -> None:
+    validator = UploadXLSXInstanceValidator(program_with_unmapped_issuer_country)
+
+    validator.rows_validator(sheet_with_unmapped_issuer_country)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "birth_certificate_issuer_i_c",
+            "message": "Sheet: 'Individuals': Issuing country 'AFG' does not exist",
+        }
+    ]
+
+
 def test_rows_validator(
     program: Any,
     business_area: Any,
