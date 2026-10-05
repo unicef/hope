@@ -144,6 +144,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
+      {/* TODO: pass closure once the group exposes closed-by / closed date */}
       <AcceptanceProcess approvalProcess={group?.approvalProcess} />
       {group?.batches && group.batches.length > 0 && (
         <Grid size={{ xs: 12 }} data-cy="batches-section">

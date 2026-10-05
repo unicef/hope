@@ -27,6 +27,16 @@ vi.mock('@hooks/usePermissions', () => ({
   usePermissions: mockUsePermissions,
 }));
 
+const mockShowMessage = vi.hoisted(() => vi.fn());
+
+vi.mock('@hooks/useSnackBar', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@hooks/useSnackBar')>()),
+  useSnackbar: () => ({
+    showMessage: mockShowMessage,
+    showRestApiError: vi.fn(),
+  }),
+}));
+
 vi.mock('@components/core/ConfirmationDialog/useConfirmation', () => ({
   useConfirmation: () => () => Promise.resolve(),
 }));
@@ -57,6 +67,7 @@ const renderHeader = (
 describe('PaymentPlanGroupDetailsHeader', () => {
   beforeEach(() => {
     mockUsePermissions.mockReturnValue([]);
+    mockShowMessage.mockClear();
   });
 
   it('shows the background action status while an export is running', () => {
@@ -310,6 +321,103 @@ describe('PaymentPlanGroupDetailsHeader', () => {
         id: 'group-1',
         requestBody: {},
       }),
+    );
+  });
+
+  it.each([
+    PaymentPlanGroupStatusEnum.LOCKED,
+    PaymentPlanGroupStatusEnum.IN_APPROVAL,
+    PaymentPlanGroupStatusEnum.IN_AUTHORIZATION,
+    PaymentPlanGroupStatusEnum.IN_REVIEW,
+  ])('shows Abort in %s to users who can abort', (status) => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_ABORT]);
+    renderHeader(null, status);
+
+    expect(screen.getByTestId('button-abort')).not.toBeNull();
+  });
+
+  it('hides Abort for an open group and without the permission', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_ABORT]);
+    const { unmount } = renderHeader(null, PaymentPlanGroupStatusEnum.OPEN);
+    expect(screen.queryByTestId('button-abort')).toBeNull();
+    unmount();
+
+    mockUsePermissions.mockReturnValue([]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+    expect(screen.queryByTestId('button-abort')).toBeNull();
+  });
+
+  it('asks for an abort reason before aborting', async () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_ABORT]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.LOCKED);
+
+    fireEvent.click(screen.getByTestId('button-abort'));
+    fireEvent.click(screen.getByTestId('button-submit-abort'));
+    expect(await screen.findByText('Abort Reason is required')).not.toBeNull();
+    expect(mockShowMessage).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText(/Abort Reason/), {
+      target: { value: 'wrong cycle' },
+    });
+    fireEvent.click(screen.getByTestId('button-submit-abort'));
+
+    await waitFor(() =>
+      expect(mockShowMessage).toHaveBeenCalledWith('Not available yet'),
+    );
+  });
+
+  it.each([
+    [
+      PaymentPlanGroupStatusEnum.ABORTED,
+      PERMISSIONS.PM_REACTIVATE_ABORT,
+      'button-reactivate-payment-plan-group',
+    ],
+    [
+      PaymentPlanGroupStatusEnum.FINISHED,
+      PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+      'button-set-ready-for-closure',
+    ],
+    [
+      PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE,
+      PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
+      'button-send-back',
+    ],
+  ])('shows the closure action in %s', async (status, permission, buttonId) => {
+    mockUsePermissions.mockReturnValue([permission]);
+    renderHeader(null, status);
+
+    fireEvent.click(screen.getByTestId(buttonId));
+
+    await waitFor(() =>
+      expect(mockShowMessage).toHaveBeenCalledWith('Not available yet'),
+    );
+  });
+
+  it('hides closure actions without the permissions', () => {
+    renderHeader(null, PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE);
+
+    expect(screen.queryByTestId('button-send-back')).toBeNull();
+    expect(screen.queryByTestId('button-close')).toBeNull();
+  });
+
+  it('closes the group only with a justification', async () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_CLOSE_FINISHED]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE);
+    expect(screen.queryByTestId('button-send-back')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('button-close'));
+    expect(screen.getByText('Summary of Payment Plan Group')).not.toBeNull();
+    const submit = screen.getByTestId('button-close-payment-plan-group');
+    expect(submit.hasAttribute('disabled')).toBe(true);
+
+    fireEvent.change(screen.getByLabelText('Comment (Mandatory)'), {
+      target: { value: 'no verification needed' },
+    });
+    expect(submit.hasAttribute('disabled')).toBe(false);
+    fireEvent.click(submit);
+
+    await waitFor(() =>
+      expect(mockShowMessage).toHaveBeenCalledWith('Not available yet'),
     );
   });
 });

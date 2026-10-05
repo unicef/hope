@@ -15,11 +15,14 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import type { GroupAcceptanceAction } from './actions/AcceptanceActionGroupButton';
 import { AcceptanceActionGroupButton } from './actions/AcceptanceActionGroupButton';
+import { AbortGroupButton } from './actions/AbortGroupButton';
+import { CloseGroupButton } from './actions/CloseGroupButton';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroup } from './actions/EditGroup';
 import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
 import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExportXlsxWithAuthCodeGroupButton';
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
+import { GroupClosureActionButton } from './actions/GroupClosureActionButton';
 import { LockUnlockGroupButton } from './actions/LockUnlockGroupButton';
 import { SendForApprovalGroupButton } from './actions/SendForApprovalGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
@@ -68,6 +71,52 @@ function ApprovalButtons({
       <AcceptanceActionGroupButton group={group} action={stage.action} />
     </>
   );
+}
+
+const ABORTABLE_STATUSES: PaymentPlanGroupStatusEnum[] = [
+  PaymentPlanGroupStatusEnum.LOCKED,
+  PaymentPlanGroupStatusEnum.IN_APPROVAL,
+  PaymentPlanGroupStatusEnum.IN_AUTHORIZATION,
+  PaymentPlanGroupStatusEnum.IN_REVIEW,
+];
+
+function ClosureButtons({
+  group,
+}: {
+  group: PaymentPlanGroupDetail | null;
+}): ReactElement | null {
+  const permissions = usePermissions();
+  if (!group?.status || !permissions) return null;
+  const can = (permission: string) => hasPermissions(permission, permissions);
+
+  if (ABORTABLE_STATUSES.includes(group.status)) {
+    return can(PERMISSIONS.PM_ABORT) ? (
+      <AbortGroupButton group={group} />
+    ) : null;
+  }
+  switch (group.status) {
+    case PaymentPlanGroupStatusEnum.ABORTED:
+      return can(PERMISSIONS.PM_REACTIVATE_ABORT) ? (
+        <GroupClosureActionButton group={group} action="reactivate" />
+      ) : null;
+    case PaymentPlanGroupStatusEnum.FINISHED:
+      return can(PERMISSIONS.PM_MARK_READY_FOR_CLOSURE) ? (
+        <GroupClosureActionButton group={group} action="readyForClosure" />
+      ) : null;
+    case PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE:
+      return (
+        <>
+          {can(PERMISSIONS.PM_MARK_READY_FOR_CLOSURE) && (
+            <GroupClosureActionButton group={group} action="sendBack" />
+          )}
+          {can(PERMISSIONS.PM_CLOSE_FINISHED) && (
+            <CloseGroupButton group={group} />
+          )}
+        </>
+      );
+    default:
+      return null;
+  }
 }
 
 interface PaymentPlanGroupDetailsHeaderProps {
@@ -144,6 +193,7 @@ export function PaymentPlanGroupDetailsHeader({
         <EditGroup group={group} />
         <LockUnlockGroupButton group={group} />
         <ApprovalButtons group={group} />
+        <ClosureButtons group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
