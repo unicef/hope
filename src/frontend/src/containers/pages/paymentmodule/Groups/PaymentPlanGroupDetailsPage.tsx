@@ -1,4 +1,5 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -143,6 +144,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
+      <AcceptanceProcess approvalProcess={group?.approvalProcess} />
       {group?.batches && group.batches.length > 0 && (
         <Grid size={{ xs: 12 }} data-cy="batches-section">
           <ContainerColumnWithBorder>

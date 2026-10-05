@@ -1,5 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, renderWithProviders, screen } from 'src/testUtils/testUtils';
+import {
+  fireEvent,
+  renderWithProviders,
+  screen,
+} from 'src/testUtils/testUtils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PERMISSIONS } from 'src/config/permissions';
@@ -22,7 +26,9 @@ vi.mock('@hooks/useSnackBar', () => ({
 }));
 
 vi.mock('@hooks/usePermissions', () => ({
-  usePermissions: () => [PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+  usePermissions: () => [
+    PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
+  ],
 }));
 
 vi.mock('@restgenerated/services/RestService', () => ({

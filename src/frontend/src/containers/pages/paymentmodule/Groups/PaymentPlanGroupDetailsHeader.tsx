@@ -3,21 +3,72 @@ import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import type { GroupAcceptanceAction } from './actions/AcceptanceActionGroupButton';
+import { AcceptanceActionGroupButton } from './actions/AcceptanceActionGroupButton';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroup } from './actions/EditGroup';
 import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
 import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExportXlsxWithAuthCodeGroupButton';
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
 import { LockUnlockGroupButton } from './actions/LockUnlockGroupButton';
+import { SendForApprovalGroupButton } from './actions/SendForApprovalGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import type { PaymentPlanGroupDetail } from './types';
+
+// For each approval stage: the action that moves the group forward and the
+// permission it needs; Reject in that stage needs the same permission.
+const STAGE_ACTIONS: Partial<
+  Record<
+    PaymentPlanGroupStatusEnum,
+    { action: GroupAcceptanceAction; permission: string }
+  >
+> = {
+  [PaymentPlanGroupStatusEnum.IN_APPROVAL]: {
+    action: 'approve',
+    permission: PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
+  },
+  [PaymentPlanGroupStatusEnum.IN_AUTHORIZATION]: {
+    action: 'authorize',
+    permission: PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+  },
+  [PaymentPlanGroupStatusEnum.IN_REVIEW]: {
+    action: 'markAsReleased',
+    permission: PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+  },
+};
+
+function ApprovalButtons({
+  group,
+}: {
+  group: PaymentPlanGroupDetail | null;
+}): ReactElement | null {
+  const permissions = usePermissions();
+  if (!group || !permissions) return null;
+
+  if (group.status === PaymentPlanGroupStatusEnum.LOCKED) {
+    return hasPermissions(PERMISSIONS.PM_SEND_FOR_APPROVAL, permissions) ? (
+      <SendForApprovalGroupButton group={group} />
+    ) : null;
+  }
+  const stage = STAGE_ACTIONS[group.status];
+  if (!stage || !hasPermissions(stage.permission, permissions)) return null;
+  return (
+    <>
+      <AcceptanceActionGroupButton group={group} action="reject" />
+      <AcceptanceActionGroupButton group={group} action={stage.action} />
+    </>
+  );
+}
 
 interface PaymentPlanGroupDetailsHeaderProps {
   group: PaymentPlanGroupDetail | null;
@@ -92,6 +143,7 @@ export function PaymentPlanGroupDetailsHeader({
       >
         <EditGroup group={group} />
         <LockUnlockGroupButton group={group} />
+        <ApprovalButtons group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />

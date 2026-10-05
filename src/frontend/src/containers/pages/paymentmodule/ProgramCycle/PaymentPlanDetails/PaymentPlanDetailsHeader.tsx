@@ -1,9 +1,7 @@
 import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 import { FinishedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
 import { ReadyForClosurePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
-import { InAuthorizationPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
-import { InReviewPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
+import { InAcceptancePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAcceptancePaymentPlanHeaderButtons';
 import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
@@ -83,23 +81,6 @@ export const PaymentPlanDetailsHeader = ({
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-  const canSendForApproval = hasPermissions(
-    PERMISSIONS.PM_SEND_FOR_APPROVAL,
-    permissions,
-  );
-  const canApprove = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-    permissions,
-  );
-  const canAuthorize = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-    permissions,
-  );
-  const canMarkAsReleased =
-    hasPermissions(
-      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-      permissions,
-    ) && !visionManaged;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canSendToPaymentGateway =
@@ -145,46 +126,16 @@ export const PaymentPlanDetailsHeader = ({
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
-          canSendForApproval={canSendForApproval}
           canAbort={canAbort}
         />
       );
       break;
     case PaymentPlanStatusEnum.IN_APPROVAL:
-      buttons = (
-        <InApprovalPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReject={hasPermissions(
-            PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-            permissions,
-          )}
-          canApprove={canApprove}
-          canAbort={canAbort}
-        />
-      );
-      break;
     case PaymentPlanStatusEnum.IN_AUTHORIZATION:
-      buttons = (
-        <InAuthorizationPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReject={hasPermissions(
-            PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            permissions,
-          )}
-          canAuthorize={canAuthorize}
-          canAbort={canAbort}
-        />
-      );
-      break;
     case PaymentPlanStatusEnum.IN_REVIEW:
       buttons = (
-        <InReviewPaymentPlanHeaderButtons
+        <InAcceptancePaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canReject={hasPermissions(
-            PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            permissions,
-          )}
-          canMarkAsReleased={canMarkAsReleased}
           canAbort={canAbort}
         />
       );

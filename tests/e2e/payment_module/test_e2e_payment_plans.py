@@ -621,25 +621,33 @@ class TestSmokePaymentModule:
         # the status is LOCKED before the formula runs too; the snackbar only shows once the apply request is done
         page_payment_module_details.check_alert("Formula is executing, please wait until completed")
         page_payment_module_details.check_status("LOCKED")
-        page_payment_module_details.click_button_lock_plan()
-        page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan FSPs are locked.")
-        page_payment_module_details.check_status("LOCKED FSP")
+        payment_plan.refresh_from_db()
+        group = payment_plan.payment_plan_group
+        group.financial_service_provider = FinancialServiceProvider.objects.get(name="FSP_1")
+        group.save(update_fields=["financial_service_provider"])
+        group_status = 'div[data-cy="group-status"]'
+        page_payment_module_details.driver.get(
+            f"{page_payment_module_details.driver.current_url.split('/payment-module/')[0]}"
+            f"/payment-module/groups/{group.id}"
+        )
+        page_payment_module_details.click('button[data-cy="button-lock-group"]')
+        page_payment_module_details.click('button[data-cy="button-confirm"]')
+        page_payment_module_details.wait_for_text("LOCKED", group_status)
         page_payment_module_details.click_button_send_for_approval()
-        page_payment_module_details.check_alert("Payment Plan has been sent for approval.")
-        page_payment_module_details.check_status("IN APPROVAL")
+        page_payment_module_details.check_alert("Payment Plan Group has been sent for approval.")
+        page_payment_module_details.wait_for_text("IN APPROVAL", group_status)
         page_payment_module_details.click_button_approve()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan has been approved.")
-        page_payment_module_details.check_status("IN AUTHORIZATION")
+        page_payment_module_details.check_alert("Payment Plan Group has been approved.")
+        page_payment_module_details.wait_for_text("IN AUTHORIZATION", group_status)
         page_payment_module_details.click_button_authorize()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan has been authorized")
-        page_payment_module_details.check_status("IN REVIEW")
+        page_payment_module_details.check_alert("Payment Plan Group has been authorized")
+        page_payment_module_details.wait_for_text("IN REVIEW", group_status)
         page_payment_module_details.click_button_mark_as_released()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan has been marked as released.")
-        page_payment_module_details.check_status("ACCEPTED")
+        page_payment_module_details.check_alert("Payment Plan Group has been marked as released.")
+        page_payment_module_details.wait_for_text("ACCEPTED", group_status)
 
 
 @pytest.mark.usefixtures("login")

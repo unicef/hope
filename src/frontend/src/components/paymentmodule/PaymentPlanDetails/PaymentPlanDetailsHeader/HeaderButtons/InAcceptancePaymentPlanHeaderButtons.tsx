@@ -1,23 +1,18 @@
 import { Box } from '@mui/material';
-import { AuthorizePaymentPlan } from '../AuthorizePaymentPlan';
-import { RejectPaymentPlan } from '../RejectPaymentPlan';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 
-export interface InAuthorizationPaymentPlanHeaderButtonsProps {
+export interface InAcceptancePaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
-  canReject: boolean;
-  canAuthorize: boolean;
   canAbort: boolean;
 }
 
-export function InAuthorizationPaymentPlanHeaderButtons({
+/** In approval, authorization or review; the acceptance actions live on the group page. */
+export function InAcceptancePaymentPlanHeaderButtons({
   paymentPlan,
-  canReject,
-  canAuthorize,
   canAbort,
-}: InAuthorizationPaymentPlanHeaderButtonsProps): ReactElement {
+}: InAcceptancePaymentPlanHeaderButtonsProps): ReactElement {
   return (
     <Box
       sx={{
@@ -25,8 +20,6 @@ export function InAuthorizationPaymentPlanHeaderButtons({
         alignItems: 'center',
       }}
     >
-      {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
-      {canAuthorize && <AuthorizePaymentPlan paymentPlan={paymentPlan} />}
       {canAbort && <AbortPaymentPlan paymentPlan={paymentPlan} />}
     </Box>
   );
