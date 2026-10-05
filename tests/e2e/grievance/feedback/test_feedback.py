@@ -178,7 +178,7 @@ class TestSmokeFeedback:
         Check if all elements on page exist
         """
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Check Feedback page
         page_feedback.get_title_page()
@@ -212,7 +212,7 @@ class TestSmokeFeedback:
         """
         # Go to Feedback
         page_feedback.driver.refresh()
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.get_row(0).click()
         # Check Feedback details page
@@ -238,7 +238,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -271,15 +271,13 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
         page_new_feedback.choose_option_by_name(issue_type)
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_household_tab()
-        page_new_feedback.get_individual_tab()
-        page_feedback.get_table_row_loading()
+        page_new_feedback.wait_for_household_table()
         page_new_feedback.get_button_next().click()
         page_new_feedback.check_received_consent()
         page_new_feedback.get_button_next().click()
@@ -305,7 +303,7 @@ class TestFeedback:
         page_programme_details: ProgrammeDetails,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Edit field Program in Feedback
         page_feedback.get_row(0).click()
@@ -318,7 +316,7 @@ class TestFeedback:
         assert page_feedback.global_program_filter_text in page_feedback.get_global_program_filter().text
         page_feedback.select_global_program_filter("Test Programm")
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.get_row(0)
         assert len(page_feedback.get_rows()) == 1
@@ -326,14 +324,14 @@ class TestFeedback:
 
         page_feedback.select_global_program_filter("Draft Program")
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.wait_for_text("No results", page_feedback.table_row_loading)
         assert len(page_feedback.get_rows()) == 0
 
         page_feedback.select_global_program_filter("All Programmes")
         page_feedback.wait_for_disappear(page_feedback.nav_grievance_dashboard)
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.get_row(1)
         assert len(page_feedback.get_rows()) == 2
@@ -347,7 +345,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -375,7 +373,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -405,7 +403,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
@@ -435,7 +433,7 @@ class TestFeedback:
         page_new_feedback: NewFeedback,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Edit field Program in Feedback
         page_feedback.get_row(0).click()
@@ -470,14 +468,14 @@ class TestFeedback:
         add_feedbacks: None,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         page_feedback.wait_for_rows()[0].click()
         page_feedback_details.get_button_create_linked_ticket().click()
         page_grievance_new_ticket.get_select_category().click()
         page_grievance_new_ticket.select_option_by_name("Referral")
         page_grievance_new_ticket.get_button_next().click()
-        page_grievance_new_ticket.get_household_tab()
+        page_grievance_new_ticket.wait_for_household_table()
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_new_ticket.check_received_consent()
         page_grievance_new_ticket.get_button_next().click()
@@ -500,14 +498,14 @@ class TestFeedback:
         create_households_and_individuals: Household,
     ) -> None:
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
         page_new_feedback.get_button_next().click()
         page_new_feedback.choose_option_by_name("Negative feedback")
         page_new_feedback.get_button_next().click()
-        page_new_feedback.get_household_tab()
+        page_new_feedback.wait_for_household_table()
         page_new_feedback.get_button_next().click()
         page_new_feedback.get_received_consent()
         page_new_feedback.get_button_next().click()
@@ -531,7 +529,7 @@ class TestFeedback:
         page_feedback.get_menu_user_profile().click()
         page_feedback.get_menu_item_clear_cache().click()
         # Go to Feedback
-        page_feedback.get_nav_grievance().click()
+        page_feedback.open_nav_section("Grievance")
         page_feedback.get_nav_feedback().click()
         # Create Feedback
         page_feedback.get_button_submit_new_feedback().click()
