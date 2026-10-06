@@ -6,9 +6,11 @@ from unittest.mock import MagicMock
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
+from django.db import connection
 from django.forms.models import inlineformset_factory
 from django.http import HttpRequest
 from django.test import RequestFactory
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 import pytest
 
@@ -23,9 +25,17 @@ from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
+from hope.admin.business_area import BusinessAreaAdmin
 from hope.admin.partner import PartnerAdmin
 from hope.admin.project import ProjectAdmin
-from hope.admin.user_role import PartnerRoleAssignmentAdmin, RoleAssignmentInline, UserRoleAssignmentAdmin
+from hope.admin.role import RoleAdmin
+from hope.admin.user import UserAdmin
+from hope.admin.user_role import (
+    PartnerAutocompleteSelect,
+    PartnerRoleAssignmentAdmin,
+    RoleAssignmentInline,
+    UserRoleAssignmentAdmin,
+)
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
 
 pytestmark = pytest.mark.django_db
@@ -60,6 +70,16 @@ def business_area_ukr(db: Any) -> BusinessArea:
 
 
 @pytest.fixture
+def business_area_split(db: Any) -> BusinessArea:
+    return BusinessAreaFactory(
+        slug="sudan",
+        code="1234",
+        name="Sudan",
+        is_split=True,
+    )
+
+
+@pytest.fixture
 def role_1(db: Any) -> Role:
     return RoleFactory(name="Role 1")
 
@@ -72,6 +92,13 @@ def unicef_parent(db: Any) -> Partner:
 @pytest.fixture
 def unicef_subpartner(unicef_parent: Partner) -> Partner:
     return PartnerFactory(parent=unicef_parent)
+
+
+@pytest.fixture
+def unicef_subpartner_role_assignment(
+    unicef_subpartner: Partner, business_area_afg: BusinessArea, role_1: Role
+) -> RoleAssignment:
+    return RoleAssignmentFactory(partner=unicef_subpartner, user=None, business_area=business_area_afg, role=role_1)
 
 
 @pytest.fixture
@@ -128,6 +155,51 @@ def request_factory() -> RequestFactory:
 @pytest.fixture
 def admin_site() -> AdminSite:
     return admin.site
+
+
+@pytest.fixture
+def partner_roles(db: Any) -> list[Role]:
+    return [
+        RoleFactory(name="Partner Role A", is_available_for_partner=True),
+        RoleFactory(name="Partner Role B", is_available_for_partner=True),
+        RoleFactory(name="Partner Role C", is_available_for_partner=True),
+    ]
+
+
+@pytest.fixture
+def sub_partner_with_one_role_assignment(
+    parent_partner: Partner, business_area_afg: BusinessArea, partner_roles: list[Role]
+) -> Partner:
+    sub_partner = PartnerFactory(name="Sub Partner One", parent=parent_partner)
+    RoleAssignmentFactory(partner=sub_partner, business_area=business_area_afg, role=partner_roles[0])
+    return sub_partner
+
+
+@pytest.fixture
+def sub_partner_with_three_role_assignments(
+    parent_partner: Partner, business_area_afg: BusinessArea, partner_roles: list[Role]
+) -> Partner:
+    sub_partner = PartnerFactory(name="Sub Partner Three", parent=parent_partner)
+    RoleAssignmentFactory(partner=sub_partner, business_area=business_area_afg, role=partner_roles[0])
+    RoleAssignmentFactory(partner=sub_partner, business_area=business_area_afg, role=partner_roles[1])
+    RoleAssignmentFactory(partner=sub_partner, business_area=business_area_afg, role=partner_roles[2])
+    return sub_partner
+
+
+@pytest.fixture
+def user_with_one_role_assignment(business_area_afg: BusinessArea, partner_roles: list[Role]) -> User:
+    user = UserFactory(username="user_one_role_assignment")
+    RoleAssignmentFactory(user=user, business_area=business_area_afg, role=partner_roles[0])
+    return user
+
+
+@pytest.fixture
+def user_with_three_role_assignments(business_area_afg: BusinessArea, partner_roles: list[Role]) -> User:
+    user = UserFactory(username="user_three_role_assignments")
+    RoleAssignmentFactory(user=user, business_area=business_area_afg, role=partner_roles[0])
+    RoleAssignmentFactory(user=user, business_area=business_area_afg, role=partner_roles[1])
+    RoleAssignmentFactory(user=user, business_area=business_area_afg, role=partner_roles[2])
+    return user
 
 
 def test_role_history(role_1: Role, superuser: User, django_app):
@@ -288,7 +360,7 @@ def test_role_assignment_inline_formfield_for_foreignkey_business_area(
     assert business_area_ukr in field.queryset
 
 
-def test_role_assignment_inline_business_area_not_autocomplete(
+def test_role_assignment_inline_business_area_uses_partner_autocomplete(
     request_factory: RequestFactory,
     business_area_afg: BusinessArea,
     business_area_ukr: BusinessArea,
@@ -299,23 +371,107 @@ def test_role_assignment_inline_business_area_not_autocomplete(
     request = get_mock_request(request_factory, object_id=partner.id)
 
     model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
-    fields = model_admin.get_autocomplete_fields(request)
-    assert "business_area" not in fields
-
     form_set = model_admin.get_formset(request, partner)
     field = form_set.form.base_fields["business_area"]
+
+    assert isinstance(field.widget.widget, PartnerAutocompleteSelect)
+    assert field.widget.widget.get_url() == f"{reverse('admin:autocomplete')}?partner_id={partner.id}"
     assert list(field.queryset) == [business_area_afg]
 
 
-def test_role_assignment_inline_role_not_autocomplete(
+def test_role_assignment_inline_role_uses_partner_autocomplete(
     request_factory: RequestFactory,
     partner: Partner,
 ):
     request = get_mock_request(request_factory, object_id=partner.id)
 
     model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin.site)
-    fields = model_admin.get_autocomplete_fields(request)
-    assert "role" not in fields
+    form_set = model_admin.get_formset(request, partner)
+    widget = form_set.form.base_fields["role"].widget.widget
+
+    assert isinstance(widget, PartnerAutocompleteSelect)
+    assert widget.get_url() == f"{reverse('admin:autocomplete')}?partner_id={partner.id}"
+
+
+def test_business_area_autocomplete_for_role_assignment_limited_to_partner_allowed_business_areas(
+    request_factory: RequestFactory,
+    business_area_afg: BusinessArea,
+    business_area_ukr: BusinessArea,
+    business_area_split: BusinessArea,
+    partner: Partner,
+):
+    partner.allowed_business_areas.add(business_area_afg, business_area_split)
+    request = request_factory.get(
+        "/",
+        {
+            "app_label": "account",
+            "model_name": "roleassignment",
+            "field_name": "business_area",
+            "partner_id": str(partner.id),
+        },
+    )
+    model_admin = BusinessAreaAdmin(BusinessArea, admin.site)
+
+    queryset, _ = model_admin.get_search_results(request, BusinessArea.objects.all(), "")
+
+    assert list(queryset) == [business_area_afg]
+
+
+def test_business_area_autocomplete_without_partner_id_is_not_limited(
+    request_factory: RequestFactory,
+    business_area_afg: BusinessArea,
+    business_area_split: BusinessArea,
+):
+    request = request_factory.get(
+        "/",
+        {"app_label": "account", "model_name": "roleassignment", "field_name": "business_area"},
+    )
+    model_admin = BusinessAreaAdmin(BusinessArea, admin.site)
+
+    queryset, _ = model_admin.get_search_results(request, BusinessArea.objects.order_by("name"), "")
+
+    assert list(queryset) == [business_area_afg, business_area_split]
+
+
+def test_role_autocomplete_for_role_assignment_of_regular_partner_limited_to_partner_roles(
+    request_factory: RequestFactory,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+    partner: Partner,
+):
+    request = request_factory.get(
+        "/",
+        {"app_label": "account", "model_name": "roleassignment", "field_name": "role", "partner_id": str(partner.id)},
+    )
+    model_admin = RoleAdmin(Role, admin.site)
+
+    queryset, _ = model_admin.get_search_results(request, Role.objects.all(), "")
+
+    assert role_available_for_partner in queryset
+    assert role_not_available_for_partner not in queryset
+
+
+def test_role_autocomplete_for_role_assignment_of_unicef_subpartner_not_limited(
+    request_factory: RequestFactory,
+    role_available_for_partner: Role,
+    role_not_available_for_partner: Role,
+    unicef_subpartner: Partner,
+):
+    request = request_factory.get(
+        "/",
+        {
+            "app_label": "account",
+            "model_name": "roleassignment",
+            "field_name": "role",
+            "partner_id": str(unicef_subpartner.id),
+        },
+    )
+    model_admin = RoleAdmin(Role, admin.site)
+
+    queryset, _ = model_admin.get_search_results(request, Role.objects.all(), "")
+
+    assert role_available_for_partner in queryset
+    assert role_not_available_for_partner in queryset
 
 
 def test_role_assignment_inline_formfield_for_foreignkey_role(
@@ -390,14 +546,59 @@ def test_partner_role_assignment_admin_business_area_not_autocomplete(
     assert "business_area" not in fields
 
 
-def test_partner_admin_parent_not_autocomplete(
+def test_partner_admin_parent_uses_partner_autocomplete(
     request_factory: RequestFactory,
     admin_site: AdminSite,
+    partner: Partner,
 ):
-    admin = PartnerAdmin(model=Partner, admin_site=admin_site)
-    request = get_mock_request(request_factory)
-    fields = admin.get_autocomplete_fields(request)
-    assert "parent" not in fields
+    model_admin = PartnerAdmin(model=Partner, admin_site=admin_site)
+    request = get_mock_request(request_factory, object_id=partner.id)
+
+    field = model_admin.formfield_for_foreignkey(Partner._meta.get_field("parent"), request)
+
+    assert isinstance(field.widget, PartnerAutocompleteSelect)
+    assert field.widget.get_url() == f"{reverse('admin:autocomplete')}?partner_id={partner.id}"
+
+
+def test_partner_admin_parent_autocomplete_excludes_edited_partner_and_sub_partners(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    partner: Partner,
+    parent_partner: Partner,
+    unicef_parent: Partner,
+    unicef_subpartner: Partner,
+):
+    model_admin = PartnerAdmin(model=Partner, admin_site=admin_site)
+    request = request_factory.get(
+        "/",
+        {"app_label": "account", "model_name": "partner", "field_name": "parent", "partner_id": str(partner.id)},
+    )
+
+    queryset, _ = model_admin.get_search_results(request, Partner.objects.order_by("name"), "")
+
+    assert list(queryset) == [parent_partner, unicef_parent]
+
+
+def test_partner_admin_parent_autocomplete_returns_nothing_for_partner_with_sub_partners(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    unicef_parent: Partner,
+    unicef_subpartner: Partner,
+):
+    model_admin = PartnerAdmin(model=Partner, admin_site=admin_site)
+    request = request_factory.get(
+        "/",
+        {
+            "app_label": "account",
+            "model_name": "partner",
+            "field_name": "parent",
+            "partner_id": str(unicef_parent.id),
+        },
+    )
+
+    queryset, _ = model_admin.get_search_results(request, Partner.objects.all(), "")
+
+    assert list(queryset) == []
 
 
 def test_project_admin_programme_not_autocomplete(
@@ -410,6 +611,75 @@ def test_project_admin_programme_not_autocomplete(
     request = get_mock_request(request_factory)
     fields = admin.get_autocomplete_fields(request)
     assert "programme" not in fields
+
+
+def test_role_assignment_inline_queryset_renders_str_in_single_query(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    unicef_subpartner: Partner,
+    unicef_subpartner_role_assignment: RoleAssignment,
+    django_assert_num_queries: Any,
+):
+    model_admin = RoleAssignmentInline(parent_model=Partner, admin_site=admin_site)
+    request = get_mock_request(request_factory, object_id=unicef_subpartner.id)
+
+    with django_assert_num_queries(1):
+        role_assignment = model_admin.get_queryset(request).get(pk=unicef_subpartner_role_assignment.pk)
+        label = str(role_assignment)
+
+    assert label == f"{unicef_subpartner.name} [Sub-Partner of UNICEF] Role 1 in Afghanistan"
+
+
+def test_partner_change_page_adds_two_queries_per_role_assignment_row(
+    django_app: Any,
+    superuser: User,
+    sub_partner_with_one_role_assignment: Partner,
+    sub_partner_with_three_role_assignments: Partner,
+):
+    one_row_url = reverse("admin:account_partner_change", args=[sub_partner_with_one_role_assignment.pk])
+    three_rows_url = reverse("admin:account_partner_change", args=[sub_partner_with_three_role_assignments.pk])
+    django_app.get(one_row_url, user=superuser)
+
+    with CaptureQueriesContext(connection) as one_row_queries:
+        django_app.get(one_row_url, user=superuser)
+    with CaptureQueriesContext(connection) as three_rows_queries:
+        django_app.get(three_rows_url, user=superuser)
+
+    assert len(three_rows_queries) - len(one_row_queries) == 4
+
+
+def test_user_change_page_adds_two_queries_per_role_assignment_row(
+    django_app: Any,
+    superuser: User,
+    user_with_one_role_assignment: User,
+    user_with_three_role_assignments: User,
+):
+    one_row_url = reverse("admin:account_user_change", args=[user_with_one_role_assignment.pk])
+    three_rows_url = reverse("admin:account_user_change", args=[user_with_three_role_assignments.pk])
+    django_app.get(one_row_url, user=superuser)
+
+    with CaptureQueriesContext(connection) as one_row_queries:
+        django_app.get(one_row_url, user=superuser)
+    with CaptureQueriesContext(connection) as three_rows_queries:
+        django_app.get(three_rows_url, user=superuser)
+
+    assert len(three_rows_queries) - len(one_row_queries) == 4
+
+
+def test_user_admin_partner_choice_renders_sub_partner_label_in_single_query(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    unicef_subpartner: Partner,
+    django_assert_num_queries: Any,
+):
+    model_admin = UserAdmin(model=User, admin_site=admin_site)
+    request = get_mock_request(request_factory)
+    field = model_admin.formfield_for_foreignkey(User._meta.get_field("partner"), request)
+
+    with django_assert_num_queries(1):
+        label = field.label_from_instance(field.queryset.get(pk=unicef_subpartner.pk))
+
+    assert label == f"{unicef_subpartner.name} [Sub-Partner of UNICEF]"
 
 
 def test_role_assignment_inline_has_permissions(
