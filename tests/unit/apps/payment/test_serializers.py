@@ -342,16 +342,6 @@ def test_payment_list_serializer_get_auth_code_without_request_context(payment_l
     assert data["fsp_auth_code"] == ""
 
 
-def test_payment_list_serializer_get_auth_code_without_program(payment_list_context: dict[str, Any]) -> None:
-    payment = payment_list_context["payment"]
-    payment.program = None
-
-    serializer = PaymentListSerializer(instance=payment)
-    data = serializer.data
-
-    assert data["fsp_auth_code"] == ""
-
-
 def test_payment_list_serializer_reuses_fsp_auth_code_permission_check(payment_list_context: dict[str, Any]) -> None:
     payment = payment_list_context["payment"]
     other_payment = PaymentFactory(parent=payment.parent, fsp_auth_code="AUTH_456")

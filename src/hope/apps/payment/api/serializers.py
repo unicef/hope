@@ -1619,8 +1619,6 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.fsp_auth_code or ""
 
     def _can_view_fsp_auth_code(self, program: Program) -> bool:
-        if program is None:
-            return False
         program_id = program.id
         if program_id not in self._fsp_auth_code_cache:
             request = self.context.get("request")
