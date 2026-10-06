@@ -447,6 +447,23 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     )[0]
     pp2.payment_plan_purposes.add(purpose)
     PaymentPlanService(payment_plan=pp2).full_rebuild()
+    pp3_name = "Test TP for PM (ready to create Payment Plan)"
+    pp3_group, _ = PaymentPlanGroup.objects.get_or_create(cycle=program_cycle, name=f"{pp3_name} Group")
+    pp3 = PaymentPlan.objects.update_or_create(
+        name=pp3_name,
+        program_cycle=program_cycle,
+        defaults={
+            "status": PaymentPlan.Status.DRAFT,
+            "business_area": afghanistan,
+            "status_date": now,
+            "created_by": root,
+            "payment_plan_group": pp3_group,
+            "financial_service_provider": fsp_1,
+            "delivery_mechanism": delivery_mechanism_cash,
+        },
+    )[0]
+    pp3.payment_plan_purposes.add(purpose)
+    PaymentPlanService(payment_plan=pp3).full_rebuild()
 
 
 def create_payment_verification_plan_with_status(
