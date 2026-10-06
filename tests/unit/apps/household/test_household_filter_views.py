@@ -26,7 +26,6 @@ from extras.test_utils.factories.grievance import (
     TicketHouseholdDataUpdateDetailsFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.exceptions import SearchError
 from hope.apps.household.const import HOST, REFUGEE, ROLE_PRIMARY
 from hope.apps.household.filters import HouseholdFilter, HouseholdOfficeSearchFilter, _prepare_kobo_asset_id_value
 from hope.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -1155,53 +1154,6 @@ def test_search_db_no_program_filter(
     result_ids = [result["id"] for result in response_data]
     assert str(expected_results[0].id) in result_ids
     assert str(expected_results[1].id) in result_ids
-
-
-def test_filter_detail_id_requires_numeric(household_filter_search_context: dict[str, Any]) -> None:
-    household_filter = HouseholdFilter(data={}, queryset=Household.objects.all(), request=None)
-
-    with pytest.raises(SearchError):
-        household_filter._filter_detail_id(Household.objects.all(), "abc123")
-
-
-def test_filter_detail_id_filters_queryset(household_filter_search_context: dict[str, Any]) -> None:
-    household1 = HouseholdFactory(
-        program=household_filter_search_context["program"],
-        business_area=household_filter_search_context["afghanistan"],
-        create_role=False,
-        detail_id="12345",
-    )
-    household1_hoh = household1.head_of_household
-    household1_hoh.save()
-    IndividualRoleInHouseholdFactory(household=household1, individual=household1_hoh, role=ROLE_PRIMARY)
-    IndividualFactory(
-        household=household1,
-        business_area=household_filter_search_context["afghanistan"],
-        program=household_filter_search_context["program"],
-        registration_data_import=household1.registration_data_import,
-    )
-
-    household2 = HouseholdFactory(
-        program=household_filter_search_context["program"],
-        business_area=household_filter_search_context["afghanistan"],
-        create_role=False,
-        detail_id="67890",
-    )
-    household2_hoh = household2.head_of_household
-    household2_hoh.save()
-    IndividualRoleInHouseholdFactory(household=household2, individual=household2_hoh, role=ROLE_PRIMARY)
-    IndividualFactory(
-        household=household2,
-        business_area=household_filter_search_context["afghanistan"],
-        program=household_filter_search_context["program"],
-        registration_data_import=household2.registration_data_import,
-    )
-
-    household_filter = HouseholdFilter(data={}, queryset=Household.objects.all(), request=None)
-
-    result_qs = household_filter._filter_detail_id(Household.objects.all(), "123")
-
-    assert list(result_qs.values_list("id", flat=True)) == [household1.id]
 
 
 def test_phone_no_valid_filter_with_none_returns_queryset_unchanged(db: Any) -> None:

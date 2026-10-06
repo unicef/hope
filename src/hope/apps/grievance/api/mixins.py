@@ -18,11 +18,7 @@ from hope.apps.grievance.utils import (
     update_grievance_documents,
 )
 from hope.apps.grievance.validators import validate_grievance_documents_size
-from hope.apps.household.const import (
-    HEAD,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-)
+from hope.apps.household.const import HEAD
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, Program, User
 
@@ -592,10 +588,6 @@ class GrievanceMutationMixin:
         if is_feedback:
             return feedback_permissions or any_permissions or based_on_current_status_permissions
         return any_permissions or based_on_current_status_permissions
-
-    def verify_role_choices(self, role: str) -> None:
-        if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
-            log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     def verify_if_role_exists(self, household: Household, current_individual: Individual, role: str) -> None:
         if role == HEAD:
