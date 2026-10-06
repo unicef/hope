@@ -136,7 +136,6 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.input_partner)
 
     def choose_partner_option(self, option_name: str) -> None:
-        # Todo: Change undefined to name of Partner
         self.get_input_partner().click()
         self.select_option_by_name(option_name)
 
@@ -172,8 +171,7 @@ class ProgrammeManagement(BaseComponents):
     def choose_input_start_date_via_calendar(self, day: int) -> None:
         self.get(self.label_start_date).find_element(By.TAG_NAME, "button").click()
         self.get_calendar()
-        # ToDo: Create additional waiting mechanism
-        sleep(1)
+        self.wait_for_element_clickable(self.calendar_days)
         self.get_elements(self.calendar_days, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar, By.XPATH)
 

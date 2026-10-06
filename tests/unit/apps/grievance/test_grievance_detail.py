@@ -48,7 +48,7 @@ from extras.test_utils.factories.payment import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from extras.test_utils.factories.registration_data import DeduplicationEngineSimilarityPairFactory
+from extras.test_utils.factories.registration_data import BiometricDeduplicationEngineSimilarityPairFactory
 from extras.test_utils.factories.sanction_list import (
     SanctionListIndividualDateOfBirthFactory,
     SanctionListIndividualDocumentFactory,
@@ -300,6 +300,55 @@ def configured_grievance_ticket(
 @pytest.fixture
 def detail_url_name() -> str:
     return "api:grievance:grievance-tickets-global-detail"
+
+
+@pytest.fixture
+def household_data_update_ticket_with_consent_sign(
+    grievance_ticket_base_data: dict, program: Program, household1: Household
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        **grievance_ticket_base_data,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        household_unicef_id=household1.unicef_id,
+    )
+    ticket.programs.add(program)
+    TicketHouseholdDataUpdateDetailsFactory(
+        ticket=ticket,
+        household=household1,
+        household_data={
+            "consent_sign": {
+                "value": "consent/new-signature.jpg",
+                "previous_value": "consent/old-signature.jpg",
+                "approve_status": False,
+            },
+        },
+    )
+    return ticket
+
+
+@pytest.fixture
+def individual_data_update_ticket_with_consent_sign(
+    grievance_ticket_base_data: dict, program: Program, individuals1: list[Individual]
+) -> GrievanceTicket:
+    ticket = GrievanceTicketFactory(
+        **grievance_ticket_base_data,
+        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+        issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+    )
+    ticket.programs.add(program)
+    TicketIndividualDataUpdateDetailsFactory(
+        ticket=ticket,
+        individual=individuals1[0],
+        individual_data={
+            "consent_sign": {
+                "value": "consent/new-signature.jpg",
+                "previous_value": "consent/old-signature.jpg",
+                "approve_status": False,
+            },
+        },
+    )
+    return ticket
 
 
 def assert_base_grievance_data(
@@ -936,6 +985,72 @@ def test_grievance_detail_household_data_update(
     }
 
 
+def test_grievance_detail_household_data_update_returns_consent_sign_as_urls(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    household_data_update_ticket_with_consent_sign: GrievanceTicket,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(household_data_update_ticket_with_consent_sign.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["household_data"]["consent_sign"] == {
+        "value": "/api/uploads/consent/new-signature.jpg",
+        "previous_value": "/api/uploads/consent/old-signature.jpg",
+        "approve_status": False,
+    }
+
+
+def test_grievance_detail_individual_data_update_returns_consent_sign_as_urls(
+    authenticated_client: Any,
+    afghanistan: BusinessArea,
+    user: User,
+    individual_data_update_ticket_with_consent_sign: GrievanceTicket,
+    detail_url_name: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(
+        reverse(
+            detail_url_name,
+            kwargs={
+                "business_area_slug": afghanistan.slug,
+                "pk": str(individual_data_update_ticket_with_consent_sign.id),
+            },
+        )
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["ticket_details"]["individual_data"]["consent_sign"] == {
+        "value": "/api/uploads/consent/new-signature.jpg",
+        "previous_value": "/api/uploads/consent/old-signature.jpg",
+        "approve_status": False,
+    }
+
+
 def test_grievance_detail_individual_data_update(
     authenticated_client: Any,
     afghanistan: BusinessArea,
@@ -993,7 +1108,6 @@ def test_grievance_detail_individual_data_update(
     assert data["ticket_details"] == {
         "id": str(ticket_details.id),
         "individual_data": ticket_details.individual_data,
-        "role_reassign_data": ticket_details.role_reassign_data,
         "linked_needs_adjudication_ticket_id": None,
     }
 
@@ -1599,7 +1713,7 @@ def test_grievance_detail_needs_adjudication(
         photo=ContentFile(b"abc", name="doc_aaa.png"),
     )
 
-    dedup_engine_similarity_pair = DeduplicationEngineSimilarityPairFactory(
+    dedup_engine_similarity_pair = BiometricDeduplicationEngineSimilarityPairFactory(
         program=program,
         individual1=golden_records_individual,
         individual2=duplicate,

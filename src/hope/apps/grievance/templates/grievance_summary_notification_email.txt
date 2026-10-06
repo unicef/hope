@@ -1,0 +1,8 @@
+{% extends 'base_notification_email.txt' %}
+
+{% block content %}
+    {{ intro }}
+    {% for section in sections %}
+    {% if section.label %}{{ section.label }}: {% endif %}{{ section.ticket_count }} ticket{{ section.ticket_count|pluralize }} - {{ section.tickets_url|safe }}
+    {% endfor %}
+{% endblock content %}

@@ -1,22 +1,44 @@
 from typing import Any
 
+from django.db import transaction
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hope.api.caches import (
     BusinessAreaAndProgramKeyBitMixin,
-    BusinessAreaAndProgramLastUpdatedKeyBit,
     BusinessAreaKeyBitMixin,
     KeyConstructorMixin,
     get_or_create_cache_key,
+    increment_business_area_and_program_version,
 )
 from hope.models import BusinessArea
+
+PAYMENT_PLAN_LIST_CACHE_KEYS = (
+    "payment_plans_list",
+    "target_populations_list",
+    "payment_verifications_list",
+)
+PAYMENT_VERIFICATION_LIST_CACHE_KEYS = ("payment_verifications_list",)
+
+
+def invalidate_payment_plan_list_cache(
+    business_area_slug: Any,
+    program_code: Any,
+    specific_view_cache_keys: tuple[str, ...] = PAYMENT_PLAN_LIST_CACHE_KEYS,
+) -> None:
+    """Invalidate the payment plan list caches for a program."""
+
+    def _increment() -> None:
+        for specific_view_cache_key in specific_view_cache_keys:
+            increment_business_area_and_program_version(business_area_slug, program_code, specific_view_cache_key)
+
+    transaction.on_commit(_increment)
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
     specific_view_cache_key = "management_payment_plans_list"
 
 
-class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+class PaymentPlanListKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "payment_plans_list"
 
 
@@ -38,11 +60,11 @@ class PaymentPlanPurposeListVersionsKeyBit(KeyBitBase):
         return str(version)
 
 
-class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+class PaymentVerificationListKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "payment_verifications_list"
 
 
-class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+class TargetPopulationListKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "target_populations_list"
 
 

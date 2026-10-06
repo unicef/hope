@@ -65,7 +65,7 @@ def test_get_periodic_task_name_from_protocol_v2_message():
 
 
 def test_get_periodic_task_name_from_message_with_headers_dict():
-    periodic_task_name = "periodic_grievances_notifications_async_task"
+    periodic_task_name = "daily_grievance_digest_async_task"
     raw_message = redis_dumps(
         {
             "headers": {
@@ -107,7 +107,7 @@ def test_get_periodic_task_name_from_dict_message_without_periodic_task_name_ret
     raw_message = redis_dumps(
         {
             "headers": {
-                "task": "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+                "task": "hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
             }
         }
     )
@@ -146,7 +146,7 @@ def test_is_periodic_task_already_in_queue_returns_false_when_entry_name_is_miss
     scheduler = make_scheduler(channel=channel)
     entry = SimpleNamespace(
         name="",
-        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        task="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
         options={"queue": CELERY_QUEUE_PERIODIC},
     )
 
@@ -159,8 +159,8 @@ def test_is_periodic_task_already_in_queue_closes_channel(make_scheduler):
     channel.close = MagicMock()
     scheduler = make_scheduler(channel=channel)
     entry = SimpleNamespace(
-        name="periodic_grievances_notifications_async_task",
-        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        name="daily_grievance_digest_async_task",
+        task="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
         options={"queue": CELERY_QUEUE_PERIODIC},
     )
 
@@ -173,8 +173,8 @@ def test_is_periodic_task_already_in_queue_ignores_channel_without_callable_clos
     channel.close = None
     scheduler = make_scheduler(channel=channel)
     entry = SimpleNamespace(
-        name="periodic_grievances_notifications_async_task",
-        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        name="daily_grievance_digest_async_task",
+        task="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
         options={"queue": CELERY_QUEUE_PERIODIC},
     )
 
@@ -294,8 +294,8 @@ def test_apply_async_skips_queue_scan_for_non_periodic_queue(make_scheduler):
     channel = FakeRedisChannel(messages_by_queue={"default": []})
     scheduler = make_scheduler(channel=channel, default_queue="default")
     entry = SimpleNamespace(
-        name="periodic_grievances_notifications_async_task",
-        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        name="daily_grievance_digest_async_task",
+        task="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
         options={"queue": "default"},
     )
 
@@ -315,8 +315,8 @@ def test_apply_async_skips_queue_scan_for_non_redis_transport(make_scheduler):
     channel = FakeRedisChannel(messages_by_queue={CELERY_QUEUE_PERIODIC: []})
     scheduler = make_scheduler(channel=channel, driver_type="memory")
     entry = SimpleNamespace(
-        name="periodic_grievances_notifications_async_task",
-        task="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task",
+        name="daily_grievance_digest_async_task",
+        task="hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
         options={"queue": CELERY_QUEUE_PERIODIC},
     )
 

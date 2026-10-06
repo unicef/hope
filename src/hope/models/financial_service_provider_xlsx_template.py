@@ -41,8 +41,9 @@ class FlexFieldArrayField(ArrayField):
         **kwargs: Any,
     ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
-        # TODO exclude PDU here
-        flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
+        flexible_attributes = (
+            FlexibleAttribute.objects.exclude(type=FlexibleAttribute.PDU).values_list("name", flat=True).distinct()
+        )
         flexible_choices = ((x, x) for x in flexible_attributes)
         kwargs.setdefault("widget", widget)
         kwargs.setdefault("choices", flexible_choices)
@@ -100,6 +101,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
+
+    # Declared as export columns, so they must resolve without a DocumentType row for the key.
+    DOCUMENT_NUMBER_COLUMNS = ("registration_token", "national_id")
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -168,14 +172,17 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if main_key in {"primary_collector", "alternate_collector"}:
             return ctx.household_data.get(main_key, {}).get("id")
 
-        if main_key == "documents":
-            doc_type, doc_lookup = (
+        discriminators = {"documents": "type", "identities": "partner"}
+        if main_key in discriminators:
+            item_key, item_lookup = (
                 snapshot_field_path_split[1],
                 snapshot_field_path_split[2],
             )
-            documents_list = ctx.collector_data.get("documents", [])
-            documents_dict = {doc.get("type"): doc for doc in documents_list}
-            return documents_dict.get(doc_type, {}).get(doc_lookup)
+            discriminator = discriminators[main_key]
+            items = ctx.collector_data.get(main_key, [])
+            # DocumentType.key is lowercase, Partner.name uses a case-insensitive collation
+            items_dict = {(item.get(discriminator) or "").upper(): item for item in items}
+            return items_dict.get(item_key.upper(), {}).get(item_lookup)
 
         return None
 
@@ -303,7 +310,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data, areas_dict]),
             "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
         }
-        if column_name in document_types:
+        if column_name in document_types or column_name in cls.DOCUMENT_NUMBER_COLUMNS:
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
         result: str | float | list | None

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     XlsxPaymentPlanDeliveryImportService,
 )
+from hope.models import Payment, PaymentPlan
 
 
 def _build_service(payments_dict: dict) -> XlsxPaymentPlanDeliveryImportService:
@@ -12,6 +13,9 @@ def _build_service(payments_dict: dict) -> XlsxPaymentPlanDeliveryImportService:
     svc.sheetname = "TestSheet"
     svc.xlsx_headers = ["payment_id", "delivered_quantity"]
     svc.payments_dict = payments_dict
+    svc.override = False
+    svc.null_delivery_policy = "reset"
+    svc.payment_plan = MagicMock(status=PaymentPlan.Status.ACCEPTED, Status=PaymentPlan.Status)
     return svc
 
 
@@ -19,6 +23,7 @@ def test_validate_delivered_quantity_uses_zero_when_entitlement_is_none() -> Non
     payment = MagicMock()
     payment.entitlement_quantity = None
     payment.delivered_quantity = None
+    payment.status = Payment.STATUS_SENT_TO_FSP
 
     svc = _build_service({"PAY-001": payment})
 
@@ -45,6 +50,7 @@ def test_validate_delivered_quantity_no_error_when_within_entitlement() -> None:
     payment = MagicMock()
     payment.entitlement_quantity = None
     payment.delivered_quantity = None
+    payment.status = Payment.STATUS_SENT_TO_FSP
 
     svc = _build_service({"PAY-002": payment})
 

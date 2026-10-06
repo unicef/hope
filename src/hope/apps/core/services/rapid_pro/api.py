@@ -11,6 +11,7 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import JSONDecodeError
 from urllib3.util.retry import Retry
 
+from hope.apps.utils.external_urls import build_url, normalize_base_url
 from hope.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -62,14 +63,14 @@ class RapidProAPI:
     def _init_token(self, business_area_slug: str, mode: str) -> None:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         token = getattr(business_area, RapidProAPI.mode_to_token_dict[mode], None)
-        self.url = (business_area.rapid_pro_host or settings.RAPID_PRO_URL).rstrip("/")
+        self.url = normalize_base_url(business_area.rapid_pro_host or settings.RAPID_PRO_URL)
         if not token:
             raise TokenNotProvidedError(f"Token is not set for {business_area.name}.")
         self._client.headers.update({"Authorization": f"Token {token}"})
 
     def _handle_get_request(self, url: str, is_absolute_url: bool = False) -> dict:
         if not is_absolute_url:
-            url = f"{self._get_url()}{url}"
+            url = build_url(self._get_url(), url)
         response = self._client.get(url, timeout=self._timeout)
         try:
             response.raise_for_status()
@@ -79,7 +80,7 @@ class RapidProAPI:
         return response.json()
 
     def _handle_post_request(self, url: str, data: dict) -> dict:
-        response = self._client.post(url=f"{self._get_url()}{url}", json=data, timeout=self._timeout)
+        response = self._client.post(url=build_url(self._get_url(), url), json=data, timeout=self._timeout)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError:
@@ -106,7 +107,7 @@ class RapidProAPI:
             return None
 
     def _get_url(self) -> str:
-        return f"{self.url}/api/v2"
+        return build_url(self.url, "api/v2")
 
     def get_flows(self) -> list:
         flows = self._handle_get_request(RapidProAPI.FLOWS_ENDPOINT)
@@ -165,7 +166,7 @@ class RapidProAPI:
         ]
 
     def _get_paginated_results(self, url: str) -> list:
-        next_url = f"{self._get_url()}{url}"
+        next_url = build_url(self._get_url(), url)
         results: list = []
         while next_url:
             data = self._handle_get_request(next_url, is_absolute_url=True)

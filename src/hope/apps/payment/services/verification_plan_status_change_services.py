@@ -7,7 +7,6 @@ from rest_framework.exceptions import ValidationError
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
 from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.payment.celery_tasks import create_payment_verification_plan_xlsx_async_task
 from hope.apps.payment.utils import calculate_counts
 from hope.apps.payment.xlsx.xlsx_verification_import_service import (
@@ -173,10 +172,6 @@ class VerificationPlanStatusChangeServices:
 
         ticket_payment_verification_details_list = []
         for verification, grievance_ticket in zip(verifications, grievance_ticket_objs, strict=True):
-            GrievanceNotification.send_all_notifications(
-                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-            )
-
             ticket_payment_verification_details = TicketPaymentVerificationDetails(
                 ticket=grievance_ticket,
                 payment_verification_status=status,

@@ -7,6 +7,7 @@ from django.utils import timezone
 import requests
 
 from hope.apps.core.api.mixins import BaseAPI
+from hope.apps.utils.external_urls import build_url
 from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
 from hope.contrib.vision.choices import VISION_SEND_MUTABLE_STATUSES, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
@@ -30,9 +31,8 @@ class VisionAPI(BaseAPI):
 
     def __init__(self) -> None:
         super().__init__()
-        base_url = self.api_url.rstrip("/")
-        self.token_url = f"{base_url}/v1/OAuthService/GenerateToken"
-        self.payment_plan_creation_url = f"{base_url}/ps/ezcash/PaymentPlan"
+        self.token_url = build_url(self.api_url, "v1/OAuthService/GenerateToken")
+        self.payment_plan_creation_url = build_url(self.api_url, "ps/ezcash/PaymentPlan")
         self._token_expiry: datetime | None = None
 
     def _acquire_token(self) -> None:
@@ -106,7 +106,7 @@ class VisionAPI(BaseAPI):
                 send_result_updates_status
                 # A late HTTP response must not change an aborted, rejected, or released plan.
                 and plan_is_still_in_review
-                # Preserve a newer callback status such as FC_NOT_FOUND, FC_MISSING, or CALLBACK_FAILED.
+                # Preserve a newer callback status such as PP_CREATED, FC_NOT_FOUND, or CALLBACK_FAILED.
                 and current_status_can_be_changed_by_send_result
             ):
                 VisionService.set_status(locked_payment_plan, cast("VisionStatus", vision_status))

@@ -260,10 +260,10 @@ def test_frontend_url_payment_without_program(program, cycle):
 
 
 @pytest.mark.django_db
-def test_frontend_url_rdi_without_program(program):
+def test_frontend_url_rdi_without_business_area(program):
     program = program()
     rdi = RegistrationDataImportFactory(program=program, business_area=program.business_area)
-    rdi.program = None
+    rdi.business_area = None
     assert site._registry[RegistrationDataImport].frontend_url(rdi) is None
 
 

@@ -1,5 +1,7 @@
+from collections.abc import Generator
 from datetime import UTC, timedelta
 from decimal import Decimal
+import logging
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
@@ -15,6 +17,7 @@ from django.utils.timezone import now
 from flags.models import FlagState
 from freezegun import freeze_time
 import pytest
+import requests_mock as requests_mock_lib
 from rest_framework.exceptions import ValidationError
 from viewflow.fsm import TransitionNotAllowed
 
@@ -409,7 +412,7 @@ def test_create(
     }
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(23):
+        with django_assert_num_queries(26):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -431,6 +434,56 @@ def test_create(
     assert pp.total_households_count == 2
     assert pp.total_individuals_count == 6
     assert pp.payment_items.count() == 2
+
+
+@pytest.fixture
+def draft_payment_plan(payment_plan_base: PaymentPlan) -> PaymentPlan:
+    payment_plan_base.status = PaymentPlan.Status.DRAFT
+    payment_plan_base.exchange_rate = None
+    payment_plan_base.save(update_fields=["status", "exchange_rate"])
+    return payment_plan_base
+
+
+@pytest.fixture
+def unore_unavailable(request: pytest.FixtureRequest, settings: Any) -> Generator[requests_mock_lib.Mocker, None, None]:
+    settings.USE_DUMMY_EXCHANGE_RATES = False
+    settings.EXCHANGE_RATES_API_KEY = "TEST_API_KEY"
+    settings.EXCHANGE_RATE_CACHE_EXPIRY = 60 * 60 * 24
+    with requests_mock_lib.Mocker() as adapter:
+        adapter.get(settings.EXCHANGE_RATES_API_URL, status_code=request.param)
+        yield adapter
+
+
+@freeze_time("2026-10-05")
+@pytest.mark.parametrize(
+    ("unore_unavailable", "expected_log_level"),
+    [
+        pytest.param(500, "WARNING", id="unore_server_error"),
+        pytest.param(400, "ERROR", id="hope_bad_request"),
+    ],
+    indirect=["unore_unavailable"],
+)
+def test_open_arrange_unore_unavailable_and_cache_empty_act_open_assert_payment_plan_opened_without_exchange_rate(
+    draft_payment_plan: PaymentPlan,
+    unore_unavailable: requests_mock_lib.Mocker,
+    expected_log_level: str,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    open_input_data = {
+        "dispersion_start_date": parse_date("2026-10-05"),
+        "dispersion_end_date": parse_date("2026-10-31"),
+        "currency": CurrencyFactory(code="SDG", name="Sudanese pound"),
+    }
+
+    with caplog.at_level(logging.WARNING, logger="hope.apps.payment.services.payment_plan_services"):
+        PaymentPlanService(payment_plan=draft_payment_plan).open(input_data=open_input_data)
+
+    draft_payment_plan.refresh_from_db()
+    assert unore_unavailable.called is True
+    assert draft_payment_plan.status == PaymentPlan.Status.OPEN
+    assert draft_payment_plan.exchange_rate is None
+    assert caplog.records[-1].name == "hope.apps.payment.services.payment_plan_services"
+    assert caplog.records[-1].levelname == expected_log_level
 
 
 def test_create_raises_when_payment_plan_group_belongs_to_different_cycle(user: User, business_area: Any) -> None:
@@ -552,7 +605,7 @@ def test_create_follow_up_pp(
     p_force_failed = payments[2]
     p_manually_cancelled = payments[3]
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         follow_up_pp = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     follow_up_pp.refresh_from_db()
@@ -603,12 +656,12 @@ def test_create_follow_up_pp(
     follow_up_payment.excluded = True
     follow_up_payment.save()
 
-    with django_assert_num_queries(10):
+    with django_assert_num_queries(11):
         follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, dispersion_start_date, dispersion_end_date)
 
     assert pp.child_plans.count() == 2
 
-    with django_assert_num_queries(60):
+    with django_assert_num_queries(66):
         with django_capture_on_commit_callbacks(execute=True):
             prepare_child_payment_plan_async_task(follow_up_pp_2)
 
@@ -1067,7 +1120,7 @@ def test_full_rebuild(
         "payment_plan_purposes": [purpose],
     }
     with mock.patch("hope.apps.payment.services.payment_plan_services.transaction") as mock_transaction:
-        with django_assert_num_queries(16):
+        with django_assert_num_queries(18):
             pp = PaymentPlanService.create(
                 input_data=input_data,
                 user=user,
@@ -1707,7 +1760,7 @@ def test_create_payments_integrity_error_handling(
     household.save(update_fields=["size"])
     payment_plan = PaymentPlanFactory(
         created_by=user,
-        status=PaymentPlan.Status.PREPARING,
+        status=PaymentPlan.Status.DRAFT,
         business_area=business_area,
         program_cycle=cycle,
         delivery_mechanism=dm_transfer_to_account,
@@ -1731,9 +1784,12 @@ def test_create_payments_integrity_error_handling(
     assert hh_qs.first().unicef_id == household.unicef_id
 
     with transaction.atomic():
-        with pytest.raises(IntegrityError) as error:
+        with pytest.raises(ValidationError, match="Duplicated Households in provided Targeting List") as error:
             PaymentPlanService.create_payments(payment_plan)
-        assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(error.value)
+        assert isinstance(error.value.__cause__, IntegrityError)
+        assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(
+            error.value.__cause__
+        )
 
     with transaction.atomic():
         IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
@@ -1744,7 +1800,7 @@ def test_create_payments_integrity_error_handling(
 
 
 def test_acceptance_process_validation_error(payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.PREPARING
+    payment_plan_base.status = PaymentPlan.Status.OPEN
     payment_plan_base.save()
 
     with pytest.raises(ValidationError) as error:
@@ -2129,7 +2185,7 @@ def test_ready_for_closure_sends_notification(
         status=PaymentPlan.Status.FINISHED,
     )
 
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(12):
         PaymentPlanService(payment_plan).ready_for_closure(user=user)
 
     payment_plan.refresh_from_db()
@@ -2169,7 +2225,7 @@ def test_send_back_to_finished_sends_notification(
         status=PaymentPlan.Status.READY_FOR_CLOSURE,
     )
 
-    with django_assert_num_queries(11):
+    with django_assert_num_queries(12):
         PaymentPlanService(payment_plan).send_back_to_finished(user=user)
 
     payment_plan.refresh_from_db()
