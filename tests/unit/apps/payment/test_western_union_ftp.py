@@ -58,10 +58,12 @@ def ftp_client() -> WesternUnionFTPClient:
     return WesternUnionFTPClientMock()
 
 
-def test_print_files(ftp_client: WesternUnionFTPClient) -> None:
+def test_list_files_w_attrs_lists_the_given_path(ftp_client: WesternUnionFTPClient) -> None:
     ftp_client.client.listdir_attr = MagicMock(return_value=[])
-    ftp_client.print_files()
-    ftp_client.client.listdir_attr.assert_called_once()
+
+    assert ftp_client.list_files_w_attrs("inbox") == []
+
+    ftp_client.client.listdir_attr.assert_called_once_with("inbox")
 
 
 def test_get_files_since_filters_and_downloads(ftp_client: WesternUnionFTPClient) -> None:
