@@ -121,7 +121,7 @@ class FundsCommitmentItem(models.Model):
 
 class FundsCommitment(models.Model):
     rec_serial_number = models.IntegerField(primary_key=True)
-    funds_commitment_number = models.CharField(max_length=10, blank=True, null=True)
+    funds_commitment_number = models.CharField(max_length=10, blank=True, null=True, db_index=True)
     vendor_id = models.CharField(max_length=10, blank=True, null=True)
     business_area = models.CharField(max_length=4, blank=True, null=True)
     posting_date = models.DateField(blank=True, null=True)

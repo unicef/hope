@@ -33,28 +33,25 @@ DECLARE
     office_id UUID;
 
 BEGIN
-    SELECT id INTO fc_header_id FROM vision_fundscommitmentheader
-    WHERE funds_commitment_number = NEW.funds_commitment_number;
-
-    IF fc_header_id IS NULL THEN
-        INSERT INTO vision_fundscommitmentheader (
-            funds_commitment_number,
-            vendor_id,
-            posting_date,
-            document_reference,
-            fc_status,
-            currency
-        )
-        VALUES (
-            NEW.funds_commitment_number,
-            NEW.vendor_id,
-            NEW.posting_date,
-            NEW.document_reference,
-            NEW.fc_status,
-            NEW.currency_code
-        )
-        RETURNING id INTO fc_header_id;
-    END IF;
+    INSERT INTO vision_fundscommitmentheader (
+        funds_commitment_number,
+        vendor_id,
+        posting_date,
+        document_reference,
+        fc_status,
+        currency
+    )
+    VALUES (
+        NEW.funds_commitment_number,
+        NEW.vendor_id,
+        NEW.posting_date,
+        NEW.document_reference,
+        NEW.fc_status,
+        NEW.currency_code
+    )
+    ON CONFLICT (funds_commitment_number) DO UPDATE
+        SET funds_commitment_number = EXCLUDED.funds_commitment_number
+    RETURNING id INTO fc_header_id;
 
     SELECT id INTO office_id FROM core_businessarea
     WHERE code = NEW.business_area
@@ -283,6 +280,11 @@ class Migration(migrations.Migration):
             model_name="fundscommitmentheader",
             name="funds_commitment_number",
             field=models.CharField(max_length=10, unique=True),
+        ),
+        migrations.AlterField(
+            model_name="fundscommitment",
+            name="funds_commitment_number",
+            field=models.CharField(blank=True, db_index=True, max_length=10, null=True),
         ),
         migrations.AddField(
             model_name="fundscommitmentheader",

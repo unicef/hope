@@ -190,6 +190,26 @@ def test_payment_plan_callback_request_serializer_defaults_fc_numbers_for_creati
     }
 
 
+@pytest.mark.parametrize("fc_numbers", [None, ""])
+def test_payment_plan_callback_request_serializer_accepts_explicit_empty_fc_numbers(fc_numbers) -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP001", "status": "SUCCESS", "fc_numbers": fc_numbers}
+    )
+
+    serializer.is_valid(raise_exception=True)
+
+    assert serializer.validated_data["fc_numbers"] == []
+
+
+def test_payment_plan_callback_request_serializer_rejects_nonempty_string_fc_numbers() -> None:
+    serializer = PaymentPlanCallbackRequestSerializer(
+        data={"payplanSno": "PP001", "status": "SUCCESS", "fc_numbers": "FC123"}
+    )
+
+    assert serializer.is_valid() is False
+    assert "fc_numbers" in serializer.errors
+
+
 def test_payment_plan_callback_request_serializer_external_payload() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(
         data={

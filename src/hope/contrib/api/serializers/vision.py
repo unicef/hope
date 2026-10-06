@@ -73,12 +73,14 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
 
     def to_internal_value(self, data: dict) -> dict[str, Any]:
         field_names: tuple[str, ...] = tuple(self.fields.keys())
+        fc_numbers = data.get("fc_numbers")
+        if fc_numbers is None or fc_numbers == "":
+            fc_numbers = []
         return super().to_internal_value(
             {
-                field_name: data.get(
-                    vision_callback_external_field_name(field_name),
-                    [] if field_name == "fc_numbers" else "",
-                )
+                field_name: fc_numbers
+                if field_name == "fc_numbers"
+                else data.get(vision_callback_external_field_name(field_name), "")
                 for field_name in field_names
             }
         )
