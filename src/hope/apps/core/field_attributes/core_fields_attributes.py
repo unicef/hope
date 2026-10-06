@@ -2542,23 +2542,6 @@ class FieldFactory(list):
                 field_attr["xlsx_field"] = "pp_" + field_attr["xlsx_field"].replace("_h_c", "_i_c")
         return factory
 
-    @classmethod
-    def not_from_scope(cls, scope: Scope) -> "FieldFactory":
-        factory = cls()
-        all_fields = copy.deepcopy(factory.all_fields)
-        factory.extend(filter(lambda field: scope not in field["scope"], all_fields))
-        factory.scopes.add(scope)
-        return factory
-
-    def and_scope(self, scope: Scope) -> "FieldFactory":
-        factory = FieldFactory(self, self.scopes)
-
-        if scope not in self.scopes:
-            all_fields = copy.deepcopy(factory.all_fields)
-            factory.scopes.add(scope)
-            factory.extend(filter(lambda field: scope in field["scope"], all_fields))
-        return factory
-
     def filtered_by_types(self, types: list) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
 

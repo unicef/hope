@@ -1,20 +1,11 @@
 from django.db import models
-from django.db.models.query import QuerySet
-
-
-class LimitBusinessAreaModelQuerySet(QuerySet):
-    def allowed_to(self, business_area_slug: str) -> QuerySet:
-        return self.filter(allowed_business_areas__slug=business_area_slug)
-
-
-class LimitBusinessAreaModelManager(models.Manager):
-    _queryset_class = LimitBusinessAreaModelQuerySet
 
 
 class LimitBusinessAreaModelMixin(models.Model):
     allowed_business_areas = models.ManyToManyField(to="core.BusinessArea", blank=True)
 
-    objects = LimitBusinessAreaModelManager()
+    # Partner lists this mixin before MPTTModel, so this keeps Partner.objects a plain manager, not MPTT's TreeManager.
+    objects = models.Manager()
 
     class Meta:
         abstract = True

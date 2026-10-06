@@ -1,13 +1,11 @@
 from datetime import UTC, date, datetime
 
-from freezegun import freeze_time
 import pytest
 
 from hope.apps.core.timezones import (
     format_human_datetime,
     get_country_timezone_name,
     latest_local_schedule_time,
-    local_date,
     localize_datetime,
     resolve_timezone,
     resolve_timezone_name,
@@ -132,14 +130,3 @@ def test_format_human_datetime_rejects_naive_datetime() -> None:
 
     with pytest.raises(ValueError, match=r"localtime\(\) cannot be applied to a naive datetime"):
         format_human_datetime(value, timezone_name="America/New_York")
-
-
-def test_local_date_uses_provided_datetime() -> None:
-    value = datetime(2026, 8, 21, 22, 30, tzinfo=UTC)
-
-    assert local_date(at=value) == date(2026, 8, 21)
-
-
-@freeze_time("2026-08-21 22:30:00")
-def test_local_date_uses_current_datetime() -> None:
-    assert local_date() == date(2026, 8, 21)

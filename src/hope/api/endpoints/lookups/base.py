@@ -99,21 +99,6 @@ class Sex(HOPEAPIView):
         return Response(dict(SEX_CHOICE))
 
 
-class Sector(HOPEAPIView):
-    def get(self, request: "Request", **kwargs: str) -> Response:
-        return Response(dict(Program.SECTOR_CHOICE))
-
-
-class FrequencyOfPayments(HOPEAPIView):
-    def get(self, request: "Request", **kwargs: str) -> Response:
-        return Response(dict(Program.FREQUENCY_OF_PAYMENTS_CHOICE))
-
-
-class ProgramScope(HOPEAPIView):
-    def get(self, request: "Request", **kwargs: str) -> Response:
-        return Response(dict(Program.SCOPE_CHOICE))
-
-
 class ProgramStatuses(HOPEAPIView):
     def get(self, request: "Request", **kwargs: str) -> Response:
         return Response(dict(Program.STATUS_CHOICE))

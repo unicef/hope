@@ -348,10 +348,6 @@ class SerializerActionMixin:
         return super().get_serializer_class()  # pragma: no cover
 
 
-class ActionMixin(PermissionActionMixin, SerializerActionMixin):
-    pass
-
-
 class CustomSerializerMixin:
     serializer_classes = {}
 
