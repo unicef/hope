@@ -492,9 +492,6 @@ class GrievanceDetailsPage(BaseComponents):
     def get_button_clear(self) -> WebElement:
         return self.wait_for(self.button_clear)
 
-    def get_select_all_checkbox(self) -> WebElement:
-        return self.wait_for(self.select_all_checkbox)
-
     def get_table_cell_uniqueness(self) -> WebElement:
         return self.wait_for(self.table_cell_uniqueness)
 

@@ -1,8 +1,6 @@
 from time import sleep
 
-from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions
 
 from e2e.page_object.base_components import BaseComponents
 
@@ -107,6 +105,11 @@ class NewFeedback(BaseComponents):
         assert self.text_look_up_household.format(tab_name) in household_tab.text, household_tab.text
         return household_tab
 
+    def wait_for_household_table(self) -> None:
+        # The table loads after the tab and pushes the Next button down; a click caught
+        # mid-shift gets its mousedown and mouseup on different elements and is lost.
+        self.wait_for_table_loaded(self.household_table_row)
+
     def get_individual_tab(self, tab_name: str = "MEMBER") -> WebElement:
         try:
             individual_tab = self.get_elements(self.look_up_tabs_individual, attempts=5)[1]
@@ -136,10 +139,7 @@ class NewFeedback(BaseComponents):
         return self.wait_for(self.received_consent)
 
     def check_received_consent(self) -> None:
-        consent = self.wait_for(self.received_consent)
-        consent.click()
-        consent_input = consent.find_element(By.CSS_SELECTOR, "input")
-        self._wait().until(expected_conditions.element_to_be_selected(consent_input))
+        self.check_checkbox(self.received_consent)
 
     def get_error(self) -> WebElement:
         return self.wait_for(self.error)

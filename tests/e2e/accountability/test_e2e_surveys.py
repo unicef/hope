@@ -69,7 +69,7 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys: AccountabilitySurveys,
     ) -> None:
         page_accountability_surveys.select_global_program_filter("Test Program")
-        page_accountability_surveys.get_nav_accountability().click()
+        page_accountability_surveys.open_nav_section("Accountability")
         page_accountability_surveys.get_nav_surveys().click()
 
         page_accountability_surveys.assert_page_header_title("Surveys")
@@ -103,7 +103,7 @@ class TestSmokeAccountabilitySurveys:
         page_accountability_surveys_details: AccountabilitySurveysDetails,
     ) -> None:
         page_accountability_surveys.select_global_program_filter("Test Program")
-        page_accountability_surveys.get_nav_accountability().click()
+        page_accountability_surveys.open_nav_section("Accountability")
         page_accountability_surveys.get_nav_surveys().click()
         page_accountability_surveys.get_rows()[0].click()
         page_accountability_surveys_details.assert_page_header_title(add_accountability_surveys_message.unicef_id)

@@ -110,12 +110,12 @@ def test_managerial_console_happy_path(
     page_managerial_console.get_program_select_authorization().click()
     page_managerial_console.select_listbox_element("Test Programm")
     page_managerial_console.get_column_field_authorization()
-    page_managerial_console.get_select_all_authorization().click()
+    page_managerial_console.check_checkbox(page_managerial_console.select_all_authorization)
     page_managerial_console.get_authorize_button().click()
     page_managerial_console.get_button_save().click()
     # Release Payment Plan
     page_managerial_console.get_column_field_release()
-    page_managerial_console.get_select_all_release().click()
+    page_managerial_console.check_checkbox(page_managerial_console.select_all_release)
     page_managerial_console.get_release_button().click()
     page_managerial_console.get_button_save().click()
     # Check Released Payment Plans

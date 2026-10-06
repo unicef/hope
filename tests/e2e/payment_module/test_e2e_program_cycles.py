@@ -94,7 +94,7 @@ class TestSmokeProgramCycle:
         self, create_program_cycle: ProgramCycle, page_program_cycle: ProgramCyclePage
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         assert "Payment Module" in page_program_cycle.get_page_header_container().text
         page_program_cycle.assert_page_header_title("Payment Module")
@@ -156,7 +156,7 @@ class TestSmokeProgramCycle:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         start_date = page_program_cycle.get_program_cycle_start_date_list()[1].text
         end_date = page_program_cycle.get_program_cycle_end_date_list()[1].text
@@ -176,7 +176,7 @@ class TestProgramCycle:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
         page_program_cycle_details.assert_page_header_title("Test Programme Cycle 001")
@@ -208,7 +208,7 @@ class TestProgramCycle:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[1].find_element("tag name", "a").click()
         page_program_cycle_details.assert_page_header_title("Test Programme Cycle 001")

@@ -49,9 +49,6 @@ class ManagerialConsole(BaseComponents):
     def get_authorize_button(self) -> WebElement:
         return self.wait_for(self.authorize_button)
 
-    def get_select_all_authorization(self) -> WebElement:
-        return self.wait_for(self.select_all_authorization)
-
     def get_program_select_authorization(self) -> WebElement:
         return self.wait_for(self.program_select_authorization)
 
@@ -63,9 +60,6 @@ class ManagerialConsole(BaseComponents):
 
     def get_release_button(self) -> WebElement:
         return self.wait_for(self.release_button)
-
-    def get_select_all_release(self) -> WebElement:
-        return self.wait_for(self.select_all_release)
 
     def get_program_select_release(self) -> WebElement:
         return self.wait_for(self.program_select_release)

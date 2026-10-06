@@ -780,12 +780,13 @@ class TestManualCalendar:
 
         page_programme_management.wait_for(page_programme_management.input_partner).click()
         select_options_container = page_programme_management.get_select_options_container()
-        options = select_options_container.find_elements(By.TAG_NAME, "li")
-        assert any(li.text == "Test Partner 1" for li in options)
-        assert not any(li.text == "Test Partner 2" for li in options)
-        assert any(li.text == "UNHCR" for li in options)
+        # textContent, because .text is empty while the menu is still fading in.
+        labels = {li.get_attribute("textContent") for li in select_options_container.find_elements(By.TAG_NAME, "li")}
+        assert "Test Partner 1" in labels
+        assert "Test Partner 2" not in labels
+        assert "UNHCR" in labels
         # The login fixture gives every partner but UNICEF a role in the business area.
-        assert any(li.text == "TEST" for li in options)
+        assert "TEST" in labels
 
         page_programme_management.driver.find_element(By.CSS_SELECTOR, "body").click()
 
