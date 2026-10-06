@@ -176,7 +176,9 @@ def stale_flagged_individual(household_with_individuals):
 def index_with_max_terms_count_1(program, household_with_individuals, national_id_document):
     with override_config(IS_ELASTICSEARCH_ENABLED=True):
         rebuild_program_indexes(str(program.id))
-    # production AFG program has 226k individuals vs the default limit of 65536
+    # ES rejects a terms query with more values than index.max_terms_count (default 65536),
+    # so a check that sends individual ids in a terms filter breaks on big programs/RDIs.
+    # Lowering the limit to 1 makes our few individuals hit the same error.
     get_individual_doc(str(program.id))._index.put_settings(settings={"index.max_terms_count": 1})
 
 
