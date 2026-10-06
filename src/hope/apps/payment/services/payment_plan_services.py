@@ -23,6 +23,7 @@ from django.db.models import (
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
+from requests import RequestException
 from rest_framework.exceptions import ValidationError
 from rest_framework.status import is_client_error
 
