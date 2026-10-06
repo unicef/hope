@@ -626,11 +626,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     ) -> list:
         errors = []
         for cell, header in zip(row, first_row, strict=True):
-            admin_error = self._validate_admin_column(header.value, cell.value, cell.row, admin_area_code_tuples)
-            if admin_error:
-                errors.append(admin_error)
-
             current_field = combined_fields.get(header.value)
+            if current_field or self._cell_has_value(cell):
+                admin_error = self._validate_admin_column(header.value, cell.value, cell.row, admin_area_code_tuples)
+                if admin_error:
+                    errors.append(admin_error)
+
             if not current_field:
                 continue
 
@@ -1011,7 +1012,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             field = self.all_fields.get(header)
             if (
                 field
-                and (header in combined_fields or value)
+                and (header in combined_fields or value or field.get("required", False))
                 and (type_error := self._validate_field_type(value, header, cell, field["type"], False))
             ):
                 errors.append(type_error)

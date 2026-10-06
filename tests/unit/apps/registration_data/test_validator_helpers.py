@@ -188,22 +188,6 @@ def test_validate_admin_column_admin3_empty_returns_none():
     assert result is None
 
 
-def test_validate_admin_column_pp_admin1_empty_returns_error():
-    validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
-    result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin1_i_c", None, 4, [])
-    assert result is not None
-    assert result["header"] == "pp_admin1_i_c"
-
-
-def test_validate_admin_column_pp_admin2_empty_returns_error():
-    validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
-    result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin2_i_c", "", 6, [])
-    assert result is not None
-    assert result["header"] == "pp_admin2_i_c"
-
-
 def test_validate_admin_column_pp_admin3_empty_returns_none():
     """pp_admin3_i_c is also not required."""
     validator = MagicMock(spec=UploadXLSXInstanceValidator)

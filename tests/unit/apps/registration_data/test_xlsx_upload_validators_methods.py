@@ -486,16 +486,39 @@ def test_rows_validator_reports_missing_people_admin_area_once(
 
 
 @pytest.fixture
+def sheet_with_blank_people_admin_areas():
+    sheet = openpyxl.Workbook().active
+    sheet.title = "People"
+    sheet["A1"] = "pp_country_i_c"
+    sheet["B1"] = "pp_admin1_i_c"
+    sheet["C1"] = "pp_admin2_i_c"
+    sheet["A3"] = "AFG"
+    sheet["C3"] = ""
+    return sheet
+
+
+def test_rows_validator_allows_blank_people_admin_areas(
+    social_worker_program: Any, sheet_with_blank_people_admin_areas
+) -> None:
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+
+    validator.rows_validator(sheet_with_blank_people_admin_areas)
+
+    assert validator.errors == []
+
+
+@pytest.fixture
 def sheet_with_invalid_people_country_choice():
     sheet = openpyxl.Workbook().active
     sheet.title = "People"
     sheet["A1"] = "pp_country_i_c"
     sheet["B1"] = "pp_country_origin_i_c"
+    sheet["A3"] = "AFG"
     sheet["B3"] = "ZZZ"
     return sheet
 
 
-def test_rows_validator_checks_people_country_choices_without_requiring_blank_country(
+def test_rows_validator_checks_people_country_choices(
     social_worker_program: Any, sheet_with_invalid_people_country_choice
 ) -> None:
     validator = UploadXLSXInstanceValidator(social_worker_program)
@@ -507,6 +530,32 @@ def test_rows_validator_checks_people_country_choices_without_requiring_blank_co
             "row_number": 3,
             "header": "pp_country_origin_i_c",
             "message": "Sheet: 'People', Unexpected value: ZZZ for type select one of field pp_country_origin_i_c",
+        }
+    ]
+
+
+@pytest.fixture(params=[None, ""])
+def sheet_with_missing_people_country(request):
+    sheet = openpyxl.Workbook().active
+    sheet.title = "People"
+    sheet["A1"] = "pp_country_i_c"
+    sheet["B1"] = "pp_country_origin_i_c"
+    sheet["A3"] = request.param
+    sheet["B3"] = "AFG"
+    return sheet, request.param
+
+
+def test_rows_validator_requires_people_country(social_worker_program: Any, sheet_with_missing_people_country) -> None:
+    sheet, value = sheet_with_missing_people_country
+    validator = UploadXLSXInstanceValidator(social_worker_program)
+
+    validator.rows_validator(sheet)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "pp_country_i_c",
+            "message": f"Sheet: 'People', Unexpected value: {value} for type select one of field pp_country_i_c",
         }
     ]
 
