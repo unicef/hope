@@ -14,11 +14,24 @@ from hope.apps.household.documents import get_individual_doc
 from hope.apps.utils.querysets import evaluate_qs
 from hope.models import Individual, Program, RegistrationDataImport, SanctionListIndividual
 from hope.models.individual import sanction_list_last_check_key
+from hope.models.utils import MergeStatusModel
 
 log = logging.getLogger(__name__)
 
 
-def _get_query_dict(sanction_list_individual: SanctionListIndividual, individuals_ids: list[str] | None) -> dict:
+def _get_scope_filter(
+    individuals_ids: set[str], full_run: bool, registration_data_import: RegistrationDataImport | None
+) -> dict:
+    # terms query is capped by index.max_terms_count (see elasticsearch_utils.MAX_TERMS_COUNT),
+    # so big scopes use indexed fields, the exact ids are still checked in _resolve_individual_hit
+    if full_run:
+        return {"term": {"rdi_merge_status": MergeStatusModel.MERGED}}
+    if registration_data_import:
+        return {"term": {"registration_data_import_id": str(registration_data_import.id)}}
+    return {"terms": {"id": list(individuals_ids)}}
+
+
+def _get_query_dict(sanction_list_individual: SanctionListIndividual, scope_filter: dict) -> dict:
     documents = [
         doc
         for doc in sanction_list_individual.documents.all()
@@ -61,19 +74,17 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
     queries.extend(document_queries)
     queries.extend(birth_dates_queries)
 
-    query_dict = {
+    return {
         "size": 10000,
         "query": {
             "bool": {
                 "minimum_should_match": 1,
                 "should": queries,
+                "filter": [scope_filter],
             },
         },
         "_source": ["id", "full_name"],
     }
-    if individuals_ids:
-        query_dict["query"]["bool"]["filter"] = [{"terms": {"id": [str(ind_id) for ind_id in individuals_ids]}}]  # type: ignore
-    return query_dict
 
 
 def _generate_ticket(
@@ -117,7 +128,7 @@ def _generate_ticket(
 
 def _resolve_individual_hit(
     individual_hit: Any,
-    individuals_ids: list[str],
+    individuals_ids: set[str],
     possible_match_score: float,
     program: Program,
 ) -> Individual | None:
@@ -172,7 +183,8 @@ def check_against_sanction_list_pre_merge(
     full_run = not individuals_ids
     if full_run:
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)  # type: ignore
-    individuals_ids = [str(ind_id) for ind_id in individuals_ids]
+    ids_to_check = {str(ind_id) for ind_id in individuals_ids}
+    scope_filter = _get_scope_filter(ids_to_check, full_run, registration_data_import)
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
     document = get_individual_doc(str(program.id))
 
@@ -181,12 +193,12 @@ def check_against_sanction_list_pre_merge(
     tickets_programs = []
     possible_matches = set()
     for sanction_list_individual in sanction_list_individuals_queryset:
-        query_dict = _get_query_dict(sanction_list_individual, individuals_ids=individuals_ids)
+        query_dict = _get_query_dict(sanction_list_individual, scope_filter)
         query = document.search().update_from_dict(query_dict)
 
         results = query.execute()
         for individual_hit in results:
-            marked_individual = _resolve_individual_hit(individual_hit, individuals_ids, possible_match_score, program)
+            marked_individual = _resolve_individual_hit(individual_hit, ids_to_check, possible_match_score, program)
             if not marked_individual:  # pragma: no cover
                 continue
 

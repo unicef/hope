@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Any
+from datetime import date
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any, cast
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
@@ -9,7 +11,7 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import Model, Prefetch, QuerySet
 from django.db.models.fields.related import ManyToManyField
 from django.forms import ModelForm, ModelMultipleChoiceField
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -20,7 +22,7 @@ from django.utils.html import format_html
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
-from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentItemAssignmentForm
+from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
@@ -30,7 +32,7 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     OVERRIDE_OPTION,
 )
 from hope.apps.utils.security import is_root
-from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
 from hope.models import (
@@ -48,29 +50,78 @@ if TYPE_CHECKING:
     from uuid import UUID
 
 
-class FundsCommitmentItemInline(admin.TabularInline):
-    model = FundsCommitmentItem
+class FundsCommitmentHeaderInline(admin.TabularInline):
+    model = FundsCommitmentHeader.payment_plans.through
     extra = 0
     can_delete = False
-    show_change_link = True
     fields = readonly_fields = (
-        "rec_serial_number",
-        "funds_commitment_group",
-        "funds_commitment_item",
+        "funds_commitment_number",
+        "vendor_id",
+        "posting_date",
+        "document_reference",
         "fc_status",
-        "commitment_amount_local",
-        "commitment_amount_usd",
-        "total_open_amount_local",
-        "total_open_amount_usd",
+        "total_amount_usd",
+        "total_amount_local",
+        "currency",
     )
 
-    def has_add_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                Prefetch(
+                    "fundscommitmentheader",
+                    queryset=FundsCommitmentHeader.objects.with_derived_fields(),
+                )
+            )
+        )
+
+    @staticmethod
+    def _header(obj: Model) -> FundsCommitmentHeader:
+        return cast("FundsCommitmentHeader", getattr(obj, "fundscommitmentheader"))  # noqa: B009
+
+    @admin.display(description="Funds Commitment Number")
+    def funds_commitment_number(self, obj: Model) -> str:
+        header = self._header(obj)
+        url = reverse("admin:vision_fundscommitmentheader_change", args=[header.pk])
+        return format_html('<a href="{}">{}</a>', url, header.funds_commitment_number)
+
+    @admin.display(description="Vendor")
+    def vendor_id(self, obj: Model) -> str | None:
+        return self._header(obj).vendor_id
+
+    @admin.display(description="Posting Date")
+    def posting_date(self, obj: Model) -> date | None:
+        return self._header(obj).posting_date
+
+    @admin.display(description="Document Reference")
+    def document_reference(self, obj: Model) -> str | None:
+        return self._header(obj).document_reference
+
+    @admin.display(description="Status")
+    def fc_status(self, obj: Model) -> str | None:
+        return self._header(obj).fc_status
+
+    @admin.display(description="Total Amount USD")
+    def total_amount_usd(self, obj: Model) -> Decimal | None:
+        return cast("Decimal | None", getattr(self._header(obj), "total_amount_usd", None))
+
+    @admin.display(description="Total Amount Local")
+    def total_amount_local(self, obj: Model) -> Decimal | None:
+        return cast("Decimal | None", getattr(self._header(obj), "total_amount_local", None))
+
+    @admin.display(description="Currency")
+    def currency(self, obj: Model) -> str | None:
+        return self._header(obj).currency
+
+    def has_add_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
         return False
 
-    def has_delete_permission(self, request: HttpRequest, obj: Any = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: PaymentPlan | None = None) -> bool:
         return False
 
 
@@ -130,7 +181,7 @@ def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
 
 
 def can_recover_vision_funds_commitment(payment_plan: PaymentPlan) -> bool:
-    return VisionService.can_recover_with_funds_commitment_items(payment_plan)
+    return VisionService.can_recover_with_funds_commitment_headers(payment_plan)
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
@@ -187,7 +238,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     filter_horizontal = ("payment_plan_purposes",)
-    inlines = [FundsCommitmentItemInline, PaymentInstructionInline]
+    inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
@@ -415,11 +466,11 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
     @button(
         visible=lambda btn: can_recover_vision_funds_commitment(btn.original),
         permission="payment.pm_manage_vision_workflow",
-        label="Assign Vision FC Items",
+        label="Assign Vision FC Headers",
     )
-    def assign_vision_funds_commitment_items(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    def assign_vision_funds_commitment_headers(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         payment_plan = PaymentPlan.objects.select_related("business_area", "created_by").get(pk=pk)
-        form = VisionFundsCommitmentItemAssignmentForm(
+        form = VisionFundsCommitmentHeaderAssignmentForm(
             data=request.POST or None,
             payment_plan=payment_plan,
         )
@@ -429,19 +480,19 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
                     locked_payment_plan = (
                         PaymentPlan.objects.select_for_update().select_related("business_area", "created_by").get(pk=pk)
                     )
-                    VisionService.recover_with_funds_commitment_items(
+                    VisionService.recover_with_funds_commitment_headers(
                         locked_payment_plan,
-                        form.cleaned_data["funds_commitment_items"],
+                        form.cleaned_data["funds_commitment_headers"],
                     )
             except FundsCommitmentAssignmentError:
                 form.add_error(
-                    "funds_commitment_items",
-                    "Select one or more available Funds Commitment Items from the same group.",
+                    "funds_commitment_headers",
+                    "Select one or more available Funds Commitment Headers.",
                 )
             else:
                 self.message_user(
                     request,
-                    "Funds Commitment Items assigned and the Vision flow continued.",
+                    "Funds Commitment Headers assigned and the Vision flow continued.",
                     level=messages.SUCCESS,
                 )
                 return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
@@ -453,9 +504,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             "payment_plan": payment_plan,
             "vision_receipt_unconfirmed": not payment_plan.sent_to_vision,
             "form": form,
-            "funds_commitment_options": form.funds_commitment_options,
-            "selected_funds_commitment_item_ids": request.POST.getlist("funds_commitment_items"),
-            "title": "Assign Vision Funds Commitment Items",
+            "title": "Assign Vision Funds Commitment Headers",
         }
         return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
 
