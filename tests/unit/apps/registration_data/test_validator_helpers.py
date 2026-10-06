@@ -5,7 +5,7 @@ from openpyxl import Workbook
 import pytest
 
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.geo import CountryFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from extras.test_utils.factories.household import DocumentTypeFactory
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_data.validators import (
@@ -421,6 +421,51 @@ def test_validate_admin_areas_reports_missing_people_area(afghanistan_business_a
             "header": "pp_admin4_i_c",
             "message": "Sheet: 'People': Area with code: MISSING does not exist",
         }
+    ]
+
+
+@pytest.fixture
+def mixed_admin_area_codes(afghanistan_country):
+    afghanistan_area_type = AreaTypeFactory(country=afghanistan_country)
+    AreaFactory(p_code="AF01", area_type=afghanistan_area_type)
+    AreaFactory(p_code="AF02", area_type=afghanistan_area_type)
+    other_country = CountryFactory(iso_code2="PK", iso_code3="PAK")
+    AreaFactory(p_code="PK01", area_type=AreaTypeFactory(country=other_country))
+    return [
+        (3, "pp_admin1_i_c", "AF01"),
+        (3, "pp_admin2_i_c", "AF02"),
+        (4, "pp_admin1_i_c", "PK01"),
+        (5, "pp_admin1_i_c", "MISSING"),
+        (6, "pp_admin2_i_c", "MISSING"),
+    ]
+
+
+@pytest.mark.django_db
+def test_validate_admin_areas_batches_queries_and_preserves_cell_errors(
+    afghanistan_business_area, mixed_admin_area_codes, django_assert_num_queries
+):
+    validator = object.__new__(UploadXLSXInstanceValidator)
+    validator.sheet_title = "People"
+
+    with django_assert_num_queries(3):
+        errors = validator.validate_admin_areas(mixed_admin_area_codes, afghanistan_business_area.slug)
+
+    assert errors == [
+        {
+            "row_number": 4,
+            "header": "pp_admin1_i_c",
+            "message": "Sheet: 'People': Admin Area: PK01 unavailable in Business Area: afghanistan",
+        },
+        {
+            "row_number": 5,
+            "header": "pp_admin1_i_c",
+            "message": "Sheet: 'People': Area with code: MISSING does not exist",
+        },
+        {
+            "row_number": 6,
+            "header": "pp_admin2_i_c",
+            "message": "Sheet: 'People': Area with code: MISSING does not exist",
+        },
     ]
 
 

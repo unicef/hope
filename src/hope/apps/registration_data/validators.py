@@ -973,16 +973,22 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     ) -> list[dict[str, Any]]:
         invalid_rows = []
         if admin_area_code_tuples:
-            business_area_countries = BusinessArea.objects.get(slug=business_area_slug).countries.all()
-            queryset = Area.objects.select_related("area_type")
+            business_area = BusinessArea.objects.get(slug=business_area_slug)
+            area_country_ids = dict(
+                Area.objects.filter(p_code__in={p_code for _, _, p_code in admin_area_code_tuples}).values_list(
+                    "p_code", "area_type__country_id"
+                )
+            )
+            business_area_country_ids = (
+                set(business_area.countries.values_list("id", flat=True)) if area_country_ids else set()
+            )
 
             for code_tuple in admin_area_code_tuples:
                 message = None
                 row_number, header_name, p_code = code_tuple
-                area = queryset.filter(p_code=p_code).first()
-                if not area:
+                if p_code not in area_country_ids:
                     message = f"Sheet: {self.sheet_title!r}: Area with code: {p_code} does not exist"
-                elif area.area_type.country not in business_area_countries:
+                elif area_country_ids[p_code] not in business_area_country_ids:
                     message = (
                         f"Sheet: {self.sheet_title!r}: Admin Area: {p_code} "
                         f"unavailable in Business Area: {business_area_slug}"
