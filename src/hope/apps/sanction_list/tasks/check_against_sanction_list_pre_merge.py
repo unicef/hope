@@ -22,8 +22,8 @@ log = logging.getLogger(__name__)
 def _get_scope_filter(
     individuals_ids: set[str], full_run: bool, registration_data_import: RegistrationDataImport | None
 ) -> dict:
-    # terms query is capped by index.max_terms_count (65536) so big scopes use indexed fields,
-    # the exact ids are still checked in _resolve_individual_hit
+    # terms query is capped by index.max_terms_count (see elasticsearch_utils.MAX_TERMS_COUNT),
+    # so big scopes use indexed fields, the exact ids are still checked in _resolve_individual_hit
     if full_run:
         return {"term": {"rdi_merge_status": MergeStatusModel.MERGED}}
     if registration_data_import:
