@@ -108,6 +108,7 @@ class HouseholdFactory(DjangoModelFactory):
             program=self.program,
             registration_data_import=rdi,
             rdi_merge_status=self.rdi_merge_status,
+            **kwargs,
         )
         self.head_of_household = individual
 

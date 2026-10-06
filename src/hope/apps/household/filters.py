@@ -38,6 +38,8 @@ from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
+_WILDCARD_ESCAPE = str.maketrans({"\\": r"\\", "*": r"\*", "?": r"\?"})
+
 
 def _prepare_kobo_asset_id_value(code: str) -> str:
     """Prepare value for filter by kobo_asset_id.
@@ -414,7 +416,7 @@ class IndividualFilter(UpdatedAtFilter):
         return [
             {"term": {"unicef_id.keyword": search.lower()}},
             {"term": {"household.unicef_id.keyword": search.lower()}},
-            {"wildcard": {"household.address": f"*{search.lower()}*"}},
+            {"wildcard": {"household.address": f"*{search.lower().translate(_WILDCARD_ESCAPE)}*"}},
             {"match": {"full_name": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
             {"match": {"full_name_latin": {"query": search, "fuzziness": "AUTO", "operator": "and"}}},
         ]

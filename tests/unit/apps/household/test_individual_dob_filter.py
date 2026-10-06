@@ -60,47 +60,48 @@ def _refresh_es_index() -> None:
     es.indices.refresh(index="_all")
 
 
-def _create_individual(
-    es_program: Program,
-    afghanistan: BusinessArea,
-    **kwargs: Any,
-) -> Individual:
-    hh = HouseholdFactory(program=es_program, business_area=afghanistan)
-    ind = hh.head_of_household
-    for field, value in kwargs.items():
-        setattr(ind, field, value)
-    ind.save()
-    return ind
+@pytest.fixture
+def john_born_1990_05_12(es_program: Program, afghanistan: BusinessArea) -> Individual:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="John Smith",
+        head_of_household__birth_date=date(1990, 5, 12),
+    ).head_of_household
+
+
+@pytest.fixture
+def john_born_1991_01_01(es_program: Program, afghanistan: BusinessArea) -> Individual:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="John Smith",
+        head_of_household__birth_date=date(1991, 1, 1),
+    ).head_of_household
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=False)
 def test_dob_filter_exact_match(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_born_1990_05_12: Individual,
+    john_born_1991_01_01: Individual,
     django_assert_num_queries: Any,
 ) -> None:
-    target = _create_individual(es_program, afghanistan, birth_date=date(1990, 5, 12))
-    _create_individual(es_program, afghanistan, birth_date=date(1985, 1, 1))
-
     with django_assert_num_queries(18):
         response = es_client.get(individuals_list_url, {"birth_date": "1990-05-12"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(target.id)
+    assert results[0]["id"] == str(john_born_1990_05_12.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=False)
 def test_dob_filter_no_match_different_day(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_born_1990_05_12: Individual,
 ) -> None:
-    _create_individual(es_program, afghanistan, birth_date=date(1990, 5, 12))
-
     response = es_client.get(individuals_list_url, {"birth_date": "1990-05-13"})
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["results"] == []
@@ -110,11 +111,8 @@ def test_dob_filter_no_match_different_day(
 def test_dob_filter_no_match_different_year(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_born_1990_05_12: Individual,
 ) -> None:
-    _create_individual(es_program, afghanistan, birth_date=date(1990, 5, 12))
-
     response = es_client.get(individuals_list_url, {"birth_date": "1991-05-12"})
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["results"] == []
@@ -124,8 +122,6 @@ def test_dob_filter_no_match_different_year(
 def test_dob_filter_invalid_format_returns_validation_error(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
 ) -> None:
     response = es_client.get(individuals_list_url, {"birth_date": "not-a-date"})
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -135,12 +131,9 @@ def test_dob_filter_invalid_format_returns_validation_error(
 def test_dob_filter_empty_value_ignored(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_born_1990_05_12: Individual,
+    john_born_1991_01_01: Individual,
 ) -> None:
-    _create_individual(es_program, afghanistan, birth_date=date(1990, 5, 12))
-    _create_individual(es_program, afghanistan, birth_date=date(1985, 1, 1))
-
     response = es_client.get(individuals_list_url, {"birth_date": ""})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()["results"]) == 2
@@ -150,21 +143,9 @@ def test_dob_filter_empty_value_ignored(
 def test_dob_filter_combines_with_name_search_via_es(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_born_1990_05_12: Individual,
+    john_born_1991_01_01: Individual,
 ) -> None:
-    target = _create_individual(
-        es_program,
-        afghanistan,
-        full_name="John Smith",
-        birth_date=date(1990, 5, 12),
-    )
-    _create_individual(
-        es_program,
-        afghanistan,
-        full_name="John Smith",
-        birth_date=date(1991, 1, 1),
-    )
     rebuild_search_index()
     _refresh_es_index()
 
@@ -175,24 +156,21 @@ def test_dob_filter_combines_with_name_search_via_es(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(target.id)
+    assert results[0]["id"] == str(john_born_1990_05_12.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_dob_filter_alone_does_not_route_through_es(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_born_1990_05_12: Individual,
 ) -> None:
     # ES is enabled but the doc index is intentionally NOT rebuilt. If the DOB
     # filter incorrectly routed through ES (e.g. reused search_filter), the
     # target individual would not be returned because ES has no documents for
     # it. A Postgres-only DOB path returns the row regardless.
-    target = _create_individual(es_program, afghanistan, birth_date=date(1990, 5, 12))
-
     response = es_client.get(individuals_list_url, {"birth_date": "1990-05-12"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(target.id)
+    assert results[0]["id"] == str(john_born_1990_05_12.id)

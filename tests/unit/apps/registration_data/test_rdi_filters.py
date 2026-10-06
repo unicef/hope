@@ -22,6 +22,11 @@ def rdi_syria_lowercase(db):
     return RegistrationDataImportFactory(name="syria lowercase")
 
 
+@pytest.fixture
+def rdi_syria_excluded(db):
+    return RegistrationDataImportFactory(name="Syria excluded", excluded=True)
+
+
 def _filtered_qs(data):
     return RegistrationDataImportFilter(data=data, queryset=RegistrationDataImport.objects.all()).qs
 
@@ -56,8 +61,7 @@ def test_rdi_name_exact_meta_lookup_removed():
     assert "name__icontains" in f.form.fields
 
 
-def test_rdi_search_excludes_soft_deleted(rdi_syria_import):
-    excluded_rdi = RegistrationDataImportFactory(name="Syria excluded", excluded=True)
+def test_rdi_search_excludes_soft_deleted(rdi_syria_import, rdi_syria_excluded):
     result = list(_filtered_qs({"search": "Syria"}))
     assert rdi_syria_import in result
-    assert excluded_rdi not in result
+    assert rdi_syria_excluded not in result

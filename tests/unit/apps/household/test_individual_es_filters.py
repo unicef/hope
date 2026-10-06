@@ -62,29 +62,155 @@ def individuals_list_url(afghanistan: BusinessArea, es_program: Program) -> str:
     )
 
 
+@pytest.fixture
+def john_smith(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="John Smith",
+        head_of_household__unicef_id="IND-0000001",
+    ).head_of_household
+
+
+@pytest.fixture
+def jane_doe(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Jane Doe",
+        head_of_household__unicef_id="IND-0000002",
+    ).head_of_household
+
+
+@pytest.fixture
+def bob_wilson(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Bob Wilson",
+    ).head_of_household
+
+
+@pytest.fixture
+def maria_elena_gomez(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Maria Elena Gomez",
+    ).head_of_household
+
+
+@pytest.fixture
+def jon_baptiste(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Jon Baptiste",
+    ).head_of_household
+
+
+@pytest.fixture
+def alice_in_aleppo(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        unicef_id="HH-0000001",
+        address="Main Street 5, Aleppo",
+        head_of_household__full_name="Alice Aleppan",
+    ).head_of_household
+
+
+@pytest.fixture
+def alice_wonderland(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Alice Wonderland",
+        head_of_household__unicef_id="IND-0000010",
+    ).head_of_household
+
+
+@pytest.fixture
+def bob_builder(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Bob Builder",
+        head_of_household__unicef_id="IND-0000009",
+    ).head_of_household
+
+
+@pytest.fixture
+def charlie_in_damascus(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        address="Damascus, Syria",
+        head_of_household__full_name="Charlie Brown",
+        head_of_household__unicef_id="IND-0000008",
+    ).head_of_household
+
+
+@pytest.fixture
+def afghan_person(es_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=es_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Afghan Person",
+    ).head_of_household
+
+
+@pytest.fixture
+def ukraine() -> BusinessArea:
+    return BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0061")
+
+
+@pytest.fixture
+def ukraine_program(ukraine: BusinessArea) -> Program:
+    program = ProgramFactory(business_area=ukraine, status=Program.DRAFT)
+    program.status = Program.ACTIVE
+    program.save()
+    return program
+
+
+@pytest.fixture
+def ukrainian_person(ukraine_program: Program, ukraine: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=ukraine_program,
+        business_area=ukraine,
+        head_of_household__full_name="Ukrainian Person",
+    ).head_of_household
+
+
+@pytest.fixture
+def other_program(afghanistan: BusinessArea) -> Program:
+    program = ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
+    program.status = Program.ACTIVE
+    program.save()
+    return program
+
+
+@pytest.fixture
+def other_program_person(other_program: Program, afghanistan: BusinessArea) -> Any:
+    return HouseholdFactory(
+        program=other_program,
+        business_area=afghanistan,
+        head_of_household__full_name="Program Two Person",
+    ).head_of_household
+
+
 def _refresh_es_index() -> None:
     es = Elasticsearch(settings.ELASTICSEARCH_HOST)
     es.indices.refresh(index="_all")
-
-
-def _create_individual(es_program: Program, afghanistan: BusinessArea, **kwargs: Any) -> Any:
-    hh = HouseholdFactory(program=es_program, business_area=afghanistan)
-    ind = hh.head_of_household
-    for field, value in kwargs.items():
-        setattr(ind, field, value)
-    ind.save()
-    return ind
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_fuzzy_name_match_tolerates_single_typo(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    bob_wilson: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
-    _create_individual(es_program, afghanistan, full_name="Bob Wilson")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -92,18 +218,16 @@ def test_fuzzy_name_match_tolerates_single_typo(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_fuzzy_name_match_by_surname(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    jane_doe: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
-    _create_individual(es_program, afghanistan, full_name="Jane Doe")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -111,18 +235,16 @@ def test_fuzzy_name_match_by_surname(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_fuzzy_name_match_by_middle_token(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    maria_elena_gomez: Any,
+    jane_doe: Any,
 ) -> None:
-    maria = _create_individual(es_program, afghanistan, full_name="Maria Elena Gomez")
-    _create_individual(es_program, afghanistan, full_name="Jane Doe")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -130,17 +252,15 @@ def test_fuzzy_name_match_by_middle_token(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(maria.id)
+    assert results[0]["id"] == str(maria_elena_gomez.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_fuzzy_name_match_is_case_insensitive(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -148,17 +268,15 @@ def test_fuzzy_name_match_is_case_insensitive(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_fuzzy_name_no_match_beyond_edit_distance(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    _create_individual(es_program, afghanistan, full_name="John Smith")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -172,11 +290,9 @@ def test_fuzzy_name_no_match_beyond_edit_distance(
 def test_fuzzy_name_preserves_phonetic_behavior(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    jon_baptiste: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
-    jon = _create_individual(es_program, afghanistan, full_name="Jon Baptiste")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -184,29 +300,35 @@ def test_fuzzy_name_preserves_phonetic_behavior(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     returned_ids = {r["id"] for r in results}
-    assert str(jon.id) in returned_ids
-    assert str(john.id) in returned_ids
+    assert str(jon_baptiste.id) in returned_ids
+    assert str(john_smith.id) in returned_ids
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
-def test_fuzzy_name_operator_and_requires_all_terms(
+def test_fuzzy_name_operator_and_matches_when_all_terms_present(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
     rebuild_search_index()
     _refresh_es_index()
 
-    # Both terms present — should match
     response = es_client.get(individuals_list_url, {"search": "John Smith"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
+    assert results[0]["id"] == str(john_smith.id)
 
-    # One real term + one nonsense term — should not match
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
+def test_fuzzy_name_operator_and_no_match_when_one_term_missing(
+    es_client: Any,
+    individuals_list_url: str,
+    john_smith: Any,
+) -> None:
+    rebuild_search_index()
+    _refresh_es_index()
+
     response = es_client.get(individuals_list_url, {"search": "John Zxcvb"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
@@ -217,11 +339,9 @@ def test_fuzzy_name_operator_and_requires_all_terms(
 def test_fuzzy_name_matches_tokens_out_of_order(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    bob_wilson: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
-    _create_individual(es_program, afghanistan, full_name="Bob Wilson")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -229,59 +349,46 @@ def test_fuzzy_name_matches_tokens_out_of_order(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=False)
 def test_search_db_fallback_name_still_works_when_es_disabled(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    jane_doe: Any,
     django_assert_num_queries: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
-    _create_individual(es_program, afghanistan, full_name="Jane Doe")
-
     with django_assert_num_queries(19):
         response = es_client.get(individuals_list_url, {"search": "John"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=False)
 def test_search_db_fallback_unicef_id_case_insensitive(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    jane_doe: Any,
 ) -> None:
-    john = _create_individual(es_program, afghanistan, full_name="John Smith")
-    john.unicef_id = "IND-24-0000.0001"
-    john.save(update_fields=["unicef_id"])
-    _create_individual(es_program, afghanistan, full_name="Jane Doe")
-
-    response = es_client.get(individuals_list_url, {"search": "ind-24-0000.0001"})
+    response = es_client.get(individuals_list_url, {"search": "ind-0000001"})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(john.id)
-
-
-# ── Phase 5: HOPE ID exact (term), address wildcard ──────────────────
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_hope_id_exact_match_case_insensitive_upper(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
+    jane_doe: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="John Smith", unicef_id="IND-0000001")
-    _create_individual(es_program, afghanistan, full_name="Jane Doe", unicef_id="IND-0000002")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -289,17 +396,15 @@ def test_hope_id_exact_match_case_insensitive_upper(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(ind.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_hope_id_exact_match_case_insensitive_lower(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="John Smith", unicef_id="IND-0000001")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -307,17 +412,15 @@ def test_hope_id_exact_match_case_insensitive_lower(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(ind.id)
+    assert results[0]["id"] == str(john_smith.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_hope_id_different_id_no_match(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    _create_individual(es_program, afghanistan, full_name="John Smith", unicef_id="IND-0000001")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -331,10 +434,8 @@ def test_hope_id_different_id_no_match(
 def test_hope_id_partial_input_does_not_match(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    _create_individual(es_program, afghanistan, full_name="John Smith", unicef_id="IND-0000001")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -348,12 +449,8 @@ def test_hope_id_partial_input_does_not_match(
 def test_household_unicef_id_exact_match(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    alice_in_aleppo: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="Alice Test")
-    ind.household.unicef_id = "HH-0000001"
-    ind.household.save(update_fields=["unicef_id"])
     rebuild_search_index()
     _refresh_es_index()
 
@@ -361,19 +458,15 @@ def test_household_unicef_id_exact_match(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(ind.id)
+    assert results[0]["id"] == str(alice_in_aleppo.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_household_address_contains_match(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    alice_in_aleppo: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="Alice Aleppan")
-    ind.household.address = "Main Street 5, Aleppo"
-    ind.household.save(update_fields=["address"])
     rebuild_search_index()
     _refresh_es_index()
 
@@ -381,19 +474,15 @@ def test_household_address_contains_match(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(ind.id)
+    assert results[0]["id"] == str(alice_in_aleppo.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_household_address_contains_match_middle_token(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    alice_in_aleppo: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="Alice Aleppan")
-    ind.household.address = "Main Street 5, Aleppo"
-    ind.household.save(update_fields=["address"])
     rebuild_search_index()
     _refresh_es_index()
 
@@ -401,19 +490,15 @@ def test_household_address_contains_match_middle_token(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(ind.id)
+    assert results[0]["id"] == str(alice_in_aleppo.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_household_address_case_insensitive(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    alice_in_aleppo: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="Alice Aleppan")
-    ind.household.address = "Main Street 5, Aleppo"
-    ind.household.save(update_fields=["address"])
     rebuild_search_index()
     _refresh_es_index()
 
@@ -421,19 +506,15 @@ def test_household_address_case_insensitive(
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(ind.id)
+    assert results[0]["id"] == str(alice_in_aleppo.id)
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_household_address_no_match(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    alice_in_aleppo: Any,
 ) -> None:
-    ind = _create_individual(es_program, afghanistan, full_name="Alice Aleppan")
-    ind.household.address = "Main Street 5, Aleppo"
-    ind.household.save(update_fields=["address"])
     rebuild_search_index()
     _refresh_es_index()
 
@@ -443,42 +524,55 @@ def test_household_address_no_match(
     assert len(results) == 0
 
 
+@pytest.mark.parametrize(
+    "search",
+    ["*", "?", "street*aleppo", "main?street"],
+    ids=["lone_star", "lone_question_mark", "star_inside_term", "question_mark_inside_term"],
+)
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
-def test_main_search_box_combined_name_or_hope_id_or_address(
+def test_household_address_treats_wildcard_characters_literally(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    alice_in_aleppo: Any,
+    search: str,
 ) -> None:
-    alice = _create_individual(es_program, afghanistan, full_name="Alice Wonderland", unicef_id="IND-0000010")
-    bob = _create_individual(es_program, afghanistan, full_name="Bob Builder", unicef_id="IND-0000009")
-    charlie = _create_individual(es_program, afghanistan, full_name="Charlie Brown", unicef_id="IND-0000008")
-    charlie.household.address = "Damascus, Syria"
-    charlie.household.save(update_fields=["address"])
-
     rebuild_search_index()
     _refresh_es_index()
 
-    # Search by name → only Alice
-    response = es_client.get(individuals_list_url, {"search": "Alice Wonderland"})
+    response = es_client.get(individuals_list_url, {"search": search})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
-    assert len(results) == 1
-    assert results[0]["id"] == str(alice.id)
+    assert len(results) == 0
 
-    # Search by HOPE ID → only Bob
-    response = es_client.get(individuals_list_url, {"search": "IND-0000009"})
-    assert response.status_code == status.HTTP_200_OK
-    results = response.json()["results"]
-    assert len(results) == 1
-    assert results[0]["id"] == str(bob.id)
 
-    # Search by address → only Charlie
-    response = es_client.get(individuals_list_url, {"search": "Damascus"})
+@pytest.mark.parametrize(
+    ("search", "expected_individual"),
+    [
+        ("Alice Wonderland", "alice_wonderland"),
+        ("IND-0000009", "bob_builder"),
+        ("Damascus", "charlie_in_damascus"),
+    ],
+    ids=["name", "hope_id", "address"],
+)
+@override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
+def test_main_search_box_matches_name_or_hope_id_or_address(
+    es_client: Any,
+    individuals_list_url: str,
+    alice_wonderland: Any,
+    bob_builder: Any,
+    charlie_in_damascus: Any,
+    request: pytest.FixtureRequest,
+    search: str,
+    expected_individual: str,
+) -> None:
+    rebuild_search_index()
+    _refresh_es_index()
+
+    response = es_client.get(individuals_list_url, {"search": search})
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 1
-    assert results[0]["id"] == str(charlie.id)
+    assert results[0]["id"] == str(request.getfixturevalue(expected_individual).id)
 
 
 def _clause_signatures(afghanistan: BusinessArea, es_program: Program) -> set[tuple[str, str]]:
@@ -515,8 +609,6 @@ def test_es_query_shape_flag_off_uses_match_phrase_prefix(
     afghanistan: BusinessArea,
     es_program: Program,
 ) -> None:
-    # locks the pre-reindex path: the new .keyword / address clauses must not be emitted
-    # while any program's alias still points at an index built from the old mapping
     clause_signatures = _clause_signatures(afghanistan, es_program)
 
     assert ("match_phrase_prefix", "unicef_id") in clause_signatures
@@ -531,11 +623,8 @@ def test_es_query_shape_flag_off_uses_match_phrase_prefix(
 def test_hope_id_prefix_search_still_works_before_fleet_reindex(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    john_smith: Any,
 ) -> None:
-    # the OFF path is what production serves between deploy and es_reindex --all
-    _create_individual(es_program, afghanistan, full_name="John Smith", unicef_id="IND-0000001")
     rebuild_search_index()
     _refresh_es_index()
 
@@ -549,46 +638,31 @@ def test_hope_id_prefix_search_still_works_before_fleet_reindex(
 def test_es_search_does_not_leak_across_business_areas(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    afghan_person: Any,
+    ukrainian_person: Any,
 ) -> None:
-    ind_afg = _create_individual(es_program, afghanistan, full_name="Afghan Person")
-
-    ukraine = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="0061")
-    ukraine_program = ProgramFactory(business_area=ukraine, status=Program.DRAFT)
-    ukraine_program.status = Program.ACTIVE
-    ukraine_program.save()
-    ind_ukr = _create_individual(ukraine_program, ukraine, full_name="Ukrainian Person")
-
     rebuild_search_index()
     _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"search": "Person"})
     assert response.status_code == status.HTTP_200_OK
     returned_ids = {r["id"] for r in response.json()["results"]}
-    assert str(ind_afg.id) in returned_ids
-    assert str(ind_ukr.id) not in returned_ids
+    assert str(afghan_person.id) in returned_ids
+    assert str(ukrainian_person.id) not in returned_ids
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True, ES_USE_EXACT_ID_AND_ADDRESS_SEARCH=True)
 def test_es_search_does_not_leak_across_programs(
     es_client: Any,
     individuals_list_url: str,
-    es_program: Program,
-    afghanistan: BusinessArea,
+    afghan_person: Any,
+    other_program_person: Any,
 ) -> None:
-    ind_prog1 = _create_individual(es_program, afghanistan, full_name="Program One Person")
-
-    other_program = ProgramFactory(business_area=afghanistan, status=Program.DRAFT)
-    other_program.status = Program.ACTIVE
-    other_program.save()
-    ind_prog2 = _create_individual(other_program, afghanistan, full_name="Program Two Person")
-
     rebuild_search_index()
     _refresh_es_index()
 
     response = es_client.get(individuals_list_url, {"search": "Person"})
     assert response.status_code == status.HTTP_200_OK
     returned_ids = {r["id"] for r in response.json()["results"]}
-    assert str(ind_prog1.id) in returned_ids
-    assert str(ind_prog2.id) not in returned_ids
+    assert str(afghan_person.id) in returned_ids
+    assert str(other_program_person.id) not in returned_ids

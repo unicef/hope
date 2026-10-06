@@ -33,6 +33,15 @@ def individual_john_smith(es_program: Program) -> Individual:
 
 
 @pytest.fixture
+def individual_with_alternative_phone(es_program: Program) -> Individual:
+    return IndividualFactory(
+        program=es_program,
+        phone_no="+48 123 456 789",
+        phone_no_alternative="+48 999 000 111",
+    )
+
+
+@pytest.fixture
 def household_with_address(es_program: Program) -> Household:
     return HouseholdFactory(program=es_program, address="Main Street 5, Aleppo")
 
@@ -105,3 +114,16 @@ def test_indexed_document_populates_household_address(es_program, individual_in_
     )
     hit_ids = {hit["_id"] for hit in result["hits"]["hits"]}
     assert str(individual_in_addressed_household.id) in hit_ids
+
+
+@pytest.mark.elasticsearch
+@pytest.mark.xdist_group(name="elasticsearch")
+def test_indexed_document_populates_phone_no_alternative_text_from_alternative_number(
+    es_program, individual_with_alternative_phone
+):
+    es = Elasticsearch(settings.ELASTICSEARCH_HOST)
+    index_name = get_individual_doc(str(es_program.id))._index._name
+    es.indices.refresh(index=index_name)
+
+    source = es.get(index=index_name, id=str(individual_with_alternative_phone.id))["_source"]
+    assert source["phone_no_alternative_text"] == "+48999000111"
