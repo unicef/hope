@@ -1,0 +1,73 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1651"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/7y27/payment-plans/e782640c-0e9e-44df-84e8-01563248f4b1/payments/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "8888c0b0-cfe8-4daf-8478-47cd955dbb64",
+                "unicef_id": "RCPT-BA0000-25-0.000.001",
+                "parent_id": "e782640c-0e9e-44df-84e8-01563248f4b1",
+                "parent_unicef_id": "PP-BA0000-25-00000001",
+                "household_id": "c110a739-0a95-4953-ba39-721fe48d853b",
+                "household_unicef_id": "HH-25-0000.0006",
+                "household_size": null,
+                "household_admin2": "",
+                "household_status": "ACTIVE",
+                "hoh_phone_no": "None",
+                "hoh_phone_no_alternative": "None",
+                "snapshot_collector_full_name": null,
+                "snapshot_alternate_collector_full_name": null,
+                "snapshot_alternate_collector_id": null,
+                "fsp_name": "",
+                "entitlement_quantity": null,
+                "entitlement_quantity_usd": null,
+                "delivered_quantity": null,
+                "delivered_quantity_usd": null,
+                "delivery_date": null,
+                "delivery_type": null,
+                "status": "Pending",
+                "status_display": "Pending",
+                "currency": "PLN",
+                "fsp_auth_code": "",
+                "hoh_id": null,
+                "hoh_unicef_id": null,
+                "hoh_full_name": null,
+                "collector_id": "f9d60c1c-741c-4239-b1f7-151ff8946e00",
+                "collector_phone_no": "",
+                "collector_phone_no_alt": "",
+                "verification": {
+                    "received_amount": null,
+                    "status": null,
+                    "payment_verification_plan_unicef_id": "",
+                    "verification_channel": "",
+                    "version": null
+                },
+                "payment_plan_hard_conflicted": false,
+                "payment_plan_hard_conflicted_data": [],
+                "payment_plan_soft_conflicted": false,
+                "payment_plan_soft_conflicted_data": [],
+                "people_individual": null,
+                "program_name": "Program 0",
+                "program_code": "7y27",
+                "collector_type_display": "Primary collector",
+                "payment_plan_cycle": "Programme Cycle 0",
+                "payment_plan_group": "Default Group",
+                "payment_plan_purposes": [
+                    "Purpose 0"
+                ]
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

@@ -9,7 +9,6 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import type { MiśTheme } from '../../../../theme';
 import {
   formatFigure,
-  registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
 import type { OptionType } from '../DedupeBox';
@@ -19,7 +18,6 @@ import { useProgramContext } from 'src/programContext';
 import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
-import { DeduplicationEngineStatusEnum } from '@restgenerated/models/DeduplicationEngineStatusEnum';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -161,9 +159,7 @@ function RegistrationDetails({
   const showBiographicalDeduplicationResult =
     registration.status !== RegistrationDataImportStatusEnum.DEDUPLICATION;
   const showBiometricDeduplicationResult =
-    registration.biometricDeduplicationEnabled &&
-    registration.deduplicationEngineStatus ===
-      DeduplicationEngineStatusEnum.FINISHED;
+    registration.biometricDeduplicationEnabled;
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -196,27 +192,6 @@ function RegistrationDetails({
                   )}
                 </Box>
               </Grid>
-              {registration?.biometricDeduplicationEnabled && (
-                <Grid size={{ xs: 6 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <LabelizedField
-                      label={t('Biometrics Deduplication Status')}
-                    >
-                      <StatusBox
-                        status={registration?.deduplicationEngineStatus}
-                        statusToColor={
-                          registrationDataImportDeduplicationEngineStatusToColor
-                        }
-                      />
-                    </LabelizedField>
-                  </Box>
-                </Grid>
-              )}
               <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Source of Data')}

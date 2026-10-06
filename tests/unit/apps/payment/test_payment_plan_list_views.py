@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 import pytest
 from rest_framework import status
@@ -276,7 +277,7 @@ def test_payment_plan_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 1
-        assert len(ctx.captured_queries) == 18
+        assert len(ctx.captured_queries) == 16
 
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
@@ -284,10 +285,11 @@ def test_payment_plan_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
 
-    payment_plan_list_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_list_context["pp"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan_list_context["pp"].status = PaymentPlan.Status.IN_REVIEW
+        payment_plan_list_context["pp"].save()
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -295,7 +297,7 @@ def test_payment_plan_caching(
         new_etag = response.headers["etag"]
         assert json.loads(cache.get(new_etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 1
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 10
 
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
@@ -303,14 +305,15 @@ def test_payment_plan_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert new_etag == etag_second_call
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
 
-    PaymentPlanFactory(
-        business_area=payment_plan_list_context["business_area"],
-        program_cycle=payment_plan_list_context["cycle"],
-        status=PaymentPlan.Status.OPEN,
-        created_by=payment_plan_list_context["user"],
-    )
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        PaymentPlanFactory(
+            business_area=payment_plan_list_context["business_area"],
+            program_cycle=payment_plan_list_context["cycle"],
+            status=PaymentPlan.Status.OPEN,
+            created_by=payment_plan_list_context["user"],
+        )
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -318,7 +321,7 @@ def test_payment_plan_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 2
-        assert len(ctx.captured_queries) == 14
+        assert len(ctx.captured_queries) == 12
 
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
@@ -326,9 +329,10 @@ def test_payment_plan_caching(
         assert response.has_header("etag")
         etag_second_call = response.headers["etag"]
         assert etag == etag_second_call
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
 
-    payment_plan_list_context["pp"].delete()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan_list_context["pp"].delete()
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
         assert response.status_code == status.HTTP_200_OK
@@ -336,7 +340,7 @@ def test_payment_plan_caching(
         etag = response.headers["etag"]
         assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
         assert len(response.json()["results"]) == 1
-        assert len(ctx.captured_queries) == 12
+        assert len(ctx.captured_queries) == 10
 
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
@@ -344,18 +348,19 @@ def test_payment_plan_caching(
         assert response.has_header("etag")
         last_etag_second_call = response.headers["etag"]
         assert etag == last_etag_second_call
-        assert len(ctx.captured_queries) == 7
+        assert len(ctx.captured_queries) == 4
 
-    payment_plan_list_context["tp"].status = PaymentPlan.Status.TP_LOCKED
-    payment_plan_list_context["tp"].save()
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payment_plan_list_context["tp"].status = PaymentPlan.Status.TP_LOCKED
+        payment_plan_list_context["tp"].save()
     with CaptureQueriesContext(connection) as ctx:
         response = payment_plan_list_context["client"].get(payment_plan_list_context["pp_list_url"])
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
         assert response.has_header("etag")
         get_etag = response.headers["etag"]
-        assert get_etag == last_etag_second_call
-        assert len(ctx.captured_queries) == 7
+        assert get_etag != last_etag_second_call
+        assert len(ctx.captured_queries) == 10
 
 
 @pytest.mark.parametrize(

@@ -6,6 +6,7 @@ import PictureErrorEditPage from '../pages/grievances/PictureErrorEditPage';
 import GrievancesDetailsPage from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import GrievancesTablePage from '../pages/grievances/GrievancesTablePage';
 import NaTicketsManagementPage from '../pages/grievances/NaTicketsManagementPage';
+import MyTasksPage from '../pages/grievances/MyTasksPage';
 import type { ReactElement } from 'react';
 import CreateFeedbackPage from '@containers/pages/accountability/feedback/CreateFeedbackPage';
 import FeedbackDetailsPage from '@containers/pages/accountability/feedback/FeedbackDetailsPage';
@@ -60,6 +61,10 @@ export const GrievanceRoutes = (): ReactElement => {
         {
           path: 'na-tickets-management',
           element: <NaTicketsManagementPage />,
+        },
+        {
+          path: 'my-tasks',
+          element: <MyTasksPage />,
         },
         {
           path: 'dashboard',

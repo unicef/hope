@@ -15,7 +15,8 @@ class SentryScopeMiddleware:
 
     # Note: must be listed AFTER AuthenticationMiddleware
     def __call__(self, request: HttpRequest) -> Any:
-        sys.stderr.isatty = lambda: False  # type: ignore # I guess this is a hack to make Sentry not use colors in the terminal?
+        # I guess this is a hack to make Sentry not use colors in the terminal?
+        sys.stderr.isatty = lambda: False  # type: ignore[method-assign]
         scope = sentry_sdk.get_isolation_scope()
         business_area = request.headers.get("Business-Area")
         if not business_area:

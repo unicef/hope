@@ -570,7 +570,7 @@ class TestSmokePaymentModule:
         assert "FSP Auth Code" in page_payment_module_details.get_table_label()[10].text
         assert "Reconciliation" in page_payment_module_details.get_table_label()[11].text
 
-    @pytest.mark.xfail(reason="psycopg2.errors.DeadlockDetected: deadlock detected")
+    @pytest.mark.xfail(reason="psycopg.errors.DeadlockDetected: deadlock detected")
     def test_payment_plan_happy_path(
         self,
         clear_downloaded_files: None,

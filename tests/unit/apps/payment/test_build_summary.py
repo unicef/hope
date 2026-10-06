@@ -72,5 +72,5 @@ def test_status_pending_when_add_and_removed_verification(payment_plan, payment_
 
 
 def test_query_number(payment_plan, django_assert_num_queries) -> None:
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(3):
         build_summary(payment_plan)

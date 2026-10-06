@@ -1,13 +1,11 @@
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from typing import Any
 from unittest.mock import Mock, patch
 
 from constance.forms import ConstanceForm
-from constance.test import override_config
 from django.core.exceptions import ValidationError
 from django.db import Error
 from django.utils import timezone
-from freezegun import freeze_time
 import pytest
 
 from extras.test_utils.factories import (
@@ -20,15 +18,12 @@ from extras.test_utils.factories import (
 )
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action,
-    periodic_grievances_notifications_async_task,
-    periodic_grievances_notifications_async_task_action,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
-from hope.models import AsyncJob, PeriodicAsyncJob
+from hope.models import AsyncJob
 
 pytestmark = pytest.mark.django_db
 
@@ -236,58 +231,6 @@ def test_deduplicate_and_check_sanctions_single_individual_action_failure_rerais
         deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job)
 
 
-@patch.object(PeriodicAsyncJob, "queue")
-def test_periodic_grievances_notifications_schedules_async_job(
-    mock_queue: Mock, django_capture_on_commit_callbacks
-) -> None:
-    with django_capture_on_commit_callbacks(execute=True):
-        periodic_grievances_notifications_async_task()
-
-    job = PeriodicAsyncJob.objects.get()
-
-    assert job.owner is None
-    assert job.type == "JOB_TASK"
-    assert job.action == "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action"
-    assert job.config == {}
-    assert job.group_key == "grievance"
-    assert job.description == "Send periodic grievance notifications"
-    mock_queue.assert_called_once_with()
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_periodic_grievances_notifications_action_sends_notifications(mock_notification_cls: Mock) -> None:
-    business_area = BusinessAreaFactory(enable_email_notification=True)
-    sensitive_ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=UserFactory(),
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
-        status=GrievanceTicket.STATUS_NEW,
-        last_notification_sent=None,
-    )
-    sensitive_ticket.created_at = timezone.now() - timedelta(days=2)
-    sensitive_ticket.save(update_fields=["created_at"])
-    other_ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=UserFactory(),
-        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
-        status=GrievanceTicket.STATUS_NEW,
-        last_notification_sent=None,
-    )
-    other_ticket.created_at = timezone.now() - timedelta(days=31)
-    other_ticket.save(update_fields=["created_at"])
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-
-    periodic_grievances_notifications_async_task_action(job)
-
-    sensitive_ticket.refresh_from_db()
-    other_ticket.refresh_from_db()
-    assert mock_notification_cls.call_count == 2
-    assert sensitive_ticket.last_notification_sent is not None
-    assert other_ticket.last_notification_sent is not None
-
-
 def test_celery_task_returns_when_individual_not_found() -> None:
     job = create_async_job(
         "hope.apps.grievance.celery_tasks.deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action",
@@ -320,9 +263,6 @@ def test_celery_task_calls_inner_function_with_individual(
     assert call_args[0][1].pk == individual.pk
 
 
-# --- periodic_grievances_notifications_async_task tests ---
-
-
 def _make_ticket(
     category: int,
     status: int = GrievanceTicket.STATUS_NEW,
@@ -350,223 +290,3 @@ def _make_ticket(
         created_at=timezone.now() - timedelta(days=created_days_ago),
     )
     return ticket
-
-
-@pytest.fixture
-def new_york_sensitive_ticket() -> GrievanceTicket:
-    business_area = BusinessAreaFactory(enable_email_notification=True, timezone="UTC")
-    assignee = UserFactory(timezone="America/New_York")
-    ticket = GrievanceTicketFactory(
-        business_area=business_area,
-        assigned_to=assignee,
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
-        status=GrievanceTicket.STATUS_NEW,
-        last_notification_sent=None,
-    )
-    GrievanceTicket.objects.filter(pk=ticket.pk).update(created_at=datetime(2026, 8, 9, 12, tzinfo=UTC))
-    ticket.refresh_from_db()
-    return ticket
-
-
-@pytest.fixture
-def unassigned_sensitive_ticket() -> GrievanceTicket:
-    ticket = GrievanceTicketFactory(
-        business_area=BusinessAreaFactory(enable_email_notification=True, timezone="UTC"),
-        assigned_to=None,
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
-        status=GrievanceTicket.STATUS_NEW,
-        last_notification_sent=None,
-    )
-    GrievanceTicket.objects.filter(pk=ticket.pk).update(created_at=datetime(2026, 8, 8, 12, tzinfo=UTC))
-    ticket.refresh_from_db()
-    return ticket
-
-
-@pytest.fixture
-def grievance_notification_job() -> AsyncJob:
-    return create_async_job(
-        "hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action",
-        {},
-    )
-
-
-@pytest.fixture
-def email_disabled_overdue_ticket() -> GrievanceTicket:
-    return _make_ticket(
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        created_days_ago=31,
-        enable_email=False,
-    )
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_sensitive_ticket_notified_when_never_notified(mock_notification_cls: Mock) -> None:
-    ticket = _make_ticket(
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        created_days_ago=2,
-    )
-
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    periodic_grievances_notifications_async_task_action(job)
-
-    # Verify called once and check first argument is the ticket
-    mock_notification_cls.assert_called_once()
-    call_args = mock_notification_cls.call_args
-    assert call_args[0][0] == ticket
-    mock_notification_cls.return_value.send_email_notification.assert_called_once()
-    ticket.refresh_from_db()
-    assert ticket.last_notification_sent is not None
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_sensitive_ticket_waits_for_the_next_local_morning(
-    mock_notification_cls: Mock,
-    new_york_sensitive_ticket: GrievanceTicket,
-    grievance_notification_job: AsyncJob,
-) -> None:
-    with freeze_time("2026-08-10 13:00:00+00:00"):
-        periodic_grievances_notifications_async_task_action(grievance_notification_job)
-
-    mock_notification_cls.assert_not_called()
-
-
-@override_config(GRIEVANCE_NOTIFICATION_HOUR=8)
-@patch.object(GrievanceNotification, "send_email_notification", autospec=True)
-def test_sensitive_ticket_uses_the_configured_local_notification_hour(
-    mock_send_email_notification: Mock,
-    new_york_sensitive_ticket: GrievanceTicket,
-    grievance_notification_job: AsyncJob,
-) -> None:
-    with freeze_time("2026-08-10 13:00:00+00:00"):
-        periodic_grievances_notifications_async_task_action(grievance_notification_job)
-
-    mock_send_email_notification.assert_called_once()
-    notification = mock_send_email_notification.call_args.args[0]
-    assert notification.grievance_ticket == new_york_sensitive_ticket
-    assert notification.action == GrievanceNotification.ACTION_SENSITIVE_REMINDER
-
-
-@patch.object(GrievanceNotification, "send_email_notification", autospec=True)
-def test_sensitive_ticket_is_sent_at_the_next_local_morning(
-    mock_send_email_notification: Mock,
-    new_york_sensitive_ticket: GrievanceTicket,
-    grievance_notification_job: AsyncJob,
-) -> None:
-    with freeze_time("2026-08-11 10:00:00+00:00"):
-        periodic_grievances_notifications_async_task_action(grievance_notification_job)
-
-    mock_send_email_notification.assert_called_once()
-    notification = mock_send_email_notification.call_args.args[0]
-    assert notification.grievance_ticket == new_york_sensitive_ticket
-    assert notification.action == GrievanceNotification.ACTION_SENSITIVE_REMINDER
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_unassigned_sensitive_ticket_is_not_marked_as_notified(
-    mock_notification_cls: Mock,
-    unassigned_sensitive_ticket: GrievanceTicket,
-    grievance_notification_job: AsyncJob,
-) -> None:
-    with freeze_time("2026-08-11 10:00:00+00:00"):
-        periodic_grievances_notifications_async_task_action(grievance_notification_job)
-
-    mock_notification_cls.assert_not_called()
-    unassigned_sensitive_ticket.refresh_from_db()
-    assert unassigned_sensitive_ticket.last_notification_sent is None
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_sensitive_ticket_notified_when_last_sent_overdue(mock_notification_cls: Mock) -> None:
-    ticket = _make_ticket(
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        created_days_ago=5,
-        last_notification_sent=timezone.now() - timedelta(days=2),
-    )
-
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    periodic_grievances_notifications_async_task_action(job)
-
-    # Verify called once and check first argument is the ticket
-    mock_notification_cls.assert_called_once()
-    call_args = mock_notification_cls.call_args
-    assert call_args[0][0] == ticket
-    mock_notification_cls.return_value.send_email_notification.assert_called_once()
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_sensitive_ticket_skipped_when_email_disabled(mock_notification_cls: Mock) -> None:
-    _make_ticket(
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        created_days_ago=2,
-        enable_email=False,
-    )
-
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    periodic_grievances_notifications_async_task_action(job)
-
-    mock_notification_cls.return_value.send_email_notification.assert_not_called()
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_closed_ticket_excluded_from_notifications(mock_notification_cls: Mock) -> None:
-    _make_ticket(
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        status=GrievanceTicket.STATUS_CLOSED,
-        created_days_ago=2,
-    )
-
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    periodic_grievances_notifications_async_task_action(job)
-
-    mock_notification_cls.return_value.send_email_notification.assert_not_called()
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_other_ticket_notified_when_overdue(mock_notification_cls: Mock) -> None:
-    ticket = _make_ticket(
-        category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-        created_days_ago=31,
-    )
-
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    periodic_grievances_notifications_async_task_action(job)
-
-    # Verify called once and check first argument is the ticket
-    mock_notification_cls.assert_called_once()
-    call_args = mock_notification_cls.call_args
-    assert call_args[0][0] == ticket
-    mock_notification_cls.return_value.send_email_notification.assert_called_once()
-    ticket.refresh_from_db()
-    assert ticket.last_notification_sent is not None
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_other_ticket_skipped_when_email_disabled(
-    mock_notification_cls: Mock,
-    email_disabled_overdue_ticket: GrievanceTicket,
-    grievance_notification_job: AsyncJob,
-) -> None:
-    periodic_grievances_notifications_async_task_action(grievance_notification_job)
-
-    mock_notification_cls.assert_not_called()
-    email_disabled_overdue_ticket.refresh_from_db()
-    assert email_disabled_overdue_ticket.last_notification_sent is None
-
-
-@patch("hope.apps.grievance.celery_tasks.GrievanceNotification")
-def test_sensitive_ticket_excluded_from_other_notifications(mock_notification_cls: Mock) -> None:
-    ticket = _make_ticket(
-        category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-        created_days_ago=31,
-    )
-
-    job = create_async_job("hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action", {})
-    periodic_grievances_notifications_async_task_action(job)
-
-    # Sensitive ticket 31 days old matches 1-day threshold → ACTION_SENSITIVE_REMINDER only
-    # Verify called once and check first argument is the ticket
-    mock_notification_cls.assert_called_once()
-    call_args = mock_notification_cls.call_args
-    assert call_args[0][0] == ticket

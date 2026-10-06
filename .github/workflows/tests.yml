@@ -30,7 +30,6 @@ jobs:
             zlib1g-dev \
             postgresql-client \
             libpq-dev \
-            python3-psycopg2 \
             python3-gdal \
             gdal-bin \
             libcairo2 \
@@ -164,7 +163,6 @@ jobs:
             zlib1g-dev \
             postgresql-client \
             libpq-dev \
-            python3-psycopg2 \
             python3-gdal \
             gdal-bin \
             libcairo2 \

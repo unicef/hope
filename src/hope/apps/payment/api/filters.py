@@ -86,7 +86,6 @@ class TargetPopulationFilter(PaymentPlanFilter):
     def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         # assigned TP statuses
         is_assigned = [
-            PaymentPlan.Status.PREPARING.value,
             PaymentPlan.Status.OPEN.value,
             PaymentPlan.Status.LOCKED.value,
             PaymentPlan.Status.LOCKED_FSP.value,

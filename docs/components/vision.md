@@ -79,27 +79,34 @@ processed only when:
 - the Payment Plan is in `IN_REVIEW`, and
 - its Vision state represents an active request or a previous send, callback, or FC-assignment failure.
 
-Every callback is logged. Callbacks received after a completed release, abort, rejection, or while Vision is disabled
-do not change FC assignments or Payment Plan status. Duplicate callbacks do not repeat release or delivery side
-effects.
+Every callback associated with a Payment Plan is logged with HOPE's receipt timestamp. The logged payload contains
+the full parsed JSON notification. Callbacks received after a completed release, abort, rejection, or while Vision is
+disabled do not change FC assignments or Payment Plan status.
+Any callback with a Vision plan identifier for an active request confirms that Vision received
+the Payment Plan, even when Vision reports an error or the FC cannot be assigned.
+Duplicate callbacks do not repeat release or delivery side effects.
 
 ### Callback Outcomes
 
 | Callback result | Vision state | Payment Plan result |
 | --- | --- | --- |
-| Invalid payload or missing Vision identifier | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
+| Invalid payload | Unchanged | HTTP `400`; no FC changes |
+| Missing Vision identifier on an active plan in review | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
 | Plan has no active Vision request | Unchanged | Callback is logged; no workflow changes |
+| `SUCCESS` status without `fc_num` after Vision creates the plan | `PP_CREATED` | Remains `IN_REVIEW` and waits for the FC callback |
 | Vision reports failure | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
-| Success without `fc_num` | `FC_MISSING` | Remains `IN_REVIEW`; no FC changes |
 | No matching HOPE FC group | `FC_NOT_FOUND` | Remains `IN_REVIEW`; no FC changes |
 | More than one group matches | `CALLBACK_FAILED` with `FC_AMBIGUOUS` | Remains `IN_REVIEW`; no FC changes |
 | The FC conflicts with another assignment | `CALLBACK_FAILED` with `FC_CONFLICT` | Remains `IN_REVIEW`; no FC changes |
 | FC assignment succeeds | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
 
-An FC assignment failure returns HTTP `400`, status `KO`, and message `FC not found`. A later callback retries
-processing from `SEND_FAILED`, `CALLBACK_FAILED`, `FC_MISSING`, or `FC_NOT_FOUND`. A successful callback with a valid
-FC can therefore recover the workflow without admin intervention. Callbacks that still cannot assign an FC return the
-same `KO` response.
+The callback response includes `status`, `messageId`, `payplanSno`, and `message`. An accepted callback returns HTTP
+`200`, status `OK`, and message `Callback received`, including when Vision reports a failed Payment Plan status.
+An invalid callback returns HTTP `400` with a reason in `message`; an unknown `payplanSno` returns HTTP `404` and
+`Payment plan not found`. An FC assignment failure returns HTTP `400`, status `KO`, and a message describing the
+missing, unknown, ambiguous, or conflicting FC. A later callback retries processing from `SEND_FAILED`, `PP_CREATED`,
+`CALLBACK_FAILED`, or `FC_NOT_FOUND`. A successful callback with a valid FC can therefore recover the
+workflow without admin intervention.
 
 ## Funds Commitment Assignment
 
@@ -125,7 +132,8 @@ Django admin provides recovery when sending fails, a sent plan waits indefinitel
 While both Vision flags remain enabled, an administrator can select an available FC group on the recovery page and
 select one or more of its available items. The group and item selection happen on the same page. For `SEND_FAILED` or
 `WAITING_FOR_CALLBACK` without a successful-send marker, the page warns that HOPE cannot confirm that Vision
-received the Payment Plan.
+received the Payment Plan. An active callback with a Vision plan identifier confirms receipt even if the original
+request did not record its successful response.
 
 The recovery action rejects:
 
@@ -194,7 +202,6 @@ Vision workflow data is stored under `payment_plan.internal_data["vision"]`. Sup
 - `SEND_FAILED`
 - `WAITING_FOR_CALLBACK`
 - `CALLBACK_FAILED`
-- `FC_MISSING`
 - `FC_NOT_FOUND`
 - `FC_ASSOCIATED`
 - `RELEASED`
