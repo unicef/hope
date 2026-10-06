@@ -257,7 +257,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             )
         elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
             try:
-                country = GeoCountry.objects.get(iso_code3=cell.value)
+                country = GeoCountry.objects.get(iso_code3=value)
             except GeoCountry.DoesNotExist as exc:
                 raise ValueError(f"Country with ISO3 code {cell.value!r} does not exist") from exc
             setattr(

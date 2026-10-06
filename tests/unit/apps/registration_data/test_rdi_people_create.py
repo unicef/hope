@@ -345,6 +345,32 @@ def test_process_people_country_reports_missing_code(unknown_people_country_cell
             )
 
 
+@pytest.fixture
+def existing_people_country():
+    return CountryFactory(iso_code2="AF", iso_code3="AFG")
+
+
+@pytest.fixture(params=[("pp_country_i_c", "country"), ("pp_country_origin_i_c", "country_origin")])
+def people_country_cell_with_trailing_space(request):
+    workbook = openpyxl.Workbook()
+    cell = workbook.active["L4"]
+    cell.value = "AFG "
+    header, field_name = request.param
+    return cell, header, field_name, PendingHousehold()
+
+
+def test_process_people_country_uses_normalized_value(
+    existing_people_country, people_country_cell_with_trailing_space, django_assert_num_queries
+) -> None:
+    cell, header, field_name, household = people_country_cell_with_trailing_space
+    task = RdiXlsxPeopleCreateTask()
+
+    with django_assert_num_queries(1):
+        task._process_admin_areas_and_country(cell, {"name": field_name}, header, household, "AFG")
+
+    assert getattr(household, field_name) == existing_people_country
+
+
 def test_execute_sets_phone_no_valid_on_imported_individual(
     rdi_people_dependencies: dict[str, object],
     registration_data_import: object,
