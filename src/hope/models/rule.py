@@ -188,17 +188,6 @@ class Rule(NaturalKeyModel, LimitBusinessAreaModelMixin):
         except RuleCommit.DoesNotExist:
             return None
 
-    @property
-    def last_changes(self) -> dict | None:
-        try:
-            return {
-                "fields": self.latest_commit.affected_fields,
-                "before": self.latest_commit.before,
-                "after": self.latest_commit.after,
-            }
-        except RuleCommit.DoesNotExist:
-            return None
-
     @cached_property
     def interpreter(self) -> Any:
         func: type[Interpreter] = mapping[self.language]

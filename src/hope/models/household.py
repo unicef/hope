@@ -52,7 +52,6 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
-    from hope.contrib.aurora.models import Record
     from hope.models.area import Area
     from hope.models.business_area import BusinessArea
     from hope.models.individual import Individual
@@ -778,12 +777,6 @@ class Household(
     @cached_property
     def alternate_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
-
-    @property
-    def flex_registrations_record(self) -> "Record" | None:
-        from hope.contrib.aurora.models import Record
-
-        return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
     @property
     def geopoint(self) -> str | None:

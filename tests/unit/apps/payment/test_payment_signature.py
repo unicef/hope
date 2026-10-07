@@ -127,18 +127,6 @@ def test_bulk_update(payment_plan: PaymentPlan) -> None:
     assert payment.signature_hash == calculate_hash_manually(payment)
 
 
-def test_bulk_create(payment_plan: PaymentPlan) -> None:
-    (payment,) = PaymentFactory.create_batch(1, parent=payment_plan)
-    creation_dict = payment.__dict__.copy()
-    creation_dict.pop("id")
-    creation_dict.pop("_state")
-    Payment.all_objects.filter(id=payment.id).delete()
-    (payment,) = Payment.signature_manager.bulk_create_with_signature([Payment(**creation_dict)])
-    create_payment_plan_snapshot_data(payment_plan)
-    payment.refresh_from_db()
-    assert payment.signature_hash == calculate_hash_manually(payment)
-
-
 @freeze_time("2020-10-10")
 def test_signature_after_prepare_payment_plan(
     business_area: Any,

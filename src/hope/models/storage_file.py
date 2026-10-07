@@ -50,9 +50,5 @@ class StorageFile(models.Model):
         return self.file.name or ""
 
     @property
-    def file_url(self) -> str:
-        return self.file.url
-
-    @property
     def file_size(self) -> int:
         return self.file.size
