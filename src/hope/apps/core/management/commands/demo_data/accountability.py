@@ -94,16 +94,19 @@ def generate_messages() -> None:
 
 def generate_feedback() -> None:
     ba = BusinessArea.objects.get(slug="afghanistan")
+    user_root = User.objects.get(username="root")
     feedback_data = [
         {
             "business_area": ba,
             "issue_type": "POSITIVE_FEEDBACK",
             "description": "Positive Feedback",
+            "created_by": user_root,
         },
         {
             "business_area": ba,
             "issue_type": "NEGATIVE_FEEDBACK",
             "description": "Negative Feedback",
+            "created_by": user_root,
         },
     ]
     feedback_positive = FeedbackFactory(**feedback_data[0])
