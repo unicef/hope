@@ -17,6 +17,7 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.languages import Languages
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.core.utils import FlexFieldsEncoder
 from hope.apps.household.const import (
     BLANK,
@@ -211,7 +212,7 @@ class Individual(
     )
 
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
-    photo = models.ImageField(blank=True, help_text="Photo")
+    photo = models.ImageField(upload_to=upload_path, max_length=255, blank=True, help_text="Photo")
     full_name = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(2)],
@@ -314,7 +315,11 @@ class Individual(
         help_text="Observed disability status",
     )
     disability_certificate_picture = models.ImageField(
-        blank=True, null=True, help_text="Disability certificate picture"
+        upload_to=upload_path,
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Disability certificate picture",
     )
     seeing_disability = models.CharField(
         max_length=50,

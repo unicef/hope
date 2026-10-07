@@ -1,6 +1,7 @@
 from decimal import Decimal
 from itertools import chain
 import logging
+import os
 from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
@@ -16,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import UUIDModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.grievance.constants import (
     PRIORITY_NOT_SET,
     SUBMISSION_CHANNEL_HOPE,
@@ -1231,13 +1233,13 @@ class GrievanceDocument(UUIDModel):
         on_delete=models.SET_NULL,
     )
     created_by = models.ForeignKey(User, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    file = models.FileField(upload_to="", blank=True, null=True)
+    file = models.FileField(upload_to=upload_path, max_length=255, blank=True, null=True)
     content_type = models.CharField(max_length=100, null=False)
     file_size = models.IntegerField(null=True, blank=True)
 
     @property
     def file_name(self) -> str:
-        return self.file.name or ""
+        return os.path.basename(self.file.name or "")
 
     @property
     def file_path(self) -> str:

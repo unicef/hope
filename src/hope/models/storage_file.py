@@ -1,7 +1,11 @@
+import os
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
+
+from hope.apps.core.upload_paths import upload_path
 
 
 def get_storage_status_choices() -> tuple:
@@ -30,7 +34,7 @@ class StorageFile(models.Model):
         verbose_name=_("Created by"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True, blank=True)
-    file = models.FileField(upload_to="files")
+    file = models.FileField(upload_to=upload_path, max_length=255)
 
     status = models.CharField(
         choices=get_storage_status_choices,
@@ -47,7 +51,7 @@ class StorageFile(models.Model):
 
     @property
     def file_name(self) -> str:
-        return self.file.name or ""
+        return os.path.basename(self.file.name or "")
 
     @property
     def file_url(self) -> str:

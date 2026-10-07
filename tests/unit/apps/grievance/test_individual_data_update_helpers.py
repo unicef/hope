@@ -1,7 +1,9 @@
 import pytest
 
 from extras.test_utils.factories import HouseholdFactory, IndividualFactory
-from hope.apps.grievance.services.data_change.individual_data_update_service import IndividualDataUpdateService
+from hope.apps.grievance.services.data_change.individual_data_update_service import (
+    IndividualDataUpdateService,
+)
 from hope.apps.household.const import SON_DAUGHTER
 from hope.models import AsyncJob
 
