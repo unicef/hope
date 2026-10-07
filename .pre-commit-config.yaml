@@ -40,6 +40,12 @@ repos:
                 language: system
                 pass_filenames: false
                 files: ^src/hope/(.*/models\.py|.*/models/.*\.py|models/.*\.py|.*/migrations/.*\.py)$
+            -   id: no-db-index
+                name: "Django: declare indexes in Meta.indexes, not db_index=True"
+                entry: 'db_index\s*=\s*True'
+                language: pygrep
+                files: ^src/hope/.*\.py$
+                exclude: /migrations/
     -   repo: meta
         hooks:
             -   id: check-hooks-apply
