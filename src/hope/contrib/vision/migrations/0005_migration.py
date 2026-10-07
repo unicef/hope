@@ -15,9 +15,29 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AlterField(
+                    model_name="fundscommitment",
+                    name="funds_commitment_number",
+                    field=models.CharField(blank=True, max_length=10, null=True),
+                ),
+                migrations.AlterField(
                     model_name="fundscommitmentitem",
                     name="funds_commitment_item",
                     field=models.CharField(max_length=3),
+                ),
+                migrations.AddIndex(
+                    model_name="fundscommitment",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["funds_commitment_number"],
+                        name="vision_fundscommitment_funds_commitment_number_7eeae3be",
+                    ),
+                ),
+                migrations.AddIndex(
+                    model_name="fundscommitment",
+                    index=hope.models.utils.LongNameIndex(
+                        fields=["funds_commitment_number"],
+                        name="vision_fundscommitment_funds_commitment_number_7eeae3be_like",
+                        opclasses=["varchar_pattern_ops"],
+                    ),
                 ),
                 migrations.AddIndex(
                     model_name="fundscommitmentitem",

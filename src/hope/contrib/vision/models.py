@@ -134,7 +134,7 @@ class FundsCommitmentItem(models.Model):
 
 class FundsCommitment(models.Model):
     rec_serial_number = models.IntegerField(primary_key=True)
-    funds_commitment_number = models.CharField(max_length=10, blank=True, null=True, db_index=True)
+    funds_commitment_number = models.CharField(max_length=10, blank=True, null=True)
     vendor_id = models.CharField(max_length=10, blank=True, null=True)
     business_area = models.CharField(max_length=4, blank=True, null=True)
     posting_date = models.DateField(blank=True, null=True)
@@ -191,6 +191,18 @@ class FundsCommitment(models.Model):
         blank=True,
         help_text="This can be a business office or a business area",
     )
+
+    class Meta:
+        indexes = [
+            LongNameIndex(
+                fields=["funds_commitment_number"], name="vision_fundscommitment_funds_commitment_number_7eeae3be"
+            ),
+            LongNameIndex(
+                fields=["funds_commitment_number"],
+                opclasses=["varchar_pattern_ops"],
+                name="vision_fundscommitment_funds_commitment_number_7eeae3be_like",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.funds_commitment_number or ""
