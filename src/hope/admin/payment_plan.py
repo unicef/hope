@@ -802,10 +802,7 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
         return False
 
     def frontend_url(self, obj: Payment) -> str | None:
-        program = obj.program
-        if program is None:
-            return None
-        return f"/{obj.business_area.slug}/programs/{program.code}/payment-module/payments/{obj.id}"
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/payments/{obj.id}"
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
