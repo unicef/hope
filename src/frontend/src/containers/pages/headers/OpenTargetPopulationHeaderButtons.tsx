@@ -67,6 +67,16 @@ export function OpenTargetPopulationHeaderButtons({
           RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
         ),
       });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve,
+        ),
+      });
 
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
