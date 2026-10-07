@@ -440,6 +440,17 @@ def handle_photo(
     return None
 
 
+def handle_image_field(data: dict, field_name: str, scope_of: "Model | None" = None) -> None:
+    """Replace an uploaded image with the name it is stored under, so the ticket can keep it as JSON."""
+    not_provided = object()
+    image = data.pop(field_name, not_provided)
+    if image is not not_provided:
+        if image is None:
+            data[field_name] = ""
+        elif saved_image := handle_photo(image, None, scope_of):
+            data[field_name] = saved_image
+
+
 def handle_document(document: dict, scope_of: "Model | None" = None) -> dict:
     # photo is photo URL and raw photo is just name
     photo = document.pop("new_photo") if "new_photo" in document else document.get("photo")

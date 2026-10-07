@@ -30255,7 +30255,7 @@
                 "AssignFundsCommitments": {
                     "type": "object",
                     "properties": {
-                        "fund_commitment_items_ids": {
+                        "funds_commitment_numbers": {
                             "type": "array",
                             "items": {
                                 "type": "string"
@@ -30263,7 +30263,7 @@
                         }
                     },
                     "required": [
-                        "fund_commitment_items_ids"
+                        "funds_commitment_numbers"
                     ]
                 },
                 "AuthorizedUser": {
@@ -32749,6 +32749,46 @@
                         "funds_commitment_number": {
                             "type": "string"
                         },
+                        "vendor_id": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "posting_date": {
+                            "type": "string",
+                            "format": "date",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "document_reference": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "fc_status": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "total_amount_usd": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "total_amount_local": {
+                            "type": "string",
+                            "format": "decimal",
+                            "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
+                            "nullable": true,
+                            "readOnly": true
+                        },
+                        "currency": {
+                            "type": "string",
+                            "nullable": true,
+                            "readOnly": true
+                        },
                         "funds_commitment_items": {
                             "type": "array",
                             "items": {
@@ -32757,9 +32797,16 @@
                         }
                     },
                     "required": [
+                        "currency",
+                        "document_reference",
+                        "fc_status",
                         "funds_commitment_items",
                         "funds_commitment_number",
-                        "id"
+                        "id",
+                        "posting_date",
+                        "total_amount_local",
+                        "total_amount_usd",
+                        "vendor_id"
                     ]
                 },
                 "FundsCommitmentItem": {
@@ -32803,6 +32850,11 @@
                             "format": "decimal",
                             "pattern": "^-?\\d{0,13}(?:\\.\\d{0,2})?$",
                             "nullable": true
+                        },
+                        "business_area": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 4
                         },
                         "rec_serial_number": {
                             "type": "integer",
@@ -40629,12 +40681,10 @@
                             "readOnly": true
                         },
                         "funds_commitments": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/components/schemas/FundsCommitment"
-                                }
-                            ],
-                            "nullable": true,
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/FundsCommitment"
+                            },
                             "readOnly": true
                         },
                         "available_funds_commitments": {

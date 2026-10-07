@@ -656,6 +656,35 @@ def test_create_documents(countries: dict[str, object]) -> None:
     assert photo.endswith(".png")
 
 
+@pytest.fixture
+def task_with_unknown_document_country(countries: dict[str, object]) -> RdiXlsxCreateTask:
+    assert countries
+    task = RdiXlsxCreateTask()
+    task.sheet_title = "individuals"
+    individual = PendingIndividualFactory(detail_id=14, rdi_merge_status=MergeStatusModel.PENDING)
+    DocumentTypeFactory(key="birth_certificate")
+    task.documents = {
+        "individual_14_birth_certificate_i_c": {
+            "individual": individual,
+            "key": "birth_certificate",
+            "value": "123",
+            "issuing_country": Country("ZZ"),
+        }
+    }
+    return task
+
+
+def test_create_documents_reports_missing_issuing_country(
+    task_with_unknown_document_country: RdiXlsxCreateTask, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(2):
+        with pytest.raises(
+            ValueError,
+            match="row 14, document type 'birth_certificate': issuing country 'ZZ'",
+        ):
+            task_with_unknown_document_country._create_documents()
+
+
 def test_cast_value() -> None:
     task = RdiXlsxCreateTask()
 

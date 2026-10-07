@@ -22,6 +22,13 @@ const _utilsMock = vi.hoisted(() => ({
     ...options,
   })),
   adjustHeadCells: vi.fn((headCells) => headCells),
+  isPhoneSearchTooShort: vi.fn(
+    (phone) => !!phone && phone.replace(/\D/g, '').length < 4,
+  ),
+  sanitizePhoneSearch: vi.fn((phone) => {
+    const trimmed = phone?.trim() ?? '';
+    return trimmed.replace(/\D/g, '').length < 4 ? '' : trimmed;
+  }),
   formatCurrencyWithSymbol: vi.fn(
     (amount, currency) => `${amount} ${currency}`,
   ),
@@ -67,6 +74,8 @@ const _restServiceMethods = vi.hoisted(() => {
     restBusinessAreasProgramsHouseholdsCountRetrieve: vi.fn(),
     restBusinessAreasProgramsIndividualsList: vi.fn(),
     restBusinessAreasProgramsIndividualsCountRetrieve: vi.fn(),
+    restBusinessAreasIndividualsList: vi.fn(),
+    restBusinessAreasIndividualsCountRetrieve: vi.fn(),
     restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
     restBusinessAreasProgramsList: vi.fn(),
     restBusinessAreasProgramsCountRetrieve: vi.fn(),

@@ -1,6 +1,6 @@
 import dataclasses
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -30,7 +30,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_document,
     handle_edit_document,
     handle_edit_identity,
-    handle_photo,
+    handle_image_field,
     handle_update_account,
     is_approved,
     prepare_edit_accounts_save,
@@ -55,9 +55,6 @@ from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
 
-if TYPE_CHECKING:
-    from django.db.models import Model
-
 
 @dataclasses.dataclass
 class AccountPayloadField:
@@ -74,20 +71,18 @@ class AccountPayload:
     data_fields: list[AccountPayloadField]
 
 
-def _handle_photo_field(new_individual_data: dict, scope_of: "Model | None" = None) -> None:
-    _not_provided = object()
-    photo = new_individual_data.pop("photo", _not_provided)
-    if photo is not _not_provided:
-        if photo is None:
-            new_individual_data["photo"] = ""
-        else:
-            saved_photo = handle_photo(photo, None, scope_of)
-            if saved_photo:
-                new_individual_data["photo"] = saved_photo
+# core field names picked in the UI that differ from the model attribute they update
+INDIVIDUAL_FIELD_NAME_MAP = {"ind_identification_key": "identification_key"}
+HOUSEHOLD_FIELD_NAME_MAP = {"hh_identification_key": "identification_key"}
+
+
+def _validate_identification_key(model: type[Household] | type[Individual], obj: Any, key: str | None) -> None:
+    if key and model.objects.filter(program_id=obj.program_id, identification_key=key).exclude(pk=obj.pk).exists():
+        raise ValidationError(f"Ticket cannot be closed, identification key {key} is already used in this programme")
 
 
 class IndividualDataUpdateService(DataChangeService):
-    def save(self) -> list[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:  # noqa: PLR0915
         data_change_extras = self.extras.get("issue_type")
         individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
         individual = individual_data_update_issue_type_extras.get("individual")
@@ -105,7 +100,8 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
         scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
-        _handle_photo_field(individual_data, scope_of)
+        handle_image_field(individual_data, "photo", scope_of)
+        handle_image_field(individual_data, "consent_sign", scope_of)
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals", scope_of)
@@ -113,7 +109,7 @@ class IndividualDataUpdateService(DataChangeService):
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
         for field, value in individual_data_with_approve_status.items():
-            current_value = getattr(individual, field, None)
+            current_value = getattr(individual, INDIVIDUAL_FIELD_NAME_MAP.get(field, field), None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             elif field in (
@@ -191,7 +187,8 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
         scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
-        _handle_photo_field(new_individual_data, scope_of)
+        handle_image_field(new_individual_data, "photo", scope_of)
+        handle_image_field(new_individual_data, "consent_sign", scope_of)
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals", scope_of)
         individual_data_with_approve_status: dict[str, Any] = {
@@ -199,7 +196,7 @@ class IndividualDataUpdateService(DataChangeService):
             for field, value in new_individual_data.items()
         }
         for field, value in individual_data_with_approve_status.items():
-            current_value = getattr(individual, field, None)
+            current_value = getattr(individual, INDIVIDUAL_FIELD_NAME_MAP.get(field, field), None)
             if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             elif field in (
@@ -301,9 +298,18 @@ class IndividualDataUpdateService(DataChangeService):
             "org_name_enumerator",
             "registration_method",
             "admin_area_title",
+            "consent_sign",
+            "hh_identification_key",
         ]
-        hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
+        hh_approved_data = {
+            HOUSEHOLD_FIELD_NAME_MAP.get(hh_f, hh_f): only_approved_data.pop(hh_f)
+            for hh_f in hh_fields
+            if hh_f in only_approved_data
+        }
         if hh_approved_data:
+            if "identification_key" in hh_approved_data:
+                hh_approved_data["identification_key"] = hh_approved_data["identification_key"] or None
+                _validate_identification_key(Household, household, hh_approved_data["identification_key"])
             if hh_country_origin := hh_approved_data.get("country_origin"):
                 hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
             if hh_country := hh_approved_data.get("country"):
@@ -359,7 +365,9 @@ class IndividualDataUpdateService(DataChangeService):
         accounts = [account["value"] for account in individual_data.pop("accounts", []) if is_approved(account)]
         accounts_to_edit = [account for account in individual_data.pop("accounts_to_edit", []) if is_approved(account)]
         only_approved_data = {
-            field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
+            INDIVIDUAL_FIELD_NAME_MAP.get(field, field): convert_to_empty_string_if_null(
+                value_and_approve_status.get("value")
+            )
             for field, value_and_approve_status in individual_data.items()
             if is_approved(value_and_approve_status) and field != "previous_documents"
         }
@@ -372,6 +380,7 @@ class IndividualDataUpdateService(DataChangeService):
         household, new_individual = lock_household_then_individual(individual)
 
         self._validate_phone_numbers(only_approved_data)
+        self._prepare_identification_key(new_individual, only_approved_data)
         self._update_household_fields(household, only_approved_data)  # type: ignore[arg-type]
 
         # upd Individual
@@ -420,6 +429,12 @@ class IndividualDataUpdateService(DataChangeService):
                     individual=new_individual,
                 )
             )
+
+    @staticmethod
+    def _prepare_identification_key(individual: Individual, only_approved_data: dict) -> None:
+        if "identification_key" in only_approved_data:
+            only_approved_data["identification_key"] = only_approved_data["identification_key"] or None
+            _validate_identification_key(Individual, individual, only_approved_data["identification_key"])
 
     def _validate_phone_numbers(self, only_approved_data: dict) -> None:
         if "phone_no" in only_approved_data:

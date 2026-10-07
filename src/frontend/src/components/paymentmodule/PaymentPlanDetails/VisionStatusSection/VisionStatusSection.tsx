@@ -13,7 +13,6 @@ interface VisionStatusSectionProps {
 const errorStatuses = new Set([
   'SEND_FAILED',
   'CALLBACK_FAILED',
-  'FC_MISSING',
   'FC_NOT_FOUND',
 ]);
 
@@ -54,8 +53,8 @@ export function VisionStatusSection({
           </Grid>
           <Grid size={{ xs: 6 }}>
             <LabelizedField
-              label={t('Funds Commitment Number')}
-              value={vision.fcNum ?? '-'}
+              label={t('Funds Commitment Numbers')}
+              value={vision.fcNumbers.length ? vision.fcNumbers.join(', ') : '-'}
             />
           </Grid>
         </Grid>

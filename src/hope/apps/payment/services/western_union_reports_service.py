@@ -663,8 +663,9 @@ class WesternUnionReportsService:
 
         funds_commitments_str = ", ".join(
             f"{number}/{item}"
-            for number, item in payment_plan.funds_commitments.all().values_list(
-                "funds_commitment_group__funds_commitment_number", "funds_commitment_item"
+            for number, item in payment_plan.funds_commitment_headers.values_list(
+                "funds_commitment_number",
+                "funds_commitment_items__funds_commitment_item",
             )
         )
         payments_data: list[QCFReportPaymentRowData] = []
