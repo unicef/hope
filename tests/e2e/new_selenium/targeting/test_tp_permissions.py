@@ -26,10 +26,12 @@ def tp_url(tp: PaymentPlan) -> str:
 @pytest.mark.parametrize(
     ("tp_fixture", "status", "permission", "visible", "hidden"),
     [
-        pytest.param("built_tp", "OPEN", Permissions.TARGETING_LOCK, (LOCK,), (DELETE, EDIT, DUPLICATE), id="lock"),
+        pytest.param(
+            "built_tp", "OPEN", Permissions.TARGETING_LOCK, (LOCK, REBUILD), (DELETE, EDIT, DUPLICATE), id="lock"
+        ),
         pytest.param("built_tp", "OPEN", Permissions.TARGETING_REMOVE, (DELETE,), (LOCK, EDIT, DUPLICATE), id="remove"),
         pytest.param(
-            "built_tp", "OPEN", Permissions.TARGETING_UPDATE, (EDIT, REBUILD), (LOCK, DELETE, DUPLICATE), id="update"
+            "built_tp", "OPEN", Permissions.TARGETING_UPDATE, (EDIT,), (LOCK, REBUILD, DELETE, DUPLICATE), id="update"
         ),
         pytest.param(
             "built_tp", "OPEN", Permissions.TARGETING_DUPLICATE, (DUPLICATE,), (LOCK, DELETE, EDIT), id="duplicate"
