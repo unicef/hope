@@ -17,6 +17,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.views import (
     download_payment_plan_group_batch,
+    download_payment_plan_group_summary_pdf,
     download_payment_plan_payment_list,
     download_payment_plan_summary_pdf,
     download_payment_verification_plan,
@@ -369,3 +370,44 @@ def test_download_payment_plan_group_batch_missing_file_raises(
 
     with pytest.raises(FileNotFoundError):
         download_payment_plan_group_batch(request, str(group.id), 1)
+
+
+@pytest.fixture
+def group_with_summary_pdf(user):
+    group = PaymentPlanGroupFactory(cycle=ProgramCycleFactory())
+    group.export_pdf_file_summary = FileTempFactory(file=SimpleUploadedFile("summary.pdf", b"data"), created_by=user)
+    group.save(update_fields=["export_pdf_file_summary"])
+    return group
+
+
+def test_download_payment_plan_group_summary_pdf_requires_permission(rf, group_with_summary_pdf, user):
+    request = rf.get(reverse("download-payment-plan-group-summary-pdf", args=[group_with_summary_pdf.id]))
+    request.user = user
+
+    with pytest.raises(PermissionDenied) as excinfo:
+        download_payment_plan_group_summary_pdf(request, str(group_with_summary_pdf.id))
+
+    assert excinfo.value.args[0]["required_permissions"] == [Permissions.PM_EXPORT_PDF_SUMMARY.value]
+
+
+def test_download_payment_plan_group_summary_pdf_redirects_with_permission(
+    rf, create_user_role_with_permissions, group_with_summary_pdf, user
+):
+    create_user_role_with_permissions(user, [Permissions.PM_EXPORT_PDF_SUMMARY], group_with_summary_pdf.business_area)
+    request = rf.get(reverse("download-payment-plan-group-summary-pdf", args=[group_with_summary_pdf.id]))
+    request.user = user
+
+    response = download_payment_plan_group_summary_pdf(request, str(group_with_summary_pdf.id))
+
+    assert response.status_code == 302
+    assert response.url == group_with_summary_pdf.export_pdf_file_summary.file.url
+
+
+def test_download_payment_plan_group_summary_pdf_missing_file_raises(rf, create_user_role_with_permissions, user):
+    group = PaymentPlanGroupFactory(cycle=ProgramCycleFactory())
+    create_user_role_with_permissions(user, [Permissions.PM_EXPORT_PDF_SUMMARY], group.business_area)
+    request = rf.get(reverse("download-payment-plan-group-summary-pdf", args=[group.id]))
+    request.user = user
+
+    with pytest.raises(FileNotFoundError):
+        download_payment_plan_group_summary_pdf(request, str(group.id))

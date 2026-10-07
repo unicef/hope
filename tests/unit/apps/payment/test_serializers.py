@@ -25,7 +25,6 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.utils import to_choice_object
 from hope.apps.household.const import ROLE_ALTERNATE
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
@@ -37,7 +36,7 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan, PaymentPlanSplit
+from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -429,8 +428,6 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["reconciliation_summary"]["number_of_payments"] == 1
     assert data["excluded_households"] == []
     assert data["excluded_individuals"] == []
-    assert data["can_split"] is True
-    assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
     assert data["status_date"] is not None
     assert data["start_date"] == "2024-01-02"

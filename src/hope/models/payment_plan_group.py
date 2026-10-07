@@ -34,6 +34,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "financial_service_provider",
             "background_action_status",
             "delivery_import_file",
+            "export_pdf_file_summary",
             "abort_comment",
             "closure_comment",
             "closed_by",
@@ -68,6 +69,9 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     ]
 
     CHILD_GROUP_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+    # Statuses in which payments go out and come back: delivery export, send to Payment Gateway, reconciliation import.
+    DELIVERY_STATUSES = (Status.ACCEPTED, Status.FINISHED)
+    SUMMARY_PDF_STATUSES = (Status.IN_REVIEW, Status.ACCEPTED, Status.FINISHED)
     LINKED_GROUP_SOURCE_PLAN_TYPES = {
         PaymentPlan.PlanType.FOLLOW_UP: (
             PaymentPlan.PlanType.REGULAR,
@@ -129,6 +133,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         on_delete=models.SET_NULL,
         related_name="+",
         help_text="Uploaded reconciliation XLSX [sys]",
+    )
+    export_pdf_file_summary = models.ForeignKey(
+        "core.FileTemp",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Generated summary PDF [sys]",
     )
     background_action_status = models.CharField(
         max_length=50,
@@ -198,6 +210,17 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         if self.status not in self.CHILD_GROUP_SOURCE_STATUSES:
             return []
         return [plan for plan in payment_plans if plan.eligible_payments_for_child_plan().exists()]
+
+    @property
+    def can_split(self) -> bool:
+        from hope.models import PaymentPlanSplit
+
+        return (
+            self.status == PaymentPlanGroup.Status.ACCEPTED
+            and not PaymentPlanSplit.objects.filter(
+                payment_plan__payment_plan_group=self, sent_to_payment_gateway=True
+            ).exists()
+        )
 
     @property
     def is_reconciled(self) -> bool:

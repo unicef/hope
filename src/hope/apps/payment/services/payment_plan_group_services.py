@@ -28,6 +28,7 @@ from hope.models import (
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
+    PaymentPlanSplit,
 )
 
 if TYPE_CHECKING:
@@ -128,6 +129,21 @@ class PaymentPlanGroupService:
         if PaymentPlanGroup.objects.filter(cycle_id=source_group.cycle_id, name=name).exists():
             raise ValidationError(f"A group named '{name}' already exists in this cycle.")
         return name
+
+    @transaction.atomic
+    def split(self, split_type: str, payments_no: int | None = None) -> PaymentPlanGroup:
+        """Split every plan in the group the same way; each plan keeps its own splits for the Payment Gateway."""
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.ACCEPTED:
+            raise ValidationError(f"Split is possible only within Status {PaymentPlanGroup.Status.ACCEPTED}")
+        if PaymentPlanSplit.objects.filter(
+            payment_plan__payment_plan_group=payment_plan_group, sent_to_payment_gateway=True
+        ).exists():
+            raise ValidationError("Payment Plan Group is already sent to payment gateway")
+        for payment_plan in self._payment_plans(payment_plan_group):
+            PaymentPlanService(payment_plan).split(split_type, payments_no)
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
 
     def assign_financial_service_provider(self, financial_service_provider: FinancialServiceProvider | None) -> None:
         """Set the group's FSP, copy it onto its Target Populations and rebuild them; the caller saves the group.

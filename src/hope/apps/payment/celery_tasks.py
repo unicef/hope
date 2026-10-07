@@ -23,6 +23,7 @@ from hope.apps.core.utils import (
 from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
+    PaymentPlanGroupPDFExportService,
     PaymentPlanPDFExportService,
 )
 from hope.apps.payment.utils import (
@@ -1323,6 +1324,49 @@ def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_i
         config=config,
         group_key="payment",
         description=f"Export payment plan summary pdf for {payment_plan_id}",
+    )
+
+
+def export_pdf_payment_plan_group_summary_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.models import FileTemp, PaymentPlanGroup, User
+
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    set_sentry_business_area_tag(payment_plan_group.business_area.name)
+    user = User.objects.get(pk=job.config["user_id"])
+
+    with transaction.atomic():
+        if payment_plan_group.export_pdf_file_summary:
+            payment_plan_group.export_pdf_file_summary.file.delete()
+            payment_plan_group.export_pdf_file_summary.delete()
+            payment_plan_group.export_pdf_file_summary = None
+
+        service = PaymentPlanGroupPDFExportService(payment_plan_group)
+        pdf, filename = service.generate_pdf_summary()
+
+        file_pdf_obj = FileTemp(
+            object_id=payment_plan_group.pk,
+            content_type=get_content_type_for_model(payment_plan_group),
+            created_by=user,
+        )
+        file_pdf_obj.file.save(filename, ContentFile(pdf))
+
+        payment_plan_group.export_pdf_file_summary = file_pdf_obj
+        payment_plan_group.save(update_fields=["export_pdf_file_summary", "updated_at"])
+
+        if payment_plan_group.business_area.enable_email_notification:
+            send_email_notification_on_commit(service, user)
+
+
+def export_pdf_payment_plan_group_summary_async_task(payment_plan_group: PaymentPlanGroup, user_id: str) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    AsyncRetryJob.queue_task(
+        instance=payment_plan_group,
+        owner_id=user_id,
+        job_name=export_pdf_payment_plan_group_summary_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_group_summary_async_task_action",
+        config={"payment_plan_group_id": payment_plan_group_id, "user_id": user_id},
+        group_key="payment",
+        description=f"Export payment plan group summary pdf for {payment_plan_group_id}",
     )
 
 

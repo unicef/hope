@@ -982,11 +982,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     vision_integration_enabled = serializers.BooleanField(read_only=True)
     vision_managed = serializers.BooleanField(read_only=True)
     vision = serializers.SerializerMethodField()
-    can_split = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    split_choices = serializers.SerializerMethodField()
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
@@ -1015,7 +1013,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "payments_conflicts_count",
             "delivery_mechanism",
             "volume_by_delivery_mechanism",
-            "split_choices",
             "exclusion_reason",
             "exclude_household_error",
             "bank_reconciliation_success",
@@ -1031,7 +1028,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "vision_integration_enabled",
             "vision_managed",
             "vision",
-            "can_split",
             "can_delete",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
@@ -1208,16 +1204,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_unsuccessful_payments_count(self, obj: PaymentPlan) -> int:
         return obj.unsuccessful_payments_for_follow_up().count()
 
-    def get_can_split(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status != PaymentPlan.Status.ACCEPTED:
-            return False
-
-        return not obj.splits.filter(
-            sent_to_payment_gateway=True,
-        ).exists()
-
     def get_total_households_count_with_valid_phone_no(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["valid_phone_count"]
 
@@ -1230,9 +1216,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
-
-    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
         return VolumeByDeliveryMechanismSerializer([obj], many=True).data
@@ -2160,11 +2143,14 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     can_send_to_payment_gateway = serializers.SerializerMethodField()
     batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
+    export_pdf_file_summary = serializers.SerializerMethodField()
     can_export_regular = serializers.SerializerMethodField()
     can_export_follow_up = serializers.SerializerMethodField()
     can_export_top_up = serializers.SerializerMethodField()
     can_export_top_up_amendment = serializers.SerializerMethodField()
     linked_groups = PaymentPlanGroupLinkedSerializer(read_only=True, many=True)
+    can_split = serializers.BooleanField(read_only=True)
+    split_choices = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
     can_create_top_up = serializers.SerializerMethodField()
     can_create_top_up_amendment = serializers.SerializerMethodField()
@@ -2185,15 +2171,22 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_send_to_payment_gateway",
             "batches",
             "delivery_import_file",
+            "export_pdf_file_summary",
             "can_export_regular",
             "can_export_follow_up",
             "can_export_top_up",
             "can_export_top_up_amendment",
             "linked_groups",
+            "can_split",
+            "split_choices",
             "can_create_follow_up",
             "can_create_top_up",
             "can_create_top_up_amendment",
         ]
+
+    @staticmethod
+    def get_split_choices(obj: PaymentPlanGroup) -> list[dict[str, Any]]:
+        return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     @staticmethod
     def get_can_create_follow_up(obj: PaymentPlanGroup) -> bool:
@@ -2285,6 +2278,11 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     def get_delivery_import_file(self, obj: PaymentPlanGroup) -> str | None:
         if obj.delivery_import_file_id and obj.delivery_import_file.file:
             return obj.delivery_import_file.file.url
+        return None
+
+    def get_export_pdf_file_summary(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.export_pdf_file_summary_id and obj.export_pdf_file_summary.file:
+            return obj.export_pdf_file_summary.file.url
         return None
 
     def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:

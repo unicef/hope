@@ -208,7 +208,7 @@ class FollowUpInstructionService:
             updated_payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
                 input_data=input_data,
                 user=user,
-                allow_instruction_managed=True,
+                as_manager=True,
             )
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
         return instruction

@@ -20,6 +20,7 @@ from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentPlanSplitFactory,
     PaymentVerificationPlanFactory,
 )
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
@@ -32,6 +33,7 @@ from hope.models import (
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
+    PaymentPlanSplit,
 )
 
 pytestmark = pytest.mark.django_db
@@ -868,3 +870,40 @@ def test_sync_finished_moves_top_up_group_with_its_top_up_plans(accepted_top_up_
     accepted_top_up_plan.refresh_from_db()
     assert accepted_top_up_group.status == PaymentPlanGroup.Status.FINISHED
     assert accepted_top_up_plan.status == PaymentPlan.Status.FINISHED
+
+
+def test_split_splits_every_plan_in_the_group_the_same_way(
+    accepted_group, locked_payment_plan, delivered_payment, second_accepted_payment_plan, second_plan_payment
+):
+    PaymentPlanGroupService(accepted_group).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
+
+    assert list(locked_payment_plan.splits.values_list("split_type", flat=True)) == [
+        PaymentPlanSplit.SplitType.BY_COLLECTOR
+    ]
+    assert list(second_accepted_payment_plan.splits.values_list("split_type", flat=True)) == [
+        PaymentPlanSplit.SplitType.BY_COLLECTOR
+    ]
+
+
+def test_split_rejects_group_not_accepted(locked_group):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(locked_group).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+    assert error.value.detail[0] == "Split is possible only within Status ACCEPTED"
+
+
+def test_split_rejects_group_already_sent_to_payment_gateway(accepted_group, locked_payment_plan, delivered_payment):
+    PaymentPlanSplitFactory(payment_plan=locked_payment_plan, sent_to_payment_gateway=True)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(accepted_group).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+    assert error.value.detail[0] == "Payment Plan Group is already sent to payment gateway"
+
+
+def test_can_split_is_true_for_accepted_group_not_sent_to_payment_gateway(accepted_group):
+    assert accepted_group.can_split is True
+
+
+def test_can_split_is_false_once_a_split_was_sent_to_payment_gateway(accepted_group, locked_payment_plan):
+    PaymentPlanSplitFactory(payment_plan=locked_payment_plan, sent_to_payment_gateway=True)
+
+    assert accepted_group.can_split is False

@@ -113,6 +113,7 @@ from hope.apps.payment.api.serializers import (
 )
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_delivery_xlsx_async_task,
+    export_pdf_payment_plan_group_summary_async_task,
     export_pdf_payment_plan_summary_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
@@ -191,7 +192,6 @@ from hope.models import (
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
-    PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -786,7 +786,6 @@ class PaymentPlanViewSet(
         "unlock_fsp",
         "send_to_payment_gateway",
         "fsp_extra_fields_import_xlsx",
-        "split",
     }
     program_model_field = "program_cycle__program"
     queryset = (
@@ -807,7 +806,6 @@ class PaymentPlanViewSet(
         "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_extra_fields_import_xlsx": PaymentPlanImportFileSerializer,
-        "split": SplitPaymentPlanSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
@@ -837,7 +835,6 @@ class PaymentPlanViewSet(
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
         "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
-        "split": [Permissions.PM_SPLIT],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
@@ -1352,37 +1349,6 @@ class PaymentPlanViewSet(
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["post"])
-    @transaction.atomic
-    def split(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        splits_sent_to_pg = payment_plan.splits.filter(
-            sent_to_payment_gateway=True,
-        )
-        if splits_sent_to_pg.exists():
-            raise ValidationError("Payment plan is already sent to payment gateway")
-
-        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
-            raise ValidationError("Payment plan must be accepted to make a split")
-
-        payments_no = request.data.get("payments_no")
-        split_type = request.data.get("split_type")
-        if not split_type:
-            raise ValidationError("split_type is required")
-        if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
-            if not payments_no:
-                raise ValidationError("Payment Number is required for split by records")
-            if (payment_plan.eligible_payments.count() // payments_no) > PaymentPlanSplit.MAX_CHUNKS:
-                raise ValidationError(f"Cannot split Payment Plan into more than {PaymentPlanSplit.MAX_CHUNKS} parts")
-
-        with transaction.atomic():
-            payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
-            payment_plan_service.split(split_type, payments_no)
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
@@ -2523,6 +2489,7 @@ class PaymentPlanGroupViewSet(
         "create_follow_up": PaymentPlanCreateFollowUpSerializer,
         "create_top_up": PaymentPlanCreateTopUpSerializer,
         "create_top_up_amendment": PaymentPlanCreateTopUpSerializer,
+        "split": SplitPaymentPlanSerializer,
     }
 
     permissions_by_action = {
@@ -2555,6 +2522,8 @@ class PaymentPlanGroupViewSet(
         "create_top_up": [Permissions.PM_CREATE],
         "top_up_amount_template": [Permissions.PM_CREATE],
         "create_top_up_amendment": [Permissions.PM_CREATE],
+        "split": [Permissions.PM_SPLIT],
+        "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
@@ -2573,6 +2542,13 @@ class PaymentPlanGroupViewSet(
             old_object=None,
             new_object=payment_plan_group,
         )
+
+    @staticmethod
+    def _validate_delivery_status(payment_plan_group: PaymentPlanGroup, action_label: str) -> None:
+        if payment_plan_group.status not in PaymentPlanGroup.DELIVERY_STATUSES:
+            raise ValidationError(
+                f"{action_label} is possible only within Status ACCEPTED or FINISHED, got {payment_plan_group.status}"
+            )
 
     def _create_linked_group_response(self, request: Request, plan_type: "PaymentPlan.PlanType") -> Response:
         """Shared body for the create-follow-up / create-top-up / create-top-up-amendment actions."""
@@ -2623,6 +2599,33 @@ class PaymentPlanGroupViewSet(
     @transaction.atomic
     def create_top_up_amendment(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._create_linked_group_response(request, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
+
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
+    def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan_group = self.get_object()
+        if payment_plan_group.status not in PaymentPlanGroup.SUMMARY_PDF_STATUSES:
+            raise ValidationError(
+                "Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, "
+                f"got {payment_plan_group.status}"
+            )
+        export_pdf_payment_plan_group_summary_async_task(payment_plan_group, str(request.user.pk))
+        return Response(
+            data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(request=SplitPaymentPlanSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"])
+    def split(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return self._run_status_action(
+            request,
+            lambda service: service.split(
+                serializer.validated_data["split_type"], serializer.validated_data.get("payments_no")
+            ),
+        )
 
     @extend_schema(responses={(200, XLSX_CONTENT_TYPE): OpenApiTypes.BINARY})
     @action(detail=True, methods=["get"], url_path="top-up-amount-template")
@@ -2691,6 +2694,7 @@ class PaymentPlanGroupViewSet(
     @transaction.atomic
     def delivery_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
+        self._validate_delivery_status(payment_plan_group, "Export")
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
 
@@ -2795,13 +2799,9 @@ class PaymentPlanGroupViewSet(
     @transaction.atomic
     def delivery_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
+        self._validate_delivery_status(payment_plan_group, "Import")
         if not payment_plan_group.can_start_background_action:
             raise ValidationError("Another background action is already in progress.")
-        importable_plans = payment_plan_group.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.CLOSED],
-        )
-        if not importable_plans.exists():
-            raise ValidationError("Import requires at least one payment plan in ACCEPTED, FINISHED, or CLOSED status.")
 
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
@@ -2986,6 +2986,7 @@ class PaymentPlanGroupViewSet(
         is locked for update to prevent double processing the same objects.
         """
         group = self.get_object()
+        self._validate_delivery_status(group, "Send to Payment Gateway")
 
         with transaction.atomic():
             PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)
@@ -3006,6 +3007,7 @@ class PaymentPlanGroupViewSet(
                 updated_plan = PaymentPlanService(plan).execute_update_status_action(
                     input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
                     user=request.user,
+                    as_manager=True,
                 )
                 log_create(
                     mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

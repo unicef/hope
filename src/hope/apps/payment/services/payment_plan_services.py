@@ -182,14 +182,20 @@ class PaymentPlanService:
         self,
         input_data: dict,
         user: "AbstractBaseUser | AnonymousUser",
-        allow_instruction_managed: bool = False,
+        as_manager: bool = False,
     ) -> PaymentPlan:
-        """Get function from get_action_function and execute it return PaymentPlan object."""
-        if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
-            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
-        payment_plan_group = self.payment_plan.payment_plan_group
-        if payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
-            raise ValidationError("This Payment Plan is managed by its Payment Plan Group.")
+        """Run the action named in ``input_data`` on the plan and return it.
+
+        A plan's workflow belongs to its manager — its Payment Plan Group once that is no longer OPEN, or its
+        Follow-Up Instruction. A user acting on the plan itself is refused then; the manager (and the system,
+        e.g. Vision or an admin retry) passes ``as_manager=True``.
+        """
+        if not as_manager:
+            if self.payment_plan.is_instruction_managed:
+                raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
+            payment_plan_group = self.payment_plan.payment_plan_group
+            if payment_plan_group is not None and payment_plan_group.status != PaymentPlanGroup.Status.OPEN:
+                raise ValidationError("This Payment Plan is managed by its Payment Plan Group.")
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = cast("User", user)

@@ -44,7 +44,6 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
     Program,
     Rule,
 )
@@ -120,7 +119,6 @@ def payment_plan_actions_context(
         "url_export_pdf_payment_plan_summary": reverse(
             "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
         ),
-        "url_pp_split": reverse("api:payments:payment-plans-split", kwargs=url_kwargs),
         "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
     }
 
@@ -1256,103 +1254,6 @@ def test_pp_send_to_payment_gateway(
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
-        ([Permissions.PM_SPLIT], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_split(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="123",
-    )
-    split = PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"], sent_to_payment_gateway=True)
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
-    payment_plan_actions_context["pp"].save()
-    payment_plan_actions_context["pp"].payment_plan_group.financial_service_provider = fsp
-    payment_plan_actions_context["pp"].payment_plan_group.save(update_fields=["financial_service_provider"])
-    data = {"payments_no": 1, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS}
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_split"],
-        data,
-        format="json",
-    )
-
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment plan is already sent to payment gateway" in response.data
-
-        split.sent_to_payment_gateway = False
-        split.save()
-        response_2 = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            data,
-            format="json",
-        )
-        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment plan must be accepted to make a split" in response_2.data
-
-        payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-        payment_plan_actions_context["pp"].save()
-        payment_plan_actions_context["pp"].eligible_payments.delete()
-        response_3 = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
-            format="json",
-        )
-        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment Number is required for split by records" in response_3.data
-
-        response_missing_split_type = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            {"payments_no": 1},
-            format="json",
-        )
-        assert response_missing_split_type.status_code == status.HTTP_400_BAD_REQUEST
-        assert "split_type is required" in response_missing_split_type.data
-
-        fsp_api = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="123",
-        )
-        PaymentFactory.create_batch(
-            3,
-            parent=payment_plan_actions_context["pp"],
-            status=Payment.STATUS_PENDING,
-            financial_service_provider=fsp_api,
-        )
-        with patch.object(PaymentPlanSplit, "MAX_CHUNKS", 2):
-            response_4 = payment_plan_actions_context["client"].post(
-                payment_plan_actions_context["url_pp_split"],
-                data,
-                format="json",
-            )
-            assert response_4.status_code == status.HTTP_400_BAD_REQUEST
-            assert "Cannot split Payment Plan into more than 2 parts" in response_4.data
-
-        with patch.object(PaymentPlanSplit, "MIN_NO_OF_PAYMENTS_IN_CHUNK", 1):
-            response_ok = payment_plan_actions_context["client"].post(
-                payment_plan_actions_context["url_pp_split"],
-                {"payments_no": 1, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
-                format="json",
-            )
-            assert response_ok.status_code == status.HTTP_200_OK
-        assert "id" in response_ok.data
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
         ([Permissions.PM_EXPORT_PDF_SUMMARY], status.HTTP_200_OK),
         ([], status.HTTP_403_FORBIDDEN),
     ],
@@ -1786,31 +1687,6 @@ def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
         format="json",
     )
     assert response.status_code == status.HTTP_200_OK
-
-
-def test_split_with_split_type_no_split_skips_records_branch(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SPLIT],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
-
-    with patch("hope.apps.payment.api.views.PaymentPlanService") as mock_service_cls:
-        mock_service_cls.return_value.split.return_value = None
-        response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            {"split_type": PaymentPlanSplit.SplitType.NO_SPLIT},
-            format="json",
-        )
-    assert response.status_code == status.HTTP_200_OK
-    mock_service_cls.return_value.split.assert_called_once_with(PaymentPlanSplit.SplitType.NO_SPLIT, None)
 
 
 def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(

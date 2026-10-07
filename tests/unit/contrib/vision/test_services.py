@@ -892,6 +892,7 @@ def test_process_callback_assigns_fc_releases_and_sends_to_pg(
     mock_send_to_pg.assert_called_once_with(
         input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
         user=vision_payment_plan.created_by,
+        as_manager=True,
     )
     assert mock_activity_log.call_args.kwargs["user"] == vision_payment_plan.created_by
     assert mock_activity_log.call_args.kwargs["programs"] == vision_payment_plan.program.pk
@@ -957,6 +958,7 @@ def test_manual_fc_item_recovery_assigns_selected_items_and_continues_automatic_
     mock_send_to_pg.assert_called_once_with(
         input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
         user=vision_payment_plan.created_by,
+        as_manager=True,
     )
     mock_activity_log.assert_called_once()
 

@@ -135,6 +135,22 @@ def download_payment_plan_summary_pdf(
 
 
 @login_required
+def download_payment_plan_group_summary_pdf(request: "HttpRequest", payment_plan_group_id: str) -> "HttpResponse":
+    payment_plan_group = get_object_or_404(PaymentPlanGroup, id=payment_plan_group_id)
+
+    if not request.user.has_perm(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan_group.business_area):
+        raise PermissionDenied({"required_permissions": [Permissions.PM_EXPORT_PDF_SUMMARY.value]})
+
+    export_pdf_file_summary = payment_plan_group.export_pdf_file_summary
+    if not (export_pdf_file_summary and export_pdf_file_summary.file):
+        log_and_raise(
+            f"PDF file not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}",
+            error_type=FileNotFoundError,
+        )
+    return redirect(export_pdf_file_summary.file.url)
+
+
+@login_required
 def download_payment_plan_invoice_report_pdf(request: "HttpRequest", report_id: str) -> "HttpResponse":
     report = WesternUnionPaymentPlanReport.objects.get(id=report_id)
     payment_plan = report.payment_plan

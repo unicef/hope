@@ -38,6 +38,8 @@ from hope.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx_async_task_action,
     export_payment_plan_group_delivery_xlsx_async_task,
     export_payment_plan_group_delivery_xlsx_async_task_action,
+    export_pdf_payment_plan_group_summary_async_task,
+    export_pdf_payment_plan_group_summary_async_task_action,
     export_pdf_payment_plan_summary_async_task,
     export_pdf_payment_plan_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
@@ -2378,3 +2380,53 @@ def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
     assert lower_bound <= called_since <= upper_bound
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.celery_tasks.PaymentPlanGroupPDFExportService.generate_pdf_summary")
+def test_export_pdf_payment_plan_group_summary_action_replaces_existing_file_and_sends_email(
+    mock_generate_pdf_summary: Mock,
+    mock_send_email: Mock,
+    payment_plan: PaymentPlan,
+    user,
+) -> None:
+    payment_plan_group = payment_plan.payment_plan_group
+    old_file = FileTempFactory(
+        object_id=payment_plan_group.pk,
+        content_type=get_content_type_for_model(payment_plan_group),
+        created_by=user,
+    )
+    payment_plan_group.export_pdf_file_summary = old_file
+    payment_plan_group.save(update_fields=["export_pdf_file_summary"])
+    payment_plan.business_area.enable_email_notification = True
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    job = AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_group_summary_async_task_action",
+        config={"payment_plan_group_id": str(payment_plan_group.pk), "user_id": str(user.pk)},
+    )
+    mock_generate_pdf_summary.return_value = (b"%PDF-1.4 test", "summary.pdf")
+
+    export_pdf_payment_plan_group_summary_async_task_action(job)
+
+    payment_plan_group.refresh_from_db(fields=["export_pdf_file_summary"])
+    assert payment_plan_group.export_pdf_file_summary_id is not None
+    assert payment_plan_group.export_pdf_file_summary_id != old_file.pk
+    assert FileTemp.objects.filter(pk=old_file.pk).exists() is False
+    mock_send_email.assert_called_once()
+
+
+def test_export_pdf_payment_plan_group_summary_queues_retry_job(django_capture_on_commit_callbacks) -> None:
+    payment_plan_group = PaymentPlanGroupFactory()
+    user = UserFactory()
+
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            export_pdf_payment_plan_group_summary_async_task(payment_plan_group, str(user.pk))
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.action == "hope.apps.payment.celery_tasks.export_pdf_payment_plan_group_summary_async_task_action"
+    assert job.content_object == payment_plan_group
+    assert job.config == {"payment_plan_group_id": str(payment_plan_group.pk), "user_id": str(user.pk)}
+    assert job.description == f"Export payment plan group summary pdf for {payment_plan_group.pk}"
+    mock_queue.assert_called_once()

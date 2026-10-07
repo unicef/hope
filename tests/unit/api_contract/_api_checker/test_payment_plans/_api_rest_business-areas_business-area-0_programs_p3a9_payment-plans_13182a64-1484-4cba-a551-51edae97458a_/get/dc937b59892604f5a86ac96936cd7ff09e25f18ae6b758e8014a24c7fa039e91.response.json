@@ -68,32 +68,6 @@
                 "volume_usd": null
             }
         ],
-        "split_choices": [
-            {
-                "name": "By Admin Area 1",
-                "value": "BY_ADMIN_AREA1"
-            },
-            {
-                "name": "By Admin Area 2",
-                "value": "BY_ADMIN_AREA2"
-            },
-            {
-                "name": "By Admin Area 3",
-                "value": "BY_ADMIN_AREA3"
-            },
-            {
-                "name": "By Collector",
-                "value": "BY_COLLECTOR"
-            },
-            {
-                "name": "By Records",
-                "value": "BY_RECORDS"
-            },
-            {
-                "name": "No Split",
-                "value": "NO_SPLIT"
-            }
-        ],
         "exclusion_reason": null,
         "exclude_household_error": null,
         "bank_reconciliation_success": 0,
@@ -127,7 +101,6 @@
             "fc_num": null,
             "error_code": null
         },
-        "can_split": false,
         "can_delete": true,
         "supporting_documents": [],
         "total_households_count_with_valid_phone_no": 0,

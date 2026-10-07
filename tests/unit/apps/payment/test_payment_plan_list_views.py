@@ -18,7 +18,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
-    PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
@@ -437,7 +436,6 @@ def test_payment_plan_detail(
     assert payment_plan["total_withdrawn_households_count"] == 0
     assert payment_plan["unsuccessful_payments_count"] == 0
     assert payment_plan["can_send_to_payment_gateway"] is False
-    assert payment_plan["can_split"] is False
     assert payment_plan["total_households_count_with_valid_phone_no"] == 0
     purpose = payment_plan_detail_context["purpose"]
     assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
@@ -481,51 +479,6 @@ def test_follow_ups_and_top_ups_return_correct_children(
     follow_up_ids = [p["id"] for p in data["follow_ups"]]
     assert top_up_ids == [str(top_up.id)]
     assert follow_up_ids == [str(follow_up.id)]
-
-
-def test_get_can_split(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    PaymentPlanSplitFactory(payment_plan=payment_plan_detail_context["pp"], sent_to_payment_gateway=True)
-    payment_plan_detail_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_detail_context["pp"].save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan = response.json()
-    assert payment_plan["can_split"] is False
-
-
-def test_get_can_split_returns_false_when_instruction_managed(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    instruction = FollowUpInstructionFactory(
-        program=payment_plan_detail_context["program_active"],
-        business_area=payment_plan_detail_context["business_area"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.follow_up_instruction = instruction
-    pp.payment_plan_group = None
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_split"] is False
 
 
 def test_filter_by_status(payment_plan_filter_context: dict[str, Any]) -> None:
