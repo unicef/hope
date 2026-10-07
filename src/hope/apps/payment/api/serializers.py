@@ -2071,6 +2071,55 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
         ]
 
 
+class PaymentPlanGroupManagerialSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    """Row of the managerial console: the group with its programme, totals and the last approval step."""
+
+    status_display = serializers.CharField(source="get_status_display")
+    program = serializers.CharField(source="cycle.program.name")
+    program_id = serializers.UUIDField(source="cycle.program.id")
+    program_code = serializers.CharField(source="cycle.program.code")
+    cycle_title = serializers.CharField(source="cycle.title")
+    financial_service_provider = serializers.CharField(
+        source="financial_service_provider.name", read_only=True, allow_null=True
+    )
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    payment_plans_count = serializers.IntegerField(read_only=True)
+    total_households_count = serializers.IntegerField(source="households_total", read_only=True)
+    total_entitled_quantity_usd = serializers.DecimalField(
+        source="entitled_usd_total", max_digits=15, decimal_places=2, read_only=True
+    )
+    last_approval_process_date = serializers.DateTimeField(read_only=True)
+    last_approval_process_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "status_display",
+            "program",
+            "program_id",
+            "program_code",
+            "cycle_title",
+            "financial_service_provider",
+            "currency",
+            "currency_vision_code",
+            "payment_plans_count",
+            "total_households_count",
+            "total_entitled_quantity_usd",
+            "last_approval_process_date",
+            "last_approval_process_by",
+            "admin_url",
+        )
+
+    @staticmethod
+    def get_last_approval_process_by(obj: PaymentPlanGroup) -> str | None:
+        return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
+
+
 class PaymentPlanGroupConfigurationMixin(serializers.Serializer):
     financial_service_provider = ScopedRelatedField(
         queryset=FinancialServiceProvider.objects.all(),

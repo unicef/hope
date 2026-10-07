@@ -14,13 +14,15 @@ from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
-from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan import PaymentPlan, last_approval_step
 from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from django.db.models import QuerySet
 
-    from hope.models import AcceptanceProcessThreshold, BusinessArea, Program
+    from hope.models import AcceptanceProcessThreshold, BusinessArea, Program, User
 
 
 class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
@@ -210,6 +212,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         if self.status not in self.CHILD_GROUP_SOURCE_STATUSES:
             return []
         return [plan for plan in payment_plans if plan.eligible_payments_for_child_plan().exists()]
+
+    @property
+    def last_approval_process_date(self) -> "datetime | None":
+        return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_date
+
+    @property
+    def last_approval_process_by(self) -> "User | None":
+        return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_by
 
     @property
     def can_split(self) -> bool:

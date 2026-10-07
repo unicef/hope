@@ -63,6 +63,27 @@ class ModifiedData:
     modified_by: Optional["User"] = None
 
 
+def last_approval_step(approval_process: "ApprovalProcess | None", status: str, fallback: datetime) -> ModifiedData:
+    """Who took the approval step that led to ``status`` on a group (or an instruction-managed plan), and when."""
+    if approval_process:
+        if status == PaymentPlan.Status.IN_APPROVAL:
+            return ModifiedData(
+                approval_process.sent_for_approval_date,  # type: ignore[arg-type]
+                approval_process.sent_for_approval_by,
+            )
+        approval_type_by_status: dict[str, str] = {
+            PaymentPlan.Status.IN_AUTHORIZATION: Approval.APPROVAL,
+            PaymentPlan.Status.IN_REVIEW: Approval.AUTHORIZATION,
+            PaymentPlan.Status.ACCEPTED: Approval.FINANCE_RELEASE,
+        }
+        approval_type = approval_type_by_status.get(status)
+        if approval_type and (
+            approval := approval_process.approvals.filter(type=approval_type).order_by("created_at").last()
+        ):
+            return ModifiedData(approval.created_at, approval.created_by)
+    return ModifiedData(fallback)
+
+
 class PaymentPlan(
     TimeStampedUUIDModel,
     InternalDataFieldModel,
@@ -902,28 +923,7 @@ class PaymentPlan(
         return self.approval_process.first()
 
     def _get_last_approval_process_data(self) -> ModifiedData:
-        approval_process = self.last_approval_process
-        if approval_process:
-            if self.status == PaymentPlan.Status.IN_APPROVAL:
-                return ModifiedData(
-                    approval_process.sent_for_approval_date,  # type: ignore[arg-type]
-                    approval_process.sent_for_approval_by,
-                )
-            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
-                approval = approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last()
-                if approval:
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.IN_REVIEW:
-                approval = approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
-                if approval:
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.ACCEPTED and (
-                approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
-                .order_by("created_at")
-                .last()
-            ):
-                return ModifiedData(approval.created_at, approval.created_by)
-        return ModifiedData(self.updated_at)
+        return last_approval_step(self.last_approval_process, self.status, self.updated_at)
 
     # from generic pp
     def get_exchange_rate(

@@ -9,7 +9,8 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Count, Q, QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -89,6 +90,7 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanGroupDeliveryExportSerializer,
     PaymentPlanGroupDetailSerializer,
     PaymentPlanGroupListSerializer,
+    PaymentPlanGroupManagerialSerializer,
     PaymentPlanGroupReconciliationImportSerializer,
     PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
@@ -182,7 +184,6 @@ from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import (
     Account,
     AccountAttachment,
-    BusinessArea,
     DeliveryMechanism,
     FileTemp,
     FinancialInstitution,
@@ -2013,29 +2014,44 @@ class TargetPopulationViewSet(
 
 class PaymentPlanManagerialViewSet(
     BusinessAreaProgramsAccessMixin,
-    PaymentPlanMixin,
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = PaymentPlan.objects.all()
-    PERMISSIONS = [
-        Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
-    ]
-    program_model_field = "program_cycle__program"
+    """Managerial console: the groups awaiting approval, authorization or release, and bulk actions on them."""
+
+    MANAGERIAL_STATUSES = (
+        PaymentPlanGroup.Status.IN_APPROVAL,
+        PaymentPlanGroup.Status.IN_AUTHORIZATION,
+        PaymentPlanGroup.Status.IN_REVIEW,
+        PaymentPlanGroup.Status.ACCEPTED,
+    )
+    ACTION_PERMISSIONS = {
+        PaymentPlan.Action.APPROVE.value: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+        PaymentPlan.Action.AUTHORIZE.value: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+        PaymentPlan.Action.REVIEW.value: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+    }
+
+    queryset = PaymentPlanGroup.objects.all()
+    serializer_class = PaymentPlanGroupManagerialSerializer
+    PERMISSIONS = [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL]
+    business_area_model_field = "cycle__program__business_area"
+    program_model_field = "cycle__program"
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    filterset_class = PaymentPlanGroupFilter
+    search_fields = ("unicef_id", "id", "^name")
 
     def get_queryset(self) -> QuerySet:
         return (
             super()
             .get_queryset()
-            .filter(
-                status__in=[
-                    PaymentPlan.Status.IN_APPROVAL,
-                    PaymentPlan.Status.IN_AUTHORIZATION,
-                    PaymentPlan.Status.IN_REVIEW,
-                    PaymentPlan.Status.ACCEPTED,
-                ],
+            .filter(status__in=self.MANAGERIAL_STATUSES)
+            .select_related("cycle__program", "financial_service_provider", "currency")
+            .annotate(
+                payment_plans_count=Count("payment_plans"),
+                households_total=Coalesce(Sum("payment_plans__total_households_count"), 0),
+                entitled_usd_total=Coalesce(Sum("payment_plans__total_entitled_quantity_usd"), Decimal(0)),
             )
-            .select_related("program_cycle__program")
+            .order_by("-created_at")
         )
 
     @etag_decorator(PaymentPlanKeyConstructor)
@@ -2055,73 +2071,36 @@ class PaymentPlanManagerialViewSet(
         serializer.is_valid(raise_exception=True)
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
-        input_data = {"action": action_name, "comment": comment}
-        payment_plans: QuerySet[PaymentPlan] = PaymentPlan.objects.filter(
-            id__in=serializer.validated_data["ids"]
-        ).select_related(
-            "business_area",
-            "program_cycle__program",
-            "imported_file",
-            "export_file_entitlement",
-            "export_file_delivery",
-        )
-        with transaction.atomic():
-            for payment_plan in payment_plans:
-                self._perform_payment_plan_status_action(
-                    payment_plan,
-                    input_data,
-                    self.business_area,
-                    request,
-                )
-
+        payment_plan_groups = PaymentPlanGroup.objects.filter(
+            id__in=serializer.validated_data["ids"], cycle__program__business_area=self.business_area
+        ).select_related("cycle__program")
+        for payment_plan_group in payment_plan_groups:
+            self._perform_group_action(payment_plan_group, action_name, comment, request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @transaction.atomic
-    def _perform_payment_plan_status_action(
-        self,
-        payment_plan: PaymentPlan,
-        input_data: dict,
-        business_area: BusinessArea,
-        request: Request,
+    def _perform_group_action(
+        self, payment_plan_group: PaymentPlanGroup, action_name: str, comment: str, request: Request
     ) -> None:
-        if input_data["action"] == PaymentPlan.Action.REVIEW.value and payment_plan.vision_managed:
-            return
-        if payment_plan.is_instruction_managed:
-            raise ValidationError("This Payment Plan is managed by a Follow Up Instruction.")
-        perm = self._get_action_permission(input_data["action"])
-        if not self.request.user.has_perm(
-            perm,  # type: ignore
-            payment_plan.program_cycle.program or business_area,
+        if action_name == PaymentPlan.Action.REVIEW.value and any(
+            payment_plan.vision_managed for payment_plan in payment_plan_group.payment_plans.all()
         ):
-            raise PermissionDenied(detail={"required_permissions": [perm]})
+            return
+        permission = self.ACTION_PERMISSIONS[action_name]
+        if not request.user.has_perm(permission.value, payment_plan_group.cycle.program):
+            raise PermissionDenied(detail={"required_permissions": [permission.value]})
 
-        old_payment_plan = copy_model_object(payment_plan)
-        if old_payment_plan.imported_file:
-            old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
-        if old_payment_plan.export_file_entitlement:
-            old_payment_plan.export_file_entitlement = copy_model_object(payment_plan.export_file_entitlement)
-        if old_payment_plan.export_file_delivery:
-            old_payment_plan.export_file_delivery = copy_model_object(payment_plan.export_file_delivery)
-
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user
+        old_payment_plan_group = copy_model_object(payment_plan_group)
+        payment_plan_group = PaymentPlanGroupService(payment_plan_group).acceptance_process(
+            action_name, cast("User", request.user), comment
         )
         log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
+            mapping=PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+            business_area_field="cycle.program.business_area",
             user=request.user,
-            programs=payment_plan.program_cycle.program_id,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
+            programs=payment_plan_group.cycle.program_id,
+            old_object=old_payment_plan_group,
+            new_object=payment_plan_group,
         )
-
-    def _get_action_permission(self, action_name: str) -> str | None:
-        action_to_permissions_map = {
-            PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
-            PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
-            PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
-        }
-        return action_to_permissions_map.get(action_name)
 
 
 class AccountViewSet(
