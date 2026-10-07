@@ -299,6 +299,15 @@ def test_postcondition_failure_skips_post_swap_deltas(program: Program, es_swap_
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_successful_run_ends_with_finished_summary(program: Program, es_aliased: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_aliased), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=out)
+
+    assert out.getvalue().splitlines()[-1] == "Reindex finished: 1/1 program(s) reindexed successfully."
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_lock_held_by_another_run_refuses(program: Program, es_locked: MagicMock) -> None:
     with patch(GET_CONN, return_value=es_locked), pytest.raises(CommandError, match="lock"):
         call_command(CMD, program=str(program.id), stdout=StringIO())

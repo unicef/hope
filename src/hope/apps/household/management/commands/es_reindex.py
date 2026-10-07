@@ -169,6 +169,11 @@ class Command(BaseCommand):
 
         if failed:
             raise CommandError(f"{len(failed)} program(s) failed: {[f'{c}: {m}' for c, _, m in failed]}")
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Reindex finished: {len(code_by_id)}/{len(code_by_id)} program(s) reindexed successfully."
+            )
+        )
 
     @staticmethod
     def _scope(opts: dict) -> dict:
