@@ -491,6 +491,14 @@ def individual_data_change_ticket_without_program(
 
 
 @pytest.fixture
+def household_data_change_ticket_without_program(
+    household_data_change_grievance_ticket: GrievanceTicket,
+) -> GrievanceTicket:
+    household_data_change_grievance_ticket.programs.clear()
+    return household_data_change_grievance_ticket
+
+
+@pytest.fixture
 def complaint_ticket_for_approval(complaint_ticket: GrievanceTicket) -> GrievanceTicket:
     complaint_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
     complaint_ticket.save(update_fields=["status"])
@@ -1719,13 +1727,6 @@ def test_update_grievance_ticket_add_individual_with_photo(
             lambda individual_data: individual_data["photo"],
             id="add-individual",
         ),
-        pytest.param(
-            "individual_data_change_ticket_without_program",
-            "individual_data_update_issue_type_extras",
-            "individual_data_update_ticket_details",
-            lambda individual_data: individual_data["photo"]["value"],
-            id="individual-data-update",
-        ),
     ],
 )
 def test_update_grievance_ticket_stores_the_photo_under_the_business_area_without_a_program(
@@ -1763,6 +1764,78 @@ def test_update_grievance_ticket_stores_the_photo_under_the_business_area_withou
     ticket.refresh_from_db()
     individual_data = getattr(ticket, details_attribute).individual_data
     assert read_photo(individual_data).startswith("2026/afghanistan/_unassigned/")
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_stores_the_household_consent_sign_under_the_household_program(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    one_pixel_photo: SimpleUploadedFile,
+    household_data_change_ticket_without_program: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    url = reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={"business_area_slug": afghanistan.slug, "pk": str(household_data_change_ticket_without_program.pk)},
+    )
+
+    client = api_client(user)
+    response = client.patch(
+        url,
+        {"extras.household_data_update_issue_type_extras.household_data.consent_sign": one_pixel_photo},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    household_data_change_ticket_without_program.refresh_from_db()
+    household_data = household_data_change_ticket_without_program.household_data_update_ticket_details.household_data
+    assert household_data["consent_sign"]["value"].startswith(
+        f"{program.start_date.year}/{afghanistan.slug}/{program.code}/"
+    )
+
+
+@pytest.mark.usefixtures("mock_elasticsearch")
+def test_update_grievance_ticket_stores_the_individual_photo_under_the_individual_program(
+    api_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    one_pixel_photo: SimpleUploadedFile,
+    individual_data_change_ticket_without_program: GrievanceTicket,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    url = reverse(
+        "api:grievance-tickets:grievance-tickets-global-detail",
+        kwargs={"business_area_slug": afghanistan.slug, "pk": str(individual_data_change_ticket_without_program.pk)},
+    )
+
+    client = api_client(user)
+    response = client.patch(
+        url,
+        {"extras.individual_data_update_issue_type_extras.individual_data.photo": one_pixel_photo},
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_200_OK, response.json()
+    individual_data_change_ticket_without_program.refresh_from_db()
+    ticket_details = individual_data_change_ticket_without_program.individual_data_update_ticket_details
+    assert ticket_details.individual_data["photo"]["value"].startswith(
+        f"{program.start_date.year}/{afghanistan.slug}/{program.code}/"
+    )
 
 
 @pytest.mark.usefixtures("mock_elasticsearch")

@@ -316,11 +316,12 @@ def test_add_individual_stores_the_document_photo_under_the_business_area_withou
     assert photoraw.startswith("2026/afghanistan/_unassigned/")
 
 
-@freeze_time("2026-09-09 12:00:00")
-def test_individual_data_update_stores_the_document_photo_under_the_business_area_without_a_program(
+def test_individual_data_update_stores_the_document_photo_under_the_individual_program(
     authenticated_client: Any,
     grant_create_permission: None,
     user: User,
+    business_area: BusinessArea,
+    program: Program,
     grievance_context: dict[str, Any],
     list_url: str,
     load_test_image: Callable[[], SimpleUploadedFile],
@@ -350,7 +351,40 @@ def test_individual_data_update_stores_the_document_photo_under_the_business_are
     ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
     assert list(ticket.programs.all()) == []
     photoraw = response.data[0]["ticket_details"]["individual_data"]["documents"][0]["value"]["photoraw"]
-    assert photoraw.startswith("2026/afghanistan/_unassigned/")
+    assert photoraw.startswith(f"{program.start_date.year}/{business_area.slug}/{program.code}/")
+
+
+def test_household_data_update_stores_the_consent_sign_under_the_household_program(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    business_area: BusinessArea,
+    program: Program,
+    grievance_context: dict[str, Any],
+    list_url: str,
+    load_test_image: Callable[[], SimpleUploadedFile],
+) -> None:
+    extra_path = "extras.issue_type.household_data_update_issue_type_extras."
+    response = authenticated_client.post(
+        list_url,
+        {
+            "description": "Test",
+            "assigned_to": str(user.id),
+            "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+            "consent": True,
+            "language": "PL",
+            f"{extra_path}household": str(grievance_context["household"].id),
+            f"{extra_path}household_data.consent_sign": load_test_image(),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    assert list(ticket.programs.all()) == []
+    consent_sign = ticket.household_data_update_ticket_details.household_data["consent_sign"]["value"]
+    assert consent_sign.startswith(f"{program.start_date.year}/{business_area.slug}/{program.code}/")
 
 
 def test_grievance_update_individual_data_change(

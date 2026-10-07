@@ -9,7 +9,6 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.currency_resolution import resolve_active_currency_or_none
-from hope.apps.core.upload_paths import get_program
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task_single_individual_async_task,
@@ -82,7 +81,7 @@ def _validate_identification_key(model: type[Household] | type[Individual], obj:
 
 
 class IndividualDataUpdateService(DataChangeService):
-    def save(self) -> list[GrievanceTicket]:  # noqa: PLR0915
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
         individual = individual_data_update_issue_type_extras.get("individual")
@@ -99,12 +98,11 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
-        scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
-        handle_image_field(individual_data, "photo", scope_of)
-        handle_image_field(individual_data, "consent_sign", scope_of)
+        handle_image_field(individual_data, "photo", individual)
+        handle_image_field(individual_data, "consent_sign", individual)
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals", scope_of)
+        save_images(flex_fields, "individuals", individual)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
@@ -122,7 +120,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document, scope_of), "approve_status": False} for document in documents
+            {"value": handle_document(document, individual), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove
@@ -186,11 +184,10 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
-        scope_of = get_program(self.grievance_ticket) or self.grievance_ticket
-        handle_image_field(new_individual_data, "photo", scope_of)
-        handle_image_field(new_individual_data, "consent_sign", scope_of)
+        handle_image_field(new_individual_data, "photo", individual)
+        handle_image_field(new_individual_data, "consent_sign", individual)
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals", scope_of)
+        save_images(flex_fields, "individuals", individual)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
@@ -209,7 +206,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document, scope_of), "approve_status": False} for document in documents
+            {"value": handle_document(document, individual), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove
