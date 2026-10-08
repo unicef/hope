@@ -64,7 +64,7 @@ Read-only state report::
 
 from datetime import UTC, datetime
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 import uuid
 
 from constance import config
@@ -88,6 +88,31 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 DELTA_SINCE_BUFFER_MINUTES = 5
+MAX_SHARDS_SETTING = "cluster.max_shards_per_node"
+
+
+class ProgramOutcome(NamedTuple):
+    skipped: bool
+    message: str
+
+
+class FleetResult(NamedTuple):
+    reindexed: int
+    skipped: int
+    failed: list
+
+
+class ShardCapacity(NamedTuple):
+    needed: int
+    limit: int
+    open_shards: int
+
+    @property
+    def free(self) -> int:
+        return self.limit - self.open_shards
+
+    def __str__(self) -> str:
+        return f"need {self.needed}, free {self.free} ({self.open_shards}/{self.limit} open)"
 
 
 class Command(BaseCommand):
@@ -157,23 +182,29 @@ class Command(BaseCommand):
         if opts["status"]:
             self._report_status(es, code_by_id)
             return
+        capacity = self._shard_capacity(es, code_by_id, opts)
         if opts["dry_run"]:
             self._report_plan(es, code_by_id, opts)
+            self.stdout.write(f"Shard capacity: {capacity}")
+            self._ensure_shard_capacity(capacity)
             return
 
+        self._ensure_shard_capacity(capacity)
         self._acquire_lock(es, force=opts["force_unlock"])
         try:
-            failed = self._reindex_programs(es, code_by_id, opts)
+            result = self._reindex_programs(es, code_by_id, opts)
         finally:
             self._release_lock(es)
 
-        if failed:
-            raise CommandError(f"{len(failed)} program(s) failed: {[f'{c}: {m}' for c, _, m in failed]}")
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Reindex finished: {len(code_by_id)}/{len(code_by_id)} program(s) reindexed successfully."
-            )
+        summary = (
+            f"{result.reindexed} reindexed, {result.skipped} skipped (up-to-date), "
+            f"{len(result.failed)} failed of {len(code_by_id)}"
         )
+        if result.failed:
+            raise CommandError(
+                f"{len(result.failed)} program(s) failed ({summary}): {[f'{c}: {m}' for c, _, m in result.failed]}"
+            )
+        self.stdout.write(self.style.SUCCESS(f"Reindex finished: {summary} program(s)."))
 
     @staticmethod
     def _scope(opts: dict) -> dict:
@@ -223,11 +254,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"{code}: SKIP - not an alias yet: {not_aliased} (run es_bootstrap_aliases)")
                 continue
             current = {n: t for n in names if (t := self._alias_target(es, n)) is not None}
-            if (
-                not opts["force"]
-                and not opts["sweep_wrecks"]
-                and all(self._resumable(es, doc, current[doc._index._name]) for doc in docs)
-            ):
+            if self._would_skip(es, docs, current, opts):
                 self.stdout.write(f"{code}: up-to-date {list(current.values())} - would skip (--force to rebuild)")
                 continue
             try:
@@ -244,6 +271,56 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"{code}: REINDEX {list(current.values())} -> _{suffix}, then swap both aliases{resume_note}"
             )
+
+    def _shard_capacity(self, es: Elasticsearch, code_by_id: dict, opts: dict) -> ShardCapacity:
+        """Shards this run will ADD vs what the cluster still allows.
+
+        The need is cumulative over the whole scope: every old ``_vN`` stays open (rollback
+        target) until es_drop_old_index_versions, so nothing is freed while the fleet runs.
+        ES enforces ``max_shards_per_node`` x data nodes against OPEN shards - active and
+        unassigned, replicas included.
+        """
+        needed = 0
+        for pid in code_by_id:
+            docs = self._doc_classes(str(pid))
+            targets = {doc._index._name: self._alias_target(es, doc._index._name) for doc in docs}
+            # not an alias -> the run fails it before creating anything; up-to-date -> skipped
+            if None in targets.values() or self._would_skip(es, docs, targets, opts):
+                continue
+            needed += sum(self._index_shards(doc) for doc in docs)
+        cluster_settings = es.cluster.get_settings(include_defaults=True, flat_settings=True)
+        per_node = next(
+            int(cluster_settings[scope][MAX_SHARDS_SETTING])
+            for scope in ("transient", "persistent", "defaults")
+            if MAX_SHARDS_SETTING in cluster_settings[scope]
+        )
+        health = es.cluster.health()
+        return ShardCapacity(
+            needed=needed,
+            limit=per_node * health["number_of_data_nodes"],
+            open_shards=health["active_shards"] + health["unassigned_shards"],
+        )
+
+    @staticmethod
+    def _index_shards(doc_class: type) -> int:
+        index_settings = doc_class._index.to_dict().get("settings", {})
+        return int(index_settings.get("number_of_shards", 1)) * (1 + int(index_settings.get("number_of_replicas", 0)))
+
+    @staticmethod
+    def _ensure_shard_capacity(capacity: ShardCapacity) -> None:
+        if capacity.needed > capacity.free:
+            raise CommandError(
+                f"Not enough shard capacity: {capacity}. Run es_drop_old_index_versions, raise "
+                f"cluster.max_shards_per_node, or narrow the scope (--business-area / --program)."
+            )
+
+    def _would_skip(self, es: Elasticsearch, docs: list, targets: dict, opts: dict) -> bool:
+        """Fleet-level resume: alias targets already carry the current code mapping stamp."""
+        return (
+            not opts["force"]
+            and not opts["sweep_wrecks"]
+            and all(self._resumable(es, doc, targets[doc._index._name]) for doc in docs)
+        )
 
     def _acquire_lock(self, es: Elasticsearch, force: bool) -> None:
         if force:
@@ -280,20 +357,27 @@ class Command(BaseCommand):
             es.indices.delete(index=index)
             self.stdout.write(self.style.WARNING(f"  swept wreck {index} (dark, newer than {old_target})"))
 
-    def _reindex_programs(self, es: Elasticsearch, code_by_id: dict, opts: dict) -> list:
+    def _reindex_programs(self, es: Elasticsearch, code_by_id: dict, opts: dict) -> FleetResult:
         total = len(code_by_id)
+        reindexed = skipped = 0
         failed: list = []
         for n, (pid, code) in enumerate(sorted(code_by_id.items(), key=lambda kv: kv[1] or ""), start=1):
             try:
-                outcome = self._reindex_program(es, str(pid), opts)
+                program_outcome = self._reindex_program(es, str(pid), opts)
+                outcome = program_outcome.message
             except Exception as exc:  # noqa: BLE001  # one bad program must not abort the fleet
                 outcome = f"FAILED - {exc}"
                 failed.append((code, pid, str(exc)))
+            else:
+                if program_outcome.skipped:
+                    skipped += 1
+                else:
+                    reindexed += 1
             style = self.style.ERROR if outcome.startswith("FAILED") else self.style.SUCCESS
             self.stdout.write(style(f"[{n}/{total}] {code}: {outcome}"))
-        return failed
+        return FleetResult(reindexed=reindexed, skipped=skipped, failed=failed)
 
-    def _reindex_program(self, es: Elasticsearch, pid: str, opts: dict) -> str:
+    def _reindex_program(self, es: Elasticsearch, pid: str, opts: dict) -> ProgramOutcome:
         docs = self._doc_classes(pid)
         names = [d._index._name for d in docs]
         old = {}
@@ -307,12 +391,11 @@ class Command(BaseCommand):
         # by this very code - skip, so a crashed --all run finishes only the remainder. --force
         # rebuilds anyway; --sweep-wrecks bypasses too (analyzer-only changes are invisible to
         # the stamp, a sweep must never be suppressed by it).
-        if (
-            not opts["force"]
-            and not opts["sweep_wrecks"]
-            and all(self._resumable(es, doc_class, old[doc_class._index._name]) for doc_class in docs)
-        ):
-            return f"up-to-date ({list(old.values())} built from current mapping) - skipped, --force to rebuild"
+        if self._would_skip(es, docs, old, opts):
+            return ProgramOutcome(
+                skipped=True,
+                message=f"up-to-date ({list(old.values())} built from current mapping) - skipped, --force to rebuild",
+            )
 
         if opts["sweep_wrecks"]:
             for name, old_target in old.items():
@@ -363,7 +446,10 @@ class Command(BaseCommand):
         self._delta(pid, since=delta_start)
         self._delta(pid, since=final_start)
         note = ", resumed dark pair" if resumed else ""
-        return f"reindexed {list(old.values())} -> _{suffix}, aliases swapped (old kept for rollback){note}"
+        return ProgramOutcome(
+            skipped=False,
+            message=f"reindexed {list(old.values())} -> _{suffix}, aliases swapped (old kept for rollback){note}",
+        )
 
     def _progress(self, target: str, db_count: int) -> "Callable[[int], None]":
         def report(n: int) -> None:
