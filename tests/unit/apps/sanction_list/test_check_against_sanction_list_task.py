@@ -24,7 +24,7 @@ from extras.test_utils.factories import (
 from hope.apps.sanction_list.tasks.check_against_sanction_list import (
     CheckAgainstSanctionListTask,
 )
-from hope.models import SanctionList, SanctionListIndividual, SanctionListIndividualDateOfBirth, UploadedXLSXFile
+from hope.models import SanctionList, SanctionListIndividual, UploadedXLSXFile
 
 pytestmark = pytest.mark.django_db
 
@@ -68,6 +68,20 @@ def john_doe(sanction_list: SanctionList) -> SanctionListIndividual:
         full_name="John Doe",
     )
     SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1980, 1, 1))
+    return individual
+
+
+@pytest.fixture
+def individual_with_two_birth_dates(sanction_list: SanctionList) -> SanctionListIndividual:
+    individual = SanctionListIndividualFactory(
+        sanction_list=sanction_list,
+        first_name="FirstName",
+        second_name="SecondName",
+        third_name="ThirdName",
+        fourth_name="FourthName",
+    )
+    SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1981, 1, 1))
+    SanctionListIndividualDateOfBirthFactory(individual=individual, date=datetime.date(1980, 2, 1))
     return individual
 
 
@@ -195,35 +209,13 @@ def test_sanction_list_email(
     assert actual_attachment[0]["Base64Content"]  # non-empty
 
 
-def test_join_names_and_birthday_db():
-    wb = Workbook()
-    ws = wb.active
+def test_create_results_attachment_lists_individual_with_birth_dates(
+    individual_with_two_birth_dates: SanctionListIndividual,
+) -> None:
+    attachment = CheckAgainstSanctionListTask()._create_results_attachment({2: individual_with_two_birth_dates})
 
-    individual = SanctionListIndividualFactory(
-        first_name="FirstName",
-        second_name="SecondName",
-        third_name="ThirdName",
-        fourth_name="FourthName",
-    )
-
-    SanctionListIndividualDateOfBirth.objects.create(
-        individual=individual,
-        date=datetime.date(1981, 1, 1),
-    )
-    SanctionListIndividualDateOfBirth.objects.create(
-        individual=individual,
-        date=datetime.date(1980, 2, 1),
-    )
-
-    results_dict = {2: individual}
-
-    task = CheckAgainstSanctionListTask()
-    task.join_names_and_birthday(ws, results_dict)
-
-    rows = list(ws.iter_rows(values_only=True))
-
-    assert rows[0][4] == "1980-02-01, 1981-01-01"
-    assert rows[0][5] == 2
+    rows = list(load_workbook(io.BytesIO(base64.b64decode(attachment))).active.iter_rows(values_only=True))
+    assert rows[1] == ("FirstName", "SecondName", "ThirdName", "FourthName", "1980-02-01, 1981-01-01", 2)
 
 
 def test_execute_matches_two_name_row_with_date_cell(
