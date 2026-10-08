@@ -4,7 +4,7 @@ from typing import cast
 from django.db import transaction
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.deduplication_engine import DeduplicationEngineService
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import (
@@ -64,11 +64,11 @@ class FetchFindingsAndMergeRdi:
 
     def _fetch_biometric_findings(
         self, rdi: RegistrationDataImport
-    ) -> tuple[BiometricDeduplicationService | None, list[dict] | None]:
-        dedupe_service: BiometricDeduplicationService | None = None
+    ) -> tuple[DeduplicationEngineService | None, list[dict] | None]:
+        dedupe_service: DeduplicationEngineService | None = None
         findings: list[dict] | None = None
         if rdi.program.biometric_deduplication_enabled:
-            dedupe_service = BiometricDeduplicationService()
+            dedupe_service = DeduplicationEngineService()
             findings = dedupe_service.get_rdi_findings(cast("str", rdi.country_workspace_id))
             logger.info(f"RDI:{rdi.id} fetched {len(findings)} biometric findings from Deduplication Engine")
         return dedupe_service, findings
@@ -96,7 +96,7 @@ class FetchFindingsAndMergeRdi:
     def _store_deduplication_results(
         self,
         rdi: RegistrationDataImport,
-        dedupe_service: BiometricDeduplicationService | None,
+        dedupe_service: DeduplicationEngineService | None,
         findings: list[dict] | None,
     ) -> None:
         if dedupe_service is not None and findings is not None:

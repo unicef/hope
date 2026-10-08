@@ -553,7 +553,7 @@ def test_merging_external_collector(
     DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+    "hope.apps.registration_data.services.deduplication_engine.DeduplicationEngineService.create_grievance_tickets_for_duplicates"
 )
 def test_merge_biometric_deduplication_cw_path(
     create_grievance_tickets_for_duplicates_mock: mock.Mock,
