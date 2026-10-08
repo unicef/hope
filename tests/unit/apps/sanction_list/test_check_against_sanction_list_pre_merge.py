@@ -2,6 +2,7 @@ from datetime import date
 from typing import TYPE_CHECKING, Any
 
 from constance.test import override_config
+from defusedxml import ElementTree
 from django.conf import settings
 from django.core.cache import cache
 import pytest
@@ -51,7 +52,7 @@ def sanction_list(db: Any) -> "SanctionList":
     full_path = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files/full_sanction_list.xml"
 
     task = LoadSanctionListXMLTask(sanction_list)
-    task.load_from_file(full_path)
+    task.parse(ElementTree.parse(full_path).getroot())
 
     return sanction_list
 
