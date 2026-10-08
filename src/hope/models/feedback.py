@@ -49,7 +49,7 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         verbose_name=_("Individual lookup"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField()
@@ -85,3 +85,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Feedback")
+
+    def __str__(self) -> str:
+        return f"{self.description} ({self.business_area.name})"

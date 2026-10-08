@@ -1,8 +1,13 @@
 from collections import defaultdict
 from unittest.mock import MagicMock
 
+from openpyxl import Workbook
 import pytest
 
+from extras.test_utils.factories.core import BusinessAreaFactory
+from extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from extras.test_utils.factories.household import DocumentTypeFactory
+from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.registration_data.validators import (
     ImportDataInstanceValidator,
     KoboProjectImportDataInstanceValidator,
@@ -183,22 +188,6 @@ def test_validate_admin_column_admin3_empty_returns_none():
     assert result is None
 
 
-def test_validate_admin_column_pp_admin1_empty_returns_error():
-    validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
-    result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin1_i_c", None, 4, [])
-    assert result is not None
-    assert result["header"] == "pp_admin1_i_c"
-
-
-def test_validate_admin_column_pp_admin2_empty_returns_error():
-    validator = MagicMock(spec=UploadXLSXInstanceValidator)
-    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
-    result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin2_i_c", "", 6, [])
-    assert result is not None
-    assert result["header"] == "pp_admin2_i_c"
-
-
 def test_validate_admin_column_pp_admin3_empty_returns_none():
     """pp_admin3_i_c is also not required."""
     validator = MagicMock(spec=UploadXLSXInstanceValidator)
@@ -214,6 +203,298 @@ def test_validate_admin_column_pp_admin1_with_value_appends():
     result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin1_i_c", "CODE1", 2, admin_tuples)
     assert result is None
     assert (2, "pp_admin1_i_c", "CODE1") in admin_tuples
+
+
+def test_validate_admin_column_pp_admin4_with_value_appends():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
+    admin_tuples = []
+
+    result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin4_i_c", "CODE4", 4, admin_tuples)
+
+    assert result is None
+    assert admin_tuples == [(4, "pp_admin4_i_c", "CODE4")]
+
+
+def test_validate_admin_column_pp_admin4_empty_is_allowed():
+    validator = MagicMock(spec=UploadXLSXInstanceValidator)
+    validator.ADMIN_COLUMNS_ALL = UploadXLSXInstanceValidator.ADMIN_COLUMNS_ALL
+
+    result = UploadXLSXInstanceValidator._validate_admin_column(validator, "pp_admin4_i_c", None, 4, [])
+
+    assert result is None
+
+
+@pytest.fixture
+def people_admin4_row():
+    sheet = Workbook().active
+    sheet["A1"] = "pp_admin4_i_c"
+    sheet["A4"] = "MISSING"
+    return (sheet["A4"],), (sheet["A1"],)
+
+
+def test_validate_row_cells_collects_people_area_outside_individual_fields(people_admin4_row):
+    validator = object.__new__(UploadXLSXInstanceValidator)
+    validator.country_columns = {}
+    admin_area_code_tuples = []
+
+    errors = validator._validate_row_cells(*people_admin4_row, {}, admin_area_code_tuples)
+
+    assert errors == []
+    assert admin_area_code_tuples == [(4, "pp_admin4_i_c", "MISSING")]
+
+
+@pytest.fixture
+def people_row_with_unlabeled_columns():
+    sheet = Workbook().active
+    sheet["B1"] = 123
+    sheet["C1"] = "pp_country_i_c"
+    sheet["D1"] = "pp_birth_certificate_issuer_i_c"
+    sheet["E1"] = "unrelated_issuer_i_c"
+    sheet["F1"] = "pp_country_origin_i_c"
+    sheet["A3"] = "extra under blank header"
+    sheet["B3"] = "extra under numeric header"
+    sheet["C3"] = "AFG"
+    sheet["D3"] = "AF"
+    sheet["E3"] = "ZZ"
+    sheet["F3"] = "ZZZ"
+    return sheet[3], sheet[1]
+
+
+@pytest.fixture
+def people_country_validator():
+    validator = object.__new__(UploadXLSXInstanceValidator)
+    validator.sheet_title = "People"
+    validator.country_columns = {
+        "pp_country_i_c": "iso_code3",
+        "pp_birth_certificate_issuer_i_c": "iso_code2",
+        "pp_unhcr_id_issuer_i_c": "iso_code2",
+        "pp_country_origin_i_c": "iso_code3",
+    }
+    validator.all_fields = {}
+    return validator
+
+
+def test_country_cell_scan_skips_unrecognized_headers(people_row_with_unlabeled_columns, people_country_validator):
+    row, headers = people_row_with_unlabeled_columns
+
+    cells = people_country_validator._country_cells_in_row(row, headers)
+
+    assert [(cell.coordinate, header) for cell, header in cells] == [
+        ("C3", "pp_country_i_c"),
+        ("D3", "pp_birth_certificate_issuer_i_c"),
+        ("F3", "pp_country_origin_i_c"),
+    ]
+
+
+@pytest.fixture
+def program_with_custom_document_type():
+    DocumentTypeFactory(key="custom_document")
+    return ProgramFactory()
+
+
+@pytest.fixture
+def custom_document_country_row():
+    sheet = Workbook().active
+    sheet.title = "Individuals"
+    sheet["A1"] = "custom_document_issuer_i_c"
+    sheet["A3"] = "ZZ"
+    return sheet
+
+
+@pytest.fixture
+def duplicate_custom_document_issuer_row():
+    sheet = Workbook().active
+    sheet.title = "Individuals"
+    sheet["A1"] = "custom_document_issuer_i_c"
+    sheet["B1"] = "custom_document_issuer_i_c"
+    sheet["A3"] = "ZZ"
+    sheet["B3"] = "YY"
+    return sheet
+
+
+@pytest.mark.django_db
+def test_validator_collects_configured_document_issuer(program_with_custom_document_type, custom_document_country_row):
+    validator = UploadXLSXInstanceValidator(program_with_custom_document_type)
+
+    validator.rows_validator(custom_document_country_row)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "custom_document_issuer_i_c",
+            "message": "Sheet: 'Individuals': Issuing country 'ZZ' does not exist",
+        }
+    ]
+
+
+@pytest.mark.django_db
+def test_validator_reports_each_duplicate_issuer_column(
+    program_with_custom_document_type, duplicate_custom_document_issuer_row
+):
+    validator = UploadXLSXInstanceValidator(program_with_custom_document_type)
+
+    validator.rows_validator(duplicate_custom_document_issuer_row)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "custom_document_issuer_i_c",
+            "message": "Sheet: 'Individuals': Issuing country 'ZZ' does not exist",
+        },
+        {
+            "row_number": 3,
+            "header": "custom_document_issuer_i_c",
+            "message": "Sheet: 'Individuals': Issuing country 'YY' does not exist",
+        },
+    ]
+
+
+@pytest.fixture(params=["", 0])
+def custom_document_invalid_issuer_value(request):
+    sheet = Workbook().active
+    sheet.title = "Individuals"
+    sheet["A1"] = "custom_document_issuer_i_c"
+    sheet["B1"] = "custom_document_no_i_c"
+    sheet["A3"] = request.param
+    sheet["B3"] = "ABC123"
+    return sheet, request.param
+
+
+@pytest.mark.django_db
+def test_validator_reports_empty_or_numeric_custom_document_issuer(
+    program_with_custom_document_type, custom_document_invalid_issuer_value
+):
+    sheet, value = custom_document_invalid_issuer_value
+    validator = UploadXLSXInstanceValidator(program_with_custom_document_type)
+
+    validator.rows_validator(sheet)
+
+    assert validator.errors == [
+        {
+            "row_number": 3,
+            "header": "custom_document_issuer_i_c",
+            "message": f"Sheet: 'Individuals': Issuing country {value!r} does not exist",
+        }
+    ]
+
+
+@pytest.fixture
+def afghanistan_country():
+    return CountryFactory(iso_code2="AF", iso_code3="AFG")
+
+
+@pytest.fixture
+def afghanistan_business_area(afghanistan_country):
+    business_area = BusinessAreaFactory(slug="afghanistan")
+    business_area.countries.add(afghanistan_country)
+    return business_area
+
+
+@pytest.mark.django_db
+def test_validate_admin_areas_reports_missing_people_area(afghanistan_business_area, django_assert_num_queries):
+    validator = object.__new__(UploadXLSXInstanceValidator)
+    validator.sheet_title = "People"
+
+    with django_assert_num_queries(2):
+        errors = validator.validate_admin_areas([(4, "pp_admin4_i_c", "MISSING")], afghanistan_business_area.slug)
+
+    assert errors == [
+        {
+            "row_number": 4,
+            "header": "pp_admin4_i_c",
+            "message": "Sheet: 'People': Area with code: MISSING does not exist",
+        }
+    ]
+
+
+@pytest.fixture
+def mixed_admin_area_codes(afghanistan_country):
+    afghanistan_area_type = AreaTypeFactory(country=afghanistan_country)
+    AreaFactory(p_code="AF01", area_type=afghanistan_area_type)
+    AreaFactory(p_code="AF02", area_type=afghanistan_area_type)
+    other_country = CountryFactory(iso_code2="PK", iso_code3="PAK")
+    AreaFactory(p_code="PK01", area_type=AreaTypeFactory(country=other_country))
+    return [
+        (3, "pp_admin1_i_c", "AF01"),
+        (3, "pp_admin2_i_c", "AF02"),
+        (4, "pp_admin1_i_c", "PK01"),
+        (5, "pp_admin1_i_c", "MISSING"),
+        (6, "pp_admin2_i_c", "MISSING"),
+    ]
+
+
+@pytest.mark.django_db
+def test_validate_admin_areas_batches_queries_and_preserves_cell_errors(
+    afghanistan_business_area, mixed_admin_area_codes, django_assert_num_queries
+):
+    validator = object.__new__(UploadXLSXInstanceValidator)
+    validator.sheet_title = "People"
+
+    with django_assert_num_queries(3):
+        errors = validator.validate_admin_areas(mixed_admin_area_codes, afghanistan_business_area.slug)
+
+    assert errors == [
+        {
+            "row_number": 4,
+            "header": "pp_admin1_i_c",
+            "message": "Sheet: 'People': Admin Area: PK01 unavailable in Business Area: afghanistan",
+        },
+        {
+            "row_number": 5,
+            "header": "pp_admin1_i_c",
+            "message": "Sheet: 'People': Area with code: MISSING does not exist",
+        },
+        {
+            "row_number": 6,
+            "header": "pp_admin2_i_c",
+            "message": "Sheet: 'People': Area with code: MISSING does not exist",
+        },
+    ]
+
+
+@pytest.fixture
+def existing_issuer_country_cells():
+    sheet = Workbook().active
+    sheet["A4"] = "AFG"
+    sheet["B5"] = "AF"
+    return [(sheet["A4"], "pp_birth_certificate_issuer_i_c"), (sheet["B5"], "pp_unhcr_id_issuer_i_c")]
+
+
+@pytest.fixture
+def missing_issuer_country_cells():
+    sheet = Workbook().active
+    sheet["A4"] = "AFG"
+    sheet["B5"] = "ZZ"
+    return [(sheet["A4"], "pp_birth_certificate_issuer_i_c"), (sheet["B5"], "pp_unhcr_id_issuer_i_c")]
+
+
+@pytest.mark.django_db
+def test_validate_countries_accepts_existing_issuing_country(
+    afghanistan_country, people_country_validator, existing_issuer_country_cells, django_assert_num_queries
+):
+
+    with django_assert_num_queries(1):
+        errors = people_country_validator.validate_countries(existing_issuer_country_cells, {})
+
+    assert errors == []
+
+
+@pytest.mark.django_db
+def test_validate_countries_reports_missing_issuing_country(
+    afghanistan_country, people_country_validator, missing_issuer_country_cells, django_assert_num_queries
+):
+
+    with django_assert_num_queries(1):
+        errors = people_country_validator.validate_countries(missing_issuer_country_cells, {})
+
+    assert errors == [
+        {
+            "row_number": 5,
+            "header": "pp_unhcr_id_issuer_i_c",
+            "message": "Sheet: 'People': Issuing country 'ZZ' does not exist",
+        }
+    ]
 
 
 # --- _validate_head_of_household (on UploadXLSXInstanceValidator) ---
