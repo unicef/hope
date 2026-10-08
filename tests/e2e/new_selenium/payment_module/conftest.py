@@ -366,3 +366,55 @@ def household_size_entitlement_rule(business_area: BusinessArea) -> Rule:
     )
     commit.rule.allowed_business_areas.add(business_area)
     return commit.rule
+
+
+@pytest.fixture
+def cycles_program(business_area: BusinessArea) -> Program:
+    today = timezone.now().date()
+    program = ProgramFactory(
+        business_area=business_area,
+        status=Program.ACTIVE,
+        start_date=today - datetime.timedelta(days=30),
+        end_date=today + datetime.timedelta(days=30),
+        cycle=False,
+    )
+    ProgramCycleFactory(
+        program=program,
+        title="Default Programme Cycle",
+        status=ProgramCycle.FINISHED,
+        start_date=today - datetime.timedelta(days=25),
+        end_date=today - datetime.timedelta(days=20),
+    )
+    return program
+
+
+@pytest.fixture
+def active_cycle(cycles_program: Program) -> ProgramCycle:
+    today = timezone.now().date()
+    cycle = ProgramCycleFactory(
+        program=cycles_program,
+        title="Test Programme Cycle 001",
+        status=ProgramCycle.ACTIVE,
+        start_date=today,
+        end_date=today + datetime.timedelta(days=5),
+    )
+    ProgramCycleFactory(
+        program=cycles_program,
+        title="Programme Cycle in Draft",
+        status=ProgramCycle.DRAFT,
+        start_date=today + datetime.timedelta(days=6),
+        end_date=today + datetime.timedelta(days=16),
+    )
+    return cycle
+
+
+@pytest.fixture
+def active_cycle_with_payment_plans(active_cycle: ProgramCycle) -> ProgramCycle:
+    business_area = active_cycle.program.business_area
+    PaymentPlanFactory(
+        program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("333.99")
+    )
+    PaymentPlanFactory(
+        program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("1500.00")
+    )
+    return active_cycle
