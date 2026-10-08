@@ -261,11 +261,6 @@ def pytest_configure(config) -> None:  # type: ignore
     _patch_sync_apps_for_no_migrations()
     _retry_flush_on_deadlock()
 
-    config.addinivalue_line(
-        "markers",
-        "night: This marker is intended for e2e tests conducted during the night on CI",
-    )
-
     SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
     for file in SCREENSHOT_DIRECTORY.iterdir():
         if file.is_file():
