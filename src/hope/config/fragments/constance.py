@@ -100,11 +100,6 @@ CONSTANCE_CONFIG = {
         "positive_integers",
     ),
     "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
-    "KOBO_ADMIN_CREDENTIALS": (
-        "",
-        "Kobo superuser credentials in format user:password",
-        str,
-    ),
     "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED": (
         5,
         "If amount of duplicates for single individual exceeds this limit deduplication is aborted",

@@ -3,7 +3,6 @@ from typing import Any
 
 from admin_extra_buttons.decorators import button
 from admin_sync.mixins.admin import SyncModelAdmin
-from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -98,26 +97,4 @@ class UserGroupAdmin(HOPEModelAdminBase):
                 "user",
                 "group",
             )
-        )
-
-    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return request.user.is_staff
-
-    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return False
-
-    def _get_data(self, record: Any) -> str:
-        groups = Group.objects.all()
-        collector = ForeignKeysCollector("")
-        objs = []
-        for qs in [groups]:
-            objs.extend(qs)
-        objs.extend(UserGroup.objects.filter(pk=record.pk))  # pragma: no cover
-        collector.collect(objs)
-        serializer = self.get_serializer("json")
-        return serializer.serialize(
-            collector.data,
-            use_natural_foreign_keys=True,
-            use_natural_primary_keys=True,
-            indent=3,
         )

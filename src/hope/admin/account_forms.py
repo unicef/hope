@@ -1,5 +1,4 @@
 import csv
-import logging
 from typing import Any
 
 from adminactions.api import delimiters, quotes
@@ -7,14 +6,11 @@ from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
 from django.forms.utils import ErrorList
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, IncompatibleRoles, Partner, Role, RoleAssignment, User
-
-logger = logging.getLogger(__name__)
 
 
 class RoleAdminForm(forms.ModelForm):
@@ -133,27 +129,6 @@ class AddRoleForm(forms.Form):
         queryset=Role.objects.all(),
         widget=FilteredSelectMultiple("Roles", False),
     )
-
-
-class KoboLoginForm(forms.Form):
-    kobo_username = forms.CharField()
-    kobo_password = forms.CharField(widget=forms.PasswordInput)
-
-
-class KoboImportUsersForm(forms.Form):
-    emails = forms.CharField(required=False, widget=forms.Textarea)
-
-    def clean_emails(self) -> dict:
-        errors = []
-        for e in self.cleaned_data["emails"].split():
-            try:
-                validate_email(e)
-            except ValidationError:
-                errors.append(e)
-        if errors:
-            logger.warning("Invalid emails {}".format(", ".join(errors)))
-            raise ValidationError("Invalid emails {}".format(", ".join(errors)))
-        return self.cleaned_data["emails"]
 
 
 class ImportCSVForm(forms.Form):
