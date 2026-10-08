@@ -645,19 +645,6 @@ class TestSmokePaymentModule:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentPlans:
-    def test_payment_plan_edit(
-        self,
-        clear_downloaded_files: None,
-        create_targeting: None,
-        page_payment_module: PaymentModule,
-        page_payment_module_details: PaymentModuleDetails,
-        page_new_payment_plan: NewPaymentPlan,
-        page_program_cycle: ProgramCyclePage,
-        page_program_cycle_details: ProgramCycleDetailsPage,
-    ) -> None:
-        page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
-
     def test_payment_plan_exclude_not_lock_error(
         self,
         create_payment_plan: PaymentPlan,
