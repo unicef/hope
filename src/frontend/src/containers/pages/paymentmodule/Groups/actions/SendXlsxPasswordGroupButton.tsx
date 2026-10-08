@@ -10,16 +10,15 @@ import { showApiErrorMessages } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import type { PaymentPlanGroupDetail } from '../types';
 
-interface SendXlsxPasswordBatchButtonProps {
-  groupId: string;
-  tag: string;
+interface SendXlsxPasswordGroupButtonProps {
+  group: PaymentPlanGroupDetail | null;
 }
 
-export function SendXlsxPasswordBatchButton({
-  groupId,
-  tag,
-}: SendXlsxPasswordBatchButtonProps): ReactElement | null {
+export function SendXlsxPasswordGroupButton({
+  group,
+}: SendXlsxPasswordGroupButtonProps): ReactElement | null {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
@@ -31,8 +30,7 @@ export function SendXlsxPasswordBatchButton({
         {
           businessAreaSlug: businessArea,
           programCode: programId,
-          id: groupId,
-          requestBody: { exportTag: parseInt(tag, 10) },
+          id: group?.id ?? '',
         },
       ),
     onSuccess: () => {
@@ -45,6 +43,7 @@ export function SendXlsxPasswordBatchButton({
 
   if (!hasPermissions(PERMISSIONS.PM_SEND_XLSX_PASSWORD, permissions))
     return null;
+  if (!group?.exportFileHasPassword) return null;
 
   return (
     <Box
@@ -58,8 +57,8 @@ export function SendXlsxPasswordBatchButton({
         color="primary"
         variant="contained"
         onClick={() => sendPassword()}
-        disabled={!groupId || !tag || loadingSend}
-        data-cy="button-send-xlsx-password-batch"
+        disabled={loadingSend}
+        data-cy="button-send-xlsx-password-group"
       >
         {t('Send Xlsx Password')}
       </LoadingButton>
