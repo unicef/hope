@@ -15,18 +15,18 @@ class SimilarityPair:
     second: str | None = None
 
 
-class BiometricDeduplicationEngineAPI(BaseAPI):
+class DeduplicationEngineAPI(BaseAPI):
     API_KEY_SETTING_NAME = "DEDUPLICATION_ENGINE_API_KEY"
     API_URL_SETTING_NAME = "DEDUPLICATION_ENGINE_API_URL"
 
-    class BiometricDeduplicationEngineAPIError(Exception):
+    class DeduplicationEngineAPIError(Exception):
         pass
 
-    class BiometricDeduplicationEngineMissingAPICredentialsError(Exception):
+    class DeduplicationEngineMissingAPICredentialsError(Exception):
         pass
 
-    API_EXCEPTION_CLASS = BiometricDeduplicationEngineAPIError
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = BiometricDeduplicationEngineMissingAPICredentialsError
+    API_EXCEPTION_CLASS = DeduplicationEngineAPIError
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = DeduplicationEngineMissingAPICredentialsError
 
     class Endpoints:
         GET_RDI_BIOMETRIC_FINDINGS = "deduplication_sets/{rdi_country_workspace_id}/findings/"

@@ -139,7 +139,7 @@ def _complete_rdi(
     complete_url = reverse("api:rdi-complete", args=[business_area.slug, rdi_id])
     with (
         patch(
-            "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings",
+            "hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings",
             return_value=cw_findings,
         ) as mock_findings,
     ):
@@ -440,7 +440,7 @@ def test_cw_reset_wipes_population_then_reupload_merges_clean(
 
     complete_url = reverse("api:rdi-complete", args=[user_business_area.slug, second_rdi_id])
     with patch(
-        "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings",
+        "hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings",
         return_value=cw_findings,
     ) as mock_findings:
         with django_capture_on_commit_callbacks(execute=True):

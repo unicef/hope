@@ -9,7 +9,7 @@ from hope.apps.household.const import (
     UNIQUE_IN_BATCH,
 )
 from hope.apps.registration_data.api.deduplication_engine import (
-    BiometricDeduplicationEngineAPI,
+    DeduplicationEngineAPI,
     SimilarityPair,
 )
 from hope.models import (
@@ -39,7 +39,7 @@ class DeduplicationEngineService:
         pass
 
     def __init__(self) -> None:
-        self.api = BiometricDeduplicationEngineAPI()
+        self.api = DeduplicationEngineAPI()
 
     def parse_findings(self, findings: list[dict]) -> list[SimilarityPair]:
         similarity_pairs: list[SimilarityPair] = []
