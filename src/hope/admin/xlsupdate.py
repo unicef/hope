@@ -37,6 +37,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area", "rdi", "program", "uploaded_by")
 
+    # Looks unused, but Django admin routes the "add" page here: it starts the xlsx update wizard.
     def add_view(
         self,
         request: HttpRequest,
