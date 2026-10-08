@@ -25,7 +25,7 @@ from hope.models.utils import MergeStatusModel
 logger = logging.getLogger(__name__)
 
 
-PERSISTED_FINDINGS_STATUS_CODES = (
+PERSISTED_BIOMETRIC_FINDINGS_STATUS_CODES = (
     BiometricDedupeSimilarityPair.StatusCode.STATUS_200.value,
     BiometricDedupeSimilarityPair.StatusCode.STATUS_412.value,
     BiometricDedupeSimilarityPair.StatusCode.STATUS_429.value,
@@ -45,7 +45,7 @@ class DeduplicationEngineService:
         similarity_pairs: list[SimilarityPair] = []
         for finding in findings:
             status_code = str(finding["status_code"])
-            if status_code not in PERSISTED_FINDINGS_STATUS_CODES:
+            if status_code not in PERSISTED_BIOMETRIC_FINDINGS_STATUS_CODES:
                 logger.debug(f"Dedup Engine Findings, skipping non-persisted status_code={status_code}")
                 continue
             first = finding["first"].get("reference_pk") or None
@@ -63,7 +63,7 @@ class DeduplicationEngineService:
             )
         return similarity_pairs
 
-    def store_similarity_pairs(
+    def store_biometric_similarity_pairs(
         self,
         program: Program,
         similarity_pairs: list[SimilarityPair],
