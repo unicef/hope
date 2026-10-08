@@ -264,7 +264,6 @@ class TestProgrammeManagement:
         assert "No" in page_programme_details.get_label_cash_plus().text
         assert "0" in page_programme_details.get_label_program_size().text
 
-    @pytest.mark.night
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -319,7 +318,6 @@ class TestProgrammeManagement:
         assert "Yes" in page_programme_details.get_label_cash_plus().text
         assert "0" in page_programme_details.get_label_program_size().text
 
-    @pytest.mark.night
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -459,7 +457,6 @@ class TestProgrammeManagement:
 
 
 # ToDo: Check Unicef partner! and delete classes
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
     @pytest.mark.parametrize(
@@ -520,7 +517,6 @@ class TestBusinessAreas:
         assert "15" in page_programme_details.get_label_admin_area2().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestComeBackScenarios:
     @pytest.mark.parametrize(
@@ -599,7 +595,6 @@ class TestComeBackScenarios:
         page_programme_details.wait_for_text_in_any_element("UNHCR", page_programme_details.label_partner_name)
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.parametrize(
