@@ -9,7 +9,7 @@ from natural_keys import NaturalKeyModel
 
 from hope.models.area_type import AreaType
 from hope.models.country import UpgradeModel, ValidityManager
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class AreaManager(ValidityManager):
@@ -24,7 +24,6 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     parent = TreeForeignKey(
         "self",
         blank=True,
-        db_index=True,
         null=True,
         on_delete=models.CASCADE,
         verbose_name=_("Parent"),
@@ -51,6 +50,13 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             )
         ]
         permissions = (("import_areas", "Can import areas"),)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="geo_area_created_at_3f07c235"),
+            LongNameIndex(fields=["updated_at"], name="geo_area_updated_at_7ec5b7d0"),
+            # django-mptt appends this index on its own unless Meta declares it. It is in the migration
+            # state only: migrated databases do not have it.
+            models.Index(fields=["tree_id", "lft"], name="geo_area_tree_id_lft_idx"),
+        ]
 
     class MPTTMeta:
         order_insertion_by = ("name", "p_code")

@@ -8,7 +8,7 @@ from django_celery_boost.models import AsyncJobModel
 
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.async_job import AsyncJob
-from hope.models.utils import AdminUrlMixin, TimeStampedModel
+from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedModel
 
 
 class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
@@ -109,6 +109,10 @@ class PDUOnlineEdit(AdminUrlMixin, TimeStampedModel):
             ),
         ]
         ordering = ("-created_at",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="periodic_data_update_pduonlineedit_created_at_cbf512a8"),
+            LongNameIndex(fields=["updated_at"], name="periodic_data_update_pduonlineedit_updated_at_416e7971"),
+        ]
 
     def _get_async_job(self, job_name: str) -> AsyncJob | None:
         return self.async_jobs.filter(job_name=job_name).order_by("-datetime_created", "-pk").first()

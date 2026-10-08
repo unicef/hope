@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
@@ -86,6 +86,16 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         app_label = "accountability"
         ordering = ("created_at",)
         verbose_name = _("Message")
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="accountability_message_created_at_6189007a"),
+            LongNameIndex(fields=["updated_at"], name="accountability_message_updated_at_0c461641"),
+            LongNameIndex(fields=["unicef_id"], name="accountability_message_unicef_id_e1aefe5a"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="accountability_message_unicef_id_e1aefe5a_like",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.title} ({self.number_of_recipients} recipients)"

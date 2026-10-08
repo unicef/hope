@@ -3,7 +3,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class AdminAreaLimitedTo(TimeStampedUUIDModel):
@@ -20,6 +20,10 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
         app_label = "account"
         unique_together = ("partner", "program")
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="account_adminarealimitedto_created_at_06b87506"),
+            LongNameIndex(fields=["updated_at"], name="account_adminarealimitedto_updated_at_1c1ce965"),
+        ]
 
     def clean(self) -> None:
         if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:

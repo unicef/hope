@@ -3,11 +3,12 @@ from types import SimpleNamespace
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.db import models
+from django.test.utils import isolate_apps
 import pytest
 
 from extras.test_utils.factories import FlexibleAttributeGroupFactory
 from hope.models import FlexibleAttributeGroup, Payment
-from hope.models.utils import HorizontalChoiceArrayField, SignatureMixin
+from hope.models.utils import HorizontalChoiceArrayField, LongNameIndex, SignatureMixin
 
 
 @pytest.fixture
@@ -63,3 +64,22 @@ def test_horizontal_choice_array_field_formfield_builds_multiple_choice_field():
     assert isinstance(form_field, forms.MultipleChoiceField)
     assert isinstance(form_field.widget, FilteredSelectMultiple)
     assert list(form_field.choices) == [("A", "Letter A"), ("B", "Letter B")]
+
+
+@pytest.mark.parametrize(
+    ("index_class", "expected_error_ids"),
+    [
+        (models.Index, ["models.E034"]),
+        (LongNameIndex, []),
+    ],
+)
+@isolate_apps("hope.apps.core")
+def test_index_name_at_postgres_identifier_limit_passes_check_only_for_long_name_index(index_class, expected_error_ids):
+    class Sample(models.Model):  # noqa: DJ008
+        class Meta:
+            app_label = "core"
+            indexes = [index_class(fields=["id"], name="a" * 63)]
+
+    errors = Sample._check_indexes(databases=[])
+
+    assert [error.id for error in errors] == expected_error_ids

@@ -1,6 +1,6 @@
 from django.db import models
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class DeliveryMechanism(TimeStampedUUIDModel):
@@ -34,6 +34,10 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         ordering = ["code"]
         verbose_name = "Delivery Mechanism"
         verbose_name_plural = "Delivery Mechanisms"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_deliverymechanism_created_at_784397b0"),
+            LongNameIndex(fields=["updated_at"], name="payment_deliverymechanism_updated_at_ed583b15"),
+        ]
 
     @classmethod
     def get_choices(cls, only_active: bool = True) -> list[tuple[str, str]]:
