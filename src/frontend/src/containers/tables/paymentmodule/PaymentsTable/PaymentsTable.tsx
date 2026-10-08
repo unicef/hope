@@ -15,12 +15,16 @@ import type { PaymentList } from '@restgenerated/models/PaymentList';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import type { Profile } from '@restgenerated/models/Profile';
 import { RestService } from '@restgenerated/services/RestService';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { restQueryKey } from '@utils/queryKeys';
 import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -176,6 +180,17 @@ const PaymentsTableSection = ({
     queryFn: () => listService(paymentsListParams),
     placeholderData: keepPreviousData,
   });
+
+  // Entitlement and exchange-rate actions update payments in a background task while the plan
+  // query polls, so the rows are refreshed when the plan's totals or background status change.
+  const queryClient = useQueryClient();
+  const planMoneyState = `${paymentPlan.totalEntitledQuantity}|${paymentPlan.totalEntitledQuantityUsd}|${paymentPlan.backgroundActionStatus}`;
+  const previousPlanMoneyState = useRef(planMoneyState);
+  useEffect(() => {
+    if (previousPlanMoneyState.current === planMoneyState) return;
+    previousPlanMoneyState.current = planMoneyState;
+    queryClient.invalidateQueries({ queryKey: restQueryKey(listService) });
+  }, [planMoneyState, listService, queryClient]);
 
   const paymentsCountParams = createApiParams(primaryParams, filterVariables);
   const countService = notEligible
