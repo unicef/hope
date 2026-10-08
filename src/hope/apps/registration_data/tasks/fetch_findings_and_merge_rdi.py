@@ -37,7 +37,7 @@ class FetchFindingsAndMergeRdi:
                     logger.info(f"RDI:{registration_data_import_id} is locked by another worker, skipping merge.")
                     return False
                 self._transition_to_merging(locked_rdi)
-                self._store_deduplication_results(locked_rdi, dedupe_service, findings)
+                self._store_biometric_deduplication_results(locked_rdi, dedupe_service, findings)
                 RdiMergeTask().execute(str(locked_rdi.id))
         except Exception:
             logger.exception(
@@ -93,7 +93,7 @@ class FetchFindingsAndMergeRdi:
             f"(country_workspace_id={rdi.country_workspace_id})"
         )
 
-    def _store_deduplication_results(
+    def _store_biometric_deduplication_results(
         self,
         rdi: RegistrationDataImport,
         dedupe_service: DeduplicationEngineService | None,
@@ -102,12 +102,15 @@ class FetchFindingsAndMergeRdi:
         if dedupe_service is not None and findings is not None:
             registration_data_import_id = str(rdi.id)
             similarity_pairs = dedupe_service.parse_findings(findings)
-            dedupe_service.store_similarity_pairs(rdi.program, similarity_pairs, id_field_name="country_workspace_id")
+            dedupe_service.store_biometric_similarity_pairs(
+                rdi.program, similarity_pairs, id_field_name="country_workspace_id"
+            )
             logger.info(
-                f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings"
+                f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} "
+                f"biometric similarity pairs from findings"
             )
             dedupe_service.store_rdi_deduplication_statistics(rdi)
-            logger.info(f"RDI:{registration_data_import_id} stored deduplication statistics")
+            logger.info(f"RDI:{registration_data_import_id} stored biometric deduplication statistics")
 
     def _reset_rdi_state_for_cw_retry(self, rdi: RegistrationDataImport) -> None:
         rdi.error_message = ""

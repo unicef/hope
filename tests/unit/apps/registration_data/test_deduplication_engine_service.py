@@ -55,7 +55,7 @@ def test_store_results(biometric_deduplication_context: dict[str, object]) -> No
         SimilarityPair(score=0.9, first=str(ind3.id), second=str(ind3.id), status_code="200"),
     ]
 
-    service.store_similarity_pairs(program, similarity_pairs)
+    service.store_biometric_similarity_pairs(program, similarity_pairs)
 
     assert program.deduplication_engine_similarity_pairs.count() == 3
     assert program.deduplication_engine_similarity_pairs.filter(
@@ -76,7 +76,7 @@ def test_store_results_no_individuals(biometric_deduplication_context: dict[str,
         SimilarityPair(score=0.0, status_code="404"),
     ]
 
-    service.store_similarity_pairs(program, similarity_pairs)
+    service.store_biometric_similarity_pairs(program, similarity_pairs)
     assert program.deduplication_engine_similarity_pairs.count() == 0
 
 
@@ -88,7 +88,7 @@ def test_store_results_1_individual(biometric_deduplication_context: dict[str, o
         SimilarityPair(score=0.0, first=str(ind1.id), status_code="429"),
     ]
 
-    service.store_similarity_pairs(program, similarity_pairs)
+    service.store_biometric_similarity_pairs(program, similarity_pairs)
 
     assert program.deduplication_engine_similarity_pairs.count() == 1
     assert program.deduplication_engine_similarity_pairs.filter(
@@ -104,7 +104,7 @@ def test_store_results_not_existing_individual(biometric_deduplication_context: 
         SimilarityPair(score=70.0, first=str(ind1.id), second=str(uuid.uuid4()), status_code="429"),
     ]
 
-    service.store_similarity_pairs(program, similarity_pairs)
+    service.store_biometric_similarity_pairs(program, similarity_pairs)
 
     assert program.deduplication_engine_similarity_pairs.count() == 0
 
