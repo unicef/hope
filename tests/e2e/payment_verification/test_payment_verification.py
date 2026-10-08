@@ -539,16 +539,6 @@ class TestSmokePaymentVerification:
 
         page_grievance_tickets.scroll(execute=2)
 
-    def test_payment_verification_by_payment_related_complaint(
-        self,
-        active_program: Program,
-        add_payment_verification: PaymentVerification,
-        page_payment_verification: PaymentVerificationComponent,
-        page_payment_verification_details: PaymentVerificationDetails,
-        page_payment_record: PaymentRecord,
-    ) -> None:
-        page_payment_verification.select_global_program_filter("Active Program")
-
     def test_payment_verification_xlsx_successful(
         self,
         clear_downloaded_files: None,
