@@ -30,11 +30,6 @@ class Countries:
         ]
 
     @classmethod
-    @cache
-    def is_valid_country_choice(cls, choice: str) -> bool:
-        return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.get_countries())
-
-    @classmethod
     def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> str | None:
         index_map = {
             "name": 0,
@@ -1294,10 +1289,6 @@ class SanctionListCountries:
             }
             for name, alpha2, alpha3 in cls.COUNTRIES
         ]
-
-    @classmethod
-    def is_valid_country_choice(cls, choice: str) -> bool:
-        return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.COUNTRIES)
 
     @classmethod
     def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> str | None:
