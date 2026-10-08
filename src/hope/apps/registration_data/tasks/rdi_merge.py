@@ -116,7 +116,9 @@ class RdiMergeTask:
                 ):
                     cache.delete(key)
 
-    def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
+    def _create_adjudication_tickets_from_deduplication_engine_findings(
+        self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list
+    ) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = DeduplicationEngineService()
             dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
@@ -237,7 +239,9 @@ class RdiMergeTask:
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     deduplicate_documents_for_rdi(str(obj_hct.id))
-                    self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
+                    self._create_adjudication_tickets_from_deduplication_engine_findings(
+                        obj_hct, individuals_to_merge_ids
+                    )
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
