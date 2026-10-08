@@ -1,3 +1,4 @@
+import csv
 from typing import Tuple
 from uuid import uuid4
 
@@ -75,6 +76,31 @@ def rule_test_setup(client: DjangoClient) -> Tuple[DjangoClient, Rule]:
         type=Rule.TYPE_PAYMENT_PLAN,
     )
     return client, rule
+
+
+@pytest.mark.django_db
+def test_process_file_step_two_downloads_csv_with_quoted_filename(
+    rule_test_setup: Tuple[DjangoClient, Rule],
+) -> None:
+    client, rule = rule_test_setup
+    url = reverse("admin:steficon_rule_process_file", args=[rule.pk])
+    post_data = {
+        "step": "2",
+        "filename": 'results "2026".csv',
+        "data": '[{"a": "1", "Value": "5"}]',
+        "fields": "a,Value",
+        "delimiter": ",",
+        "quotechar": "'",
+        "quoting": str(csv.QUOTE_NONE),
+        "escapechar": "\\",
+    }
+
+    response = client.post(url, post_data)
+
+    assert response.status_code == 200
+    assert response["Content-Type"] == "text/csv"
+    assert response["Content-Disposition"] == 'attachment; filename="results \\"2026\\".csv"'
+    assert response.content == b"a,Value\r\n1,5\r\n"
 
 
 @pytest.mark.django_db
