@@ -5,7 +5,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, PaymentPlanPurpose, Program, User
 
-from .conftest import BA_PURPOSE_NAME, SECOND_BA_PURPOSE_NAME
+from .conftest import BA_PURPOSE_NAME, SECOND_BA_PURPOSE_NAME, days_from_today
 
 pytestmark = pytest.mark.django_db()
 
@@ -137,3 +137,39 @@ def test_edit_programme_max_ten_purposes_enforced(
         # All 10 purposes are already selected — the input is disabled and cannot be opened
         browser.click('[data-cy="input-payment-plan-purposes"]')
         browser.assert_element_absent('ul[role="listbox"]')
+
+
+def test_edit_programme_end_date_before_latest_cycle_fails(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    programme_with_mixed_cycles: Program,
+) -> None:
+    end_date = programme_with_mixed_cycles.end_date
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PROGRAMME_UPDATE,
+        Permissions.USER_MANAGEMENT_VIEW_LIST,
+        Permissions.GEO_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
+        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
+    ):
+        browser.login(username="noperm_user")
+        program = programme_with_mixed_cycles
+        browser.open(f"/{business_area.slug}/programs/{program.code}/details/{program.code}")
+        browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
+        browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
+
+        browser.wait_for_element_visible('input[name="name"]')
+        browser.fill_date('input[name="endDate"]', days_from_today(5).isoformat())
+        browser.click('input[name="name"]')
+        browser.click('button[data-cy="button-next"]')
+        browser.wait_for_element_visible('button[data-cy="button-add-time-series-field"]')
+        browser.wait_for_element_visible('button[data-cy="button-save"]').click()
+
+        browser.wait_for_text("End date must be the same as or after the latest cycle.")
+        browser.assert_element('button[data-cy="button-save"]')
+        program.refresh_from_db()
+        assert program.end_date == end_date
