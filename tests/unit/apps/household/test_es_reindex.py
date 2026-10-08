@@ -46,9 +46,31 @@ def index_names(program: Program) -> list[str]:
     ]
 
 
-def _make_es(*, aliased: bool = True, alias_version: str = "v1", swap_flips_to: str = "v2") -> MagicMock:
-    """Mock ES: every name aliased to ``alias_version``, flipping to ``swap_flips_to`` after the swap."""
+def _make_es(
+    *,
+    aliased: bool = True,
+    alias_version: str = "v1",
+    swap_flips_to: str = "v2",
+    shard_settings: dict | None = None,
+    data_nodes: int = 1,
+    active_shards: int = 0,
+    unassigned_shards: int = 0,
+) -> MagicMock:
+    """Mock ES: every name aliased to ``alias_version``, flipping to ``swap_flips_to`` after the swap.
+
+    Cluster shard capacity defaults to the ES default (1000 per node, one data node, empty cluster).
+    """
     es = MagicMock()
+    es.cluster.get_settings.return_value = shard_settings or {
+        "transient": {},
+        "persistent": {},
+        "defaults": {"cluster.max_shards_per_node": "1000"},
+    }
+    es.cluster.health.return_value = {
+        "number_of_data_nodes": data_nodes,
+        "active_shards": active_shards,
+        "unassigned_shards": unassigned_shards,
+    }
     state = {"swapped": False}
     es.indices.exists_alias.return_value = aliased
     es.indices.exists.return_value = False  # no dark leftovers by default -> fresh create path
@@ -177,6 +199,75 @@ def es_up_to_date(program: Program) -> MagicMock:
 
 
 @pytest.fixture
+def es_shards_short() -> MagicMock:
+    """One free shard, a program pair needs two."""
+    return _make_es(active_shards=999)
+
+
+@pytest.fixture
+def es_shards_exact() -> MagicMock:
+    """Exactly two free shards - one program pair fits."""
+    return _make_es(active_shards=998)
+
+
+@pytest.fixture
+def es_shards_short_by_unassigned() -> MagicMock:
+    """Two free by active shards alone, but an unassigned shard is open too."""
+    return _make_es(active_shards=998, unassigned_shards=1)
+
+
+@pytest.fixture
+def es_two_data_nodes() -> MagicMock:
+    """500 per node x 2 nodes = 1000 - room for one pair only when the node count is applied."""
+    return _make_es(
+        shard_settings={"transient": {}, "persistent": {}, "defaults": {"cluster.max_shards_per_node": "500"}},
+        data_nodes=2,
+        active_shards=998,
+    )
+
+
+@pytest.fixture
+def es_persistent_shard_limit() -> MagicMock:
+    """Persistent limit of 5 overrides the default 1000 - one free shard left."""
+    return _make_es(
+        shard_settings={
+            "transient": {},
+            "persistent": {"cluster.max_shards_per_node": "5"},
+            "defaults": {"cluster.max_shards_per_node": "1000"},
+        },
+        active_shards=4,
+    )
+
+
+@pytest.fixture
+def es_transient_shard_limit() -> MagicMock:
+    """Transient 2000 overrides the persistent 5 - plenty of room."""
+    return _make_es(
+        shard_settings={
+            "transient": {"cluster.max_shards_per_node": "2000"},
+            "persistent": {"cluster.max_shards_per_node": "5"},
+            "defaults": {"cluster.max_shards_per_node": "1000"},
+        },
+        active_shards=4,
+    )
+
+
+@pytest.fixture
+def es_up_to_date_cluster_full(es_up_to_date: MagicMock) -> MagicMock:
+    es_up_to_date.cluster.health.return_value = {
+        "number_of_data_nodes": 1,
+        "active_shards": 1000,
+        "unassigned_shards": 0,
+    }
+    return es_up_to_date
+
+
+@pytest.fixture
+def es_not_aliased_cluster_full() -> MagicMock:
+    return _make_es(aliased=False, active_shards=1000)
+
+
+@pytest.fixture
 def es_locked() -> MagicMock:
     es = _make_es()
     es.indices.create.side_effect = BadRequestError("resource_already_exists_exception", MagicMock(), None)
@@ -296,6 +387,18 @@ def test_postcondition_failure_skips_post_swap_deltas(program: Program, es_swap_
         call_command(CMD, program=str(program.id), stdout=StringIO())
 
     assert delta.call_count == 1
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_successful_run_ends_with_finished_summary(program: Program, es_aliased: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_aliased), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=out)
+
+    assert (
+        out.getvalue().splitlines()[-1]
+        == "Reindex finished: 1 reindexed, 0 skipped (up-to-date), 0 failed of 1 program(s)."
+    )
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
@@ -449,6 +552,66 @@ def test_up_to_date_program_is_skipped(program: Program, es_up_to_date: MagicMoc
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_up_to_date_program_is_counted_as_skipped_in_summary(program: Program, es_up_to_date: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_up_to_date), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=out)
+
+    assert (
+        out.getvalue().splitlines()[-1]
+        == "Reindex finished: 0 reindexed, 1 skipped (up-to-date), 0 failed of 1 program(s)."
+    )
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_failed_run_reports_outcome_counts(program: Program, es_count_mismatch: MagicMock) -> None:
+    with (
+        patch(GET_CONN, return_value=es_count_mismatch),
+        patch(DELTA_CALL),
+        patch(POPULATE),
+        pytest.raises(
+            CommandError,
+            match=r"1 program\(s\) failed \(0 reindexed, 0 skipped \(up-to-date\), 1 failed of 1\)",
+        ),
+    ):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+
+REINDEX_OPTS = {"force": False, "sweep_wrecks": False, "chunk_size": 2000}
+
+
+def test_reindex_program_outcome_marks_up_to_date_program_as_skipped(
+    program: Program, es_up_to_date: MagicMock
+) -> None:
+    command = Command(stdout=StringIO())
+
+    outcome = command._reindex_program(es_up_to_date, str(program.id), REINDEX_OPTS)
+
+    assert outcome.skipped is True
+    assert outcome.message.startswith("up-to-date")
+
+
+def test_reindex_program_outcome_marks_rebuilt_program_as_not_skipped(program: Program, es_aliased: MagicMock) -> None:
+    command = Command(stdout=StringIO())
+
+    with patch(DELTA_CALL), patch(POPULATE):
+        outcome = command._reindex_program(es_aliased, str(program.id), REINDEX_OPTS)
+
+    assert outcome.skipped is False
+    assert outcome.message.startswith("reindexed")
+
+
+def test_reindex_programs_result_counts_skipped_program(program: Program, es_up_to_date: MagicMock) -> None:
+    command = Command(stdout=StringIO())
+
+    result = command._reindex_programs(es_up_to_date, {program.id: program.code}, REINDEX_OPTS)
+
+    assert result.reindexed == 0
+    assert result.skipped == 1
+    assert result.failed == []
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_force_rebuilds_an_up_to_date_program(
     program: Program, index_names: list[str], es_up_to_date: MagicMock
 ) -> None:
@@ -487,3 +650,109 @@ def test_ambiguous_program_code_is_rejected(programs_same_code: list[Program], e
         call_command(CMD, program="SAME", stdout=StringIO())
 
     es_aliased.indices.update_aliases.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_reindex_refuses_before_lock_when_shard_capacity_is_short(program: Program, es_shards_short: MagicMock) -> None:
+    with (
+        patch(GET_CONN, return_value=es_shards_short),
+        patch(DELTA_CALL),
+        patch(POPULATE) as populate,
+        pytest.raises(CommandError, match=r"Not enough shard capacity: need 2, free 1 \(999/1000 open\)"),
+    ):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    es_shards_short.indices.create.assert_not_called()
+    populate.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_reindex_runs_when_free_shards_exactly_cover_the_need(program: Program, es_shards_exact: MagicMock) -> None:
+    with patch(GET_CONN, return_value=es_shards_exact), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    assert es_shards_exact.indices.update_aliases.call_count == 1
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_unassigned_shards_count_against_shard_capacity(
+    program: Program, es_shards_short_by_unassigned: MagicMock
+) -> None:
+    with (
+        patch(GET_CONN, return_value=es_shards_short_by_unassigned),
+        pytest.raises(CommandError, match="need 2, free 1"),
+    ):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_shard_limit_scales_with_data_nodes(program: Program, es_two_data_nodes: MagicMock) -> None:
+    with patch(GET_CONN, return_value=es_two_data_nodes), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    assert es_two_data_nodes.indices.update_aliases.call_count == 1
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_persistent_shard_limit_overrides_the_default(program: Program, es_persistent_shard_limit: MagicMock) -> None:
+    with (
+        patch(GET_CONN, return_value=es_persistent_shard_limit),
+        pytest.raises(CommandError, match=r"need 2, free 1 \(4/5 open\)"),
+    ):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_transient_shard_limit_overrides_persistent(program: Program, es_transient_shard_limit: MagicMock) -> None:
+    with patch(GET_CONN, return_value=es_transient_shard_limit), patch(DELTA_CALL), patch(POPULATE):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+    assert es_transient_shard_limit.indices.update_aliases.call_count == 1
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_replicas_count_toward_the_shard_need(program: Program, es_shards_exact: MagicMock) -> None:
+    with (
+        patch.dict("hope.apps.household.documents.index_settings", number_of_replicas=1),
+        patch(GET_CONN, return_value=es_shards_exact),
+        pytest.raises(CommandError, match="need 3, free 2"),
+    ):
+        call_command(CMD, program=str(program.id), stdout=StringIO())
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_up_to_date_program_needs_no_free_shards(program: Program, es_up_to_date_cluster_full: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_up_to_date_cluster_full):
+        call_command(CMD, program=str(program.id), stdout=out)
+
+    assert "1 skipped (up-to-date)" in out.getvalue().splitlines()[-1]
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_non_aliased_program_needs_no_free_shards(program: Program, es_not_aliased_cluster_full: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_not_aliased_cluster_full):
+        call_command(CMD, program=str(program.id), dry_run=True, stdout=out)
+
+    assert "need 0, free 0" in out.getvalue()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_dry_run_fails_when_shard_capacity_is_short(program: Program, es_shards_short: MagicMock) -> None:
+    with (
+        patch(GET_CONN, return_value=es_shards_short),
+        pytest.raises(CommandError, match="Not enough shard capacity: need 2, free 1"),
+    ):
+        call_command(CMD, program=str(program.id), dry_run=True, stdout=StringIO())
+
+    es_shards_short.indices.create.assert_not_called()
+
+
+@override_config(IS_ELASTICSEARCH_ENABLED=True)
+def test_dry_run_reports_shard_capacity(program: Program, es_aliased: MagicMock) -> None:
+    out = StringIO()
+    with patch(GET_CONN, return_value=es_aliased):
+        call_command(CMD, program=str(program.id), dry_run=True, stdout=out)
+
+    assert "Shard capacity: need 2, free 1000 (0/1000 open)" in out.getvalue()
