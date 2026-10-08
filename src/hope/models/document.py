@@ -113,12 +113,6 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
             return f"{self.type_id}--{self.document_number}--{self.country_id}"
         return f"{self.document_number}--{self.country_id}"
 
-    def mark_as_need_investigation(self) -> None:
-        self.status = self.STATUS_NEED_INVESTIGATION
-
-    def mark_as_valid(self) -> None:
-        self.status = self.STATUS_VALID
-
     def erase(self) -> None:
         self.is_removed = True
         self.photo = ""

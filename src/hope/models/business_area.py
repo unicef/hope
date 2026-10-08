@@ -185,10 +185,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     def is_rdi_ingest_source_all_except_country_workspace(self) -> bool:
         return self.ingest_source == self.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE
 
-    @property
-    def can_import_ocha_response_plans(self) -> bool:
-        return any(c.details for c in self.countries.all())
-
     @classmethod
     def get_business_areas_as_choices(cls) -> list[dict[str, Any]]:
         return [
