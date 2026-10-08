@@ -56,7 +56,7 @@ def test_get_group_findings_single_page(get_mock: mock.Mock) -> None:
     }
     get_mock.return_value = ({"count": 1, "next": None, "previous": None, "results": [finding]}, 200)
 
-    results = list(api.get_rdi_findings("PROG-1"))
+    results = list(api.get_rdi_biometric_findings("PROG-1"))
 
     assert results == [finding]
     get_mock.assert_called_once_with("TEST/deduplication_sets/PROG-1/findings/", None)
@@ -70,7 +70,7 @@ def test_get_group_findings_auto_paginates(
     api = BiometricDeduplicationEngineAPI()
     get_mock.side_effect = [findings_page_first, findings_page_last]
 
-    results = list(api.get_rdi_findings("PROG-1"))
+    results = list(api.get_rdi_biometric_findings("PROG-1"))
 
     assert results == [{"score": 0.9}, {"score": 0.8}, {"score": 0.7}]
     assert get_mock.call_count == 2
@@ -83,7 +83,7 @@ def test_get_group_findings_with_filters(get_mock: mock.Mock) -> None:
     get_mock.return_value = ({"next": None, "results": []}, 200)
 
     list(
-        api.get_rdi_findings(
+        api.get_rdi_biometric_findings(
             "PROG-1",
             status_code="200",
             updated_after="2026-04-01T00:00:00Z",

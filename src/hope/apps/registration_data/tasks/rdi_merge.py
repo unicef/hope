@@ -119,7 +119,7 @@ class RdiMergeTask:
     def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = DeduplicationEngineService()
-            dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
+            dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
 
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
