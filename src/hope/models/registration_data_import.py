@@ -134,7 +134,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         db_collation="und-ci-det",
     )
     status = models.CharField(max_length=255, choices=get_status_choices, default=IN_REVIEW)
-    business_area = models.ForeignKey(BusinessArea, null=True, blank=True, on_delete=models.CASCADE)
+    business_area = models.ForeignKey(BusinessArea, on_delete=models.PROTECT)
     program = models.ForeignKey(
         "program.Program",
         related_name="registration_imports",
