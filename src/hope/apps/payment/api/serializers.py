@@ -247,18 +247,6 @@ class PaymentVerificationSerializer(serializers.ModelSerializer):
         fields = ("id", "status", "status_date", "received_amount")
 
 
-class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentVerificationPlan
-        fields = (
-            "id",
-            "status",
-            # "verification_channel",
-            "activation_date",
-            "completion_date",
-        )
-
-
 class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
@@ -1742,54 +1730,6 @@ class PaymentSmallSerializer(serializers.ModelSerializer):
     def get_verification(self, obj: Payment) -> str | None:
         verification = obj.payment_verifications.first()
         return getattr(verification, "id", None)
-
-
-class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
-    payment_verification_plan = PaymentVerificationPlanSerializer()
-
-    class Meta:
-        model = PaymentVerification
-        fields = (
-            "id",
-            "admin_url",
-            "status",
-            "received_amount",
-            "payment",
-            "payment_verification_plan",
-        )
-
-
-class VerificationListSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
-    verification_channel = serializers.CharField(source="payment_verification_plan.verification_channel")
-    verification_plan_unicef_id = serializers.CharField(source="payment_verification_plan.unief_id")
-    household_unicef_id = serializers.CharField(source="payment.household.unicef_id")
-    household_size = serializers.IntegerField(source="household.size")
-    snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
-    payment = PaymentListSerializer(read_only=True)
-
-    class Meta:
-        model = PaymentVerification
-        fields = (
-            "id",
-            "status",
-            "verification_channel",
-            "verification_plan_unicef_id",
-            "received_amount",
-        )
-
-    @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> str | None:
-        """Return primary_collector or alternate_collector field value or None."""
-        if household_snapshot := getattr(payment, "household_snapshot", None):
-            household_snapshot_data = household_snapshot.snapshot_data
-            collector_data = household_snapshot_data.get(f"{payment.collector_type}_collector".lower(), {})
-            return collector_data.get(field_name)
-        return None
-
-    def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
-        return PaymentListSerializer.get_collector_field(obj, "full_name")
 
 
 class FullListSerializer(serializers.Serializer):

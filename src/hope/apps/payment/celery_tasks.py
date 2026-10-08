@@ -1785,10 +1785,6 @@ def send_qcf_report_email_notifications_async_task_action(job: AsyncRetryJob) ->
     send_western_union_report_email_notifications_async_task_action(job)
 
 
-def send_qcf_report_email_notifications_async_task(qcf_report_id: str) -> None:
-    send_western_union_report_email_notifications_async_task(qcf_report_id)
-
-
 def periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action(
     job: AsyncRetryJob | None = None,
 ) -> None:
