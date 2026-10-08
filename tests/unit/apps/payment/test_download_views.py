@@ -19,7 +19,6 @@ from hope.apps.payment.views import (
     download_payment_plan_group_batch,
     download_payment_plan_group_summary_pdf,
     download_payment_plan_payment_list,
-    download_payment_plan_summary_pdf,
     download_payment_verification_plan,
 )
 from hope.models import PaymentPlan, PaymentVerificationPlan
@@ -242,54 +241,6 @@ def test_download_payment_plan_payment_list_empty_file_raises(rf, create_user_ro
 
     with pytest.raises(ValueError, match="Payment plan entitlement export file link must not be None"):
         download_payment_plan_payment_list(request, str(payment_plan.id))
-
-
-def test_download_payment_plan_summary_pdf_requires_permission(rf, payment_plan_accepted, user):
-    request = rf.get(reverse("download-payment-plan-summary-pdf", args=[payment_plan_accepted.id]))
-    request.user = user
-
-    with pytest.raises(PermissionDenied) as excinfo:
-        download_payment_plan_summary_pdf(request, str(payment_plan_accepted.id))
-
-    assert excinfo.value.args[0]["required_permissions"] == [Permissions.PM_EXPORT_PDF_SUMMARY.value]
-
-
-def test_download_payment_plan_summary_pdf_redirects_with_permission(
-    rf,
-    create_user_role_with_permissions,
-    payment_plan_accepted,
-    user,
-):
-    create_user_role_with_permissions(user, [Permissions.PM_EXPORT_PDF_SUMMARY], payment_plan_accepted.business_area)
-
-    payment_plan_accepted.export_pdf_file_summary = FileTempFactory(
-        file=SimpleUploadedFile("summary.pdf", b"data"),
-        created_by=user,
-    )
-    payment_plan_accepted.save()
-
-    request = rf.get(reverse("download-payment-plan-summary-pdf", args=[payment_plan_accepted.id]))
-    request.user = user
-
-    response = download_payment_plan_summary_pdf(request, str(payment_plan_accepted.id))
-
-    assert response.status_code == 302
-    assert response.url == payment_plan_accepted.export_pdf_file_summary.file.url
-
-
-def test_download_payment_plan_summary_pdf_missing_file_raises(
-    rf,
-    create_user_role_with_permissions,
-    payment_plan_accepted,
-    user,
-):
-    create_user_role_with_permissions(user, [Permissions.PM_EXPORT_PDF_SUMMARY], payment_plan_accepted.business_area)
-
-    request = rf.get(reverse("download-payment-plan-summary-pdf", args=[payment_plan_accepted.id]))
-    request.user = user
-
-    with pytest.raises(FileNotFoundError):
-        download_payment_plan_summary_pdf(request, str(payment_plan_accepted.id))
 
 
 @pytest.fixture

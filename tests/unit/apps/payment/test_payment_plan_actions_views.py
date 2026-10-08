@@ -29,7 +29,6 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanSplitFactory,
     ProgramFactory,
     RuleCommitFactory,
     UserFactory,
@@ -37,10 +36,8 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     FileTemp,
-    FinancialServiceProvider,
     LogEntry,
     Payment,
     PaymentPlan,
@@ -113,12 +110,6 @@ def payment_plan_actions_context(
             "api:payments:payment-plans-entitlement-flat-amount", kwargs=url_kwargs
         ),
         "url_custom_exchange_rate": reverse("api:payments:payment-plans-custom-exchange-rate", kwargs=url_kwargs),
-        "url_send_to_payment_gate_way": reverse(
-            "api:payments:payment-plans-send-to-payment-gateway", kwargs=url_kwargs
-        ),
-        "url_export_pdf_payment_plan_summary": reverse(
-            "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
-        ),
         "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
     }
 
@@ -1218,73 +1209,6 @@ def test_pp_entitlement_import_xlsx_status_invalid(
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
-        ([Permissions.PM_SEND_TO_PAYMENT_GATEWAY], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_pp_send_to_payment_gateway(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="123",
-    )
-    PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    payment_plan_actions_context["pp"].payment_plan_group.financial_service_provider = fsp
-    payment_plan_actions_context["pp"].payment_plan_group.save(update_fields=["financial_service_provider"])
-    PaymentFactory(parent=payment_plan_actions_context["pp"])
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_to_payment_gate_way"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "ACCEPTED"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_EXPORT_PDF_SUMMARY], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_export_pdf_payment_plan_summary(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"])
-    response = payment_plan_actions_context["client"].get(
-        payment_plan_actions_context["url_export_pdf_payment_plan_summary"]
-    )
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert "id" in response.json()
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
         ([Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], status.HTTP_200_OK),
         ([], status.HTTP_403_FORBIDDEN),
     ],
@@ -1781,26 +1705,3 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "assigned automatically" in str(response.data)
-
-
-def test_manual_pg_send_is_blocked_for_vision_managed_plan(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    _enable_vision_flag(payment_plan_actions_context)
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value}}
-    payment_plan_actions_context["pp"].save(update_fields=["status", "internal_data"])
-
-    response = payment_plan_actions_context["client"].get(
-        payment_plan_actions_context["url_send_to_payment_gate_way"],
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "only be sent to Payment Gateway automatically" in str(response.data)

@@ -48,8 +48,8 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     A group is bound to a single FSP, so every exported payment plan shares the same FSP XLSX
     template and the sheet has a single, flat header.
 
-    Each export is a batch: only ACCEPTED/FINISHED plans of the requested ``plan_type``
-    that have not been exported yet (``export_tag`` is null) are included. On success
+    Each export is a batch: only ACCEPTED/FINISHED plans that have not been exported yet
+    (``export_tag`` is null) are included. On success
     the exported plans are stamped with the next sequential ``export_tag`` so they are excluded
     from the next export.
     """
@@ -62,7 +62,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         payment_plan_group: "PaymentPlanGroup",
         fsp_xlsx_template_id: str | None = None,
         export_tag: int | None = None,
-        plan_type: str | None = None,
     ) -> None:
         self.payment_plan_group = payment_plan_group
         self.export_tag = export_tag
@@ -72,20 +71,15 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         if export_tag is not None:
             plan_qs = payment_plan_group.payment_plans.filter(export_tag=export_tag)
         else:
-            if plan_type is None:
-                raise ValueError("plan_type is required when creating a new export batch.")
             plan_qs = payment_plan_group.payment_plans.filter(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-                plan_type=plan_type,
-                export_tag__isnull=True,
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED], export_tag__isnull=True
             )
         self.payment_plans = list(
             plan_qs.select_related(
                 "payment_plan_group__financial_service_provider", "payment_plan_group__currency", "delivery_mechanism"
             ).order_by("unicef_id")
         )
-        # in a batch all payment plans are of the same type
-        self.plan_type: str | None = self.payment_plans[0].plan_type if self.payment_plans else plan_type
+        self.plan_type: str = payment_plan_group.plan_type
         self.exported_plan_ids: list = []
         self.payments_to_mark_sent: list[Payment] = []
         self.skipped_reasons: list[str] = []
@@ -171,12 +165,12 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
 
     def _batch_name(self, tag: int | None) -> str:
-        if not self.plan_type or self.plan_type == PaymentPlan.PlanType.REGULAR:
+        if self.plan_type == PaymentPlan.PlanType.REGULAR:
             return f"Batch {tag}"
         return f"Batch {tag} {PaymentPlan.PlanType(self.plan_type).label}"
 
     def _filename_suffix(self) -> str:
-        if not self.plan_type or self.plan_type == PaymentPlan.PlanType.REGULAR:
+        if self.plan_type == PaymentPlan.PlanType.REGULAR:
             return ""
         return f"_{self.plan_type.lower()}"
 

@@ -191,7 +191,6 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
-        "export_pdf_file_summary",
         "reconciliation_import_file",
     )
     readonly_fields = (
@@ -601,7 +600,6 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                     user_id,
                     config.get("fsp_xlsx_template_id"),
                     config.get("export_tag"),
-                    config.get("plan_type"),
                 )
 
             messages.success(request, "Successfully restarted delivery XLSX export.")

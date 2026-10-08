@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from hope.apps.payment.utils import get_link
 from hope.apps.utils.pdf_generator import generate_pdf_from_html
-from hope.models import Approval, ApprovalProcess, Payment, PaymentPlan, PaymentPlanGroup
+from hope.models import Approval, ApprovalProcess, Payment, PaymentPlanGroup
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -52,68 +52,6 @@ def approval_chain(approval_process: ApprovalProcess | None) -> dict:
         "authorization": approvals.filter(type=Approval.AUTHORIZATION).first(),
         "release": approvals.filter(type=Approval.FINANCE_RELEASE).first(),
     }
-
-
-class PaymentPlanPDFExportService:
-    text_template = "payment/pdf_file_generated_email.txt"
-    html_template = "payment/pdf_file_generated_email.html"
-
-    def __init__(self, payment_plan: PaymentPlan):
-        self.payment_plan = payment_plan
-        self.download_link: str = ""
-        self.payment_plan_link: str = ""
-        self.is_social_worker_program = payment_plan.program.is_social_worker_program
-
-    def generate_web_links(self) -> None:
-        payment_plan_id = str(self.payment_plan.id)
-        program_code = self.payment_plan.program.code
-        path_name = "download-payment-plan-summary-pdf"
-        self.download_link = get_link(reverse(path_name, args=[payment_plan_id]))
-        self.payment_plan_link = get_link(
-            f"/{self.payment_plan.business_area.slug}/programs/{program_code}/payment-module/payment-plans/{payment_plan_id}"
-        )
-
-    def get_email_context(self, user: "User") -> dict:
-        msg = (
-            "Payment Plan Summary PDF file(s) have been generated, "
-            "and below you will find the link to download the file(s)."
-        )
-
-        return {
-            "first_name": getattr(user, "first_name", "") or getattr(user, "username", ""),
-            "last_name": getattr(user, "last_name", ""),
-            "email": getattr(user, "email", ""),
-            "message": msg,
-            "link": self.download_link,
-            "title": "Payment Plan Payment List files generated",
-        }
-
-    def generate_pdf_summary(self) -> tuple[bytes, str]:
-        self.generate_web_links()
-        template_name = "payment/payment_plan_summary_pdf_template.html"
-        filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
-        fsp = self.payment_plan.financial_service_provider
-        delivery_mechanism = self.payment_plan.delivery_mechanism
-
-        approval_process = self.payment_plan.last_approval_process
-
-        pdf_context_data = {
-            "title": self.payment_plan.unicef_id,
-            "payment_plan": self.payment_plan,
-            "is_social_worker_program": self.is_social_worker_program,
-            "fsp": fsp,
-            "delivery_mechanism_per_payment_plan": delivery_mechanism,
-            "approval_process": approval_process,
-            "payment_plan_link": self.payment_plan_link,
-            **approval_chain(approval_process),
-            "reconciliation": reconciliation_summary(self.payment_plan.eligible_payments),
-        }
-
-        pdf = generate_pdf_from_html(
-            template_name=template_name,
-            data=pdf_context_data,
-        )
-        return pdf, filename
 
 
 class PaymentPlanGroupPDFExportService:

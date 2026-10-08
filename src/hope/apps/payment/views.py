@@ -105,36 +105,6 @@ def download_payment_plan_group_batch(
 
 
 @login_required
-def download_payment_plan_summary_pdf(
-    request: "HttpRequest", payment_plan_id: str
-) -> Union[
-    "HttpResponseRedirect",
-    "HttpResponseRedirect",
-    "HttpResponsePermanentRedirect",
-    "HttpResponsePermanentRedirect",
-]:
-    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-
-    if not request.user.has_perm(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan.business_area):
-        raise PermissionDenied({"required_permissions": [Permissions.PM_EXPORT_PDF_SUMMARY.value]})
-
-    if payment_plan.status not in (
-        PaymentPlan.Status.IN_REVIEW,
-        PaymentPlan.Status.ACCEPTED,
-        PaymentPlan.Status.FINISHED,
-    ):  # pragma: no cover
-        raise ValidationError("Export PDF is possible only for Payment Plan within status IN_REVIEW/ACCEPTED/FINISHED.")
-
-    export_pdf_file_summary = payment_plan.export_pdf_file_summary
-    if not (export_pdf_file_summary and export_pdf_file_summary.file):
-        log_and_raise(
-            f"PDF file not found. PaymentPlan ID: {payment_plan.unicef_id}",
-            error_type=FileNotFoundError,
-        )
-    return redirect(export_pdf_file_summary.file.url)
-
-
-@login_required
 def download_payment_plan_group_summary_pdf(request: "HttpRequest", payment_plan_group_id: str) -> "HttpResponse":
     payment_plan_group = get_object_or_404(PaymentPlanGroup, id=payment_plan_group_id)
 

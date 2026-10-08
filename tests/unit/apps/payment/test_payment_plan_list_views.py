@@ -435,7 +435,6 @@ def test_payment_plan_detail(
     assert payment_plan["available_payment_records_count"] == 0
     assert payment_plan["total_withdrawn_households_count"] == 0
     assert payment_plan["unsuccessful_payments_count"] == 0
-    assert payment_plan["can_send_to_payment_gateway"] is False
     assert payment_plan["total_households_count_with_valid_phone_no"] == 0
     purpose = payment_plan_detail_context["purpose"]
     assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]

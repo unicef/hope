@@ -17,7 +17,6 @@
                 "imported_file": null,
                 "export_file_entitlement": null,
                 "export_file_delivery": null,
-                "export_pdf_file_summary": null,
                 "reconciliation_import_file": null,
                 "steficon_rule": null,
                 "steficon_rule_targeting": null,
@@ -241,7 +240,6 @@
                     "closure_comment": null,
                     "closed_by": null,
                     "delivery_import_file": null,
-                    "export_pdf_file_summary": null,
                     "background_action_status": null,
                     "plan_type": "REGULAR",
                     "source_group": null

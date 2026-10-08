@@ -22,10 +22,7 @@ from hope.apps.core.utils import (
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
-from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
-    PaymentPlanGroupPDFExportService,
-    PaymentPlanPDFExportService,
-)
+from hope.apps.payment.pdf.payment_plan_export_pdf_service import PaymentPlanGroupPDFExportService
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     calculate_counts,
@@ -268,13 +265,9 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         user = User.objects.get(pk=job.config["user_id"])
         export_tag = job.config.get("export_tag")
         fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
-        plan_type = job.config.get("plan_type")
         try:
             service = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group,
-                fsp_xlsx_template_id=fsp_xlsx_template_id,
-                export_tag=export_tag,
-                plan_type=plan_type,
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
             )
             if service.payment_plans and service.payment_generate_token_and_order_numbers:
                 program = payment_plan_group.cycle.program
@@ -319,14 +312,11 @@ def export_payment_plan_group_delivery_xlsx_async_task(
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
     export_tag: int | None = None,
-    plan_type: str | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
     config: dict = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
     if fsp_xlsx_template_id is not None:
         config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
-    if plan_type is not None:
-        config["plan_type"] = plan_type
     if export_tag is not None:
         config["export_tag"] = export_tag
         description = f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}"
@@ -1277,53 +1267,6 @@ def payment_plan_exclude_beneficiaries_async_task(
         config=config,
         group_key="payment",
         description=f"Exclude beneficiaries from payment plan {payment_plan_id}",
-    )
-
-
-def export_pdf_payment_plan_summary_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import FileTemp, PaymentPlan, User
-
-    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-    user = User.objects.get(pk=job.config["user_id"])
-
-    with transaction.atomic():
-        if payment_plan.export_pdf_file_summary:
-            payment_plan.export_pdf_file_summary.file.delete()
-            payment_plan.export_pdf_file_summary.delete()
-            payment_plan.export_pdf_file_summary = None
-
-        service = PaymentPlanPDFExportService(payment_plan)
-        pdf, filename = service.generate_pdf_summary()
-
-        file_pdf_obj = FileTemp(
-            object_id=payment_plan.pk,
-            content_type=get_content_type_for_model(payment_plan),
-            created_by=user,
-        )
-        file_pdf_obj.file.save(filename, ContentFile(pdf))
-
-        payment_plan.export_pdf_file_summary = file_pdf_obj
-        payment_plan.save()
-
-        if payment_plan.business_area.enable_email_notification:
-            send_email_notification_on_commit(service, user)
-
-
-def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_id: str) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {
-        "payment_plan_id": payment_plan_id,
-        "user_id": user_id,
-    }
-    AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        owner_id=user_id,
-        job_name=export_pdf_payment_plan_summary_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Export payment plan summary pdf for {payment_plan_id}",
     )
 
 

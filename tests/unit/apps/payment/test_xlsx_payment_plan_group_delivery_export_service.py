@@ -637,7 +637,9 @@ def make_auth_code_group_with_typed_plan(
     """Build a group with one exportable payment-gateway plan of the given plan type."""
 
     def build_group(plan_type):
-        group = PaymentPlanGroupFactory(cycle=program_cycle)
+        group = PaymentPlanGroupFactory(
+            cycle=program_cycle, plan_type=plan_type, source_group=PaymentPlanGroupFactory(cycle=program_cycle)
+        )
         plan = PaymentPlanFactory(
             program_cycle=program_cycle,
             payment_plan_group=group,
@@ -684,17 +686,13 @@ def group_with_registration_token_in_snapshot(program_cycle, business_area, fsp,
 
 
 def test_workbook_has_single_sheet_with_group_title(group_with_one_accepted_plan):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).generate_workbook()
 
     assert wb.sheetnames == ["Payment Plan Group - Payment List"]
 
 
 def test_header_row_contains_fsp_template_columns(group_with_one_accepted_plan):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).generate_workbook()
     header_row = [cell.value for cell in wb.active[1]]
 
     assert header_row[0] == "payment_id"
@@ -704,36 +702,28 @@ def test_header_row_contains_fsp_template_columns(group_with_one_accepted_plan):
 
 
 def test_empty_group_produces_workbook_with_no_payment_rows(empty_group):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        empty_group, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(empty_group).generate_workbook()
     ws = wb.active
 
     assert ws.max_row == 1
 
 
 def test_plan_whose_fsp_has_no_template_is_skipped(group_with_plan_without_template):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_plan_without_template, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template).generate_workbook()
     ws = wb.active
 
     assert ws.max_row == 1
 
 
 def test_open_plans_are_not_exported(group_with_open_plan):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_open_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_open_plan).generate_workbook()
     ws = wb.active
 
     assert ws.max_row == 1
 
 
 def test_headers_for_social_worker_program(group_with_social_worker_program):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_social_worker_program, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_social_worker_program).generate_workbook()
     header_row = [cell.value for cell in wb.active[1]]
 
     assert "individual_id" in header_row
@@ -742,9 +732,7 @@ def test_headers_for_social_worker_program(group_with_social_worker_program):
 
 
 def test_payment_row_contains_entitlement_quantities(group_with_payment_and_full_snapshot):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_payment_and_full_snapshot, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_payment_and_full_snapshot).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     entitlement_col = headers.index("entitlement_quantity") + 1
@@ -755,9 +743,7 @@ def test_payment_row_contains_entitlement_quantities(group_with_payment_and_full
 
 
 def test_payment_row_contains_snapshot_household_data(group_with_payment_and_full_snapshot):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_payment_and_full_snapshot, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_payment_and_full_snapshot).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     household_id_col = headers.index("household_id") + 1
@@ -772,9 +758,7 @@ def test_payment_row_contains_snapshot_household_data(group_with_payment_and_ful
 def test_registration_token_column_holds_document_number_without_document_type_row(
     group_with_registration_token_in_snapshot,
 ):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_registration_token_in_snapshot, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_registration_token_in_snapshot).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
     registration_token_col = headers.index("registration_token") + 1
@@ -787,10 +771,7 @@ def test_account_values_are_omitted_when_group_template_excludes_account_data(
 ):
     group, payment = group_with_account_snapshot_and_template_without_account_data
 
-    workbook = XlsxPaymentPlanGroupDeliveryExportService(
-        group,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-    ).generate_workbook()
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
 
     assert list(workbook.active.values) == [
         ("payment_id", "provider_reference"),
@@ -803,10 +784,7 @@ def test_rows_are_aligned_to_group_headers_when_account_headers_differ_between_p
 ):
     group, payment_with_account, payment_with_extra = group_with_plan_specific_account_headers
 
-    workbook = XlsxPaymentPlanGroupDeliveryExportService(
-        group,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-    ).generate_workbook()
+    workbook = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
 
     assert list(workbook.active.values) == [
         ("payment_id", "iban", "number", "financial_institution_pk", "financial_institution_name"),
@@ -826,7 +804,7 @@ def test_payments_grouped_by_plan_and_sorted_within_each_plan(group_with_two_pla
     )
     expected_order = plan_one_payment_ids + plan_two_payment_ids
 
-    wb = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group).generate_workbook()
     ws = wb.active
     payment_ids_in_order = [ws.cell(row=row, column=1).value for row in range(2, ws.max_row + 1)]
 
@@ -839,18 +817,13 @@ def user():
 
 
 @pytest.fixture
-def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    regular_plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp,
-        delivery_mechanism=delivery_mechanism,
-        status=PaymentPlan.Status.ACCEPTED,
-        plan_type=PaymentPlan.PlanType.REGULAR,
+def follow_up_group(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    group = PaymentPlanGroupFactory(
+        cycle=program_cycle,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_group=PaymentPlanGroupFactory(cycle=program_cycle),
     )
-    follow_up_plan = PaymentPlanFactory(
+    PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
@@ -859,7 +832,17 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    top_up_plan = PaymentPlanFactory(
+    return group
+
+
+@pytest.fixture
+def top_up_group(program_cycle, business_area, fsp, delivery_mechanism, fsp_template):
+    group = PaymentPlanGroupFactory(
+        cycle=program_cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_group=PaymentPlanGroupFactory(cycle=program_cycle),
+    )
+    PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
         business_area=business_area,
@@ -868,7 +851,7 @@ def group_with_follow_up_and_top_up_plans(program_cycle, business_area, fsp, del
         status=PaymentPlan.Status.ACCEPTED,
         plan_type=PaymentPlan.PlanType.TOP_UP,
     )
-    return group, regular_plan, follow_up_plan, top_up_plan
+    return group
 
 
 @pytest.fixture
@@ -895,84 +878,29 @@ def group_with_tagged_and_untagged_plans(program_cycle, business_area, fsp, deli
     return group, tagged_plan, untagged_plan
 
 
-def test_follow_up_and_top_up_plans_are_excluded_from_regular_export(group_with_follow_up_and_top_up_plans):
-    group, regular_plan, _follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
+def test_save_xlsx_file_follow_up_group_filename_contains_follow_up(follow_up_group, user):
+    plan = follow_up_group.payment_plans.first()
 
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR)
+    XlsxPaymentPlanGroupDeliveryExportService(follow_up_group).save_xlsx_file(user)
 
-    assert [plan.id for plan in service.payment_plans] == [regular_plan.id]
-
-
-def test_new_export_without_plan_type_raises(group_with_follow_up_and_top_up_plans):
-    group, _regular_plan, _follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
-
-    with pytest.raises(ValueError, match="plan_type is required when creating a new export batch."):
-        XlsxPaymentPlanGroupDeliveryExportService(group)
+    plan.refresh_from_db()
+    assert plan.export_file_delivery is not None
+    assert "_follow_up" in plan.export_file_delivery.file.name
+    assert plan.export_file_delivery.file.name.endswith(".xlsx")
 
 
-def test_plan_type_follow_up_selects_only_follow_up_plans(group_with_follow_up_and_top_up_plans):
-    group, _regular_plan, follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
+def test_save_xlsx_file_top_up_group_filename_contains_top_up(top_up_group, user):
+    plan = top_up_group.payment_plans.first()
 
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+    XlsxPaymentPlanGroupDeliveryExportService(top_up_group).save_xlsx_file(user)
 
-    assert [plan.id for plan in service.payment_plans] == [follow_up_plan.id]
-
-
-def test_plan_type_top_up_selects_only_top_up_plans(group_with_follow_up_and_top_up_plans):
-    group, _regular_plan, _follow_up_plan, top_up_plan = group_with_follow_up_and_top_up_plans
-
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.TOP_UP)
-
-    assert [plan.id for plan in service.payment_plans] == [top_up_plan.id]
+    plan.refresh_from_db()
+    assert plan.export_file_delivery is not None
+    assert "_top_up" in plan.export_file_delivery.file.name
 
 
-def test_save_xlsx_file_follow_up_filename_contains_follow_up(group_with_follow_up_and_top_up_plans, user):
-    group, _regular_plan, follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
-
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
-
-    follow_up_plan.refresh_from_db()
-    assert follow_up_plan.export_file_delivery is not None
-    assert "_follow_up" in follow_up_plan.export_file_delivery.file.name
-    assert follow_up_plan.export_file_delivery.file.name.endswith(".xlsx")
-
-
-def test_save_xlsx_file_top_up_filename_contains_top_up(group_with_follow_up_and_top_up_plans, user):
-    group, _regular_plan, _follow_up_plan, top_up_plan = group_with_follow_up_and_top_up_plans
-
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.TOP_UP).save_xlsx_file(user)
-
-    top_up_plan.refresh_from_db()
-    assert top_up_plan.export_file_delivery is not None
-    assert "_top_up" in top_up_plan.export_file_delivery.file.name
-
-
-def test_save_xlsx_file_follow_up_leaves_other_plan_types_untagged(group_with_follow_up_and_top_up_plans, user):
-    group, regular_plan, follow_up_plan, top_up_plan = group_with_follow_up_and_top_up_plans
-
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
-
-    regular_plan.refresh_from_db()
-    follow_up_plan.refresh_from_db()
-    top_up_plan.refresh_from_db()
-    assert follow_up_plan.export_tag == 1
-    assert regular_plan.export_tag is None
-    assert top_up_plan.export_tag is None
-
-
-def test_reexport_batch_recovers_plan_type_from_batch(group_with_follow_up_and_top_up_plans, user):
-    group, _regular_plan, follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
-    follow_up_plan.refresh_from_db()
-
-    reexport_service = XlsxPaymentPlanGroupDeliveryExportService(group, export_tag=follow_up_plan.export_tag)
-
-    assert reexport_service.plan_type == PaymentPlan.PlanType.FOLLOW_UP
-
-
-def test_get_email_context_follow_up_batch_name_carries_plan_type(group_with_follow_up_and_top_up_plans, user):
-    group, _regular_plan, _follow_up_plan, _top_up_plan = group_with_follow_up_and_top_up_plans
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
+def test_get_email_context_follow_up_group_batch_name_carries_plan_type(follow_up_group, user):
+    service = XlsxPaymentPlanGroupDeliveryExportService(follow_up_group)
     service.save_xlsx_file(user)
 
     context = service.get_email_context(user)
@@ -984,7 +912,7 @@ def test_get_email_context_follow_up_batch_name_carries_plan_type(group_with_fol
 def test_already_tagged_plans_are_excluded_from_export(group_with_tagged_and_untagged_plans):
     group, _tagged_plan, untagged_plan = group_with_tagged_and_untagged_plans
 
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR)
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
 
     assert [plan.id for plan in service.payment_plans] == [untagged_plan.id]
 
@@ -992,9 +920,7 @@ def test_already_tagged_plans_are_excluded_from_export(group_with_tagged_and_unt
 def test_save_xlsx_file_stamps_first_batch_with_tag_one(group_with_one_accepted_plan, user):
     plan = group_with_one_accepted_plan.payment_plans.first()
 
-    XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    ).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag == 1
@@ -1003,9 +929,7 @@ def test_save_xlsx_file_stamps_first_batch_with_tag_one(group_with_one_accepted_
 def test_save_xlsx_file_stores_batch_file_on_plan(group_with_one_accepted_plan, user):
     plan = group_with_one_accepted_plan.payment_plans.first()
 
-    XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    ).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_file_delivery is not None
@@ -1015,17 +939,13 @@ def test_save_xlsx_file_stores_batch_file_on_plan(group_with_one_accepted_plan, 
 
 def test_save_xlsx_file_no_eligible_plans_raises_and_creates_no_file(empty_group, user):
     with pytest.raises(EmptyDeliveryExportError):
-        XlsxPaymentPlanGroupDeliveryExportService(empty_group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(
-            user
-        )
+        XlsxPaymentPlanGroupDeliveryExportService(empty_group).save_xlsx_file(user)
 
     assert not empty_group.payment_plans.filter(export_file_delivery__isnull=False).exists()
 
 
 def test_save_xlsx_file_all_plans_skipped_reports_reasons(group_with_plan_without_template, user):
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_plan_without_template, plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template)
 
     with pytest.raises(EmptyDeliveryExportError) as exc_info:
         service.save_xlsx_file(user)
@@ -1036,9 +956,7 @@ def test_save_xlsx_file_all_plans_skipped_reports_reasons(group_with_plan_withou
 
 
 def test_save_xlsx_file_skips_plan_in_inactive_currency(group_with_plan_in_inactive_currency, user):
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_plan_in_inactive_currency, plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_in_inactive_currency)
 
     with pytest.raises(EmptyDeliveryExportError) as exc_info:
         service.save_xlsx_file(user)
@@ -1048,9 +966,7 @@ def test_save_xlsx_file_skips_plan_in_inactive_currency(group_with_plan_in_inact
 
 
 def test_currency_column_carries_iso_code_of_redenominated_currency(group_with_payment_in_redenominated_currency):
-    wb = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_payment_in_redenominated_currency, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    wb = XlsxPaymentPlanGroupDeliveryExportService(group_with_payment_in_redenominated_currency).generate_workbook()
     ws = wb.active
     headers = [cell.value for cell in ws[1]]
 
@@ -1060,7 +976,7 @@ def test_currency_column_carries_iso_code_of_redenominated_currency(group_with_p
 def test_save_xlsx_file_exports_mapped_plan_and_leaves_skipped_untouched(group_one_exportable_two_skipped, user):
     group, exportable_plan, skipped_plan_one, skipped_plan_two = group_one_exportable_two_skipped
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     exportable_plan.refresh_from_db()
     skipped_plan_one.refresh_from_db()
@@ -1083,7 +999,7 @@ def test_save_xlsx_file_marks_exported_manual_payments_as_sent_to_fsp(
     old_status_date = exported_payment.status_date
     old_signature = exported_payment.signature_hash
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     exported_payment.refresh_from_db()
     skipped_payment.refresh_from_db()
@@ -1109,7 +1025,7 @@ def test_save_xlsx_file_does_not_change_payment_gateway_payment(
 ):
     group, payment = group_with_pending_payment_gateway_payment
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     payment.refresh_from_db()
     assert payment.status == Payment.STATUS_PENDING
@@ -1123,7 +1039,7 @@ def test_reexport_keeps_sent_to_fsp_payment_unchanged(group_one_exportable_two_s
     group, exportable_plan, _skipped_plan_one, _skipped_plan_two = group_one_exportable_two_skipped
     payment = exportable_plan.payment_items.get()
     content_type = ContentType.objects.get_for_model(Payment)
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
     payment.refresh_from_db()
     first_status_date = payment.status_date
     first_sent_to_fsp_date = payment.sent_to_fsp_date
@@ -1141,9 +1057,7 @@ def test_reexport_keeps_sent_to_fsp_payment_unchanged(group_one_exportable_two_s
 
 
 def test_save_xlsx_file_multiple_plans_all_skipped_raises_with_all_reasons(group_with_two_plans_without_template, user):
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_two_plans_without_template, plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_without_template)
 
     with pytest.raises(EmptyDeliveryExportError) as exc_info:
         service.save_xlsx_file(user)
@@ -1156,7 +1070,7 @@ def test_save_xlsx_file_multiple_plans_all_skipped_raises_with_all_reasons(group
 def test_save_xlsx_file_one_batch_tags_all_plans_and_shares_file(group_with_two_plans_and_payments, user):
     group = group_with_two_plans_and_payments
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plans = list(group.payment_plans.order_by("unicef_id"))
     assert all(plan.export_tag == 1 for plan in plans)
@@ -1176,7 +1090,7 @@ def test_save_xlsx_file_second_export_increments_tag_and_excludes_first_batch(
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
     second_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -1186,7 +1100,7 @@ def test_save_xlsx_file_second_export_increments_tag_and_excludes_first_batch(
         status=PaymentPlan.Status.ACCEPTED,
     )
 
-    second_service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR)
+    second_service = XlsxPaymentPlanGroupDeliveryExportService(group)
     assert [plan.id for plan in second_service.payment_plans] == [second_plan.id]
     second_service.save_xlsx_file(user)
 
@@ -1207,9 +1121,7 @@ def test_resolve_template_returns_explicitly_requested_template(program_cycle, b
         status=PaymentPlan.Status.ACCEPTED,
     )
     explicit_template = FinancialServiceProviderXlsxTemplateFactory()
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group, fsp_xlsx_template_id=str(explicit_template.pk), plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group, fsp_xlsx_template_id=str(explicit_template.pk))
 
     assert service._resolve_template(plan) == explicit_template
 
@@ -1224,15 +1136,13 @@ def test_resolve_template_returns_none_when_plan_has_no_fsp_or_delivery_mechanis
         delivery_mechanism=None,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR)
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
 
     assert service._resolve_template(plan) is None
 
 
 def test_save_xlsx_file_reexport_with_export_tag_replaces_file_and_keeps_tag(group_with_one_accepted_plan, user):
-    XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    ).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan).save_xlsx_file(user)
     plan = group_with_one_accepted_plan.payment_plans.first()
     plan.refresh_from_db()
     first_file_id = plan.export_file_delivery_id
@@ -1250,7 +1160,7 @@ def test_reexport_uses_current_payment_values_while_existing_file_remains_snapsh
     user,
 ):
     group, plan, payment = group_with_reexportable_payment
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     new_delivery_date = timezone.localdate()
     import_workbook = openpyxl.Workbook()
@@ -1331,9 +1241,7 @@ def test_save_xlsx_file_does_not_tag_plan_whose_fsp_has_no_template(group_with_p
     plan = group_with_plan_without_template.payment_plans.first()
 
     with pytest.raises(EmptyDeliveryExportError):
-        XlsxPaymentPlanGroupDeliveryExportService(
-            group_with_plan_without_template, plan_type=PaymentPlan.PlanType.REGULAR
-        ).save_xlsx_file(user)
+        XlsxPaymentPlanGroupDeliveryExportService(group_with_plan_without_template).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag is None
@@ -1355,7 +1263,7 @@ def test_plan_with_unprocessed_payments_is_skipped_when_template_requires_auth_c
     PaymentFactory(parent=plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_PENDING)
 
     with pytest.raises(EmptyDeliveryExportError):
-        XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+        XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag is None
@@ -1381,7 +1289,7 @@ def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag == 1
@@ -1395,7 +1303,7 @@ def test_save_xlsx_file_with_auth_code_produces_encrypted_zip(
 def test_save_xlsx_file_with_auth_code_follow_up_produces_zip_with_suffix(make_auth_code_group_with_typed_plan, user):
     group, plan = make_auth_code_group_with_typed_plan(PaymentPlan.PlanType.FOLLOW_UP)
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.FOLLOW_UP).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag == 1
@@ -1410,7 +1318,7 @@ def test_save_xlsx_file_with_auth_code_follow_up_produces_zip_with_suffix(make_a
 def test_save_xlsx_file_with_auth_code_top_up_produces_zip_with_suffix(make_auth_code_group_with_typed_plan, user):
     group, plan = make_auth_code_group_with_typed_plan(PaymentPlan.PlanType.TOP_UP)
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.TOP_UP).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
 
     plan.refresh_from_db()
     assert plan.export_tag == 1
@@ -1438,7 +1346,7 @@ def test_save_xlsx_file_with_auth_code_reexport_with_export_tag_replaces_file_an
         parent=plan, financial_service_provider=payment_gateway_fsp, status=Payment.STATUS_DISTRIBUTION_SUCCESS
     )
 
-    XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR).save_xlsx_file(user)
+    XlsxPaymentPlanGroupDeliveryExportService(group).save_xlsx_file(user)
     plan.refresh_from_db()
     first_file_id = plan.export_file_delivery_id
     assert plan.export_tag == 1
@@ -1451,9 +1359,7 @@ def test_save_xlsx_file_with_auth_code_reexport_with_export_tag_replaces_file_an
 
 
 def test_get_email_context_returns_user_recipient_fields(group_with_one_accepted_plan, user):
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan)
     service.applied_export_tag = 1
 
     context = service.get_email_context(user)
@@ -1464,9 +1370,7 @@ def test_get_email_context_returns_user_recipient_fields(group_with_one_accepted
 
 
 def test_get_email_context_link_points_to_batch_download(group_with_one_accepted_plan, user):
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_one_accepted_plan, plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_one_accepted_plan)
     service.applied_export_tag = 1
 
     context = service.get_email_context(user)
@@ -1480,7 +1384,7 @@ def test_get_email_context_link_points_to_batch_download(group_with_one_accepted
 
 def test_get_email_context_message_and_title_carry_group_and_batch(group_with_one_accepted_plan, user):
     group = group_with_one_accepted_plan
-    service = XlsxPaymentPlanGroupDeliveryExportService(group, plan_type=PaymentPlan.PlanType.REGULAR)
+    service = XlsxPaymentPlanGroupDeliveryExportService(group)
     service.applied_export_tag = 1
 
     context = service.get_email_context(user)
@@ -1529,20 +1433,14 @@ def test_per_plan_service_uses_provided_shared_lookups_without_reloading(group_w
 def test_group_export_builds_shared_lookups_once_for_multiple_plans(group_with_two_plans_and_payments, mocker):
     build_spy = mocker.spy(XlsxPaymentPlanDeliveryExportService, "build_shared_lookups")
 
-    XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_two_plans_and_payments, plan_type=PaymentPlan.PlanType.REGULAR
-    ).generate_workbook()
+    XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_and_payments).generate_workbook()
 
     assert build_spy.call_count == 1
 
 
 def test_preview_export_query_count_is_independent_of_plan_count(make_payment_gateway_group):
-    service_two_plans = XlsxPaymentPlanGroupDeliveryExportService(
-        make_payment_gateway_group(2), plan_type=PaymentPlan.PlanType.REGULAR
-    )
-    service_three_plans = XlsxPaymentPlanGroupDeliveryExportService(
-        make_payment_gateway_group(3), plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service_two_plans = XlsxPaymentPlanGroupDeliveryExportService(make_payment_gateway_group(2))
+    service_three_plans = XlsxPaymentPlanGroupDeliveryExportService(make_payment_gateway_group(3))
 
     with CaptureQueriesContext(connection) as queries_two_plans:
         exported_two_plans = service_two_plans.preview_export()
@@ -1558,9 +1456,7 @@ def test_preview_export_query_count_is_independent_of_plan_count(make_payment_ga
 
 def test_preview_export_runs_single_query_for_non_gateway_plans(group_with_two_plans_and_payments):
     # XLSX (non-payment-gateway) FSPs short-circuit before the blocking-payments query, leaving only the template map
-    service = XlsxPaymentPlanGroupDeliveryExportService(
-        group_with_two_plans_and_payments, plan_type=PaymentPlan.PlanType.REGULAR
-    )
+    service = XlsxPaymentPlanGroupDeliveryExportService(group_with_two_plans_and_payments)
 
     with CaptureQueriesContext(connection) as queries:
         exported = service.preview_export()

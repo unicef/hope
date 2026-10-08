@@ -53,11 +53,6 @@ api_patterns: list[URLPattern | URLResolver] = [
         name="download-payment-plan-payment-list",
     ),
     path(
-        "download-payment-plan-payment-summary-pdf/<str:payment_plan_id>",
-        hope.apps.payment.views.download_payment_plan_summary_pdf,
-        name="download-payment-plan-summary-pdf",
-    ),
-    path(
         "download-payment-plan-group-summary-pdf/<str:payment_plan_group_id>",
         hope.apps.payment.views.download_payment_plan_group_summary_pdf,
         name="download-payment-plan-group-summary-pdf",

@@ -108,7 +108,6 @@ class PaymentPlan(
             "imported_file",
             "export_file_entitlement",
             "export_file_delivery",
-            "export_pdf_file_summary",
             "steficon_rule",
             "steficon_applied_date",
             "steficon_rule_targeting",
@@ -354,14 +353,6 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export File Delivery",
     )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
-    export_pdf_file_summary = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Export PDF File Summary",
-    )
     reconciliation_import_file = models.ForeignKey(
         FileTemp,
         null=True,
@@ -1250,10 +1241,6 @@ class PaymentPlan(
         return self.vision_integration_enabled and (
             self.status == PaymentPlan.Status.IN_REVIEW or self.vision_status != VisionStatus.NOT_SENT.value
         )
-
-    @property
-    def can_manually_send_to_payment_gateway(self) -> bool:
-        return self.can_send_to_payment_gateway and not self.vision_managed
 
     @property
     def can_send_to_vision(self) -> bool:

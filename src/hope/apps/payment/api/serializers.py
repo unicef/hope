@@ -187,11 +187,6 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
-    plan_type = serializers.ChoiceField(
-        choices=PaymentPlan.PlanType.choices,
-        required=False,
-        default=PaymentPlan.PlanType.REGULAR,
-    )
 
 
 class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
@@ -978,7 +973,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_individuals = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
     vision_integration_enabled = serializers.BooleanField(read_only=True)
     vision_managed = serializers.BooleanField(read_only=True)
     vision = serializers.SerializerMethodField()
@@ -1024,7 +1018,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "excluded_individuals",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
-            "can_send_to_payment_gateway",
             "vision_integration_enabled",
             "vision_managed",
             "vision",
@@ -2177,7 +2170,6 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
 
 class PaymentPlanGroupBatchSerializer(serializers.Serializer):
     export_tag = serializers.IntegerField()
-    plan_type = serializers.ChoiceField(choices=PaymentPlan.PlanType.choices)
     export_file_link = serializers.CharField(allow_null=True)
     has_password = serializers.BooleanField()
 
@@ -2193,10 +2185,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     batches = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
     export_pdf_file_summary = serializers.SerializerMethodField()
-    can_export_regular = serializers.SerializerMethodField()
-    can_export_follow_up = serializers.SerializerMethodField()
-    can_export_top_up = serializers.SerializerMethodField()
-    can_export_top_up_amendment = serializers.SerializerMethodField()
+    can_export = serializers.SerializerMethodField()
     linked_groups = PaymentPlanGroupLinkedSerializer(read_only=True, many=True)
     can_split = serializers.BooleanField(read_only=True)
     split_choices = serializers.SerializerMethodField()
@@ -2221,10 +2210,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "batches",
             "delivery_import_file",
             "export_pdf_file_summary",
-            "can_export_regular",
-            "can_export_follow_up",
-            "can_export_top_up",
-            "can_export_top_up_amendment",
+            "can_export",
             "linked_groups",
             "can_split",
             "split_choices",
@@ -2270,15 +2256,12 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
                         output_field=IntegerField(),
                     )
                 ),
-                # a batch is exported for a single plan type, so Max just picks that type
-                batch_plan_type=Max("plan_type"),
             )
             .order_by("export_tag")
         )
         return [
             {
                 "export_tag": row["export_tag"],
-                "plan_type": row["batch_plan_type"],
                 "export_file_link": (
                     reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
                     if row["has_file"]
@@ -2289,25 +2272,11 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             for row in tags_qs
         ]
 
-    def _has_exportable_plans(self, obj: PaymentPlanGroup, plan_type: str) -> bool:
-        """Whether any plan of a plan_type can be exported."""
+    def get_can_export(self, obj: PaymentPlanGroup) -> bool:
+        """Whether the group still has released plans that no export batch covers."""
         return obj.payment_plans.filter(
-            plan_type=plan_type,
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-            export_tag__isnull=True,
+            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED], export_tag__isnull=True
         ).exists()
-
-    def get_can_export_regular(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.REGULAR)
-
-    def get_can_export_follow_up(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.FOLLOW_UP)
-
-    def get_can_export_top_up(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP)
-
-    def get_can_export_top_up_amendment(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

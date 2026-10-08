@@ -116,7 +116,6 @@ from hope.apps.payment.api.serializers import (
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_delivery_xlsx_async_task,
     export_pdf_payment_plan_group_summary_async_task,
-    export_pdf_payment_plan_summary_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
@@ -785,7 +784,6 @@ class PaymentPlanViewSet(
         "unlock",
         "lock_fsp",
         "unlock_fsp",
-        "send_to_payment_gateway",
         "fsp_extra_fields_import_xlsx",
     }
     program_model_field = "program_cycle__program"
@@ -835,8 +833,6 @@ class PaymentPlanViewSet(
             Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
-        "send_to_payment_gateway": [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
-        "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "custom_exchange_rate": [
@@ -1328,40 +1324,6 @@ class PaymentPlanViewSet(
         response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
         return Response(
             data=response_serializer.data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["get"], url_path="send-to-payment-gateway")
-    @transaction.atomic
-    def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        if payment_plan.vision_managed:
-            raise ValidationError("Vision-managed Payment Plans can only be sent to Payment Gateway automatically")
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
-            user=request.user,
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
-    @transaction.atomic
-    def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        export_pdf_payment_plan_summary_async_task(payment_plan, str(request.user.pk))
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
 
@@ -2681,7 +2643,6 @@ class PaymentPlanGroupViewSet(
         serializer.is_valid(raise_exception=True)
         export_tag = serializer.validated_data["export_tag"]
         fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
-        plan_type = serializer.validated_data["plan_type"]
 
         if fsp_xlsx_template_id is not None:
             template = get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=fsp_xlsx_template_id)
@@ -2696,9 +2657,7 @@ class PaymentPlanGroupViewSet(
                 raise ValidationError(f"No batch found for export_tag={export_tag} in this group.")
         else:
             exportable_plans = payment_plan_group.payment_plans.filter(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-                plan_type=plan_type,
-                export_tag__isnull=True,
+                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED], export_tag__isnull=True
             )
             if not exportable_plans.exists():
                 raise ValidationError(
@@ -2710,10 +2669,7 @@ class PaymentPlanGroupViewSet(
             # Reject up-front if every plan would be filtered out (e.g. no FSP XLSX template mapping),
             # so the user gets the error on click instead of a silently failing background task.
             exportable_ids = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group,
-                fsp_xlsx_template_id=fsp_xlsx_template_id,
-                export_tag=export_tag,
-                plan_type=plan_type,
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
             ).preview_export()
             if not exportable_ids:
                 raise ValidationError(EmptyDeliveryExportError.MESSAGE)
@@ -2731,7 +2687,7 @@ class PaymentPlanGroupViewSet(
         )
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
-                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag, plan_type
+                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
             )
         )
         return Response(
