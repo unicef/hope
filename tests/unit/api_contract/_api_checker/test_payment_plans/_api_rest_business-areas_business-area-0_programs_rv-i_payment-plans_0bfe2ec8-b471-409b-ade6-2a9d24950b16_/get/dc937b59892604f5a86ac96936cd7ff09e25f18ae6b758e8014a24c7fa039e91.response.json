@@ -134,7 +134,7 @@
         "unore_exchange_rate": null,
         "unore_exchange_rate_unavailable": false,
         "eligible_payments_count": 0,
-        "funds_commitments": null,
+        "funds_commitments": [],
         "available_funds_commitments": [],
         "payment_verification_plans": [],
         "admin_url": "/api/unicorn/payment/paymentplan/0bfe2ec8-b471-409b-ade6-2a9d24950b16/change/",

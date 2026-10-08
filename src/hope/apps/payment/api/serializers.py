@@ -53,7 +53,7 @@ from hope.apps.steficon.api.serializers import RuleCommitSerializer
 from hope.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.choices import VisionStatus
-from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 from hope.models import (
     Account,
     AccountAttachment,
@@ -941,7 +941,7 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
 class VisionStateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=[status.value for status in VisionStatus])
     vision_id = serializers.CharField(allow_null=True)
-    fc_num = serializers.CharField(allow_null=True)
+    fc_numbers = serializers.ListField(child=serializers.CharField())
     error_code = serializers.CharField(allow_null=True)
 
 
@@ -1210,68 +1210,28 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
 
-    @extend_schema_field(FundsCommitmentSerializer(allow_null=True))
-    def get_funds_commitments(self, obj: PaymentPlan) -> dict[str, Any] | None:
-        assigned_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj)
-
-        group = (
-            FundsCommitmentGroup.objects.filter(
-                funds_commitment_items__in=assigned_items_qs,
-            )
-            .distinct()
-            .prefetch_related(
-                Prefetch(
-                    "funds_commitment_items",
-                    queryset=assigned_items_qs,
-                    to_attr="filtered_items",
-                )
-            )
-            .first()
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
+            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
         )
-
-        if not group:
-            return None
-
-        return FundsCommitmentSerializer(
-            {
-                "id": group.pk,
-                "funds_commitment_number": group.funds_commitment_number,
-                "funds_commitment_items": group.filtered_items,
-            }
-        ).data
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
     @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         if obj.vision_managed:
             return []
 
-        available_items_qs = FundsCommitmentItem.objects.filter(
-            Q(payment_plan__isnull=True) | Q(payment_plan=obj),
-            office=obj.business_area,
-        )
-
-        groups = (
-            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+        headers = (
+            FundsCommitmentHeader.objects.with_derived_fields()
+            .filter(funds_commitment_items__office_id=obj.business_area_id)
             .distinct()
             .prefetch_related(
-                Prefetch(
-                    "funds_commitment_items",
-                    queryset=available_items_qs,
-                    to_attr="filtered_items",
-                )
+                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
             )
         )
 
-        return [
-            FundsCommitmentSerializer(
-                {
-                    "id": group.pk,
-                    "funds_commitment_number": group.funds_commitment_number,
-                    "funds_commitment_items": group.filtered_items,
-                }
-            ).data
-            for group in groups
-        ]
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
     @extend_schema_field(VisionStateSerializer)
     def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
@@ -1279,7 +1239,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         return {
             "status": obj.vision_status,
             "vision_id": vision_data.get("vision_id"),
-            "fc_num": vision_data.get("fc_num"),
+            "fc_numbers": vision_data.get("fc_numbers", []),
             "error_code": vision_data.get("error_code"),
         }
 
@@ -1450,6 +1410,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._fsp_auth_code_cache: dict[int, bool] = {}
+
     class Meta:
         model = Payment
         fields: tuple[str, ...] = (
@@ -1547,15 +1511,17 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.financial_service_provider.name if obj.financial_service_provider else ""
 
     def get_fsp_auth_code(self, obj: Payment) -> str:
-        if "request" not in self.context:
-            return ""
-        user = self.context["request"].user
-        if not user.has_perm(
-            Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-            obj.program or obj.business_area,
-        ):
+        if not self._can_view_fsp_auth_code(obj.program):
             return ""
         return obj.fsp_auth_code or ""
+
+    def _can_view_fsp_auth_code(self, program: Program) -> bool:
+        program_id = program.id
+        if program_id not in self._fsp_auth_code_cache:
+            request = self.context.get("request")
+            can_view = bool(request) and bool(request.user.has_perm(Permissions.PM_VIEW_FSP_AUTH_CODE.value, program))
+            self._fsp_auth_code_cache[program_id] = can_view
+        return self._fsp_auth_code_cache[program_id]
 
     @extend_schema_field(PaymentVerificationDetailsSerializer)
     def get_verification(self, obj: Payment) -> dict[str, Any]:
@@ -2020,7 +1986,7 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
 
 
 class AssignFundsCommitmentsSerializer(serializers.Serializer):
-    fund_commitment_items_ids = serializers.ListSerializer(
+    funds_commitment_numbers = serializers.ListField(
         child=serializers.CharField(),
         allow_empty=False,
     )

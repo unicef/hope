@@ -69,7 +69,12 @@ class PaymentPlanFilter(FilterSet):
         )
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+        return qs.filter(
+            Q(id__icontains=value)
+            | Q(unicef_id__icontains=value)
+            | Q(name__icontains=value)
+            | Q(program_cycle__title__icontains=value)
+        )
 
 
 class TargetPopulationFilter(PaymentPlanFilter):
@@ -283,7 +288,7 @@ class PaymentVerificationRecordFilter(FilterSet):
         fields = []
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(unicef_id__istartswith=value)
+        return qs.filter(unicef_id__iexact=value)
 
 
 class StableOrderingFilter(OrderingFilter):
@@ -313,15 +318,15 @@ class BasePaymentSearchFilter(FilterSet):
     collector_full_name = django_filters.CharFilter(method="filter_collector_full_name")
     household_unicef_id = django_filters.CharFilter(
         field_name="household__unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     individual_unicef_id = django_filters.CharFilter(
         field_name="household__individuals__unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     payment_unicef_id = django_filters.CharFilter(
         field_name="unicef_id",
-        lookup_expr="istartswith",
+        lookup_expr="iexact",
     )
     collector_id = django_filters.CharFilter(field_name="collector_id")
 
@@ -347,7 +352,7 @@ class BasePaymentSearchFilter(FilterSet):
 
     def filter_collector_full_name(self, queryset: QuerySet, name: str, value: str) -> QuerySet:
         return queryset.filter(
-            Q(collector__full_name__istartswith=value) | Q(collector__full_name_latin__istartswith=value)
+            Q(collector__full_name__icontains=value) | Q(collector__full_name_latin__icontains=value)
         )
 
     def filter_queryset(self, queryset: QuerySet) -> "QuerySet[Payment]":

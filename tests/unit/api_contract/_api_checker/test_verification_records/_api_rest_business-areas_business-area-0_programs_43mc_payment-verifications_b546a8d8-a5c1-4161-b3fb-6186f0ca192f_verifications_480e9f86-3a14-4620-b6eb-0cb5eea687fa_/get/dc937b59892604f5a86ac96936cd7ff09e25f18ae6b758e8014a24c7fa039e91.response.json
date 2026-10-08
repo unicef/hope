@@ -170,7 +170,7 @@
             "vision": {
                 "status": "NOT_SENT",
                 "vision_id": null,
-                "fc_num": null,
+                "fc_numbers": [],
                 "error_code": null
             },
             "can_split": false,
@@ -194,7 +194,7 @@
             "unore_exchange_rate": null,
             "unore_exchange_rate_unavailable": false,
             "eligible_payments_count": 1,
-            "funds_commitments": null,
+            "funds_commitments": [],
             "available_funds_commitments": [],
             "payment_verification_plans": [
                 {

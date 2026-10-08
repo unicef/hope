@@ -20,7 +20,7 @@ from hope.models import AcceptanceProcessThreshold, ApprovalProcess, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0086_migration")
 
 
 def build_apps() -> SimpleNamespace:

@@ -11,7 +11,7 @@ from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0083_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
 
 
 def build_apps() -> SimpleNamespace:

@@ -1,4 +1,5 @@
 from datetime import UTC, date, datetime
+from decimal import Decimal
 from typing import Any
 from unittest.mock import Mock
 
@@ -36,6 +37,8 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
+from hope.contrib.vision.fixtures import FundsCommitmentFactory
+from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
@@ -43,7 +46,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def business_area() -> Any:
-    return BusinessAreaFactory()
+    return BusinessAreaFactory(code="BA01")
 
 
 @pytest.fixture
@@ -333,6 +336,32 @@ def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, A
     assert data["fsp_auth_code"] == "AUTH_123"
 
 
+def test_payment_list_serializer_get_auth_code_without_request_context(payment_list_context: dict[str, Any]) -> None:
+    payment = payment_list_context["payment"]
+
+    serializer = PaymentListSerializer(instance=payment)
+    data = serializer.data
+
+    assert data["fsp_auth_code"] == ""
+
+
+def test_payment_list_serializer_reuses_fsp_auth_code_permission_check(payment_list_context: dict[str, Any]) -> None:
+    payment = payment_list_context["payment"]
+    other_payment = PaymentFactory(parent=payment.parent, fsp_auth_code="AUTH_456")
+    request = Mock(user=Mock(has_perm=Mock(return_value=True)))
+
+    serializer = PaymentListSerializer(
+        Payment.objects.filter(id__in=[payment.id, other_payment.id]),
+        many=True,
+        context={"request": request},
+    )
+    data = serializer.data
+
+    assert len(data) == 2
+    assert {item["fsp_auth_code"] for item in data} == {"AUTH_123", "AUTH_456"}
+    assert request.user.has_perm.call_count == 1
+
+
 def test_payment_list_serializer_snapshot_collector_full_name(payment_list_context: dict[str, Any]) -> None:
     payment = payment_list_context["payment"]
     household_data = {
@@ -452,6 +481,76 @@ def test_payment_plan_detail_serializer_returns_pending_status_breakdown(
     }
 
 
+@pytest.fixture
+def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[str, Any]) -> dict[str, Any]:
+    payment_plan = payment_plan_detail_context["payment_plan"]
+    funds_commitment = FundsCommitmentFactory(
+        rec_serial_number=100,
+        funds_commitment_number="FC123",
+        vendor_id="VENDOR-1",
+        business_area=payment_plan.business_area.code,
+        posting_date=date(2026, 9, 1),
+        document_reference="REFERENCE-1",
+        fc_status="O",
+        funds_commitment_item="001",
+        currency_code="USD",
+        commitment_amount_local=Decimal("100.25"),
+        commitment_amount_usd=Decimal("100.50"),
+    )
+    item = FundsCommitmentItem.objects.get(pk=funds_commitment.pk)
+    item.funds_commitment_header.payment_plans.add(payment_plan)
+    return payment_plan_detail_context
+
+
+def test_payment_plan_detail_serializer_funds_commitments_exposes_header_fields(
+    payment_plan_with_funds_commitment_header: dict[str, Any],
+    django_assert_num_queries,
+) -> None:
+    payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
+
+    with django_assert_num_queries(2):
+        data = PaymentPlanDetailSerializer().get_funds_commitments(payment_plan)
+
+    assert data == [
+        {
+            "id": data[0]["id"],
+            "funds_commitment_number": "FC123",
+            "vendor_id": "VENDOR-1",
+            "posting_date": "2026-09-01",
+            "document_reference": "REFERENCE-1",
+            "fc_status": "O",
+            "total_amount_usd": "100.50",
+            "total_amount_local": "100.25",
+            "currency": "USD",
+            "funds_commitment_items": data[0]["funds_commitment_items"],
+        }
+    ]
+    assert data[0]["funds_commitment_items"][0]["business_area"] == payment_plan.business_area.slug
+    assert data[0]["funds_commitment_items"][0]["rec_serial_number"] == 100
+
+
+def test_payment_plan_detail_serializer_available_funds_commitments_exposes_header_fields(
+    payment_plan_with_funds_commitment_header: dict[str, Any],
+    django_assert_num_queries,
+) -> None:
+    payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
+
+    with django_assert_num_queries(3):
+        data = PaymentPlanDetailSerializer().get_available_funds_commitments(payment_plan)
+
+    assert len(data) == 1
+    assert data[0]["funds_commitment_number"] == "FC123"
+    assert data[0]["vendor_id"] == "VENDOR-1"
+    assert data[0]["posting_date"] == "2026-09-01"
+    assert data[0]["document_reference"] == "REFERENCE-1"
+    assert data[0]["fc_status"] == "O"
+    assert data[0]["total_amount_usd"] == "100.50"
+    assert data[0]["total_amount_local"] == "100.25"
+    assert data[0]["currency"] == "USD"
+    assert data[0]["funds_commitment_items"][0]["business_area"] == payment_plan.business_area.slug
+    assert data[0]["funds_commitment_items"][0]["rec_serial_number"] == 100
+
+
 @pytest.mark.parametrize(
     "serializer_class",
     [PaymentVerificationPlanDetailsSerializer, PaymentVerificationPlanListSerializer],
@@ -481,7 +580,7 @@ def test_payment_plan_detail_serializer_vision_state(
     assert data["vision"] == {
         "status": "NOT_SENT",
         "vision_id": None,
-        "fc_num": None,
+        "fc_numbers": [],
         "error_code": None,
     }
 

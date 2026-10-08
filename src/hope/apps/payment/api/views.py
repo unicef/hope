@@ -177,7 +177,8 @@ from hope.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hope.apps.program.api.serializers import PaymentPlanPurposeSerializer
 from hope.apps.targeting.api.serializers import TargetPopulationListSerializer
-from hope.contrib.vision.models import FundsCommitmentItem
+from hope.contrib.vision.models import FundsCommitmentHeader
+from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.models import (
     Account,
     AccountAttachment,
@@ -222,15 +223,9 @@ class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
     filter_backends = (
         filters.DjangoFilterBackend,
-        SearchFilter,
         OrderingFilter,
     )
     filterset_class = PaymentPlanFilter
-    search_fields = (
-        "unicef_id",
-        "id",
-        "^name",
-    )
 
 
 class PaymentVerificationViewSet(
@@ -1352,7 +1347,7 @@ class PaymentPlanViewSet(
     def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        fund_commitment_items_ids = serializer.validated_data["fund_commitment_items_ids"]
+        requested_numbers = set(serializer.validated_data["funds_commitment_numbers"])
 
         payment_plan = self.get_object()
         if payment_plan.vision_managed:
@@ -1360,22 +1355,16 @@ class PaymentPlanViewSet(
         if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             raise ValidationError("Payment plan must be in review")
 
-        funds_commitment_items = list(
-            FundsCommitmentItem.objects.select_for_update().filter(
-                rec_serial_number__in=fund_commitment_items_ids,
-            )
+        funds_commitment_headers = list(
+            FundsCommitmentHeader.objects.filter(funds_commitment_number__in=requested_numbers)
         )
-        if any(item.payment_plan_id not in {None, payment_plan.pk} for item in funds_commitment_items):
-            raise ValidationError("Chosen Funds Commitments are already assigned to a different Payment Plan")
-        if any(item.office_id != payment_plan.business_area_id for item in funds_commitment_items):
-            raise ValidationError("Chosen Funds Commitments have the wrong Business Area")
-        if len({item.funds_commitment_group_id for item in funds_commitment_items}) != 1:
-            raise ValidationError("Chosen Funds Commitment Items must belong to the same Funds Commitment Group")
-
-        FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
-        FundsCommitmentItem.objects.filter(pk__in=[item.pk for item in funds_commitment_items]).update(
-            payment_plan=payment_plan
-        )
+        if len(funds_commitment_headers) != len(requested_numbers):
+            raise ValidationError("One or more Funds Commitment Headers were not found")
+        try:
+            VisionService.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
+        except FundsCommitmentAssignmentError as error:
+            message = "One or more Funds Commitment Headers are not available for this Business Area"
+            raise ValidationError(message) from error
 
         payment_plan.refresh_from_db()
         return Response(

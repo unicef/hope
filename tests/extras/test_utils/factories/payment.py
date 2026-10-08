@@ -175,6 +175,7 @@ class PaymentFactory(DjangoModelFactory):
     status_date = factory.LazyFunction(timezone.now)
     currency = factory.SubFactory(CurrencyFactory)
     business_area = factory.SelfAttribute("parent.business_area")
+    program = factory.SelfAttribute("parent.program")
     household = factory.SubFactory(
         HouseholdFactory,
         business_area=factory.SelfAttribute("..business_area"),
