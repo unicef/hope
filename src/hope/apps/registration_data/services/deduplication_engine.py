@@ -34,8 +34,8 @@ PERSISTED_FINDINGS_STATUS_CODES = (
 )
 
 
-class BiometricDeduplicationService:
-    class BiometricDeduplicationServiceError(Exception):
+class DeduplicationEngineService:
+    class DeduplicationEngineServiceError(Exception):
         pass
 
     def __init__(self) -> None:

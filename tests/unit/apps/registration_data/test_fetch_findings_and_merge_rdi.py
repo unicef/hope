@@ -24,7 +24,7 @@ from hope.apps.registration_data.celery_tasks import (
     handle_rdi_exception,
     mark_merge_error_if_still_owned,
 )
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.deduplication_engine import DeduplicationEngineService
 from hope.models import (
     AsyncRetryJob,
     BiometricDedupeSimilarityPair,
@@ -659,7 +659,7 @@ def test_parse_findings_happy_path() -> None:
         },
     ]
 
-    pairs = BiometricDeduplicationService().parse_findings(findings)
+    pairs = DeduplicationEngineService().parse_findings(findings)
 
     assert pairs == [
         SimilarityPair(score=0.95, status_code="200", first="CW-001", second="CW-002"),
@@ -683,7 +683,7 @@ def test_parse_findings_drops_non_persisted_status_code() -> None:
         },
     ]
 
-    assert BiometricDeduplicationService().parse_findings(findings) == []
+    assert DeduplicationEngineService().parse_findings(findings) == []
 
 
 def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
@@ -696,7 +696,7 @@ def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
         },
     ]
 
-    assert BiometricDeduplicationService().parse_findings(findings) == []
+    assert DeduplicationEngineService().parse_findings(findings) == []
 
 
 def test_parse_findings_normalises_empty_string_to_none() -> None:
@@ -709,13 +709,13 @@ def test_parse_findings_normalises_empty_string_to_none() -> None:
         },
     ]
 
-    pairs = BiometricDeduplicationService().parse_findings(findings)
+    pairs = DeduplicationEngineService().parse_findings(findings)
 
     assert pairs == [SimilarityPair(score=0.5, status_code="429", first="CW-001", second=None)]
 
 
 def test_parse_findings_empty_input() -> None:
-    assert BiometricDeduplicationService().parse_findings([]) == []
+    assert DeduplicationEngineService().parse_findings([]) == []
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
@@ -787,7 +787,7 @@ def test_fetch_findings_and_merge_rdi_delegates_statistics_to_biometric_dedup_se
     mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
 
     with patch(
-        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.BiometricDeduplicationService.store_rdi_deduplication_statistics"
+        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.DeduplicationEngineService.store_rdi_deduplication_statistics"
     ) as mock_store_stats:
         queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -810,7 +810,7 @@ def test_fetch_findings_and_merge_rdi_skips_merge_when_status_changed_under_lock
         RegistrationDataImport.objects.filter(pk=rdi.pk).update(status=RegistrationDataImport.MERGING)
 
     with patch(
-        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.BiometricDeduplicationService.store_rdi_deduplication_statistics",
+        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.DeduplicationEngineService.store_rdi_deduplication_statistics",
         side_effect=flip_status_to_merging,
     ):
         queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
@@ -906,7 +906,7 @@ def test_fetch_and_merge_store_failure_rolls_back_and_cleans_es(
 
     with patch(
         "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi."
-        "BiometricDeduplicationService.store_rdi_deduplication_statistics",
+        "DeduplicationEngineService.store_rdi_deduplication_statistics",
         side_effect=RuntimeError("stats write failed"),
     ):
         with pytest.raises(Retry):
