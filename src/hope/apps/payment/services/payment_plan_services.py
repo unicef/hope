@@ -1483,7 +1483,7 @@ class PaymentPlanService:
         self, split_type: str, chunks_no: int | None, payments: Any, payments_count: int
     ) -> list:
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
-            self._validate_split_by_record(chunks_no, payments_count)
+            self._validate_split_by_record(chunks_no)
             return list(chunks(payments.order_by("unicef_id"), chunks_no))  # type: ignore[arg-type]
 
         if split_type in [
@@ -1528,6 +1528,11 @@ class PaymentPlanService:
             payment_plan_splits_to_create[i].split_payment_items.set(chunk)
 
     def split(self, split_type: str, chunks_no: int | None = None) -> PaymentPlan:
+        """Split the plan's payments into parts of the chosen shape.
+
+        The group picks one shape for every plan in it, so "by records" with more records than the plan
+        has payments gives a single part rather than an error.
+        """
         payments = self.payment_plan.eligible_payments.all()
         payments_count = payments.count()
         if not payments_count:
@@ -1546,14 +1551,13 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def _validate_split_by_record(self, chunks_no: int | None, payments_count: int) -> None:
+    def _validate_split_by_record(self, chunks_no: int | None) -> None:
         if not chunks_no:
             raise ValidationError("Payments Number is required for split by records")
 
-        if chunks_no > payments_count or chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
+        if chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
             raise ValidationError(
-                f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} "
-                f"and total number of payments"
+                f"Payment Parts number should be at least {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK}"
             )
 
     def full_rebuild(self) -> None:

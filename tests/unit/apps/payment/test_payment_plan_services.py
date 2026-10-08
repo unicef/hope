@@ -1003,8 +1003,8 @@ def test_split(
     with pytest.raises(ValidationError, match="Payments Number is required for split by records"):
         PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=None)
 
-    with pytest.raises(ValidationError, match="Payment Parts number should be between 2 and total number of payments"):
-        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
+    with pytest.raises(ValidationError, match="Payment Parts number should be at least 2"):
+        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=1)
 
     with mock.patch("hope.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS") as max_chunks_patch:
         max_chunks_patch.__get__ = mock.Mock(return_value=2)

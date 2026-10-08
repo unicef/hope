@@ -885,6 +885,42 @@ def test_split_splits_every_plan_in_the_group_the_same_way(
     ]
 
 
+@pytest.fixture
+def five_payments_on_first_plan(locked_payment_plan):
+    return PaymentFactory.create_batch(5, parent=locked_payment_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+
+@pytest.fixture
+def twelve_payments_on_second_plan(second_accepted_payment_plan):
+    return PaymentFactory.create_batch(
+        12, parent=second_accepted_payment_plan, status=Payment.STATUS_DISTRIBUTION_SUCCESS
+    )
+
+
+def test_split_by_records_makes_one_part_of_a_plan_smaller_than_the_chunk(
+    accepted_group,
+    locked_payment_plan,
+    five_payments_on_first_plan,
+    second_accepted_payment_plan,
+    twelve_payments_on_second_plan,
+):
+    PaymentPlanGroupService(accepted_group).split(PaymentPlanSplit.SplitType.BY_RECORDS, payments_no=10)
+
+    first_plan_parts = locked_payment_plan.splits.order_by("order")
+    second_plan_parts = second_accepted_payment_plan.splits.order_by("order")
+    assert first_plan_parts.count() == 1
+    assert first_plan_parts.get().split_payment_items.count() == 5
+    assert second_plan_parts.count() == 2
+    assert second_plan_parts[0].split_payment_items.count() == 10
+    assert second_plan_parts[1].split_payment_items.count() == 2
+
+
+def test_split_by_records_below_minimum_names_the_plan(accepted_group, locked_payment_plan, delivered_payment):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(accepted_group).split(PaymentPlanSplit.SplitType.BY_RECORDS, payments_no=5)
+    assert error.value.detail[0] == (f"{locked_payment_plan.unicef_id}: Payment Parts number should be at least 10")
+
+
 def test_split_removes_the_group_export_file(accepted_group, locked_payment_plan, delivered_payment):
     accepted_group.export_file_delivery = FileTempFactory()
     accepted_group.save(update_fields=["export_file_delivery"])

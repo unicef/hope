@@ -141,7 +141,10 @@ class PaymentPlanGroupService:
         ).exists():
             raise ValidationError("Payment Plan Group is already sent to payment gateway")
         for payment_plan in self._payment_plans(payment_plan_group):
-            PaymentPlanService(payment_plan).split(split_type, payments_no)
+            try:
+                PaymentPlanService(payment_plan).split(split_type, payments_no)
+            except ValidationError as error:
+                raise ValidationError(f"{payment_plan.unicef_id}: {' '.join(map(str, error.detail))}") from error
         payment_plan_group.remove_export_file_delivery()
         payment_plan_group.save(update_fields=["export_file_delivery", "updated_at"])
         self.payment_plan_group = payment_plan_group
