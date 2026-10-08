@@ -304,6 +304,8 @@ class XlsxPaymentPlanGroupDeliveryImportService:
 
             if affected_plan_ids:
                 logger.info(f"Imported reconciliation for Payment Plans: {affected_plan_ids}")
+                self.payment_plan_group.remove_export_file_delivery()
+                self.payment_plan_group.save(update_fields=["export_file_delivery", "updated_at"])
                 # All plans in the group share one cycle: invalidate the cycle-list cache once.
                 self.payment_plan_group.cycle.save()
 

@@ -16,8 +16,8 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.views import (
-    download_payment_plan_group_batch,
     download_payment_plan_group_summary_pdf,
+    download_payment_plan_group_xlsx,
     download_payment_plan_payment_list,
     download_payment_verification_plan,
 )
@@ -244,83 +244,66 @@ def test_download_payment_plan_payment_list_empty_file_raises(rf, create_user_ro
 
 
 @pytest.fixture
-def group_with_batch_file(user):
+def group_with_export_file(user):
     cycle = ProgramCycleFactory()
-    group = PaymentPlanGroupFactory(cycle=cycle)
     file_temp = FileTempFactory(
-        file=SimpleUploadedFile("batch-1.xlsx", b"data"),
+        file=SimpleUploadedFile("payment-list.xlsx", b"data"),
         created_by=user,
     )
-    PaymentPlanFactory(
-        payment_plan_group=group,
-        program_cycle=cycle,
-        business_area=cycle.program.business_area,
-        status=PaymentPlan.Status.ACCEPTED,
-        export_tag=1,
-        export_file_delivery=file_temp,
-    )
-    return {"group": group, "file": file_temp}
+    return PaymentPlanGroupFactory(cycle=cycle, export_file_delivery=file_temp)
 
 
-def test_download_payment_plan_group_batch_requires_permission(rf, group_with_batch_file, user):
-    group = group_with_batch_file["group"]
-    request = rf.get(reverse("download-payment-plan-group-batch", args=[str(group.id), 1]))
+def test_download_payment_plan_group_xlsx_requires_permission(rf, group_with_export_file, user):
+    group = group_with_export_file
+    request = rf.get(reverse("download-payment-plan-group-xlsx", args=[str(group.id)]))
     request.user = user
 
     with pytest.raises(PermissionDenied) as excinfo:
-        download_payment_plan_group_batch(request, str(group.id), 1)
+        download_payment_plan_group_xlsx(request, str(group.id))
 
     assert excinfo.value.args[0]["required_permissions"] == [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX.value]
 
 
-def test_download_payment_plan_group_batch_redirects_with_permission(
+def test_download_payment_plan_group_xlsx_redirects_with_permission(
     rf,
     create_user_role_with_permissions,
-    group_with_batch_file,
+    group_with_export_file,
     user,
 ):
-    group = group_with_batch_file["group"]
+    group = group_with_export_file
     create_user_role_with_permissions(
         user,
         [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         group.cycle.program.business_area,
         program=group.cycle.program,
     )
-    request = rf.get(reverse("download-payment-plan-group-batch", args=[str(group.id), 1]))
+    request = rf.get(reverse("download-payment-plan-group-xlsx", args=[str(group.id)]))
     request.user = user
 
-    response = download_payment_plan_group_batch(request, str(group.id), 1)
+    response = download_payment_plan_group_xlsx(request, str(group.id))
 
     assert response.status_code == 302
-    assert response.url == group_with_batch_file["file"].file.url
+    assert response.url == group.export_file_delivery.file.url
 
 
-def test_download_payment_plan_group_batch_missing_file_raises(
+def test_download_payment_plan_group_xlsx_missing_file_raises(
     rf,
     create_user_role_with_permissions,
     user,
 ):
     cycle = ProgramCycleFactory()
     group = PaymentPlanGroupFactory(cycle=cycle)
-    PaymentPlanFactory(
-        payment_plan_group=group,
-        program_cycle=cycle,
-        business_area=cycle.program.business_area,
-        status=PaymentPlan.Status.ACCEPTED,
-        export_tag=1,
-        export_file_delivery=None,
-    )
     create_user_role_with_permissions(
         user,
         [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX],
         cycle.program.business_area,
         program=cycle.program,
     )
-    request = rf.get(reverse("download-payment-plan-group-batch", args=[str(group.id), 1]))
+    request = rf.get(reverse("download-payment-plan-group-xlsx", args=[str(group.id)]))
     request.user = user
 
     with pytest.raises(FileNotFoundError):
-        download_payment_plan_group_batch(request, str(group.id), 1)
+        download_payment_plan_group_xlsx(request, str(group.id))
 
 
 @pytest.fixture

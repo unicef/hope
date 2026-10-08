@@ -6,7 +6,7 @@ from typing import Any, cast
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -185,12 +185,7 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 
 
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
-
-
-class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1)
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
@@ -522,7 +517,6 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "updated_at",
             "program",
             "payment_plan_group",
-            "export_tag",
         )
 
     @staticmethod
@@ -2168,12 +2162,6 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
         return super().update(instance, validated_data)
 
 
-class PaymentPlanGroupBatchSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField()
-    export_file_link = serializers.CharField(allow_null=True)
-    has_password = serializers.BooleanField()
-
-
 class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     closed_by = serializers.SerializerMethodField()
@@ -2182,10 +2170,12 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.SerializerMethodField()
-    batches = serializers.SerializerMethodField()
+    export_file_delivery = serializers.SerializerMethodField()
+    export_file_has_password = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
     export_pdf_file_summary = serializers.SerializerMethodField()
     can_export = serializers.SerializerMethodField()
+    can_regenerate_export = serializers.SerializerMethodField()
     linked_groups = PaymentPlanGroupLinkedSerializer(read_only=True, many=True)
     can_split = serializers.BooleanField(read_only=True)
     split_choices = serializers.SerializerMethodField()
@@ -2207,10 +2197,12 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "total_undelivered_quantity_usd",
             "payment_plans_count",
             "can_send_to_payment_gateway",
-            "batches",
+            "export_file_delivery",
+            "export_file_has_password",
             "delivery_import_file",
             "export_pdf_file_summary",
             "can_export",
+            "can_regenerate_export",
             "linked_groups",
             "can_split",
             "split_choices",
@@ -2239,44 +2231,23 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     def get_closed_by(obj: PaymentPlanGroup) -> str | None:
         return f"{obj.closed_by.first_name} {obj.closed_by.last_name}" if obj.closed_by_id else None
 
-    @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
-    def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
-        tags_qs = (
-            obj.payment_plans.filter(export_tag__isnull=False)
-            .order_by()
-            .values("export_tag")
-            .annotate(
-                has_file=Max(
-                    Case(When(export_file_delivery__isnull=False, then=1), default=0, output_field=IntegerField())
-                ),
-                has_password=Max(
-                    Case(
-                        When(export_file_delivery__password__isnull=False, then=1),
-                        default=0,
-                        output_field=IntegerField(),
-                    )
-                ),
-            )
-            .order_by("export_tag")
-        )
-        return [
-            {
-                "export_tag": row["export_tag"],
-                "export_file_link": (
-                    reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
-                    if row["has_file"]
-                    else None
-                ),
-                "has_password": bool(row["has_password"]),
-            }
-            for row in tags_qs
-        ]
+    @staticmethod
+    def get_export_file_delivery(obj: PaymentPlanGroup) -> str | None:
+        if obj.export_file_delivery_id is None:
+            return None
+        return reverse("download-payment-plan-group-xlsx", args=[str(obj.id)])
 
-    def get_can_export(self, obj: PaymentPlanGroup) -> bool:
-        """Whether the group still has released plans that no export batch covers."""
-        return obj.payment_plans.filter(
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED], export_tag__isnull=True
-        ).exists()
+    @staticmethod
+    def get_export_file_has_password(obj: PaymentPlanGroup) -> bool:
+        return obj.export_file_delivery_id is not None and obj.export_file_delivery.password is not None
+
+    @staticmethod
+    def get_can_export(obj: PaymentPlanGroup) -> bool:
+        return obj.can_export
+
+    @staticmethod
+    def get_can_regenerate_export(obj: PaymentPlanGroup) -> bool:
+        return obj.can_regenerate_export
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))

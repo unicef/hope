@@ -92,7 +92,6 @@ from hope.apps.payment.api.serializers import (
     PaymentPlanGroupListSerializer,
     PaymentPlanGroupManagerialSerializer,
     PaymentPlanGroupReconciliationImportSerializer,
-    PaymentPlanGroupSendXlsxPasswordSerializer,
     PaymentPlanGroupUpdateSerializer,
     PaymentPlanImportFileSerializer,
     PaymentPlanListSerializer,
@@ -165,7 +164,6 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service im
     XlsxPaymentPlanFspExtraFieldsImportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
-    EmptyDeliveryExportError,
     XlsxPaymentPlanGroupDeliveryExportService,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_import_service import (
@@ -2419,7 +2417,6 @@ class PaymentPlanGroupViewSet(
         "create": PaymentPlanGroupCreateSerializer,
         "update": PaymentPlanGroupUpdateSerializer,
         "delivery_export_xlsx": PaymentPlanGroupDeliveryExportSerializer,
-        "send_xlsx_password": PaymentPlanGroupSendXlsxPasswordSerializer,
         "delivery_import_xlsx": PaymentPlanGroupReconciliationImportSerializer,
         "approve": AcceptanceProcessSerializer,
         "authorize": AcceptanceProcessSerializer,
@@ -2641,7 +2638,6 @@ class PaymentPlanGroupViewSet(
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        export_tag = serializer.validated_data["export_tag"]
         fsp_xlsx_template_id = serializer.validated_data["fsp_xlsx_template_id"]
 
         if fsp_xlsx_template_id is not None:
@@ -2652,27 +2648,18 @@ class PaymentPlanGroupViewSet(
             ):
                 raise PermissionDenied(detail={"required_permissions": [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value]})
 
-        if export_tag is not None:
-            if not payment_plan_group.payment_plans.filter(export_tag=export_tag).exists():
-                raise ValidationError(f"No batch found for export_tag={export_tag} in this group.")
-        else:
-            exportable_plans = payment_plan_group.payment_plans.filter(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED], export_tag__isnull=True
-            )
-            if not exportable_plans.exists():
-                raise ValidationError(
-                    "Export requires at least one not-yet-exported payment plan in ACCEPTED or FINISHED status."
-                )
-            if not Payment.objects.filter(parent__in=exportable_plans).eligible().exists():
-                raise ValidationError("Export failed: there are no eligible payments to export.")
+        if not payment_plan_group.payment_plans.exists():
+            raise ValidationError("Export requires at least one payment plan in the group.")
+        if not Payment.objects.filter(parent__payment_plan_group=payment_plan_group).eligible().exists():
+            raise ValidationError("Export failed: there are no eligible payments to export.")
 
-            # Reject up-front if every plan would be filtered out (e.g. no FSP XLSX template mapping),
-            # so the user gets the error on click instead of a silently failing background task.
-            exportable_ids = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id, export_tag=export_tag
-            ).preview_export()
-            if not exportable_ids:
-                raise ValidationError(EmptyDeliveryExportError.MESSAGE)
+        # The file goes to the FSP as one list, so a plan that cannot be exported blocks the whole
+        # group; the user gets the reason on click instead of a failing background task.
+        unexportable_reasons = XlsxPaymentPlanGroupDeliveryExportService(
+            payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id
+        ).unexportable_reasons()
+        if unexportable_reasons:
+            raise ValidationError(unexportable_reasons)
 
         old_payment_plan_group = copy_model_object(payment_plan_group)
         payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
@@ -2687,7 +2674,7 @@ class PaymentPlanGroupViewSet(
         )
         transaction.on_commit(
             lambda: export_payment_plan_group_delivery_xlsx_async_task(
-                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id, export_tag
+                payment_plan_group, str(request.user.pk), fsp_xlsx_template_id
             )
         )
         return Response(
@@ -2695,26 +2682,15 @@ class PaymentPlanGroupViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @extend_schema(
-        request=PaymentPlanGroupSendXlsxPasswordSerializer,
-        responses={200: PaymentPlanGroupDetailSerializer},
-    )
+    @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
     @action(detail=True, methods=["post"], url_path="send-xlsx-password")
     def send_xlsx_password(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        export_tag = serializer.validated_data["export_tag"]
-
-        if not payment_plan_group.payment_plans.filter(
-            export_tag=export_tag, export_file_delivery__isnull=False
-        ).exists():
-            raise ValidationError(f"No exported batch file found for export_tag={export_tag} in this group.")
+        if payment_plan_group.export_file_delivery_id is None:
+            raise ValidationError("No exported payment list file found for this group.")
 
         transaction.on_commit(
-            lambda: send_payment_plan_group_delivery_xlsx_password_async_task(
-                payment_plan_group, str(request.user.pk), export_tag
-            )
+            lambda: send_payment_plan_group_delivery_xlsx_password_async_task(payment_plan_group, str(request.user.pk))
         )
         return Response(
             data=PaymentPlanGroupDetailSerializer(payment_plan_group, context={"request": request}).data,

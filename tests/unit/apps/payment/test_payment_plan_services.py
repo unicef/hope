@@ -7,8 +7,6 @@ import uuid
 
 from aniso8601 import parse_date
 from constance.test import override_config
-from django.contrib.contenttypes.models import ContentType
-from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.timezone import now
@@ -29,7 +27,6 @@ from extras.test_utils.factories import (
     CountryFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
-    FileTempFactory,
     FinancialServiceProviderFactory,
     FollowUpInstructionFactory,
     HouseholdFactory,
@@ -2705,34 +2702,6 @@ def test_change_group_rejects_group_not_open(
     with pytest.raises(ValidationError) as error:
         service._set_group_for_open_pp({"payment_plan_group_id": str(locked_group.id)})
     assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
-
-
-def test_split_removes_existing_export_file_delivery(
-    user: User,
-    business_area: Any,
-    cycle: ProgramCycle,
-) -> None:
-    pp = PaymentPlanFactory(
-        created_by=user,
-        business_area=business_area,
-        program_cycle=cycle,
-        status=PaymentPlan.Status.ACCEPTED,
-    )
-    household = HouseholdFactory(business_area=business_area, program=cycle.program)
-    PaymentFactory(parent=pp, household=household, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    file_temp = FileTempFactory(
-        object_id=pp.pk,
-        content_type=ContentType.objects.get_for_model(pp),
-        created_by=user,
-        file=ContentFile(b"data", "delivery.xlsx"),
-    )
-    pp.export_file_delivery = file_temp
-    pp.save(update_fields=["export_file_delivery"])
-
-    PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
-
-    pp.refresh_from_db()
-    assert pp.export_file_delivery is None
 
 
 def test_status_action_rejected_when_group_is_not_open(user: User, business_area: Any, cycle: ProgramCycle) -> None:

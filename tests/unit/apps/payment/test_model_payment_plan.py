@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
-from unittest.mock import Mock, patch
-import uuid
+from unittest.mock import Mock
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
@@ -990,76 +989,6 @@ def test_payment_plan_flow_xlsx_import_error_from_importing_fsp_extra_fields(
         payment_plan_importing_fsp_extra_fields.background_action_status
         == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
     )
-
-
-def test_remove_export_file_delivery_skips_when_no_file_temp_id() -> None:
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
-    # no export_file_delivery set → file_temp_id is None
-    payment_plan.remove_export_file_delivery()
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_file_delivery_skips_deletion_when_another_plan_references_file() -> None:
-    file_temp = FileTempFactory()
-    plan_a = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
-    plan_b = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        export_file_delivery=file_temp,
-        payment_plan_group=plan_a.payment_plan_group,
-        program_cycle=plan_a.program_cycle,
-    )
-
-    plan_a.remove_export_file_delivery()
-
-    assert FileTemp.objects.filter(pk=file_temp.pk).exists()
-    assert plan_a.export_file_delivery is None
-    plan_b.refresh_from_db()
-    assert plan_b.export_file_delivery_id == file_temp.pk
-
-
-def test_remove_export_file_delivery_skips_when_file_temp_missing() -> None:
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
-    payment_plan.export_file_delivery_id = uuid.uuid4()
-
-    payment_plan.remove_export_file_delivery()
-
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_file_delivery_deletes_file_temp_when_last_reference() -> None:
-    file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
-
-    with patch("django.db.models.fields.files.FieldFile.delete"):
-        payment_plan.remove_export_file_delivery()
-
-    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
-    payment_plan.refresh_from_db()
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_files_removes_delivery_when_accepted_with_file() -> None:
-    file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
-
-    with patch("django.db.models.fields.files.FieldFile.delete"):
-        payment_plan.remove_export_files()
-
-    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
-    payment_plan.refresh_from_db()
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_files_removes_delivery_when_finished_with_file() -> None:
-    file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, export_file_delivery=file_temp)
-
-    with patch("django.db.models.fields.files.FieldFile.delete"):
-        payment_plan.remove_export_files()
-
-    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
 
 
 @pytest.fixture

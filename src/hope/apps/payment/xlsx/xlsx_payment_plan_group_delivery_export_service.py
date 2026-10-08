@@ -1,11 +1,9 @@
-import logging
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, cast
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.db import transaction
-from django.db.models import Max
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -29,13 +27,14 @@ from hope.models import (
 if TYPE_CHECKING:
     from hope.models import PaymentPlanGroup, Program, User
 
-logger = logging.getLogger(__name__)
 
+class UnexportablePaymentPlansError(Exception):
+    """Raised when at least one payment plan of the group cannot go into the payment list.
 
-class EmptyDeliveryExportError(Exception):
-    """Raised when an export batch would produce no rows because every payment plan was skipped."""
+    The export is all or nothing: the FSP receives one file for the whole group.
+    """
 
-    MESSAGE = "Nothing to export: no payment plan is currently exportable."
+    MESSAGE = "Export refused: not every payment plan in the group can be exported."
 
     def __init__(self, skipped_reasons: list[str]) -> None:
         self.skipped_reasons = skipped_reasons
@@ -43,15 +42,10 @@ class EmptyDeliveryExportError(Exception):
 
 
 class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
-    """Export one batch of a group's payment plans into a single-sheet xlsx.
+    """Export every payment plan of a group into one single-sheet xlsx.
 
     A group is bound to a single FSP, so every exported payment plan shares the same FSP XLSX
-    template and the sheet has a single, flat header.
-
-    Each export is a batch: only ACCEPTED/FINISHED plans that have not been exported yet
-    (``export_tag`` is null) are included. On success
-    the exported plans are stamped with the next sequential ``export_tag`` so they are excluded
-    from the next export.
+    template and the sheet has a single, flat header. Exporting again replaces the group's file.
     """
 
     TITLE = "Payment Plan Group - Payment List"
@@ -61,21 +55,12 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         self,
         payment_plan_group: "PaymentPlanGroup",
         fsp_xlsx_template_id: str | None = None,
-        export_tag: int | None = None,
     ) -> None:
         self.payment_plan_group = payment_plan_group
-        self.export_tag = export_tag
-        self.applied_export_tag: int | None = None
         self.payment_generate_token_and_order_numbers = True
         self.allow_export_fsp_auth_code = False
-        if export_tag is not None:
-            plan_qs = payment_plan_group.payment_plans.filter(export_tag=export_tag)
-        else:
-            plan_qs = payment_plan_group.payment_plans.filter(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED], export_tag__isnull=True
-            )
         self.payment_plans = list(
-            plan_qs.select_related(
+            payment_plan_group.payment_plans.select_related(
                 "payment_plan_group__financial_service_provider", "payment_plan_group__currency", "delivery_mechanism"
             ).order_by("unicef_id")
         )
@@ -152,22 +137,17 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             )
         return None
 
-    def preview_export(self) -> list:
-        """Return the ids of plans that would be exported (empty if every plan would be skipped)."""
+    def unexportable_reasons(self) -> list[str]:
+        """One reason per payment plan that would keep the export from running; empty when it can run."""
         return [
-            payment_plan.id
+            reason
             for payment_plan in self.payment_plans
-            if self._skip_reason(payment_plan, self._resolve_template(payment_plan)) is None
+            if (reason := self._skip_reason(payment_plan, self._resolve_template(payment_plan))) is not None
         ]
 
     def generate_token_and_order_numbers(self, program: "Program") -> None:
         all_eligible = Payment.objects.filter(parent__in=self.payment_plans).eligible()
         XlsxPaymentPlanDeliveryExportService.generate_token_and_order_numbers(all_eligible, program)
-
-    def _batch_name(self, tag: int | None) -> str:
-        if self.plan_type == PaymentPlan.PlanType.REGULAR:
-            return f"Batch {tag}"
-        return f"Batch {tag} {PaymentPlan.PlanType(self.plan_type).label}"
 
     def _filename_suffix(self) -> str:
         if self.plan_type == PaymentPlan.PlanType.REGULAR:
@@ -176,28 +156,22 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
 
     def get_email_context(self, user: "User") -> dict:
         group = self.payment_plan_group
-        tag = self.applied_export_tag
-        batch_name = self._batch_name(tag)
-        link = get_link(reverse("download-payment-plan-group-batch", args=[str(group.id), tag]))
+        link = get_link(reverse("download-payment-plan-group-xlsx", args=[str(group.id)]))
         return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
             "message": (
-                f"Payment Plan Group {group.unicef_id} {batch_name} Payment List xlsx file "
+                f"Payment Plan Group {group.unicef_id} Payment List xlsx file "
                 "was generated and below you have the link to download this file."
             ),
             "link": link or "",
-            "title": f"Payment Plan Group {group.unicef_id} {batch_name} Payment List Generated",
+            "title": f"Payment Plan Group {group.unicef_id} Payment List Generated",
         }
 
     def _invalidate_list_cache(self) -> None:
         program = self.payment_plan_group.cycle.program
         invalidate_payment_plan_list_cache(program.business_area.slug, program.code)
-
-    def _next_export_tag(self) -> int:
-        current_max = self.payment_plan_group.payment_plans.aggregate(max_tag=Max("export_tag"))["max_tag"]
-        return (current_max or 0) + 1
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
@@ -217,7 +191,6 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             template = self._resolve_template(payment_plan)
             reason = self._skip_reason(payment_plan, template)
             if reason:
-                logger.warning(f"Skipping {reason}")
                 self.skipped_reasons.append(reason)
                 continue
             per_fsp_service = XlsxPaymentPlanDeliveryExportService(
@@ -260,18 +233,13 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
     def save_xlsx_file(self, user: "User") -> None:
         group = self.payment_plan_group
         self.generate_workbook()
-        if not self.exported_plan_ids:
-            raise EmptyDeliveryExportError(self.skipped_reasons)
-        if self.export_tag is not None:
-            tag = self.export_tag
-        else:
-            tag = self._next_export_tag()
-        self.applied_export_tag = tag
+        if self.skipped_reasons or not self.exported_plan_ids:
+            raise UnexportablePaymentPlansError(self.skipped_reasons)
 
         if self.allow_export_fsp_auth_code:
-            self._save_xlsx_file_with_auth_code(group, tag, user)
+            self._save_xlsx_file_with_auth_code(group, user)
         else:
-            self._save_plain_xlsx_file(group, tag, user)
+            self._save_plain_xlsx_file(group, user)
 
     def _mark_exported_payments_as_sent(self, user: "User") -> None:
         if not self.payments_to_mark_sent:
@@ -293,8 +261,16 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
         )
         bulk_log_payment_changes(old_new_pairs, user)
 
-    def _save_plain_xlsx_file(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
-        filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.xlsx"
+    def _attach_file(self, group: "PaymentPlanGroup", file_temp: FileTemp, user: "User") -> None:
+        with transaction.atomic():
+            group.remove_export_file_delivery()
+            group.export_file_delivery = file_temp
+            group.save(update_fields=["export_file_delivery", "updated_at"])
+            self._mark_exported_payments_as_sent(user)
+            self._invalidate_list_cache()
+
+    def _save_plain_xlsx_file(self, group: "PaymentPlanGroup", user: "User") -> None:
+        filename = f"payment_plan_group_{group.unicef_id}_payment_list{self._filename_suffix()}.xlsx"
         with NamedTemporaryFile() as tmp:
             file_temp = FileTemp(
                 object_id=str(group.pk),
@@ -304,24 +280,13 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             self.wb.save(tmp.name)
             tmp.seek(0)
             file_temp.file.save(filename, File(tmp))
-            with transaction.atomic():
-                if self.export_tag is not None:
-                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
-                        export_file_delivery=file_temp, updated_at=timezone.now()
-                    )
-                else:
-                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
-                        export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
-                    )
-                self._mark_exported_payments_as_sent(user)
-                # .update() bypasses post_save, so the list caches are invalidated explicitly
-                self._invalidate_list_cache()
+            self._attach_file(group, file_temp, user)
 
-    def _save_xlsx_file_with_auth_code(self, group: "PaymentPlanGroup", tag: int, user: "User") -> None:
+    def _save_xlsx_file_with_auth_code(self, group: "PaymentPlanGroup", user: "User") -> None:
         zip_password = get_random_string(12)
         xlsx_password = get_random_string(12)
-        zip_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.zip"
-        xlsx_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_{tag}{self._filename_suffix()}.xlsx"
+        zip_filename = f"payment_plan_group_{group.unicef_id}_payment_list{self._filename_suffix()}.zip"
+        xlsx_filename = f"payment_plan_group_{group.unicef_id}_payment_list{self._filename_suffix()}.xlsx"
 
         with NamedTemporaryFile(suffix=".zip") as tmp_zip:
             with pyzipper.AESZipFile(
@@ -339,15 +304,4 @@ class XlsxPaymentPlanGroupDeliveryExportService(XlsxExportBaseService):
             )
             tmp_zip.seek(0)
             file_temp.file.save(zip_filename, File(tmp_zip))
-            with transaction.atomic():
-                if self.export_tag is not None:
-                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
-                        export_file_delivery=file_temp, updated_at=timezone.now()
-                    )
-                else:
-                    PaymentPlan.objects.filter(id__in=self.exported_plan_ids).update(
-                        export_tag=tag, export_file_delivery=file_temp, updated_at=timezone.now()
-                    )
-                self._mark_exported_payments_as_sent(user)
-                # .update() bypasses post_save, so the list caches are invalidated explicitly
-                self._invalidate_list_cache()
+            self._attach_file(group, file_temp, user)

@@ -138,18 +138,15 @@ def group_two_plans_one_fsp(program_cycle, business_area, fsp, delivery_mechanis
 
 
 @pytest.fixture
-def group_two_plans_with_shared_export_file(group_two_plans_one_fsp):
+def group_two_plans_with_export_file(group_two_plans_one_fsp):
     ctx = group_two_plans_one_fsp
     file_temp = FileTemp.objects.create(
         object_id=str(ctx["group"].pk),
         content_type=ContentType.objects.get_for_model(ctx["group"]),
     )
     file_temp.file.save("export.xlsx", ContentFile(b"exported-bytes"))
-    PaymentPlan.objects.filter(id__in=[ctx["plan_one"].id, ctx["plan_two"].id]).update(
-        export_tag=1, export_file_delivery=file_temp
-    )
-    ctx["plan_one"].refresh_from_db()
-    ctx["plan_two"].refresh_from_db()
+    ctx["group"].export_file_delivery = file_temp
+    ctx["group"].save(update_fields=["export_file_delivery"])
     return {**ctx, "file_temp": file_temp, "file_name": file_temp.file.name}
 
 
@@ -580,10 +577,8 @@ def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_one_fsp
     assert ctx["payment_two"].delivered_quantity == Decimal("50.00")
 
 
-def test_import_deletes_whole_shared_export_filetemp(
-    group_two_plans_with_shared_export_file, django_capture_on_commit_callbacks
-):
-    ctx = group_two_plans_with_shared_export_file
+def test_import_deletes_group_export_file(group_two_plans_with_export_file, django_capture_on_commit_callbacks):
+    ctx = group_two_plans_with_export_file
     file_temp = ctx["file_temp"]
     storage = file_temp.file.storage
     file_name = ctx["file_name"]
@@ -601,14 +596,16 @@ def test_import_deletes_whole_shared_export_filetemp(
     with django_capture_on_commit_callbacks(execute=True):
         service.import_payment_list()
 
+    ctx["group"].refresh_from_db()
+    assert ctx["group"].export_file_delivery is None
     assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
     assert not storage.exists(file_name)
 
 
-def test_import_does_not_crash_logging_change_after_removing_shared_export_file(
-    group_two_plans_with_shared_export_file,
+def test_import_does_not_crash_logging_change_after_removing_export_file(
+    group_two_plans_with_export_file,
 ):
-    ctx = group_two_plans_with_shared_export_file
+    ctx = group_two_plans_with_export_file
     file = _make_workbook(
         ["payment_id", "delivered_quantity", "currency"],
         [
@@ -619,8 +616,6 @@ def test_import_does_not_crash_logging_change_after_removing_shared_export_file(
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
-    # log_payment_plan_change diffs a pre-remove snapshot whose export_file_delivery FK now
-    # points at a deleted FileTemp: this must not raise FileTemp.DoesNotExist.
     service.import_payment_list()
 
     ctx["payment_one"].refresh_from_db()

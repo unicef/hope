@@ -15,7 +15,7 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
     UserFactory,
 )
-from extras.test_utils.factories.core import CurrencyFactory
+from extras.test_utils.factories.core import CurrencyFactory, FileTempFactory
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
@@ -883,6 +883,16 @@ def test_split_splits_every_plan_in_the_group_the_same_way(
     assert list(second_accepted_payment_plan.splits.values_list("split_type", flat=True)) == [
         PaymentPlanSplit.SplitType.BY_COLLECTOR
     ]
+
+
+def test_split_removes_the_group_export_file(accepted_group, locked_payment_plan, delivered_payment):
+    accepted_group.export_file_delivery = FileTempFactory()
+    accepted_group.save(update_fields=["export_file_delivery"])
+
+    PaymentPlanGroupService(accepted_group).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+
+    accepted_group.refresh_from_db()
+    assert accepted_group.export_file_delivery is None
 
 
 def test_split_rejects_group_not_accepted(locked_group):

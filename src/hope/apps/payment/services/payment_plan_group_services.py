@@ -142,6 +142,8 @@ class PaymentPlanGroupService:
             raise ValidationError("Payment Plan Group is already sent to payment gateway")
         for payment_plan in self._payment_plans(payment_plan_group):
             PaymentPlanService(payment_plan).split(split_type, payments_no)
+        payment_plan_group.remove_export_file_delivery()
+        payment_plan_group.save(update_fields=["export_file_delivery", "updated_at"])
         self.payment_plan_group = payment_plan_group
         return payment_plan_group
 

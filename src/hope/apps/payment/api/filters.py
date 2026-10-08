@@ -26,7 +26,6 @@ class PaymentPlanFilter(FilterSet):
     program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program code")
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
     payment_plan_group = django_filters.UUIDFilter(field_name="payment_plan_group__id")
-    export_tag = django_filters.NumberFilter(field_name="export_tag")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     fsp = django_filters.CharFilter(method="filter_by_fsp")
     delivery_mechanism = django_filters.ModelMultipleChoiceFilter(

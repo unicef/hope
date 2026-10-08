@@ -35,6 +35,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "source_group",
             "financial_service_provider",
             "background_action_status",
+            "export_file_delivery",
             "delivery_import_file",
             "export_pdf_file_summary",
             "abort_comment",
@@ -127,6 +128,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         related_name="+",
         null=True,
         blank=True,
+    )
+    export_file_delivery = models.ForeignKey(
+        "core.FileTemp",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Generated payment list XLSX for the FSP [sys]",
     )
     delivery_import_file = models.ForeignKey(
         "core.FileTemp",
@@ -274,25 +283,30 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             or self.background_action_status in PaymentPlanGroup.BACKGROUND_ACTION_ERROR_STATES
         )
 
-    def can_reexport_batch(self, export_tag: int) -> bool:
-        return (
-            self.can_start_background_action
-            and self.payment_plans.filter(
-                export_tag=export_tag,
-                export_file_delivery__isnull=False,
-            ).exists()
-        )
+    @property
+    def export_file_link(self) -> str | None:
+        if self.export_file_delivery_id and self.export_file_delivery.file:
+            return self.export_file_delivery.file.url
+        return None
 
-    def get_batch_export_file_link(self, export_tag: int) -> str | None:
-        """Return the download URL of the batch's XLSX, or None if the batch has no stored file.
+    @property
+    def can_export(self) -> bool:
+        """Released and not exported yet; exporting again once a file exists is `can_regenerate_export`."""
+        return self.status in self.DELIVERY_STATUSES and self.export_file_delivery_id is None
 
-        A batch is identified by export_tag; every plan in the batch references the same
-        export_file_delivery, so any plan with that tag yields the file.
-        """
-        plan = self.payment_plans.filter(export_tag=export_tag, export_file_delivery__isnull=False).first()
-        if plan is None or not plan.export_file_delivery.file:
-            return None
-        return plan.export_file_delivery.file.url
+    @property
+    def can_regenerate_export(self) -> bool:
+        return self.status in self.DELIVERY_STATUSES and self.export_file_delivery_id is not None
+
+    def remove_export_file_delivery(self) -> None:
+        file_temp = self.export_file_delivery
+        if file_temp is None:
+            return
+        self.export_file_delivery = None
+        file_field = file_temp.file
+        file_temp.delete()
+        # Storage delete is not transactional: delete the file when the transaction commits
+        transaction.on_commit(lambda: file_field.delete(save=False))
 
     def sendable_to_payment_gateway_plans(self) -> "QuerySet[PaymentPlan]":
         """Narrow the group's payment plans to the ones that can be sent to the payment gateway.

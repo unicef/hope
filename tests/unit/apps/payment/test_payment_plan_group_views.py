@@ -864,18 +864,23 @@ def test_retrieve_detail_can_export_false_when_already_exported(
     user: Any,
     business_area: Any,
     program: Any,
-    group_with_exported_batch: Any,
+    group_with_export_file: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], business_area, program=program
     )
 
-    response = client.get(_detail_url(business_area.slug, program.code, group_with_exported_batch.id))
+    response = client.get(_detail_url(business_area.slug, program.code, group_with_export_file.id))
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["can_export"] is False
+    assert data["can_regenerate_export"] is True
+    assert data["export_file_delivery"] == reverse(
+        "download-payment-plan-group-xlsx", args=[str(group_with_export_file.id)]
+    )
+    assert data["export_file_has_password"] is False
 
 
 def test_delete_group_with_no_plans_succeeds(
@@ -1567,36 +1572,6 @@ def test_export_on_group_not_accepted_or_finished_returns_400(
     assert group.background_action_status is None
 
 
-def test_export_excludes_already_tagged_plan_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    cycle: Any,
-    create_user_role_with_permissions: Any,
-    accepted_group: Any,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
-    )
-    group = accepted_group
-    plan = PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=group,
-        status=PaymentPlan.Status.ACCEPTED,
-        export_tag=1,
-    )
-    PaymentFactory(parent=plan)
-
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
-        response = client.post(_export_url(business_area.slug, program.code, group.id))
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "not-yet-exported" in str(response.json())
-    mocked_task.assert_not_called()
-
-
 def test_export_follow_up_group_queues_task(
     client: Any,
     user: Any,
@@ -1660,7 +1635,7 @@ def test_export_without_resolvable_template_returns_400(
         response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()[0].startswith("Nothing to export:")
+    assert "no FSP XLSX Template" in response.json()[0]
     mocked_task.assert_not_called()
     group.refresh_from_db()
     assert group.background_action_status is None
@@ -1769,11 +1744,10 @@ def test_export_queues_async_task_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_template_id is None
-    assert called_tag is None
 
 
 def test_export_rejected_for_group_in_other_business_area(
@@ -2170,68 +2144,25 @@ def test_send_group_to_payment_gateway_permissions(
     assert response.status_code == expected_status
 
 
-def test_get_batches_returns_empty_when_no_export(cycle: Any, business_area: Any) -> None:
+def test_detail_export_file_delivery_is_none_without_export(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
     PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group)
 
-    result = PaymentPlanGroupDetailSerializer().get_batches(group)
+    data = PaymentPlanGroupDetailSerializer(group).data
 
-    assert result == []
+    assert data["export_file_delivery"] is None
+    assert data["export_file_has_password"] is False
+    assert data["can_regenerate_export"] is False
 
 
-def test_get_batches_sets_link_when_file_present(cycle: Any, business_area: Any) -> None:
+def test_detail_export_file_has_password_when_zip_is_protected(cycle: Any, business_area: Any) -> None:
     group = cycle.payment_plan_groups.first()
-    file_temp = FileTempFactory()
-    PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=group,
-        export_tag=1,
-        export_file_delivery=file_temp,
-    )
-    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=1)
+    group.export_file_delivery = FileTempFactory(password="zip-pw")
+    group.save(update_fields=["export_file_delivery"])
 
-    result = PaymentPlanGroupDetailSerializer().get_batches(group)
+    data = PaymentPlanGroupDetailSerializer(group).data
 
-    expected_link = reverse("download-payment-plan-group-batch", args=[str(group.id), 1])
-    assert result == [
-        {
-            "export_tag": 1,
-            "export_file_link": expected_link,
-            "has_password": False,
-        }
-    ]
-
-
-def test_get_batches_link_is_none_when_file_missing(cycle: Any, business_area: Any) -> None:
-    group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=group,
-        export_tag=1,
-        export_file_delivery=None,
-    )
-
-    result = PaymentPlanGroupDetailSerializer().get_batches(group)
-
-    assert result == [
-        {
-            "export_tag": 1,
-            "export_file_link": None,
-            "has_password": False,
-        }
-    ]
-
-
-def test_get_batches_orders_by_export_tag(cycle: Any, business_area: Any) -> None:
-    group = cycle.payment_plan_groups.first()
-    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=2)
-    PaymentPlanFactory(business_area=business_area, program_cycle=cycle, payment_plan_group=group, export_tag=1)
-
-    result = PaymentPlanGroupDetailSerializer().get_batches(group)
-
-    assert [batch["export_tag"] for batch in result] == [1, 2]
+    assert data["export_file_has_password"] is True
 
 
 def test_delivery_import_xlsx_returns_400_when_no_file(
@@ -3020,11 +2951,10 @@ def test_export_with_template_queues_task_with_template_id_on_commit(
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id, called_template_id = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
     assert called_template_id == str(template.pk)
-    assert called_tag is None
 
 
 @pytest.mark.parametrize(
@@ -3077,16 +3007,16 @@ def test_export_with_template_permission_checks(
 
 
 @pytest.fixture
-def group_with_exported_batch(business_area: Any, cycle: Any) -> Any:
+def group_with_export_file(business_area: Any, cycle: Any) -> Any:
     group = cycle.payment_plan_groups.first()
-    file_temp = FileTempFactory()
+    group.status = PaymentPlanGroup.Status.ACCEPTED
+    group.export_file_delivery = FileTempFactory()
+    group.save(update_fields=["status", "export_file_delivery"])
     PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
         payment_plan_group=group,
         status=PaymentPlan.Status.ACCEPTED,
-        export_tag=1,
-        export_file_delivery=file_temp,
     )
     return group
 
@@ -3096,28 +3026,24 @@ def test_send_xlsx_password_queues_task_on_commit(
     user: Any,
     business_area: Any,
     program: Any,
-    group_with_exported_batch: Any,
+    group_with_export_file: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
-    group = group_with_exported_batch
+    group = group_with_export_file
 
     with (
         patch("hope.apps.payment.api.views.send_payment_plan_group_delivery_xlsx_password_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
-        response = client.post(
-            _send_xlsx_password_url(business_area.slug, program.code, group.id),
-            {"export_tag": 1},
-        )
+        response = client.post(_send_xlsx_password_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["id"] == str(group.id)
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_tag = mocked_task.call_args[0]
+    called_group, called_user_id = mocked_task.call_args[0]
     assert called_group.id == group.id
     assert called_user_id == str(user.pk)
-    assert called_tag == 1
 
 
 def test_send_xlsx_password_task_not_called_before_commit(
@@ -3125,45 +3051,20 @@ def test_send_xlsx_password_task_not_called_before_commit(
     user: Any,
     business_area: Any,
     program: Any,
-    group_with_exported_batch: Any,
+    group_with_export_file: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
-    group = group_with_exported_batch
+    group = group_with_export_file
 
     with patch("hope.apps.payment.api.views.send_payment_plan_group_delivery_xlsx_password_async_task") as mocked_task:
-        response = client.post(
-            _send_xlsx_password_url(business_area.slug, program.code, group.id),
-            {"export_tag": 1},
-        )
+        response = client.post(_send_xlsx_password_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_not_called()
 
 
-def test_send_xlsx_password_unknown_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
-    group = group_with_exported_batch
-
-    with patch("hope.apps.payment.api.views.send_payment_plan_group_delivery_xlsx_password_async_task") as mocked_task:
-        response = client.post(
-            _send_xlsx_password_url(business_area.slug, program.code, group.id),
-            {"export_tag": 99},
-        )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "export_tag=99" in str(response.json())
-    mocked_task.assert_not_called()
-
-
-def test_send_xlsx_password_tag_with_no_file_returns_400(
+def test_send_xlsx_password_without_export_file_returns_400(
     client: Any,
     user: Any,
     business_area: Any,
@@ -3178,38 +3079,14 @@ def test_send_xlsx_password_tag_with_no_file_returns_400(
         program_cycle=cycle,
         payment_plan_group=group,
         status=PaymentPlan.Status.ACCEPTED,
-        export_tag=3,
-        export_file_delivery=None,
     )
 
     with patch("hope.apps.payment.api.views.send_payment_plan_group_delivery_xlsx_password_async_task") as mocked_task:
-        response = client.post(
-            _send_xlsx_password_url(business_area.slug, program.code, group.id),
-            {"export_tag": 3},
-        )
+        response = client.post(_send_xlsx_password_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "export_tag=3" in str(response.json())
+    assert "No exported payment list file" in str(response.json())
     mocked_task.assert_not_called()
-
-
-def test_send_xlsx_password_zero_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_exported_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(user, [Permissions.PM_SEND_XLSX_PASSWORD], business_area, program=program)
-    group = group_with_exported_batch
-
-    response = client.post(
-        _send_xlsx_password_url(business_area.slug, program.code, group.id),
-        {"export_tag": 0},
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.parametrize(
@@ -3227,229 +3104,44 @@ def test_send_xlsx_password_permissions(
     user: Any,
     business_area: Any,
     program: Any,
-    group_with_exported_batch: Any,
+    group_with_export_file: Any,
     create_user_role_with_permissions: Any,
     permissions: list,
     expected_status: int,
 ) -> None:
     create_user_role_with_permissions(user, permissions, business_area, program=program)
-    group = group_with_exported_batch
+    group = group_with_export_file
 
     with patch("hope.apps.payment.api.views.send_payment_plan_group_delivery_xlsx_password_async_task"):
-        response = client.post(
-            _send_xlsx_password_url(business_area.slug, program.code, group.id),
-            {"export_tag": 1},
-        )
+        response = client.post(_send_xlsx_password_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == expected_status
 
 
-# --- delivery_export_xlsx with export_tag (re-export an already-tagged batch) ---
-
-
-@pytest.fixture
-def group_with_tagged_batch(business_area: Any, cycle: Any, accepted_group: Any) -> Any:
-    group = accepted_group
-    file_temp = FileTempFactory()
-    PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=group,
-        status=PaymentPlan.Status.ACCEPTED,
-        export_tag=5,
-        export_file_delivery=file_temp,
-    )
-    return group
-
-
-def test_export_for_batch_returns_200_and_sets_exporting_status(
+def test_export_again_replaces_the_group_file(
     client: Any,
     user: Any,
     business_area: Any,
     program: Any,
-    group_with_tagged_batch: Any,
+    group_with_accepted_plan_and_payment: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
         user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
     )
-    group = group_with_tagged_batch
-
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
-        response = client.post(
-            _export_url(business_area.slug, program.code, group.id),
-            {"export_tag": 5},
-        )
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["id"] == str(group.id)
-    group.refresh_from_db()
-    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-
-
-def test_export_for_batch_queues_task_without_template_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
-    )
-    group = group_with_tagged_batch
+    group = group_with_accepted_plan_and_payment
+    group.export_file_delivery = FileTempFactory()
+    group.save(update_fields=["export_file_delivery"])
 
     with (
         patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
         TestCase.captureOnCommitCallbacks(execute=True),
     ):
-        response = client.post(
-            _export_url(business_area.slug, program.code, group.id),
-            {"export_tag": 5},
-        )
+        response = client.post(_export_url(business_area.slug, program.code, group.id))
 
     assert response.status_code == status.HTTP_200_OK
     mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
-    assert called_group.id == group.id
-    assert called_user_id == str(user.pk)
-    assert called_tag == 5
-    assert called_template_id is None
-
-
-def test_export_for_batch_queues_task_with_template_id_on_commit(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
-    )
-    group = group_with_tagged_batch
-    template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "currency"])
-
-    with (
-        patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task,
-        TestCase.captureOnCommitCallbacks(execute=True),
-    ):
-        response = client.post(
-            _export_url(business_area.slug, program.code, group.id),
-            {"export_tag": 5, "fsp_xlsx_template_id": str(template.pk)},
-        )
-
-    assert response.status_code == status.HTTP_200_OK
-    mocked_task.assert_called_once()
-    called_group, called_user_id, called_template_id, called_tag = mocked_task.call_args[0]
-    assert called_group.id == group.id
-    assert called_user_id == str(user.pk)
-    assert called_tag == 5
-    assert called_template_id == str(template.pk)
-
-
-def test_export_for_batch_when_already_exporting_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
-    )
-    group = group_with_tagged_batch
-    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
-    group.save(update_fields=["background_action_status"])
-
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
-        response = client.post(
-            _export_url(business_area.slug, program.code, group.id),
-            {"export_tag": 5},
-        )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Another background action is already in progress." in str(response.json())
-    mocked_task.assert_not_called()
-
-
-def test_export_for_batch_unknown_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
-    )
-    group = group_with_tagged_batch
-
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
-        response = client.post(
-            _export_url(business_area.slug, program.code, group.id),
-            {"export_tag": 99},
-        )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "export_tag=99" in str(response.json())
-    mocked_task.assert_not_called()
-
-
-def test_export_for_batch_zero_tag_returns_400(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
-    )
-    group = group_with_tagged_batch
-
-    response = client.post(
-        _export_url(business_area.slug, program.code, group.id),
-        {"export_tag": 0},
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], status.HTTP_200_OK),
-        ([Permissions.PM_DOWNLOAD_FSP_AUTH_CODE], status.HTTP_403_FORBIDDEN),
-        ([Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL], status.HTTP_403_FORBIDDEN),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_export_for_batch_permissions(
-    client: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-    group_with_tagged_batch: Any,
-    create_user_role_with_permissions: Any,
-    permissions: list,
-    expected_status: int,
-) -> None:
-    create_user_role_with_permissions(user, permissions, business_area, program=program)
-    group = group_with_tagged_batch
-
-    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task"):
-        response = client.post(
-            _export_url(business_area.slug, program.code, group.id),
-            {"export_tag": 5},
-        )
-
-    assert response.status_code == expected_status
+    assert response.json()["background_action_status"] == PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORTING
 
 
 def _group_action_url(ba_slug: str, program_code: str, group_id: Any, action: str) -> str:

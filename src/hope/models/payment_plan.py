@@ -107,7 +107,6 @@ class PaymentPlan(
             "imported_file_date",
             "imported_file",
             "export_file_entitlement",
-            "export_file_delivery",
             "steficon_rule",
             "steficon_applied_date",
             "steficon_rule_targeting",
@@ -345,14 +344,6 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         help_text="Export File Entitlement",
     )
-    export_file_delivery = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Export File Delivery",
-    )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     reconciliation_import_file = models.ForeignKey(
         FileTemp,
         null=True,
@@ -614,12 +605,6 @@ class PaymentPlan(
         db_index=True,
         help_text="Payment Plan type [sys]",
     )
-    export_tag = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True,
-        db_index=True,
-        help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
-    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )
@@ -779,35 +764,9 @@ class PaymentPlan(
         # Storage delete is not transactional: delete the file when the transaction commits
         transaction.on_commit(lambda: file_field.delete(save=False))
 
-    def remove_export_file_delivery(self) -> None:
-        # The batch export shares one FileTemp across every plan in the batch (same export_tag).
-        # Detach this plan and hard-delete the file only once no other plan still references it.
-        file_temp_id = self.export_file_delivery_id
-        self.export_file_delivery = None
-        if (
-            not file_temp_id
-            or PaymentPlan.all_objects.filter(export_file_delivery_id=file_temp_id).exclude(pk=self.pk).exists()
-        ):
-            return
-        file_temp = FileTemp.objects.filter(pk=file_temp_id).first()
-        if file_temp is not None:
-            file_field = file_temp.file
-            file_temp.delete()
-            # Storage delete is not transactional: delete the file when the transaction commits
-            transaction.on_commit(lambda: file_field.delete(save=False))
-
     def remove_export_files(self) -> None:
-        # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
-        # remove export_file_delivery (use the cached id: the FileTemp is shared across the batch
-        # and a sibling may already have deleted it, so don't dereference the FK just to test presence)
-        if (
-            self.status
-            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_delivery_id
-        ):
-            self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -1041,16 +1000,6 @@ class PaymentPlan(
             status__in=(Payment.STATUS_PENDING, Payment.STATUS_SENT_TO_PG)
         ).exists()
         return self.is_payment_gateway and not has_blocking_payments
-
-    @property
-    def can_regenerate_delivery_export_file(self) -> bool:
-        """Can regenerate export_file_delivery."""
-        return (
-            self.status
-            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_delivery is not None
-            and self.background_action_status is None
-        )
 
     @property
     def financial_service_provider(self) -> "FinancialServiceProvider | None":

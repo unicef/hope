@@ -81,8 +81,8 @@ def download_payment_plan_payment_list(
 
 
 @login_required
-def download_payment_plan_group_batch(
-    request: "HttpRequest", payment_plan_group_id: str, export_tag: int
+def download_payment_plan_group_xlsx(
+    request: "HttpRequest", payment_plan_group_id: str
 ) -> Union[
     "HttpResponseRedirect",
     "HttpResponsePermanentRedirect",
@@ -95,10 +95,10 @@ def download_payment_plan_group_batch(
     ):
         raise PermissionDenied({"required_permissions": [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX.value]})
 
-    link = payment_plan_group.get_batch_export_file_link(export_tag)
+    link = payment_plan_group.export_file_link
     if link is None:
         log_and_raise(
-            f"XLSX File not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}, batch: {export_tag}",
+            f"XLSX File not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}",
             error_type=FileNotFoundError,
         )
     return redirect(link)

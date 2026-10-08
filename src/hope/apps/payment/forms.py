@@ -8,7 +8,7 @@ from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import AcceptanceProcessThreshold, FinancialServiceProviderXlsxTemplate
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlan, PaymentPlanGroup
+    from hope.models import PaymentPlan
 
 
 class VisionFundsCommitmentItemAssignmentForm(forms.Form):
@@ -85,24 +85,12 @@ class AcceptanceProcessThresholdForm(forms.ModelForm):
         ]
 
 
-class BatchReexportForm(forms.Form):
-    export_tag = forms.ChoiceField(choices=[], label="Batch to re-export")
+class GroupReexportForm(forms.Form):
     template = forms.ModelChoiceField(
         queryset=FinancialServiceProviderXlsxTemplate.objects.all(),
         required=False,
         label="FSP XLSX Template (optional override)",
     )
-
-    def __init__(self, *args: Any, payment_plan_group: "PaymentPlanGroup | None" = None, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        if payment_plan_group is not None:
-            tags = (
-                payment_plan_group.payment_plans.filter(export_tag__isnull=False)
-                .values_list("export_tag", flat=True)
-                .distinct()
-                .order_by("export_tag")
-            )
-            self.fields["export_tag"].choices = [(t, f"Batch {t}") for t in tags]
 
 
 class TemplateSelectForm(forms.Form):

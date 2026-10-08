@@ -1513,8 +1513,6 @@ class PaymentPlanService:
     def _persist_splits(self, payments_chunks: list, split_type: str, chunks_no: int | None) -> None:
         if self.payment_plan.splits.exists():
             self.payment_plan.splits.all().delete()
-        if self.payment_plan.export_file_delivery:
-            self.payment_plan.remove_export_file_delivery()
 
         payment_plan_splits_to_create = [
             PaymentPlanSplit(
