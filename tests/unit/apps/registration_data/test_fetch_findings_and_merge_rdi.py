@@ -123,7 +123,9 @@ def _finding(first_pk: str, second_pk: str, *, score: float = 0.95, status_code:
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_persists_pairs_and_enqueues_merge(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -147,7 +149,9 @@ def test_fetch_findings_and_merge_rdi_persists_pairs_and_enqueues_merge(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_consumes_full_findings_iterator(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -174,7 +178,9 @@ def test_fetch_findings_and_merge_rdi_consumes_full_findings_iterator(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_empty_findings_still_enqueues_merge(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -193,7 +199,9 @@ def test_fetch_findings_and_merge_rdi_empty_findings_still_enqueues_merge(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_skips_findings_when_biometric_dedup_disabled(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -210,7 +218,9 @@ def test_fetch_findings_and_merge_rdi_skips_findings_when_biometric_dedup_disabl
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_classifies_batch_when_both_sides_pending(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -238,7 +248,9 @@ def test_fetch_findings_and_merge_rdi_classifies_batch_when_both_sides_pending(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_classifies_population_when_one_side_merged(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -270,7 +282,9 @@ def test_fetch_findings_and_merge_rdi_classifies_population_when_one_side_merged
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 @pytest.mark.parametrize(
     "post_publish_status",
     [
@@ -297,7 +311,9 @@ def test_fetch_findings_and_merge_rdi_entry_guard_short_circuits_before_fetching
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_skips_rdi_without_country_workspace_id(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -322,7 +338,9 @@ def test_fetch_findings_and_merge_rdi_skips_rdi_without_country_workspace_id(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_rerun_does_not_double_persist_pairs(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -345,7 +363,9 @@ def test_fetch_findings_and_merge_rdi_rerun_does_not_double_persist_pairs(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_skips_findings_with_unknown_country_workspace_id(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -369,7 +389,9 @@ def test_fetch_findings_and_merge_rdi_skips_findings_with_unknown_country_worksp
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_self_heals_import_error_to_merge_scheduled(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -392,7 +414,9 @@ def test_fetch_findings_and_merge_rdi_self_heals_import_error_to_merge_scheduled
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_skips_self_pair_findings(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -413,7 +437,9 @@ def test_fetch_findings_and_merge_rdi_skips_self_pair_findings(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_orders_pair_by_individual_id(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -435,7 +461,9 @@ def test_fetch_findings_and_merge_rdi_orders_pair_by_individual_id(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_classifies_mixed_batch_and_population_for_same_individual(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -482,7 +510,9 @@ def test_fetch_findings_and_merge_rdi_classifies_mixed_batch_and_population_for_
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -518,7 +548,9 @@ def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_status_200_persists_with_scaled_score(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -535,7 +567,9 @@ def test_fetch_findings_and_merge_rdi_status_200_persists_with_scaled_score(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 @pytest.mark.parametrize("status_code", ["412", "416", "418", "429"])
 def test_fetch_findings_and_merge_rdi_invalid_pair_status_codes_persist_with_scaled_score(
     mock_get_findings: mock.Mock,
@@ -554,7 +588,9 @@ def test_fetch_findings_and_merge_rdi_invalid_pair_status_codes_persist_with_sca
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 @pytest.mark.parametrize("status_code", ["404", "500"])
 def test_fetch_findings_and_merge_rdi_dropped_status_codes_skip_persist(
     mock_get_findings: mock.Mock,
@@ -574,7 +610,9 @@ def test_fetch_findings_and_merge_rdi_dropped_status_codes_skip_persist(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_mixed_status_codes_persist_correct_subset(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -607,7 +645,9 @@ def test_fetch_findings_and_merge_rdi_mixed_status_codes_persist_correct_subset(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_dropped_finding_does_not_touch_individual_snapshots(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -626,7 +666,9 @@ def test_fetch_findings_and_merge_rdi_dropped_finding_does_not_touch_individual_
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_invalid_pair_surfaces_zero_score_in_individual_snapshot(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -719,7 +761,9 @@ def test_parse_findings_empty_input() -> None:
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_updates_rdi_counters_and_individual_dedup_statuses(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -777,7 +821,9 @@ def test_fetch_findings_and_merge_rdi_updates_rdi_counters_and_individual_dedup_
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_delegates_statistics_to_biometric_dedup_service(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -797,7 +843,9 @@ def test_fetch_findings_and_merge_rdi_delegates_statistics_to_biometric_dedup_se
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_skips_merge_when_status_changed_under_lock(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -835,7 +883,9 @@ def test_fetch_findings_and_merge_rdi_returns_true_when_lock_not_acquired(
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and_lock(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -845,7 +895,7 @@ def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and
     # Concurrency re-check: the pre-lock read passes the status filter, then a competing
     # worker advances the RDI out of a processable status before this one takes the row
     # lock. Findings are fetched between those two reads, so flipping the DB status inside
-    # get_rdi_findings's side_effect reproduces the race deterministically — the locked
+    # get_rdi_biometric_findings's side_effect reproduces the race deterministically — the locked
     # re-read filters on the processable statuses, misses, and execute() returns False
     # before transitioning to MERGING or scheduling the merge.
     def steal_rdi_then_return_findings(_country_workspace_id: str) -> list[dict]:
@@ -865,7 +915,9 @@ def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.remove_elasticsearch_documents_by_matching_ids")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_and_merge_merge_failure_rolls_back_and_cleans_es(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -892,7 +944,9 @@ def test_fetch_and_merge_merge_failure_rolls_back_and_cleans_es(
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.remove_elasticsearch_documents_by_matching_ids")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_and_merge_store_failure_rolls_back_and_cleans_es(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
@@ -922,7 +976,9 @@ def test_fetch_and_merge_store_failure_rolls_back_and_cleans_es(
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.remove_elasticsearch_documents_by_matching_ids")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_findings")
+@patch(
+    "hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI.get_rdi_biometric_findings"
+)
 def test_fetch_and_merge_fetch_failure_before_txn_is_merge_error(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,

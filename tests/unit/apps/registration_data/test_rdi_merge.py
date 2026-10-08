@@ -553,10 +553,10 @@ def test_merging_external_collector(
     DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
-    "hope.apps.registration_data.services.deduplication_engine.DeduplicationEngineService.create_grievance_tickets_for_duplicates"
+    "hope.apps.registration_data.services.deduplication_engine.DeduplicationEngineService.create_grievance_tickets_for_biometric_duplicates"
 )
 def test_merge_biometric_deduplication_cw_path(
-    create_grievance_tickets_for_duplicates_mock: mock.Mock,
+    create_grievance_tickets_for_biometric_duplicates_mock: mock.Mock,
     rdi: object,
     areas: dict,
     pending_head_individual: object,
@@ -578,7 +578,7 @@ def test_merge_biometric_deduplication_cw_path(
     with django_capture_on_commit_callbacks(execute=True):
         RdiMergeTask().execute(rdi.pk)
 
-    create_grievance_tickets_for_duplicates_mock.assert_called_once_with(rdi)
+    create_grievance_tickets_for_biometric_duplicates_mock.assert_called_once_with(rdi)
 
 
 def test_merge_empty_rdi(rdi: object, django_capture_on_commit_callbacks) -> None:

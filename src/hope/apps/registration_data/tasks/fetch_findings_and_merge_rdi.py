@@ -69,7 +69,7 @@ class FetchFindingsAndMergeRdi:
         findings: list[dict] | None = None
         if rdi.program.biometric_deduplication_enabled:
             dedupe_service = DeduplicationEngineService()
-            findings = dedupe_service.get_rdi_findings(cast("str", rdi.country_workspace_id))
+            findings = dedupe_service.get_rdi_biometric_findings(cast("str", rdi.country_workspace_id))
             logger.info(f"RDI:{rdi.id} fetched {len(findings)} biometric findings from Deduplication Engine")
         return dedupe_service, findings
 

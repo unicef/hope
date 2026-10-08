@@ -29,10 +29,10 @@ class BiometricDeduplicationEngineAPI(BaseAPI):
     API_MISSING_CREDENTIALS_EXCEPTION_CLASS = BiometricDeduplicationEngineMissingAPICredentialsError
 
     class Endpoints:
-        GET_RDI_FINDINGS = "deduplication_sets/{rdi_country_workspace_id}/findings/"
+        GET_RDI_BIOMETRIC_FINDINGS = "deduplication_sets/{rdi_country_workspace_id}/findings/"
 
     @staticmethod
-    def _create_get_rdi_findings_params(
+    def _create_get_rdi_biometric_findings_params(
         status_code: str | None,
         updated_after: str | None,
         updated_before: str | None,
@@ -46,7 +46,7 @@ class BiometricDeduplicationEngineAPI(BaseAPI):
             filters["updated_before"] = updated_before
         return urlencode(filters, safe=",") if filters else None
 
-    def get_rdi_findings(
+    def get_rdi_biometric_findings(
         self,
         rdi_country_workspace_id: str,
         *,
@@ -54,8 +54,10 @@ class BiometricDeduplicationEngineAPI(BaseAPI):
         updated_after: str | None = None,
         updated_before: str | None = None,
     ) -> list[dict]:
-        url = self.get_url(self.Endpoints.GET_RDI_FINDINGS.format(rdi_country_workspace_id=rdi_country_workspace_id))
-        params = self._create_get_rdi_findings_params(
+        url = self.get_url(
+            self.Endpoints.GET_RDI_BIOMETRIC_FINDINGS.format(rdi_country_workspace_id=rdi_country_workspace_id)
+        )
+        params = self._create_get_rdi_biometric_findings_params(
             status_code=status_code,
             updated_after=updated_after,
             updated_before=updated_before,

@@ -169,7 +169,7 @@ class DeduplicationEngineService:
 
         return qs.distinct()
 
-    def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
+    def create_grievance_tickets_for_biometric_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
         from hope.apps.grievance.services.biometric_photo_ticket import (
             create_biometrics_photo_data_change_tickets,
@@ -188,5 +188,5 @@ class DeduplicationEngineService:
         )
         create_biometrics_photo_data_change_tickets(deduplication_pairs.filter(status_code__in=photo_error_codes), rdi)
 
-    def get_rdi_findings(self, rdi_country_workspace_id: str) -> list[dict]:
-        return self.api.get_rdi_findings(rdi_country_workspace_id)
+    def get_rdi_biometric_findings(self, rdi_country_workspace_id: str) -> list[dict]:
+        return self.api.get_rdi_biometric_findings(rdi_country_workspace_id)
