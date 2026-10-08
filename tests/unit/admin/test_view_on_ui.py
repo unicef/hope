@@ -25,6 +25,7 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
     SurveyFactory,
+    TargetPopulationFactory,
 )
 from hope.admin.utils import ViewOnUiMixin
 from hope.apps.grievance.models import GrievanceTicket
@@ -45,6 +46,7 @@ from hope.models import (
     ProgramCycle,
     RegistrationDataImport,
     Survey,
+    TargetPopulation,
 )
 
 pytestmark = pytest.mark.unit
@@ -109,6 +111,15 @@ def test_frontend_url_individual_social(program):
     individual = IndividualFactory(program=program, business_area=program.business_area)
     assert (
         site._registry[Individual].frontend_url(individual) == f"/afg/programs/TEST/population/people/{individual.id}"
+    )
+
+
+@pytest.mark.django_db
+def test_frontend_url_target_population(program, cycle):
+    target_population = TargetPopulationFactory(program_cycle=cycle(program()))
+    assert (
+        site._registry[TargetPopulation].frontend_url(target_population)
+        == f"/afg/programs/TEST/target-population/{target_population.id}"
     )
 
 
