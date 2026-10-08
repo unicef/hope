@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from hope.apps.registration_data.api.deduplication_engine import (
-    BiometricDeduplicationEngineAPI,
+    DeduplicationEngineAPI,
 )
 
 pytestmark = pytest.mark.django_db
@@ -18,13 +18,13 @@ def mock_deduplication_engine_env_vars(settings) -> None:
 
 @pytest.fixture
 def get_mock() -> mock.Mock:
-    with patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI._get") as m:
+    with patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._get") as m:
         yield m
 
 
 @pytest.fixture
 def post_mock() -> mock.Mock:
-    with patch("hope.apps.registration_data.api.deduplication_engine.BiometricDeduplicationEngineAPI._post") as m:
+    with patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI._post") as m:
         yield m
 
 
@@ -45,7 +45,7 @@ def findings_page_last() -> tuple[dict, int]:
 
 
 def test_get_group_findings_single_page(get_mock: mock.Mock) -> None:
-    api = BiometricDeduplicationEngineAPI()
+    api = DeduplicationEngineAPI()
     finding = {
         "first": {"reference_pk": "1"},
         "second": {"reference_pk": "2"},
@@ -67,7 +67,7 @@ def test_get_group_findings_auto_paginates(
     findings_page_first: tuple[dict, int],
     findings_page_last: tuple[dict, int],
 ) -> None:
-    api = BiometricDeduplicationEngineAPI()
+    api = DeduplicationEngineAPI()
     get_mock.side_effect = [findings_page_first, findings_page_last]
 
     results = list(api.get_rdi_biometric_findings("PROG-1"))
@@ -79,7 +79,7 @@ def test_get_group_findings_auto_paginates(
 
 
 def test_get_group_findings_with_filters(get_mock: mock.Mock) -> None:
-    api = BiometricDeduplicationEngineAPI()
+    api = DeduplicationEngineAPI()
     get_mock.return_value = ({"next": None, "results": []}, 200)
 
     list(
