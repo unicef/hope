@@ -20,6 +20,8 @@ import { CloseGroupButton } from './actions/CloseGroupButton';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroup } from './actions/EditGroup';
 import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
+import { DownloadGroupXlsxButton } from './actions/DownloadGroupXlsxButton';
+import { SendXlsxPasswordGroupButton } from './actions/SendXlsxPasswordGroupButton';
 import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExportXlsxWithAuthCodeGroupButton';
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
 import { GroupClosureActionButton } from './actions/GroupClosureActionButton';
@@ -196,6 +198,8 @@ export function PaymentPlanGroupDetailsHeader({
         <ClosureButtons group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
+        <DownloadGroupXlsxButton group={group} />
+        <SendXlsxPasswordGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />
         <DeletePaymentPlanGroup group={group} />

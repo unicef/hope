@@ -35,29 +35,3 @@ export function planTypeDisplayLabel(
   }
 }
 
-// Untranslated label shown next to a batch name; empty for regular batches.
-export function batchPlanTypeLabel(planType: PlanTypeEnum | undefined): string {
-  if (planType === PlanTypeEnum.REGULAR) return '';
-  return planTypeDisplayLabel(planType);
-}
-
-export interface GroupExportPlanTypeOption {
-  value: PlanTypeEnum;
-  label: string;
-}
-
-// Plan types the group can currently export, as translated dialog options.
-export function exportablePlanTypeOptions(
-  group: PaymentPlanGroupDetail | null,
-  t: (key: string) => string,
-): GroupExportPlanTypeOption[] {
-  const flagged: Array<[boolean | undefined, PlanTypeEnum]> = [
-    [group?.canExportRegular, PlanTypeEnum.REGULAR],
-    [group?.canExportFollowUp, PlanTypeEnum.FOLLOW_UP],
-    [group?.canExportTopUp, PlanTypeEnum.TOP_UP],
-    [group?.canExportTopUpAmendment, PlanTypeEnum.TOP_UP_AMENDMENT],
-  ];
-  return flagged
-    .filter(([canExport]) => canExport)
-    .map(([, value]) => ({ value, label: t(planTypeDisplayLabel(value)) }));
-}
