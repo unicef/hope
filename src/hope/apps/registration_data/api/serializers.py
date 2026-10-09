@@ -71,6 +71,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "number_of_individuals",
             "number_of_registered_individuals",
             "error_message",
+            "refuse_reason",
             "can_merge",
             "biometric_deduplication_enabled",
             "batch_duplicates_count_and_percentage",
