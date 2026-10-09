@@ -17,6 +17,7 @@ import type { GroupAcceptanceAction } from './actions/AcceptanceActionGroupButto
 import { AcceptanceActionGroupButton } from './actions/AcceptanceActionGroupButton';
 import { AbortGroupButton } from './actions/AbortGroupButton';
 import { CloseGroupButton } from './actions/CloseGroupButton';
+import { CreateLinkedGroupButton } from './actions/CreateLinkedGroup';
 import { DeletePaymentPlanGroup } from './actions/DeletePaymentPlanGroup';
 import { EditGroup } from './actions/EditGroup';
 import { DeliveryExportXlsxGroupButton } from './actions/DeliveryExportXlsxGroupButton';
@@ -28,6 +29,7 @@ import { GroupClosureActionButton } from './actions/GroupClosureActionButton';
 import { LockUnlockGroupButton } from './actions/LockUnlockGroupButton';
 import { SendForApprovalGroupButton } from './actions/SendForApprovalGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
+import { SplitGroupButton } from './actions/SplitGroupButton';
 import type { PaymentPlanGroupDetail } from './types';
 
 // For each approval stage: the action that moves the group forward and the
@@ -121,6 +123,27 @@ function ClosureButtons({
   }
 }
 
+function LinkedGroupButtons({
+  group,
+}: {
+  group: PaymentPlanGroupDetail | null;
+}): ReactElement | null {
+  if (!group) return null;
+  return (
+    <>
+      {group.canCreateFollowUp && (
+        <CreateLinkedGroupButton group={group} variant="followup" />
+      )}
+      {group.canCreateTopUp && (
+        <CreateLinkedGroupButton group={group} variant="topup" />
+      )}
+      {group.canCreateTopUpAmendment && (
+        <CreateLinkedGroupButton group={group} variant="amendment" />
+      )}
+    </>
+  );
+}
+
 interface PaymentPlanGroupDetailsHeaderProps {
   group: PaymentPlanGroupDetail | null;
 }
@@ -201,7 +224,9 @@ export function PaymentPlanGroupDetailsHeader({
         <DownloadGroupXlsxButton group={group} />
         <SendXlsxPasswordGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
+        <SplitGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />
+        <LinkedGroupButtons group={group} />
         <DeletePaymentPlanGroup group={group} />
       </Box>
     </PageHeader>

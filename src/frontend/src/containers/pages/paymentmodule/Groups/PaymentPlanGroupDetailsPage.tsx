@@ -12,6 +12,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { Grid, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,7 +24,9 @@ import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { isGroupBackgroundActionBusy } from './utils';
+import { ExportGroupSummaryPdfButton } from './actions/ExportGroupSummaryPdfButton';
+import { LinkedGroupsTable } from './LinkedGroupsTable';
+import { isGroupBackgroundActionBusy, planTypeDisplayLabel } from './utils';
 
 const initialFilter = {
   search: '',
@@ -116,6 +119,25 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                   )}
                 </LabelizedField>
               </Grid>
+              {group?.planType && group.planType !== PlanTypeEnum.REGULAR && (
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('Type')}>
+                    {t(planTypeDisplayLabel(group.planType))}
+                  </LabelizedField>
+                </Grid>
+              )}
+              {group?.sourceGroup && (
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('Created from')}>
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/groups/${group.sourceGroup.id}`}
+                      data-cy="source-group-link"
+                    >
+                      {group.sourceGroup.unicefId ?? group.sourceGroup.name}
+                    </BlackLink>
+                  </LabelizedField>
+                </Grid>
+              )}
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('FSP')}>
                   {group?.financialServiceProvider?.name ?? '-'}
@@ -152,12 +174,16 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
             ? { closedBy: group.closedBy, closedDate: group.statusDate }
             : null
         }
+        headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
       />
+      {group?.linkedGroups && (
+        <LinkedGroupsTable linkedGroups={group.linkedGroups} />
+      )}
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}
           canViewDetails
-          title={t('Payment Plans')}
+          title={t('Payment Plan Components')}
           paymentPlanGroupId={groupId}
         />
       </TableWrapper>

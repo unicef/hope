@@ -125,7 +125,9 @@ function templateFile(base64: string): File {
 
 describe('countTopUpAmountRows', () => {
   it('counts only rows with a positive amount', async () => {
-    await expect(countTopUpAmountRows(templateFile(TEMPLATE_BASE64))).resolves.toBe(2);
+    await expect(
+      countTopUpAmountRows(templateFile(TEMPLATE_BASE64)),
+    ).resolves.toBe(2);
   });
 
   it('returns null for a file that is not a workbook', async () => {

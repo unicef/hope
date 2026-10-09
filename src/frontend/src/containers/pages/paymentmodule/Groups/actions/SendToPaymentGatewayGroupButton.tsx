@@ -51,7 +51,7 @@ export function SendToPaymentGatewayGroupButton({
     },
   });
 
-  if (!group) return null;
+  if (!group?.canSendToPaymentGateway) return null;
   if (
     !hasPermissions(
       PERMISSIONS.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY,

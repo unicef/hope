@@ -45,6 +45,7 @@ const renderHeader = (
   backgroundActionStatus: PaymentPlanGroupDetailBackgroundActionStatusEnum | null,
   status: PaymentPlanGroupStatusEnum = PaymentPlanGroupStatusEnum.OPEN,
   approvalProcess: PaymentPlanGroupDetail['approvalProcess'] = [],
+  extra: Partial<PaymentPlanGroupDetail> = {},
 ) =>
   render(
     <MemoryRouter>
@@ -57,6 +58,7 @@ const renderHeader = (
             backgroundActionStatus,
             status,
             approvalProcess,
+            ...extra,
           } as PaymentPlanGroupDetail
         }
       />
@@ -464,5 +466,59 @@ describe('PaymentPlanGroupDetailsHeader', () => {
         requestBody: { closureComment: 'no verification needed' },
       }),
     );
+  });
+
+  it('shows Split only to users with the split permission', () => {
+    renderHeader(null, PaymentPlanGroupStatusEnum.ACCEPTED, [], {
+      canSplit: true,
+    });
+    expect(screen.queryByTestId('button-split-group')).toBeNull();
+  });
+
+  it('enables Split only when the group can be split', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_SPLIT]);
+    const { unmount } = renderHeader(
+      null,
+      PaymentPlanGroupStatusEnum.ACCEPTED,
+      [],
+      { canSplit: true },
+    );
+    expect(
+      screen.getByTestId('button-split-group').hasAttribute('disabled'),
+    ).toBe(false);
+    unmount();
+
+    renderHeader(null, PaymentPlanGroupStatusEnum.ACCEPTED, [], {
+      canSplit: false,
+    });
+    expect(
+      screen.getByTestId('button-split-group').hasAttribute('disabled'),
+    ).toBe(true);
+  });
+
+  it('shows a create button for each linked group the backend allows', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_CREATE]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.FINISHED, [], {
+      canCreateFollowUp: true,
+      canCreateTopUp: false,
+      canCreateTopUpAmendment: true,
+    });
+
+    expect(screen.getByTestId('button-create-followup')).not.toBeNull();
+    expect(screen.queryByTestId('button-create-topup')).toBeNull();
+    expect(screen.getByTestId('button-create-amendment')).not.toBeNull();
+  });
+
+  it('shows no create buttons when the backend allows none', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_CREATE]);
+    renderHeader(null, PaymentPlanGroupStatusEnum.ACCEPTED, [], {
+      canCreateFollowUp: false,
+      canCreateTopUp: false,
+      canCreateTopUpAmendment: false,
+    });
+
+    expect(screen.queryByTestId('button-create-followup')).toBeNull();
+    expect(screen.queryByTestId('button-create-topup')).toBeNull();
+    expect(screen.queryByTestId('button-create-amendment')).toBeNull();
   });
 });

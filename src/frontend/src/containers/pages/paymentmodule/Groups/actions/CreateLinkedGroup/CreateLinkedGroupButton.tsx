@@ -2,10 +2,8 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DividerLine } from '@core/DividerLine';
-import { FieldBorder } from '@core/FieldBorder';
 import { DropzoneField } from '@core/DropzoneField';
 import { GreyText } from '@core/GreyText';
-import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -22,7 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 import type { PaymentPlanCreateTopUp } from '@restgenerated/models/PaymentPlanCreateTopUp';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -36,27 +34,29 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useProgramContext } from '../../../programContext';
+import {
+  PERMISSIONS,
+  hasPermissions,
+} from '../../../../../../config/permissions';
+import { useProgramContext } from '../../../../../../programContext';
 import { countTopUpAmountRows } from './countTopUpAmountRows';
 
 type Variant = 'followup' | 'topup' | 'amendment';
 
-export interface CreateChildPaymentPlanProps {
-  paymentPlan: PaymentPlanDetail;
+export interface CreateLinkedGroupButtonProps {
+  group: PaymentPlanGroupDetail;
   variant: Variant;
 }
 
 /**
- * Shared dialog for creating a child Payment Plan from the current one:
- * Follow-up, Top-Up or Top-Up Amendment. The flows differ only in labels,
- * endpoint and navigation target. The withdrawn/unsuccessful warnings are
- * specific to Follow-up (it may only be started for unsuccessful payments).
+ * Creates a linked group from this one: Follow-up, Top-Up or Top-Up Amendment.
+ * The backend adds a child plan for every plan of the group that qualifies.
+ * The flows differ only in labels and endpoint.
  */
-export function CreateChildPaymentPlan({
-  paymentPlan,
+export function CreateLinkedGroupButton({
+  group,
   variant,
-}: CreateChildPaymentPlanProps): ReactElement {
+}: CreateLinkedGroupButtonProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -85,9 +85,8 @@ export function CreateChildPaymentPlan({
       title: t('Create Top-Up Amendment Payment Plan'),
     },
   }[variant];
-  const detailPath = isFollowUp ? 'followup-payment-plans' : 'payment-plans';
 
-  const { mutateAsync: createChildPaymentPlan, isPending: loadingCreate } =
+  const { mutateAsync: createLinkedGroup, isPending: loadingCreate } =
     useMutation({
       mutationFn: (requestBody: {
         dispersionStartDate: string;
@@ -97,28 +96,28 @@ export function CreateChildPaymentPlan({
       }) => {
         const params = {
           businessAreaSlug: businessArea,
-          id: paymentPlan.id,
+          id: group.id,
           programCode: programId,
           requestBody,
         };
         if (variant === 'followup') {
-          return RestService.restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate(
+          return RestService.restBusinessAreasProgramsPaymentPlanGroupsCreateFollowUpCreate(
             params,
           );
         }
         const multipartParams = {
           businessAreaSlug: businessArea,
-          id: paymentPlan.id,
+          id: group.id,
           programCode: programId,
           // drf-spectacular types the multipart `file` as a string; the API takes a File.
           formData: requestBody as unknown as PaymentPlanCreateTopUp,
         };
         if (variant === 'amendment') {
-          return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpAmendmentCreate(
+          return RestService.restBusinessAreasProgramsPaymentPlanGroupsCreateTopUpAmendmentCreate(
             multipartParams,
           );
         }
-        return RestService.restBusinessAreasProgramsPaymentPlansCreateTopUpCreate(
+        return RestService.restBusinessAreasProgramsPaymentPlanGroupsCreateTopUpCreate(
           multipartParams,
         );
       },
@@ -184,7 +183,7 @@ export function CreateChildPaymentPlan({
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
 
-      const res = await createChildPaymentPlan({
+      const res = await createLinkedGroup({
         dispersionStartDate,
         dispersionEndDate,
         ...(isTopUp && values.file ? { file: values.file } : {}),
@@ -194,7 +193,7 @@ export function CreateChildPaymentPlan({
       });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
-      navigate(`/${baseUrl}/payment-module/${detailPath}/${res.id}`);
+      navigate(`/${baseUrl}/payment-module/groups/${res.id}`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
     }
@@ -254,74 +253,15 @@ export function CreateChildPaymentPlan({
                   >
                     {isFollowUp && (
                       <>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                          }}
-                        >
-                          {paymentPlan.unsuccessfulPaymentsCount === 0 && (
-                            <Box
-                              sx={{
-                                mb: 2,
-                              }}
-                            >
-                              <FieldBorder color="#FF0200">
-                                <GreyText>
-                                  {t(
-                                    'Follow-up Payment Plan might be started just for unsuccessful payments',
-                                  )}
-                                </GreyText>
-                              </FieldBorder>
-                            </Box>
+                        <GreyText>
+                          {t(
+                            'A Follow-up Payment Plan Component is created for every component with unsuccessful payments.',
+                          )}{' '}
+                          {t(
+                            `Withdrawn ${beneficiaryGroup?.groupLabelPlural} are not added.`,
                           )}
-                          {paymentPlan.totalWithdrawnHouseholdsCount > 0 && (
-                            <Box
-                              sx={{
-                                mb: 4,
-                              }}
-                            >
-                              <FieldBorder color="#FF0200">
-                                <GreyText>
-                                  {t(
-                                    `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
-                                  )}
-                                </GreyText>
-                              </FieldBorder>
-                            </Box>
-                          )}
-                        </Box>
-                        <Grid container spacing={3}>
-                          <Grid size={{ xs: 6 }}>
-                            <Box
-                              sx={{
-                                mt: 2,
-                              }}
-                            >
-                              <Typography>
-                                {t('Main Payment Plan Details')}
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          <Grid size={{ xs: 6 }} />
-                          <Grid size={{ xs: 6 }}>
-                            <LabelizedField label={t('Unsuccessful payments')}>
-                              {paymentPlan.unsuccessfulPaymentsCount}
-                            </LabelizedField>
-                          </Grid>
-                          <Grid size={{ xs: 6 }}>
-                            <LabelizedField
-                              label={t(
-                                `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
-                              )}
-                            >
-                              {paymentPlan.totalWithdrawnHouseholdsCount}
-                            </LabelizedField>
-                          </Grid>
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <DividerLine />
-                        </Grid>
+                        </GreyText>
+                        <DividerLine />
                       </>
                     )}
                     {isTopUp && (
@@ -359,7 +299,7 @@ export function CreateChildPaymentPlan({
                               variant="contained"
                               component="a"
                               download
-                              href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plans/${paymentPlan.id}/top-up-amount-template/`}
+                              href={`/api/rest/business-areas/${businessArea}/programs/${programId}/payment-plan-groups/${group.id}/top-up-amount-template/`}
                               data-cy="button-download-top-up-template"
                             >
                               {t('Download template')}
