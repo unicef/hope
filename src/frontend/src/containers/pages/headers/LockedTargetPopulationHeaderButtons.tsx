@@ -88,6 +88,7 @@ export function LockedTargetPopulationHeaderButtons({
       {canDuplicate && (
         <IconContainer>
           <Button
+            data-cy="button-target-population-duplicate"
             onClick={() => setOpenDuplicate(true)}
             disabled={!isActiveProgram}
           >

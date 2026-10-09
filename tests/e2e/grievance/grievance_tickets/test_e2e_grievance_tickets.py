@@ -590,7 +590,6 @@ class TestSmokeGrievanceTickets:
         assert "IND-00-0000.0011" in page_grievance_details_page.get_ticket_target_id().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
     @pytest.mark.parametrize(

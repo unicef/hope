@@ -488,7 +488,6 @@ class TestSmokeFilters:
         filters.get_button_filters_apply().click()
         assert filters.wait_for_number_of_rows(1)
 
-    @pytest.mark.night
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,
         create_programs: None,

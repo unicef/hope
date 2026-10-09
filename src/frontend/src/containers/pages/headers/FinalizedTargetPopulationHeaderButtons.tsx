@@ -40,6 +40,7 @@ export function FinalizedTargetPopulationHeaderButtons({
         <IconContainer>
           <Button
             data-perm={PERMISSIONS.TARGETING_DUPLICATE}
+            data-cy="button-target-population-duplicate"
             onClick={() => setOpenDuplicate(true)}
           >
             <FileCopy />

@@ -200,6 +200,10 @@ class HopeTestBrowser(BaseCase):
         actual = self.get_value(selector, timeout=timeout)
         assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"
 
+    def assert_elements_absent(self, *selectors: str) -> None:
+        for selector in selectors:
+            self.assert_element_absent(selector)
+
     def select_chip_option(self, name: str, select_selector: str) -> None:
         """Pick one option from a MUI multiple-Select chip field and dismiss the listbox.
 
