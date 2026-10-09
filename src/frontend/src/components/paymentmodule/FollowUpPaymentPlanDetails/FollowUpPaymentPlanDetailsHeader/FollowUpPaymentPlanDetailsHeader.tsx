@@ -34,9 +34,15 @@ export function FollowUpPaymentPlanDetailsHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/payment-plans`,
+      to: `/${baseUrl}/payment-module/groups`,
     },
   ];
+  if (paymentPlan.paymentPlanGroup) {
+    breadCrumbsItems.push({
+      title: paymentPlan.paymentPlanGroup.name,
+      to: `/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`,
+    });
+  }
 
   const canRemove =
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
@@ -80,7 +86,7 @@ export function FollowUpPaymentPlanDetailsHeader({
             alignItems: 'center',
           }}
         >
-          {t('Follow-up Payment Plan')} ID:{' '}
+          {t('Follow-up Payment Plan Component')} ID:{' '}
           <Box
             sx={{
               ml: 1,

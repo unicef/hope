@@ -28,7 +28,7 @@ export const PaymentPlanParameters = ({
   let currencyDisplay = '-';
   if (paymentPlanGroup) {
     currencyDisplay =
-      paymentPlanGroup.currency ?? t('Not set on the Payment Plan Group');
+      paymentPlanGroup.currency ?? t('Not set on the Payment Plan');
   }
   return (
     <PaperContainer>

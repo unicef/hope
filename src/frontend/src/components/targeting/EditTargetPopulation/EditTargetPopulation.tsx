@@ -185,7 +185,7 @@ const EditTargetPopulation = ({
       values.programCycleId.value !== paymentPlan.programCycle.id &&
       !values.paymentPlanGroupId?.value
     ) {
-      errors.paymentPlanGroupId = { value: 'Payment Plan Group is required' };
+      errors.paymentPlanGroupId = { value: 'Payment Plan is required' };
     }
     return errors;
   };
@@ -315,7 +315,7 @@ const EditTargetPopulation = ({
                   }}
                 >
                   <TextField
-                    label={t('Group')}
+                    label={t('Payment Plan')}
                     value={values.paymentPlanGroupId?.name || ''}
                     disabled
                     fullWidth

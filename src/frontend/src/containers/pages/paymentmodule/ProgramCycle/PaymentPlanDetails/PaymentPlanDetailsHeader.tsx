@@ -30,7 +30,7 @@ export const PaymentPlanDetailsHeader = ({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, baseUrl } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery<ProgramCycleList>({
     queryKey: restQueryKey(
@@ -66,6 +66,13 @@ export const PaymentPlanDetailsHeader = ({
     breadCrumbsItems.push({
       title: t('Payment Module'),
       to: '..',
+    });
+  }
+
+  if (paymentPlan.paymentPlanGroup) {
+    breadCrumbsItems.push({
+      title: paymentPlan.paymentPlanGroup.name,
+      to: `/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`,
     });
   }
 
@@ -110,7 +117,7 @@ export const PaymentPlanDetailsHeader = ({
             alignItems: 'center',
           }}
         >
-          {t('Payment Plan')} ID:{' '}
+          {t('Payment Plan Component')} ID:{' '}
           <Box
             sx={{
               ml: 1,

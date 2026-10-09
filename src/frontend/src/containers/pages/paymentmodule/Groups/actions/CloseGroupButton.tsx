@@ -60,7 +60,7 @@ export function CloseGroupButton({
         requestBody: { closureComment },
       }),
     onSuccess: async () => {
-      showMessage(t('Payment Plan Group has been closed.'));
+      showMessage(t('Payment Plan has been closed.'));
       setDialogOpen(false);
       await Promise.all(
         [
@@ -86,7 +86,10 @@ export function CloseGroupButton({
   // TODO: add the reconciliation and verification rows (payments delivered
   // fully / partially / not delivered, verified as received ...) once the group exposes them.
   const summaryRows = [
-    { label: t('Number of Payment Plans'), value: group.paymentPlansCount },
+    {
+      label: t('Number of Payment Plan Components'),
+      value: group.paymentPlansCount,
+    },
     {
       label: t('Total Entitlement'),
       value: `${group.totalEntitledQuantityUsd ?? 0} USD`,
@@ -129,7 +132,7 @@ export function CloseGroupButton({
             fullWidth
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Summary of Payment Plan Group')}</DialogTitle>
+              <DialogTitle>{t('Summary of Payment Plan')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
@@ -185,7 +188,7 @@ export function CloseGroupButton({
                   disabled={!hasVerification && !values.comment?.trim()}
                   data-cy="button-close-payment-plan-group"
                 >
-                  {t('Close Payment Plan Group')}
+                  {t('Close Payment Plan')}
                 </LoadingButton>
               </DialogActions>
             </DialogFooter>

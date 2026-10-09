@@ -34,7 +34,7 @@ export function SendForApprovalGroupButton({
         },
       ),
     onSuccess: async () => {
-      showMessage(t('Payment Plan Group has been sent for approval.'));
+      showMessage(t('Payment Plan has been sent for approval.'));
       await Promise.all(
         [
           RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,

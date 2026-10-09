@@ -94,7 +94,7 @@ export const LinkedPaymentPlansModal = ({
         scroll="paper"
       >
         <DialogTitleWrapper>
-          <DialogTitle>{t('Linked Payment Plans')}</DialogTitle>
+          <DialogTitle>{t('Linked Payment Plan Components')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
@@ -103,7 +103,7 @@ export const LinkedPaymentPlansModal = ({
                 mb: 2,
               }}
             >
-              <LabelizedField label={t('Original Payment Plan')}>
+              <LabelizedField label={t('Original Payment Plan Component')}>
                 {canViewDetails ? (
                   <BlackLink
                     to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.id}`}
@@ -123,7 +123,7 @@ export const LinkedPaymentPlansModal = ({
                   data-cy="table-cell-linked-payment-plan-id"
                   align="left"
                 >
-                  {t('Linked Payment Plan ID')}
+                  {t('Linked Payment Plan Component ID')}
                 </TableCell>
                 <TableCell data-cy="table-cell-start-date" align="left">
                   {t('Dispersion Start Date')}

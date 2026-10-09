@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentPlanGroupsTableProps {
   filter?: { search?: string; cycle?: string; status?: string[] };
@@ -22,6 +23,7 @@ interface PaymentPlanGroupsTableProps {
 export const PaymentPlanGroupsTable = ({
   filter,
 }: PaymentPlanGroupsTableProps): ReactElement => {
+  const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const filterVariables = useMemo(
     () => ({
@@ -72,7 +74,7 @@ export const PaymentPlanGroupsTable = ({
 
   return (
     <UniversalRestTable
-      title="Groups"
+      title={t('Payment Plans')}
       headCells={headCells}
       tableState={table}
       data={data}

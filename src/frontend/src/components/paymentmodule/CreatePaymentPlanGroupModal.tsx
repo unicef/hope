@@ -81,7 +81,7 @@ export const CreatePaymentPlanGroupModal = ({
   const handleCreate = async (): Promise<void> => {
     try {
       const result = await createGroup(groupName.trim());
-      showMessage(t('Payment Plan Group created'));
+      showMessage(t('Payment Plan created'));
       onSuccess({ id: result.id, name: result.name ?? groupName.trim() });
       setGroupName('');
       setSettings(emptySettings);
@@ -92,7 +92,7 @@ export const CreatePaymentPlanGroupModal = ({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t('Create Payment Plan Group')}</DialogTitle>
+      <DialogTitle>{t('Create Payment Plan')}</DialogTitle>
       <DialogContent>
         <Box
           sx={{

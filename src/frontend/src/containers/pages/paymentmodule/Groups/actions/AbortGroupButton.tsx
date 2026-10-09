@@ -50,7 +50,7 @@ export function AbortGroupButton({
         requestBody: { abortComment },
       }),
     onSuccess: async () => {
-      showMessage(t('Payment Plan Group has been aborted.'));
+      showMessage(t('Payment Plan has been aborted.'));
       setDialogOpen(false);
       await Promise.all(
         [
@@ -104,12 +104,12 @@ export function AbortGroupButton({
             maxWidth="md"
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t('Abort Payment Plan Group')}</DialogTitle>
+              <DialogTitle>{t('Abort Payment Plan')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <Box sx={{ p: 5 }}>
-                  {t('Are you sure you want to abort this Payment Plan Group?')}
+                  {t('Are you sure you want to abort this Payment Plan?')}
                 </Box>
                 <Form>
                   <Field

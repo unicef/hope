@@ -46,7 +46,7 @@ export const PaymentPlanGroupAutocompleteRest = ({
     <BaseAutocompleteRest
       value={value}
       disabled={disabled}
-      label={t('Payment Plan Group')}
+      label={t('Payment Plan')}
       dataCy="filters-payment-plan-group-autocomplete"
       fetchFunction={(_, __, params) =>
         RestService.restBusinessAreasProgramsPaymentPlanGroupsList({

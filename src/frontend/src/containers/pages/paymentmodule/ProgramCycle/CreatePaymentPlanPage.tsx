@@ -131,7 +131,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         requestBody,
       });
 
-      showMessage(t('Payment Plan Created'));
+      showMessage(t('Payment Plan Component Created'));
       navigate(`../${res.id}`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);

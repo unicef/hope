@@ -18,7 +18,7 @@ export const headCells: HeadCell<PaymentPlanGroupList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Group ID',
+    label: 'Payment Plan ID',
     id: 'unicefId',
     numeric: false,
     weight: 25,

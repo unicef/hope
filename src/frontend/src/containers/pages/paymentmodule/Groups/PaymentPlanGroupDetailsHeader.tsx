@@ -160,7 +160,7 @@ export function PaymentPlanGroupDetailsHeader({
       to: `/${baseUrl}/payment-module/program-cycles`,
     },
     {
-      title: t('Groups'),
+      title: t('Payment Plans'),
       to: `/${baseUrl}/payment-module/groups`,
     },
   ];
@@ -175,7 +175,7 @@ export function PaymentPlanGroupDetailsHeader({
             gap: 1,
           }}
         >
-          <Box>{group?.name ?? t('Group Detail')}</Box>
+          <Box>{group?.name ?? t('Payment Plan')}</Box>
           {group?.unicefId && (
             <Box
               sx={{

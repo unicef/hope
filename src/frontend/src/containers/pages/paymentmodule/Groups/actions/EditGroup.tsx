@@ -73,7 +73,7 @@ export function EditGroup({ group }: EditGroupProps): ReactElement | null {
         ),
       });
       setOpen(false);
-      showMessage(t('Group updated'));
+      showMessage(t('Payment Plan updated'));
     },
     onError: (error) => {
       showApiErrorMessages(error, showMessage);
@@ -93,7 +93,7 @@ export function EditGroup({ group }: EditGroupProps): ReactElement | null {
         startIcon={<EditIcon />}
         data-cy="button-edit-group-name"
       >
-        {t('Edit Group')}
+        {t('Edit Payment Plan')}
       </Button>
 
       <Dialog
@@ -122,7 +122,7 @@ export function EditGroup({ group }: EditGroupProps): ReactElement | null {
           {({ submitForm, values, setValues }) => (
             <>
               <DialogTitleWrapper>
-                <DialogTitle>{t('Edit Group')}</DialogTitle>
+                <DialogTitle>{t('Edit Payment Plan')}</DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <Field

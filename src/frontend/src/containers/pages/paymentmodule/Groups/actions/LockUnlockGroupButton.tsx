@@ -45,7 +45,9 @@ export function LockUnlockGroupButton({
           );
     },
     onSuccess: async () => {
-      showMessage(isLocked ? t('Group unlocked') : t('Group locked'));
+      showMessage(
+        isLocked ? t('Payment Plan unlocked') : t('Payment Plan locked'),
+      );
       await Promise.all(
         [
           RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
@@ -70,7 +72,7 @@ export function LockUnlockGroupButton({
 
   const handleClick = (): void => {
     confirm({
-      title: isLocked ? t('Unlock Group') : t('Lock Group'),
+      title: isLocked ? t('Unlock Payment Plan') : t('Lock Payment Plan'),
       content: isLocked
         ? t(
             'The group will accept new Payment Plans again and the FSP of its Payment Plans will be unlocked.',

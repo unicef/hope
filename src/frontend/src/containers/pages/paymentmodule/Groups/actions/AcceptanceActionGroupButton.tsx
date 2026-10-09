@@ -54,12 +54,12 @@ const ACTIONS: Record<GroupAcceptanceAction, ActionConfig> = {
     request: (args) =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsApproveCreate(args),
     label: 'Approve',
-    title: 'Approve Payment Plan Group',
-    question: 'Are you sure you want to approve this Payment Plan Group?',
-    successMessage: 'Payment Plan Group has been approved.',
+    title: 'Approve Payment Plan',
+    question: 'Are you sure you want to approve this Payment Plan?',
+    successMessage: 'Payment Plan has been approved.',
     dataCy: 'button-approve',
     lastActionNote:
-      'Note: You are the last approver. Upon proceeding, this Payment Plan Group will be automatically moved to authorization stage.',
+      'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
     isLastAction: (process) =>
       isLast(process?.actions?.approval, process?.approvalNumberRequired),
   },
@@ -69,12 +69,12 @@ const ACTIONS: Record<GroupAcceptanceAction, ActionConfig> = {
         args,
       ),
     label: 'Authorize',
-    title: 'Authorize Payment Plan Group',
-    question: 'Are you sure you want to authorize this Payment Plan Group?',
-    successMessage: 'Payment Plan Group has been authorized.',
+    title: 'Authorize Payment Plan',
+    question: 'Are you sure you want to authorize this Payment Plan?',
+    successMessage: 'Payment Plan has been authorized.',
     dataCy: 'button-authorize',
     lastActionNote:
-      'Note: Upon Proceeding, this Payment Plan Group will be automatically moved to Finance Release stage.',
+      'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Release stage.',
     isLastAction: (process) =>
       isLast(
         process?.actions?.authorization,
@@ -88,12 +88,11 @@ const ACTIONS: Record<GroupAcceptanceAction, ActionConfig> = {
       ),
     label: 'Mark as released',
     title: 'Mark as Released',
-    question:
-      'Are you sure you want to mark this Payment Plan Group as released?',
-    successMessage: 'Payment Plan Group has been marked as released.',
+    question: 'Are you sure you want to mark this Payment Plan as released?',
+    successMessage: 'Payment Plan has been marked as released.',
     dataCy: 'button-mark-as-released',
     lastActionNote:
-      'Note: You are the last reviewer. Upon proceeding, this Payment Plan Group will be automatically moved to accepted status',
+      'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',
     isLastAction: (process) =>
       isLast(
         process?.actions?.financeRelease,
@@ -104,12 +103,12 @@ const ACTIONS: Record<GroupAcceptanceAction, ActionConfig> = {
     request: (args) =>
       RestService.restBusinessAreasProgramsPaymentPlanGroupsRejectCreate(args),
     label: 'Reject',
-    title: 'Reject Payment Plan Group',
-    question: 'Are you sure you want to reject this Payment Plan Group?',
-    successMessage: 'Payment Plan Group has been rejected.',
+    title: 'Reject Payment Plan',
+    question: 'Are you sure you want to reject this Payment Plan?',
+    successMessage: 'Payment Plan has been rejected.',
     dataCy: 'button-reject',
     lastActionNote:
-      'Note: Upon proceeding this Payment Plan Group will be automatically moved to locked status.',
+      'Note: Upon proceeding this Payment Plan will be automatically moved to locked status.',
     isLastAction: () => true,
   },
 };

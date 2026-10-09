@@ -384,7 +384,7 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     );
     await waitFor(() =>
       expect(mockShowMessage).toHaveBeenCalledWith(
-        'Payment Plan Group has been aborted.',
+        'Payment Plan has been aborted.',
       ),
     );
   });
@@ -448,7 +448,7 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     expect(screen.queryByTestId('button-send-back')).toBeNull();
 
     fireEvent.click(screen.getByTestId('button-close'));
-    expect(screen.getByText('Summary of Payment Plan Group')).not.toBeNull();
+    expect(screen.getByText('Summary of Payment Plan')).not.toBeNull();
     const submit = screen.getByTestId('button-close-payment-plan-group');
     expect(submit.hasAttribute('disabled')).toBe(true);
 

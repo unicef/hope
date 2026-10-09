@@ -36,7 +36,7 @@ const PaymentPlanGroupsPage = (): ReactElement => {
 
   return (
     <>
-      <PageHeader title={t('Groups')} />
+      <PageHeader title={t('Payment Plans')} />
       <TableWrapper>
         <PaymentPlanGroupsFilters
           filter={filter}

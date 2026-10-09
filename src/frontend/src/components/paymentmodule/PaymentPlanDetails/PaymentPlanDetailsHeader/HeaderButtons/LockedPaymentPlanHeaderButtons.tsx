@@ -35,7 +35,7 @@ export function LockedPaymentPlanHeaderButtons({
         id: paymentPlan.id,
       }),
     onSuccess: async () => {
-      showMessage(t('Payment Plan has been unlocked.'));
+      showMessage(t('Payment Plan Component has been unlocked.'));
       await queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansRetrieve,

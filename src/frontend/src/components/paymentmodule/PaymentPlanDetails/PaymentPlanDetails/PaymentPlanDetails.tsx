@@ -72,7 +72,7 @@ const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Group')}>
+                <LabelizedField label={t('Payment Plan')}>
                   {paymentPlanGroup ? (
                     <BlackLink
                       to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}`}

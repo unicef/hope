@@ -329,10 +329,10 @@ export const TargetingCriteriaForm = ({
           );
           let deliveryMechanismHint = '';
           if (!paymentPlanGroup) {
-            deliveryMechanismHint = t('Select a Payment Plan Group first.');
+            deliveryMechanismHint = t('Select a Payment Plan first.');
           } else if (!groupFsp) {
             deliveryMechanismHint = t(
-              'The selected Payment Plan Group has no FSP yet. Set the FSP on the group to choose a delivery mechanism.',
+              'The selected Payment Plan has no FSP yet. Set the FSP on the Payment Plan to choose a delivery mechanism.',
             );
           }
           const handleSave = () => {
