@@ -18,13 +18,14 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, ProgramCycle, User
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -55,6 +56,13 @@ def regular_pp(business_area: Any, cycle: ProgramCycle) -> PaymentPlan:
     )
 
 
+@pytest.fixture
+def follow_up_group(cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle, plan_type=PaymentPlan.PlanType.FOLLOW_UP, source_group=regular_pp.payment_plan_group
+    )
+
+
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement_copied(
@@ -62,6 +70,7 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
     user: User,
     regular_pp: PaymentPlan,
     django_capture_on_commit_callbacks: Any,
+    follow_up_group: Any,
 ) -> None:
     failed_payment = PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR)
     failed_payment.entitlement_quantity = Decimal("250.00")
@@ -70,7 +79,7 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
 
-    follow_up_pp = PaymentPlanService(regular_pp).create_follow_up(user, start, end)
+    follow_up_pp = PaymentPlanService(regular_pp).create_follow_up(user, start, end, payment_plan_group=follow_up_group)
     with django_capture_on_commit_callbacks(execute=True):
         prepare_child_payment_plan_async_task(follow_up_pp)
 
@@ -85,7 +94,7 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
 
 
 def test_create_follow_up_arrange_follow_up_origin_act_create_assert_raises(
-    user: User, business_area: Any, cycle: ProgramCycle
+    user: User, business_area: Any, cycle: ProgramCycle, follow_up_group: Any
 ) -> None:
     follow_up_pp = PaymentPlanFactory(
         business_area=business_area,
@@ -96,19 +105,19 @@ def test_create_follow_up_arrange_follow_up_origin_act_create_assert_raises(
     end = follow_up_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(follow_up_pp).create_follow_up(user, start, end)
+        PaymentPlanService(follow_up_pp).create_follow_up(user, start, end, payment_plan_group=follow_up_group)
 
     assert "follow-up of a follow-up" in str(error.value.detail[0])
 
 
 def test_create_follow_up_arrange_no_unsuccessful_payments_act_create_assert_raises(
-    user: User, regular_pp: PaymentPlan
+    user: User, regular_pp: PaymentPlan, follow_up_group: Any
 ) -> None:
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(regular_pp).create_follow_up(user, start, end)
+        PaymentPlanService(regular_pp).create_follow_up(user, start, end, payment_plan_group=follow_up_group)
 
     assert "no unsuccessful payments" in str(error.value.detail[0])

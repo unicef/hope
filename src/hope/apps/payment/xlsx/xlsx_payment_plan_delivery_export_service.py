@@ -414,14 +414,6 @@ class XlsxPaymentPlanDeliveryExportService(XlsxExportBaseService):
         )
 
     @staticmethod
-    def send_delivery_passwords(user: "User", payment_plan: PaymentPlan) -> None:
-        XlsxPaymentPlanDeliveryExportService._send_file_passwords(
-            user,
-            payment_plan.export_file_delivery,
-            f"Payment Plan {payment_plan.unicef_id} Payment List",
-        )
-
-    @staticmethod
     def send_delivery_passwords_for_file(user: "User", file_temp: FileTemp | None, label: str) -> None:
         XlsxPaymentPlanDeliveryExportService._send_file_passwords(user, file_temp, label)
 

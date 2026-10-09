@@ -18,10 +18,10 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
-import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanGroupManagerialList } from '@restgenerated/models/PaginatedPaymentPlanGroupManagerialList';
 
 interface ReleasedSectionProps {
-  releasedData: PaginatedPaymentPlanList;
+  releasedData: PaginatedPaymentPlanGroupManagerialList;
 }
 
 export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
@@ -52,13 +52,14 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/groups/${params.row.id}`}
           newTab={true}
         >
           {params.value}
         </BlackLink>
       ),
     },
+    { field: 'name', headerName: t('Name'), width: 200 },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
       field: 'totalEntitledQuantityUsd',
@@ -76,20 +77,6 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       field: 'lastApprovalProcessBy',
       headerName: t('Released by'),
       width: 200,
-    },
-    {
-      field: 'hasPaymentsReconciliationOverdue',
-      headerName: t('Payments Reconciliation Overdue'),
-      width: 100,
-      renderCell: (params) => (
-        <>
-          {params.value ? (
-            <span style={{ color: 'red', fontWeight: 600 }}>YES</span>
-          ) : (
-            ''
-          )}
-        </>
-      ),
     },
   ];
 

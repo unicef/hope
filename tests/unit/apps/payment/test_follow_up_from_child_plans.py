@@ -10,14 +10,14 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.apps.payment.api.serializers import PaymentPlanDetailSerializer
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, ProgramCycle, User
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -62,7 +62,12 @@ def top_up_with_failed_payment(business_area: Any, cycle: ProgramCycle, purpose:
         plan_type=PaymentPlan.PlanType.TOP_UP,
         status=PaymentPlan.Status.FINISHED,
         source_payment_plan=regular_pp,
-        currency=regular_pp.currency,
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=cycle,
+            plan_type=PaymentPlan.PlanType.TOP_UP,
+            source_group=regular_pp.payment_plan_group,
+            currency=regular_pp.currency,
+        ),
         payment_plan_purposes=[purpose],
     )
     PaymentFactory(parent=top_up, status=Payment.STATUS_ERROR)
@@ -72,17 +77,32 @@ def top_up_with_failed_payment(business_area: Any, cycle: ProgramCycle, purpose:
 def test_can_create_follow_up_arrange_top_up_with_failed_payment_act_get_assert_true(
     top_up_with_failed_payment: PaymentPlan,
 ) -> None:
-    assert PaymentPlanDetailSerializer().get_can_create_follow_up(top_up_with_failed_payment) is True
+    top_up_group = top_up_with_failed_payment.payment_plan_group
+
+    assert top_up_group.plans_qualifying_for_linked_group(PaymentPlan.PlanType.FOLLOW_UP) == [
+        top_up_with_failed_payment
+    ]
+
+
+@pytest.fixture
+def follow_up_group_of_top_up(cycle: ProgramCycle, top_up_with_failed_payment: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_group=top_up_with_failed_payment.payment_plan_group,
+    )
 
 
 def test_create_follow_up_arrange_top_up_with_failed_payment_act_create_assert_child_of_top_up(
-    user: User, top_up_with_failed_payment: PaymentPlan
+    user: User, top_up_with_failed_payment: PaymentPlan, follow_up_group_of_top_up: PaymentPlanGroup
 ) -> None:
     source = top_up_with_failed_payment
     start = source.dispersion_start_date + timedelta(days=1)
     end = source.dispersion_end_date + timedelta(days=1)
 
-    follow_up = PaymentPlanService(source).create_follow_up(user, start, end)
+    follow_up = PaymentPlanService(source).create_follow_up(
+        user, start, end, payment_plan_group=follow_up_group_of_top_up
+    )
 
     assert follow_up.plan_type == PaymentPlan.PlanType.FOLLOW_UP
     assert follow_up.source_payment_plan == source
@@ -97,7 +117,12 @@ def amendment_with_failed_payment(top_up_with_failed_payment: PaymentPlan, purpo
         plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
         status=PaymentPlan.Status.FINISHED,
         source_payment_plan=top_up_with_failed_payment,
-        currency=top_up_with_failed_payment.currency,
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=top_up_with_failed_payment.program_cycle,
+            plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+            source_group=top_up_with_failed_payment.payment_plan_group,
+            currency=top_up_with_failed_payment.currency,
+        ),
         payment_plan_purposes=[purpose],
     )
     PaymentFactory(parent=amendment, status=Payment.STATUS_ERROR)
@@ -107,17 +132,32 @@ def amendment_with_failed_payment(top_up_with_failed_payment: PaymentPlan, purpo
 def test_can_create_follow_up_arrange_amendment_with_failed_payment_act_get_assert_true(
     amendment_with_failed_payment: PaymentPlan,
 ) -> None:
-    assert PaymentPlanDetailSerializer().get_can_create_follow_up(amendment_with_failed_payment) is True
+    amendment_group = amendment_with_failed_payment.payment_plan_group
+
+    assert amendment_group.plans_qualifying_for_linked_group(PaymentPlan.PlanType.FOLLOW_UP) == [
+        amendment_with_failed_payment
+    ]
+
+
+@pytest.fixture
+def follow_up_group_of_amendment(cycle: ProgramCycle, amendment_with_failed_payment: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_group=amendment_with_failed_payment.payment_plan_group,
+    )
 
 
 def test_create_follow_up_arrange_amendment_with_failed_payment_act_create_assert_child_of_amendment(
-    user: User, amendment_with_failed_payment: PaymentPlan
+    user: User, amendment_with_failed_payment: PaymentPlan, follow_up_group_of_amendment: PaymentPlanGroup
 ) -> None:
     source = amendment_with_failed_payment
     start = source.dispersion_start_date + timedelta(days=1)
     end = source.dispersion_end_date + timedelta(days=1)
 
-    follow_up = PaymentPlanService(source).create_follow_up(user, start, end)
+    follow_up = PaymentPlanService(source).create_follow_up(
+        user, start, end, payment_plan_group=follow_up_group_of_amendment
+    )
 
     assert follow_up.plan_type == PaymentPlan.PlanType.FOLLOW_UP
     assert follow_up.source_payment_plan == source

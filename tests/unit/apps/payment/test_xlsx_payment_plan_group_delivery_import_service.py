@@ -40,6 +40,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentVerification,
     PaymentVerificationPlan,
     ProgramCycle,
@@ -90,7 +91,7 @@ def template(fsp, delivery_mechanism):
 
 @pytest.fixture
 def group_two_plans_one_fsp(program_cycle, business_area, fsp, delivery_mechanism, template):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.ACCEPTED)
     plan_one = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -137,18 +138,15 @@ def group_two_plans_one_fsp(program_cycle, business_area, fsp, delivery_mechanis
 
 
 @pytest.fixture
-def group_two_plans_with_shared_export_file(group_two_plans_one_fsp):
+def group_two_plans_with_export_file(group_two_plans_one_fsp):
     ctx = group_two_plans_one_fsp
     file_temp = FileTemp.objects.create(
         object_id=str(ctx["group"].pk),
         content_type=ContentType.objects.get_for_model(ctx["group"]),
     )
     file_temp.file.save("export.xlsx", ContentFile(b"exported-bytes"))
-    PaymentPlan.objects.filter(id__in=[ctx["plan_one"].id, ctx["plan_two"].id]).update(
-        export_tag=1, export_file_delivery=file_temp
-    )
-    ctx["plan_one"].refresh_from_db()
-    ctx["plan_two"].refresh_from_db()
+    ctx["group"].export_file_delivery = file_temp
+    ctx["group"].save(update_fields=["export_file_delivery"])
     return {**ctx, "file_temp": file_temp, "file_name": file_temp.file.name}
 
 
@@ -579,10 +577,8 @@ def test_import_rolls_back_all_plans_when_any_plan_fails(group_two_plans_one_fsp
     assert ctx["payment_two"].delivered_quantity == Decimal("50.00")
 
 
-def test_import_deletes_whole_shared_export_filetemp(
-    group_two_plans_with_shared_export_file, django_capture_on_commit_callbacks
-):
-    ctx = group_two_plans_with_shared_export_file
+def test_import_deletes_group_export_file(group_two_plans_with_export_file, django_capture_on_commit_callbacks):
+    ctx = group_two_plans_with_export_file
     file_temp = ctx["file_temp"]
     storage = file_temp.file.storage
     file_name = ctx["file_name"]
@@ -600,14 +596,16 @@ def test_import_deletes_whole_shared_export_filetemp(
     with django_capture_on_commit_callbacks(execute=True):
         service.import_payment_list()
 
+    ctx["group"].refresh_from_db()
+    assert ctx["group"].export_file_delivery is None
     assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
     assert not storage.exists(file_name)
 
 
-def test_import_does_not_crash_logging_change_after_removing_shared_export_file(
-    group_two_plans_with_shared_export_file,
+def test_import_does_not_crash_logging_change_after_removing_export_file(
+    group_two_plans_with_export_file,
 ):
-    ctx = group_two_plans_with_shared_export_file
+    ctx = group_two_plans_with_export_file
     file = _make_workbook(
         ["payment_id", "delivered_quantity", "currency"],
         [
@@ -618,8 +616,6 @@ def test_import_does_not_crash_logging_change_after_removing_shared_export_file(
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
     service.open_workbook()
 
-    # log_payment_plan_change diffs a pre-remove snapshot whose export_file_delivery FK now
-    # points at a deleted FileTemp: this must not raise FileTemp.DoesNotExist.
     service.import_payment_list()
 
     ctx["payment_one"].refresh_from_db()
@@ -812,40 +808,9 @@ def test_validate_skips_fully_blank_rows(group_two_plans_one_fsp):
 
 
 @pytest.fixture
-def group_with_closed_plan(program_cycle, business_area, fsp, delivery_mechanism, template):
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
-    payment_plan = PaymentPlanFactory(
-        program_cycle=program_cycle,
-        payment_plan_group=group,
-        business_area=business_area,
-        financial_service_provider=fsp,
-        delivery_mechanism=delivery_mechanism,
-        status=PaymentPlan.Status.CLOSED,
-    )
-    payment = PaymentFactory(
-        parent=payment_plan,
-        financial_service_provider=fsp,
-        delivery_type=delivery_mechanism,
-        program=payment_plan.program,
-        entitlement_quantity=Decimal("100.00"),
-        delivered_quantity=Decimal("100.00"),
-        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
-        transaction_reference_id="CLOSED-REFERENCE",
-    )
-    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
-    file_temp = FileTemp.objects.create(
-        object_id=str(group.pk),
-        content_type=ContentType.objects.get_for_model(group),
-    )
-    group.delivery_import_file = file_temp
-    group.save(update_fields=["delivery_import_file"])
-    return {"group": group, "payment_plan": payment_plan, "payment": payment, "file_temp": file_temp}
-
-
-@pytest.fixture
 def group_with_finished_usd_plan(program_cycle, business_area, fsp, delivery_mechanism, template):
     currency = CurrencyFactory(code="USD", name="US Dollar")
-    group = PaymentPlanGroupFactory(cycle=program_cycle)
+    group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.FINISHED)
     payment_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -997,7 +962,7 @@ def test_normal_import_reports_finished_plan_row_as_ineligible(group_with_finish
     )
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file)
 
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(2):
         service.open_workbook()
     with django_assert_num_queries(0):
         service.validate()
@@ -1025,7 +990,7 @@ def test_flagged_payment_is_not_added_to_group_payment_index(group_with_flagged_
     ctx = group_with_flagged_payment
     service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], BytesIO())
 
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(2):
         service._prepare_payment_data()
 
     assert str(ctx["payment_one"].unicef_id) not in service.payment_to_plan
@@ -1141,7 +1106,7 @@ def test_minus_one_sets_error_and_stores_no_quantity(group_two_plans_one_fsp):
     assert payment.delivered_quantity is None
     assert payment.delivered_quantity_usd is None
     assert payment.status == Payment.STATUS_ERROR
-    assert ctx["plan_one"].status == PaymentPlan.Status.FINISHED
+    assert ctx["plan_one"].status == PaymentPlan.Status.ACCEPTED
 
 
 @pytest.mark.enable_activity_log
@@ -1454,7 +1419,7 @@ def test_override_equal_quantity_and_fields_counts_row_as_ignored(
     service.open_workbook()
 
     ContentType.objects.clear_cache()
-    with django_assert_num_queries(9):
+    with django_assert_num_queries(12):
         service.import_payment_list()
 
     assert service.get_result_counts() == {
@@ -1519,229 +1484,6 @@ def test_override_empty_optional_cell_clears_existing_value(group_two_plans_one_
 
     payment.refresh_from_db()
     assert payment.transaction_reference_id is None
-
-
-@pytest.mark.parametrize("override", [False, True])
-@pytest.mark.parametrize("quantity", [None, Decimal("100.00")])
-def test_closed_plan_row_with_empty_or_matching_quantity_is_skipped(
-    group_with_closed_plan, override, quantity, django_assert_num_queries
-):
-    ctx = group_with_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity", "reference_id"],
-        [[str(ctx["payment"].unicef_id), quantity, "MUST-NOT-CHANGE"]],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    service.validate()
-    assert service.errors == []
-    service.import_payment_list()
-
-    assert service.skipped_rows == [
-        {
-            "row": 2,
-            "payment_id": str(ctx["payment"].unicef_id),
-            "reason": (
-                f"Payment belongs to CLOSED Payment Plan {ctx['payment_plan'].unicef_id}; existing data was preserved."
-            ),
-        }
-    ]
-    with django_assert_num_queries(3):
-        ctx["payment"].refresh_from_db()
-        ctx["payment_plan"].refresh_from_db()
-        ctx["file_temp"].refresh_from_db()
-    assert ctx["payment"].delivered_quantity == Decimal("100.00")
-    assert ctx["payment"].status == Payment.STATUS_DISTRIBUTION_SUCCESS
-    assert ctx["payment"].transaction_reference_id == "CLOSED-REFERENCE"
-    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
-    assert ctx["file_temp"].extras == {}
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_closed_plan_row_with_different_quantity_rejects_file(
-    group_with_closed_plan, override, django_assert_num_queries
-):
-    ctx = group_with_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity"],
-        [[str(ctx["payment"].unicef_id), Decimal("50.00")]],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    with pytest.raises(XlsxPaymentPlanGroupDeliveryImportError):
-        service.import_payment_list()
-
-    assert service.skipped_rows == []
-    assert len(service.errors) == 1
-    assert service.errors[0].coordinates == "A2"
-    assert f"CLOSED Payment Plan {ctx['payment_plan'].unicef_id}" in service.errors[0].message
-    with django_assert_num_queries(2):
-        ctx["payment"].refresh_from_db()
-        ctx["payment_plan"].refresh_from_db()
-    assert ctx["payment"].delivered_quantity == Decimal("100.00")
-    assert ctx["payment"].status == Payment.STATUS_DISTRIBUTION_SUCCESS
-    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_closed_plan_row_with_invalid_quantity_rejects_file(
-    group_with_closed_plan, override, django_assert_num_queries
-):
-    ctx = group_with_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity"],
-        [[str(ctx["payment"].unicef_id), "not-a-number"]],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    with pytest.raises(XlsxPaymentPlanGroupDeliveryImportError):
-        service.import_payment_list()
-
-    assert service.skipped_rows == []
-    assert len(service.errors) == 1
-    assert service.errors[0].coordinates == "B2"
-    with django_assert_num_queries(2):
-        ctx["payment"].refresh_from_db()
-        ctx["payment_plan"].refresh_from_db()
-    assert ctx["payment"].delivered_quantity == Decimal("100.00")
-    assert ctx["payment"].status == Payment.STATUS_DISTRIBUTION_SUCCESS
-    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
-
-
-@pytest.fixture
-def group_with_closed_error_payment(group_with_closed_plan):
-    ctx = group_with_closed_plan
-    ctx["payment"].delivered_quantity = None
-    ctx["payment"].delivered_quantity_usd = None
-    ctx["payment"].status = Payment.STATUS_ERROR
-    ctx["payment"].save(update_fields=["delivered_quantity", "delivered_quantity_usd", "status"])
-    return ctx
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_closed_error_payment_treats_minus_one_as_matching_result(
-    group_with_closed_error_payment, override, django_assert_num_queries
-):
-    ctx = group_with_closed_error_payment
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity"],
-        [[str(ctx["payment"].unicef_id), Decimal(-1)]],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    service.import_payment_list()
-
-    assert service.errors == []
-    assert len(service.skipped_rows) == 1
-    with django_assert_num_queries(2):
-        ctx["payment"].refresh_from_db()
-        ctx["payment_plan"].refresh_from_db()
-    assert ctx["payment"].delivered_quantity is None
-    assert ctx["payment"].status == Payment.STATUS_ERROR
-    assert ctx["payment_plan"].status == PaymentPlan.Status.CLOSED
-
-
-@pytest.fixture
-def mixed_group_with_closed_plan(group_two_plans_one_fsp):
-    ctx = group_two_plans_one_fsp
-    ctx["plan_two"].status = PaymentPlan.Status.CLOSED
-    ctx["plan_two"].save(update_fields=["status"])
-    return ctx
-
-
-@pytest.fixture
-def mixed_group_with_reconciled_closed_plan(mixed_group_with_closed_plan):
-    ctx = mixed_group_with_closed_plan
-    ctx["payment_two"].delivered_quantity = Decimal("75.00")
-    ctx["payment_two"].status = Payment.STATUS_DISTRIBUTION_PARTIAL
-    ctx["payment_two"].transaction_reference_id = "CLOSED-REFERENCE"
-    ctx["payment_two"].save(update_fields=["delivered_quantity", "status", "transaction_reference_id"])
-    return ctx
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_mixed_group_rejects_file_containing_closed_plan_row(
-    mixed_group_with_closed_plan, override, django_assert_num_queries
-):
-    ctx = mixed_group_with_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity"],
-        [
-            [str(ctx["payment_one"].unicef_id), Decimal("50.00")],
-            [str(ctx["payment_two"].unicef_id), Decimal("75.00")],
-        ],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    with pytest.raises(XlsxPaymentPlanGroupDeliveryImportError):
-        service.import_payment_list()
-
-    with django_assert_num_queries(2):
-        ctx["payment_one"].refresh_from_db()
-        ctx["payment_two"].refresh_from_db()
-    assert ctx["payment_one"].delivered_quantity is None
-    assert ctx["payment_two"].delivered_quantity is None
-    assert len(service.errors) == 1
-    assert service.errors[0].coordinates == "A3"
-    assert "CLOSED Payment Plan" in service.errors[0].message
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_mixed_group_imports_open_plan_when_closed_plan_row_matches(
-    mixed_group_with_reconciled_closed_plan, override, django_assert_num_queries
-):
-    ctx = mixed_group_with_reconciled_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity", "reference_id"],
-        [
-            [str(ctx["payment_one"].unicef_id), Decimal("50.00"), "OPEN-REFERENCE"],
-            [str(ctx["payment_two"].unicef_id), Decimal("75.00"), "MUST-NOT-CHANGE"],
-        ],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    service.import_payment_list()
-
-    with django_assert_num_queries(3):
-        ctx["payment_one"].refresh_from_db()
-        ctx["payment_two"].refresh_from_db()
-        ctx["plan_two"].refresh_from_db()
-    assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
-    assert ctx["payment_one"].transaction_reference_id == "OPEN-REFERENCE"
-    assert ctx["payment_two"].delivered_quantity == Decimal("75.00")
-    assert ctx["payment_two"].status == Payment.STATUS_DISTRIBUTION_PARTIAL
-    assert ctx["payment_two"].transaction_reference_id == "CLOSED-REFERENCE"
-    assert ctx["plan_two"].status == PaymentPlan.Status.CLOSED
-    assert service.errors == []
-    assert len(service.skipped_rows) == 1
-
-
-@pytest.mark.parametrize("override", [False, True])
-def test_mixed_group_imports_file_omitting_closed_plan_rows(
-    mixed_group_with_closed_plan, override, django_assert_num_queries
-):
-    ctx = mixed_group_with_closed_plan
-    file = _make_workbook(
-        ["payment_id", "delivered_quantity"],
-        [[str(ctx["payment_one"].unicef_id), Decimal("50.00")]],
-    )
-    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=override)
-    service.open_workbook()
-
-    service.import_payment_list()
-
-    with django_assert_num_queries(2):
-        ctx["payment_one"].refresh_from_db()
-        ctx["payment_two"].refresh_from_db()
-    assert ctx["payment_one"].delivered_quantity == Decimal("50.00")
-    assert ctx["payment_two"].delivered_quantity is None
-    assert service.errors == []
 
 
 def test_normal_import_skips_non_pending_payment_without_quantity(group_two_plans_one_fsp):
@@ -1928,6 +1670,8 @@ def test_usd_reconciliation_saves_both_quantity_fields(group_with_finished_usd_p
     payment.save(update_fields=["delivered_quantity", "delivered_quantity_usd", "status"])
     ctx["payment_plan"].status = PaymentPlan.Status.ACCEPTED
     ctx["payment_plan"].save(update_fields=["status"])
+    ctx["group"].status = PaymentPlanGroup.Status.ACCEPTED
+    ctx["group"].save(update_fields=["status"])
     file = _make_workbook(
         ["payment_id", "delivered_quantity"],
         [[str(payment.unicef_id), Decimal("75.00")]],

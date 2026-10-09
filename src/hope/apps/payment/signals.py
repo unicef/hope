@@ -74,6 +74,8 @@ def increment_payment_plan_group_list_cache(sender: Any, instance: PaymentPlanGr
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:{program_code}:payment_plan_groups_list"
         increment_cache_key(version_key)
+        # Also invalidate the managerial list: a saved group may have entered or left the approval stages.
+        increment_cache_key(f"{business_area_slug}:{business_area_version}:management_payment_plans_list")
 
     transaction.on_commit(_increment)
 

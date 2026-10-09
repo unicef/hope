@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -19,7 +20,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, ProgramCycle, User
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -70,6 +71,13 @@ def top_up_pp(business_area: Any, cycle: ProgramCycle, purpose: Any) -> PaymentP
 
 
 @pytest.fixture
+def amendment_group(cycle: ProgramCycle, top_up_pp: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT, source_group=top_up_pp.payment_plan_group
+    )
+
+
+@pytest.fixture
 def mixed_status_payments(top_up_pp: PaymentPlan) -> list[Payment]:
     """One of each: delivered, pending, failed. All three are amendable."""
     return [
@@ -80,6 +88,7 @@ def mixed_status_payments(top_up_pp: PaymentPlan) -> list[Payment]:
 
 def _create_and_run(
     top_up_pp: PaymentPlan,
+    amendment_group: PaymentPlanGroup,
     user: User,
     on_commit: Any,
     *,
@@ -90,7 +99,7 @@ def _create_and_run(
     start = top_up_pp.dispersion_start_date + timedelta(days=1)
     end = top_up_pp.dispersion_end_date + timedelta(days=1)
     amendment = PaymentPlanService(top_up_pp).create_top_up_amendment(
-        user, start, end, fixed_amount=fixed_amount, amounts=amounts
+        user, start, end, payment_plan_group=amendment_group, fixed_amount=fixed_amount, amounts=amounts
     )
     extra_config = (
         {"amounts": {unicef_id: str(amount) for unicef_id, amount in amounts.items()}}
@@ -110,8 +119,11 @@ def test_create_top_up_amendment_arrange_fixed_amount_act_run_task_assert_every_
     top_up_pp: PaymentPlan,
     mixed_status_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    amendment_group: Any,
 ) -> None:
-    amendment = _create_and_run(top_up_pp, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("30.00"))
+    amendment = _create_and_run(
+        top_up_pp, amendment_group, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("30.00")
+    )
 
     assert amendment.payment_items.count() == 3
     assert set(amendment.payment_items.values_list("entitlement_quantity", flat=True)) == {Decimal("30.00")}
@@ -124,11 +136,13 @@ def test_create_top_up_amendment_arrange_per_beneficiary_amounts_act_run_task_as
     top_up_pp: PaymentPlan,
     mixed_status_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    amendment_group: Any,
 ) -> None:
     funded, *rest = mixed_status_payments
 
     amendment = _create_and_run(
         top_up_pp,
+        amendment_group,
         user,
         django_capture_on_commit_callbacks,
         amounts={funded.unicef_id: Decimal("12.50")},
@@ -148,17 +162,21 @@ def test_create_second_top_up_amendment_arrange_beneficiaries_left_over_act_run_
     top_up_pp: PaymentPlan,
     mixed_status_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    amendment_group: Any,
 ) -> None:
     """A second Amendment picks up exactly the beneficiaries the first one left behind."""
     first_funded, *rest = mixed_status_payments
     first = _create_and_run(
         top_up_pp,
+        amendment_group,
         user,
         django_capture_on_commit_callbacks,
         amounts={first_funded.unicef_id: Decimal("12.50")},
     )
 
-    second = _create_and_run(top_up_pp, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("5.00"))
+    second = _create_and_run(
+        top_up_pp, amendment_group, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("5.00")
+    )
 
     assert second.payment_items.count() == 2
     assert set(second.payment_items.values_list("source_payment_id", flat=True)) == {payment.id for payment in rest}

@@ -195,6 +195,39 @@ def test_create_creates_follow_up_instruction_from_multiple_groups(
     assert all(child.plan_type == PaymentPlan.PlanType.FOLLOW_UP for child in child_plans)
 
 
+@pytest.fixture
+def instruction_over_one_group(user, program, cycle, business_area, currency, delivery_mechanism, fsp):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    return FollowUpInstructionService(program).create(
+        user=user,
+        payment_plan_group_ids=[str(group.id)],
+        dispersion_start_date=cycle.start_date + timedelta(days=1),
+        dispersion_end_date=cycle.start_date + timedelta(days=2),
+    )
+
+
+def test_create_takes_fsp_and_currency_from_the_source_group(instruction_over_one_group, fsp, currency):
+    assert instruction_over_one_group.financial_service_provider == fsp
+    assert instruction_over_one_group.currency == currency
+
+
+def test_create_leaves_child_payment_plans_outside_any_group(instruction_over_one_group, fsp, currency):
+    child_plan = instruction_over_one_group.payment_plans.get()
+
+    assert child_plan.payment_plan_group_id is None
+    assert child_plan.financial_service_provider == fsp
+    assert child_plan.currency == currency
+
+
 @pytest.mark.enable_activity_log
 def test_create_logs_activity_for_each_child_payment_plan(
     user,
@@ -436,6 +469,7 @@ def test_create_raises_validation_error_for_mixed_currency(
     fsp,
 ):
     group = PaymentPlanGroupFactory(cycle=cycle)
+    other_group = PaymentPlanGroupFactory(cycle=cycle)
     _create_source_payment_plan(
         cycle=cycle,
         group=group,
@@ -447,7 +481,7 @@ def test_create_raises_validation_error_for_mixed_currency(
     )
     _create_source_payment_plan(
         cycle=cycle,
-        group=group,
+        group=other_group,
         business_area=business_area,
         currency=second_currency,
         delivery_mechanism=delivery_mechanism,
@@ -458,46 +492,47 @@ def test_create_raises_validation_error_for_mixed_currency(
     with pytest.raises(ValidationError, match="must share the same Currency"):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group.id)],
+            payment_plan_group_ids=[str(group.id), str(other_group.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )
 
 
 @pytest.fixture
-def group_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
-    group = PaymentPlanGroupFactory(cycle=cycle)
+def group_ids_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
+    deprecated_group = PaymentPlanGroupFactory(cycle=cycle)
     _create_source_payment_plan(
         cycle=cycle,
-        group=group,
+        group=deprecated_group,
         business_area=business_area,
         currency=deprecated_syp,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
         with_failed_payment=True,
     )
+    active_group = PaymentPlanGroupFactory(cycle=cycle)
     _create_source_payment_plan(
         cycle=cycle,
-        group=group,
+        group=active_group,
         business_area=business_area,
         currency=active_syp,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
         with_failed_payment=True,
     )
-    return group
+    return [str(deprecated_group.id), str(active_group.id)]
 
 
 def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
     user,
     program,
     cycle,
-    group_paid_in_both_syp_denominations,
+    group_ids_paid_in_both_syp_denominations,
 ):
     with pytest.raises(ValidationError, match=re.escape("Found: SYP (SYP01) - Syrian Pound, SYP - Syrian Pound.")):
         FollowUpInstructionService(program).create(
             user=user,
-            payment_plan_group_ids=[str(group_paid_in_both_syp_denominations.id)],
+            payment_plan_group_ids=group_ids_paid_in_both_syp_denominations,
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )

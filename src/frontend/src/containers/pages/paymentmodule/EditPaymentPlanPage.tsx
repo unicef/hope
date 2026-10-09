@@ -95,10 +95,6 @@ const EditPaymentPlanForm = ({
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     programCycle: paymentPlan.programCycle.id,
-    currency: {
-      name: paymentPlan.currency,
-      value: paymentPlan.currency,
-    },
     dispersionStartDate: paymentPlan.dispersionStartDate,
     dispersionEndDate: paymentPlan.dispersionEndDate,
   };
@@ -130,9 +126,6 @@ const EditPaymentPlanForm = ({
     const requestBody = {
       dispersionStartDate: values.dispersionStartDate,
       dispersionEndDate: values.dispersionEndDate,
-      currency: values.currency?.value
-        ? values.currency.value
-        : values.currency,
       // @ts-ignore TODO: add program_cycle to PatchedPaymentPlanCreateUpdate when regenerated
       program_cycle: values.programCycle,
     };
@@ -172,8 +165,8 @@ const EditPaymentPlanForm = ({
             disabled
           />
           <PaymentPlanParameters
-            paymentPlan={paymentPlan}
             values={values}
+            paymentPlanGroupId={paymentPlan.paymentPlanGroup?.id}
             cycles={cycles}
           />
         </Form>

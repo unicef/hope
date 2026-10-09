@@ -22,9 +22,7 @@ from hope.apps.core.utils import (
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
-from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
-    PaymentPlanPDFExportService,
-)
+from hope.apps.payment.pdf.payment_plan_export_pdf_service import PaymentPlanGroupPDFExportService
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     calculate_counts,
@@ -249,7 +247,7 @@ def create_follow_up_instruction_delivery_xlsx_async_task(
 def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.core.celery_tasks import NonRetriableTaskError
     from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
-        EmptyDeliveryExportError,
+        UnexportablePaymentPlansError,
         XlsxPaymentPlanGroupDeliveryExportService,
     )
     from hope.models import PaymentPlanGroup, User
@@ -265,15 +263,10 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         )
         old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
         user = User.objects.get(pk=job.config["user_id"])
-        export_tag = job.config.get("export_tag")
         fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
-        plan_type = job.config.get("plan_type")
         try:
             service = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group,
-                fsp_xlsx_template_id=fsp_xlsx_template_id,
-                export_tag=export_tag,
-                plan_type=plan_type,
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id
             )
             if service.payment_plans and service.payment_generate_token_and_order_numbers:
                 program = payment_plan_group.cycle.program
@@ -291,13 +284,9 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 payment_plan_group.background_action_status = None
                 payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
                 log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config["user_id"])
-            if (
-                service.applied_export_tag is not None
-                and payment_plan_group.cycle.program.business_area.enable_email_notification
-            ):
+            if payment_plan_group.cycle.program.business_area.enable_email_notification:
                 send_email_notification(service, user)
-        except EmptyDeliveryExportError as exc:
-            # Nothing was exportable (every plan skipped).
+        except UnexportablePaymentPlansError as exc:
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
             payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
             payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
@@ -317,20 +306,11 @@ def export_payment_plan_group_delivery_xlsx_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
-    export_tag: int | None = None,
-    plan_type: str | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
     config: dict = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
     if fsp_xlsx_template_id is not None:
         config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
-    if plan_type is not None:
-        config["plan_type"] = plan_type
-    if export_tag is not None:
-        config["export_tag"] = export_tag
-        description = f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}"
-    else:
-        description = f"Export payment plan group delivery xlsx for {payment_plan_group_id}"
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
         job_name=export_payment_plan_group_delivery_xlsx_async_task.__name__,
@@ -338,33 +318,29 @@ def export_payment_plan_group_delivery_xlsx_async_task(
         instance=payment_plan_group,
         config=config,
         group_key="payment",
-        description=description,
+        description=f"Export payment plan group delivery xlsx for {payment_plan_group_id}",
     )
 
 
 def send_payment_plan_group_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlanGroup, User
 
-    group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    group = PaymentPlanGroup.objects.select_related("export_file_delivery").get(id=job.config["payment_plan_group_id"])
     user = User.objects.get(pk=job.config["user_id"])
-    export_tag = job.config["export_tag"]
 
-    plan = group.payment_plans.filter(export_tag=export_tag, export_file_delivery__isnull=False).first()
-    if plan is None:
-        raise Exception(f"No exported batch file found for group {group.id} with export_tag={export_tag}.")
-    label = f"Payment Plan Group {group.unicef_id} Batch {export_tag} Payment List"
-    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, plan.export_file_delivery, label)
+    if group.export_file_delivery is None:
+        raise Exception(f"No exported payment list file found for group {group.id}.")
+    label = f"Payment Plan Group {group.unicef_id} Payment List"
+    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, group.export_file_delivery, label)
 
 
 def send_payment_plan_group_delivery_xlsx_password_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
-    export_tag: int,
 ) -> None:
     config = {
         "payment_plan_group_id": str(payment_plan_group.id),
         "user_id": user_id,
-        "export_tag": export_tag,
     }
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
@@ -373,7 +349,7 @@ def send_payment_plan_group_delivery_xlsx_password_async_task(
         action="hope.apps.payment.celery_tasks.send_payment_plan_group_delivery_xlsx_password_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Send group delivery xlsx password for group {payment_plan_group.id} batch {export_tag}",
+        description=f"Send group delivery xlsx password for group {payment_plan_group.id}",
     )
 
 
@@ -1279,50 +1255,46 @@ def payment_plan_exclude_beneficiaries_async_task(
     )
 
 
-def export_pdf_payment_plan_summary_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import FileTemp, PaymentPlan, User
+def export_pdf_payment_plan_group_summary_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.models import FileTemp, PaymentPlanGroup, User
 
-    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    set_sentry_business_area_tag(payment_plan_group.business_area.name)
     user = User.objects.get(pk=job.config["user_id"])
 
     with transaction.atomic():
-        if payment_plan.export_pdf_file_summary:
-            payment_plan.export_pdf_file_summary.file.delete()
-            payment_plan.export_pdf_file_summary.delete()
-            payment_plan.export_pdf_file_summary = None
+        if payment_plan_group.export_pdf_file_summary:
+            payment_plan_group.export_pdf_file_summary.file.delete()
+            payment_plan_group.export_pdf_file_summary.delete()
+            payment_plan_group.export_pdf_file_summary = None
 
-        service = PaymentPlanPDFExportService(payment_plan)
+        service = PaymentPlanGroupPDFExportService(payment_plan_group)
         pdf, filename = service.generate_pdf_summary()
 
         file_pdf_obj = FileTemp(
-            object_id=payment_plan.pk,
-            content_type=get_content_type_for_model(payment_plan),
+            object_id=payment_plan_group.pk,
+            content_type=get_content_type_for_model(payment_plan_group),
             created_by=user,
         )
         file_pdf_obj.file.save(filename, ContentFile(pdf))
 
-        payment_plan.export_pdf_file_summary = file_pdf_obj
-        payment_plan.save()
+        payment_plan_group.export_pdf_file_summary = file_pdf_obj
+        payment_plan_group.save(update_fields=["export_pdf_file_summary", "updated_at"])
 
-        if payment_plan.business_area.enable_email_notification:
+        if payment_plan_group.business_area.enable_email_notification:
             send_email_notification_on_commit(service, user)
 
 
-def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_id: str) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {
-        "payment_plan_id": payment_plan_id,
-        "user_id": user_id,
-    }
+def export_pdf_payment_plan_group_summary_async_task(payment_plan_group: PaymentPlanGroup, user_id: str) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
     AsyncRetryJob.queue_task(
-        instance=payment_plan,
+        instance=payment_plan_group,
         owner_id=user_id,
-        job_name=export_pdf_payment_plan_summary_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_async_task_action",
-        config=config,
+        job_name=export_pdf_payment_plan_group_summary_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_group_summary_async_task_action",
+        config={"payment_plan_group_id": payment_plan_group_id, "user_id": user_id},
         group_key="payment",
-        description=f"Export payment plan summary pdf for {payment_plan_id}",
+        description=f"Export payment plan group summary pdf for {payment_plan_group_id}",
     )
 
 
@@ -1443,6 +1415,44 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         action_user,
         datetime.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
+
+
+def send_payment_plan_group_notification_emails_async_task_action(job: AsyncJob) -> None:
+    from hope.apps.payment.notifications import PaymentNotification
+    from hope.models import PaymentPlanGroup, User
+
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    action_user = User.objects.get(id=job.config["action_user_id"])
+    set_sentry_business_area_tag(payment_plan_group.business_area.name)
+    PaymentNotification(
+        payment_plan_group,
+        job.config["action"],
+        action_user,
+        datetime.datetime.fromisoformat(job.config["action_date"]),
+    ).send_email_notification()
+
+
+def send_payment_plan_group_notification_emails_async_task(
+    payment_plan_group: PaymentPlanGroup,
+    action: str,
+    action_user_id: str,
+    action_date: str,
+) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    AsyncJob.queue_task(
+        instance=payment_plan_group,
+        owner_id=action_user_id,
+        job_name=send_payment_plan_group_notification_emails_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.send_payment_plan_group_notification_emails_async_task_action",
+        config={
+            "payment_plan_group_id": payment_plan_group_id,
+            "action": action,
+            "action_user_id": action_user_id,
+            "action_date": action_date,
+        },
+        group_key="payment",
+        description=f"Send payment notification emails for group {payment_plan_group_id}",
+    )
 
 
 def send_payment_notification_emails_async_task(

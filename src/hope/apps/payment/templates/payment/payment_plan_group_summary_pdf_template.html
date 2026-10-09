@@ -1,0 +1,205 @@
+{% extends "export/pdf_base.html" %}
+
+{% block table %}
+
+<section id="section-authorization" class="pdf-title">
+  <h2>LETTER OF AUTHORIZATION</h2>
+</section>
+
+<table class="table">
+  <tbody>
+    <tr>
+      <td colspan="4" class="header">PAYMENT PLAN DETAILS</td>
+    </tr>
+    <tr>
+      <td>Payment Plan</td>
+      <td>{{ payment_plan_group.unicef_id }}</td>
+      <td>Programme Name</td>
+      <td>{{ payment_plan_group.program.name }}</td>
+    </tr>
+    <tr>
+      <td>Name</td>
+      <td>{{ payment_plan_group.name }}</td>
+      <td>Programme Cycle</td>
+      <td>{{ payment_plan_group.cycle.title }}</td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>{{ payment_plan_group.get_status_display }}</td>
+      <td>FSP</td>
+      <td>{{ fsp.name }}</td>
+    </tr>
+    <tr>
+      <td>Currency</td>
+      <td>{{ payment_plan_group.currency }}</td>
+      <td>Vision Vendor number</td>
+      <td>{{ fsp.vision_vendor_number }}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="header">SUMMARY</td>
+    </tr>
+    <tr>
+      {% if is_social_worker_program %}
+        <td>Total number of people covered</td>
+        <td>{{ totals.individuals|default_if_none:"0" }}</td>
+      {% else %}
+        <td>Total number of households covered</td>
+        <td>{{ totals.households|default_if_none:"0" }}</td>
+      {% endif %}
+      <td>Total entitlement</td>
+      <td>{{ totals.entitled|default_if_none:"0" }}</td>
+    </tr>
+    <tr>
+      {% if is_social_worker_program %}
+        <td></td>
+        <td></td>
+      {% else %}
+        <td>Total number of individuals covered</td>
+        <td>{{ totals.individuals|default_if_none:"0" }}</td>
+      {% endif %}
+      <td>Total entitlement (USD)</td>
+      <td>{{ totals.entitled_usd|default_if_none:"0" }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td colspan="6" class="header">COMPONENTS</td>
+    </tr>
+    <tr>
+      <td>ID</td>
+      <td>Target Population</td>
+      <td>Delivery mechanism</td>
+      <td>Dispersion dates</td>
+      <td>{% if is_social_worker_program %}People{% else %}Households{% endif %}</td>
+      <td>Entitlement ({{ payment_plan_group.currency }})</td>
+    </tr>
+    {% for payment_plan in payment_plans %}
+    <tr>
+      <td>{{ payment_plan.unicef_id }}</td>
+      <td>{{ payment_plan.name }}</td>
+      <td>{{ payment_plan.delivery_mechanism|default_if_none:"-" }}</td>
+      <td>{{ payment_plan.dispersion_start_date|date:"j N Y" }} - {{ payment_plan.dispersion_end_date|date:"j N Y" }}</td>
+      <td>{% if is_social_worker_program %}{{ payment_plan.total_individuals_count }}{% else %}{{ payment_plan.total_households_count }}{% endif %}</td>
+      <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <td colspan="6" class="header">RECONCILIATION SUMMARY</td>
+    </tr>
+    <tr>
+      {% if is_social_worker_program %}
+        <td>Total People redeemed</td>
+      {% else %}
+        <td>Total Households redeemed</td>
+      {% endif %}
+      <td>{{ reconciliation.reconciled|default_if_none:"0" }}</td>
+      <td>Total amount redeemed ({{ payment_plan_group.currency }})</td>
+      <td>{{ reconciliation.reconciled_local|default_if_none:"0" }}</td>
+      <td>Total amount redeemed (USD)</td>
+      <td>{{ reconciliation.reconciled_usd|default_if_none:"0" }}</td>
+    </tr>
+    <tr>
+      {% if is_social_worker_program %}
+        <td>Total pending People</td>
+      {% else %}
+        <td>Total pending Households</td>
+      {% endif %}
+      <td>{{ reconciliation.pending|default_if_none:"0" }}</td>
+      <td>Total amount unredeemed ({{ payment_plan_group.currency }})</td>
+      <td>{{ reconciliation.failed_local|default_if_none:"0" }}</td>
+      <td>Total amount unredeemed (USD)</td>
+      <td>{{ reconciliation.failed_usd|default_if_none:"0" }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<section id="section-acceptance" class="pdf-title">
+  <h3>PAYMENT PLAN ACCEPTANCE PROCESS</h3>
+</section>
+
+<table>
+  <tbody>
+    <tr>
+      <td colspan="2" class="header">approval</td>
+      <td colspan="2" class="header">authorization</td>
+      <td colspan="2" class="header">release</td>
+    </tr>
+    <tr>
+      <td>Name of Approver</td>
+      <td>{{ approval.created_by.get_full_name }}</td>
+      <td>Name of authorizer</td>
+      <td>{{ authorization.created_by.get_full_name }}</td>
+      <td>Name of Releaser</td>
+      <td>{{ release.created_by.get_full_name }}</td>
+    </tr>
+    <tr>
+      <td>Approval date</td>
+      <td>{{ approval.created_at|date:"j N Y" }}</td>
+      <td>Authorization date</td>
+      <td>{{ authorization.created_at|date:"j N Y" }}</td>
+      <td>Release date</td>
+      <td>{{ release.created_at|date:"j N Y" }}</td>
+    </tr>
+    <tr>
+      <td>Comment</td>
+      <td>{{ approval.comment }}</td>
+      <td>Comment</td>
+      <td>{{ authorization.comment }}</td>
+      <td>Comment</td>
+      <td>{{ release.comment }}</td>
+    </tr>
+    <tr>
+      <td class="height45">Signature</td>
+      <td></td>
+      <td class="height45">Signature</td>
+      <td></td>
+      <td class="height45">Signature</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+
+<table>
+  <tbody>
+    <tr>
+      <td class="header" style="text-transform: none;">This part is reserved for FSP Authorized signatories</td>
+    </tr>
+  </tbody>
+</table>
+
+<table style="float: left; width: 40%; margin-right: 20%;">
+  <tbody>
+    <tr>
+      <td class="height45">FSP Authorized signatory 1</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<table style="float: left; width: 40%;">
+  <tbody>
+    <tr>
+      <td class="height45">FSP Authorized signatory 2</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="clear: both;"></div>
+
+<p></p>
+<p>Link to Payment Plan: <a href="{{ payment_plan_group_link }}">{{ payment_plan_group_link }}</a></p>
+<p></p>
+<p>Generated on {% now "N j, Y" %}</p>
+
+{% endblock table %}

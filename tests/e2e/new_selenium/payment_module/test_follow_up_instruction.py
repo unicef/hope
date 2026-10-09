@@ -16,7 +16,7 @@ pytestmark = pytest.mark.django_db()
 def _select_autocomplete_option(browser: HopeTestBrowser, label: str) -> None:
     # Append with send_keys; browser.type() clears the field first, which on a
     # MUI multi-autocomplete backspaces away an already-selected chip.
-    el = browser.find_element('input[aria-label="Payment Plan Groups"]')
+    el = browser.find_element('input[aria-label="Payment Plans"]')
     el.send_keys(label)
     browser.wait_for_element_visible('li[role="option"]')
     browser.click('li[role="option"]')
@@ -74,7 +74,7 @@ def test_follow_up_instruction_full_flow(
     login.wait_for_text("Follow-up Instructions")
     login.wait_for_element_clickable('[data-cy="button-create-follow-up-instruction"]')
     login.click('[data-cy="button-create-follow-up-instruction"]')
-    login.wait_for_element_visible('input[aria-label="Payment Plan Groups"]')
+    login.wait_for_element_visible('input[aria-label="Payment Plans"]')
     _select_autocomplete_option(login, group_one.unicef_id or group_one.name)
     _select_autocomplete_option(login, group_two.unicef_id or group_two.name)
     _fill_date(login, "dispersionStartDate", "2027-01-01")

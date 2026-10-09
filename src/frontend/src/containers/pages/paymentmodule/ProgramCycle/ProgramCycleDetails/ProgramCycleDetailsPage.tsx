@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
+import { PaymentPlanGroupsTable } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsTable';
 import { ProgramCycleDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsHeader';
 import { ProgramCycleDetailsSection } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsSection';
 import { TableWrapper } from '@core/TableWrapper';
@@ -30,6 +32,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
   const location = useLocation();
+  const { t } = useTranslation();
   const permissions = usePermissions();
 
   const { data, isLoading } = useQuery<ProgramCycleList>({
@@ -68,6 +71,14 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
     <>
       <ProgramCycleDetailsHeader programCycle={data} />
       <ProgramCycleDetailsSection programCycle={data} />
+      {hasPermissions(
+        PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        permissions,
+      ) && (
+        <TableWrapper>
+          <PaymentPlanGroupsTable filter={{ cycle: data.id }} />
+        </TableWrapper>
+      )}
       <TableWrapper>
         <PaymentPlansFilters
           filter={filter}
@@ -84,6 +95,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
         <TableWrapper>
           <PaymentPlansTable
             programCycle={data}
+            title={t('Payment Plan Components')}
             filter={appliedFilter}
             canViewDetails={hasPermissions(
               PERMISSIONS.PM_VIEW_DETAILS,

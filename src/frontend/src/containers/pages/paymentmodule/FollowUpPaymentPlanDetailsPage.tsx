@@ -2,7 +2,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
-import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/PaymentPlanAcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
@@ -89,7 +89,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       />
       <VisionStatusSection paymentPlan={paymentPlan} />
       <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      <AcceptanceProcess paymentPlan={paymentPlan} />
+      <PaymentPlanAcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayFundsCommitment && (
         <FundsCommitmentSection paymentPlan={paymentPlan} />
       )}

@@ -6,9 +6,10 @@ from unit.api_contract._helpers import HopeRecorder
 
 from extras.test_utils.factories.account import RoleAssignmentFactory, RoleFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory
-from extras.test_utils.factories.program import ProgramFactory
+from extras.test_utils.factories.payment import PaymentPlanFactory, PaymentPlanGroupFactory
+from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_group import PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -43,16 +44,28 @@ def role_assignment(request, db, superuser, business_area, role):
 
 
 @frozenfixture()
-def payment_plan(request, db, business_area, program, superuser):
-    cycle = program.cycles.first()
+def payment_plan_group(request, db, program, superuser):
+    return PaymentPlanGroupFactory(
+        cycle=ProgramCycleFactory(program=program),
+        name="Managerial Group",
+        status=PaymentPlanGroup.Status.IN_APPROVAL,
+        created_by=superuser,
+    )
+
+
+@frozenfixture()
+def payment_plan(request, db, business_area, program, superuser, payment_plan_group):
     return PaymentPlanFactory(
         business_area=business_area,
-        program_cycle=cycle,
+        program_cycle=payment_plan_group.cycle,
+        payment_plan_group=payment_plan_group,
         created_by=superuser,
         status=PaymentPlan.Status.IN_APPROVAL,
     )
 
 
-def test_list_payment_plans_managerial(superuser, business_area, program, role_assignment, payment_plan):
+def test_list_payment_plans_managerial(
+    superuser, business_area, program, role_assignment, payment_plan_group, payment_plan
+):
     recorder = HopeRecorder(DATA_DIR, as_user=superuser)
     recorder.assertGET(f"/api/rest/business-areas/{business_area.slug}/payments/payment-plans-managerial/")

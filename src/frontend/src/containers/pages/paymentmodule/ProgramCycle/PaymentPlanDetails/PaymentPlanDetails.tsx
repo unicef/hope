@@ -40,7 +40,6 @@ export const PaymentPlanDetails = ({
     followUps,
     topUps,
     program,
-    exportTag,
     paymentPlanGroup,
   } = paymentPlan;
 
@@ -80,25 +79,12 @@ export const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Group')}>
+                <LabelizedField label={t('Payment Plan')}>
                   {paymentPlanGroup ? (
                     <BlackLink
                       to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}`}
                     >
                       {paymentPlanGroup.name}
-                    </BlackLink>
-                  ) : (
-                    '-'
-                  )}
-                </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Export Batch')}>
-                  {exportTag && paymentPlanGroup?.id ? (
-                    <BlackLink
-                      to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}/batches/${exportTag}`}
-                    >
-                      {exportTag}
                     </BlackLink>
                   ) : (
                     '-'
@@ -173,7 +159,7 @@ export const PaymentPlanDetails = ({
               </Grid>
               {paymentPlan.sourcePaymentPlan && (
                 <Grid size={{ xs: 3 }}>
-                  <LabelizedField label={t('Main Payment Plan')}>
+                  <LabelizedField label={t('Main Payment Plan Component')}>
                     <BlackLink
                       to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.sourcePaymentPlan.id}`}
                     >

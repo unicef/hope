@@ -1,0 +1,46 @@
+import { usePermissions } from '@hooks/usePermissions';
+import { GetApp } from '@mui/icons-material';
+import { Box, Button } from '@mui/material';
+import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import type { PaymentPlanGroupDetail } from '../types';
+
+interface DownloadGroupXlsxButtonProps {
+  group: PaymentPlanGroupDetail | null;
+}
+
+export function DownloadGroupXlsxButton({
+  group,
+}: DownloadGroupXlsxButtonProps): ReactElement | null {
+  const { t } = useTranslation();
+  const permissions = usePermissions();
+
+  if (
+    !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX, permissions)
+  )
+    return null;
+
+  if (!group?.exportFileDelivery) return null;
+  const href = group.exportFileDelivery;
+
+  return (
+    <Box
+      sx={{
+        m: 2,
+      }}
+    >
+      <Button
+        component="a"
+        href={href}
+        download
+        startIcon={<GetApp />}
+        color="primary"
+        variant="outlined"
+        data-cy="button-download-group-xlsx"
+      >
+        {t('Download XLSX')}
+      </Button>
+    </Box>
+  );
+}

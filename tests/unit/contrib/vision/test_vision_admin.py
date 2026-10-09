@@ -299,7 +299,7 @@ def test_manual_fc_header_recovery_assigns_headers_and_releases_plan(
         }
     }
     payment_plan.save(update_fields=["internal_data"])
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     funds_commitment_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     FundsCommitmentItemFactory(
         funds_commitment_header=funds_commitment_header,

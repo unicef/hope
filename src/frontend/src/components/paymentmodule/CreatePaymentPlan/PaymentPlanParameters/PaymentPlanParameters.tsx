@@ -1,7 +1,8 @@
+import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
+import { usePaymentPlanGroup } from '@hooks/usePaymentPlanGroup';
 import { Grid, Typography } from '@mui/material';
 import { CalendarTodayRounded } from '@mui/icons-material';
-import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { tomorrow } from '@utils/utils';
@@ -12,16 +13,23 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 
 interface PaymentPlanParametersProps {
   values;
-  paymentPlan?;
+  // Currency is set on the group; shown here read-only.
+  paymentPlanGroupId?: string;
   cycles?: Array<{ id: string; title: string | null }>;
 }
 
 export const PaymentPlanParameters = ({
   values,
-  paymentPlan,
+  paymentPlanGroupId,
   cycles,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
+  const { data: paymentPlanGroup } = usePaymentPlanGroup(paymentPlanGroupId);
+  let currencyDisplay = '-';
+  if (paymentPlanGroup) {
+    currencyDisplay =
+      paymentPlanGroup.currency ?? t('Not set on the Payment Plan');
+  }
   return (
     <PaperContainer>
       <Title>
@@ -74,12 +82,9 @@ export const PaymentPlanParameters = ({
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <Field
-            name="currency"
-            component={FormikCurrencyAutocomplete}
-            required
-            disabled={paymentPlan?.planType === 'FOLLOW_UP'}
-          />
+          <LabelizedField label={t('Currency')} dataCy="group-currency">
+            {currencyDisplay}
+          </LabelizedField>
         </Grid>
       </Grid>
     </PaperContainer>

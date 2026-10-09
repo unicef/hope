@@ -26,7 +26,6 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.core.utils import to_choice_object
 from hope.apps.household.const import ROLE_ALTERNATE
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
@@ -40,7 +39,7 @@ from hope.apps.payment.api.serializers import (
 )
 from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan, PaymentPlanSplit
+from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -171,7 +170,8 @@ def payment_plan_detail_context(business_area: Any, user: Any) -> dict[str, Any]
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         payment_gateway_id="123id",
     )
-    payment_plan.financial_service_provider = fsp_xlsx
+    payment_plan.payment_plan_group.financial_service_provider = fsp_xlsx
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.delivery_mechanism = DeliveryMechanismFactory()
     payment_plan.save()
     return {
@@ -457,9 +457,6 @@ def test_payment_plan_detail_serializer_all_data(payment_plan_detail_context: di
     assert data["reconciliation_summary"]["number_of_payments"] == 1
     assert data["excluded_households"] == []
     assert data["excluded_individuals"] == []
-    assert data["can_create_follow_up"] is False
-    assert data["can_split"] is True
-    assert data["split_choices"] == to_choice_object(PaymentPlanSplit.SplitType.choices)
     assert data.get("volume_by_delivery_mechanism") is not None
     assert data["status_date"] is not None
     assert data["start_date"] == "2024-01-02"
@@ -594,10 +591,11 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
     payment_plan.status = PaymentPlan.Status.ACCEPTED
-    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.exchange_rate = 1.25
     payment_plan.custom_exchange_rate = True
-    payment_plan.save(update_fields=["status", "currency", "exchange_rate", "custom_exchange_rate"])
+    payment_plan.save(update_fields=["status", "exchange_rate", "custom_exchange_rate"])
     payment_plan.get_unore_exchange_rate = Mock(return_value=2.0)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
@@ -614,11 +612,11 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    payment_plan.save(update_fields=["currency"])
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
-    with django_assert_num_queries(23):
+    with django_assert_num_queries(20):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["id"] == str(payment_plan.id)
@@ -632,10 +630,10 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
 ) -> None:
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.currency = None
-    payment_plan.save(update_fields=["currency"])
+    payment_plan.payment_plan_group.currency = None
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
 
-    with django_assert_num_queries(23):
+    with django_assert_num_queries(20):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["currency"] is None
@@ -652,11 +650,12 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     # get_unore_exchange_rate path through the dummy exchange rate client (no method mock).
     payment_plan = payment_plan_detail_context["payment_plan"]
     user = payment_plan_detail_context["user"]
-    payment_plan.currency = CurrencyFactory(code="BHD", name="Bahraini Dinar")
+    payment_plan.payment_plan_group.currency = CurrencyFactory(code="BHD", name="Bahraini Dinar")
+    payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.custom_exchange_rate = False
-    payment_plan.save(update_fields=["currency", "custom_exchange_rate"])
+    payment_plan.save(update_fields=["custom_exchange_rate"])
 
-    with django_assert_num_queries(23):
+    with django_assert_num_queries(20):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     expected_rate = payment_plan.get_unore_exchange_rate()
@@ -726,8 +725,8 @@ def test_volume_by_delivery_mechanism_serializer_get_volume_fields(volume_by_del
     assert data["volume"] is None
     assert data["volume_usd"] is None
 
-    payment_plan.financial_service_provider = volume_by_delivery_context["fsp"]
-    payment_plan.save(update_fields=["financial_service_provider"])
+    payment_plan.payment_plan_group.financial_service_provider = volume_by_delivery_context["fsp"]
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     data = VolumeByDeliveryMechanismSerializer(instance=payment_plan).data
 
     assert data["volume"] == 222

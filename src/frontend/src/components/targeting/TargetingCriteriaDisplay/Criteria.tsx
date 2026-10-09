@@ -289,7 +289,6 @@ export function Criteria({
   const { selectedProgram } = useProgramContext();
   const [deliveryMechanismToDisplay, setDeliveryMechanismToDisplay] =
     useState('');
-  const [fspToDisplay, setFspToDisplay] = useState('');
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
   >({
@@ -333,30 +332,8 @@ export function Criteria({
         (el) => el.value === criteria.deliveryMechanism,
       )?.name;
 
-    const mappedFsps =
-      availableFspsForDeliveryMechanismData
-        ?.find(
-          (el) =>
-            el.deliveryMechanism.code === deliveryMechanism ||
-            el.deliveryMechanism.code ===
-              mappedDeliveryMechanisms?.find(
-                (elem) => elem.value === criteria.deliveryMechanism,
-              )?.value,
-        )
-        ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
-
-    const fspName =
-      financialServiceProvider?.name ||
-      mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
-
     setDeliveryMechanismToDisplay(deliveryMechanismName);
-    setFspToDisplay(fspName);
-  }, [
-    deliveryMechanism,
-    financialServiceProvider,
-    availableFspsForDeliveryMechanismData,
-    criteria,
-  ]);
+  }, [deliveryMechanism, availableFspsForDeliveryMechanismData, criteria]);
 
   if (!availableFspsForDeliveryMechanismData) return null;
 
@@ -419,7 +396,10 @@ export function Criteria({
             />
           </Grid>
           <Grid size={6}>
-            <LabelizedField label={t('FSP')} value={fspToDisplay} />
+            <LabelizedField
+              label={t('FSP')}
+              value={financialServiceProvider?.name}
+            />
           </Grid>
         </Grid>
       )}

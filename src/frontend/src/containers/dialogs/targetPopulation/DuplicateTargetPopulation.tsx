@@ -31,7 +31,7 @@ const validationSchema = Yup.object().shape({
     value: Yup.string().required('Programme Cycle is required'),
   }),
   paymentPlanGroupId: Yup.object().shape({
-    value: Yup.string().required('Payment Plan Group is required'),
+    value: Yup.string().required('Payment Plan is required'),
   }),
 });
 
@@ -143,7 +143,7 @@ export const DuplicateTargetPopulation = ({
             showApiErrorMessages(
               e,
               showMessage,
-              t('Failed to finish programme.'),
+              t('Failed to duplicate Target Population.'),
             );
           }
         }}

@@ -13,7 +13,7 @@ class NewPaymentPlan(BaseComponents):
     input_start_date_error = 'div[data-cy="input-dispersion-start-date"]'
     input_end_date = 'div[data-cy="input-end-date"]'
     input_end_date_error = 'div[data-cy="input-dispersion-end-date"]'
-    input_currency = 'div[data-cy="input-currency"]'
+    label_group_currency = 'div[data-cy="labelized-field-container-group-currency"]'
     input_dispersion_start_date = 'div[data-cy="input-dispersion-start-date"]'
     input_dispersion_end_date = 'div[data-cy="input-dispersion-end-date"]'
 
@@ -43,8 +43,8 @@ class NewPaymentPlan(BaseComponents):
     def get_input_end_date_error(self) -> WebElement:
         return self.wait_for(self.input_end_date_error)
 
-    def get_input_currency(self) -> WebElement:
-        return self.wait_for(self.input_currency)
+    def get_label_group_currency(self) -> WebElement:
+        return self.wait_for(self.label_group_currency)
 
     def get_input_dispersion_start_date(self) -> WebElement:
         return self.wait_for(self.input_dispersion_start_date).find_elements(By.TAG_NAME, "input")[0]

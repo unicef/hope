@@ -1118,3 +1118,18 @@ def test_notification_without_permission_recipients_notifies_action_user(
     assert len(payment_notification.emails) == 1
     assert payment_notification.emails[0].recipients == [action_user.email]
     assert payment_notification.emails[0].ccs == []
+
+
+def test_group_notification_links_to_the_group_page(business_area: Any, program: Any) -> None:
+    creator = UserFactory()
+    payment_plan_group = PaymentPlanGroupFactory(cycle=program.cycles.first(), created_by=creator)
+
+    payment_notification = PaymentNotification(
+        payment_plan_group, PaymentNotification.ACTION_SEND_FOR_APPROVAL, UserFactory(), datetime.now(UTC)
+    )
+
+    body_variables = payment_notification._prepare_body_variables("Europe/Warsaw")
+    assert body_variables["payment_plan_url"].endswith(f"/payment-module/groups/{payment_plan_group.id}")
+    assert body_variables["payment_plan_id"] == payment_plan_group.unicef_id
+    assert body_variables["payment_plan_creator"] == creator.get_full_name()
+    assert body_variables["program_name"] == program.name

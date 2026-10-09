@@ -26,7 +26,6 @@
         "dispersion_start_date": "2025-01-01",
         "dispersion_end_date": "2025-01-31",
         "plan_type": "REGULAR",
-        "export_tag": null,
         "follow_ups": [],
         "top_ups": [],
         "created_by": " ",
@@ -68,32 +67,6 @@
                 "volume_usd": null
             }
         ],
-        "split_choices": [
-            {
-                "name": "By Admin Area 1",
-                "value": "BY_ADMIN_AREA1"
-            },
-            {
-                "name": "By Admin Area 2",
-                "value": "BY_ADMIN_AREA2"
-            },
-            {
-                "name": "By Admin Area 3",
-                "value": "BY_ADMIN_AREA3"
-            },
-            {
-                "name": "By Collector",
-                "value": "BY_COLLECTOR"
-            },
-            {
-                "name": "By Records",
-                "value": "BY_RECORDS"
-            },
-            {
-                "name": "No Split",
-                "value": "NO_SPLIT"
-            }
-        ],
         "exclusion_reason": null,
         "exclude_household_error": null,
         "bank_reconciliation_success": 0,
@@ -116,12 +89,8 @@
         },
         "excluded_households": [],
         "excluded_individuals": [],
-        "can_create_follow_up": false,
-        "can_create_top_up": false,
-        "can_create_top_up_amendment": false,
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
-        "can_send_to_payment_gateway": false,
         "vision_integration_enabled": false,
         "vision_managed": false,
         "vision": {
@@ -130,12 +99,10 @@
             "fc_numbers": [],
             "error_code": null
         },
-        "can_split": false,
         "can_delete": true,
         "supporting_documents": [],
         "total_households_count_with_valid_phone_no": 0,
         "financial_service_provider": null,
-        "approval_process": [],
         "total_entitled_quantity_usd": null,
         "total_entitled_quantity_revised_usd": null,
         "total_delivered_quantity_usd": null,

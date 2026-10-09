@@ -4,7 +4,7 @@ import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 export const headCells: HeadCell<PaymentPlanList>[] = [
   {
     disablePadding: false,
-    label: 'Payment Plan ID',
+    label: 'Payment Plan Component ID',
     id: 'unicefId',
     numeric: false,
   },
@@ -52,13 +52,7 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Export Batch',
-    id: 'exportTag',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Linked Payment Plans',
+    label: 'Linked Payment Plan Components',
     id: 'followup-id',
     numeric: false,
   },

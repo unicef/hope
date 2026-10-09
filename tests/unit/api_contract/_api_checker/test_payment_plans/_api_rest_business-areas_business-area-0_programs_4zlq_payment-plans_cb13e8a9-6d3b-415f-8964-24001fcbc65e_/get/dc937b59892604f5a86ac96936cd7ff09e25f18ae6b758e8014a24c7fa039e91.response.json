@@ -42,7 +42,6 @@
             "unicef_id": "PPG-4",
             "name": "Default Group"
         },
-        "export_tag": null,
         "version": 1735688653315202,
         "background_action_status": null,
         "background_action_status_display": null,
@@ -116,7 +115,6 @@
         "can_create_top_up_amendment": false,
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
-        "can_send_to_payment_gateway": false,
         "can_split": false,
         "supporting_documents": [],
         "total_households_count_with_valid_phone_no": 0,
@@ -124,7 +122,6 @@
         "can_export_xlsx": false,
         "can_download_xlsx": false,
         "can_send_xlsx_password": false,
-        "approval_process": [],
         "total_entitled_quantity_usd": null,
         "total_entitled_quantity_revised_usd": null,
         "total_delivered_quantity_usd": null,

@@ -186,10 +186,10 @@ export function CreateFollowUpInstructionDialog(): ReactElement {
                             ...params.slotProps,
                             htmlInput: {
                               ...params.slotProps.htmlInput,
-                              'aria-label': 'Payment Plan Groups',
+                              'aria-label': 'Payment Plans',
                             },
                           }}
-                          label={t('Payment Plan Groups')}
+                          label={t('Payment Plans')}
                           required
                           error={
                             touched.paymentPlanGroupIds &&

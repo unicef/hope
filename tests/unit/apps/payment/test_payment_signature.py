@@ -13,7 +13,6 @@ from extras.test_utils.factories import (
     AccountFactory,
     BusinessAreaFactory,
     DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -148,8 +147,6 @@ def test_signature_after_prepare_payment_plan(
     django_capture_on_commit_callbacks: Any,
 ) -> None:
     DeliveryMechanismFactory(code="cash", name="Cash")
-    fsp = FinancialServiceProviderFactory()
-    fsp.allowed_business_areas.add(business_area)
 
     hoh1 = IndividualFactory(household=None, program=program, business_area=business_area)
     hoh2 = IndividualFactory(household=None, program=program, business_area=business_area)
@@ -199,7 +196,6 @@ def test_signature_after_prepare_payment_plan(
         "flag_exclude_if_active_adjudication_ticket": False,
         "flag_exclude_if_on_sanction_list": False,
         "excluded_ids": "TEST_INVALID_ID_01, TEST_INVALID_ID_02",
-        "fsp_id": fsp.id,
         "delivery_mechanism_code": "cash",
         "payment_plan_purposes": [purpose],
     }
