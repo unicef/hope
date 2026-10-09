@@ -811,6 +811,42 @@ def test_filter_by_payment_plan_group(
 
 
 @pytest.fixture
+def target_population_in_group(payment_plan_filter_context: dict[str, Any]) -> PaymentPlan:
+    return PaymentPlanFactory(
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=payment_plan_filter_context["pp"].payment_plan_group,
+        status=PaymentPlan.Status.TP_OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+
+def test_list_leaves_out_target_populations_without_group_filter(
+    payment_plan_filter_context: dict[str, Any], target_population_in_group: PaymentPlan
+) -> None:
+    response = payment_plan_filter_context["client"].get(payment_plan_filter_context["list_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert str(target_population_in_group.id) not in {r["id"] for r in response.json()["results"]}
+
+
+def test_list_filtered_by_group_includes_its_target_populations(
+    payment_plan_filter_context: dict[str, Any], target_population_in_group: PaymentPlan
+) -> None:
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"payment_plan_group": str(payment_plan_filter_context["pp"].payment_plan_group_id)},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert {r["id"] for r in response.json()["results"]} == {
+        str(payment_plan_filter_context["pp"].id),
+        str(payment_plan_filter_context["pp_finished"].id),
+        str(target_population_in_group.id),
+    }
+
+
+@pytest.fixture
 def instruction_child_with_fsp(payment_plan_list_context: dict[str, Any]) -> PaymentPlan:
     program = payment_plan_list_context["program_active"]
     return PaymentPlanFactory(

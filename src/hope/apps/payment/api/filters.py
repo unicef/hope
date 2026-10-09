@@ -77,6 +77,14 @@ class PaymentPlanFilter(FilterSet):
         )
 
 
+class PaymentPlanListFilter(PaymentPlanFilter):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        # A group's page lists every plan in it; elsewhere target populations and drafts stay in Targeting.
+        if not self.form.cleaned_data.get("payment_plan_group"):
+            queryset = queryset.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return super().filter_queryset(queryset)
+
+
 class TargetPopulationFilter(PaymentPlanFilter):
     status = django_filters.ChoiceFilter(
         method="filter_by_status",
