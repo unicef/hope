@@ -1,7 +1,7 @@
 import type { Dispatch, FC, SetStateAction } from 'react';
 import { useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
-import type { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanGroupManagerialList } from '@restgenerated/models/PaginatedPaymentPlanGroupManagerialList';
 import type {
   BulkActionMutation,
   SelectAllHandler,
@@ -34,7 +34,7 @@ interface AuthorizationSectionProps {
   setSelectedAuthorized: Dispatch<SetStateAction<string[]>>;
   handleSelect: SelectHandler;
   handleSelectAll: SelectAllHandler;
-  inAuthorizationData: PaginatedPaymentPlanList;
+  inAuthorizationData: PaginatedPaymentPlanGroupManagerialList;
   bulkAction: BulkActionMutation;
   enableSearch?: boolean;
 }
@@ -93,13 +93,14 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/groups/${params.row.id}`}
           newTab={true}
         >
           {params.value}
         </BlackLink>
       ),
     },
+    { field: 'name', headerName: t('Name'), width: 200 },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
     {
       field: 'lastApprovalProcessDate',
