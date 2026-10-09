@@ -3,7 +3,6 @@ import { usePaymentPlanGroup } from '@hooks/usePaymentPlanGroup';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import AcceptanceProcess from './AcceptanceProcess';
-import { ExportPaymentPlanSummaryPdfButton } from './ExportPaymentPlanSummaryPdfButton';
 
 interface PaymentPlanAcceptanceProcessProps {
   paymentPlan: PaymentPlanDetail;
@@ -23,9 +22,6 @@ export function PaymentPlanAcceptanceProcess({
     <AcceptanceProcess
       approvalProcess={group?.approvalProcess}
       closure={closure}
-      headerAction={
-        <ExportPaymentPlanSummaryPdfButton paymentPlan={paymentPlan} />
-      }
     />
   );
 }

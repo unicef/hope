@@ -52,13 +52,7 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
   },
   {
     disablePadding: false,
-    label: 'Export Batch',
-    id: 'exportTag',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Linked Payment Plans',
+    label: 'Linked Payment Plan Components',
     id: 'followup-id',
     numeric: false,
   },

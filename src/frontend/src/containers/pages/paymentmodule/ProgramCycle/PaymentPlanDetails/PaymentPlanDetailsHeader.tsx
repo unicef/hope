@@ -1,5 +1,3 @@
-import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
-import { FinishedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
@@ -31,7 +29,6 @@ export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
-  const visionManaged = paymentPlan.visionManaged;
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
@@ -76,12 +73,6 @@ export const PaymentPlanDetailsHeader = ({
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-  const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway &&
-    !visionManaged;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -100,23 +91,6 @@ export const PaymentPlanDetailsHeader = ({
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.ACCEPTED:
-      buttons = (
-        <AcceptedPaymentPlanHeaderButtons
-          canSplit={canSplit}
-          paymentPlan={paymentPlan}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.FINISHED:
-      buttons = (
-        <FinishedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
-          canSplit={canSplit}
-          paymentPlan={paymentPlan}
         />
       );
       break;

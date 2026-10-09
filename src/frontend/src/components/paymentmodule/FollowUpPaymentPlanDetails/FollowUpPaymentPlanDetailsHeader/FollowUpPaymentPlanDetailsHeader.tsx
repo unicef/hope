@@ -9,8 +9,6 @@ import {
 import type { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
-import { AcceptedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
-import { FinishedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import type { ReactElement } from 'react';
@@ -32,7 +30,6 @@ export function FollowUpPaymentPlanDetailsHeader({
   permissions,
   paymentPlan,
 }: FollowUpPaymentPlanDetailsHeaderProps): ReactElement {
-  const visionManaged = paymentPlan.visionManaged;
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -46,14 +43,6 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway &&
-    !visionManaged;
-
-  const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -72,23 +61,6 @@ export function FollowUpPaymentPlanDetailsHeader({
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
-        />
-      );
-      break;
-    case 'ACCEPTED':
-      buttons = (
-        <AcceptedPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canSplit={canSplit}
-        />
-      );
-      break;
-    case 'FINISHED':
-      buttons = (
-        <FinishedPaymentPlanHeaderButtons
-          canSendToPaymentGateway={canSendToPaymentGateway}
-          paymentPlan={paymentPlan}
-          canSplit={canSplit}
         />
       );
       break;
