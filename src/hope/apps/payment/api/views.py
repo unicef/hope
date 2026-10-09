@@ -8,7 +8,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django_filters import rest_framework as filters
@@ -671,9 +671,8 @@ class PaymentVerificationRecordViewSet(
         )
 
     def get_queryset(self) -> QuerySet:
-        return with_payment_related_data(
-            self.payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
-        )
+        has_verification = Exists(PaymentVerification.objects.filter(payment=OuterRef("pk")))
+        return with_payment_related_data(self.payment_plan.eligible_payments.filter(has_verification))
 
     @extend_schema(
         responses={
