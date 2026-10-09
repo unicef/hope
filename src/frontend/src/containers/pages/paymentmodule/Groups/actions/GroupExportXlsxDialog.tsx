@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -142,6 +143,11 @@ export function GroupExportXlsxDialog({
           {/* keep top padding despite MUI's `DialogTitle + DialogContent { padding-top: 0 }`,
               otherwise the first field's shrunk label is clipped */}
           <DialogContent sx={{ pt: '12px !important' }}>
+            <Typography variant="body2" sx={{ mb: showTemplateChoice ? 2 : 0 }}>
+              {t(
+                'One payment list file is generated for every payment plan in this group. Exporting again replaces the current file.',
+              )}
+            </Typography>
             {showTemplateChoice && (
               <Autocomplete
                 options={templateOptions}

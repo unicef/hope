@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '@core/LoadingButton';
-import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -16,13 +15,11 @@ import { PERMISSIONS } from 'src/config/permissions';
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
-  permissions: string[];
 }
 
 export function LockedPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
-  permissions,
 }: LockedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -82,7 +79,6 @@ export function LockedPaymentPlanHeaderButtons({
           </LoadingButton>
         </Box>
       )}
-      <LockFspPaymentPlan paymentPlan={paymentPlan} permissions={permissions} />
     </Box>
   );
 }

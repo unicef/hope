@@ -775,8 +775,6 @@ class PaymentPlanViewSet(
         "destroy",
         "lock",
         "unlock",
-        "lock_fsp",
-        "unlock_fsp",
         "fsp_extra_fields_import_xlsx",
     }
     program_model_field = "program_cycle__program"
@@ -816,8 +814,6 @@ class PaymentPlanViewSet(
         "apply_engine_formula": [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
         "lock": [Permissions.PM_LOCK_AND_UNLOCK],
         "unlock": [Permissions.PM_LOCK_AND_UNLOCK],
-        "lock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
-        "unlock_fsp": [Permissions.PM_LOCK_AND_UNLOCK_FSP],
         "entitlement_export_xlsx": [Permissions.PM_VIEW_LIST],
         "entitlement_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS],
         "fsp_extra_fields_template": [Permissions.PM_VIEW_LIST],
@@ -960,50 +956,6 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan unlocked"})
-
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="lock-fsp",
-    )
-    @transaction.atomic
-    def lock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.LOCK_FSP}, user=request.user
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP locked"})
-
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="unlock-fsp",
-    )
-    @transaction.atomic
-    def unlock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.UNLOCK_FSP}, user=request.user
-        )
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=payment_plan,
-        )
-        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP unlocked"})
 
     @extend_schema(
         request=ApplyEngineFormulaSerializer,

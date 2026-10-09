@@ -19,7 +19,6 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
-    DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -102,8 +101,6 @@ def payment_plan_actions_context(
         "url_unlock": reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs),
         "url_exclude_hh": reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs),
         "url_apply_steficon": reverse("api:payments:payment-plans-apply-engine-formula", kwargs=url_kwargs),
-        "url_lock_fsp": reverse("api:payments:payment-plans-lock-fsp", kwargs=url_kwargs),
-        "url_unlock_fsp": reverse("api:payments:payment-plans-unlock-fsp", kwargs=url_kwargs),
         "url_export_entitlement_xlsx": reverse("api:payments:payment-plans-entitlement-export-xlsx", kwargs=url_kwargs),
         "url_import_entitlement_xlsx": reverse("api:payments:payment-plans-entitlement-import-xlsx", kwargs=url_kwargs),
         "url_import_entitlement_flat_amount": reverse(
@@ -883,66 +880,6 @@ def test_apply_engine_formula_pp_validation_errors(
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "engine_formula_rule_id" in response_3.data
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_pp_fsp_lock(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
-    payment_plan_actions_context["pp"].payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
-    payment_plan_actions_context["pp"].payment_plan_group.save(update_fields=["financial_service_provider"])
-    payment_plan_actions_context["pp"].delivery_mechanism = DeliveryMechanismFactory()
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"], entitlement_quantity=999)
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_lock_fsp"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan FSP locked"}
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_pp_fsp_unlock(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED_FSP
-    payment_plan_actions_context["pp"].save()
-
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_unlock_fsp"])
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan FSP unlocked"}
 
 
 @pytest.mark.parametrize(
