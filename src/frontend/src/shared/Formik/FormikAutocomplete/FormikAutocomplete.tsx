@@ -7,6 +7,7 @@ export function FormikAutocomplete({
   choices,
   label,
   required = false,
+  dataCy = undefined,
 }): ReactElement {
   const realSelectedValue = choices.find((item) => item.value === field.value);
 
@@ -31,6 +32,7 @@ export function FormikAutocomplete({
     >
       <Autocomplete
         id="combo-box-demo"
+        data-cy={dataCy}
         size="small"
         options={choices}
         onChange={handleChange}
