@@ -26,6 +26,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -218,13 +219,17 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
+    group = PaymentPlanGroupFactory(
+        cycle=cycle,
+        currency=Currency.objects.get(code="USD"),
+        financial_service_provider=fsp,
+    )
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         defaults={
             "business_area": program.business_area,
             "program_cycle": cycle,
-            "payment_plan_group": cycle.payment_plan_groups.first(),
-            "currency": Currency.objects.get(code="USD"),
+            "payment_plan_group": group,
             "dispersion_start_date": timezone.now() + relativedelta(days=10),
             "dispersion_end_date": timezone.now() + relativedelta(days=15),
             "status_date": timezone.now(),
@@ -233,7 +238,6 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
             "total_delivered_quantity": 999,
             "total_entitled_quantity": 2999,
             "plan_type": PaymentPlan.PlanType.REGULAR,
-            "financial_service_provider": fsp,
             "delivery_mechanism": dm_cash,
         },
     )
@@ -502,7 +506,7 @@ class TestSmokePaymentModule:
         page_new_payment_plan.assert_page_header_title("New Payment Plan")
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
-        assert "Currency" in page_new_payment_plan.get_label_group_currency().text
+        assert "CURRENCY" in page_new_payment_plan.get_label_group_currency().text.upper()
         # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
         # strip the thin space so the bare-asterisk assertion still matches.
         assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(

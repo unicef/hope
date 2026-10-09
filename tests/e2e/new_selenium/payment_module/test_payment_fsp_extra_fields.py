@@ -185,14 +185,14 @@ def test_payment_fsp_extra_fields_full_xlsx_flow(
     _confirm_workflow_action(login, "button-mark-as-released")
     login.wait_for_text("ACCEPTED", '[data-cy="group-status"]')
 
-    export_filename = f"payment_plan_group_{group.unicef_id}_payment_list_batch_1.xlsx"
+    export_filename = f"payment_plan_group_{group.unicef_id}_payment_list.xlsx"
     login.delete_downloaded_file_if_present(export_filename, browser=True)
     login.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group"]').click()
     login.wait_for_element_visible('[data-cy="dialog-delivery-export-xlsx-group"]')
     login.wait_for_element_clickable('[data-cy="button-delivery-export-xlsx-group-submit"]').click()
     login.wait_for_text("Export started")
     login.open(group_path)
-    login.wait_for_element_clickable('[data-cy="batch-download-link-1"]').click()
+    login.wait_for_element_clickable('[data-cy="button-download-group-xlsx"]').click()
 
     login.assert_downloaded_file(export_filename, browser=True)
     export_path = login.get_path_of_downloaded_file(export_filename, browser=True)

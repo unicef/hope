@@ -47,7 +47,7 @@ def _amount_file_funding_first_beneficiary(source_plan: PaymentPlan) -> str:
     this Top-Up", and the two are worth distinguishing because only the zero is something the
     operator actually typed.
     """
-    workbook = TopUpAmountTemplateService(source_plan).generate_workbook()
+    workbook = TopUpAmountTemplateService([source_plan]).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
     amount_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1

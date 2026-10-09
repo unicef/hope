@@ -72,6 +72,7 @@ def test_create_tp_with_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_CREATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
@@ -160,6 +161,7 @@ def test_edit_tp_shows_group_and_purpose(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_CREATE,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
@@ -245,6 +247,7 @@ def test_edit_latest_tp_purposes_are_editable(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
