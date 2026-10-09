@@ -3,7 +3,6 @@ import EditFollowUpPaymentPlanPage from '@containers/pages/paymentmodule/EditFol
 import EditPaymentPlanPage from '@containers/pages/paymentmodule/EditPaymentPlanPage';
 import FollowUpPaymentPlanDetailsPage from '@containers/pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import PaymentDetailsPage from '@containers/pages/paymentmodule/PaymentDetailsPage';
-import PaymentModulePage from '@containers/pages/paymentmodule/PaymentModulePage';
 import CreatePaymentPlanPage from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
 import PaymentPlanDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
 import ProgramCycleDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsPage';
@@ -21,7 +20,7 @@ export const PaymentModuleRoutes = (): ReactElement => {
       children: [
         {
           path: '',
-          element: <PaymentModulePage />,
+          element: <Navigate to="../groups" replace />,
         },
         {
           path: ':paymentPlanId',

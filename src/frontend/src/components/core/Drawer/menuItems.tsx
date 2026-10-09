@@ -176,23 +176,17 @@ export const menuItems: MenuItem[] = [
       },
       {
         name: 'Payment Plans',
-        href: '/payment-module/payment-plans',
-        selectedRegexp: /^\/payment-module\/payment-plans.*$/,
+        href: '/payment-module/groups',
+        selectedRegexp:
+          /^\/payment-module\/(groups|payment-plans|followup-payment-plans|top-up-payment-plans).*$/,
         icon: <PaymentIcon />,
-        permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+        permissions: [
+          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+          PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        ],
         permissionModule: PERMISSION_MODULES.PM,
         scopes: [SCOPE_PROGRAM],
-        dataPerm: PERMISSIONS.PM_VIEW_LIST,
-      },
-      {
-        name: 'Groups',
-        href: '/payment-module/groups',
-        selectedRegexp: /^\/payment-module\/groups.*$/,
-        icon: <PaymentIcon />,
-        permissions: [PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL],
-        permissionModule: 'PM',
-        scopes: [SCOPE_PROGRAM],
-        dataPerm: PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        dataPerm: PERMISSIONS.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
       },
       {
         name: 'Follow-up Instructions',
