@@ -473,29 +473,15 @@ class TestSmokePaymentModule:
         page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.wait_for_page_ready()
-        page_payment_module.assert_page_header_title("Payment Module")
-        assert "Status" in page_payment_module.get_select_filter().text
-        assert "" in page_payment_module.get_filters_total_entitled_quantity_from().text
-        assert "" in page_payment_module.get_filters_total_entitled_quantity_to().text
-        assert "" in page_payment_module.get_date_picker_filter_from().text
-        assert "" in page_payment_module.get_date_picker_filter_to().text
-        assert "CLEAR" in page_payment_module.get_button_filters_clear().text
-        assert "APPLY" in page_payment_module.get_button_filters_apply().text
+        page_payment_module.assert_page_header_title("Payment Plans")
         assert "Payment Plans" in page_payment_module.get_table_title().text
-        assert "Payment Plan ID" in page_payment_module.get_table_label()[0].text
-        assert "Status" in page_payment_module.get_table_label()[1].text
-        assert "Target Population" in page_payment_module.get_table_label()[2].text
-        assert "Num. of Items Groups" in page_payment_module.get_table_label()[3].text
-        assert "Currency" in page_payment_module.get_table_label()[4].text
-        assert "Total Entitled Quantity" in page_payment_module.get_table_label()[5].text
-        assert "Total Delivered Quantity" in page_payment_module.get_table_label()[6].text
-        assert "Total Undelivered Quantity" in page_payment_module.get_table_label()[7].text
-        assert "Dispersion Start Date" in page_payment_module.get_table_label()[8].text
-        assert "Dispersion End Date" in page_payment_module.get_table_label()[9].text
-        assert "Export Batch" in page_payment_module.get_table_label()[10].text
-        assert "Linked Payment Plans" in page_payment_module.get_table_label()[11].text
-        assert "ACCEPTED" in page_payment_module.get_status_container().text
-        assert "Rows per page: 5 1–1 of 1" in page_payment_module.get_table_pagination().text.replace("\n", " ")
+        assert "Cycle" in page_payment_module.get_table_label()[0].text
+        assert "Name" in page_payment_module.get_table_label()[1].text
+        assert "Payment Plan ID" in page_payment_module.get_table_label()[2].text
+        assert "Status" in page_payment_module.get_table_label()[3].text
+        page_payment_module.wait_for_text(
+            create_payment_plan.payment_plan_group.unicef_id, page_payment_module.main_content
+        )
 
     def test_smoke_new_payment_plan(
         self,
@@ -532,10 +518,7 @@ class TestSmokePaymentModule:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan)
         assert "ACCEPTED" in page_payment_module_details.get_status_container().text
         assert "EXPORT XLSX" in page_payment_module_details.get_button_export_xlsx().text
         assert "USD" in page_payment_module_details.get_label_currency().text
@@ -634,19 +617,19 @@ class TestSmokePaymentModule:
         page_payment_module_details.click('button[data-cy="button-confirm"]')
         page_payment_module_details.wait_for_text("LOCKED", group_status)
         page_payment_module_details.click_button_send_for_approval()
-        page_payment_module_details.check_alert("Payment Plan Group has been sent for approval.")
+        page_payment_module_details.check_alert("Payment Plan has been sent for approval.")
         page_payment_module_details.wait_for_text("IN APPROVAL", group_status)
         page_payment_module_details.click_button_approve()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan Group has been approved.")
+        page_payment_module_details.check_alert("Payment Plan has been approved.")
         page_payment_module_details.wait_for_text("IN AUTHORIZATION", group_status)
         page_payment_module_details.click_button_authorize()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan Group has been authorized")
+        page_payment_module_details.check_alert("Payment Plan has been authorized")
         page_payment_module_details.wait_for_text("IN REVIEW", group_status)
         page_payment_module_details.click_button_mark_as_released()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan Group has been marked as released.")
+        page_payment_module_details.check_alert("Payment Plan has been marked as released.")
         page_payment_module_details.wait_for_text("ACCEPTED", group_status)
 
 
@@ -674,10 +657,7 @@ class TestPaymentPlans:
         page_program_cycle: ProgramCyclePage,
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan)
         with pytest.raises(ElementClickInterceptedException):
             page_payment_module_details.get_button_create_exclusions().click()
 
@@ -687,10 +667,7 @@ class TestPaymentPlans:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan_lock_social_worker)
         page_payment_module_details.get_button_create_exclusions()
         page_payment_module_details.get_label_total_number_of_people()
         assert "5" in page_payment_module_details.get_label_female_children().text
@@ -724,10 +701,7 @@ class TestPaymentPlans:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan_lock)
         page_payment_module_details.get_button_create_exclusions()
         page_payment_module_details.get_label_targeted_individuals()
         assert "5" in page_payment_module_details.get_label_female_children().text
@@ -766,22 +740,13 @@ class TestPaymentPlans:
         page_new_payment_plan: NewPaymentPlan,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_rows()
-        for i in range(len(page_payment_module.get_rows())):
-            if "OPEN" in page_payment_module.get_row(i).text:
-                payment_plan = page_payment_module.get_row(i).text
-                page_payment_module.get_row(i).click()
-                break
-        else:
-            raise AssertionError("No payment plan has Open status")
+        follow_up = PaymentPlan.objects.get(source_payment_plan=create_payment_plan_open)
+        page_payment_module.open_payment_plan(create_payment_plan_open)
         page_payment_module_details.get_delete_button().click()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module.wait_for_text("Payment Plans", page_payment_module.table_title)
-        page_payment_module.get_row(0)
-        assert payment_plan not in page_payment_module.get_row(0).text
-        assert "LOCKED" in page_payment_module.get_row(0).text
+        # Deleting a component goes back to its Payment Plan (group), which still lists the locked follow-up.
+        page_payment_module.wait_for_text(follow_up.unicef_id, page_payment_module.main_content)
+        assert create_payment_plan_open.unicef_id not in page_payment_module.get_main_content().text
 
     def test_payment_plan_creation_error(
         self,
@@ -818,10 +783,7 @@ class TestPaymentPlans:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan_lock)
         page_payment_module_details.get_upload_file_button().click()
         page_payment_module_details.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
         page_payment_module_details.get_title_input().find_element(By.TAG_NAME, "input").send_keys("title input")

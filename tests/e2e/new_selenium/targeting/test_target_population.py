@@ -52,7 +52,7 @@ def test_tp_details_shows_group_and_purpose(
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/{targeting_tp.id}")
         browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
-        browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
+        browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
 
@@ -104,7 +104,7 @@ def test_create_tp_with_group_and_purpose(
         browser.wait_for_element_clickable('[data-cy="button-target-population-create"]')
         browser.click('[data-cy="button-target-population-create"]')
         browser.wait_for_text("E2E Create TP", 'h5[data-cy="page-header-title"]', timeout=20)
-        browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
+        browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
 
@@ -185,7 +185,7 @@ def test_edit_tp_shows_group_and_purpose(
 
         # Wait for edit form to disappear (navigate to detail page on success)
         browser.wait_for_element_absent('[data-cy="edit-target-population-form"]', timeout=20)
-        browser.assert_text("Edited Group", 'div[data-cy="label-Payment Plan Group"]')
+        browser.assert_text("Edited Group", 'div[data-cy="label-Payment Plan"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
 
@@ -228,7 +228,7 @@ def test_duplicate_tp_with_group_and_purpose(
         browser.wait_for_element_clickable('[role="dialog"] [data-cy="button-target-population-duplicate"]').click()
 
         browser.wait_for_text("E2E Duplicate TP", 'h5[data-cy="page-header-title"]')
-        browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan Group"]')
+        browser.assert_text(GROUP_NAME, 'div[data-cy="label-Payment Plan"]')
         browser.assert_text(PURPOSE_NAME, 'div[data-cy="label-Purposes"]')
 
 

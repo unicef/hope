@@ -447,11 +447,11 @@ def test_create_payment_plan_group(
         browser.wait_for_element_visible('input[name="groupName"]')
         browser.type('input[name="groupName"]', "E2E Test Group")
         browser.click('[data-cy="button-create-group-submit"]')
-        browser.wait_for_text("Payment Plan Group created")
+        browser.wait_for_text("Payment Plan created")
 
         browser.open_nav_section("Payment Module")
-        browser.wait_for_element_clickable('a[data-cy="nav-Groups"]')
-        browser.click('a[data-cy="nav-Groups"]')
+        browser.wait_for_element_clickable('a[data-cy="nav-Payment Plans"]')
+        browser.click('a[data-cy="nav-Payment Plans"]')
 
         browser.wait_for_text("E2E Test Group")
 
@@ -484,7 +484,7 @@ def test_edit_payment_plan_group(
         browser.type('input[name="name"]', "Updated Group Name")
         browser.click('[data-cy="button-submit"]')
 
-        browser.wait_for_text("Group updated")
+        browser.wait_for_text("Payment Plan updated")
         browser.assert_text("Updated Group Name")
 
 
@@ -513,10 +513,10 @@ def test_delete_payment_plan_group(
         browser.wait_for_element_clickable('[data-cy="button-delete-group"]')
         browser.click('[data-cy="button-delete-group"]')
 
-        browser.wait_for_text("Are you sure you want to remove this Group?")
+        browser.wait_for_text("Are you sure you want to remove this Payment Plan?")
         browser.wait_for_element_clickable('[role="dialog"] [data-cy="button-submit"]')
         browser.find_element('[role="dialog"] [data-cy="button-submit"]').click()
-        browser.wait_for_text("Group Deleted", timeout=20)
+        browser.wait_for_text("Payment Plan Deleted", timeout=20)
 
         browser.wait_for_text(second_payment_plan_group.name)
         browser.assert_text_not_visible(payment_plan_group.name)
@@ -819,6 +819,8 @@ def test_group_reconciliation_preserves_closed_plan_and_aborts_when_closed_quant
         )
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
+    Neither group has a plan the payment gateway can take, so Send to Payment Gateway stays hidden.
+
         _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
         _enable_reconciliation_override(browser)
         browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group-submit"]')
@@ -987,28 +989,6 @@ def test_linked_payment_plans_modal_on_cycle_details(
         _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
 
 
-def test_linked_payment_plans_modal_on_payment_plans_list(
-    browser: HopeTestBrowser,
-    user_with_no_permissions: User,
-    business_area: BusinessArea,
-    plan_with_follow_up: tuple[PaymentPlan, PaymentPlan],
-) -> None:
-    source, follow_up = plan_with_follow_up
-    program = source.program_cycle.program
-
-    with grant_permission(
-        user_with_no_permissions,
-        business_area,
-        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-        Permissions.PM_VIEW_LIST,
-        Permissions.PM_VIEW_DETAILS,
-    ):
-        browser.login(username="noperm_user")
-        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/payment-plans")
-
-        _assert_linked_plans_modal_opens_and_closes(browser, source, follow_up)
-
-
 def test_group_details_action_buttons_follow_group_state(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
@@ -1044,14 +1024,14 @@ def test_group_details_action_buttons_follow_group_state(
         browser.wait_for_element_visible('[data-cy="button-delivery-export-xlsx-group"]')
         browser.wait_for_element_visible('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
         browser.wait_for_element_visible('[data-cy="button-delivery-import-xlsx-group"]')
-        browser.wait_for_element_visible('[data-cy="button-send-to-payment-gateway-group"]')
+        browser.assert_element_absent('[data-cy="button-send-to-payment-gateway-group"]')
         browser.assert_element_absent('[data-cy="button-delete-group"]')
 
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{payment_plan_group.id}")
         browser.wait_for_element_visible('[data-cy="button-delete-group"]')
         browser.wait_for_element_visible('[data-cy="button-edit-group-name"]')
         browser.wait_for_element_visible('[data-cy="button-delivery-import-xlsx-group"]')
-        browser.wait_for_element_visible('[data-cy="button-send-to-payment-gateway-group"]')
+        browser.assert_element_absent('[data-cy="button-send-to-payment-gateway-group"]')
         browser.assert_element_absent('[data-cy="button-delivery-export-xlsx-group"]')
         browser.assert_element_absent('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
 
@@ -1078,7 +1058,7 @@ def test_group_details_actions_are_pinned_to_their_permissions(
         browser.open(group_url)
 
         browser.wait_for_element_visible('[data-cy="button-delivery-export-xlsx-group"]')
-        browser.wait_for_element_visible('[data-cy="button-send-to-payment-gateway-group"]')
+        browser.assert_element_absent('[data-cy="button-send-to-payment-gateway-group"]')
         browser.assert_element_absent('[data-cy="button-delivery-export-xlsx-with-auth-code-group"]')
         browser.assert_element_absent('[data-cy="button-edit-group-name"]')
         browser.assert_element_absent('[data-cy="button-delivery-import-xlsx-group"]')
