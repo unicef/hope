@@ -24,7 +24,7 @@ from hope.apps.registration_data.celery_tasks import (
     handle_rdi_exception,
     mark_merge_error_if_still_owned,
 )
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.biometric_deduplication import DeduplicationEngineService
 from hope.models import (
     AsyncRetryJob,
     BiometricDedupeSimilarityPair,
@@ -659,7 +659,7 @@ def test_parse_findings_happy_path() -> None:
         },
     ]
 
-    pairs = BiometricDeduplicationService().parse_findings(findings)
+    pairs = DeduplicationEngineService().parse_findings(findings)
 
     assert pairs == [
         SimilarityPair(score=0.95, status_code="200", first="CW-001", second="CW-002"),
@@ -683,7 +683,7 @@ def test_parse_findings_drops_non_persisted_status_code() -> None:
         },
     ]
 
-    assert BiometricDeduplicationService().parse_findings(findings) == []
+    assert DeduplicationEngineService().parse_findings(findings) == []
 
 
 def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
@@ -696,7 +696,7 @@ def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
         },
     ]
 
-    assert BiometricDeduplicationService().parse_findings(findings) == []
+    assert DeduplicationEngineService().parse_findings(findings) == []
 
 
 def test_parse_findings_normalises_empty_string_to_none() -> None:
@@ -709,13 +709,13 @@ def test_parse_findings_normalises_empty_string_to_none() -> None:
         },
     ]
 
-    pairs = BiometricDeduplicationService().parse_findings(findings)
+    pairs = DeduplicationEngineService().parse_findings(findings)
 
     assert pairs == [SimilarityPair(score=0.5, status_code="429", first="CW-001", second=None)]
 
 
 def test_parse_findings_empty_input() -> None:
-    assert BiometricDeduplicationService().parse_findings([]) == []
+    assert DeduplicationEngineService().parse_findings([]) == []
 
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")

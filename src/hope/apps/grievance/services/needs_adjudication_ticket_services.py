@@ -198,6 +198,12 @@ def create_grievance_ticket_with_details(
 
     kwargs: can has "dedup_engine_similarity_pair", "possible_duplicates",
     "registration_data_import", "is_multiple_duplicates_version".
+
+    main_individual (A): The one from RDI marked as DUPLICATE,
+    possible_duplicate (A): The one from RDI marked as DUPLICATE,
+    possible_duplicates: Other duplicates found by ES (e.g. {B, C}),
+    is_multiple_duplicates_version: True,
+    issue_type: GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,,
     """
     from hope.apps.grievance.models import (
         GrievanceTicket,
@@ -211,6 +217,16 @@ def create_grievance_ticket_with_details(
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None
+
+    # Let's have:
+    # - A in incoming RDI,
+    # - {b, c, d} in approved population,
+    # - ticket {B main, c, d}.
+    #
+    # I want to have ticket {A main, X duplicate} created.
+    #
+    # In order to do that there must be NO OPEN ticket, that has
+    # (A or X as main) AND (A or X as duplicate).
 
     ticket_all_individuals = {main_individual, *(possible_duplicates or [])}
 
@@ -288,6 +304,11 @@ def create_needs_adjudication_tickets(
     issue_type: int,
     registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
+    """individuals_queryset = Individual.objects.filter(
+        registration_data_import=obj_hct,
+        deduplication_golden_record_status=DUPLICATE
+    ).
+    """
     from hope.models import Individual
 
     if not individuals_queryset:
@@ -295,22 +316,23 @@ def create_needs_adjudication_tickets(
 
     unique_individuals = set()
     individuals_to_remove_from_es = set()
-    for possible_duplicate in individuals_queryset:
-        possible_duplicates = []
+    for possible_duplicate_individual in individuals_queryset:
+        matched_possible_duplicates_individuals = []
 
-        for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
-            if duplicate := Individual.objects.filter(id=individual.get("hit_id")).first():
-                possible_duplicates.append(duplicate)
+        for duplicate_record_data in possible_duplicate_individual.deduplication_golden_record_results[results_key]:
+            if duplicate := Individual.objects.filter(id=duplicate_record_data.get("hit_id")).first():
+                matched_possible_duplicates_individuals.append(duplicate)
             else:
-                individuals_to_remove_from_es.add(individual.get("hit_id"))
+                individuals_to_remove_from_es.add(duplicate_record_data.get("hit_id"))
 
-        if possible_duplicates and not (possible_duplicate in possible_duplicates and len(possible_duplicates) == 1):
+        only_matched_itself = matched_possible_duplicates_individuals == [possible_duplicate_individual]
+        if matched_possible_duplicates_individuals and not only_matched_itself:
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=possible_duplicate,
-                possible_duplicate=possible_duplicate,  # for backward compatibility
+                main_individual=possible_duplicate_individual,
+                possible_duplicate=possible_duplicate_individual,  # for backward compatibility
                 business_area=business_area,
                 registration_data_import=registration_data_import,
-                possible_duplicates=possible_duplicates,
+                possible_duplicates=matched_possible_duplicates_individuals,
                 is_multiple_duplicates_version=True,
                 issue_type=issue_type,
             )
@@ -322,7 +344,7 @@ def create_needs_adjudication_tickets(
             for ticket in linked_tickets:
                 ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
         else:
-            unique_individuals.add(possible_duplicate.id)
+            unique_individuals.add(possible_duplicate_individual.id)
 
     # Sometimes we have an old records in the Elasticsearch,
     # this will resolve false positive signals if the individual is indeed unique
@@ -336,6 +358,31 @@ def create_needs_adjudication_tickets(
     )
 
 
+def _split_into_main_and_duplicate(
+    pair: BiometricDedupeSimilarityPair,
+    rdi: RegistrationDataImport,
+) -> tuple[Individual, Individual | None] | None:
+    ind1, ind2 = pair.individual1, pair.individual2
+
+    if ind1 is None and ind2 is None:
+        return None
+    if ind1 is None or ind2 is None:
+        # only one side exists in HOPE - it is the main individual, no duplicate
+        return ind1 or ind2, None
+
+    ind1_from_current_rdi = ind1.registration_data_import_id == rdi.id
+    ind2_from_current_rdi = ind2.registration_data_import_id == rdi.id
+
+    if ind1_from_current_rdi and ind2_from_current_rdi:
+        # order doesn't matter here
+        return ind1, ind2
+    if ind1_from_current_rdi:
+        # ind2 is from the merged population
+        return ind1, ind2
+    # ind2 is from the current RDI, ind1 is from the merged population
+    return ind2, ind1
+
+
 def create_needs_adjudication_tickets_for_biometrics(
     deduplication_pairs: QuerySet[BiometricDedupeSimilarityPair],
     rdi: RegistrationDataImport,
@@ -346,26 +393,10 @@ def create_needs_adjudication_tickets_for_biometrics(
     new_tickets = []
 
     for pair in deduplication_pairs:
-        # if only one individual exists mark it as original
-        if not (pair.individual1 and pair.individual2):
-            duplicate_individual = None
-            if pair.individual1:
-                original_individual = pair.individual1
-            elif pair.individual2 is not None:
-                original_individual = pair.individual2
-            else:
-                continue
-        # if both individuals are from the same rdi mark second as duplicate
-        # if one of individuals is in already merged population mark it as original
-        elif pair.individual1.registration_data_import in [
-            pair.individual2.registration_data_import,
-            rdi,
-        ]:
-            original_individual = pair.individual1
-            duplicate_individual = pair.individual2
-        else:
-            original_individual = pair.individual2
-            duplicate_individual = pair.individual1
+        split = _split_into_main_and_duplicate(pair, rdi)
+        if split is None:
+            continue
+        original_individual, duplicate_individual = split
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=original_individual,
