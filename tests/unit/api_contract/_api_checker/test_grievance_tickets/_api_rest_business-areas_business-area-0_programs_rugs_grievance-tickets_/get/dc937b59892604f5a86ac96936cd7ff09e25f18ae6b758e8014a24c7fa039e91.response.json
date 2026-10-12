@@ -47,6 +47,7 @@
                     "username": "user_0"
                 },
                 "total_days": 0,
+                "unread": false,
                 "related_tickets_count": 0,
                 "programs": [
                     {
@@ -57,8 +58,7 @@
                         "screen_beneficiary": false
                     }
                 ],
-                "target_id": "",
-                "changed_since_visit": false
+                "target_id": ""
             }
         ]
     },

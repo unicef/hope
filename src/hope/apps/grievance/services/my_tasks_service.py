@@ -1,10 +1,9 @@
-"""My Tasks visits and the "you have new tasks" email.
+"""Unread tickets on My Tasks and the "you have new tasks" email.
 
-A user is told once, by email, that a tab of their My Tasks page changed since they last opened that
-tab. Opening any tab of the page ends the cycle. A user who does not open it is reminded after
-MY_TASKS_ALARM_WINDOW days and then every MY_TASKS_REPEAT_EACH days, for as long as the changes are
-still waiting. Nothing a user did themselves counts as a change, and nothing is ever emailed about
-a ticket the user already saw.
+A ticket is unread for a user when somebody else changed it after the user last opened it. A user with
+unread tickets is told once by email, reminded after MY_TASKS_ALARM_WINDOW days and then every
+MY_TASKS_REPEAT_EACH days, for as long as something stays unread. Opening a ticket ends the cycle, and
+so does a check that finds nothing unread. Nothing a user did themselves counts as a change.
 
 One run covers one (business area, recipient timezone, day) and evaluates only the recipients in
 that timezone, so every email goes out at the local notification hour.
@@ -21,11 +20,11 @@ from django.utils import timezone
 
 from hope.apps.core.timezones import resolve_timezone_name
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT, PRESET_PENDING_APPROVAL
-from hope.apps.grievance.models import GrievanceTicket, MyTasksTabVisit, MyTasksVisit
+from hope.apps.grievance.models import GrievanceTicket, MyTasksTracking, TicketSeen
 from hope.apps.grievance.my_tasks import (
     MY_TASKS_PERMISSIONS,
     TAB_SCOPES,
-    changed_since_q,
+    annotate_unread,
     in_active_program_q,
 )
 from hope.apps.grievance.utils import my_tasks_url
@@ -46,51 +45,40 @@ TAB_LABELS = {
     PRESET_PENDING_APPROVAL: "Pending approval",
 }
 
-NEW_TASKS_INTRO = "Tickets on your My Tasks page were created or changed since you last opened it."
+NEW_TASKS_INTRO = "Tickets on your My Tasks page were created or changed and you have not opened them yet."
 REMINDER_INTRO = "Tickets on your My Tasks page are still waiting for you."
 
 
-def record_visit(user: "User", business_area: "BusinessArea", tab: str, now: datetime | None = None) -> dict[str, bool]:
-    """Stamp the visit of one tab, end the user's email cycle and return which tabs changed.
+def start_tracking(user: "User", business_area: "BusinessArea") -> MyTasksTracking:
+    """Return the user's tracking row for the business area, creating it on their first visit or check."""
+    tracking, _ = MyTasksTracking.objects.get_or_create(user=user, business_area=business_area)
+    return tracking
 
-    The visited tab is compared with its previous visit, every other tab with its own last visit, so
-    a tab the user never opened keeps reporting its changes.
-    """
-    now = now or timezone.now()
-    visit, _ = MyTasksVisit.objects.get_or_create(user=user, business_area=business_area)
-    tab_visit, created = MyTasksTabVisit.objects.get_or_create(
-        visit=visit, tab=tab, defaults={"last_visit_at": now, "seen_until": visit.created_at}
+
+def mark_seen(user: "User", ticket: GrievanceTicket, now: datetime | None = None) -> None:
+    """Stamp that the user opened the ticket and end their email cycle in its business area."""
+    TicketSeen.objects.bulk_create(
+        [TicketSeen(user=user, ticket=ticket, seen_at=now or timezone.now())],
+        update_conflicts=True,
+        unique_fields=["user", "ticket"],
+        update_fields=["seen_at", "updated_at"],
     )
-    if not created:
-        tab_visit.seen_until = tab_visit.last_visit_at
-        tab_visit.last_visit_at = now
-        tab_visit.save(update_fields=["seen_until", "last_visit_at"])
-    visit.first_email_at = None
-    visit.last_reminder_at = None
-    visit.save(update_fields=["first_email_at", "last_reminder_at"])
-    return changed_tabs(user, business_area, {**visit.tab_baselines(), tab: tab_visit.seen_until})
-
-
-def seen_until(user: "User", business_area: "BusinessArea", tab: str) -> datetime | None:
-    """Return the visit before the user's latest one to the tab; the rows changed after it are highlighted."""
-    return (
-        MyTasksTabVisit.objects.filter(visit__user=user, visit__business_area=business_area, tab=tab)
-        .values_list("seen_until", flat=True)
-        .first()
+    MyTasksTracking.objects.filter(user=user, business_area=ticket.business_area).update(
+        first_email_at=None, last_reminder_at=None
     )
 
 
-def changed_tabs(user: "User", business_area: "BusinessArea", since: dict[str, datetime]) -> dict[str, bool]:
-    """Per My Tasks tab, whether it holds a ticket somebody else changed after that tab's `since`."""
+def unread_tabs(user: "User", business_area: "BusinessArea", tracking_start: datetime) -> dict[str, bool]:
+    """Per My Tasks tab, whether it holds a ticket the user has not opened since somebody else changed it."""
     # closed tickets are what the tabs hide by default, so a closure never lights a tab or mails
     tickets = GrievanceTicket.objects.filter(
         in_active_program_q(),
         visible_tickets_q(user, business_area, VIEW_LIST_PERMISSIONS),
         business_area=business_area,
     ).exclude(status=GrievanceTicket.STATUS_CLOSED)
+    unread = annotate_unread(tickets, user, tracking_start)
     return {
-        preset: tickets.filter(changed_since_q(user, since[preset]), scope(user, business_area)).exists()
-        for preset, scope in TAB_SCOPES.items()
+        preset: unread.filter(scope(user, business_area), unread=True).exists() for preset, scope in TAB_SCOPES.items()
     }
 
 
@@ -147,15 +135,19 @@ class MyTasksNotificationService:
 
     def _evaluate(self, user: "User") -> int:
         """Send the email the user is due, if any, and return 1 when one went out."""
-        visit, _ = MyTasksVisit.objects.get_or_create(user=user, business_area=self.business_area)
-        tabs = changed_tabs(user, self.business_area, visit.tab_baselines())
+        tracking = start_tracking(user, self.business_area)
+        tabs = unread_tabs(user, self.business_area, tracking.created_at)
         if not any(tabs.values()):
+            # everything was opened: the next unread ticket starts a new cycle with a "new tasks" email
+            tracking.first_email_at = None
+            tracking.last_reminder_at = None
+            tracking.save(update_fields=["first_email_at", "last_reminder_at"])
             return 0
 
-        if visit.first_email_at is None:
+        if tracking.first_email_at is None:
             self._send(user, NEW_TASKS_INTRO, tabs)
-            visit.first_email_at = self.notification_time
-            visit.save(update_fields=["first_email_at"])
+            tracking.first_email_at = self.notification_time
+            tracking.save(update_fields=["first_email_at"])
             return 1
 
         alarm_window = timedelta(days=int(config.MY_TASKS_ALARM_WINDOW))
@@ -163,13 +155,16 @@ class MyTasksNotificationService:
         # stamps are schedule instants, 24h +- 1h apart across a DST change; the half-day slack keeps
         # "N days later" true on those days and still rejects a same-day re-run
         slack = timedelta(hours=12)
-        if self.notification_time < visit.first_email_at + alarm_window - slack:
+        if self.notification_time < tracking.first_email_at + alarm_window - slack:
             return 0
-        if visit.last_reminder_at is not None and self.notification_time < visit.last_reminder_at + repeat_each - slack:
+        if (
+            tracking.last_reminder_at is not None
+            and self.notification_time < tracking.last_reminder_at + repeat_each - slack
+        ):
             return 0
         self._send(user, REMINDER_INTRO, tabs)
-        visit.last_reminder_at = self.notification_time
-        visit.save(update_fields=["last_reminder_at"])
+        tracking.last_reminder_at = self.notification_time
+        tracking.save(update_fields=["last_reminder_at"])
         return 1
 
     def _send(self, user: "User", intro: str, tabs: dict[str, bool]) -> None:

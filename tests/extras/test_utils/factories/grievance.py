@@ -4,12 +4,10 @@ from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
 
-from hope.apps.grievance.constants import PRESET_MINE
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
-    MyTasksTabVisit,
-    MyTasksVisit,
+    MyTasksTracking,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
@@ -22,6 +20,7 @@ from hope.apps.grievance.models import (
     TicketPaymentVerificationDetails,
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
+    TicketSeen,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
@@ -217,22 +216,21 @@ class TicketNoteFactory(DjangoModelFactory):
     description = factory.Sequence(lambda n: f"Note {n}")
 
 
-class MyTasksVisitFactory(DjangoModelFactory):
+class MyTasksTrackingFactory(DjangoModelFactory):
     class Meta:
-        model = MyTasksVisit
+        model = MyTasksTracking
 
     user = factory.SubFactory(UserFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
 
 
-class MyTasksTabVisitFactory(DjangoModelFactory):
+class TicketSeenFactory(DjangoModelFactory):
     class Meta:
-        model = MyTasksTabVisit
+        model = TicketSeen
 
-    visit = factory.SubFactory(MyTasksVisitFactory)
-    tab = PRESET_MINE
-    last_visit_at = factory.LazyFunction(timezone.now)
-    seen_until = factory.LazyFunction(timezone.now)
+    user = factory.SubFactory(UserFactory)
+    ticket = factory.SubFactory(GrievanceTicketFactory)
+    seen_at = factory.LazyFunction(timezone.now)
 
 
 class TicketPositiveFeedbackDetailsFactory(DjangoModelFactory):

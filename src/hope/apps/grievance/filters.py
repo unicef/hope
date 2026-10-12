@@ -18,19 +18,13 @@ from django_filters import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
 from hope.apps.grievance.constants import (
-    MY_TASKS_TABS,
     PRIORITY_CHOICES,
     SUBMISSION_CHANNEL_CHOICES,
     URGENCY_CHOICES,
     get_my_tasks_tab_choices,
 )
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.my_tasks import (
-    TAB_SCOPES,
-    assignable_tickets_q,
-    changed_since_q,
-)
-from hope.apps.grievance.services.my_tasks_service import seen_until
+from hope.apps.grievance.my_tasks import TAB_SCOPES, assignable_tickets_q
 from hope.apps.grievance.utils import overdue_q
 from hope.apps.grievance.visibility import without_program_q
 from hope.apps.household.const import HEAD
@@ -139,7 +133,7 @@ class GrievanceTicketFilter(FilterSet):
     sensitive = BooleanFilter(method="filter_sensitive")
     unassigned = BooleanFilter(method="filter_unassigned")
     my_tasks_tab = ChoiceFilter(choices=get_my_tasks_tab_choices, method="filter_my_tasks_tab")
-    changed_since_visit = BooleanFilter(method="filter_changed_since_visit")
+    unread = BooleanFilter(method="filter_unread")
 
     class Meta:
         fields = {
@@ -189,14 +183,9 @@ class GrievanceTicketFilter(FilterSet):
         """Narrow the list to the tickets of the given My Tasks tab: needs-assignment, mine or pending-approval."""
         return qs.filter(TAB_SCOPES[value](self.request.user, self.business_area))
 
-    def filter_changed_since_visit(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        """Keep (or drop) the rows the `my_tasks_tab` highlights: changed by somebody else since its previous visit."""
-        tab = self.data.get("my_tasks_tab")
-        since = seen_until(self.request.user, self.business_area, tab) if tab in MY_TASKS_TABS else None
-        if since is None:
-            return qs.none() if value else qs
-        changed = changed_since_q(self.request.user, since)
-        return qs.filter(changed) if value else qs.exclude(changed)
+    def filter_unread(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        """Keep (or drop) the rows My Tasks highlights; the viewset annotates `unread` for the list and the count."""
+        return qs.filter(unread=value)
 
     @cached_property
     def business_area(self) -> BusinessArea:

@@ -8,15 +8,15 @@ tags:
 
 # My Tasks Emails
 
-HOPE emails you when a tab of your [My Tasks](my-tasks.md) page changed since you last opened that
-tab, and reminds you if you then stay away. Nothing is emailed about a ticket you have already seen
-there, and nothing you did yourself ever triggers an email.
+HOPE emails you when your [My Tasks](my-tasks.md) page holds a ticket you have not opened since
+somebody else created or changed it, and reminds you while it stays unopened. Nothing is emailed
+about a ticket you have already opened, and nothing you did yourself ever triggers an email.
 
 ---
 
-## What counts as a change
+## What counts as unread
 
-A ticket counts as changed for you when somebody else, after you last opened the tab it shows up on:
+A ticket is unread for you when somebody else, after you last opened that ticket:
 
 | Did this | It shows up on |
 |---|---|
@@ -26,7 +26,9 @@ A ticket counts as changed for you when somebody else, after you last opened the
 | sent a ticket for approval that you may approve | Pending approval |
 
 Closed tickets never count, and neither does anything you did yourself: assigning a ticket to
-yourself, editing or closing your own ticket, or sending it for approval.
+yourself, editing or closing your own ticket, or sending it for approval. A ticket you have never
+opened counts from the moment HOPE started tracking you in the business area (your first visit to
+My Tasks, or the first check that looked at you), so nothing older than that is ever emailed.
 
 ---
 
@@ -36,14 +38,14 @@ One email per business area, with the business area in the subject:
 
 > **[Somalia] HOPE: you have new tasks**
 >
-> Tickets on your My Tasks page were created or changed since you last opened it. (Somalia)
+> Tickets on your My Tasks page were created or changed and you have not opened them yet. (Somalia)
 >
 > Assigned to you — *open My Tasks*
 >
 > Pending approval — *open My Tasks*
 
-It names the tabs that changed, each with a link that opens My Tasks on that tab. It carries no
-counts and no ticket IDs.
+It names the tabs holding unread tickets, each with a link that opens My Tasks on that tab. It
+carries no counts and no ticket IDs.
 
 ---
 
@@ -53,19 +55,15 @@ The check runs every `MY_TASKS_MONITOR_WINDOW` days (one by default, so every da
 your own timezone (`GRIEVANCE_NOTIFICATION_HOUR`). A user with no timezone set is treated as being
 in the business area's timezone.
 
-1. The first check after something changed, you get one email.
-2. After that, nothing more is sent until you open My Tasks, however many further changes arrive.
-3. If you have not opened My Tasks `MY_TASKS_ALARM_WINDOW` days after that email (seven by
-   default), you get a reminder.
-4. The reminder repeats every `MY_TASKS_REPEAT_EACH` days (two by default) for as long as the
-   changes are still waiting.
+1. The first check that finds an unread ticket, you get one email.
+2. After that, nothing more is sent however many further changes arrive.
+3. If something is still unread `MY_TASKS_ALARM_WINDOW` days after that email (seven by default),
+   you get a reminder.
+4. The reminder repeats every `MY_TASKS_REPEAT_EACH` days (two by default) for as long as
+   something stays unread.
 
-Opening any tab of My Tasks ends the cycle. Each tab counts its changes from the last time you
-opened that tab, so a tab you did not open keeps its changes, and the next morning's email names it
-again.
-
-Tracking starts for each user and business area the first time they open My Tasks or the first
-time the check looks at them. Changes from before that point are never emailed.
+Opening a ticket ends the cycle, and so does a check that finds nothing unread: the next unread
+ticket starts again with a "you have new tasks" email.
 
 ---
 

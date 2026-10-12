@@ -10,9 +10,8 @@ from rest_framework.response import Response
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
 from hope.apps.grievance.constants import MY_TASKS_TABS
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.my_tasks import changed_since_q
-from hope.apps.grievance.services.my_tasks_service import seen_until
+from hope.apps.grievance.models import GrievanceTicket, MyTasksTracking
+from hope.apps.grievance.my_tasks import annotate_unread
 from hope.apps.grievance.utils import (
     create_grievance_documents,
     delete_grievance_documents,
@@ -100,13 +99,17 @@ class GrievanceListBatchMixin:
         self.existing_tickets_counts = get_existing_tickets_counts(page, self.business_area)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
-    def changed_since_visit_annotation(self) -> Q | Value:
-        """My Tasks highlight: the ticket changed since the user's previous visit to `my_tasks_tab`."""
-        tab = self.request.GET.get("my_tasks_tab")
-        since = seen_until(self.request.user, self.business_area, tab) if tab in MY_TASKS_TABS else None
-        if self.action != "list" or since is None:
-            return Value(False)
-        return changed_since_q(cast("User", self.request.user), since)
+    def with_unread(self, tickets: QuerySet) -> QuerySet:
+        """Annotate `unread` for the My Tasks list and count; a constant False without `my_tasks_tab`."""
+        if self.action not in ("list", "count"):
+            return tickets
+        user = cast("User", self.request.user)
+        tracking = None
+        if self.request.GET.get("my_tasks_tab") in MY_TASKS_TABS:
+            tracking = MyTasksTracking.objects.filter(user=user, business_area=self.business_area).first()
+        if tracking is None:
+            return tickets.annotate(unread=Value(False))
+        return annotate_unread(tickets, user, tracking.created_at)
 
 
 class GrievancePermissionsMixin:

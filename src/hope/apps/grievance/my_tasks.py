@@ -1,17 +1,18 @@
-"""Querysets behind the My Tasks page: which tickets wait for a user, and which changed since they looked.
+"""Querysets behind the My Tasks page: which tickets wait for a user, and which they have not looked at yet.
 
-Every helper returns a `Q` so the API list, the per-tab change flags and the email all answer
-the same question with the same SQL.
+The API list, the tab dots and the email all go through these helpers, so they answer the same
+question with the same SQL.
 """
 
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, F, OuterRef, Q, QuerySet, Subquery, Value
+from django.db.models.functions import Coalesce
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT, PRESET_PENDING_APPROVAL
-from hope.apps.grievance.models import GrievanceTicket, TicketNote
+from hope.apps.grievance.models import GrievanceTicket, TicketNote, TicketSeen
 from hope.apps.grievance.visibility import (
     VIEW_LIST_PERMISSIONS,
     _program_ids_for,
@@ -116,17 +117,21 @@ TAB_SCOPES = {
 }
 
 
-def changed_since_q(user: "User", since: datetime) -> Q:
-    """Tickets somebody other than `user` created, assigned, edited, moved or annotated after `since`.
+def annotate_unread(
+    tickets: "QuerySet[GrievanceTicket]", user: "User", tracking_start: datetime
+) -> "QuerySet[GrievanceTicket]":
+    """Add `unread`: somebody else created, assigned, edited, moved or annotated the ticket after `user` last opened it.
 
-    A status change stamps `user_modified`, so a ticket sent back or sent for approval counts as edited.
+    A ticket the user never opened counts from `tracking_start`. A status change stamps `user_modified`, so a
+    ticket sent back or sent for approval counts as edited.
     """
-    note_by_someone_else = TicketNote.objects.filter(ticket=OuterRef("pk"), created_at__gt=since).exclude(
+    seen_at = TicketSeen.objects.filter(user=user, ticket=OuterRef("pk")).values("seen_at")[:1]
+    note_by_someone_else = TicketNote.objects.filter(ticket=OuterRef("pk"), created_at__gt=OuterRef("seen_at")).exclude(
         created_by=user
     )
-    return (
-        (Q(created_at__gt=since) & ~Q(created_by=user))
-        | (Q(assigned_at__gt=since) & ~Q(assigned_by=user))
-        | (Q(user_modified__gt=since, user_modified_by__isnull=False) & ~Q(user_modified_by=user))
+    return tickets.annotate(seen_at=Coalesce(Subquery(seen_at), Value(tracking_start))).annotate(
+        unread=(Q(created_at__gt=F("seen_at")) & ~Q(created_by=user))
+        | (Q(assigned_at__gt=F("seen_at")) & ~Q(assigned_by=user))
+        | (Q(user_modified__gt=F("seen_at"), user_modified_by__isnull=False) & ~Q(user_modified_by=user))
         | Q(Exists(note_by_someone_else))
     )

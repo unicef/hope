@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from itertools import chain
 import logging
@@ -18,11 +17,9 @@ from model_utils.models import UUIDModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.grievance.constants import (
-    MY_TASKS_TABS,
     PRIORITY_NOT_SET,
     SUBMISSION_CHANNEL_HOPE,
     URGENCY_NOT_SET,
-    get_my_tasks_tab_choices,
     get_priority_choices,
     get_submission_channel_choices,
     get_urgency_choices,
@@ -664,15 +661,16 @@ class TicketNote(TimeStampedUUIDModel):
     )
 
 
-class MyTasksVisit(TimeStampedUUIDModel):
-    """Where a user's My Tasks reminder cycle stands in a business area; the tab visits hang off it.
+class MyTasksTracking(TimeStampedUUIDModel):
+    """Where a user's My Tasks email cycle stands in a business area.
 
-    A row appears the first time the user opens the page or the first time the email check looks at
-    them, so `created_at` is where tracking starts for a tab the user has never opened.
+    A row appears the first time the user opens My Tasks or the first time the email check looks at
+    them, so `created_at` is where unread tracking starts: a ticket the user never opened counts as
+    unread only for changes after it.
     """
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="my_tasks_visits", on_delete=models.CASCADE)
-    business_area = models.ForeignKey("core.BusinessArea", related_name="my_tasks_visits", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="my_tasks_trackings", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="my_tasks_trackings", on_delete=models.CASCADE)
     # the "you have new tasks" email of the current cycle; ALARM_WINDOW counts from it
     first_email_at = models.DateTimeField(null=True, blank=True)
     # the latest alarm or repeat reminder of the current cycle; REPEAT_EACH counts from it
@@ -680,28 +678,20 @@ class MyTasksVisit(TimeStampedUUIDModel):
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=["user", "business_area"], name="unique_my_tasks_visit_user_business_area"),
+            UniqueConstraint(fields=["user", "business_area"], name="unique_my_tasks_tracking_user_business_area"),
         ]
 
-    def tab_baselines(self) -> dict[str, datetime]:
-        """Per tab, the instant changes are counted from: its last visit, or the start of tracking."""
-        baselines = dict.fromkeys(MY_TASKS_TABS, self.created_at)
-        baselines.update(self.tabs.values_list("tab", "last_visit_at"))
-        return baselines
 
+class TicketSeen(TimeStampedUUIDModel):
+    """When a user last opened a ticket; changes made by somebody else after that make it unread again."""
 
-class MyTasksTabVisit(TimeStampedUUIDModel):
-    """When a user last opened one tab of My Tasks."""
-
-    visit = models.ForeignKey(MyTasksVisit, related_name="tabs", on_delete=models.CASCADE)
-    tab = models.CharField(max_length=32, choices=get_my_tasks_tab_choices)
-    last_visit_at = models.DateTimeField()
-    # the visit before `last_visit_at` - the tab loaded right after a visit highlights what changed after it
-    seen_until = models.DateTimeField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="tickets_seen", on_delete=models.CASCADE)
+    ticket = models.ForeignKey(GrievanceTicket, related_name="seen_by", on_delete=models.CASCADE)
+    seen_at = models.DateTimeField()
 
     class Meta:
         constraints = [
-            UniqueConstraint(fields=["visit", "tab"], name="unique_my_tasks_tab_visit_visit_tab"),
+            UniqueConstraint(fields=["user", "ticket"], name="unique_ticket_seen_user_ticket"),
         ]
 
 
