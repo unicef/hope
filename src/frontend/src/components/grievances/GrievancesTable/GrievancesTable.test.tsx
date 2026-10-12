@@ -176,6 +176,16 @@ describe('GrievancesTable', () => {
     expect(countParams).not.toHaveProperty('offset');
   });
 
+  it('keeps the unread column last when it adds the Programmes column', async () => {
+    renderTable({ columns: ['unicef_id', 'total_days', 'unread'] });
+
+    await screen.findByTestId('select-all');
+    const headIds = universalTableProps.mock.lastCall[0].headCells.map(
+      (cell) => cell.id,
+    );
+    expect(headIds).toEqual(['unicef_id', 'total_days', 'programs', 'unread']);
+  });
+
   it('sends the sensitivity filter to the list endpoint', async () => {
     renderTable({ filter: { ...BASE_FILTER, sensitive: 'false' } });
 

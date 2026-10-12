@@ -353,6 +353,7 @@ describe('MyTasksPage', () => {
       'priority',
       'urgency',
       'total_days',
+      'unread',
     ]);
   });
 });

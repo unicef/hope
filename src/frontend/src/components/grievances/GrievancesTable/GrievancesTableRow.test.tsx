@@ -127,21 +127,25 @@ describe('GrievancesTableRow', () => {
     expect(screen.queryByRole('combobox')).toBeNull();
   });
 
-  it('highlights a ticket the user has not opened since it changed', () => {
+  it('marks a ticket the user has not opened since it changed with a dot and a tint', () => {
     renderRow(MY_TASKS_COLUMNS, { ...ticket, unread: true });
 
     const row = screen.getByTestId('ticket-row-GRV-0001');
     expect(row.getAttribute('data-unread')).toBe('true');
-    expect(getComputedStyle(row).backgroundColor).toBe('rgba(0, 173, 239, 0.1)');
+    expect(getComputedStyle(row).backgroundColor).toBe(
+      'rgba(0, 173, 239, 0.05)',
+    );
+    expect(screen.getByTestId('ticket-unread-dot')).toBeTruthy();
   });
 
-  it('leaves a read ticket unhighlighted', () => {
+  it('leaves a read ticket unmarked', () => {
     renderRow(MY_TASKS_COLUMNS, { ...ticket, unread: false });
 
     const row = screen.getByTestId('ticket-row-GRV-0001');
     expect(row.getAttribute('data-unread')).toBeNull();
     expect(getComputedStyle(row).backgroundColor).not.toBe(
-      'rgba(0, 173, 239, 0.1)',
+      'rgba(0, 173, 239, 0.05)',
     );
+    expect(screen.queryByTestId('ticket-unread-dot')).toBeNull();
   });
 });

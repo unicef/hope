@@ -131,7 +131,7 @@ export function GrievancesTableRow({
       data-unread={ticket.unread ? 'true' : undefined}
       sx={
         ticket.unread
-          ? { backgroundColor: alpha(theme.hctPalette.lightBlue, 0.1) }
+          ? { backgroundColor: alpha(theme.hctPalette.lightBlue, 0.05) }
           : undefined
       }
     >
