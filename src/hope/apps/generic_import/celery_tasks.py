@@ -76,8 +76,6 @@ def _process_generic_import(registration_data_import_id: str, import_data_id: st
         rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
 
         business_area = rdi.business_area
-        if business_area is None:
-            raise ValueError(f"RDI {rdi.id} has no business_area")
         set_sentry_business_area_tag(business_area.name)
 
         import_data.status = ImportData.STATUS_RUNNING

@@ -114,6 +114,7 @@ DEFAULTS = {
             "https://cdnjs.cloudflare.com",
             "https://unpkg.com",
             "https://*.blob.core.windows.net",
+            "https://observa.unicef.org",
         ),
     ),
     "CSP_IMG_SRC": (
@@ -122,6 +123,7 @@ DEFAULTS = {
             "'self'",
             "data:",
             "https://*.blob.core.windows.net",
+            "https://observa.unicef.org",
         ),
     ),
     "CSP_FONT_SRC": (
@@ -142,6 +144,7 @@ DEFAULTS = {
             "gov-bam.nr-data.net",
             "cdn.jsdelivr.net",
             "monitoring.hope.unicef.org",
+            "https://observa.unicef.org",
         ),
     ),
     "EXCHANGE_RATES_API_KEY": (
@@ -154,7 +157,7 @@ DEFAULTS = {
     ),
     "MATOMO_TRACKER_URL": (
         str,
-        "https://unisitetracker.unicef.io/",
+        "https://observa.unicef.org/",
     ),
     "MATOMO_SCRIPT_URL": (
         str,
