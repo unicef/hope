@@ -81,7 +81,8 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     GrievanceTicketListSerializer,
     GrievanceTicketRelatedSerializer,
     GrievanceUpdateApproveStatusSerializer,
-    MyTasksVisitSerializer,
+    MyTasksTabSerializer,
+    MyTasksUnreadTabsSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
@@ -94,7 +95,7 @@ from hope.apps.grievance.models import (
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.apps.grievance.services.dashboard_datasets import build_dashboard_data
 from hope.apps.grievance.services.data_change_services import update_data_change_extras
-from hope.apps.grievance.services.my_tasks_service import mark_seen, start_tracking, unread_tabs
+from hope.apps.grievance.services.my_tasks_service import mark_seen, mark_tab_seen, start_tracking, unread_tabs
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     mark_unique_and_close,
 )
@@ -296,6 +297,14 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
+        "my_tasks_mark_read": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [
             Permissions.GRIEVANCES_UPDATE,
@@ -484,14 +493,27 @@ class GrievanceTicketGlobalViewSet(
             mark_seen(cast("User", self.request.user), ticket)
         return ticket
 
-    @extend_schema(request=None, responses={200: MyTasksVisitSerializer})
+    @extend_schema(request=None, responses={200: MyTasksUnreadTabsSerializer})
     @action(detail=False, methods=["post"], url_path="my-tasks/visit")
     def my_tasks_visit(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Start unread tracking for the user if needed and say which My Tasks tabs hold unread tickets."""
         user = cast("User", request.user)
         tabs = unread_tabs(user, self.business_area, start_tracking(user, self.business_area).created_at)
+        return self._unread_tabs_response(tabs)
+
+    @extend_schema(request=MyTasksTabSerializer, responses={200: MyTasksUnreadTabsSerializer})
+    @action(detail=False, methods=["post"], url_path="my-tasks/mark-read")
+    def my_tasks_mark_read(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Mark every unread ticket of one My Tasks tab as seen and say which tabs still hold unread tickets."""
+        serializer = MyTasksTabSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tabs = mark_tab_seen(cast("User", request.user), self.business_area, serializer.validated_data["tab"])
+        return self._unread_tabs_response(tabs)
+
+    @staticmethod
+    def _unread_tabs_response(tabs: dict[str, bool]) -> Response:
         data = {"unread_tabs": [preset for preset, unread in tabs.items() if unread]}
-        return Response(MyTasksVisitSerializer(data).data, status=status.HTTP_200_OK)
+        return Response(MyTasksUnreadTabsSerializer(data).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={200: GrievanceTicketRelatedSerializer(many=True)},

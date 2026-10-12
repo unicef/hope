@@ -11,6 +11,7 @@ from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
 from hope.apps.grievance.constants import (
+    MY_TASKS_TABS,
     PRIORITY_CHOICES,
     SUBMISSION_CHANNEL_CHOICES,
     SUBMISSION_CHANNEL_HOPE,
@@ -907,6 +908,10 @@ class BulkNeedsAdjudicationSerializer(serializers.Serializer):
         return value
 
 
-class MyTasksVisitSerializer(serializers.Serializer):
+class MyTasksTabSerializer(serializers.Serializer):
+    tab = serializers.ChoiceField(choices=MY_TASKS_TABS)
+
+
+class MyTasksUnreadTabsSerializer(serializers.Serializer):
     # presets of the tabs holding a ticket the user has not opened since somebody else changed it
     unread_tabs = serializers.ListField(child=serializers.CharField())

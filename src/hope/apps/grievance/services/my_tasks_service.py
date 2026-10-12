@@ -11,7 +11,7 @@ that timezone, so every email goes out at the local notification hour.
 
 from datetime import datetime, timedelta
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from constance import config
 from django.db.models import Q
@@ -33,6 +33,8 @@ from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from django.db.models import QuerySet
 
     from hope.models import BusinessArea, User
@@ -55,28 +57,50 @@ def start_tracking(user: "User", business_area: "BusinessArea") -> MyTasksTracki
     return tracking
 
 
-def mark_seen(user: "User", ticket: GrievanceTicket, now: datetime | None = None) -> None:
-    """Stamp that the user opened the ticket and end their email cycle in its business area."""
+def _stamp_seen(user: "User", ticket_ids: "Iterable[Any]", now: datetime) -> None:
     TicketSeen.objects.bulk_create(
-        [TicketSeen(user=user, ticket=ticket, seen_at=now or timezone.now())],
+        [TicketSeen(user=user, ticket_id=ticket_id, seen_at=now) for ticket_id in ticket_ids],
         update_conflicts=True,
         unique_fields=["user", "ticket"],
         update_fields=["seen_at", "updated_at"],
     )
+
+
+def mark_seen(user: "User", ticket: GrievanceTicket, now: datetime | None = None) -> None:
+    """Stamp that the user opened the ticket and end their email cycle in its business area."""
+    _stamp_seen(user, [ticket.pk], now or timezone.now())
     MyTasksTracking.objects.filter(user=user, business_area=ticket.business_area).update(
         first_email_at=None, last_reminder_at=None
     )
 
 
-def unread_tabs(user: "User", business_area: "BusinessArea", tracking_start: datetime) -> dict[str, bool]:
-    """Per My Tasks tab, whether it holds a ticket the user has not opened since somebody else changed it."""
+def mark_tab_seen(
+    user: "User", business_area: "BusinessArea", tab: str, now: datetime | None = None
+) -> dict[str, bool]:
+    """Stamp every unread ticket of one My Tasks tab as seen now and return which tabs still hold unread ones."""
+    tracking = start_tracking(user, business_area)
+    unread = annotate_unread(_my_tasks_tickets(user, business_area), user, tracking.created_at).filter(
+        TAB_SCOPES[tab](user, business_area), unread=True
+    )
+    _stamp_seen(user, unread.values_list("pk", flat=True), now or timezone.now())
+    tracking.first_email_at = None
+    tracking.last_reminder_at = None
+    tracking.save(update_fields=["first_email_at", "last_reminder_at"])
+    return unread_tabs(user, business_area, tracking.created_at)
+
+
+def _my_tasks_tickets(user: "User", business_area: "BusinessArea") -> "QuerySet[GrievanceTicket]":
     # closed tickets are what the tabs hide by default, so a closure never lights a tab or mails
-    tickets = GrievanceTicket.objects.filter(
+    return GrievanceTicket.objects.filter(
         in_active_program_q(),
         visible_tickets_q(user, business_area, VIEW_LIST_PERMISSIONS),
         business_area=business_area,
     ).exclude(status=GrievanceTicket.STATUS_CLOSED)
-    unread = annotate_unread(tickets, user, tracking_start)
+
+
+def unread_tabs(user: "User", business_area: "BusinessArea", tracking_start: datetime) -> dict[str, bool]:
+    """Per My Tasks tab, whether it holds a ticket the user has not opened since somebody else changed it."""
+    unread = annotate_unread(_my_tasks_tickets(user, business_area), user, tracking_start)
     return {
         preset: unread.filter(scope(user, business_area), unread=True).exists() for preset, scope in TAB_SCOPES.items()
     }

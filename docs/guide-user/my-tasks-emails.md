@@ -62,8 +62,8 @@ in the business area's timezone.
 4. The reminder repeats every `MY_TASKS_REPEAT_EACH` days (two by default) for as long as
    something stays unread.
 
-Opening a ticket ends the cycle, and so does a check that finds nothing unread: the next unread
-ticket starts again with a "you have new tasks" email.
+Opening a ticket ends the cycle, and so do **Mark all as read** on a tab and a check that finds
+nothing unread: the next unread ticket starts again with a "you have new tasks" email.
 
 ---
 

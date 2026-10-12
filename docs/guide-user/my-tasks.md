@@ -101,8 +101,9 @@ The list is ordered by **Total Days**, longest-waiting first.
 ## Arriving from an email
 
 The [My Tasks emails](my-tasks-emails.md) link straight into this page, one link per tab holding
-a ticket you have not opened since somebody else changed it. Opening the ticket is what tells HOPE
-you have seen it: the reminders stop, and the next email comes only once something else is waiting.
+a ticket you have not opened since somebody else changed it. Opening the ticket, or **Mark all as
+read** on the tab, is what tells HOPE you have seen it: the reminders stop, and the next email comes
+only once something else is waiting.
 
 ---
 
