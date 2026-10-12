@@ -2,6 +2,7 @@ from datetime import date
 from io import BytesIO
 from typing import Any, Callable
 
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
@@ -17,7 +18,9 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CountryFactory,
     DocumentFactory,
+    FacilityFactory,
     FinancialInstitutionFactory,
+    FlexibleAttributeFactory,
     HouseholdFactory,
     IndividualFactory,
     IndividualIdentityFactory,
@@ -26,7 +29,13 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
+from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hope.apps.grievance.api.serializers.grievance_ticket import (
+    HouseholdUpdateDataSerializer,
+    IndividualUpdateDataSerializer,
+)
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import (
     FEMALE,
@@ -41,6 +50,7 @@ from hope.models import (
     AccountType,
     BusinessArea,
     DocumentType,
+    FlexibleAttribute,
     Program,
     User,
 )
@@ -207,6 +217,40 @@ def grant_create_permission(
     program: Program,
 ) -> None:
     create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CREATE], business_area, program)
+
+
+@pytest.fixture
+def household_with_sex_group_counts_and_flex_field(grievance_context: dict[str, Any]) -> Any:
+    FlexibleAttributeFactory(
+        name="hh_total_eligible_ind_h_f",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+    )
+    household = grievance_context["household"]
+    household.unknown_sex_group_count = 1
+    household.other_sex_group_count = 0
+    household.flex_fields = {"hh_total_eligible_ind_h_f": 1}
+    household.save(update_fields=["unknown_sex_group_count", "other_sex_group_count", "flex_fields"])
+    return household
+
+
+@pytest.fixture
+def household_with_facility_and_consent_sign(grievance_context: dict[str, Any], business_area: BusinessArea) -> Any:
+    household = grievance_context["household"]
+    household.facility = FacilityFactory(
+        name="Old Clinic", business_area=business_area, admin_area=grievance_context["admin_area"]
+    )
+    household.consent_sign = "consent/old-signature.jpg"
+    household.save(update_fields=["facility", "consent_sign"])
+    return household
+
+
+@pytest.fixture
+def individual_with_identification_key(grievance_context: dict[str, Any]) -> Any:
+    individual = grievance_context["individual"]
+    individual.identification_key = "IND-OLD-KEY"
+    individual.save(update_fields=["identification_key"])
+    return individual
 
 
 def test_grievance_create_individual_data_change(
@@ -405,6 +449,126 @@ def test_grievance_update_household_data_change(
     response = authenticated_client.post(list_url, input_data, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response.data[0]
+
+
+def test_grievance_household_data_change_keeps_sex_group_counts_with_flex_fields(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    household_with_sex_group_counts_and_flex_field: Any,
+    list_url: str,
+) -> None:
+    household = household_with_sex_group_counts_and_flex_field
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": str(household.id),
+                    "household_data": {
+                        "unknown_sex_group_count": 3,
+                        "other_sex_group_count": 2,
+                        "flex_fields": {"hh_total_eligible_ind_h_f": 4},
+                    },
+                }
+            }
+        },
+    }
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    ticket = GrievanceTicket.objects.get(id=response.data[0]["id"])
+    household_data = ticket.household_data_update_ticket_details.household_data
+    assert household_data["unknown_sex_group_count"] == {"value": 3, "previous_value": 1, "approve_status": False}
+    assert household_data["other_sex_group_count"] == {"value": 2, "previous_value": 0, "approve_status": False}
+    assert household_data["flex_fields"] == {
+        "hh_total_eligible_ind_h_f": {"value": 4, "previous_value": 1, "approve_status": False}
+    }
+
+
+def test_grievance_create_household_data_change_stores_consent_sign_and_facility(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    household_with_facility_and_consent_sign: Any,
+    list_url: str,
+    load_test_image: Callable[[], SimpleUploadedFile],
+) -> None:
+    extra_path = "extras.issue_type.household_data_update_issue_type_extras."
+    response = authenticated_client.post(
+        list_url,
+        {
+            "description": "Test",
+            "assigned_to": str(user.id),
+            "issue_type": GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+            "consent": True,
+            "language": "PL",
+            f"{extra_path}household": str(household_with_facility_and_consent_sign.id),
+            f"{extra_path}household_data.consent_sign": load_test_image(),
+            f"{extra_path}household_data.facility": "Kabul Clinic",
+            f"{extra_path}household_data.facility_admin_area": "fggtyjyj",
+        },
+        format="multipart",
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+
+    household_data = response.data[0]["ticket_details"]["household_data"]
+    assert household_data["facility"] == {
+        "value": "Kabul Clinic",
+        "previous_value": "OLD CLINIC",
+        "approve_status": False,
+    }
+    assert household_data["facility_admin_area"] == {
+        "value": "fggtyjyj",
+        "previous_value": "dffgh565556",
+        "approve_status": False,
+    }
+    assert household_data["consent_sign"]["previous_value"] == "/api/uploads/consent/old-signature.jpg"
+    assert household_data["consent_sign"]["approve_status"] is False
+    assert household_data["consent_sign"]["value"].startswith("/api/uploads/")
+    assert household_data["consent_sign"]["value"].endswith(".jpg")
+    ticket_details = GrievanceTicket.objects.get(id=response.data[0]["id"]).household_data_update_ticket_details
+    assert default_storage.exists(ticket_details.household_data["consent_sign"]["value"])
+
+
+def test_grievance_create_individual_data_change_records_previous_identification_key(
+    authenticated_client: Any,
+    grant_create_permission: None,
+    user: User,
+    individual_with_identification_key: Any,
+    list_url: str,
+) -> None:
+    input_data = {
+        "description": "Test",
+        "assigned_to": str(user.id),
+        "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+        "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
+        "consent": True,
+        "language": "PL",
+        "extras": {
+            "issue_type": {
+                "individual_data_update_issue_type_extras": {
+                    "individual": str(individual_with_identification_key.id),
+                    "individual_data": {"ind_identification_key": "IND-NEW-KEY"},
+                }
+            }
+        },
+    }
+    response = authenticated_client.post(list_url, input_data, format="json")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    individual_data = response.data[0]["ticket_details"]["individual_data"]
+    assert individual_data["ind_identification_key"] == {
+        "value": "IND-NEW-KEY",
+        "previous_value": "IND-OLD-KEY",
+        "approve_status": False,
+    }
 
 
 def test_grievance_delete_household_data_change(
@@ -634,3 +798,21 @@ def test_edit_account_bank_with_financial_institution(
     response = authenticated_client.post(list_url, input_data_success, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response.data[0]
+
+
+def test_household_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:
+    offered = {field["name"] for field in FieldFactory.from_scope(Scope.HOUSEHOLD_UPDATE).associated_with_household()}
+
+    assert offered - set(HouseholdUpdateDataSerializer().fields) == set()
+
+
+def test_individual_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:
+    offered = {field["name"] for field in FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()}
+
+    assert offered - set(IndividualUpdateDataSerializer().fields) == set()
+
+
+def test_people_update_fields_offered_in_the_picker_are_accepted_by_the_serializer() -> None:
+    offered = {field["name"] for field in FieldFactory.from_scope(Scope.PEOPLE_UPDATE)}
+
+    assert offered - set(IndividualUpdateDataSerializer().fields) == set()

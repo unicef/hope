@@ -5,6 +5,7 @@ from pathlib import Path
 from django.core.files import File
 from django.forms import model_to_dict
 from django_countries.fields import Country
+import openpyxl
 import pytest
 
 from extras.test_utils.factories.account import PartnerFactory
@@ -306,6 +307,68 @@ def test_execute(
         "card_expiry_date": "2016-06-27T00:00:00",
         "name_of_cardholder": "Name2",
     }
+
+
+@pytest.fixture
+def unknown_people_area_cell():
+    workbook = openpyxl.Workbook()
+    cell = workbook.active["L4"]
+    cell.value = "MISSING"
+    return cell
+
+
+def test_process_people_area_reports_missing_code(unknown_people_area_cell, django_assert_num_queries) -> None:
+    task = RdiXlsxPeopleCreateTask()
+
+    with django_assert_num_queries(1):
+        with pytest.raises(ValueError, match="Area with code 'MISSING' does not exist"):
+            task._process_admin_areas_and_country(
+                unknown_people_area_cell, {"name": "admin1"}, "pp_admin1_i_c", None, "MISSING"
+            )
+
+
+@pytest.fixture
+def unknown_people_country_cell():
+    workbook = openpyxl.Workbook()
+    cell = workbook.active["L4"]
+    cell.value = "ZZZ"
+    return cell
+
+
+def test_process_people_country_reports_missing_code(unknown_people_country_cell, django_assert_num_queries) -> None:
+    task = RdiXlsxPeopleCreateTask()
+
+    with django_assert_num_queries(1):
+        with pytest.raises(ValueError, match="Country with ISO3 code 'ZZZ' does not exist"):
+            task._process_admin_areas_and_country(
+                unknown_people_country_cell, {"name": "country"}, "pp_country_i_c", None, "ZZZ"
+            )
+
+
+@pytest.fixture
+def existing_people_country():
+    return CountryFactory(iso_code2="AF", iso_code3="AFG")
+
+
+@pytest.fixture(params=[("pp_country_i_c", "country"), ("pp_country_origin_i_c", "country_origin")])
+def people_country_cell_with_trailing_space(request):
+    workbook = openpyxl.Workbook()
+    cell = workbook.active["L4"]
+    cell.value = "AFG "
+    header, field_name = request.param
+    return cell, header, field_name, PendingHousehold()
+
+
+def test_process_people_country_uses_normalized_value(
+    existing_people_country, people_country_cell_with_trailing_space, django_assert_num_queries
+) -> None:
+    cell, header, field_name, household = people_country_cell_with_trailing_space
+    task = RdiXlsxPeopleCreateTask()
+
+    with django_assert_num_queries(1):
+        task._process_admin_areas_and_country(cell, {"name": field_name}, header, household, "AFG")
+
+    assert getattr(household, field_name) == existing_people_country
 
 
 def test_execute_sets_phone_no_valid_on_imported_individual(

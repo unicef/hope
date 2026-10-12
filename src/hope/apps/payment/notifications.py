@@ -56,7 +56,7 @@ class PaymentPlanGroupReconciliationImportNotification:
             }
         self._send(
             title=f"Reconciliation import completed for {self.payment_plan_group.name}",
-            message=f'Reconciliation file "{self.file_name}" was imported successfully.',
+            message=f'Reconciliation processing completed for file "{self.file_name}".',
             statistics=statistics,
         )
 

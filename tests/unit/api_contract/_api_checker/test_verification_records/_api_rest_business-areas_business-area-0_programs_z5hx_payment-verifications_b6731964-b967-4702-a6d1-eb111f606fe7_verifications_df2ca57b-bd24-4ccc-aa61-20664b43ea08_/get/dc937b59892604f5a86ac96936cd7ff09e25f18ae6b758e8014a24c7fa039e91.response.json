@@ -188,7 +188,7 @@
             "unore_exchange_rate": null,
             "unore_exchange_rate_unavailable": false,
             "eligible_payments_count": 1,
-            "funds_commitments": null,
+            "funds_commitments": [],
             "available_funds_commitments": [],
             "payment_verification_plans": [
                 {

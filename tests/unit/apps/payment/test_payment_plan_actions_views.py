@@ -25,7 +25,7 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FollowUpInstructionFactory,
-    FundsCommitmentGroupFactory,
+    FundsCommitmentHeaderFactory,
     FundsCommitmentItemFactory,
     PartnerFactory,
     PaymentFactory,
@@ -1640,28 +1640,25 @@ def test_assign_funds_commitments(
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
 
-    group = FundsCommitmentGroupFactory()
-
-    funds_commitment_item = FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+    first_header = FundsCommitmentHeaderFactory()
+    second_header = FundsCommitmentHeaderFactory()
+    FundsCommitmentItemFactory(
+        funds_commitment_header=first_header,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=999,
-        payment_plan=None,
     )
-    second_funds_commitment_item = FundsCommitmentItemFactory(
-        funds_commitment_group=group,
+    FundsCommitmentItemFactory(
+        funds_commitment_header=second_header,
         office=payment_plan_actions_context["business_area"],
         rec_serial_number=1000,
-        payment_plan=None,
     )
-    assert funds_commitment_item.payment_plan is None
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
         {
-            "fund_commitment_items_ids": [
-                str(funds_commitment_item.pk),
-                str(second_funds_commitment_item.pk),
+            "funds_commitment_numbers": [
+                first_header.funds_commitment_number,
+                second_header.funds_commitment_number,
             ]
         },
         format="json",
@@ -1670,10 +1667,10 @@ def test_assign_funds_commitments(
 
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.json()
-        funds_commitment_item.refresh_from_db()
-        second_funds_commitment_item.refresh_from_db()
-        assert funds_commitment_item.payment_plan_id == payment_plan_actions_context["pp"].pk
-        assert second_funds_commitment_item.payment_plan_id == payment_plan_actions_context["pp"].pk
+        assert set(payment_plan_actions_context["pp"].funds_commitment_headers.all()) == {
+            first_header,
+            second_header,
+        }
 
 
 def test_assign_funds_commitments_validation_errors(
@@ -1689,7 +1686,7 @@ def test_assign_funds_commitments_validation_errors(
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
-        {"fund_commitment_items_ids": ["333"]},
+        {"funds_commitment_numbers": ["FC333"]},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1697,88 +1694,27 @@ def test_assign_funds_commitments_validation_errors(
 
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
-    other_pp = PaymentPlanFactory(
-        business_area=payment_plan_actions_context["business_area"],
-        program_cycle=payment_plan_actions_context["cycle"],
-        status=PaymentPlan.Status.DRAFT,
-        created_by=payment_plan_actions_context["user"],
-    )
-    group = FundsCommitmentGroupFactory()
-    FundsCommitmentItemFactory(
-        funds_commitment_group=group,
-        office=payment_plan_actions_context["business_area"],
-        rec_serial_number=333,
-        payment_plan=other_pp,
-    )
-
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
-        {"fund_commitment_items_ids": ["333"]},
+        {"funds_commitment_numbers": ["UNKNOWN"]},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Chosen Funds Commitments are already assigned to a different Payment Plan" in response.json()
+    assert "One or more Funds Commitment Headers were not found" in response.json()
 
-    wrong_business_area_group = FundsCommitmentGroupFactory()
+    wrong_business_area_header = FundsCommitmentHeaderFactory()
     FundsCommitmentItemFactory(
-        funds_commitment_group=wrong_business_area_group,
+        funds_commitment_header=wrong_business_area_header,
         office=None,
         rec_serial_number=2355,
-        payment_plan=None,
     )
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
-        {"fund_commitment_items_ids": ["2355"]},
+        {"funds_commitment_numbers": [wrong_business_area_header.funds_commitment_number]},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Chosen Funds Commitments have the wrong Business Area" in response.json()
-
-
-@pytest.fixture
-def funds_commitment_items_from_different_groups(
-    payment_plan_actions_context: dict[str, Any],
-) -> list:
-    return [
-        FundsCommitmentItemFactory(
-            funds_commitment_group=FundsCommitmentGroupFactory(),
-            office=payment_plan_actions_context["business_area"],
-        ),
-        FundsCommitmentItemFactory(
-            funds_commitment_group=FundsCommitmentGroupFactory(),
-            office=payment_plan_actions_context["business_area"],
-        ),
-    ]
-
-
-def test_assign_funds_commitments_rejects_items_from_different_groups(
-    payment_plan_actions_context: dict[str, Any],
-    funds_commitment_items_from_different_groups: list,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_actions_context["pp"].save(update_fields=["status"])
-    first_item, second_item = funds_commitment_items_from_different_groups
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_funds_commitments"],
-        {
-            "fund_commitment_items_ids": [
-                str(first_item.pk),
-                str(second_item.pk),
-            ]
-        },
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == ["Chosen Funds Commitment Items must belong to the same Funds Commitment Group"]
+    assert any("not available for this Business Area" in error for error in response.json())
 
 
 def test_fsp_xlsx_template_list(
@@ -2484,7 +2420,6 @@ def test_mark_as_released_is_allowed_after_vision_flags_are_disabled(
         VisionStatus.PP_CREATED,
         VisionStatus.SEND_FAILED,
         VisionStatus.CALLBACK_FAILED,
-        VisionStatus.FC_MISSING,
         VisionStatus.FC_NOT_FOUND,
     ],
 )
@@ -2511,7 +2446,7 @@ def test_reject_invalidates_vision_attempt(
             "sent": True,
             "status": vision_status.value,
             "vision_id": "VISION-1",
-            "fc_num": "FC123",
+            "fc_numbers": ["FC123"],
             "error_code": "ERROR",
             "log": [{"type": "api-call"}],
         }
@@ -2600,7 +2535,7 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
-        {"fund_commitment_items_ids": ["1"]},
+        {"funds_commitment_numbers": ["FC1"]},
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST

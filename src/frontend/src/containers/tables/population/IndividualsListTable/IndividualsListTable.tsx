@@ -6,7 +6,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { adjustHeadCells } from '@utils/utils';
+import { adjustHeadCells, sanitizePhoneSearch } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
@@ -43,6 +43,7 @@ export function IndividualsListTable({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
       admin2: filter.admin2,
@@ -53,12 +54,14 @@ export function IndividualsListTable({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
+      birthDate: filter.birthDate,
     }),
     [
       filter.ageMin,
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin2,
@@ -70,6 +73,7 @@ export function IndividualsListTable({
       programId,
       businessArea,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
   const table = useTableState({
@@ -121,6 +125,7 @@ export function IndividualsListTable({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search?.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber?.trim(),
       admin2: filter.admin2,
@@ -130,6 +135,7 @@ export function IndividualsListTable({
       lastRegistrationDateAfter: filter.lastRegistrationDateMax,
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
+      birthDate: filter.birthDate,
     },
   );
   const { data: countData } = useQuery<CountResponse>({

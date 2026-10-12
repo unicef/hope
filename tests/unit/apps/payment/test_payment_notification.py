@@ -73,6 +73,8 @@ def test_reconciliation_success_notification_includes_row_counts(
     reconciliation_notification.send_success(total_rows=5, updated_rows=2, reset_rows=1, ignored_rows=2)
 
     text_body = mock_email_user.call_args.kwargs["text_body"]
+    assert "Reconciliation processing completed" in text_body
+    assert "imported successfully" not in text_body
     assert "Rows in file: 5" in text_body
     assert "Rows updated: 2" in text_body
     assert "Rows reset: 1" in text_body

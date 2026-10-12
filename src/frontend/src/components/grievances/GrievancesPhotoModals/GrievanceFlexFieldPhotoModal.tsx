@@ -7,6 +7,10 @@ import { RestService } from '@restgenerated/index';
 import { restQueryKey } from '@utils/queryKeys';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { useQuery } from '@tanstack/react-query';
+import {
+  getTicketFieldChange,
+  normalizeTicketFieldChange,
+} from '../utils/ticketData';
 
 export interface GrievanceFlexFieldPhotoModalProps {
   field;
@@ -38,14 +42,11 @@ export function GrievanceFlexFieldPhotoModal({
     return null;
   }
 
-  const flexFields = isIndividual
-    ? data?.ticketDetails?.individualData?.flex_fields
-    : data.ticketDetails?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
-
-  const picUrl: string = isCurrent
-    ? flexFields[field.name]?.previousValue
-    : flexFields[field.name]?.value;
+  const { value, previousValue } = normalizeTicketFieldChange(
+    getTicketFieldChange(data.ticketDetails, field.name, isIndividual),
+    isIndividual,
+  );
+  const picUrl: string = isCurrent ? previousValue : value;
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (

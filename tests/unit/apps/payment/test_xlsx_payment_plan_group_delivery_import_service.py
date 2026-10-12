@@ -311,12 +311,6 @@ def test_validate_succeeds_for_correct_header_and_rows(group_two_plans_one_fsp):
     service.validate()
 
     assert service.errors == []
-    assert service.get_result_counts() == {
-        "total_rows": 2,
-        "updated_rows": 2,
-        "reset_rows": 0,
-        "ignored_rows": 0,
-    }
 
 
 def test_group_reconciliation_uses_group_wide_fsp_header_ownership(
@@ -1434,6 +1428,41 @@ def test_override_equal_quantity_applies_other_present_fields(group_two_plans_on
     payment.refresh_from_db()
     assert payment.transaction_reference_id == "NEW"
     assert payment.status_date == old_status_date
+    assert service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 1,
+        "reset_rows": 0,
+        "ignored_rows": 0,
+    }
+
+
+def test_override_equal_quantity_and_fields_counts_row_as_ignored(
+    group_two_plans_one_fsp,
+    django_assert_num_queries,
+):
+    ctx = group_two_plans_one_fsp
+    payment = ctx["payment_one"]
+    payment.delivered_quantity = Decimal("100.00")
+    payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    payment.transaction_reference_id = "UNCHANGED"
+    payment.save(update_fields=["delivered_quantity", "status", "transaction_reference_id"])
+    file = _make_workbook(
+        ["payment_id", "delivered_quantity", "reference_id"],
+        [[str(payment.unicef_id), Decimal("100.00"), "UNCHANGED"]],
+    )
+    service = XlsxPaymentPlanGroupDeliveryImportService(ctx["group"], file, override=True)
+    service.open_workbook()
+
+    ContentType.objects.clear_cache()
+    with django_assert_num_queries(9):
+        service.import_payment_list()
+
+    assert service.get_result_counts() == {
+        "total_rows": 1,
+        "updated_rows": 0,
+        "reset_rows": 0,
+        "ignored_rows": 1,
+    }
 
 
 def test_first_reconciliation_updates_status_date_when_status_changes(group_two_plans_one_fsp):

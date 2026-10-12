@@ -5,6 +5,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -112,6 +113,11 @@ export function DeliveryImportXlsxGroupButton({
                     {t('Ignore rows with empty/null delivered_quantity')}
                   </MenuItem>
                 </Select>
+                <FormHelperText>
+                  {t(
+                    'Any non-empty delivered quantity in this upload will replace the existing reconciliation result. The selected option only controls rows with an empty delivered quantity.',
+                  )}
+                </FormHelperText>
               </FormControl>
             ) : null}
           </>

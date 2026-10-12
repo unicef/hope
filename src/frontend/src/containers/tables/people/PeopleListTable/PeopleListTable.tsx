@@ -8,6 +8,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
+import { sanitizePhoneSearch } from '@utils/utils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import type { ReactElement } from 'react';
@@ -38,6 +39,7 @@ export const PeopleListTable = ({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
       admin1: [filter.admin1],
@@ -49,12 +51,14 @@ export const PeopleListTable = ({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
+      birthDate: filter.birthDate,
     }),
     [
       filter.ageMin,
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin1,
@@ -67,6 +71,7 @@ export const PeopleListTable = ({
       programId,
       businessArea,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
 
