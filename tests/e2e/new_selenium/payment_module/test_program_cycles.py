@@ -59,7 +59,6 @@ def test_program_cycle_details_shows_status_and_dates(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
         Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
-        Permissions.PM_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
         browser.open(cycles_url(active_cycle))
@@ -69,6 +68,8 @@ def test_program_cycle_details_shows_status_and_dates(
         browser.assert_text("Active", STATUS)
         browser.assert_text(active_cycle.start_date.strftime("%-d %b %Y"), 'div[data-cy="label-Start Date"]')
         browser.assert_text(active_cycle.end_date.strftime("%-d %b %Y"), 'div[data-cy="label-End Date"]')
+        # Without PM_VIEW_LIST the payment plans table is hidden instead of the page.
+        browser.assert_elements_absent("table", 'h1[data-cy="access-denied-title"]')
 
 
 def test_finish_and_reactivate_program_cycle(

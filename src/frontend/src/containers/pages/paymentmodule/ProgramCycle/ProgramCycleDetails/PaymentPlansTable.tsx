@@ -3,6 +3,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { useTableState } from '@hooks/useTableState';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
@@ -17,6 +18,7 @@ import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 
 interface PaymentPlansTableProps {
   programCycle?: ProgramCycleList;
@@ -36,6 +38,8 @@ export const PaymentPlansTable = ({
   tag,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
+  const permissions = usePermissions();
+  const canViewList = hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions);
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const filterVariables = useMemo(
@@ -98,7 +102,7 @@ export const PaymentPlansTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansList(paymentPlansParams),
     placeholderData: keepPreviousData,
-    enabled: !!businessArea && !!programId,
+    enabled: canViewList && !!businessArea && !!programId,
   });
 
   const paymentPlansCountParams = createApiParams(
@@ -115,7 +119,7 @@ export const PaymentPlansTable = ({
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
         paymentPlansCountParams,
       ),
-    enabled: !!businessArea && !!programId && page === 0,
+    enabled: canViewList && !!businessArea && !!programId && page === 0,
   });
 
   const replacements = {
