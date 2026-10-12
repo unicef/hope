@@ -148,6 +148,43 @@ def staff_user(db: Any) -> User:
 
 
 @pytest.fixture
+def partner_admin_user(db: Any) -> User:
+    user = UserFactory(is_staff=True)
+    user.user_permissions.add(
+        *Permission.objects.filter(
+            content_type__app_label="account",
+            codename__in=[
+                "change_partner",
+                "view_roleassignment",
+                "add_roleassignment",
+                "change_roleassignment",
+                "delete_roleassignment",
+            ],
+        )
+    )
+    return user
+
+
+@pytest.fixture
+def user_admin_user(db: Any) -> User:
+    user = UserFactory(is_staff=True)
+    user.user_permissions.add(
+        *Permission.objects.filter(
+            content_type__app_label="account",
+            codename__in=[
+                "change_user",
+                "restrict_help_desk",
+                "view_roleassignment",
+                "add_roleassignment",
+                "change_roleassignment",
+                "delete_roleassignment",
+            ],
+        )
+    )
+    return user
+
+
+@pytest.fixture
 def request_factory() -> RequestFactory:
     return RequestFactory()
 
@@ -632,36 +669,36 @@ def test_role_assignment_inline_queryset_renders_str_in_single_query(
 
 def test_partner_change_page_adds_two_queries_per_role_assignment_row(
     django_app: Any,
-    superuser: User,
+    partner_admin_user: User,
     sub_partner_with_one_role_assignment: Partner,
     sub_partner_with_three_role_assignments: Partner,
 ):
     one_row_url = reverse("admin:account_partner_change", args=[sub_partner_with_one_role_assignment.pk])
     three_rows_url = reverse("admin:account_partner_change", args=[sub_partner_with_three_role_assignments.pk])
-    django_app.get(one_row_url, user=superuser)
+    django_app.get(one_row_url, user=partner_admin_user)
 
     with CaptureQueriesContext(connection) as one_row_queries:
-        django_app.get(one_row_url, user=superuser)
+        django_app.get(one_row_url, user=partner_admin_user)
     with CaptureQueriesContext(connection) as three_rows_queries:
-        django_app.get(three_rows_url, user=superuser)
+        django_app.get(three_rows_url, user=partner_admin_user)
 
     assert len(three_rows_queries) - len(one_row_queries) == 4
 
 
 def test_user_change_page_adds_two_queries_per_role_assignment_row(
     django_app: Any,
-    superuser: User,
+    user_admin_user: User,
     user_with_one_role_assignment: User,
     user_with_three_role_assignments: User,
 ):
     one_row_url = reverse("admin:account_user_change", args=[user_with_one_role_assignment.pk])
     three_rows_url = reverse("admin:account_user_change", args=[user_with_three_role_assignments.pk])
-    django_app.get(one_row_url, user=superuser)
+    django_app.get(one_row_url, user=user_admin_user)
 
     with CaptureQueriesContext(connection) as one_row_queries:
-        django_app.get(one_row_url, user=superuser)
+        django_app.get(one_row_url, user=user_admin_user)
     with CaptureQueriesContext(connection) as three_rows_queries:
-        django_app.get(three_rows_url, user=superuser)
+        django_app.get(three_rows_url, user=user_admin_user)
 
     assert len(three_rows_queries) - len(one_row_queries) == 4
 
