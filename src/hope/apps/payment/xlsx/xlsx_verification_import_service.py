@@ -1,6 +1,6 @@
 from decimal import Decimal
 import io
-from typing import Any
+from typing import Any, cast
 
 import openpyxl
 from openpyxl.utils import get_column_letter
@@ -202,9 +202,11 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                 )
             return
         raw_decimal = Decimal(str(raw_amount)) if received_amount is not None else None
-        amount_display = (
-            format(raw_decimal, f".{max(2, -raw_decimal.as_tuple().exponent)}f") if raw_decimal is not None else None
-        )
+        if raw_decimal is not None:
+            exponent = cast("int", raw_decimal.as_tuple().exponent)
+            amount_display = format(raw_decimal, f".{max(2, -exponent)}f")
+        else:
+            amount_display = None
         received_cell = row[self.RECEIVED_COLUMN_INDEX]
         received = received_cell.value
         if received is None and received_amount is not None and received_amount == 0:

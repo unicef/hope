@@ -59,6 +59,7 @@ from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import Error, OperationalError, connections
 from django.utils import timezone
+import elasticsearch
 from flags.models import FlagState
 
 from extras.test_utils.factories.account import create_superuser, generate_unicef_partners
@@ -157,11 +158,11 @@ class Command(BaseCommand):
         generate_additional_doc_types()
         self.stdout.write("Generating Engine core ...")
         generate_rule_formulas()
-        # try:
-        #     self.stdout.write("Rebuilding search index...")
-        #     call_command("search_index", "--rebuild", "-f")
-        # except elasticsearch.exceptions.RequestError as e:
-        #     logger.warning(f"Elasticsearch RequestError: {e}")
+        try:
+            self.stdout.write("Rebuilding search index...")
+            call_command("search_index", "--rebuild", "-f")
+        except elasticsearch.exceptions.RequestError as e:
+            logger.warning(f"Elasticsearch RequestError: {e}")
         self.stdout.write("Generating delivery mechanisms...")
         generate_delivery_mechanisms()
         self.stdout.write("Generating payment plan...")

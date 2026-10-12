@@ -284,7 +284,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             return self.ACTION_SKIP, None
 
         action = self._get_row_action(payment, delivered_quantity)
-        if action == self.ACTION_CONFLICT:
+        if action == self.ACTION_CONFLICT and delivered_quantity is not None:
             conflict_error = XlsxError(
                 self.sheetname,
                 cell.coordinate,
