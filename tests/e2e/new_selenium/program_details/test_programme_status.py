@@ -83,7 +83,6 @@ def test_finish_programme(
         business_area,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PROGRAMME_FINISH,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
         browser.open(details_url(active_programme_with_finished_cycle))
@@ -92,6 +91,8 @@ def test_finish_programme(
         browser.click('button[data-cy="button-finish-program"]')
         browser.click(FINISH_DIALOG_BUTTON)
         browser.wait_for_text("FINISHED", STATUS)
+        # Without PM_PROGRAMME_CYCLE_VIEW_LIST the cycles table is hidden instead of the page.
+        browser.assert_elements_absent("table", 'h1[data-cy="access-denied-title"]')
         active_programme_with_finished_cycle.refresh_from_db()
         assert active_programme_with_finished_cycle.status == Program.FINISHED
 
@@ -107,7 +108,6 @@ def test_finish_programme_with_active_cycle_fails(
         business_area,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PROGRAMME_FINISH,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
         browser.open(details_url(active_programme_with_active_cycle))

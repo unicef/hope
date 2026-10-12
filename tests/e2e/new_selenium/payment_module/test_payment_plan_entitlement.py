@@ -32,7 +32,6 @@ VIEW_PERMISSIONS = (
     Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
     Permissions.PM_VIEW_LIST,
     Permissions.PM_VIEW_DETAILS,
-    Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
 )
 
 
