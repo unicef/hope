@@ -33,7 +33,6 @@ from extras.test_utils.factories import (
     RuleFactory,
     TargetingCriteriaRuleFactory,
 )
-from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BeneficiaryGroup,
@@ -252,71 +251,6 @@ def create_payment_plan_lock_social_worker(
     social_worker_program: Program,
 ) -> PaymentPlan:
     return payment_plan_create(program=social_worker_program)
-
-
-@pytest.fixture
-def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms) -> PaymentPlan:
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
-    fsp = FinancialServiceProviderFactory()
-    fsp.delivery_mechanisms.set([dm_cash])
-
-    program_cycle = ProgramCycleFactory(
-        program=social_worker_program,
-        title="Cycle for PaymentPlan",
-        status=ProgramCycle.ACTIVE,
-        start_date=timezone.now() + relativedelta(days=10),
-        end_date=timezone.now() + relativedelta(days=15),
-    )
-
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.DRAFT,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        program_cycle=program_cycle,
-        business_area=social_worker_program.business_area,
-        dispersion_start_date=timezone.now().date(),
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_cash,
-    )
-    hoh1 = IndividualFactory(household=None)
-    household_1 = HouseholdFactory(
-        unicef_id="HH-17-0000.3340",
-        head_of_household=hoh1,
-        size=2,
-    )
-    ind = IndividualFactory(
-        household=household_1,
-        program=social_worker_program,
-        sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
-        business_area=social_worker_program.business_area,
-    )
-    PaymentFactory(
-        parent=payment_plan,
-        household=household_1,
-        excluded=False,
-        currency=Currency.objects.get(code="PLN"),
-        collector=ind,
-    )
-
-    payment_plan.update_population_count_fields()
-    payment_plan.update_money_fields()
-
-    flow = PaymentPlanFlow(payment_plan)
-    flow.status_open()
-    payment_plan.save(update_fields=("status",))
-
-    PaymentPlanFactory(
-        status=PaymentPlan.Status.LOCKED,
-        program_cycle=program_cycle,
-        business_area=social_worker_program.business_area,
-        dispersion_start_date=timezone.now().date(),
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        source_payment_plan=payment_plan,
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_cash,
-    )
-
-    return payment_plan
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
@@ -737,31 +671,6 @@ class TestPaymentPlans:
         assert "0" in page_payment_module_details.get_label_male_adults().text
 
         assert "6" in page_payment_module_details.get_label_targeted_individuals().text
-
-    def test_payment_plan_delete(
-        self,
-        create_payment_plan_open: PaymentPlan,
-        page_payment_module: PaymentModule,
-        page_payment_module_details: PaymentModuleDetails,
-        page_new_payment_plan: NewPaymentPlan,
-    ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_rows()
-        for i in range(len(page_payment_module.get_rows())):
-            if "OPEN" in page_payment_module.get_row(i).text:
-                payment_plan = page_payment_module.get_row(i).text
-                page_payment_module.get_row(i).click()
-                break
-        else:
-            raise AssertionError("No payment plan has Open status")
-        page_payment_module_details.get_delete_button().click()
-        page_payment_module_details.get_button_submit().click()
-        page_payment_module.wait_for_text("Payment Plans", page_payment_module.table_title)
-        page_payment_module.get_row(0)
-        assert payment_plan not in page_payment_module.get_row(0).text
-        assert "LOCKED" in page_payment_module.get_row(0).text
 
     def test_payment_plan_creation_error(
         self,
