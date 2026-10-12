@@ -131,7 +131,10 @@ def annotate_unread(
     )
     return tickets.annotate(seen_at=Coalesce(Subquery(seen_at), Value(tracking_start))).annotate(
         unread=(Q(created_at__gt=F("seen_at")) & ~Q(created_by=user))
-        | (Q(assigned_at__gt=F("seen_at")) & ~Q(assigned_by=user))
-        | (Q(user_modified__gt=F("seen_at"), user_modified_by__isnull=False) & ~Q(user_modified_by=user))
+        | (Q(assigned_at__gt=F("seen_at"), assigned_at__isnull=False) & ~Q(assigned_by=user))
+        | (
+            Q(user_modified__gt=F("seen_at"), user_modified__isnull=False, user_modified_by__isnull=False)
+            & ~Q(user_modified_by=user)
+        )
         | Q(Exists(note_by_someone_else))
     )
