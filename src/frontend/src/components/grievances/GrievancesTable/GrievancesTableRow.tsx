@@ -135,24 +135,7 @@ export function GrievancesTableRow({
           : undefined
       }
     >
-      <TableCell align="left" padding="checkbox" sx={{ position: 'relative' }}>
-        {ticket.unread && (
-          // Sits in the cell's left padding, so read and unread rows keep the checkbox aligned.
-          <Box
-            component="span"
-            data-cy="ticket-unread-dot"
-            sx={{
-              position: 'absolute',
-              left: 2,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              backgroundColor: theme.hctPalette.lightBlue,
-            }}
-          />
-        )}
+      <TableCell align="left" padding="checkbox">
         <Checkbox
           color="primary"
           onClick={(event) => {
@@ -165,7 +148,28 @@ export function GrievancesTableRow({
         />
       </TableCell>
       {columns.map((id) => (
-        <TableCell key={id} align="left">
+        <TableCell
+          key={id}
+          align="left"
+          sx={id === 'unicef_id' ? { position: 'relative' } : undefined}
+        >
+          {ticket.unread && id === 'unicef_id' && (
+            // Sits in the gap between the checkbox and the ID, so IDs stay aligned either way.
+            <Box
+              component="span"
+              data-cy="ticket-unread-dot"
+              sx={{
+                position: 'absolute',
+                left: 4,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: theme.hctPalette.lightBlue,
+              }}
+            />
+          )}
           {GRIEVANCE_COLUMNS[id].render(cellContext)}
         </TableCell>
       ))}
