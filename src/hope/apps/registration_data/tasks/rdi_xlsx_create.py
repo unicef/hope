@@ -36,6 +36,7 @@ from hope.models import (
     Account,
     Area,
     BusinessArea,
+    Country as GeoCountry,
     DocumentType,
     Facility,
     FlexibleAttribute,
@@ -358,9 +359,19 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
             self.collectors[hh_id].append(PendingIndividualRoleInHousehold(individual=individual, role=role))
 
-    def _create_documents(self) -> None:
-        from hope.models import Country as GeoCountry
+    def _resolve_issuing_country(
+        self, issuing_country: Country | None, individual: PendingIndividual, source: str
+    ) -> GeoCountry:
+        try:
+            return GeoCountry.objects.get(iso_code2=issuing_country)
+        except GeoCountry.DoesNotExist as exc:
+            sheet = getattr(self, "sheet_title", "individuals").title()
+            raise ValueError(
+                f"Sheet {sheet!r}, row {individual.detail_id}, {source}: "
+                f"issuing country {str(issuing_country)!r} does not exist"
+            ) from exc
 
+    def _create_documents(self) -> None:
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
@@ -368,7 +379,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = PendingDocument(
-                country=GeoCountry.objects.get(iso_code2=issuing_country),
+                country=self._resolve_issuing_country(
+                    issuing_country, individual, f"document type {document_data['key']!r}"
+                ),
                 document_number=document_data.get("value"),
                 photo=photo,
                 individual=individual,
@@ -381,14 +394,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         PendingDocument.objects.bulk_create(docs_to_create)
 
     def _create_identities(self) -> None:
-        from hope.models import Country as GeoCountry
-
         identities_to_create = [
             PendingIndividualIdentity(
                 partner=Partner.objects.get(name=identity["partner"]),
                 individual=identity["individual"],
                 number=identity["number"],
-                country=GeoCountry.objects.get(iso_code2=identity["issuing_country"]),
+                country=self._resolve_issuing_country(
+                    identity["issuing_country"], identity["individual"], f"identity partner {identity['partner']!r}"
+                ),
             )
             for identity in self.identities.values()
         ]
@@ -636,9 +649,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if header == "org_enumerator_h_c":
             obj_to_create.flex_fields["enumerator_id"] = cell.value
         if header in ("country_h_c", "country_origin_h_c"):
-            from hope.models import Country as GeoCountry
-
-            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], GeoCountry.objects.get(iso_code3=value))
+            try:
+                country = GeoCountry.objects.get(iso_code3=value)
+            except GeoCountry.DoesNotExist as exc:
+                raise ValueError(f"Country with ISO3 code {value!r} does not exist") from exc
+            setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], country)
         elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
             setattr(obj_to_create, self.COMBINED_FIELDS[header]["name"], Area.objects.get(p_code=value))
         elif header == "facility_name_h_c":
