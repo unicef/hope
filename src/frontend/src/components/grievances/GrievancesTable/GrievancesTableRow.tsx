@@ -1,4 +1,5 @@
 import { Checkbox } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -129,7 +130,9 @@ export function GrievancesTableRow({
       data-cy={`ticket-row-${ticket.unicefId}`}
       data-unread={ticket.unread ? 'true' : undefined}
       sx={
-        ticket.unread ? { backgroundColor: theme.hctPalette.blue } : undefined
+        ticket.unread
+          ? { backgroundColor: alpha(theme.hctPalette.lightBlue, 0.1) }
+          : undefined
       }
     >
       <TableCell align="left" padding="checkbox">

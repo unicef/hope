@@ -132,7 +132,7 @@ describe('GrievancesTableRow', () => {
 
     const row = screen.getByTestId('ticket-row-GRV-0001');
     expect(row.getAttribute('data-unread')).toBe('true');
-    expect(getComputedStyle(row).backgroundColor).toBe('rgb(216, 225, 238)');
+    expect(getComputedStyle(row).backgroundColor).toBe('rgba(0, 173, 239, 0.1)');
   });
 
   it('leaves a read ticket unhighlighted', () => {
@@ -141,7 +141,7 @@ describe('GrievancesTableRow', () => {
     const row = screen.getByTestId('ticket-row-GRV-0001');
     expect(row.getAttribute('data-unread')).toBeNull();
     expect(getComputedStyle(row).backgroundColor).not.toBe(
-      'rgb(216, 225, 238)',
+      'rgba(0, 173, 239, 0.1)',
     );
   });
 });
