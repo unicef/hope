@@ -31,7 +31,8 @@ vi.mock('react-i18next', () => ({
 vi.mock('@restgenerated/services/RestService', () => ({
   RestService: {
     restChoicesGrievanceTicketsRetrieve: vi.fn(),
-    restBusinessAreasUsersProfileRetrieve: vi.fn(),
+    restBusinessAreasGrievanceTicketsMyTasksVisitCreate: vi.fn(),
+    restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate: vi.fn(),
   },
 }));
 
@@ -53,13 +54,13 @@ vi.mock('@components/grievances/MyTasks/MyTasksFilters', () => ({
   },
 }));
 
-const CURRENT_USER_ID = 'user-1';
-
 const ALL_PERMISSIONS = [
   PERMISSIONS.GRIEVANCE_ASSIGN,
   PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE,
   PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
 ];
+
+const APPROVE_PERMISSION = PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE;
 
 const LocationProbe = (): ReactElement => {
   const location = useLocation();
@@ -92,11 +93,11 @@ describe('MyTasksPage', () => {
       grievanceTicketStatusChoices: [],
     });
     (
-      RestService.restBusinessAreasUsersProfileRetrieve as any
-    ).mockResolvedValue({ id: CURRENT_USER_ID });
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate as any
+    ).mockResolvedValue({ unreadTabs: [] });
   });
 
-  it('pins the needs-assignment tab to unassigned active tickets', async () => {
+  it('sends the needs-assignment tab and pins it to active tickets', async () => {
     renderPage('?tab=needs-assignment&sensitive=true');
 
     await screen.findByTestId('grievances-table');
@@ -104,11 +105,12 @@ describe('MyTasksPage', () => {
       // Active is pinned rather than merely defaulted: a closed unassigned ticket can never be
       // acted on from this tab, and the email's count leaves it out too.
       expect(lastTableProps().extraQueryParams).toEqual({
-        unassigned: true,
+        myTasksTab: 'needs-assignment',
         grievanceStatus: 'active',
       }),
     );
     expect(lastTableProps().filter.sensitive).toBe(true);
+    // No approve grant, so no Pending Approval tab.
     expect(screen.getAllByRole('tab')).toHaveLength(2);
     expect(screen.getByRole('tab', { selected: true }).textContent).toBe(
       'NEEDS ASSIGNMENT',
@@ -121,7 +123,7 @@ describe('MyTasksPage', () => {
     await screen.findByTestId('grievances-table');
     await waitFor(() =>
       expect(lastTableProps().extraQueryParams).toEqual({
-        assignedTo: CURRENT_USER_ID,
+        myTasksTab: 'mine',
       }),
     );
     // Asserted explicitly: were this dropped, the list would silently widen to every ticket
@@ -135,7 +137,7 @@ describe('MyTasksPage', () => {
     await screen.findByTestId('grievances-table');
     await waitFor(() =>
       expect(lastTableProps().extraQueryParams).toEqual({
-        assignedTo: CURRENT_USER_ID,
+        myTasksTab: 'mine',
       }),
     );
     expect(lastTableProps().filter.sensitive).toBe('');
@@ -177,7 +179,7 @@ describe('MyTasksPage', () => {
       // The pinned param is spread last by the table, so it beats the ?sensitive=false the URL
       // asked for rather than showing tickets the user may not see.
       expect(lastTableProps().extraQueryParams).toEqual({
-        assignedTo: CURRENT_USER_ID,
+        myTasksTab: 'mine',
         sensitive: 'true',
       }),
     );
@@ -188,7 +190,8 @@ describe('MyTasksPage', () => {
     expect(lastTableProps().filter.sensitive).toBe('true');
   });
 
-  it('hides the ticket-status filter on the needs-assignment tab only', async () => {
+  it('hides the ticket-status filter on the active-only tabs', async () => {
+    mockPermissions = [...ALL_PERMISSIONS, APPROVE_PERMISSION];
     renderPage('?tab=needs-assignment');
 
     await screen.findByTestId('grievances-table');
@@ -198,6 +201,109 @@ describe('MyTasksPage', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'ASSIGNED TO ME' }));
     await waitFor(() => expect(lastFiltersProps().showStatusFilter).toBe(true));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'PENDING APPROVAL' }));
+    await waitFor(() =>
+      expect(lastFiltersProps().showStatusFilter).toBe(false),
+    );
+  });
+
+  it('offers Pending Approval to a list viewer who can approve or close', async () => {
+    mockPermissions = [
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+      APPROVE_PERMISSION,
+    ];
+    renderPage('?tab=pending-approval');
+
+    await screen.findByTestId('grievances-table');
+    expect(screen.getByRole('tab', { selected: true }).textContent).toBe(
+      'PENDING APPROVAL',
+    );
+    await waitFor(() =>
+      // Only the non-sensitive half is granted, so sensitivity is pinned too.
+      expect(lastTableProps().extraQueryParams).toEqual({
+        myTasksTab: 'pending-approval',
+        sensitive: 'false',
+      }),
+    );
+  });
+
+  it('withholds Pending Approval from an approver with no list-view grant', async () => {
+    mockPermissions = [APPROVE_PERMISSION];
+    renderPage('?tab=pending-approval');
+
+    expect(await screen.findByText('Permission Denied')).toBeTruthy();
+  });
+
+  it('sends unread=true only while Only unread is applied', async () => {
+    // Applying a filter scrolls to the table, which jsdom does not implement.
+    Element.prototype.scrollIntoView = vi.fn();
+    renderPage('?tab=mine&unread=true');
+
+    await screen.findByTestId('grievances-table');
+    await waitFor(() =>
+      expect(lastTableProps().extraQueryParams).toEqual({
+        myTasksTab: 'mine',
+        unread: true,
+      }),
+    );
+
+    lastFiltersProps().setAppliedFilter({
+      ...lastFiltersProps().appliedFilter,
+      unread: '',
+    });
+    await waitFor(() =>
+      expect(lastTableProps().extraQueryParams).toEqual({ myTasksTab: 'mine' }),
+    );
+  });
+
+  it('refetches the table on every mount so opened tickets lose their highlight', async () => {
+    renderPage('?tab=mine');
+
+    await screen.findByTestId('grievances-table');
+    expect(lastTableProps().refetchOnMount).toBe('always');
+  });
+
+  it('puts a dot on each tab the visit call reports unread', async () => {
+    (
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate as any
+    ).mockResolvedValue({ unreadTabs: ['mine'] });
+    renderPage('?tab=needs-assignment');
+
+    await screen.findByTestId('grievances-table');
+    expect(
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
+    ).toHaveBeenCalledWith({ businessAreaSlug: 'afghanistan' });
+    expect(await screen.findByTestId('tab-unread-dot-mine')).toBeTruthy();
+    expect(screen.queryByTestId('tab-unread-dot-needs-assignment')).toBeNull();
+  });
+
+  it('marks the active tab read and takes the dots from the answer', async () => {
+    (
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate as any
+    ).mockResolvedValue({ unreadTabs: ['mine', 'needs-assignment'] });
+    (
+      RestService.restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate as any
+    ).mockResolvedValue({ unreadTabs: ['needs-assignment'] });
+    renderPage('?tab=mine');
+
+    await screen.findByTestId('tab-unread-dot-mine');
+    const { toolbarActions } = lastTableProps();
+    render(toolbarActions, { wrapper: TestProviders });
+    const button = screen.getByTestId('button-mark-all-read');
+    expect(button.hasAttribute('disabled')).toBe(false);
+    fireEvent.click(button);
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('tab-unread-dot-mine')).toBeNull(),
+    );
+    expect(
+      RestService.restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate,
+    ).toHaveBeenCalledWith({
+      businessAreaSlug: 'afghanistan',
+      formData: { tab: 'mine' },
+    });
+    expect(screen.getByTestId('tab-unread-dot-needs-assignment')).toBeTruthy();
   });
 
   it('denies access to a user with none of the preset permissions', async () => {

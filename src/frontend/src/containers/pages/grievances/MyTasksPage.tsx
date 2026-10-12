@@ -1,7 +1,9 @@
 import type { ReactElement } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Badge, Button } from '@mui/material';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -14,10 +16,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
 import { RestService } from '@restgenerated/services/RestService';
+import type { MyTasksTab } from '@restgenerated/models/MyTasksTab';
 import { restQueryKey } from '@utils/queryKeys';
 import { GrievanceStatuses } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
+import { theme } from 'src/theme';
+import { useTranslation } from 'react-i18next';
 import {
+  GRIEVANCES_APPROVE_PERMISSIONS,
   GRIEVANCES_VIEW_LIST_NON_SENSITIVE_PERMISSIONS,
   GRIEVANCES_VIEW_LIST_PERMISSIONS,
   GRIEVANCES_VIEW_LIST_SENSITIVE_PERMISSIONS,
@@ -26,10 +32,10 @@ import {
 } from '../../../config/permissions';
 
 // The tab values travel in the URL as ?tab= and are what the daily digest emails deep-link to;
-// they must stay in step with hope.apps.grievance.constants (PRESET_*). Sensitivity is not a tab:
-// every email counts sensitive and other tickets separately and links each count with ?sensitive=,
-// which lands on the filter below.
-// A tab lists groups of alternatives and needs a match in every one of them: loading either tab
+// they are also sent as my_tasks_tab, so they must stay in step with hope.apps.grievance.constants
+// (PRESET_*). Sensitivity is not a tab: every email counts sensitive and other tickets separately
+// and links each count with ?sensitive=, which lands on the filter below.
+// A tab lists groups of alternatives and needs a match in every one of them: loading any tab
 // calls the ticket list, which refuses a user holding no list-view grant of its own.
 export const MY_TASKS_TABS = [
   {
@@ -45,7 +51,19 @@ export const MY_TASKS_TABS = [
     label: 'ASSIGNED TO ME',
     permissions: [GRIEVANCES_VIEW_LIST_PERMISSIONS],
   },
+  {
+    value: 'pending-approval',
+    label: 'PENDING APPROVAL',
+    permissions: [
+      GRIEVANCES_VIEW_LIST_PERMISSIONS,
+      GRIEVANCES_APPROVE_PERMISSIONS,
+    ],
+  },
 ];
+
+// Both tabs only ever list active tickets (unassigned ones, and ones waiting for approval), so
+// neither offers the ticket-status choice.
+const ACTIVE_ONLY_TABS = ['needs-assignment', 'pending-approval'];
 
 export const MY_TASKS_PERMISSIONS = MY_TASKS_TABS.flatMap((tab) =>
   tab.permissions.flat(),
@@ -61,7 +79,9 @@ export const availableMyTasksTabs = (
 
 export const MyTasksPage = (): ReactElement => {
   const [shouldScroll, setShouldScroll] = useState(false);
-  const { businessAreaSlug, programCode } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const permissions = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
@@ -71,22 +91,22 @@ export const MyTasksPage = (): ReactElement => {
     queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
-  // Same param shape as usePermissions and GrievancesTable, so react-query serves one request.
-  const currentUserParams = {
-    businessAreaSlug,
-    program: programCode === 'all' ? undefined : programCode,
-  };
-  const { data: currentUserData, isLoading: currentUserLoading } = useQuery({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasUsersProfileRetrieve,
-      currentUserParams,
-    ),
+  // A POST, but read through useQuery so it reruns on every visit, including the return from a
+  // ticket, and so mark-read can drop its answer into the same cache entry.
+  const visitQueryKey = restQueryKey(
+    RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
+    { businessAreaSlug },
+  );
+  const { data: visitData } = useQuery({
+    queryKey: visitQueryKey,
     queryFn: () =>
-      RestService.restBusinessAreasUsersProfileRetrieve(currentUserParams),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate({
+        businessAreaSlug,
+      }),
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
+  const unreadTabs = visitData?.unreadTabs ?? [];
 
   const availableTabs = useMemo(
     () => availableMyTasksTabs(permissions),
@@ -134,6 +154,7 @@ export const MyTasksPage = (): ReactElement => {
     areaScope: 'all',
     overdue: '',
     sensitive: '',
+    unread: '',
   };
 
   const [filter, setFilter] = useState(
@@ -147,8 +168,6 @@ export const MyTasksPage = (): ReactElement => {
   useScrollToRefOnChange(tableRef, shouldScroll, appliedFilter, () =>
     setShouldScroll(false),
   );
-
-  const currentUserId = currentUserData?.id;
 
   // Sensitive and other grievances are separate grants. A user holding only one of them has no
   // choice to make, so the filter is decided for them here and its control is hidden.
@@ -166,20 +185,41 @@ export const MyTasksPage = (): ReactElement => {
   // pinned value exactly as it does to a chosen one.
   const pin = pinnedSensitive ? { sensitive: pinnedSensitive } : {};
 
-  // The tab's own axis is derived from the tab, never from the filter bar, so it stays out of the
-  // URL. Sensitivity is the exception: it is a filter, so it travels in appliedFilter, and only a
-  // permission-pinned value is forced here.
+  // The backend scopes the list to the tab and marks the unread rows. Sensitivity and unread are
+  // filters, so they travel in appliedFilter; only a permission-pinned sensitivity is forced here.
   const extraQueryParams = useMemo(
     () => ({
+      myTasksTab: activeTab,
+      // Every unassigned closed ticket is unassigned for good, so the tab that exists to get
+      // tickets assigned never shows them - matching the count the email was built from.
       ...(activeTab === 'needs-assignment'
-        ? // Every unassigned closed ticket is unassigned for good, so the tab that exists to get
-          // tickets assigned never shows them - matching the count the email was built from.
-          { unassigned: true, grievanceStatus: GrievanceStatuses.Active }
-        : { assignedTo: currentUserId }),
+        ? { grievanceStatus: GrievanceStatuses.Active }
+        : {}),
       ...(pinnedSensitive ? { sensitive: pinnedSensitive } : {}),
+      // Left out when unchecked: unread=false would list only the read tickets.
+      ...(appliedFilter.unread ? { unread: true } : {}),
     }),
-    [activeTab, currentUserId, pinnedSensitive],
+    [activeTab, pinnedSensitive, appliedFilter.unread],
   );
+
+  const { mutate: markTabRead, isPending: markingRead } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate({
+        businessAreaSlug,
+        formData: { tab: activeTab as MyTasksTab['tab'] },
+      }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(visitQueryKey, data);
+      [
+        RestService.restBusinessAreasGrievanceTicketsList,
+        RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+        RestService.restBusinessAreasProgramsGrievanceTicketsList,
+        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
+      ].forEach((method) =>
+        queryClient.invalidateQueries({ queryKey: restQueryKey(method) }),
+      );
+    },
+  });
 
   const handleTabChange = (newTab: string): void => {
     // A preset change makes the previous category selection meaningless, as on the ticket list,
@@ -188,7 +228,7 @@ export const MyTasksPage = (): ReactElement => {
       category: '',
       issueType: '',
       program: '',
-      ...(newTab === 'needs-assignment'
+      ...(ACTIVE_ONLY_TABS.includes(newTab)
         ? { grievanceStatus: GrievanceStatuses.Active }
         : {}),
     };
@@ -201,12 +241,12 @@ export const MyTasksPage = (): ReactElement => {
     setAppliedFilter({ ...appliedFilter, ...reset });
   };
 
-  if (choicesLoading || currentUserLoading) return <LoadingComponent />;
+  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null || permissions.length === 0)
     return <LoadingComponent />;
   if (!availableTabs.length)
     return <PermissionDenied permission={MY_TASKS_PERMISSIONS} />;
-  if (!choicesData || !currentUserData) return null;
+  if (!choicesData) return null;
 
   const tabs = (
     <Tabs
@@ -221,7 +261,29 @@ export const MyTasksPage = (): ReactElement => {
       aria-label="tabs"
     >
       {availableTabs.map((tab) => (
-        <Tab data-cy={`tab-${tab.value}`} key={tab.value} label={tab.label} />
+        <Tab
+          data-cy={`tab-${tab.value}`}
+          key={tab.value}
+          label={
+            <Badge
+              variant="dot"
+              invisible={!unreadTabs.includes(tab.value)}
+              data-cy={
+                unreadTabs.includes(tab.value)
+                  ? `tab-unread-dot-${tab.value}`
+                  : undefined
+              }
+              sx={{
+                '& .MuiBadge-badge': {
+                  backgroundColor: theme.hctPalette.lightBlue,
+                  right: -8,
+                },
+              }}
+            >
+              {tab.label}
+            </Badge>
+          }
+        />
       ))}
     </Tabs>
   );
@@ -235,7 +297,7 @@ export const MyTasksPage = (): ReactElement => {
         setFilter={setFilter}
         initialFilter={initialFilter}
         showSensitiveFilter={pinnedSensitive === null}
-        showStatusFilter={activeTab !== 'needs-assignment'}
+        showStatusFilter={!ACTIVE_ONLY_TABS.includes(activeTab)}
         appliedFilter={appliedFilter}
         setAppliedFilter={(f) => {
           setAppliedFilter(f);
@@ -252,6 +314,19 @@ export const MyTasksPage = (): ReactElement => {
           // Needs Assignment only ever lists unassigned active tickets, none of which are
           // closable, so the bulk-close action has nothing to do there.
           showBulkClose={activeTab !== 'needs-assignment'}
+          refetchOnMount="always"
+          toolbarActions={
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<DoneAllIcon />}
+              disabled={!unreadTabs.includes(activeTab) || markingRead}
+              onClick={() => markTabRead()}
+              data-cy="button-mark-all-read"
+            >
+              {t('Mark all as read')}
+            </Button>
+          }
         />
       </div>
     </>

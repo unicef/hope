@@ -11,6 +11,7 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import type { ApiErrorShape } from '@utils/utils';
 import { showApiErrorMessages } from '@utils/utils';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { theme } from 'src/theme';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 import type { ReactElement } from 'react';
@@ -126,6 +127,10 @@ export function GrievancesTableRow({
       role="checkbox"
       key={ticket.id}
       data-cy={`ticket-row-${ticket.unicefId}`}
+      data-unread={ticket.unread ? 'true' : undefined}
+      sx={
+        ticket.unread ? { backgroundColor: theme.hctPalette.blue } : undefined
+      }
     >
       <TableCell align="left" padding="checkbox">
         <Checkbox

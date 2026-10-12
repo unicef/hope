@@ -74,13 +74,16 @@ const urgencyChoicesData = [
   { value: 2, name: 'Urgent' },
 ];
 
-const renderRow = (columns: GrievanceColumnId[]) =>
+const renderRow = (
+  columns: GrievanceColumnId[],
+  rowTicket: GrievanceTicketList = ticket,
+) =>
   render(
     <MemoryRouter>
       <table>
         <tbody>
           <GrievancesTableRow
-            ticket={ticket}
+            ticket={rowTicket}
             statusChoices={statusChoices}
             categoryChoices={categoryChoices}
             issueTypeChoicesData={[]}
@@ -122,5 +125,23 @@ describe('GrievancesTableRow', () => {
     // The preset pins both, so neither column is built for this list.
     expect(screen.queryByText('Assigned')).toBeNull();
     expect(screen.queryByRole('combobox')).toBeNull();
+  });
+
+  it('highlights a ticket the user has not opened since it changed', () => {
+    renderRow(MY_TASKS_COLUMNS, { ...ticket, unread: true });
+
+    const row = screen.getByTestId('ticket-row-GRV-0001');
+    expect(row.getAttribute('data-unread')).toBe('true');
+    expect(getComputedStyle(row).backgroundColor).toBe('rgb(216, 225, 238)');
+  });
+
+  it('leaves a read ticket unhighlighted', () => {
+    renderRow(MY_TASKS_COLUMNS, { ...ticket, unread: false });
+
+    const row = screen.getByTestId('ticket-row-GRV-0001');
+    expect(row.getAttribute('data-unread')).toBeNull();
+    expect(getComputedStyle(row).backgroundColor).not.toBe(
+      'rgb(216, 225, 238)',
+    );
   });
 });
