@@ -77,15 +77,14 @@ export const GrievancesTable = ({
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
-  // Across every programme the list gains a Programmes column, whatever the page asked for. It goes
-  // before the unread marker so the dot stays at the far right.
-  const visibleColumns = useMemo<GrievanceColumnId[]>(() => {
-    if (!isAllPrograms || columns.includes('programs')) return columns;
-    const rest = columns.filter((id) => id !== 'unread');
-    return columns.includes('unread')
-      ? [...rest, 'programs', 'unread']
-      : [...rest, 'programs'];
-  }, [columns, isAllPrograms]);
+  // Across every programme the list gains a Programmes column, whatever the page asked for.
+  const visibleColumns = useMemo<GrievanceColumnId[]>(
+    () =>
+      isAllPrograms && !columns.includes('programs')
+        ? [...columns, 'programs']
+        : columns,
+    [columns, isAllPrograms],
+  );
 
   const headCells = useMemo(
     () =>

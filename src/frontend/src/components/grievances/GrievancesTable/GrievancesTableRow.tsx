@@ -1,4 +1,4 @@
-import { Checkbox } from '@mui/material';
+import { Box, Checkbox } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
@@ -135,7 +135,24 @@ export function GrievancesTableRow({
           : undefined
       }
     >
-      <TableCell align="left" padding="checkbox">
+      <TableCell align="left" padding="checkbox" sx={{ position: 'relative' }}>
+        {ticket.unread && (
+          // Sits in the cell's left padding, so read and unread rows keep the checkbox aligned.
+          <Box
+            component="span"
+            data-cy="ticket-unread-dot"
+            sx={{
+              position: 'absolute',
+              left: 2,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              backgroundColor: theme.hctPalette.lightBlue,
+            }}
+          />
+        )}
         <Checkbox
           color="primary"
           onClick={(event) => {

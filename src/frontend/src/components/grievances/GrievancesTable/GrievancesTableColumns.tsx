@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react';
-import { Box } from '@mui/material';
-import { theme } from 'src/theme';
 import type { HeadCell } from '@core/Table/EnhancedTableHead';
 import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { BlackLink } from '@core/BlackLink';
@@ -34,8 +32,7 @@ export type GrievanceColumnId =
   | 'created_at'
   | 'user_modified'
   | 'total_days'
-  | 'programs'
-  | 'unread';
+  | 'programs';
 
 /** What a header needs to shape itself: the programme type decides the target column. */
 export interface GrievanceHeadContext {
@@ -298,31 +295,6 @@ export const GRIEVANCE_COLUMNS: Record<GrievanceColumnId, GrievanceColumn> = {
         <div>-</div>
       ),
   },
-  unread: {
-    head: {
-      disablePadding: false,
-      label: '',
-      id: 'unread',
-      numeric: false,
-      dataCy: 'unread',
-      disableSort: true,
-    },
-    render: ({ ticket }) =>
-      ticket.unread ? (
-        <Box
-          component="span"
-          data-cy="ticket-unread-dot"
-          sx={{
-            display: 'inline-block',
-            verticalAlign: 'middle',
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            backgroundColor: theme.hctPalette.lightBlue,
-          }}
-        />
-      ) : null,
-  },
 };
 
 export const DEFAULT_GRIEVANCE_COLUMNS: GrievanceColumnId[] = [
@@ -349,5 +321,4 @@ export const MY_TASKS_COLUMNS: GrievanceColumnId[] = [
   'priority',
   'urgency',
   'total_days',
-  'unread',
 ];
