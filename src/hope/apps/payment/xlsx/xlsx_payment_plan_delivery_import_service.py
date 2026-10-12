@@ -7,6 +7,7 @@ from typing import IO, TYPE_CHECKING, Any, cast
 
 from dateutil.parser import parse
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -14,6 +15,7 @@ import openpyxl
 import pytz
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.payment.services.handle_total_cash_in_households import (
@@ -52,6 +54,11 @@ DELIVERY_ATTEMPTED_BUT_FAILED_VALUE = Decimal(-1)
 NULL_DELIVERY_POLICY_RESET = "reset"
 NULL_DELIVERY_POLICY_IGNORE = "ignore"
 NULL_DELIVERY_POLICIES = (NULL_DELIVERY_POLICY_RESET, NULL_DELIVERY_POLICY_IGNORE)
+
+
+def _format_quantity_for_message(quantity: Decimal) -> str:
+    whole, _, fractional = format(quantity, "f").partition(".")
+    return f"{whole}.{fractional.rstrip('0').ljust(2, '0')}"
 
 
 class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
@@ -224,8 +231,8 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         if not quantity.is_finite() or quantity < 0 and quantity != DELIVERY_ATTEMPTED_BUT_FAILED_VALUE:
             raise ValueError
         try:
-            return quantity.quantize(Decimal("0.01"))
-        except InvalidOperation:
+            return normalize_currency_decimal(quantity)
+        except ValidationError:
             raise ValueError from None
 
     def _get_row_action(self, payment: Payment, delivered_quantity: Decimal | None) -> str:
@@ -281,8 +288,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             conflict_error = XlsxError(
                 self.sheetname,
                 cell.coordinate,
-                f"Payment {payment_id}: Delivered quantity {delivered_quantity} conflicts with the existing "
-                f"delivered quantity {payment.delivered_quantity}.",
+                f"Payment {payment_id}: Delivered quantity {_format_quantity_for_message(delivered_quantity)} "
+                f"conflicts with the existing delivered quantity "
+                f"{_format_quantity_for_message(payment.delivered_quantity)}.",
             )
             self.errors.append(conflict_error)
             self.conflict_errors.append(conflict_error)

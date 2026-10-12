@@ -19,6 +19,7 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.fields import HopeCurrencyField
 from hope.apps.household.const import (
     BLANK,
     NON_BENEFICIARY,
@@ -579,19 +580,17 @@ class Household(
         help_text="Beneficiary Program Registration id [sys]",
         db_collation="und-ci-det",
     )
-    total_cash_received_usd = models.DecimalField(
+    total_cash_received_usd = HopeCurrencyField(
         null=True,
-        decimal_places=2,
-        max_digits=64,
         blank=True,
-        help_text="Household cash received usd [sys]",
+        verbose_name="Total cash received in USD",
+        help_text="Sum of delivered payments in USD, with up to 10 decimal places [sys].",
     )
-    total_cash_received = models.DecimalField(
+    total_cash_received = HopeCurrencyField(
         null=True,
-        decimal_places=2,
-        max_digits=64,
         blank=True,
-        help_text="Household cash received [sys]",
+        verbose_name="Total cash received in base currency",
+        help_text="Sum of delivered payments in the household currency, with up to 10 decimal places [sys].",
     )
 
     flex_fields = JSONField(default=dict, blank=True, help_text="Household flex fields [sys]")

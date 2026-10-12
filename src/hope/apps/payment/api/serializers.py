@@ -18,7 +18,12 @@ from rest_framework.settings import api_settings
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.api.fields import ScopedRelatedField, UTCDateField
+from hope.apps.core.api.fields import (
+    HopeCurrencyDecimalField,
+    HopeCurrencyModelSerializer,
+    ScopedRelatedField,
+    UTCDateField,
+)
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.household.api.serializers.household import (
@@ -241,7 +246,7 @@ class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
         return obj.payment_plan.payment_verification_plans.count()
 
 
-class PaymentVerificationSerializer(serializers.ModelSerializer):
+class PaymentVerificationSerializer(HopeCurrencyModelSerializer):
     class Meta:
         model = PaymentVerification
         fields = ("id", "status", "status_date", "received_amount")
@@ -395,7 +400,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
         return self._payments_summary(obj)["error_count"]
 
 
-class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
+class PaymentVerificationPlanListSerializer(HopeCurrencyModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
@@ -421,7 +426,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+class PaymentPlanSerializer(AdminUrlSerializerMixin, HopeCurrencyModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
@@ -487,7 +492,7 @@ class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
         fields = ["id", "unicef_id", "name"]
 
 
-class PaymentPlanListSerializer(serializers.ModelSerializer):
+class PaymentPlanListSerializer(HopeCurrencyModelSerializer):
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
@@ -685,7 +690,7 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
 
 
 class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
-    delivered_quantity = serializers.FloatField()
+    delivered_quantity = HopeCurrencyDecimalField()
     delivery_date = serializers.DateField()
 
 
@@ -744,7 +749,7 @@ class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
     required.
     """
 
-    fixed_amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, min_value=Decimal("0.01"))
+    fixed_amount = HopeCurrencyDecimalField(required=False, min_value=Decimal("0.01"))
     file = serializers.FileField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
@@ -1392,7 +1397,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
 
 
-class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, HopeCurrencyModelSerializer):
     payment_verification_plan_unicef_id = serializers.CharField(source="payment_verification_plan.unicef_id")
     verification_channel = serializers.CharField(source="payment_verification_plan.verification_channel")
 
@@ -1418,7 +1423,7 @@ class PaymentChoicesSerializer(serializers.Serializer):
         return [{"name": label, "value": value} for value, label in Payment.STATUS_CHOICE]
 
 
-class PaymentListSerializer(serializers.ModelSerializer):
+class PaymentListSerializer(HopeCurrencyModelSerializer):
     id = serializers.UUIDField(read_only=True)
     parent_id = serializers.UUIDField(read_only=True)
     parent_unicef_id = serializers.CharField(source="parent.unicef_id")
@@ -1718,7 +1723,7 @@ class PaymentPlanSmallSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentSmallSerializer(serializers.ModelSerializer):
+class PaymentSmallSerializer(HopeCurrencyModelSerializer):
     verification = serializers.SerializerMethodField()
     parent = PaymentPlanSmallSerializer(read_only=True)
 
@@ -1738,7 +1743,7 @@ class PaymentSmallSerializer(serializers.ModelSerializer):
         return getattr(verification, "id", None)
 
 
-class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+class VerificationDetailSerializer(AdminUrlSerializerMixin, HopeCurrencyModelSerializer):
     status = serializers.CharField(source="get_status_display")
     payment_verification_plan = PaymentVerificationPlanSerializer()
 
@@ -1754,7 +1759,7 @@ class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSer
         )
 
 
-class VerificationListSerializer(serializers.ModelSerializer):
+class VerificationListSerializer(HopeCurrencyModelSerializer):
     status = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="payment_verification_plan.verification_channel")
     verification_plan_unicef_id = serializers.CharField(source="payment_verification_plan.unief_id")
@@ -1837,7 +1842,7 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
 
 
 class PaymentVerificationUpdateSerializer(serializers.Serializer):
-    received_amount = serializers.FloatField(required=False)
+    received_amount = HopeCurrencyDecimalField(required=False)
     received = serializers.BooleanField()
     version = serializers.IntegerField(required=False)
 
@@ -1993,7 +1998,7 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 
 
 class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
-    flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
+    flat_amount_value = HopeCurrencyDecimalField(required=True)
     version = serializers.IntegerField(required=False)
 
 

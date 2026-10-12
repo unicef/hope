@@ -285,6 +285,14 @@ def payment_gateway_setup(
 
 
 @pytest.fixture
+def ten_place_gateway_payment(payment_gateway_setup: dict) -> Payment:
+    payment = payment_gateway_setup["payments"][0]
+    payment.entitlement_quantity = Decimal("100.1234567891")
+    payment.save(update_fields=["entitlement_quantity"])
+    return payment
+
+
+@pytest.fixture
 def unmatched_payment_gateway_record():
     return PaymentRecordData(
         id=999,
@@ -1238,7 +1246,7 @@ def test_api_add_records_to_payment_instruction(
                 "remote_id": str(payments[0].id),
                 "record_code": payments[0].unicef_id,
                 "payload": {
-                    "amount": str(payments[0].entitlement_quantity),
+                    "amount": "100.00",
                     "phone_no": str(payments[0].collector.phone_no),
                     "last_name": payments[0].collector.family_name,
                     "middle_name": payments[0].collector.middle_name,
@@ -1306,7 +1314,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_mobile(
                 "remote_id": str(payments[0].id),
                 "record_code": payments[0].unicef_id,
                 "payload": {
-                    "amount": str(payments[0].entitlement_quantity),
+                    "amount": "100.00",
                     "phone_no": str(primary_collector.phone_no),
                     "last_name": primary_collector.family_name,
                     "middle_name": primary_collector.middle_name,
@@ -1393,7 +1401,7 @@ def test_api_add_records_to_payment_instruction_wallet_integration_bank(
     payments[0].household_snapshot.refresh_from_db()
 
     expected_payload = {
-        "amount": str(payments[0].entitlement_quantity),
+        "amount": "100.00",
         "phone_no": str(primary_collector.phone_no),
         "last_name": primary_collector.family_name,
         "middle_name": primary_collector.middle_name,
@@ -2257,10 +2265,16 @@ def test_payment_payload_system_fields_override_fsp_extra_fields(payment_gateway
     payload = PaymentSerializer().get_payload(payment)
 
     assert payload["fsp_reference"] == "FSP-001"
-    assert payload["amount"] == str(payment.entitlement_quantity)
+    assert payload["amount"] == "100.00"
     assert "account" not in payload
     assert "origination_currency" not in payload
     assert "reconciliation_reference" not in payload
+
+
+def test_payment_payload_preserves_ten_place_amount(ten_place_gateway_payment: Payment) -> None:
+    payload = PaymentSerializer().get_payload(ten_place_gateway_payment)
+
+    assert payload["amount"] == "100.1234567891"
 
 
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(

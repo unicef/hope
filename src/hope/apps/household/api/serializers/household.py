@@ -3,7 +3,7 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from hope.apps.core.api.fields import UTCDateField
+from hope.apps.core.api.fields import HopeCurrencyDecimalField, UTCDateField
 from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.utils import resolve_flex_fields_choices_to_string, to_choice_object
 from hope.apps.geo.api.serializers import AreaSimpleSerializer
@@ -40,7 +40,7 @@ from hope.models import (
 class DeliveredQuantitySerializer(serializers.Serializer):
     currency = serializers.CharField()
     currency_vision_code = serializers.CharField()
-    total_delivered_quantity = serializers.DecimalField(max_digits=64, decimal_places=2)
+    total_delivered_quantity = HopeCurrencyDecimalField(max_digits=64)
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
@@ -49,8 +49,8 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()
-    total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
-    total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    total_cash_received = HopeCurrencyDecimalField()
+    total_cash_received_usd = HopeCurrencyDecimalField()
     residence_status = serializers.CharField(source="get_residence_status_display")
     has_duplicates = serializers.BooleanField(source="annotate_has_duplicates")
     sanction_list_possible_match = serializers.BooleanField(source="annotate_has_sanction_list_possible_match")
@@ -115,8 +115,8 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     admin4 = AreaSimpleSerializer()
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
-    total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
-    total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    total_cash_received = HopeCurrencyDecimalField()
+    total_cash_received_usd = HopeCurrencyDecimalField()
     delivered_quantities = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
     residence_status = serializers.CharField(source="get_residence_status_display")
@@ -242,8 +242,8 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     country_origin = serializers.CharField(source="country_origin.name", default="")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
-    total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
-    total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    total_cash_received = HopeCurrencyDecimalField()
+    total_cash_received_usd = HopeCurrencyDecimalField()
     has_duplicates = serializers.SerializerMethodField()
     registration_data_import = RegistrationDataImportSerializer()
     flex_fields = serializers.SerializerMethodField()

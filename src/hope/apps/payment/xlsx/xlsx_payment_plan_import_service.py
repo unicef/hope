@@ -3,12 +3,14 @@ import io
 from typing import IO, TYPE_CHECKING, Union
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 import openpyxl
 from openpyxl.cell import Cell
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.payment.utils import bulk_log_payment_changes, get_quantity_in_usd, to_decimal
+from hope.apps.core.fields import normalize_currency_decimal
+from hope.apps.payment.utils import bulk_log_payment_changes, get_quantity_in_usd
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import (
@@ -158,7 +160,17 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return
         entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
         if entitlement_amount is not None and entitlement_amount != "":
-            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
+            try:
+                converted_entitlement_amount = normalize_currency_decimal(entitlement_amount)
+            except ValidationError:
+                self.errors.append(
+                    XlsxError(
+                        self.TITLE,
+                        self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).coordinate,
+                        "Invalid amount",
+                    )
+                )
+                return
             if converted_entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 
@@ -190,7 +202,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return None
 
         if entitlement_amount is not None and entitlement_amount != "":
-            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
+            converted_entitlement_amount = normalize_currency_decimal(entitlement_amount)
             if converted_entitlement_amount != payment.entitlement_quantity:
                 entitlement_date = timezone.now()
                 entitlement_quantity_usd = get_quantity_in_usd(

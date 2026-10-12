@@ -26,6 +26,7 @@ from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
+from hope.apps.core.fields import HopeCurrencyField
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
@@ -471,13 +472,12 @@ class PaymentPlan(
         blank=True,
         help_text="Reason for aborting",
     )
-    flat_amount_value = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    flat_amount_value = HopeCurrencyField(
+        verbose_name="Flat entitlement amount",
         validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
         blank=True,
-        help_text="Apply a fixed amount of entitlement for all payment records within a payment plan",
+        help_text="Entitlement amount applied to every payment in this plan, with up to 10 decimal places.",
     )
     # System fields
     status = models.CharField(
@@ -536,73 +536,65 @@ class PaymentPlan(
     total_households_count = models.PositiveIntegerField(default=0, help_text="Total Households Count [sys]")
     total_individuals_count = models.PositiveIntegerField(default=0, help_text="Total Individuals Count [sys]")
     imported_file_date = models.DateTimeField(blank=True, null=True, help_text="Imported File Date [sys]")
-    total_entitled_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_entitled_quantity = HopeCurrencyField(
+        verbose_name="Total entitled quantity in base currency",
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
         blank=True,
-        help_text="Total Entitled Quantity [sys]",
+        help_text="Sum of payment entitlements in the plan currency, with up to 10 decimal places [sys].",
     )
-    total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_entitled_quantity_usd = HopeCurrencyField(
+        verbose_name="Total entitled quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Entitled Quantity USD [sys]",
+        help_text="Sum of payment entitlements converted to USD, with up to 10 decimal places [sys].",
     )
-    total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_entitled_quantity_revised = HopeCurrencyField(
+        verbose_name="Revised total entitled quantity in base currency",
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
         blank=True,
-        help_text="Total Entitled Quantity Revised [sys]",
+        help_text="Revised entitlement total in the plan currency, with up to 10 decimal places [sys].",
     )
-    total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_entitled_quantity_revised_usd = HopeCurrencyField(
+        verbose_name="Revised total entitled quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Entitled Quantity Revised USD [sys]",
+        help_text="Revised entitlement total in USD, with up to 10 decimal places [sys].",
     )
-    total_delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_delivered_quantity = HopeCurrencyField(
+        verbose_name="Total delivered quantity in base currency",
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
         blank=True,
-        help_text="Total Delivered Quantity [sys]",
+        help_text="Sum of delivered payments in the plan currency, with up to 10 decimal places [sys].",
     )
-    total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_delivered_quantity_usd = HopeCurrencyField(
+        verbose_name="Total delivered quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Delivered Quantity USD [sys]",
+        help_text="Sum of delivered payments in USD, with up to 10 decimal places [sys].",
     )
-    total_undelivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_undelivered_quantity = HopeCurrencyField(
+        verbose_name="Total undelivered quantity in base currency",
         validators=[MinValueValidator(Decimal(0))],
         db_index=True,
         null=True,
         blank=True,
-        help_text="Total Undelivered Quantity [sys]",
+        help_text="Entitled amount remaining in the plan currency, with up to 10 decimal places [sys].",
     )
-    total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=15,
+    total_undelivered_quantity_usd = HopeCurrencyField(
+        verbose_name="Total undelivered quantity in USD",
         validators=[MinValueValidator(Decimal(0))],
         null=True,
         blank=True,
-        help_text="Total Undelivered Quantity USD [sys]",
+        help_text="Entitled amount remaining in USD, with up to 10 decimal places [sys].",
     )
     steficon_targeting_applied_date = models.DateTimeField(
         blank=True,

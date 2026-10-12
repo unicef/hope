@@ -1,3 +1,4 @@
+from decimal import Decimal
 import logging
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
@@ -136,7 +137,12 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             payment_record_verification.payment.delivered_quantity,
             payment_record_verification.received_amount,
         )
-        self.ws_export_list.append(payment_record_verification_row)
+        self.ws_export_list.append(
+            [
+                self.right_format_for_xlsx(value) if isinstance(value, Decimal) else value
+                for value in payment_record_verification_row
+            ]
+        )
 
     def _add_payment_record_verification_row_for_household(
         self, payment_record_verification: PaymentVerification
@@ -161,7 +167,12 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             payment_record_verification.payment.delivered_quantity,
             payment_record_verification.received_amount,
         )
-        self.ws_export_list.append(payment_record_verification_row)
+        self.ws_export_list.append(
+            [
+                self.right_format_for_xlsx(value) if isinstance(value, Decimal) else value
+                for value in payment_record_verification_row
+            ]
+        )
 
     def _add_payment_record_verifications(self) -> None:
         for payment_record_verification in self.payment_record_verifications:
