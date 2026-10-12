@@ -11,7 +11,7 @@ import pytest
 MIGRATION_CASES = (
     (
         "payment",
-        "0078_migration",
+        "0079_migration",
         "Payment",
         "PAYMENT_COLUMNS",
         "change_payment_columns",
@@ -20,7 +20,7 @@ MIGRATION_CASES = (
     ),
     (
         "payment",
-        "0079_migration",
+        "0080_migration",
         "PaymentPlan",
         "PAYMENT_PLAN_COLUMNS",
         "change_payment_plan_columns",
@@ -29,7 +29,7 @@ MIGRATION_CASES = (
     ),
     (
         "payment",
-        "0080_migration",
+        "0081_migration",
         "PaymentVerification",
         "PAYMENT_VERIFICATION_COLUMNS",
         "change_verification_amount_column",
