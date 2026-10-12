@@ -11,8 +11,7 @@ tags:
 with the right to assign them, and the ones already assigned to you. Each has its own tab, so
 neither has to be dug out of the Grievance Tickets list.
 
-It is also where the [daily grievance emails](grievance-daily-emails.md) land when a recipient
-follows a link.
+It is also where the [My Tasks emails](my-tasks-emails.md) land when a recipient follows a link.
 
 ---
 
@@ -81,7 +80,7 @@ The filter reshapes the **Category** list below it:
 **Overdue Only** narrows the list to tickets past their due date. "Overdue" is measured from the
 ticket's creation date against a threshold that differs by category — one day for sensitive
 grievances, thirty days for everything else, both configurable. See
-[Overdue thresholds](grievance-daily-emails.md#overdue-thresholds).
+[Overdue thresholds](my-tasks-emails.md#overdue-thresholds).
 
 ![The overdue filter open, offering All Tickets and Overdue Only](./_screenshots/my-tasks/overdue-filter.png)
 
@@ -101,12 +100,9 @@ The list is ordered by **Total Days**, longest-waiting first.
 
 ## Arriving from an email
 
-The [daily grievance emails](grievance-daily-emails.md) link straight into this page with the tab
-and the filters already set — for example, the sensitive half of the overdue email opens
-**ASSIGNED TO ME** with **Sensitive** and **Overdue Only** applied.
-
-Those filters are shown in the filter bar rather than applied invisibly, so a recipient who arrives
-at a short list can see why it is short.
+The [My Tasks emails](my-tasks-emails.md) link straight into this page, one link per tab that
+changed since you last opened it. Opening a tab is what tells HOPE you have seen its changes: the
+reminders stop, and the next email comes only once something new has changed.
 
 ---
 

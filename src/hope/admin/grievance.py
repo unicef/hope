@@ -12,6 +12,8 @@ from hope.admin.utils import HOPEModelAdminBase, ViewOnUiMixin
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
+    MyTasksTabVisit,
+    MyTasksVisit,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
@@ -112,6 +114,29 @@ class GrievanceTicketAdmin(ViewOnUiMixin, CursorPaginatorAdmin, LinkedObjectsMix
 @admin.register(TicketNote)
 class TicketNoteAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     pass
+
+
+class MyTasksTabVisitInline(admin.TabularInline):
+    model = MyTasksTabVisit
+    fields = ("tab", "last_visit_at", "seen_until")
+    readonly_fields = fields
+    extra = 0
+    can_delete = False
+
+    def has_add_permission(self, request: HttpRequest, obj: MyTasksVisit | None = None) -> bool:
+        return False
+
+
+@admin.register(MyTasksVisit)
+class MyTasksVisitAdmin(HOPEModelAdminBase):
+    list_display = ("user", "business_area", "first_email_at", "last_reminder_at")
+    list_filter = (("business_area", AutoCompleteFilter),)
+    search_fields = ("user__email",)
+    readonly_fields = ("user", "business_area", "created_at", "first_email_at", "last_reminder_at")
+    inlines = (MyTasksTabVisitInline,)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
 
 
 @admin.register(TicketComplaintDetails)

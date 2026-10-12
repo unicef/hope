@@ -47,7 +47,8 @@
                 "total_days": 0,
                 "related_tickets_count": 0,
                 "programs": [],
-                "target_id": ""
+                "target_id": "",
+                "changed_since_visit": false
             }
         ]
     },

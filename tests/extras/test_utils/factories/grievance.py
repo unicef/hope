@@ -1,11 +1,15 @@
 """Factories for grievance models."""
 
+from django.utils import timezone
 import factory
 from factory.django import DjangoModelFactory
 
+from hope.apps.grievance.constants import PRESET_MINE
 from hope.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
+    MyTasksTabVisit,
+    MyTasksVisit,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
@@ -23,6 +27,7 @@ from hope.apps.grievance.models import (
 )
 from hope.models import PaymentVerification
 
+from .account import UserFactory
 from .core import BusinessAreaFactory
 from .household import HouseholdFactory, IndividualFactory
 from .sanction_list import SanctionListIndividualFactory
@@ -210,6 +215,24 @@ class TicketNoteFactory(DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory)
     description = factory.Sequence(lambda n: f"Note {n}")
+
+
+class MyTasksVisitFactory(DjangoModelFactory):
+    class Meta:
+        model = MyTasksVisit
+
+    user = factory.SubFactory(UserFactory)
+    business_area = factory.SubFactory(BusinessAreaFactory)
+
+
+class MyTasksTabVisitFactory(DjangoModelFactory):
+    class Meta:
+        model = MyTasksTabVisit
+
+    visit = factory.SubFactory(MyTasksVisitFactory)
+    tab = PRESET_MINE
+    last_visit_at = factory.LazyFunction(timezone.now)
+    seen_until = factory.LazyFunction(timezone.now)
 
 
 class TicketPositiveFeedbackDetailsFactory(DjangoModelFactory):

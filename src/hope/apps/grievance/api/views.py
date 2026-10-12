@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.db import transaction
 from django.db.models import (
@@ -81,6 +81,8 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     GrievanceTicketListSerializer,
     GrievanceTicketRelatedSerializer,
     GrievanceUpdateApproveStatusSerializer,
+    MyTasksVisitRequestSerializer,
+    MyTasksVisitSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
@@ -90,10 +92,10 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNote,
 )
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.apps.grievance.services.dashboard_datasets import build_dashboard_data
 from hope.apps.grievance.services.data_change_services import update_data_change_extras
+from hope.apps.grievance.services.my_tasks_service import record_visit
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     mark_unique_and_close,
 )
@@ -132,6 +134,8 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.contrib.auth.models import AbstractUser
+
+    from hope.models import User
 
 
 class GrievanceTicketViewSet(
@@ -203,7 +207,7 @@ class GrievanceTicketViewSet(
                     output_field=DateField(),
                 ),
             )
-            .annotate(total_days=F("total__day"))
+            .annotate(total_days=F("total__day"), changed_since_visit=self.changed_since_visit_annotation())
             .order_by("-created_at")
         )
 
@@ -284,6 +288,14 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
+        "my_tasks_visit": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [
@@ -463,9 +475,19 @@ class GrievanceTicketGlobalViewSet(
                     output_field=DateField(),
                 ),
             )
-            .annotate(total_days=F("total__day"))
+            .annotate(total_days=F("total__day"), changed_since_visit=self.changed_since_visit_annotation())
             .order_by("-created_at")
         )
+
+    @extend_schema(request=MyTasksVisitRequestSerializer, responses={200: MyTasksVisitSerializer})
+    @action(detail=False, methods=["post"], url_path="my-tasks/visit")
+    def my_tasks_visit(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Record that the user opened a My Tasks tab and say which tabs changed since they were last opened."""
+        serializer = MyTasksVisitRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tabs = record_visit(cast("User", request.user), self.business_area, serializer.validated_data["tab"])
+        data = {"changed_tabs": [preset for preset, changed in tabs.items() if changed]}
+        return Response(MyTasksVisitSerializer(data).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={200: GrievanceTicketRelatedSerializer(many=True)},
@@ -633,29 +655,6 @@ class GrievanceTicketGlobalViewSet(
         if not grievance_ticket.can_change_status(new_status):
             log_and_raise("New status is incorrect")
 
-    @staticmethod
-    def _build_status_change_notifications(
-        user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
-    ) -> None:
-        if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            notifications.append(
-                GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=user)
-            )
-        if ticket.status == GrievanceTicket.STATUS_CLOSED:
-            clear_cache(ticket.ticket_details, ticket.business_area.slug)
-        if (
-            old_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
-            and ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
-        ):
-            notifications.append(
-                GrievanceNotification(
-                    ticket,
-                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                    approver=user,
-                    editor=user,
-                )
-            )
-
     @transaction.atomic
     @extend_schema(
         request=GrievanceStatusChangeSerializer,
@@ -670,7 +669,6 @@ class GrievanceTicketGlobalViewSet(
 
         user = request.user
         new_status = input_data["status"]
-        notifications = []
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket.pk)
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
         if grievance_ticket.category in (
@@ -690,8 +688,8 @@ class GrievanceTicketGlobalViewSet(
         status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
         status_changer.change_status(new_status)
         grievance_ticket.refresh_from_db()
-
-        self._build_status_change_notifications(user, old_grievance_ticket, grievance_ticket, notifications)
+        if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
@@ -702,7 +700,6 @@ class GrievanceTicketGlobalViewSet(
             new_object=grievance_ticket,
         )
 
-        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(notifications))
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
@@ -799,14 +796,6 @@ class GrievanceTicketGlobalViewSet(
 
         description = input_data["description"]
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=user)
-        notification = GrievanceNotification(
-            grievance_ticket,
-            GrievanceNotification.ACTION_NOTES_ADDED,
-            created_by=user,
-            editor=user,
-            ticket_note=ticket_note,
-        )
-        transaction.on_commit(notification.send_email_notification)
 
         return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
 

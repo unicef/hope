@@ -57,7 +57,8 @@
                         "screen_beneficiary": false
                     }
                 ],
-                "target_id": ""
+                "target_id": "",
+                "changed_since_visit": false
             }
         ]
     },
