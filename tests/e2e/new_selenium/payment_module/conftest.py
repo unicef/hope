@@ -20,7 +20,9 @@ from extras.test_utils.factories import (
     RuleCommitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BusinessArea,
     Currency,
@@ -418,3 +420,104 @@ def active_cycle_with_payment_plans(active_cycle: ProgramCycle) -> ProgramCycle:
         program_cycle=active_cycle, business_area=business_area, total_entitled_quantity_usd=Decimal("1500.00")
     )
     return active_cycle
+
+
+LIFECYCLE_PAYMENT_PLAN_NAME = "Lifecycle E2E Payment Plan"
+
+
+def _lifecycle_payment_plan(
+    business_area: BusinessArea,
+    status: str,
+    payments_count: int = 3,
+    collectors_count: int | None = None,
+) -> PaymentPlan:
+    """Payment plan with an FSP, a delivery mechanism, USD and `payments_count` payments.
+
+    `collectors_count` makes payments share that many collectors, for split by collector.
+    """
+    program = ProgramFactory(name="Lifecycle E2E Program", status=Program.ACTIVE, business_area=business_area)
+    delivery_mechanism = DeliveryMechanismFactory(
+        code="lifecycle-e2e", name="Lifecycle E2E", payment_gateway_id="lifecycle-e2e"
+    )
+    fsp = FinancialServiceProviderFactory(name="Lifecycle E2E Provider")
+    fsp.delivery_mechanisms.add(delivery_mechanism)
+    currency = CurrencyFactory(code="USD", name="United States Dollar")
+    payment_plan = PaymentPlanFactory(
+        name=LIFECYCLE_PAYMENT_PLAN_NAME,
+        program_cycle=ProgramCycleFactory(program=program),
+        business_area=business_area,
+        status=status,
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        financial_service_provider=fsp,
+        delivery_mechanism=delivery_mechanism,
+        currency=currency,
+    )
+    households = [HouseholdFactory(business_area=business_area, program=program) for _ in range(payments_count)]
+    collectors = [household.head_of_household for household in households[: collectors_count or payments_count]]
+    for index, household in enumerate(households):
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=collectors[index % len(collectors)],
+            head_of_household=household.head_of_household,
+            program=program,
+            status=Payment.STATUS_PENDING,
+            currency=currency,
+            delivery_type=delivery_mechanism,
+            financial_service_provider=fsp,
+            entitlement_quantity=Decimal("10.00"),
+            entitlement_quantity_usd=Decimal("10.00"),
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
+        )
+        PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
+    if status in (PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Status.IN_AUTHORIZATION):
+        ApprovalProcessFactory(payment_plan=payment_plan)
+    payment_plan.update_money_fields()
+    return payment_plan
+
+
+@pytest.fixture
+def in_approval_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_APPROVAL)
+
+
+@pytest.fixture
+def in_authorization_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_AUTHORIZATION)
+
+
+@pytest.fixture
+def locked_fsp_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.LOCKED_FSP)
+
+
+@pytest.fixture
+def accepted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=25)
+
+
+@pytest.fixture
+def accepted_shared_collectors_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=12, collectors_count=3)
+
+
+@pytest.fixture
+def open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.OPEN)
+
+
+@pytest.fixture
+def aborted_targeted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    """ABORTED plan whose targeting matches the programme's 3 households, so Reactivate can rebuild it."""
+    payment_plan = _lifecycle_payment_plan(business_area, PaymentPlan.Status.TP_OPEN, payments_count=0)
+    rule = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
+    TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
+    for size in (1, 3, 5):
+        HouseholdFactory(size=size, business_area=business_area, program=payment_plan.program)
+    PaymentPlanService(payment_plan).full_rebuild()
+    payment_plan.status = PaymentPlan.Status.ABORTED
+    payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    payment_plan.abort_comment = "Aborted before the e2e run"
+    payment_plan.save(update_fields=["status", "build_status", "abort_comment"])
+    return payment_plan
