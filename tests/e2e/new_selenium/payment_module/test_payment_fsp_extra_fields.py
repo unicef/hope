@@ -126,7 +126,7 @@ def _assert_export_and_prepare_reconciliation(
         "fsp_routing_code",
     )
     assert exported_payment["payment_id"] == payment_id
-    assert exported_payment["entitlement_quantity"] == 125
+    assert exported_payment["entitlement_quantity"] == "125.0000000000"
     assert exported_payment["delivered_quantity"] is None
     assert exported_payment["fsp_reference"] == FSP_REFERENCE
     assert exported_payment["fsp_routing_code"] == FSP_ROUTING_CODE
