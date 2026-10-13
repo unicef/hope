@@ -106,6 +106,7 @@ def invalid_received_amount_case(request: pytest.FixtureRequest, verification_se
 
     import_service = XlsxVerificationImportService(verification_plan, file)
     import_service.open_workbook()
+    import_service._validate_headers()
     row = next(import_service.ws_verifications.iter_rows(min_row=2))
     amount_cell = row[import_service.RECEIVED_AMOUNT_COLUMN_INDEX]
     expected_errors = (

@@ -1,7 +1,9 @@
+from datetime import date
 from decimal import Decimal
 from io import BytesIO
 
 from django.core.exceptions import ValidationError
+from django.db import connection
 import openpyxl
 import pytest
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -89,6 +91,10 @@ def test_money_model_field_has_precision_and_admin_labels(model, field_name):
 def test_currency_rounding_uses_half_away_from_zero(source, expected):
     assert normalize_currency_decimal(source) == expected
     assert HopeCurrencyField().formfield().clean(source) == expected
+
+
+def test_currency_field_uses_unbounded_postgresql_numeric_type():
+    assert HopeCurrencyField().db_type(connection) == "numeric"
 
 
 @pytest.mark.parametrize(
@@ -219,3 +225,15 @@ def test_xlsx_nonmonetary_number_remains_numeric():
 
     assert result == 10
     assert isinstance(result, int)
+
+
+@pytest.fixture
+def nonmonetary_date():
+    return date(2026, 1, 2)
+
+
+def test_xlsx_unsupported_value_uses_string_fallback(nonmonetary_date):
+    result = XlsxExportBaseService().right_format_for_xlsx(nonmonetary_date, "payment_date")
+
+    assert result == "2026-01-02"
+    assert isinstance(result, str)

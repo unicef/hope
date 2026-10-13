@@ -35,10 +35,8 @@ class HopeCurrencyField(models.DecimalField):
         kwargs.setdefault("decimal_places", CURRENCY_DECIMAL_PLACES)
         super().__init__(*args, **kwargs)
 
-    def db_type(self, connection: Any) -> str | None:
-        if connection.vendor == "postgresql":
-            return "numeric"
-        return super().db_type(connection)
+    def db_type(self, connection: Any) -> str:
+        return "numeric"
 
     def to_python(self, value: Any) -> Decimal | None:
         if value is None:

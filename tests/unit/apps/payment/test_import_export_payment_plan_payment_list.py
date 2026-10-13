@@ -204,7 +204,9 @@ def xlsx_invalid_file(payment_plan, user):
 def invalid_entitlement_import_case(payment_plan, payments):
     export_service = XlsxPaymentPlanExportService(payment_plan)
     workbook = export_service.generate_workbook()
+    payment_id_column = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
     entitlement_column = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    workbook.active.cell(row=2, column=payment_id_column).value = str(payments[0].unicef_id)
     cell = workbook.active.cell(row=2, column=entitlement_column)
     cell.value = "NaN"
 
