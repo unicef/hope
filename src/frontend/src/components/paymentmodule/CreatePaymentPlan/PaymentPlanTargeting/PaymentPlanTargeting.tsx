@@ -2,7 +2,6 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { Box, Grid, Typography } from '@mui/material';
-import type { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field } from 'formik';
 import type { ReactElement } from 'react';
@@ -15,20 +14,20 @@ const StyledBox = styled(Box)`
 `;
 
 export function PaymentPlanTargeting({
-  allTargetPopulations,
-  loading,
+  targetPopulations,
+  loading = false,
   disabled,
 }: {
-  allTargetPopulations: PaginatedTargetPopulationListList;
-  loading: boolean;
+  targetPopulations: Array<{ id: string; name?: string }>;
+  loading?: boolean;
   disabled?: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
 
-  const mappedTargetPopulations = allTargetPopulations.results.map((edge) => ({
-    name: edge.name,
-    value: edge.id,
+  const mappedTargetPopulations = targetPopulations.map((targetPopulation) => ({
+    name: targetPopulation.name,
+    value: targetPopulation.id,
   }));
 
   return (

@@ -189,18 +189,12 @@ def test_edit_payment_plan(
     CurrencyFactory(code="PLN", name="Polish Zloty")
     start_date = datetime.date.today() + datetime.timedelta(days=10)
     end_date = start_date + datetime.timedelta(days=20)
-    # The edit page also lists target populations and programme cycles; without these list permissions
-    # the whole page shows Access Denied.
-    with grant_permission(
-        user_with_no_permissions,
-        business_area,
-        *VIEW_PERMISSIONS,
-        Permissions.PM_CREATE,
-        Permissions.TARGETING_VIEW_LIST,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
-    ):
+    # No target population or cycle list permission: the edit page must not need them.
+    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, Permissions.PM_CREATE):
         open_payment_plan_as(browser, payment_plan, "OPEN")
         browser.wait_for_element_clickable(EDIT).click()
+        browser.wait_for_text(payment_plan.name, '[data-cy="select-paymentPlanId"]')
+        browser.wait_for_text(payment_plan.program_cycle.title, '[data-cy="select-programCycle"]')
         browser.fill_date('input[name="dispersionStartDate"]', start_date.isoformat())
         browser.fill_date('input[name="dispersionEndDate"]', end_date.isoformat())
         browser.set_value(CURRENCY_INPUT, "Polish")
