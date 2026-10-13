@@ -976,6 +976,17 @@ def test_payment_plan_admin_keeps_plan_type_as_readonly(admin_user, payment_plan
     assert "plan_type" in model_admin.get_readonly_fields(request, payment_plan)
 
 
+def test_payment_plan_admin_excludes_target_populations(admin_user) -> None:
+    target_population = PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    model_admin = PaymentPlanAdmin(PaymentPlan, admin.site)
+
+    assert set(model_admin.get_queryset(request).values_list("pk", flat=True)) == {payment_plan.pk}
+    assert target_population.pk not in set(model_admin.get_queryset(request).values_list("pk", flat=True))
+
+
 def test_payment_plan_admin_scopes_payment_plan_purposes_to_program(admin_user) -> None:
     payment_plan = PaymentPlanFactory()
     purpose = payment_plan.program_cycle.program.payment_plan_purposes.get()

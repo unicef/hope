@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 
+from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.test import RequestFactory
 import pytest
@@ -11,7 +12,7 @@ from extras.test_utils.factories import (
     TargetPopulationFactory,
     UserFactory,
 )
-from hope.admin.payment_plan import BasePaymentPlanAdmin
+from hope.admin.payment_plan import BasePaymentPlanAdmin, PaymentPlanAdmin
 from hope.admin.target_population import HIDDEN_FIELDS, TargetPopulationAdmin
 from hope.models import PaymentPlan, TargetPopulation
 
@@ -70,6 +71,27 @@ def test_admin_form_hides_payment_plan_only_fields() -> None:
     shown_fields = set(form.fields) | set(model_admin.get_readonly_fields(request, target_population))
 
     assert shown_fields.isdisjoint(HIDDEN_FIELDS + ("plan_type",))
+
+
+def test_admin_form_limits_status_choices() -> None:
+    target_population = TargetPopulationFactory()
+    request = RequestFactory().get("/")
+    request.user = UserFactory(is_superuser=True)
+    model_admin = TargetPopulationAdmin(TargetPopulation, admin.site)
+
+    form = model_admin.get_form(request, target_population, change=True)()
+
+    assert {value for value, _ in form.fields["status"].choices} == {
+        status.value for status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+    }
+
+
+def test_admin_hides_background_action_status() -> None:
+    assert "background_action_status" in HIDDEN_FIELDS
+    assert "background_action_status" not in TargetPopulationAdmin.list_display
+    assert ("background_action_status", ChoicesFieldComboFilter) not in TargetPopulationAdmin.list_filter
+    assert "background_action_status" in PaymentPlanAdmin.list_display
+    assert ("background_action_status", ChoicesFieldComboFilter) in PaymentPlanAdmin.list_filter
 
 
 def test_admin_form_scopes_payment_plan_purposes_to_program() -> None:

@@ -218,7 +218,6 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "business_area",
         "program_cycle",
         "status",
-        "background_action_status",
         "build_status",
     )
     list_filter: tuple[str | tuple[str, type[FieldListFilter]], ...] = (
@@ -227,7 +226,6 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         ("program_cycle__program__id", ValueFilter),
         ("currency", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
-        ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
     )
@@ -335,13 +333,21 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
 
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
-    list_display = BasePaymentPlanAdmin.list_display + ("use_payment_gateway", "plan_type")
+    list_display = BasePaymentPlanAdmin.list_display + (
+        "background_action_status",
+        "use_payment_gateway",
+        "plan_type",
+    )
     list_filter = BasePaymentPlanAdmin.list_filter + (
+        ("background_action_status", ChoicesFieldComboFilter),
         "use_payment_gateway",
         ("plan_type", ChoicesFieldComboFilter),
     )
     readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type",)
     inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
 
     @button(permission="payment.view_paymentplan")
     def western_union_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
