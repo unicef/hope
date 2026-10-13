@@ -4,6 +4,7 @@ from io import BytesIO
 from django.core.exceptions import ValidationError
 import openpyxl
 import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from extras.test_utils.factories.payment import PaymentFactory, PaymentVerificationFactory
 from hope.apps.core.api.fields import HopeCurrencyDecimalField
@@ -115,6 +116,21 @@ def test_currency_api_representation_keeps_two_places_and_meaningful_precision(a
     assert HopeCurrencyDecimalField().to_representation(Decimal(amount)) == expected
 
 
+@pytest.mark.parametrize("source", ["NaN", "100000000000000000000"])
+def test_currency_api_rejects_invalid_amount(source):
+    with pytest.raises(DRFValidationError) as exc_info:
+        HopeCurrencyDecimalField().to_internal_value(source)
+
+    assert exc_info.value.get_codes() == ["invalid"]
+
+
+def test_currency_api_representation_can_return_decimal():
+    representation = HopeCurrencyDecimalField(coerce_to_string=False).to_representation(Decimal("123.45"))
+
+    assert isinstance(representation, Decimal)
+    assert representation.as_tuple().exponent == -10
+
+
 def test_payment_model_serializer_uses_currency_api_field():
     assert isinstance(PaymentListSerializer().fields["entitlement_quantity"], HopeCurrencyDecimalField)
 
@@ -188,3 +204,18 @@ def test_xlsx_money_cell_is_exact_text():
     cell = openpyxl.load_workbook(output).active["A1"]
     assert cell.data_type == "s"
     assert cell.value == "123456789.1234567891"
+
+
+@pytest.mark.parametrize(("value", "expected"), [(10, "10"), (10.5, "10.5")])
+def test_xlsx_monetary_number_is_exported_as_text(value, expected):
+    result = XlsxExportBaseService().right_format_for_xlsx(value, "entitlement_quantity")
+
+    assert result == expected
+    assert isinstance(result, str)
+
+
+def test_xlsx_nonmonetary_number_remains_numeric():
+    result = XlsxExportBaseService().right_format_for_xlsx(10, "household_size")
+
+    assert result == 10
+    assert isinstance(result, int)

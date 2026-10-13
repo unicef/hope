@@ -201,6 +201,23 @@ def xlsx_invalid_file(payment_plan, user):
 
 
 @pytest.fixture
+def invalid_entitlement_import_case(payment_plan, payments):
+    export_service = XlsxPaymentPlanExportService(payment_plan)
+    workbook = export_service.generate_workbook()
+    entitlement_column = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    cell = workbook.active.cell(row=2, column=entitlement_column)
+    cell.value = "NaN"
+
+    file = BytesIO()
+    workbook.save(file)
+    file.seek(0)
+    import_service = XlsxPaymentPlanImportService(payment_plan, file)
+    import_service.open_workbook()
+    row = next(import_service.ws_payments.iter_rows(min_row=2))
+    return import_service, row, cell.coordinate
+
+
+@pytest.fixture
 def payment_with_alternate_collector(payment_plan, payments, business_area, program):
     payment = payment_plan.eligible_payments.order_by("unicef_id").first()
     alternate_collector = IndividualFactory(
@@ -257,6 +274,16 @@ def test_import_invalid_file(payment_plan, xlsx_invalid_file, payments):
 
     service.validate()
     assert service.errors == error_msg
+
+
+def test_import_invalid_entitlement_amount(invalid_entitlement_import_case, django_assert_num_queries):
+    import_service, row, coordinate = invalid_entitlement_import_case
+
+    with django_assert_num_queries(0):
+        import_service._validate_entitlement(row)
+
+    assert import_service.errors == [XlsxError(import_service.TITLE, coordinate, "Invalid amount")]
+    assert import_service.is_updated is False
 
 
 def test_import_invalid_file_without_required_columns(payment_plan):

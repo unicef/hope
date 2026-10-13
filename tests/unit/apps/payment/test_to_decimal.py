@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+import pytest
+
 from hope.apps.payment.utils import from_received_to_status, normalize_score, to_decimal
 from hope.models import PaymentVerification
 
@@ -23,6 +25,13 @@ def test_to_decimal_preserves_ten_fractional_digits() -> None:
 
 def test_received_status_compares_full_precision() -> None:
     status = from_received_to_status(True, "123.1234567891", Decimal("123.1234567891"))
+
+    assert status == PaymentVerification.STATUS_RECEIVED
+
+
+@pytest.mark.parametrize("received_amount", [None, "", "  "])
+def test_received_status_without_amount_is_received(received_amount) -> None:
+    status = from_received_to_status(True, received_amount, Decimal("123.45"))
 
     assert status == PaymentVerification.STATUS_RECEIVED
 

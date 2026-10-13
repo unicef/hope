@@ -23,6 +23,7 @@ from extras.test_utils.factories.payment import (
 )
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.factories.registration_data import RegistrationDataImportFactory
+from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_verification_export_service import XlsxVerificationExportService
 from hope.apps.payment.xlsx.xlsx_verification_import_service import XlsxVerificationImportService
 from hope.models import DataCollectingType, PaymentVerification
@@ -92,6 +93,25 @@ def verification_setup(verification_plan, program, business_area, admin_areas):
         "verification_plan": verification_plan,
         "payments": payments,
     }
+
+
+@pytest.fixture(params=[(10**21, "n", "Invalid received amount"), ("invalid", "s", None)], ids=["numeric", "text"])
+def invalid_received_amount_case(request: pytest.FixtureRequest, verification_setup):
+    verification_plan = verification_setup["verification_plan"]
+    workbook = XlsxVerificationExportService(verification_plan).generate_workbook()
+    workbook.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = request.param[0]
+    file = io.BytesIO()
+    workbook.save(file)
+    file.seek(0)
+
+    import_service = XlsxVerificationImportService(verification_plan, file)
+    import_service.open_workbook()
+    row = next(import_service.ws_verifications.iter_rows(min_row=2))
+    amount_cell = row[import_service.RECEIVED_AMOUNT_COLUMN_INDEX]
+    expected_errors = (
+        [XlsxError("Payment Verifications", amount_cell.coordinate, request.param[2])] if request.param[2] else []
+    )
+    return import_service, row, amount_cell, request.param[1], expected_errors
 
 
 @pytest.fixture
@@ -516,6 +536,16 @@ def test_validation_invalid_amount_zero_without_received(verification_setup):
         f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
         "You can't set received_amount 0.00 and not set received to NO",
     ]
+
+
+def test_invalid_received_amount_type_handling(invalid_received_amount_case, django_assert_num_queries):
+    import_service, row, amount_cell, expected_data_type, expected_errors = invalid_received_amount_case
+
+    assert amount_cell.data_type == expected_data_type
+    with django_assert_num_queries(0):
+        import_service._validate_received_to_received_amount(row)
+
+    assert import_service.errors == expected_errors
 
 
 def test_validation_invalid_amount_without_received(verification_setup):
