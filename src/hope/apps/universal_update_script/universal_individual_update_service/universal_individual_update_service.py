@@ -340,6 +340,7 @@ class UniversalIndividualUpdateService:
                         )
                     if field_name == "number":
                         single_data_object.number = value
+                        continue
                     if field_name == "financial_institution":
                         single_data_object.financial_institution_id = value
                         continue
@@ -511,10 +512,12 @@ class UniversalIndividualUpdateService:
             if len(wallet) > 1:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:
+                account_values = {
+                    "number": wallet[0].number,
+                    "financial_institution": wallet[0].financial_institution_id,
+                }
                 for _, field_name in data_fields:
-                    value = wallet[0].data.get(field_name)
-                    if field_name == "financial_institution":
-                        value = wallet[0].financial_institution_id
+                    value = account_values.get(field_name, wallet[0].data.get(field_name))
                     row.append(self.get_excel_value(value))
             else:
                 for _ in data_fields:
