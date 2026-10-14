@@ -4,7 +4,7 @@ from typing import cast
 from django.db import transaction
 
 from hope.apps.household.documents import get_household_doc, get_individual_doc
-from hope.apps.registration_data.services.biometric_deduplication import BiometricDeduplicationService
+from hope.apps.registration_data.services.deduplication_engine import DeduplicationEngineService
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.apps.utils.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
 from hope.models import (
@@ -37,7 +37,7 @@ class FetchFindingsAndMergeRdi:
                     logger.info(f"RDI:{registration_data_import_id} is locked by another worker, skipping merge.")
                     return False
                 self._transition_to_merging(locked_rdi)
-                self._store_deduplication_results(locked_rdi, dedupe_service, findings)
+                self._store_biometric_deduplication_results(locked_rdi, dedupe_service, findings)
                 RdiMergeTask().execute(str(locked_rdi.id))
         except Exception:
             logger.exception(
@@ -64,12 +64,12 @@ class FetchFindingsAndMergeRdi:
 
     def _fetch_biometric_findings(
         self, rdi: RegistrationDataImport
-    ) -> tuple[BiometricDeduplicationService | None, list[dict] | None]:
-        dedupe_service: BiometricDeduplicationService | None = None
+    ) -> tuple[DeduplicationEngineService | None, list[dict] | None]:
+        dedupe_service: DeduplicationEngineService | None = None
         findings: list[dict] | None = None
         if rdi.program.biometric_deduplication_enabled:
-            dedupe_service = BiometricDeduplicationService()
-            findings = dedupe_service.get_rdi_findings(cast("str", rdi.country_workspace_id))
+            dedupe_service = DeduplicationEngineService()
+            findings = dedupe_service.get_rdi_biometric_findings(cast("str", rdi.country_workspace_id))
             logger.info(f"RDI:{rdi.id} fetched {len(findings)} biometric findings from Deduplication Engine")
         return dedupe_service, findings
 
@@ -93,21 +93,24 @@ class FetchFindingsAndMergeRdi:
             f"(country_workspace_id={rdi.country_workspace_id})"
         )
 
-    def _store_deduplication_results(
+    def _store_biometric_deduplication_results(
         self,
         rdi: RegistrationDataImport,
-        dedupe_service: BiometricDeduplicationService | None,
+        dedupe_service: DeduplicationEngineService | None,
         findings: list[dict] | None,
     ) -> None:
         if dedupe_service is not None and findings is not None:
             registration_data_import_id = str(rdi.id)
             similarity_pairs = dedupe_service.parse_findings(findings)
-            dedupe_service.store_similarity_pairs(rdi.program, similarity_pairs, id_field_name="country_workspace_id")
+            dedupe_service.store_biometric_similarity_pairs(
+                rdi.program, similarity_pairs, id_field_name="country_workspace_id"
+            )
             logger.info(
-                f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} similarity pairs from findings"
+                f"RDI:{registration_data_import_id} parsed {len(similarity_pairs)} "
+                f"biometric similarity pairs from findings"
             )
             dedupe_service.store_rdi_deduplication_statistics(rdi)
-            logger.info(f"RDI:{registration_data_import_id} stored deduplication statistics")
+            logger.info(f"RDI:{registration_data_import_id} stored biometric deduplication statistics")
 
     def _reset_rdi_state_for_cw_retry(self, rdi: RegistrationDataImport) -> None:
         rdi.error_message = ""
