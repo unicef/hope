@@ -259,7 +259,7 @@ def test_execute(
         "zip_code": "002",
         "flex_fields": {},
     }
-    household = individual.pending_household
+    household = PendingHousehold.objects.get(pk=individual.household_id)
     household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
     assert household_obj_data == household_data
 

@@ -53,20 +53,27 @@ function PhotoModal({
   closeHandler,
   showRotate = true,
   alt = 'photo',
+  onOpen,
   children,
 }: {
-  src: string;
+  src?: string;
   alt?: string;
   linkText?: string;
   variant?: 'picture' | 'button' | 'link' | 'pictureClose';
   title?: string;
   closeHandler?;
+  onOpen?: () => void;
   showRotate?: boolean;
   children?: ReactNode;
 }): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
   const { t } = useTranslation();
+
+  const openDialog = (): void => {
+    onOpen?.();
+    setDialogOpen(true);
+  };
 
   const matchVariant = (): ReactElement => {
     let element;
@@ -77,7 +84,7 @@ function PhotoModal({
             data-cy="mini-image"
             alt={alt}
             src={src}
-            onClick={() => setDialogOpen(true)}
+            onClick={openDialog}
           />
         );
         break;
@@ -87,9 +94,7 @@ function PhotoModal({
             data-cy="button-show-photo"
             color="primary"
             variant="outlined"
-            onClick={() => {
-              setDialogOpen(true);
-            }}
+            onClick={openDialog}
           >
             {t('Show Photo')}
           </Button>
@@ -101,9 +106,7 @@ function PhotoModal({
             data-cy="link-show-photo"
             role="button"
             tabIndex={0}
-            onClick={() => {
-              setDialogOpen(true);
-            }}
+            onClick={openDialog}
           >
             {linkText}
           </StyledLink>
@@ -121,7 +124,7 @@ function PhotoModal({
               data-cy="mini-image-close"
               alt={alt}
               src={src}
-              onClick={() => setDialogOpen(true)}
+              onClick={openDialog}
             />
             <IconButton data-cy="close-icon" onClick={() => closeHandler()}>
               <CloseIcon />
@@ -135,7 +138,7 @@ function PhotoModal({
             data-cy="mini-image"
             alt="photo"
             src={src}
-            onClick={() => setDialogOpen(true)}
+            onClick={openDialog}
           />
         );
     }
@@ -147,7 +150,7 @@ function PhotoModal({
       {children ? (
         <Box
           data-cy="photo-modal-trigger"
-          onClick={() => setDialogOpen(true)}
+          onClick={openDialog}
           sx={{ cursor: 'pointer', display: 'inline-block' }}
         >
           {children}
