@@ -325,7 +325,7 @@ class ProgramAdmin(
             create_tp_from_list_async_task(request.POST.dict(), str(request.user.pk), str(program.pk))
             message = format_html("Creation of target population <b>{}</b> scheduled.", request.POST["name"])
             messages.success(request, message)
-            url = reverse("admin:payment_paymentplan_changelist")
+            url = reverse("admin:payment_targetpopulation_changelist")
             return HttpResponseRedirect(url)
 
         else:

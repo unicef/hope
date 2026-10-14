@@ -577,7 +577,7 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
 
     @button(permission="payment.view_paymentplan")
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_paymentplan_changelist")
+        url = reverse("admin:payment_targetpopulation_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
 
     @button(permission="payment.restart_exporting_payment_plan_list")
