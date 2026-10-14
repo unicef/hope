@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FundsCommitmentFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -38,7 +39,6 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan, PaymentPlanSplit
 
@@ -334,6 +334,32 @@ def test_payment_list_serializer_get_auth_code(payment_list_context: dict[str, A
     data = serializer.data
 
     assert data["fsp_auth_code"] == "AUTH_123"
+
+
+def test_payment_list_serializer_get_auth_code_without_request_context(payment_list_context: dict[str, Any]) -> None:
+    payment = payment_list_context["payment"]
+
+    serializer = PaymentListSerializer(instance=payment)
+    data = serializer.data
+
+    assert data["fsp_auth_code"] == ""
+
+
+def test_payment_list_serializer_reuses_fsp_auth_code_permission_check(payment_list_context: dict[str, Any]) -> None:
+    payment = payment_list_context["payment"]
+    other_payment = PaymentFactory(parent=payment.parent, fsp_auth_code="AUTH_456")
+    request = Mock(user=Mock(has_perm=Mock(return_value=True)))
+
+    serializer = PaymentListSerializer(
+        Payment.objects.filter(id__in=[payment.id, other_payment.id]),
+        many=True,
+        context={"request": request},
+    )
+    data = serializer.data
+
+    assert len(data) == 2
+    assert {item["fsp_auth_code"] for item in data} == {"AUTH_123", "AUTH_456"}
+    assert request.user.has_perm.call_count == 1
 
 
 def test_payment_list_serializer_snapshot_collector_full_name(payment_list_context: dict[str, Any]) -> None:

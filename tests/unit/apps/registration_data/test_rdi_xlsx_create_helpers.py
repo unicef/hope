@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, PropertyMock, patch
 
+from openpyxl import Workbook
 import pytest
 
 from extras.test_utils.factories import (
@@ -13,6 +14,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.household.const import HEAD
 from hope.apps.registration_data.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+from hope.models import Country as GeoCountry, PendingHousehold
 
 pytestmark = pytest.mark.django_db
 
@@ -442,6 +444,24 @@ def test_process_regular_field_country_header(task, country_afg):
     result = task._process_regular_field("country_h_c", "AFG", cell, obj)
     assert result is True
     assert obj.country == country_afg
+
+
+@pytest.fixture
+def missing_country_field(task):
+    task.COMBINED_FIELDS["country_h_c"] = {"name": "country"}
+    sheet = Workbook().active
+    sheet["A3"] = "ZZZ"
+    return task, PendingHousehold(), sheet["A3"]
+
+
+def test_process_regular_field_reports_unknown_country(missing_country_field, django_assert_num_queries):
+    task, household, cell = missing_country_field
+
+    with django_assert_num_queries(1):
+        with pytest.raises(ValueError, match="Country with ISO3 code 'ZZZ' does not exist") as exc_info:
+            task._process_regular_field("country_h_c", "ZZZ", cell, household)
+
+    assert isinstance(exc_info.value.__cause__, GeoCountry.DoesNotExist)
 
 
 def test_process_regular_field_admin_header(task, area_kabul):
