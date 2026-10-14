@@ -18,14 +18,13 @@ json_value_escapes = {
 }
 
 
-# TODO: if passed a dict, it would go into infinite loop
 def _jsonfy(value: Any) -> str | dict:
     ret = None
     try:
         if isinstance(value, Model):
             ret = json.loads(serializers.serialize("json", [value]))
         elif isinstance(value, dict):
-            ret = _jsonfy(value)  # FIXME: bug
+            ret = {key: _jsonfy(nested) for key, nested in value.items()}
         else:
             ret = str(value)
     except TypeError:

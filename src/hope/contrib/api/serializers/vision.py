@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from hope.apps.core.utils import to_camel_case
 from hope.contrib.vision.models import FundsCommitmentItem
-from hope.models import PaymentPlan
 
 VISION_CALLBACK_FIELD_OVERRIDES = {
     "vision_payplanSno": "vision_payplan_sno",
@@ -79,27 +78,23 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
 
     @property
     def external_payload(self) -> dict[str, Any]:
-        return {
-            vision_callback_external_field_name(field_name): value for field_name, value in self.validated_data.items()
-        }
+        return dict(self.initial_data)
 
-    def ack_payload(self, status: str, *, message: str | None = None) -> dict[str, Any]:
+    def ack_payload(self, status: str, *, message: str) -> dict[str, Any]:
         validated_data = getattr(self, "_validated_data", {})
-        payload = {
+        return {
             "status": status,
             "message_id": validated_data.get("message_id") or self.initial_message_id,
             "payplan_sno": validated_data.get("payplan_sno") or self.initial_payplan_sno,
+            "message": message,
         }
-        if message is not None:
-            payload["message"] = message
-        return payload
 
 
 class PaymentPlanCallbackAckSerializer(serializers.Serializer):
     status = serializers.CharField()
     message_id = serializers.CharField(allow_blank=True)
     payplan_sno = serializers.CharField(allow_blank=True)
-    message = serializers.CharField(required=False)
+    message = serializers.CharField()
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)
@@ -114,12 +109,8 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     currency = serializers.CharField(source="currency.code")
     auth_amt = serializers.CharField(source="total_entitled_quantity")
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
-    status = serializers.CharField()
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
     head_vendor = serializers.CharField(source="financial_service_provider.name")
-    creation_date = serializers.SerializerMethodField()
-
-    def get_creation_date(self, obj: PaymentPlan) -> str:
-        return obj.created_at.strftime("%Y%m%d")
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)

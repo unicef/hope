@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import logging
 
 from constance import config
@@ -9,15 +9,10 @@ from elasticsearch.exceptions import ConnectionError as ElasticsearchConnectionE
 
 from hope.apps.core.celery import app
 from hope.apps.core.timezones import latest_local_schedule_time
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.daily_digest_service import DailyDigestService
-from hope.apps.grievance.services.notification_schedule import (
-    get_grievance_notification_hour,
-    is_grievance_reminder_due,
-)
+from hope.apps.grievance.services.notification_schedule import get_grievance_notification_hour
 from hope.apps.utils.sentry import set_sentry_business_area_tag
-from hope.models import AsyncJob, AsyncRetryJob, BusinessArea, Individual, PeriodicAsyncJob
+from hope.models import AsyncRetryJob, BusinessArea, Individual, PeriodicAsyncJob
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +32,15 @@ def _daily_digest_dispatch_exists(delivery_key: str) -> bool:
     )
 
 
-def _sent_digest_user_ids(delivery_key: str) -> set[str]:
-    sent_user_ids: set[str] = set()
+def _sent_digest_email_keys(delivery_key: str) -> set[str]:
+    """Every (recipient, email) already delivered for this day, so a re-run only sends what failed."""
+    sent_email_keys: set[str] = set()
     for job_config in PeriodicAsyncJob.objects.filter(
         job_name=daily_grievance_digest_async_task.__name__,
         config__delivery_key=delivery_key,
     ).values_list("config", flat=True):
-        sent_user_ids.update(job_config.get("sent_user_ids", []))
-    return sent_user_ids
+        sent_email_keys.update(job_config.get("sent_email_keys", []))
+    return sent_email_keys
 
 
 def deduplicate_and_check_against_sanctions_list_task_single_individual_async_task_action(job: AsyncRetryJob) -> None:
@@ -103,6 +99,7 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
     digest_date = job.config["digest_date"]
     timezone_name = job.config["timezone_name"]
     delivery_key = job.config["delivery_key"]
+    notification_time = job.config.get("notification_time")
 
     if job.config.get("completed") is True:
         return
@@ -123,22 +120,23 @@ def daily_grievance_digest_async_task_action(job: PeriodicAsyncJob) -> None:
         return
 
     set_sentry_business_area_tag(business_area.name)
-    sent_user_ids = _sent_digest_user_ids(delivery_key)
+    sent_email_keys = _sent_digest_email_keys(delivery_key)
 
-    newly_sent_user_ids, failed = DailyDigestService(
+    newly_sent_email_keys, failed = DailyDigestService(
         business_area,
         date.fromisoformat(digest_date),
         timezone_name,
+        datetime.fromisoformat(notification_time) if notification_time else None,
     ).send(
-        skip_user_ids=sent_user_ids,
+        skip_email_keys=sent_email_keys,
     )
-    sent_user_ids.update(newly_sent_user_ids)
-    job.config["sent_user_ids"] = sorted(sent_user_ids)
+    sent_email_keys.update(newly_sent_email_keys)
+    job.config["sent_email_keys"] = sorted(sent_email_keys)
 
     if failed:
         job.save(update_fields=["config"])
         raise RuntimeError(
-            f"{failed} recipient(s) missed the {digest_date} grievance digest for "
+            f"{failed} grievance email(s) failed for the {digest_date} digest for "
             f"{business_area.slug} in {timezone_name}"
         )
 
@@ -154,7 +152,7 @@ def daily_grievance_digest_async_task() -> None:
     notification_hour = get_grievance_notification_hour()
     for business_area in BusinessArea.objects.filter(enable_email_notification=True).only("id", "name", "timezone"):
         for timezone_name in DailyDigestService.recipient_timezone_names(business_area):
-            notification_date, _ = latest_local_schedule_time(timezone_name, now, notification_hour)
+            notification_date, notification_time = latest_local_schedule_time(timezone_name, now, notification_hour)
             digest_date = notification_date - timedelta(days=1)
             delivery_key = _daily_digest_delivery_key(str(business_area.id), timezone_name, digest_date)
             if _daily_digest_dispatch_exists(delivery_key):
@@ -167,69 +165,8 @@ def daily_grievance_digest_async_task() -> None:
                     "digest_date": digest_date.isoformat(),
                     "timezone_name": timezone_name,
                     "delivery_key": delivery_key,
+                    "notification_time": notification_time.isoformat(),
                 },
                 group_key="grievance",
                 description=f"Send the {digest_date} grievance digest for {business_area.name} in {timezone_name}",
             )
-
-
-def periodic_grievances_notifications_async_task_action(job: AsyncJob) -> None:
-    now = timezone.now()
-    notification_hour = get_grievance_notification_hour()
-    sensitive_tickets_one_day_date = now - timedelta(days=1)
-    sensitive_tickets_to_notify = (
-        GrievanceTicket.objects.select_related("business_area", "assigned_to")
-        .exclude(status=GrievanceTicket.STATUS_CLOSED)
-        .filter(
-            Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=sensitive_tickets_one_day_date))
-            | Q(last_notification_sent__lte=sensitive_tickets_one_day_date)
-        )
-        .filter(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
-    )
-
-    other_tickets_30_days_date = now - timedelta(days=30)
-    other_tickets_to_notify = (
-        GrievanceTicket.objects.select_related("business_area", "assigned_to")
-        .exclude(status=GrievanceTicket.STATUS_CLOSED)
-        .filter(
-            Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=other_tickets_30_days_date))
-            | Q(last_notification_sent__lte=other_tickets_30_days_date)
-        )
-        .exclude(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
-    )
-    for ticket in sensitive_tickets_to_notify:
-        set_sentry_business_area_tag(ticket.business_area.name)
-        if ticket.business_area.enable_email_notification and is_grievance_reminder_due(
-            ticket,
-            now,
-            timedelta(days=1),
-            notification_hour,
-        ):
-            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-            notification.send_email_notification()
-            ticket.last_notification_sent = now
-            ticket.save(update_fields=["last_notification_sent"])
-
-    for ticket in other_tickets_to_notify:
-        set_sentry_business_area_tag(ticket.business_area.name)
-        if ticket.business_area.enable_email_notification and is_grievance_reminder_due(
-            ticket,
-            now,
-            timedelta(days=30),
-            notification_hour,
-        ):
-            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
-            notification.send_email_notification()
-            ticket.last_notification_sent = now
-            ticket.save(update_fields=["last_notification_sent"])
-
-
-@app.task()
-def periodic_grievances_notifications_async_task() -> None:
-    PeriodicAsyncJob.queue_task(
-        job_name=periodic_grievances_notifications_async_task.__name__,
-        action="hope.apps.grievance.celery_tasks.periodic_grievances_notifications_async_task_action",
-        config={},
-        group_key="grievance",
-        description="Send periodic grievance notifications",
-    )

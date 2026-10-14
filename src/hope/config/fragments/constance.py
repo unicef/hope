@@ -146,6 +146,16 @@ CONSTANCE_CONFIG = {
         "Should send grievances notification",
         bool,
     ),
+    "GRIEVANCE_OVERDUE_THRESHOLD_SENSITIVE": (
+        1,
+        "Days after creation before a sensitive grievance ticket counts as overdue",
+        "positive_integers",
+    ),
+    "GRIEVANCE_OVERDUE_THRESHOLD_NON_SENSITIVE": (
+        30,
+        "Days after creation before a non-sensitive grievance ticket counts as overdue",
+        "positive_integers",
+    ),
     "GRIEVANCE_NOTIFICATION_HOUR": (
         6,
         "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",

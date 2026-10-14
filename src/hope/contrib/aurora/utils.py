@@ -9,6 +9,7 @@ from django.db.transaction import atomic
 from django.utils import timezone
 import requests
 
+from hope.apps.utils.external_urls import build_url
 from hope.contrib.aurora.models import Organization, Project, Record, Registration
 
 if TYPE_CHECKING:
@@ -160,7 +161,7 @@ def get_metadata(auth_token: str) -> dict:
         logger.error("Aurora schema is missing 'record' endpoint")
         return {}
     rnd = timezone.now()
-    return _get_json(session, f"{record_url}metadata/?{rnd}")
+    return _get_json(session, build_url(record_url, f"metadata/?{rnd}"))
 
 
 def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> dict:

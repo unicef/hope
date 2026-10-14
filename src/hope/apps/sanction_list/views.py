@@ -1,4 +1,5 @@
 from tempfile import NamedTemporaryFile
+from typing import Any
 
 from django import forms
 from django.contrib import messages
@@ -28,7 +29,7 @@ class UploadFileView(LoginRequiredMixin, CreateView):
     form_class = UploadForm
     success_url = "."
 
-    def form_valid(self, form: UploadForm) -> HttpResponse:
+    def form_valid(self, form: forms.ModelForm[Any]) -> HttpResponse:
         self.object = form.save(commit=False)
         self.object.associated_email = self.request.user.email
         self.object.save()

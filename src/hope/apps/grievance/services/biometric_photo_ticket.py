@@ -2,11 +2,11 @@ from django.db.models import QuerySet
 
 from hope.apps.grievance.constants import SUBMISSION_CHANNEL_HOPE
 from hope.apps.grievance.models import GrievanceTicket, TicketIndividualDataUpdateDetails
-from hope.models import DeduplicationEngineSimilarityPair, Individual, RegistrationDataImport
+from hope.models import BiometricDedupeSimilarityPair, Individual, RegistrationDataImport
 
 
 def create_biometrics_photo_data_change_tickets(
-    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair],
+    deduplication_pairs: QuerySet[BiometricDedupeSimilarityPair],
     rdi: RegistrationDataImport,
 ) -> None:
     """Create a photo-fix Data Change ticket for each individual whose photo the engine couldn't read.

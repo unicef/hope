@@ -3,6 +3,7 @@ import tempfile
 from typing import Callable
 
 from django.core.files.base import ContentFile
+from django.db.models import Prefetch
 from openpyxl import load_workbook
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -11,7 +12,7 @@ from hope.apps.core.utils import chunks
 from hope.apps.payment.services.payment_household_snapshot_service import (
     get_household_snapshot,
 )
-from hope.models import Household, Individual, UniversalUpdate
+from hope.models import Household, Individual, IndividualIdentity, UniversalUpdate
 
 
 def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:
@@ -70,7 +71,14 @@ def create_snapshot_content(log_message: Callable[[str], None], program_id: str,
             households = (
                 Household.objects.filter(id__in=id_chunk)
                 .select_related("head_of_household")
-                .prefetch_related("individuals", "individuals_and_roles")
+                .prefetch_related(
+                    "individuals",
+                    "individuals_and_roles",
+                    Prefetch(
+                        "individuals__identities",
+                        queryset=IndividualIdentity.objects.select_related("partner", "country"),
+                    ),
+                )
             )
             for household in households:
                 snapshot = get_household_snapshot(household)

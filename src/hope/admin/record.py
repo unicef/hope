@@ -24,6 +24,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from hope.admin.utils import HOPEModelAdminBase
+from hope.apps.utils.external_urls import build_url
 from hope.apps.utils.security import is_root
 from hope.contrib.aurora.celery_tasks import fresh_extract_records_async_task
 from hope.contrib.aurora.models import Record, Registration
@@ -32,7 +33,8 @@ from hope.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
 from hope.contrib.aurora.utils import fetch_records, get_metadata
-from hope.models import RegistrationDataImport
+from hope.models import BusinessArea, RegistrationDataImport
+from hope.models.business_area import ALL_EXCEPT_CW_INGEST_REJECT_MSG
 
 
 class StatusFilter(ChoicesFieldComboFilter):
@@ -100,6 +102,11 @@ class BaseRDIForm(forms.Form):
 
     def clean(self) -> None:
         super().clean()
+        registration = self.cleaned_data.get("registration")
+        if registration:
+            business_area = BusinessArea.objects.filter(slug=registration.project.organization.slug).first()
+            if business_area and business_area.is_rdi_ingest_source_country_workspace_only:
+                raise forms.ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
         filters, excludes = self.cleaned_data["filters"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
             filters["status__isnull"] = True
@@ -132,6 +139,12 @@ class AmendRDIForm(BaseRDIForm):
     )
 
     field_order = ["rdi", "registration", "filters"]
+
+    def clean(self) -> None:
+        super().clean()
+        rdi = self.cleaned_data.get("rdi")
+        if rdi and rdi.business_area.is_rdi_ingest_source_country_workspace_only:
+            raise forms.ValidationError(ALL_EXCEPT_CW_INGEST_REJECT_MSG)
 
 
 @admin.register(Record)
@@ -348,7 +361,10 @@ class RecordAdmin(HOPEModelAdminBase):
                     cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
 
                 auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
-                url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
+                url = build_url(
+                    form.cleaned_data["host"],
+                    "api/data/{registration}/{start}/{end}/".format(**form.cleaned_data),
+                )
                 with requests.get(url, stream=True, auth=auth, timeout=60) as res:
                     if res.status_code != 200:
                         raise Exception(str(res))

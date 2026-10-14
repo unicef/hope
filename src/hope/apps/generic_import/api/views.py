@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from hope.api.endpoints.base import BusinessAreaIngestAllExceptCWMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.mixins import BaseViewSet, PermissionsMixin, ProgramMixin, SerializerActionMixin
 from hope.apps.core.api.parsers import DictDrfNestedParser
@@ -16,6 +17,7 @@ from hope.models import Grant, ImportData, RegistrationDataImport
 
 
 class GenericImportUploadViewSet(
+    BusinessAreaIngestAllExceptCWMixin,
     PermissionsMixin,
     ProgramMixin,
     SerializerActionMixin,

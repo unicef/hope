@@ -269,6 +269,19 @@ class Program(
 
     def clean(self) -> None:
         super().clean()
+        if (
+            self.biometric_deduplication_enabled
+            and self.business_area_id
+            and self.business_area.is_rdi_ingest_source_all_except_country_workspace
+        ):
+            raise ValidationError(
+                {
+                    "biometric_deduplication_enabled": _(
+                        "Biometric deduplication cannot be enabled for a business area that does not ingest data "
+                        "from Country Workspace."
+                    )
+                }
+            )
         if not self.data_collecting_type_id or not self.beneficiary_group_id:
             return
         if (

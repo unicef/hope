@@ -1,9 +1,5 @@
-from unittest import mock
-
 from django.contrib import messages
-from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
-from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 import pytest
@@ -11,14 +7,12 @@ from rest_framework import status
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
-    FileTempFactory,
     PaymentPlanFactory,
     ProgramFactory,
     UserFactory,
 )
-from hope.admin.utils import PaymentPlanCeleryTasksMixin
 from hope.apps.payment.utils import generate_cache_key
-from hope.models import AsyncJob, AsyncJobModel, AsyncRetryJob, PaymentPlan
+from hope.models import PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -77,11 +71,6 @@ def payment_plan_url(payment_plan):
             PaymentPlan.Status.LOCKED,
             PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
             'id="btn-restart_importing_entitlements_xlsx_file"',
-        ),
-        (
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-            'id="btn-restart_importing_reconciliation_xlsx_file"',
         ),
         (
             PaymentPlan.Status.LOCKED,
@@ -187,87 +176,3 @@ def test_restart_prepare_payment_plan_task_already_running(
         == f"Task is already running for Payment Plan {payment_plan.unicef_id}."
     )
     cache.delete(cache_key)
-
-
-def test_restart_importing_reconciliation_xlsx_file(admin_client, admin_user, program_cycle, business_area) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-        program_cycle=program_cycle,
-        created_by=admin_user["user"],
-        business_area=business_area,
-    )
-    response = admin_client.post(
-        reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-    )
-    assert response.status_code == status.HTTP_302_FOUND
-
-    assert (
-        list(messages.get_messages(response.wsgi_request))[-1].message
-        == "There is no reconciliation_import_file for this payment plan"
-    )
-
-    file_temp = FileTempFactory(
-        object_id=str(payment_plan.pk),
-        content_type=get_content_type_for_model(payment_plan),
-        created_by=admin_user["user"],
-        file=ContentFile(b"abc", "Test_123.xlsx"),
-    )
-    payment_plan.reconciliation_import_file = file_temp
-    payment_plan.save(update_fields=["reconciliation_import_file"])
-    payment_plan.refresh_from_db()
-
-    response = admin_client.post(
-        reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-    )
-    assert response.status_code == status.HTTP_302_FOUND
-    assert (
-        list(messages.get_messages(response.wsgi_request))[-1].message == "There is no current "
-        f"{PaymentPlanCeleryTasksMixin.import_payment_plan_delivery_from_xlsx_async_task}"
-        f" for this payment plan"
-    )
-
-
-def test_restart_importing_reconciliation_xlsx_file_restarts_active_async_job(
-    admin_client, admin_user, program_cycle, business_area
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-        program_cycle=program_cycle,
-        created_by=admin_user["user"],
-        business_area=business_area,
-    )
-    file_temp = FileTempFactory(
-        object_id=str(payment_plan.pk),
-        content_type=get_content_type_for_model(payment_plan),
-        created_by=admin_user["user"],
-        file=ContentFile(b"abc", "Test_123.xlsx"),
-    )
-    payment_plan.reconciliation_import_file = file_temp
-    payment_plan.save(update_fields=["reconciliation_import_file"])
-    AsyncRetryJob.create_for_instance(
-        payment_plan,
-        type=AsyncJobModel.JobType.JOB_TASK,
-        repeatable=True,
-        action="hope.apps.payment.celery_tasks.import_payment_plan_delivery_from_xlsx_async_task_action",
-        config={"payment_plan_id": str(payment_plan.pk)},
-    )
-
-    with (
-        mock.patch(
-            "hope.admin.utils.AsyncJob.task_status", new_callable=mock.PropertyMock, return_value=AsyncJob.STARTED
-        ),
-        mock.patch("hope.admin.utils.AsyncJob.terminate", autospec=True) as mocked_terminate,
-        mock.patch(
-            "hope.apps.payment.celery_tasks.import_payment_plan_delivery_from_xlsx_async_task"
-        ) as mocked_restart,
-    ):
-        response = admin_client.post(
-            reverse("admin:payment_paymentplan_restart_importing_reconciliation_xlsx_file", args=[payment_plan.id]),
-        )
-
-    assert response.status_code == status.HTTP_302_FOUND
-    mocked_terminate.assert_called_once()
-    mocked_restart.assert_called_once_with(payment_plan, str(admin_user["user"].pk))
-    assert list(messages.get_messages(response.wsgi_request))[-1].message == "Successfully executed."

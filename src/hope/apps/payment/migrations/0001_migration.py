@@ -9,10 +9,10 @@ import django.contrib.postgres.fields
 import django.contrib.postgres.validators
 import django.core.validators
 from django.db import migrations, models
+from django.db.backends.postgresql.psycopg_any import NumericRange
 import django.db.models.deletion
 import model_utils.fields
 import multiselectfield.db.fields
-import psycopg2.extras
 
 import hope.apps.payment.fields
 import hope.apps.payment.validators
@@ -2196,7 +2196,7 @@ class Migration(migrations.Migration):
                 (
                     "payments_range_usd",
                     django.contrib.postgres.fields.ranges.IntegerRangeField(
-                        default=psycopg2.extras.NumericRange(0, None, "[)"),
+                        default=NumericRange(0, None, "[)"),
                         validators=[django.contrib.postgres.validators.RangeMinValueValidator(0)],
                     ),
                 ),

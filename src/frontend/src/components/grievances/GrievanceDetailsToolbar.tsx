@@ -30,6 +30,7 @@ import {
 import type { ApiErrorShape } from '@utils/utils';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
+import { countTicketChanges, getTicketData } from './utils/ticketData';
 
 const Separator = styled.div`
   width: 1px;
@@ -38,32 +39,6 @@ const Separator = styled.div`
     ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.lightGray};
   margin: 0 28px;
 `;
-
-const countApprovedAndUnapproved = (
-  data,
-): { approved: number; notApproved: number } => {
-  // Only count objects with an approve_status property
-  let approved = 0;
-  let notApproved = 0;
-  const flattenArray = data.flat(2);
-  flattenArray
-    .filter(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'approve_status' in item &&
-        typeof item.approve_status === 'boolean',
-    )
-    .forEach((item) => {
-      if (item.approve_status === true) {
-        approved += 1;
-      } else {
-        notApproved += 1;
-      }
-    });
-
-  return { approved, notApproved };
-};
 
 export const GrievanceDetailsToolbar = ({
   ticket,
@@ -140,28 +115,6 @@ export const GrievanceDetailsToolbar = ({
 
   const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
     (): string => {
-      const householdData = ticket.ticketDetails?.householdData || {};
-      const individualData = ticket.ticketDetails?.individualData || {};
-
-      const allData = {
-        ...householdData,
-        ...individualData,
-        ...householdData?.flexFields,
-        ...individualData?.flexFields,
-      };
-      const filterData = (data: any) => {
-        const excludedKeys = [
-          'previous_documents',
-          'previous_identities',
-          'previous_payment_channels',
-          'flex_fields',
-        ];
-
-        return Object.keys(data)
-          .filter((key) => !excludedKeys.includes(key))
-          .reduce((obj, key) => ({ ...obj, [key]: data[key] }), {});
-      };
-
       const generateConfirmationText = (
         approved: number,
         notApproved: number,
@@ -180,10 +133,8 @@ export const GrievanceDetailsToolbar = ({
         return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
       };
 
-      const filteredData = filterData(allData);
-
-      const { approved, notApproved } = countApprovedAndUnapproved(
-        Object.values(filteredData),
+      const { approved, notApproved } = countTicketChanges(
+        ticket.ticketDetails,
       );
 
       return generateConfirmationText(approved, notApproved);
@@ -372,7 +323,7 @@ export const GrievanceDetailsToolbar = ({
   // Determine if closing should be disabled because a PRIMARY role was
   // previously present but no role currently has value === 'PRIMARY'.
   const roles: any[] =
-    ticket.ticketDetails?.householdData?.roles ||
+    getTicketData(ticket.ticketDetails).roles ||
     ticket.ticketDetails?.roles ||
     [];
   const primaryPreviouslyPresent = roles.some(

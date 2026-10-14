@@ -181,7 +181,7 @@ def czech_context(czech_record_fields: dict) -> dict:
     program = ProgramFactory(
         status="ACTIVE",
         data_collecting_type=data_collecting_type,
-        biometric_deduplication_enabled=True,
+        biometric_deduplication_enabled=False,
         business_area=business_area,
     )
     organization = OrganizationFactory(business_area=business_area, slug=business_area.slug)

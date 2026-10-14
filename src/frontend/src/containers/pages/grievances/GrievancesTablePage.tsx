@@ -15,6 +15,7 @@ import {
   canManageNeedsAdjudication,
   hasPermissions,
 } from '../../../config/permissions';
+import { availableMyTasksTabs } from './MyTasksPage';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import {
@@ -155,6 +156,17 @@ export const GrievancesTablePage = (): ReactElement => {
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {availableMyTasksTabs(permissions).length > 0 && (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => navigate(`/${baseUrl}/grievance/my-tasks`)}
+              data-cy="button-my-tasks"
+              sx={{ whiteSpace: 'nowrap', px: 4, flexShrink: 0 }}
+            >
+              {t('My Tasks')}
+            </Button>
+          )}
           {canManageNeedsAdjudication(permissions) && (
             <Button
               variant="outlined"

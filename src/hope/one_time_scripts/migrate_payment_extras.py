@@ -1,7 +1,7 @@
 import time
 
 from django.db import connection, transaction
-from psycopg2 import sql
+from psycopg import sql
 
 from hope.models import Payment
 

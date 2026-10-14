@@ -754,6 +754,10 @@ def test_sync_payment_plan(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
+    assert payment_plan.total_delivered_quantity == Decimal("100.00")
+    assert payment_plan.total_delivered_quantity_usd == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
 
 
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -919,6 +923,10 @@ def test_sync_record(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.FINISHED
+    assert payment_plan.total_delivered_quantity == Decimal("100.00")
+    assert payment_plan.total_delivered_quantity_usd == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity == Decimal("100.00")
+    assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
     assert change_payment_instruction_status_mock.call_count == 2
 
 
@@ -1657,7 +1665,7 @@ def test_api_get_records_for_payment_instruction(get_mock: Any) -> None:
     api = PaymentGatewayAPI()
     response_data = api.get_records_for_payment_instruction("pi-remote-id")
 
-    get_mock.assert_called_once_with(f"{api.api_url}{api.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id=pi-remote-id")
+    get_mock.assert_called_once_with("TEST/payment_records/?parent__remote_id=pi-remote-id")
     assert isinstance(response_data[0], PaymentRecordData)
 
 

@@ -1,0 +1,37 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, POST",
+        "ETag": "825a11513704bfabfac4eadac4189152",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "476"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/i4o4/target-populations/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "b768ba22-102d-4ac5-818d-fac5a8d6869b",
+                "name": null,
+                "status": "OPEN",
+                "created_by": "",
+                "created_at": "2025-01-01T00:00:00Z",
+                "total_households_count": 0,
+                "total_individuals_count": 0,
+                "updated_at": "2025-01-01T00:00:00Z",
+                "payment_plan_group": {
+                    "id": "b4081ca7-d4f4-4b08-9131-434c9118be8f",
+                    "unicef_id": "PPG-8",
+                    "name": "Default Group"
+                }
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

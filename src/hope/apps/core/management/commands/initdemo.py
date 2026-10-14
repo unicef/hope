@@ -74,6 +74,7 @@ from hope.apps.core.management.commands.demo_data.core import (
     generate_data_collecting_types,
 )
 from hope.apps.core.management.commands.demo_data.engine import generate_rule_formulas
+from hope.apps.core.management.commands.demo_data.flex_fields import generate_household_flex_fields
 from hope.apps.core.management.commands.demo_data.grievance import generate_fake_grievances
 from hope.apps.core.management.commands.demo_data.household import (
     generate_additional_doc_types,
@@ -178,6 +179,8 @@ class Command(BaseCommand):
         update_fsps()
         self.stdout.write("Loading additional fixtures...")
         generate_pdu_data()
+        self.stdout.write("Generating household flex fields...")
+        generate_household_flex_fields()
         self.stdout.write("Generating messages...")
         generate_messages()
         generate_feedback()

@@ -14,7 +14,6 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.models import (
     BusinessArea,
@@ -145,68 +144,6 @@ def test_process_collisions_with_collision_detected(
     mock_collision_detector.update_household.assert_called_once_with(pending_household)
     target_household.refresh_from_db()
     assert rdi in target_household.extra_rdis.all()
-
-
-# --- _run_biometric_deduplication ---
-
-
-def test_run_biometric_deduplication_enabled_calls_all_service_methods(
-    rdi: RegistrationDataImport,
-) -> None:
-    rdi.program.biometric_deduplication_enabled = True
-    rdi.program.save(update_fields=["biometric_deduplication_enabled"])
-
-    individual_ids = [uuid.uuid4(), uuid.uuid4()]
-
-    task = RdiMergeTask()
-    with patch("hope.apps.registration_data.tasks.rdi_merge.BiometricDeduplicationService") as mock_service_cls:
-        mock_service_instance = mock_service_cls.return_value
-        task._run_biometric_deduplication(rdi, individual_ids)
-
-    mock_service_instance.create_grievance_tickets_for_duplicates.assert_called_once_with(rdi)
-    mock_service_instance.update_rdis_deduplication_statistics.assert_called_once_with(rdi.program, exclude_rdi=rdi)
-    mock_service_instance.report_ack_to_biometric_deduplication_engine.assert_called_once_with(
-        rdi,
-        [str(_id) for _id in individual_ids],
-    )
-
-
-# --- _run_deduplication ---
-
-
-def test_run_deduplication_calls_dedup_and_creates_tickets(
-    rdi: RegistrationDataImport,
-) -> None:
-    individuals_list = []
-    registration_data_import_id = str(rdi.id)
-
-    task = RdiMergeTask()
-    with (
-        patch("hope.apps.registration_data.tasks.rdi_merge.DeduplicateTask") as mock_dedup_cls,
-        patch("hope.apps.registration_data.tasks.rdi_merge.create_needs_adjudication_tickets") as mock_create_tickets,
-    ):
-        mock_dedup_instance = mock_dedup_cls.return_value
-        task._run_deduplication(rdi, individuals_list, registration_data_import_id)
-
-    mock_dedup_cls.assert_called_once_with(rdi.business_area.slug, rdi.program.id)
-    mock_dedup_instance.deduplicate_individuals_against_population.assert_called_once_with(individuals_list)
-
-    assert mock_create_tickets.call_count == 2
-    first_call = mock_create_tickets.call_args_list[0]
-    second_call = mock_create_tickets.call_args_list[1]
-
-    assert first_call[0][1] == "duplicates"
-    assert first_call[0][2] == rdi.business_area
-    assert first_call[1]["registration_data_import"] == rdi
-    assert first_call[1]["issue_type"] == GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY
-
-    assert second_call[0][1] == "possible_duplicates"
-    assert second_call[0][2] == rdi.business_area
-    assert second_call[1]["registration_data_import"] == rdi
-    assert second_call[1]["issue_type"] == GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY
-
-
-# --- _create_kobo_submissions ---
 
 
 @pytest.fixture

@@ -120,6 +120,9 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
             "vision_payplanSno": "00000062",
             "status": "SUCCESS",
             "fc_num": "FC123",
+            "error_message": "SUCCESS",
+            "timestamp": "20261001133415",
+            "extra_field": {"key": "value"},
         }
     )
     serializer.is_valid(raise_exception=True)
@@ -129,15 +132,19 @@ def test_payment_plan_callback_request_serializer_external_payload() -> None:
         "vision_payplanSno": "00000062",
         "status": "SUCCESS",
         "fc_num": "FC123",
+        "error_message": "SUCCESS",
+        "timestamp": "20261001133415",
+        "extra_field": {"key": "value"},
     }
 
 
 def test_payment_plan_callback_request_serializer_ack_payload_uses_initial_data_before_validation() -> None:
     serializer = PaymentPlanCallbackRequestSerializer(data={"messageId": "msg-001", "payplanSno": "PP001"})
-    assert serializer.ack_payload("KO") == {
+    assert serializer.ack_payload("KO", message="Invalid callback payload") == {
         "status": "KO",
         "message_id": "msg-001",
         "payplan_sno": "PP001",
+        "message": "Invalid callback payload",
     }
 
 
@@ -157,12 +164,14 @@ def test_payment_plan_callback_ack_serializer_to_representation() -> None:
             "status": "OK",
             "message_id": "msg-001",
             "payplan_sno": "PP001",
+            "message": "Callback received",
         }
     )
     assert serializer.data == {
         "status": "OK",
         "messageId": "msg-001",
         "payplanSno": "PP001",
+        "message": "Callback received",
     }
 
 

@@ -23,11 +23,9 @@
         "number_of_households": 1,
         "number_of_individuals": 1,
         "number_of_registered_individuals": 0,
-        "biometric_deduplicated": "NO",
         "error_message": "",
         "can_merge": true,
         "biometric_deduplication_enabled": false,
-        "deduplication_engine_status": null,
         "batch_duplicates_count_and_percentage": [
             {
                 "count": 0,

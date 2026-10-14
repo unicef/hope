@@ -16,7 +16,6 @@ interface PaymentRecordTableRowProps {
   canViewDetails: boolean;
   selectedRDI?;
   radioChangeHandler?: (id: string) => void;
-  biometricDeduplicationEnabled: boolean;
 }
 
 export function RegistrationDataImportTableRow({
@@ -24,7 +23,6 @@ export function RegistrationDataImportTableRow({
   canViewDetails,
   selectedRDI,
   radioChangeHandler,
-  biometricDeduplicationEnabled,
 }: PaymentRecordTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
@@ -84,11 +82,6 @@ export function RegistrationDataImportTableRow({
           {registrationDataImport.importDate}
         </UniversalMoment>
       </TableCell>
-      {biometricDeduplicationEnabled && (
-        <TableCell align="center">
-          {registrationDataImport.biometricDeduplicated}
-        </TableCell>
-      )}
       <TableCell align="right">
         {registrationDataImport.numberOfIndividuals}
       </TableCell>

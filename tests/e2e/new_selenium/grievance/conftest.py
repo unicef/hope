@@ -24,6 +24,7 @@ from hope.models import (
     Household,
     Individual,
     Program,
+    User,
 )
 
 
@@ -434,3 +435,9 @@ def individual_in_other_program(business_area: BusinessArea) -> Individual:
         sex="FEMALE",
         birth_date=date(1988, 2, 6),
     )
+
+
+@pytest.fixture
+def me(create_super_user: User) -> User:
+    """The user the ``login`` fixture signs in as."""
+    return create_super_user

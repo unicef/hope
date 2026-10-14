@@ -1687,14 +1687,14 @@ class TestTargeting:
         PaymentPlanFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
-            status=PaymentPlan.Status.TP_PROCESSING,
+            status=PaymentPlan.Status.TP_LOCKED,
         )
         page_targeting.select_global_program_filter("Test Programm")
         page_targeting.get_nav_targeting().click()
         filters.get_filters_search().send_keys("Copy")
         filters.get_button_filters_apply().click()
         page_targeting.count_target_populations(1)
-        assert "PROCESSING" in page_targeting.get_status_container().text
+        assert "LOCKED" in page_targeting.get_status_container().text
         filters.get_button_filters_clear().click()
         filters.get_filters_status().click()
         filters.select_listbox_element("Open")
@@ -1728,7 +1728,7 @@ class TestTargeting:
         PaymentPlanFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="A Copy TP",
-            status=PaymentPlan.Status.TP_PROCESSING,
+            status=PaymentPlan.Status.TP_LOCKED,
             created_by=user2,
             total_households_count=1,
         )

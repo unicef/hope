@@ -267,16 +267,8 @@ def is_locked_payment_plan(btn: StandardButton) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.LOCKED)
 
 
-def is_accepted_payment_plan(btn: StandardButton) -> bool:
-    return is_payment_plan_in_status(btn, PaymentPlan.Status.ACCEPTED)
-
-
 def is_importing_entitlements_xlsx_file(btn: StandardButton) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
-
-
-def is_importing_reconciliation_xlsx_file(btn: StandardButton) -> bool:
-    return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION)
 
 
 def is_exporting_xlsx_file(btn: StandardButton) -> bool:
@@ -286,7 +278,6 @@ def is_exporting_xlsx_file(btn: StandardButton) -> bool:
 class PaymentPlanCeleryTasksMixin:
     prepare_payment_plan_async_task = "prepare_payment_plan_async_task"
     import_payment_plan_payment_list_from_xlsx_async_task = "import_payment_plan_payment_list_from_xlsx_async_task"
-    import_payment_plan_delivery_from_xlsx_async_task = "import_payment_plan_delivery_from_xlsx_async_task"
     create_payment_plan_payment_list_xlsx_async_task = "create_payment_plan_payment_list_xlsx_async_task"
 
     url = "admin:payment_paymentplan_change"
@@ -418,46 +409,6 @@ class PaymentPlanCeleryTasksMixin:
             modeladmin=self,
             request=request,
             action=self.restart_importing_entitlements_xlsx_file,
-            message="Do you confirm to restart importing entitlements xlsx file task?",
-        )
-
-    @button(
-        visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
-        enabled=is_enabled,
-        permission="payment.restart_importing_reconciliation_xlsx_file",
-    )
-    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
-        """Import payment plan list (from xlsx)."""
-        from hope.apps.payment.celery_tasks import (
-            import_payment_plan_delivery_from_xlsx_async_task,
-        )
-
-        if request.method == "POST":
-            task_name = self.import_payment_plan_delivery_from_xlsx_async_task
-            pp = PaymentPlan.objects.get(pk=pk)
-            file = pp.reconciliation_import_file
-            if not file:
-                messages.add_message(
-                    request, messages.ERROR, "There is no reconciliation_import_file for this payment plan"
-                )
-                return redirect(reverse(self.url, args=[pk]))
-
-            if self._terminate_active_payment_plan_jobs(pp, task_name):
-                import_payment_plan_delivery_from_xlsx_async_task(pp, str(request.user.pk))
-
-                messages.add_message(request, messages.INFO, "Successfully executed.")
-            else:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    f"There is no current {task_name} for this payment plan",
-                )
-
-            return redirect(reverse(self.url, args=[pk]))
-        return confirm_action(
-            modeladmin=self,
-            request=request,
-            action=self.restart_importing_reconciliation_xlsx_file,
             message="Do you confirm to restart importing entitlements xlsx file task?",
         )
 

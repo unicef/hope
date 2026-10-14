@@ -12,15 +12,17 @@ import {
   type QueryKey,
 } from '@tanstack/react-query';
 import { getApiErrorMessages } from '@utils/utils';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const MAX_FILE_SIZE_MB = 200;
 
-interface XlsxImportDialogProps {
+interface XlsxImportDialogProps<
+  TFormData extends PaymentPlanImportFile = PaymentPlanImportFile,
+> {
   /** Wires the actual import endpoint; receives the multipart form data. */
-  mutationFn: (formData: PaymentPlanImportFile) => Promise<unknown>;
+  mutationFn: (formData: TFormData) => Promise<unknown>;
   /** Query key invalidated on a successful import. */
   invalidateQueryKey: QueryKey;
   successMessage: string;
@@ -31,6 +33,9 @@ interface XlsxImportDialogProps {
   /** `m` spacing applied to the trigger button's wrapping Box. */
   buttonMargin?: number;
   disabled?: boolean;
+  options?: ReactNode;
+  buildMutationVariables?: (file: File) => TFormData;
+  onReset?: () => void;
   /** Base suffix, e.g. `delivery-import-xlsx-group` → `button-delivery-import-xlsx-group`. */
   dataCySuffix: string;
 }
@@ -39,7 +44,9 @@ interface XlsxImportDialogProps {
  * Shared "select an XLSX file and import it" dialog used by reconciliation
  * uploads on both Follow-up Instructions and Payment Plan Groups.
  */
-export function XlsxImportDialog({
+export function XlsxImportDialog<
+  TFormData extends PaymentPlanImportFile = PaymentPlanImportFile,
+>({
   mutationFn,
   invalidateQueryKey,
   successMessage,
@@ -48,8 +55,11 @@ export function XlsxImportDialog({
   buttonVariant = 'text',
   buttonMargin = 0,
   disabled = false,
+  options,
+  buildMutationVariables,
+  onReset,
   dataCySuffix,
-}: XlsxImportDialogProps): ReactElement {
+}: XlsxImportDialogProps<TFormData>): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
@@ -64,6 +74,7 @@ export function XlsxImportDialog({
       setOpen(false);
       setFileToImport(null);
       setXlsxError(null);
+      onReset?.();
       showMessage(successMessage);
     },
     onError: (error) => {
@@ -75,7 +86,12 @@ export function XlsxImportDialog({
     if (fileToImport) {
       // The generated PaymentPlanImportFile types `file` as string, but the
       // endpoint expects the File for multipart upload.
-      await mutateAsync({ file: fileToImport as unknown as string });
+      const formData =
+        buildMutationVariables?.(fileToImport) ??
+        ({
+          file: fileToImport as unknown as string,
+        } as TFormData);
+      await mutateAsync(formData);
     }
   };
 
@@ -83,6 +99,7 @@ export function XlsxImportDialog({
     setOpen(false);
     setFileToImport(null);
     setXlsxError(null);
+    onReset?.();
   };
 
   return (
@@ -132,6 +149,7 @@ export function XlsxImportDialog({
                 setFileToImport(file);
               }}
             />
+            {options}
             {fileToImport && xlsxError ? (
               <XlsxErrorsDisplay errors={xlsxError} />
             ) : null}

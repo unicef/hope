@@ -50,16 +50,28 @@ export function BulkAssignModal({
       );
     },
     onSuccess: () => {
+      // The count feeds the pagination label; on a list this action removes tickets from (My
+      // Tasks) it goes stale otherwise.
       if (isAllPrograms) {
         queryClient.invalidateQueries({
           queryKey: restQueryKey(
             RestService.restBusinessAreasGrievanceTicketsList,
           ),
         });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasGrievanceTicketsCountRetrieve,
+          ),
+        });
       } else {
         queryClient.invalidateQueries({
           queryKey: restQueryKey(
             RestService.restBusinessAreasProgramsGrievanceTicketsList,
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve,
           ),
         });
       }

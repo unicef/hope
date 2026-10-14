@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Any, cast
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
@@ -36,6 +37,10 @@ from hope.apps.household.const import (
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
+    NULL_DELIVERY_POLICIES,
+    NULL_DELIVERY_POLICY_RESET,
+)
 from hope.apps.program.api.serializers import (
     PaymentPlanPurposeSerializer,
     ProgramCycleSmallSerializer,
@@ -47,6 +52,8 @@ from hope.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 from hope.models import (
+    Account,
+    AccountAttachment,
     Approval,
     ApprovalProcess,
     Currency,
@@ -74,6 +81,46 @@ from hope.models.payment_plan_purpose import PaymentPlanPurpose
 logger = logging.getLogger(__name__)
 
 
+ATTACHMENT_ALLOWED_EXTENSIONS = ["pdf", "xlsx", "jpg", "jpeg", "png"]
+
+
+class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(use_url=False)
+
+    class Meta:
+        model = AccountAttachment
+        fields = ["id", "title", "file", "uploaded_at", "created_by"]
+
+    def validate_file(self, file: Any) -> Any:
+        if file.size > AccountAttachment.FILE_SIZE_LIMIT:
+            raise serializers.ValidationError(
+                f"File size must be ≤ {AccountAttachment.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+            )
+
+        extension = file.name.split(".")[-1].lower()
+        if extension not in ATTACHMENT_ALLOWED_EXTENSIONS:
+            raise serializers.ValidationError("Unsupported file type.")
+
+        return file
+
+    def validate(self, data: dict) -> dict:
+        account = self.context["account"]
+        data["account"] = account
+        data["created_by"] = self.context["request"].user
+
+        return data
+
+    @transaction.atomic
+    def create(self, validated_data: dict[str, Any]) -> AccountAttachment:
+        # Serializes uploads to one account so clean()'s count cannot miss a concurrent insert.
+        Account.all_objects.select_for_update().get(pk=validated_data["account"].pk)
+        try:
+            return super().create(validated_data)
+        except DjangoValidationError as e:
+            # clean() raises Django's ValidationError, which DRF would return as a 500.
+            raise serializers.ValidationError(e.messages) from e
+
+
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
     file = serializers.FileField(use_url=False)
 
@@ -83,7 +130,9 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
     def validate_file(self, file: Any) -> Any:
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
-            raise serializers.ValidationError("File size must be ≤ 10MB.")
+            raise serializers.ValidationError(
+                f"File size must be ≤ {PaymentPlanSupportingDocument.FILE_SIZE_LIMIT // (1024 * 1024)}MB."
+            )
 
         allowed_extensions = ["pdf", "xlsx", "jpg", "jpeg", "png"]
         extension = file.name.split(".")[-1].lower()
@@ -159,6 +208,14 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
         if extension not in allowed_extensions:
             raise serializers.ValidationError(f"Unsupported file type ({extension}).")
         return file
+
+
+class PaymentPlanGroupReconciliationImportSerializer(PaymentPlanImportFileSerializer):
+    override = serializers.BooleanField(default=False)
+    null_delivery_policy = serializers.ChoiceField(
+        choices=NULL_DELIVERY_POLICIES,
+        default=NULL_DELIVERY_POLICY_RESET,
+    )
 
 
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):

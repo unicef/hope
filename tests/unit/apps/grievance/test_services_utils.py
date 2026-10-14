@@ -15,9 +15,9 @@ from extras.test_utils.factories import (
     AdminAreaLimitedToFactory,
     AreaFactory,
     AreaTypeFactory,
+    BiometricDeduplicationEngineSimilarityPairFactory,
     BusinessAreaFactory,
     CountryFactory,
-    DeduplicationEngineSimilarityPairFactory,
     DocumentFactory,
     DocumentTypeFactory,
     FlexibleAttributeChoiceFactory,
@@ -42,6 +42,7 @@ from hope.apps.grievance.services.data_change.utils import (
     handle_add_identity,
     handle_edit_document,
     handle_edit_identity,
+    handle_image_field,
     handle_photo,
     handle_role,
     prepare_previous_documents,
@@ -60,9 +61,8 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
-from hope.apps.registration_data.api.deduplication_engine import IgnoredFilenamesPair
 from hope.models import (
-    DeduplicationEngineSimilarityPair,
+    BiometricDedupeSimilarityPair,
     Document,
     FlexibleAttribute,
     IndividualRoleInHousehold,
@@ -507,9 +507,7 @@ def test_close_needs_adjudication_ticket_service_when_just_duplicates(
     DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
     DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate")
 def test_close_needs_adjudication_ticket_service_for_biometrics(
-    dedup_engine_api_report_false_positive_duplicate_mock: MagicMock,
     user: Any,
     business_area: Any,
     program: Any,
@@ -532,12 +530,12 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
         possible_duplicates=[individual_2],
         is_multiple_duplicates_version=True,
         issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-        dedup_engine_similarity_pair=DeduplicationEngineSimilarityPairFactory(
+        dedup_engine_similarity_pair=BiometricDeduplicationEngineSimilarityPairFactory(
             program=program,
             individual1=individual_1,
             individual2=individual_2,
             similarity_score=90.55,
-            status_code=DeduplicationEngineSimilarityPair.StatusCode.STATUS_200,
+            status_code=BiometricDedupeSimilarityPair.StatusCode.STATUS_200,
         ),
     )
     assert ticket is not None
@@ -549,77 +547,11 @@ def test_close_needs_adjudication_ticket_service_for_biometrics(
     ticket_details.selected_distinct.set([individual_1])
     ticket_details.selected_individuals.set([individual_2])
     close_needs_adjudication_ticket_service(ticket, user)
-    dedup_engine_api_report_false_positive_duplicate_mock.assert_not_called()
 
     ticket_details.selected_distinct.set([individual_1, individual_2])
     ticket_details.selected_individuals.set([])
     ticket_details.save()
     close_needs_adjudication_ticket_service(ticket, user)
-    dedup_engine_api_report_false_positive_duplicate_mock.assert_called_once_with(
-        IgnoredFilenamesPair(first=f"{individual_1.photo.name}", second=f"{individual_2.photo.name}"),
-        program.unicef_id,
-    )
-
-
-@override_settings(
-    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
-    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
-)
-@patch("hope.apps.grievance.services.needs_adjudication_ticket_services.logger")
-@patch("hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService")
-def test_close_needs_adjudication_ticket_service_for_biometrics_when_deduplication_engine_fails(
-    biometric_dedup_service_mock: MagicMock,
-    mock_logger: Any,
-    user: Any,
-    business_area: Any,
-    program: Any,
-) -> None:
-    rdi = RegistrationDataImportFactory(program=program, business_area=business_area)
-    household = HouseholdFactory(program=program, business_area=business_area, create_role=False)
-    individual = household.head_of_household
-    individual.photo = ContentFile(b"abc", name="ind1.png")
-    individual.save(update_fields=["photo"])
-    household_2 = HouseholdFactory(program=program, business_area=business_area, create_role=False)
-    individual_2 = household_2.head_of_household
-    individual_2.photo = ContentFile(b"aaa", name="ind2.png")
-    individual_2.save(update_fields=["photo"])
-
-    grievance = GrievanceTicketFactory(
-        category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-        business_area=business_area,
-        status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        description="GrievanceTicket",
-        registration_data_import=rdi,
-    )
-    grievance.programs.add(program)
-    ticket_details = TicketNeedsAdjudicationDetailsFactory(
-        ticket=grievance,
-        golden_records_individual=individual,
-        is_multiple_duplicates_version=True,
-        selected_individual=None,
-    )
-    ticket_details.selected_distinct.add(individual)
-
-    mock_service = biometric_dedup_service_mock.return_value
-
-    class FakeAPIError(Exception):
-        pass
-
-    mock_service.api.API_EXCEPTION_CLASS = FakeAPIError
-    mock_service.report_false_positive_duplicate.side_effect = FakeAPIError()
-
-    # check with one Individual
-    # skip report false positive duplicate to Deduplication Engine
-    close_needs_adjudication_ticket_service(grievance, user)
-    mock_service.report_false_positive_duplicate.assert_not_called()
-
-    # process with two Inds
-    ticket_details.selected_distinct.add(individual_2)
-    close_needs_adjudication_ticket_service(grievance, user)
-
-    mock_service.report_false_positive_duplicate.assert_called_once()
-    mock_logger.exception.assert_called_once_with("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def test_create_grievance_ticket_with_details_no_possible_duplicates(business_area: Any, program: Any) -> None:
@@ -659,6 +591,43 @@ def test_handle_photo_saves_and_return() -> None:
     result = handle_photo(file, photoraw=None)
     assert result is not None
     assert result.endswith(".jpg")
+
+
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        pytest.param({"village": "Kabul"}, {"village": "Kabul"}, id="field-not-provided"),
+        pytest.param(
+            {"consent_sign": None, "village": "Kabul"},
+            {"consent_sign": "", "village": "Kabul"},
+            id="cleared",
+        ),
+        pytest.param(
+            {"consent_sign": "consent/already-stored.jpg", "village": "Kabul"},
+            {"village": "Kabul"},
+            id="stored-name-sent-back",
+        ),
+    ],
+)
+def test_handle_image_field_keeps_only_a_new_upload_or_a_clear_in_the_data(data: dict, expected: dict) -> None:
+    handle_image_field(data, "consent_sign")
+    assert data == expected
+
+
+def test_handle_image_field_stores_uploaded_image_under_generated_name() -> None:
+    uploaded = InMemoryUploadedFile(
+        file=BytesIO(b"123"),
+        field_name="consent_sign",
+        name="signature.jpg",
+        content_type="image/jpeg",
+        size=3,
+        charset=None,
+    )
+    data = {"consent_sign": uploaded, "village": "Kabul"}
+    handle_image_field(data, "consent_sign")
+    assert data["village"] == "Kabul"
+    assert data["consent_sign"].endswith(".jpg")
+    assert data["consent_sign"] != "signature.jpg"
 
 
 def test_set_status_based_on_assigned_to(user: Any) -> None:

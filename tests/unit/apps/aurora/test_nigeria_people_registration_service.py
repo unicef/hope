@@ -35,6 +35,7 @@ from hope.apps.household.const import HEAD, MALE
 from hope.contrib.aurora import models
 from hope.contrib.aurora.services.nigeria_people_registration_service import NigeriaPeopleRegistrationService
 from hope.models import (
+    BusinessArea,
     Document,
     FinancialInstitutionMapping,
     PendingAccount,
@@ -82,7 +83,9 @@ def document_type() -> object:
 
 @pytest.fixture
 def business_area() -> object:
-    return BusinessAreaFactory(slug="some-ng-slug")
+    return BusinessAreaFactory(
+        slug="some-ng-slug", ingest_source=BusinessArea.IngestSource.ALL_EXCEPT_COUNTRY_WORKSPACE
+    )
 
 
 @pytest.fixture
@@ -97,7 +100,7 @@ def program(business_area: object, data_collecting_type: object) -> object:
     return ProgramFactory(
         status="ACTIVE",
         data_collecting_type=data_collecting_type,
-        biometric_deduplication_enabled=True,
+        biometric_deduplication_enabled=False,
         business_area=business_area,
     )
 

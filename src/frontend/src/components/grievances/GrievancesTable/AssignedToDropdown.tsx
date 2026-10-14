@@ -91,6 +91,7 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
 
   return (
     <StyledAutocomplete
+      data-cy="assigned-to-dropdown"
       fullWidth={fullWidth}
       open={open}
       disableClearable={disableClearable}

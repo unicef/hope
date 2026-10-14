@@ -1,5 +1,6 @@
 from hope.models.acceptance_process_threshold import *  # noqa: F403
 from hope.models.account import *  # noqa: F403
+from hope.models.account_attachment import *  # noqa: F403
 from hope.models.account_type import *  # noqa: F403
 from hope.models.admin_area_limited_to import *  # noqa: F403
 from hope.models.api_log_entry import *  # noqa: F403

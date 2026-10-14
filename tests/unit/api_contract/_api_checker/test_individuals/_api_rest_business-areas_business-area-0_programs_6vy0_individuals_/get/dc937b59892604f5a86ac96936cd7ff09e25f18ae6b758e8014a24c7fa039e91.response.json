@@ -1,0 +1,53 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, HEAD, OPTIONS",
+        "ETag": "7e76f652c0d68572095b10b1fafb80b5",
+        "Cache-Control": "private, no-cache",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "1128"
+    },
+    "data": {
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/6vy0/individuals/?limit=50&offset=50",
+        "previous": null,
+        "results": [
+            {
+                "id": "ab10d242-c42f-422a-ae84-b1542d87ef2a",
+                "unicef_id": "IND-25-0000.0007",
+                "full_name": "Person 0",
+                "household": null,
+                "status": "ACTIVE",
+                "relationship": "",
+                "age": 35,
+                "sex": "MALE",
+                "relationship_display": "",
+                "birth_date": "1990-01-01",
+                "deduplication_batch_status": "UNIQUE_IN_BATCH",
+                "deduplication_batch_status_display": "Unique in RDI",
+                "biometric_deduplication_batch_status": "NOT_PROCESSED",
+                "biometric_deduplication_batch_status_display": "Not Processed",
+                "deduplication_batch_results": [],
+                "biometric_deduplication_batch_results": [],
+                "deduplication_golden_record_status": "UNIQUE",
+                "deduplication_golden_record_status_display": "Unique",
+                "biometric_deduplication_golden_record_status": "NOT_PROCESSED",
+                "biometric_deduplication_golden_record_status_display": "Not Processed",
+                "deduplication_golden_record_results": [],
+                "biometric_deduplication_golden_record_results": [],
+                "program": {
+                    "id": "a5d12269-6c0c-4fdb-b407-1b2b93d02da7",
+                    "name": "Program 0",
+                    "code": "6vy0"
+                },
+                "last_registration_date": "2025-01-01",
+                "role": null
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

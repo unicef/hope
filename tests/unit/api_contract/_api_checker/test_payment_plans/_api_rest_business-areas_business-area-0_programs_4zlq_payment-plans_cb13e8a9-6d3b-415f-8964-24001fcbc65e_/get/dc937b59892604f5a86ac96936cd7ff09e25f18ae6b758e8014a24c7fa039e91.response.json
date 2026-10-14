@@ -1,0 +1,161 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, PATCH, DELETE",
+        "X-Hope-Backend-Version": "None",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "3383"
+    },
+    "data": {
+        "id": "cb13e8a9-6d3b-415f-8964-24001fcbc65e",
+        "unicef_id": "PP-BA0000-25-00000001",
+        "name": null,
+        "status": "OPEN",
+        "total_households_count": 0,
+        "total_individuals_count": 0,
+        "currency": null,
+        "excluded_ids": null,
+        "total_entitled_quantity": null,
+        "total_delivered_quantity": null,
+        "total_undelivered_quantity": null,
+        "dispersion_start_date": "2025-01-01",
+        "dispersion_end_date": "2025-01-31",
+        "plan_type": "REGULAR",
+        "follow_ups": [],
+        "top_ups": [],
+        "created_by": " ",
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z",
+        "program": {
+            "id": "dab4d3f7-d80b-4f8a-9d96-0178ba307064",
+            "code": "4zlq",
+            "name": "Program 0",
+            "status": "ACTIVE",
+            "screen_beneficiary": false
+        },
+        "payment_plan_group": {
+            "id": "4de68a9d-e8c7-4024-92d2-4d7de8007ea1",
+            "unicef_id": "PPG-4",
+            "name": "Default Group"
+        },
+        "export_tag": null,
+        "version": 1735688653315202,
+        "background_action_status": null,
+        "background_action_status_display": null,
+        "start_date": null,
+        "end_date": null,
+        "program_cycle": {
+            "id": "4fe2d0d8-6c55-4b95-907a-f92e68634225",
+            "title": "Programme Cycle 0"
+        },
+        "is_payment_gateway": false,
+        "is_instruction_managed": false,
+        "has_payment_list_export_file": false,
+        "has_fsp_delivery_mechanism_xlsx_template": false,
+        "imported_file_name": "",
+        "imported_file_date": null,
+        "payments_conflicts_count": 0,
+        "delivery_mechanism": null,
+        "volume_by_delivery_mechanism": [
+            {
+                "id": "cb13e8a9-6d3b-415f-8964-24001fcbc65e",
+                "delivery_mechanism": null,
+                "volume": null,
+                "volume_usd": null
+            }
+        ],
+        "split_choices": [
+            {
+                "name": "By Admin Area 1",
+                "value": "BY_ADMIN_AREA1"
+            },
+            {
+                "name": "By Admin Area 2",
+                "value": "BY_ADMIN_AREA2"
+            },
+            {
+                "name": "By Admin Area 3",
+                "value": "BY_ADMIN_AREA3"
+            },
+            {
+                "name": "By Collector",
+                "value": "BY_COLLECTOR"
+            },
+            {
+                "name": "By Records",
+                "value": "BY_RECORDS"
+            },
+            {
+                "name": "No Split",
+                "value": "NO_SPLIT"
+            }
+        ],
+        "exclusion_reason": null,
+        "exclude_household_error": null,
+        "bank_reconciliation_success": 0,
+        "bank_reconciliation_error": 0,
+        "can_create_payment_verification_plan": false,
+        "available_payment_records_count": 0,
+        "reconciliation_summary": {
+            "delivered_fully": 0,
+            "delivered_partially": 0,
+            "not_delivered": 0,
+            "unsuccessful": 0,
+            "pending": 0,
+            "reconciled": 0,
+            "number_of_payments": 0
+        },
+        "excluded_households": [],
+        "excluded_individuals": [],
+        "can_create_follow_up": false,
+        "can_create_top_up": false,
+        "can_create_top_up_amendment": false,
+        "total_withdrawn_households_count": 0,
+        "unsuccessful_payments_count": 0,
+        "can_send_to_payment_gateway": false,
+        "can_split": false,
+        "supporting_documents": [],
+        "total_households_count_with_valid_phone_no": 0,
+        "financial_service_provider": null,
+        "can_export_xlsx": false,
+        "can_download_xlsx": false,
+        "can_send_xlsx_password": false,
+        "approval_process": [],
+        "total_entitled_quantity_usd": null,
+        "total_entitled_quantity_revised_usd": null,
+        "total_delivered_quantity_usd": null,
+        "total_undelivered_quantity_usd": null,
+        "male_children_count": 0,
+        "female_children_count": 0,
+        "male_adults_count": 0,
+        "female_adults_count": 0,
+        "steficon_rule": null,
+        "source_payment_plan": null,
+        "exchange_rate": null,
+        "custom_exchange_rate": false,
+        "unore_exchange_rate": null,
+        "unore_exchange_rate_unavailable": false,
+        "eligible_payments_count": 0,
+        "funds_commitments": null,
+        "available_funds_commitments": [],
+        "payment_verification_plans": [],
+        "payment_verification_summary": null,
+        "admin_url": "/api/unicorn/payment/paymentplan/cb13e8a9-6d3b-415f-8964-24001fcbc65e/change/",
+        "abort_comment": "",
+        "closure_comment": null,
+        "closed_by": null,
+        "status_date": "2025-01-01T00:00:00Z",
+        "flat_amount_value": null,
+        "payment_plan_purposes": [
+            {
+                "id": "488c34bc-ffaa-40f0-89a2-9e066338f32e",
+                "name": "Purpose 0"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

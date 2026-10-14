@@ -107,6 +107,7 @@ def payment_for_extras(
         collector=household.head_of_household,
         entitlement_quantity=Decimal(500),
         delivered_quantity=Decimal(400),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
 
 
@@ -133,6 +134,8 @@ RECONCILIATION_STATUS_CASES = [
 
 RECONCILIATION_ERROR_CASES = [
     pytest.param(600.00, Decimal("100.00"), id="delivered_exceeds_entitlement"),
+    pytest.param(-2, Decimal("100.00"), id="unsupported_negative"),
+    pytest.param("", Decimal("100.00"), id="empty_quantity"),
 ]
 
 
@@ -163,7 +166,7 @@ def test_get_delivered_quantity_status_and_value_valid_inputs(
 )
 def test_get_delivered_quantity_status_and_value_raises(
     payment_plan: PaymentPlan,
-    delivered_quantity: float,
+    delivered_quantity: int | float | str | Decimal,
     entitlement_quantity: Decimal,
 ) -> None:
     service = XlsxPaymentPlanDeliveryImportService(payment_plan, None)
@@ -175,7 +178,7 @@ def test_get_delivered_quantity_status_and_value_raises(
         service._get_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity, "test_payment_id")
 
 
-def test_import_row_updates_payment_and_verification_status(
+def test_override_import_row_queues_verification_cleanup_when_quantity_changes(
     payment_plan_finished: PaymentPlan,
     payment_verification_plan: PaymentVerificationPlan,
     households_with_individuals: list[dict[str, Any]],
@@ -188,6 +191,7 @@ def test_import_row_updates_payment_and_verification_status(
         entitlement_quantity_usd=Decimal(100),
         delivered_quantity=Decimal(1000),
         delivered_quantity_usd=Decimal(99),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_2 = PaymentFactory(
         parent=payment_plan_finished,
@@ -197,6 +201,7 @@ def test_import_row_updates_payment_and_verification_status(
         entitlement_quantity_usd=Decimal(100),
         delivered_quantity=Decimal(2000),
         delivered_quantity_usd=Decimal(500),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
     payment_3 = PaymentFactory(
         parent=payment_plan_finished,
@@ -206,6 +211,7 @@ def test_import_row_updates_payment_and_verification_status(
         entitlement_quantity_usd=Decimal(300),
         delivered_quantity=Decimal(3000),
         delivered_quantity_usd=Decimal(290),
+        status=Payment.STATUS_DISTRIBUTION_PARTIAL,
     )
 
     verification_1 = PaymentVerificationFactory(
@@ -227,7 +233,7 @@ def test_import_row_updates_payment_and_verification_status(
         received_amount=None,
     )
 
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
     import_service.payments_dict = {
         str(payment_1.pk): payment_1,
@@ -254,10 +260,7 @@ def test_import_row_updates_payment_and_verification_status(
     payment_2.save()
     payment_3.save()
 
-    PaymentVerification.objects.bulk_update(
-        import_service.payment_verifications_to_save,
-        ("status", "status_date"),
-    )
+    assert import_service.payment_ids_for_verification_cleanup == {payment_1.pk, payment_2.pk, payment_3.pk}
 
     payment_1.refresh_from_db()
     payment_2.refresh_from_db()
@@ -268,11 +271,11 @@ def test_import_row_updates_payment_and_verification_status(
 
     assert payment_1.delivered_quantity == 999
     assert verification_1.received_amount == 999
-    assert verification_1.status == PaymentVerification.STATUS_RECEIVED
+    assert verification_1.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
 
     assert payment_2.delivered_quantity == 100
     assert verification_2.received_amount == 500
-    assert verification_2.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+    assert verification_2.status == PaymentVerification.STATUS_RECEIVED
 
     assert payment_3.delivered_quantity == 2999
     assert verification_3.received_amount is None
@@ -285,7 +288,7 @@ def test_import_row_saves_extra_columns_to_extras(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1", "custom_field_2"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -306,7 +309,7 @@ def test_import_row_empty_extras_stays_empty_dict(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field_1"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -321,31 +324,13 @@ def test_import_row_empty_extras_stays_empty_dict(
     assert payment.extras == {}
 
 
-def test_validate_extras_sets_is_updated_when_extras_change(
-    payment_plan_finished: PaymentPlan,
-    payment_for_extras: Payment,
-) -> None:
-    payment = payment_for_extras
-
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
-    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
-    import_service.payments_dict = {str(payment.pk): payment}
-
-    Row = namedtuple("Row", ["value"])
-    row = [Row(str(payment.pk)), Row(500), Row("new_value")]
-
-    assert import_service.is_updated is False
-    import_service._validate_extras(row)
-    assert import_service.is_updated is True
-
-
 def test_known_columns_not_in_extras(
     payment_plan_finished: PaymentPlan,
     payment_for_extras: Payment,
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "currency", "fsp_name", "custom_extra"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -373,7 +358,7 @@ def test_get_extras_for_row_converts_types(
 ) -> None:
     payment = payment_for_extras
 
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_col"]
     import_service.payments_dict = {str(payment.pk): payment}
 
@@ -383,21 +368,6 @@ def test_get_extras_for_row_converts_types(
     extras = import_service._get_extras_for_row(row)
 
     assert extras == {"custom_col": expected_value}
-
-
-def test_validate_extras_skips_unknown_payment(
-    payment_plan_finished: PaymentPlan,
-) -> None:
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
-    import_service.xlsx_headers = ["payment_id", "delivered_quantity", "custom_field"]
-    import_service.payments_dict = {}
-
-    Row = namedtuple("Row", ["value"])
-    row = [Row("NONEXISTENT"), Row(500), Row("value")]
-
-    import_service._validate_extras(row)
-
-    assert import_service.is_updated is False
 
 
 def test_validate_rows_skips_already_reconciled_payment(
@@ -438,7 +408,7 @@ def test_validate_delivery_date_wrong_value(
     payment_for_extras: Payment,
 ) -> None:
     payment = payment_for_extras
-    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO())
+    import_service = XlsxPaymentPlanDeliveryImportService(payment_plan_finished, io.BytesIO(), override=True)
     import_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
     import_service.payments_dict = {str(payment.pk): payment}
     import_service.sheetname = "TestName"
@@ -458,6 +428,5 @@ def test_validate_delivery_date_wrong_value(
     import_service._validate_delivery_date([Row(str(payment.pk), 1), Row(450, 1), Row(0, 1)])
     assert len(import_service.errors) == 1
     assert import_service.errors[0].message == (
-        f"Payment {payment.id}: Delivered date 0 is not a datetime."
-        f" Parser must be a string or character stream, not int"
+        f"Payment {payment.id}: Delivered date 0 is not a datetime. value is not a date"
     )
