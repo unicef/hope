@@ -1,3 +1,4 @@
+from decimal import Decimal
 from functools import wraps
 import logging
 from typing import Any, Callable, ParamSpec, TypeVar
@@ -59,7 +60,14 @@ class LogForgingFilter(logging.Filter):
         if not args:
             return True
         if isinstance(args, dict):
-            record.args = {k: _SanitizedValue(v) for k, v in args.items()}
+            record.args = {k: _sanitize(v) for k, v in args.items()}
         elif isinstance(args, tuple):
-            record.args = tuple(_SanitizedValue(a) for a in args)
+            record.args = tuple(_sanitize(a) for a in args)
         return True
+
+
+def _sanitize(value: Any) -> Any:
+    # Numbers can't carry CR/LF, and wrapping them breaks %d / %f placeholders.
+    if isinstance(value, int | float | Decimal):
+        return value
+    return _SanitizedValue(value)
