@@ -244,7 +244,43 @@ def test_full_flow_from_edit_to_individual_page(
     login.wait_for_text("Full flow value", 'table[aria-label="programme time series fields"]')
 
 
-def test_bulk_approve_and_merge_from_lists(
+def online_edits_list_url(program: Program) -> str:
+    return f"{individuals_url(program)}?tab=periodic-data-updates&subtab=online-edits"
+
+
+def check_rows(browser: HopeTestBrowser, list_name: str, edits: list[PDUOnlineEdit]) -> None:
+    for edit in edits:
+        browser.check_checkbox(f'[data-cy="{list_name}-row-{edit.id}"] [data-cy="checkbox-row-{edit.id}"]')
+
+
+def wait_for_rows(browser: HopeTestBrowser, list_name: str, edits: list[PDUOnlineEdit]) -> None:
+    for edit in edits:
+        browser.wait_for_element_present(f'[data-cy="{list_name}-row-{edit.id}"]')
+
+
+def statuses(edits: list[PDUOnlineEdit]) -> set[str]:
+    return set(PDUOnlineEdit.objects.filter(pk__in=[edit.pk for edit in edits]).values_list("status", flat=True))
+
+
+def test_bulk_approve_from_pending_approval_list(
+    login: HopeTestBrowser,
+    program: Program,
+    online_edit_factory: OnlineEditFactory,
+) -> None:
+    edits = [
+        online_edit_factory(status=PDUOnlineEdit.Status.READY),
+        online_edit_factory(status=PDUOnlineEdit.Status.READY),
+    ]
+    login.open(online_edits_list_url(program))
+
+    check_rows(login, "pending-approval", edits)
+    login.click('button[data-cy="button-bulk-approve"]')
+
+    wait_for_rows(login, "pending-merge", edits)
+    assert statuses(edits) == {PDUOnlineEdit.Status.APPROVED}
+
+
+def test_bulk_merge_from_pending_merge_list(
     login: HopeTestBrowser,
     program: Program,
     online_edit_factory: OnlineEditFactory,
@@ -252,32 +288,22 @@ def test_bulk_approve_and_merge_from_lists(
     individual: Individual,
 ) -> None:
     # Merging the same individual's round twice fails, so only the first edit carries a value.
-    with_value = online_edit_factory(status=PDUOnlineEdit.Status.READY, value="Bulk value")
-    without_value = online_edit_factory(status=PDUOnlineEdit.Status.READY)
-    edits = [with_value, without_value]
-    login.open(f"{individuals_url(program)}?tab=periodic-data-updates&subtab=online-edits")
+    edits = [
+        online_edit_factory(status=PDUOnlineEdit.Status.APPROVED, value="Bulk value"),
+        online_edit_factory(status=PDUOnlineEdit.Status.APPROVED),
+    ]
+    login.open(online_edits_list_url(program))
 
-    for edit in edits:
-        login.check_checkbox(f'[data-cy="pending-approval-row-{edit.id}"] [data-cy="checkbox-row-{edit.id}"]')
-    login.click('button[data-cy="button-bulk-approve"]')
-
-    for edit in edits:
-        login.wait_for_element_present(f'[data-cy="pending-merge-row-{edit.id}"]')
-    assert {e.status for e in PDUOnlineEdit.objects.filter(pk__in=[e.pk for e in edits])} == {
-        PDUOnlineEdit.Status.APPROVED
-    }
-
-    for edit in edits:
-        login.check_checkbox(f'[data-cy="pending-merge-row-{edit.id}"] [data-cy="checkbox-row-{edit.id}"]')
+    check_rows(login, "pending-merge", edits)
     login.click('button[data-cy="button-bulk-merge"]')
 
-    for edit in edits:
-        login.wait_for_element_present(f'[data-cy="merged-row-{edit.id}"]')
-    assert {e.status for e in PDUOnlineEdit.objects.filter(pk__in=[e.pk for e in edits])} == {
-        PDUOnlineEdit.Status.MERGED
-    }
+    wait_for_rows(login, "merged", edits)
+    assert statuses(edits) == {PDUOnlineEdit.Status.MERGED}
     individual.refresh_from_db()
     assert individual.flex_fields[string_attribute.name]["1"]["value"] == "Bulk value"
+
+
+EDIT_ROW = 'button[data-cy="button-edit-row-IND-00-0000.0001"]'
 
 
 @pytest.mark.parametrize(
@@ -286,35 +312,52 @@ def test_bulk_approve_and_merge_from_lists(
         pytest.param(
             PDUOnlineEdit.Status.NEW, SEND_FOR_APPROVAL, Permissions.PDU_ONLINE_SAVE_DATA, id="send-for-approval"
         ),
-        pytest.param(PDUOnlineEdit.Status.NEW, "edit-row", Permissions.PDU_ONLINE_SAVE_DATA, id="edit-row"),
+        pytest.param(PDUOnlineEdit.Status.NEW, EDIT_ROW, Permissions.PDU_ONLINE_SAVE_DATA, id="edit-row"),
         pytest.param(PDUOnlineEdit.Status.READY, SEND_BACK, Permissions.PDU_ONLINE_APPROVE, id="send-back"),
         pytest.param(PDUOnlineEdit.Status.READY, APPROVE, Permissions.PDU_ONLINE_APPROVE, id="approve"),
         pytest.param(PDUOnlineEdit.Status.APPROVED, MERGE, Permissions.PDU_ONLINE_MERGE, id="merge"),
     ],
 )
-@pytest.mark.parametrize("granted", [True, False], ids=["granted", "not-granted"])
-def test_action_needs_permission(
+def test_action_shown_with_permission(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
     online_edit_factory: OnlineEditFactory,
-    individual: Individual,
     status: str,
     button: str,
     permission: Permissions,
-    granted: bool,
 ) -> None:
     online_edit = online_edit_factory(status=status, authorized_users=[user_with_no_permissions])
-    selector = edit_row(individual) if button == "edit-row" else button
-    extra = (permission,) if granted else ()
-    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, *extra):
+    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, permission):
+        browser.login(username="noperm_user")
+        open_details(browser, online_edit)
+        browser.wait_for_element_clickable(button)
+
+
+@pytest.mark.parametrize(
+    ("status", "button"),
+    [
+        pytest.param(PDUOnlineEdit.Status.NEW, SEND_FOR_APPROVAL, id="send-for-approval"),
+        pytest.param(PDUOnlineEdit.Status.NEW, EDIT_ROW, id="edit-row"),
+        pytest.param(PDUOnlineEdit.Status.READY, SEND_BACK, id="send-back"),
+        pytest.param(PDUOnlineEdit.Status.READY, APPROVE, id="approve"),
+        pytest.param(PDUOnlineEdit.Status.APPROVED, MERGE, id="merge"),
+    ],
+)
+def test_action_hidden_without_permission(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    online_edit_factory: OnlineEditFactory,
+    status: str,
+    button: str,
+) -> None:
+    online_edit = online_edit_factory(status=status, authorized_users=[user_with_no_permissions])
+    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS):
         browser.login(username="noperm_user")
         open_details(browser, online_edit)
         browser.wait_for_element_visible(STATUS)
-        if granted:
-            browser.wait_for_element_clickable(selector)
-        else:
-            browser.assert_element_absent(selector)
+        browser.assert_element_absent(button)
 
 
 @pytest.mark.parametrize(
@@ -330,7 +373,6 @@ def test_user_not_authorized_for_the_edit_sees_no_actions(
     user_with_no_permissions: User,
     business_area: BusinessArea,
     online_edit_factory: OnlineEditFactory,
-    individual: Individual,
     status: str,
     buttons: tuple[str, ...],
 ) -> None:
@@ -340,5 +382,16 @@ def test_user_not_authorized_for_the_edit_sees_no_actions(
         open_details(browser, online_edit)
         browser.wait_for_element_visible(STATUS)
         browser.assert_elements_absent(*buttons)
-        if status == PDUOnlineEdit.Status.NEW:
-            assert not browser.wait_for_element_visible(edit_row(individual)).is_enabled()
+
+
+def test_user_not_authorized_for_the_edit_cannot_edit_rows(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    online_edit_factory: OnlineEditFactory,
+) -> None:
+    online_edit = online_edit_factory()
+    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, *ALL_ONLINE_PERMISSIONS):
+        browser.login(username="noperm_user")
+        open_details(browser, online_edit)
+        assert not browser.wait_for_element_visible(EDIT_ROW).is_enabled()

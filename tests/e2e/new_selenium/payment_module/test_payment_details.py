@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 
 import pytest
@@ -6,6 +7,8 @@ from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Payment, PaymentPlan, User
+
+from .conftest import PM_VIEW_PERMISSIONS, payment_plan_url
 
 pytestmark = pytest.mark.django_db()
 
@@ -18,11 +21,6 @@ REVERT_SUBMIT = 'button[data-cy="button-revert-mark-as-failed-submit"]'
 DELIVERED_QUANTITY_INPUT = 'input[data-cy="input-deliveredQuantity"]'
 CREATE_FOLLOW_UP = 'button[data-cy="button-create-followup"]'
 CHILD_PLAN_SUBMIT = 'button[data-cy="button-submit"]'
-VIEW_PERMISSIONS = (
-    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-    Permissions.PM_VIEW_LIST,
-    Permissions.PM_VIEW_DETAILS,
-)
 
 
 def program_url(payment_plan: PaymentPlan) -> str:
@@ -47,7 +45,7 @@ def test_mark_payment_as_failed(
 ) -> None:
     payment = first_payment(delivered_payment_plan)
     with grant_permission(
-        user_with_no_permissions, business_area, *VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
+        user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
     ):
         open_payment_as(browser, payment, "DELIVERED FULLY")
         browser.wait_for_element_clickable(MARK_AS_FAILED).click()
@@ -73,7 +71,7 @@ def test_revert_mark_as_failed(
 ) -> None:
     payment = first_payment(payment_plan_with_force_failed_payment)
     with grant_permission(
-        user_with_no_permissions, business_area, *VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
+        user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
     ):
         open_payment_as(browser, payment, "FORCE FAILED")
         browser.wait_for_element_clickable(REVERT).click()
@@ -101,14 +99,16 @@ def test_create_follow_up_from_force_failed_payment(
 ) -> None:
     source = payment_plan_with_force_failed_payment
     failed_payment = first_payment(source)
-    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, Permissions.PM_CREATE):
+    start_date = datetime.date.today() + datetime.timedelta(days=10)
+    end_date = start_date + datetime.timedelta(days=20)
+    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_CREATE):
         browser.login(username="noperm_user")
-        browser.open(f"{program_url(source)}/payment-module/payment-plans/{source.id}")
+        browser.open(payment_plan_url(source))
         browser.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
         browser.wait_for_element_clickable(CREATE_FOLLOW_UP).click()
-        browser.fill_date('input[name="dispersionStartDate"]', "2027-01-01")
+        browser.fill_date('input[name="dispersionStartDate"]', start_date.isoformat())
         browser.wait_for_element_clickable('input[name="dispersionEndDate"]')
-        browser.fill_date('input[name="dispersionEndDate"]', "2027-12-31")
+        browser.fill_date('input[name="dispersionEndDate"]', end_date.isoformat())
         browser.wait_for_element_clickable(CHILD_PLAN_SUBMIT).click()
         browser.wait_for_text("Payment Plan Created")
 
@@ -121,30 +121,43 @@ def test_create_follow_up_from_force_failed_payment(
     ]
 
 
-@pytest.mark.parametrize(
+DELIVERED_PLAN_FIXTURES = pytest.mark.parametrize(
     "payment_plan_fixture",
     [
         pytest.param("delivered_payment_plan", id="accepted"),
         pytest.param("finished_delivered_payment_plan", id="finished"),
     ],
 )
-@pytest.mark.parametrize("granted", [True, False], ids=["granted", "not-granted"])
-def test_mark_as_failed_needs_permission(
+
+
+@DELIVERED_PLAN_FIXTURES
+def test_mark_as_failed_shown_with_permission(
     request: pytest.FixtureRequest,
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
     payment_plan_fixture: str,
-    granted: bool,
 ) -> None:
     payment = first_payment(request.getfixturevalue(payment_plan_fixture))
-    extra = (Permissions.PM_MARK_PAYMENT_AS_FAILED,) if granted else ()
-    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, *extra):
+    with grant_permission(
+        user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_MARK_PAYMENT_AS_FAILED
+    ):
         open_payment_as(browser, payment, "DELIVERED FULLY")
-        if granted:
-            browser.wait_for_element_clickable(MARK_AS_FAILED)
-        else:
-            browser.assert_element_absent(MARK_AS_FAILED)
+        browser.wait_for_element_clickable(MARK_AS_FAILED)
+
+
+@DELIVERED_PLAN_FIXTURES
+def test_mark_as_failed_hidden_without_permission(
+    request: pytest.FixtureRequest,
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    payment_plan_fixture: str,
+) -> None:
+    payment = first_payment(request.getfixturevalue(payment_plan_fixture))
+    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
+        open_payment_as(browser, payment, "DELIVERED FULLY")
+        browser.assert_element_absent(MARK_AS_FAILED)
 
 
 def test_create_follow_up_needs_pm_create(
@@ -154,8 +167,8 @@ def test_create_follow_up_needs_pm_create(
     payment_plan_with_force_failed_payment: PaymentPlan,
 ) -> None:
     source = payment_plan_with_force_failed_payment
-    with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS):
+    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
         browser.login(username="noperm_user")
-        browser.open(f"{program_url(source)}/payment-module/payment-plans/{source.id}")
+        browser.open(payment_plan_url(source))
         browser.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
         assert not browser.wait_for_element_visible(CREATE_FOLLOW_UP).is_enabled()

@@ -1,21 +1,13 @@
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.factories import HouseholdFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, PaymentPlan, User
+from hope.models import BusinessArea, Household, PaymentPlan, User
 
-from .conftest import BUILT_TP_NAME, CYCLE_TITLE, GROUP_NAME, PURPOSE_NAME
+from .conftest import BUILT_TP_NAME, CYCLE_TITLE, GROUP_NAME, HOUSEHOLDS_COUNT, PURPOSE_NAME, STATUS, tp_url
 
 pytestmark = pytest.mark.django_db()
-
-STATUS = 'div[data-cy="target-population-status"]'
-HOUSEHOLDS_COUNT = '[data-cy="total-number-of-households-count"]'
-
-
-def tp_url(tp: PaymentPlan) -> str:
-    return f"/{tp.business_area.slug}/programs/{tp.program_cycle.program.code}/target-population/{tp.id}"
 
 
 def test_lock_hides_edit_actions_and_unlock_restores_them(
@@ -86,8 +78,8 @@ def test_rebuild_picks_up_newly_matching_households(
     user_with_no_permissions: User,
     business_area: BusinessArea,
     built_tp: PaymentPlan,
+    household_added_after_build: Household,
 ) -> None:
-    program = built_tp.program_cycle.program
     with grant_permission(
         user_with_no_permissions,
         business_area,
@@ -100,11 +92,10 @@ def test_rebuild_picks_up_newly_matching_households(
         browser.open(tp_url(built_tp))
         browser.wait_for_text("3", HOUSEHOLDS_COUNT)
 
-        new_household = HouseholdFactory(size=2, business_area=business_area, program=program)
         browser.click('button[data-cy="button-rebuild"]')
         browser.wait_for_text("Payment Plan has been rebuilt.")
         browser.wait_for_text("4", HOUSEHOLDS_COUNT)
-        browser.assert_text(new_household.unicef_id, "table")
+        browser.assert_text(household_added_after_build.unicef_id, "table")
         assert built_tp.payment_items.count() == 4
 
 

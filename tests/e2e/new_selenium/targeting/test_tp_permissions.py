@@ -3,11 +3,12 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
-from hope.models import BusinessArea, PaymentPlan, User
+from hope.models import BusinessArea, User
+
+from .conftest import STATUS, tp_url
 
 pytestmark = pytest.mark.django_db()
 
-STATUS = 'div[data-cy="target-population-status"]'
 LOCK = 'button[data-cy="button-target-population-lock"]'
 DELETE = 'button[data-cy="button-delete"]'
 EDIT = '[data-cy="button-edit"]'
@@ -17,10 +18,6 @@ UNLOCK = 'button[data-cy="button-target-population-unlocked"]'
 MARK_READY = 'button[data-cy="button-target-population-send-to-hope"]'
 OPEN_TP_ACTIONS = (LOCK, DELETE, EDIT, REBUILD, DUPLICATE)
 LOCKED_TP_ACTIONS = (UNLOCK, MARK_READY, DUPLICATE)
-
-
-def tp_url(tp: PaymentPlan) -> str:
-    return f"/{tp.business_area.slug}/programs/{tp.program_cycle.program.code}/target-population/{tp.id}"
 
 
 @pytest.mark.parametrize(

@@ -21,6 +21,7 @@ from extras.test_utils.factories import (
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
@@ -41,6 +42,18 @@ from hope.models import (
 
 ENTITLEMENT_RULE_NAME = "Household Size Entitlement"
 ENTITLEMENT_RULE_DEFINITION = 'result.value = context["household"].size * 10'
+PM_VIEW_PERMISSIONS = (
+    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    Permissions.PM_VIEW_LIST,
+    Permissions.PM_VIEW_DETAILS,
+)
+
+
+def payment_plan_url(payment_plan: PaymentPlan) -> str:
+    return (
+        f"/{payment_plan.business_area.slug}/programs/{payment_plan.program.code}"
+        f"/payment-module/payment-plans/{payment_plan.id}"
+    )
 
 
 @pytest.fixture
@@ -140,6 +153,11 @@ def fi_currency() -> Currency:
     # USD-denominated totals mirror the local-currency amounts and stay stable
     # when the follow-up workflow recalculates entitlement_quantity_usd.
     return CurrencyFactory(code="USD")
+
+
+@pytest.fixture
+def pln_currency() -> Currency:
+    return CurrencyFactory(code="PLN", name="Polish Zloty")
 
 
 @pytest.fixture

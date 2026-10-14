@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.utils import timezone
 import pytest
 
 from extras.test_utils.factories import BusinessAreaFactory, PaymentPlanPurposeFactory
@@ -76,7 +77,11 @@ def program_with_ten_purposes(business_area: BusinessArea, ten_ba_purposes: list
 
 
 def days_from_today(days: int) -> date:
-    return date.today() + timedelta(days=days)
+    return timezone.now().date() + timedelta(days=days)
+
+
+def details_url(program: Program) -> str:
+    return f"/{program.business_area.slug}/programs/{program.code}/details/{program.code}"
 
 
 def _programme(business_area: BusinessArea, status: str, *cycles: tuple[str, str, int, int | None]) -> Program:

@@ -5,7 +5,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, PaymentPlanPurpose, Program, User
 
-from .conftest import BA_PURPOSE_NAME, SECOND_BA_PURPOSE_NAME, days_from_today
+from .conftest import BA_PURPOSE_NAME, SECOND_BA_PURPOSE_NAME, days_from_today, details_url
 
 pytestmark = pytest.mark.django_db()
 
@@ -145,7 +145,8 @@ def test_edit_programme_end_date_before_latest_cycle_fails(
     business_area: BusinessArea,
     programme_with_mixed_cycles: Program,
 ) -> None:
-    end_date = programme_with_mixed_cycles.end_date
+    program = programme_with_mixed_cycles
+    end_date = program.end_date
     with grant_permission(
         user_with_no_permissions,
         business_area,
@@ -156,8 +157,7 @@ def test_edit_programme_end_date_before_latest_cycle_fails(
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
-        program = programme_with_mixed_cycles
-        browser.open(f"/{business_area.slug}/programs/{program.code}/details/{program.code}")
+        browser.open(details_url(program))
         browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
 

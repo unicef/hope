@@ -4,6 +4,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
+    TicketNeedsAdjudicationDetailsFactory,
 )
 from extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
@@ -13,6 +14,7 @@ from extras.test_utils.factories.payment import (
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
 from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BusinessArea,
@@ -34,6 +36,12 @@ SECOND_GROUP_NAME = "Second Group"
 BUILT_TP_NAME = "Built TP"
 RULE_NAME = "Household Size Score"
 RULE_DEFINITION = 'result.value = context["household"].size'
+STATUS = 'div[data-cy="target-population-status"]'
+HOUSEHOLDS_COUNT = '[data-cy="total-number-of-households-count"]'
+
+
+def tp_url(tp: PaymentPlan) -> str:
+    return f"/{tp.business_area.slug}/programs/{tp.program_cycle.program.code}/target-population/{tp.id}"
 
 
 @pytest.fixture
@@ -171,3 +179,25 @@ def household_size_rule(business_area: BusinessArea) -> Rule:
     )
     commit.rule.allowed_business_areas.add(business_area)
     return commit.rule
+
+
+@pytest.fixture
+def household_added_after_build(built_tp: PaymentPlan) -> Household:
+    return HouseholdFactory(size=2, business_area=built_tp.business_area, program=built_tp.program_cycle.program)
+
+
+@pytest.fixture
+def smallest_household_in_adjudication(sized_households: list[Household]) -> Household:
+    smallest = sized_households[0]
+    TicketNeedsAdjudicationDetailsFactory(
+        ticket__business_area=smallest.business_area,
+        ticket__status=GrievanceTicket.STATUS_IN_PROGRESS,
+        golden_records_individual=smallest.head_of_household,
+    )
+    return smallest
+
+
+@pytest.fixture
+def finished_programme_tp(built_tp: PaymentPlan) -> PaymentPlan:
+    Program.objects.filter(id=built_tp.program_cycle.program_id).update(status=Program.FINISHED)
+    return built_tp
