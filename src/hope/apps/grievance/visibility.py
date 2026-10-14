@@ -35,9 +35,9 @@ def program_ids_by_permission(user: "User", business_area: "BusinessArea") -> di
     cache: dict[Any, dict[str, set[Any]]] = user.__dict__.setdefault("_grievance_program_ids_cache", {})
     if business_area.id not in cache:
         assignments = list(
-            RoleAssignment.objects.filter(
-                Q(user=user) | Q(partner__user=user), business_area=business_area
-            ).values_list("program_id", "role__permissions")
+            RoleAssignment.objects.filter(Q(user=user) | Q(partner__user=user), business_area=business_area)
+            .exclude(role__permissions__isnull=True)
+            .values_list("program_id", "role__permissions")
         )
         every_program_id: set[Any] = set()
         if any(program_id is None for program_id, _ in assignments):
