@@ -141,8 +141,6 @@ const EditPaymentPlanForm = ({
       currency: values.currency?.value
         ? values.currency.value
         : values.currency,
-      // @ts-ignore TODO: add program_cycle to PatchedPaymentPlanCreateUpdate when regenerated
-      program_cycle: values.programCycle,
     };
     try {
       const res = await updatePaymentPlan({
@@ -182,6 +180,7 @@ const EditPaymentPlanForm = ({
             paymentPlan={paymentPlan}
             values={values}
             cycles={cycles}
+            cycleDisabled
           />
         </Form>
       )}

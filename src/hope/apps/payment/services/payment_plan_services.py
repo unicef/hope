@@ -927,6 +927,8 @@ class PaymentPlanService:
             )
             if program_cycle == self.payment_plan.program_cycle:
                 return
+            if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+                raise ValidationError("Programme Cycle can be changed only within Open status")
             self._validate_pp_cycle(program_cycle)
             self.payment_plan.program_cycle = program_cycle
             if not (payment_plan_group_id := input_data.get("payment_plan_group_id")):

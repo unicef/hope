@@ -277,6 +277,39 @@ def payment_plan_base(
     )
 
 
+@pytest.fixture
+def payment_plan_tp_open(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
+) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
+        delivery_mechanism=dm_transfer_to_account,
+        financial_service_provider=fsp,
+    )
+
+
+@pytest.fixture
+def payment_plan_in_status(user: User, business_area: Any, cycle: ProgramCycle, pp_status: str) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        created_by=user,
+        business_area=business_area,
+        status=pp_status,
+    )
+
+
+@pytest.fixture
+def group_in_other_cycle(program: Program) -> Any:
+    return PaymentPlanGroupFactory(cycle=ProgramCycleFactory(program=program))
+
+
 def test_delete_tp_open(payment_plan_base: PaymentPlan) -> None:
     payment_plan_base.status = PaymentPlan.Status.TP_OPEN
     payment_plan_base.save()
@@ -1693,49 +1726,73 @@ def test_send_for_approval_allows_retryable_background_error(
     notification_task.assert_called_once()
 
 
-def test_update_pp_program_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
+def test_update_pp_program_cycle(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program, title="New Cycle ABC")
     new_group = PaymentPlanGroupFactory(cycle=new_cycle)
 
-    PaymentPlanService(payment_plan_base).update(
+    PaymentPlanService(payment_plan_tp_open).update(
         {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
     )
 
-    payment_plan_base.refresh_from_db()
-    assert payment_plan_base.program_cycle.title == "New Cycle ABC"
-    assert payment_plan_base.payment_plan_group == new_group
+    payment_plan_tp_open.refresh_from_db()
+    assert payment_plan_tp_open.program_cycle.title == "New Cycle ABC"
+    assert payment_plan_tp_open.payment_plan_group == new_group
 
 
-def test_edit_cycle_requires_group_from_new_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
+def test_edit_cycle_requires_group_from_new_cycle(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program)
     new_group = PaymentPlanGroupFactory(cycle=new_cycle)
 
-    PaymentPlanService(payment_plan_base).update(
+    PaymentPlanService(payment_plan_tp_open).update(
         {"program_cycle_id": new_cycle.id, "payment_plan_group_id": new_group.id}
     )
 
-    payment_plan_base.refresh_from_db()
-    assert payment_plan_base.program_cycle == new_cycle
-    assert payment_plan_base.payment_plan_group == new_group
+    payment_plan_tp_open.refresh_from_db()
+    assert payment_plan_tp_open.program_cycle == new_cycle
+    assert payment_plan_tp_open.payment_plan_group == new_group
 
 
-def test_edit_cycle_rejects_group_from_old_cycle(payment_plan_base: PaymentPlan, program: Program) -> None:
-    old_group = payment_plan_base.payment_plan_group
+def test_edit_cycle_rejects_group_from_old_cycle(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
+    old_group = payment_plan_tp_open.payment_plan_group
     new_cycle = ProgramCycleFactory(program=program)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_base).update(
+        PaymentPlanService(payment_plan_tp_open).update(
             {"program_cycle_id": new_cycle.id, "payment_plan_group_id": old_group.id}
         )
     assert error.value.detail[0] == "Payment Plan Group does not exist in the given Programme Cycle."
 
 
-def test_edit_cycle_rejects_missing_group(payment_plan_base: PaymentPlan, program: Program) -> None:
+def test_edit_cycle_rejects_missing_group(payment_plan_tp_open: PaymentPlan, program: Program) -> None:
     new_cycle = ProgramCycleFactory(program=program)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan_base).update({"program_cycle_id": new_cycle.id})
+        PaymentPlanService(payment_plan_tp_open).update({"program_cycle_id": new_cycle.id})
     assert error.value.detail[0] == "Payment Plan Group is required when changing Programme Cycle."
+
+
+@pytest.mark.parametrize(
+    "pp_status",
+    [
+        pytest.param(PaymentPlan.Status.TP_LOCKED, id="tp-locked"),
+        pytest.param(PaymentPlan.Status.OPEN, id="open"),
+        pytest.param(PaymentPlan.Status.ACCEPTED, id="accepted"),
+    ],
+)
+def test_edit_cycle_outside_tp_open_raises_and_keeps_cycle(
+    pp_status: str,
+    payment_plan_in_status: PaymentPlan,
+    group_in_other_cycle: Any,
+    cycle: ProgramCycle,
+) -> None:
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan_in_status).update(
+            {"program_cycle_id": group_in_other_cycle.cycle_id, "payment_plan_group_id": group_in_other_cycle.id}
+        )
+
+    assert error.value.detail[0] == "Programme Cycle can be changed only within Open status"
+    payment_plan_in_status.refresh_from_db()
+    assert payment_plan_in_status.program_cycle == cycle
 
 
 def test_update_pp_vulnerability_score(payment_plan_base: PaymentPlan) -> None:

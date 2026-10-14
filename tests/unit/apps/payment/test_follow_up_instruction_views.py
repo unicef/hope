@@ -84,6 +84,16 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
     }
 
 
+@pytest.fixture
+def instruction_child_plan(follow_up_context: dict[str, Any], pp_status: str) -> Any:
+    return PaymentPlanFactory(
+        status=pp_status,
+        follow_up_instruction=follow_up_context["instruction"],
+        program_cycle=follow_up_context["cycle"],
+        currency=follow_up_context["currency"],
+    )
+
+
 def test_follow_up_instruction_detail_is_scoped_to_program(
     api_client: Callable,
     create_user_role_with_permissions: Any,
@@ -217,7 +227,12 @@ def test_follow_up_instruction_reject(
     create_user_role_with_permissions: Any,
 ) -> None:
     ctx = follow_up_context
-    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_LIST], ctx["business_area"], ctx["program"])
+    create_user_role_with_permissions(
+        ctx["user"],
+        [Permissions.PM_VIEW_LIST, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+        ctx["business_area"],
+        ctx["program"],
+    )
     pp = PaymentPlanFactory(
         status=PaymentPlan.Status.IN_APPROVAL,
         follow_up_instruction=ctx["instruction"],
@@ -239,6 +254,51 @@ def test_follow_up_instruction_reject(
     assert response.status_code == status.HTTP_200_OK
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.LOCKED_FSP
+
+
+@pytest.mark.parametrize(
+    ("pp_status", "permissions"),
+    [
+        pytest.param(
+            PaymentPlan.Status.IN_APPROVAL,
+            [Permissions.PM_VIEW_LIST, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
+            id="in-approval-without-approve",
+        ),
+        pytest.param(
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            [Permissions.PM_VIEW_LIST, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+            id="in-authorization-without-authorize",
+        ),
+        pytest.param(
+            PaymentPlan.Status.IN_REVIEW,
+            [Permissions.PM_VIEW_LIST, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE],
+            id="in-review-without-financial-review",
+        ),
+    ],
+)
+def test_follow_up_instruction_reject_without_permission_for_status_returns_403(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    instruction_child_plan: Any,
+    pp_status: str,
+    permissions: list,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], permissions, ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-reject",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url, {"comment": "rejected"}, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    instruction_child_plan.refresh_from_db()
+    assert instruction_child_plan.status == pp_status
 
 
 def test_follow_up_instruction_delivery_import_xlsx_missing_file(
