@@ -149,7 +149,7 @@ class PayeeTypeForm(forms.ModelForm):
         if self.instance.pk:
             self.fields["data_collecting_types"].initial = self.instance.data_collecting_types.all()
 
-    def clean(self) -> dict[str, Any]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         selected = cleaned_data.get("data_collecting_types", DataCollectingType.objects.none())
         default_dct = cleaned_data.get("default_data_collecting_type")
