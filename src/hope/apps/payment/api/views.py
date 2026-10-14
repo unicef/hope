@@ -1926,11 +1926,12 @@ class FollowUpInstructionViewSet(
     @transaction.atomic
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
-        reject_permission = {
+        reject_permission_by_status: dict[str | None, Permissions] = {
             PaymentPlan.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
             PaymentPlan.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             PaymentPlan.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-        }.get(instruction.status)
+        }
+        reject_permission = reject_permission_by_status.get(instruction.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, instruction.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         user = self._request_user(request)
