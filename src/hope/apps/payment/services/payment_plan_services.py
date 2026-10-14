@@ -659,6 +659,7 @@ class PaymentPlanService:
                     head_of_household_id=household["head_of_household"],
                     collector=collector,
                     collector_type=collector_type,
+                    currency=payment_plan.currency,
                     financial_service_provider=financial_service_provider,
                     delivery_type=delivery_mechanism,
                     has_valid_wallet=wallet_validity_by_collector_id[collector.id],
@@ -1719,7 +1720,9 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "build_status"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "build_status"])
 
-        transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan, True))
+        # Child plans copy their payments from the source plan, so rebuilding them from targeting would replace them.
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
+            transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan, True))
 
         return self.payment_plan
 
