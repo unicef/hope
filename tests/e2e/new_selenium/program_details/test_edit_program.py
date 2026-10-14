@@ -154,7 +154,6 @@ def test_edit_programme_end_date_before_latest_cycle_fails(
         Permissions.USER_MANAGEMENT_VIEW_LIST,
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
         program = programme_with_mixed_cycles

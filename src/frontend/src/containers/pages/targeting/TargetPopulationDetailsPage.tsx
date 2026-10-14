@@ -56,6 +56,8 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
+    // The duplicate dialog needs the cycle list to pick a cycle.
+    hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions) &&
     Boolean(paymentPlan?.rules);
 
   return (

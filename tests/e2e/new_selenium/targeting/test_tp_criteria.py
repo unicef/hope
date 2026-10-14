@@ -144,7 +144,6 @@ def test_exclude_household_id_in_standard_programme(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
     ):
         browser.login(username="noperm_user")

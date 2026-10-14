@@ -112,6 +112,10 @@ const CreateTargetPopulationPage = (): ReactElement => {
   if (!program) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied permission={PERMISSIONS.TARGETING_CREATE} />;
+  if (!hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions))
+    return (
+      <PermissionDenied permission={PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST} />
+    );
 
   const screenBeneficiary = program?.screenBeneficiary;
   const programPurposes = (program?.paymentPlanPurposes ?? []).map((p) => ({

@@ -24,20 +24,33 @@ def tp_url(tp: PaymentPlan) -> str:
 
 
 @pytest.mark.parametrize(
-    ("tp_fixture", "status", "permission", "visible", "hidden"),
+    ("tp_fixture", "status", "permissions", "visible", "hidden"),
     [
         pytest.param(
-            "built_tp", "OPEN", Permissions.TARGETING_LOCK, (LOCK, REBUILD), (DELETE, EDIT, DUPLICATE), id="lock"
-        ),
-        pytest.param("built_tp", "OPEN", Permissions.TARGETING_REMOVE, (DELETE,), (LOCK, EDIT, DUPLICATE), id="remove"),
-        pytest.param(
-            "built_tp", "OPEN", Permissions.TARGETING_UPDATE, (EDIT,), (LOCK, REBUILD, DELETE, DUPLICATE), id="update"
+            "built_tp", "OPEN", (Permissions.TARGETING_LOCK,), (LOCK, REBUILD), (DELETE, EDIT, DUPLICATE), id="lock"
         ),
         pytest.param(
-            "built_tp", "OPEN", Permissions.TARGETING_DUPLICATE, (DUPLICATE,), (LOCK, DELETE, EDIT), id="duplicate"
+            "built_tp", "OPEN", (Permissions.TARGETING_REMOVE,), (DELETE,), (LOCK, EDIT, DUPLICATE), id="remove"
         ),
-        pytest.param("locked_tp", "LOCKED", Permissions.TARGETING_UNLOCK, (UNLOCK,), (MARK_READY,), id="unlock"),
-        pytest.param("locked_tp", "LOCKED", Permissions.TARGETING_SEND, (MARK_READY,), (UNLOCK,), id="send"),
+        pytest.param(
+            "built_tp",
+            "OPEN",
+            (Permissions.TARGETING_UPDATE,),
+            (EDIT,),
+            (LOCK, REBUILD, DELETE, DUPLICATE),
+            id="update",
+        ),
+        # The duplicate dialog picks a cycle, so it also needs the cycle list.
+        pytest.param(
+            "built_tp",
+            "OPEN",
+            (Permissions.TARGETING_DUPLICATE, Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST),
+            (DUPLICATE,),
+            (LOCK, DELETE, EDIT),
+            id="duplicate",
+        ),
+        pytest.param("locked_tp", "LOCKED", (Permissions.TARGETING_UNLOCK,), (UNLOCK,), (MARK_READY,), id="unlock"),
+        pytest.param("locked_tp", "LOCKED", (Permissions.TARGETING_SEND,), (MARK_READY,), (UNLOCK,), id="send"),
     ],
 )
 def test_each_targeting_permission_shows_only_its_action(
@@ -47,7 +60,7 @@ def test_each_targeting_permission_shows_only_its_action(
     business_area: BusinessArea,
     tp_fixture: str,
     status: str,
-    permission: Permissions,
+    permissions: tuple[Permissions, ...],
     visible: tuple[str, ...],
     hidden: tuple[str, ...],
 ) -> None:
@@ -57,7 +70,7 @@ def test_each_targeting_permission_shows_only_its_action(
         business_area,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.TARGETING_VIEW_DETAILS,
-        permission,
+        *permissions,
     ):
         browser.login(username="noperm_user")
         browser.open(tp_url(tp))
