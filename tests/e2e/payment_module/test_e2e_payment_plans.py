@@ -26,6 +26,7 @@ from extras.test_utils.factories import (
     IndividualFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
@@ -188,6 +189,7 @@ def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
         status=PaymentPlan.Status.DRAFT,
         build_status="OK",
         financial_service_provider=fsp_1,
+        currency=Currency.objects.get(code="AFN"),
         delivery_mechanism=dm_cash,
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
@@ -217,13 +219,17 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
+    group = PaymentPlanGroupFactory(
+        cycle=cycle,
+        currency=Currency.objects.get(code="USD"),
+        financial_service_provider=fsp,
+    )
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         defaults={
             "business_area": program.business_area,
             "program_cycle": cycle,
-            "payment_plan_group": cycle.payment_plan_groups.first(),
-            "currency": Currency.objects.get(code="USD"),
+            "payment_plan_group": group,
             "dispersion_start_date": timezone.now() + relativedelta(days=10),
             "dispersion_end_date": timezone.now() + relativedelta(days=15),
             "status_date": timezone.now(),
@@ -232,7 +238,6 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
             "total_delivered_quantity": 999,
             "total_entitled_quantity": 2999,
             "plan_type": PaymentPlan.PlanType.REGULAR,
-            "financial_service_provider": fsp,
             "delivery_mechanism": dm_cash,
         },
     )
@@ -472,29 +477,15 @@ class TestSmokePaymentModule:
         page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.wait_for_page_ready()
-        page_payment_module.assert_page_header_title("Payment Module")
-        assert "Status" in page_payment_module.get_select_filter().text
-        assert "" in page_payment_module.get_filters_total_entitled_quantity_from().text
-        assert "" in page_payment_module.get_filters_total_entitled_quantity_to().text
-        assert "" in page_payment_module.get_date_picker_filter_from().text
-        assert "" in page_payment_module.get_date_picker_filter_to().text
-        assert "CLEAR" in page_payment_module.get_button_filters_clear().text
-        assert "APPLY" in page_payment_module.get_button_filters_apply().text
+        page_payment_module.assert_page_header_title("Payment Plans")
         assert "Payment Plans" in page_payment_module.get_table_title().text
-        assert "Payment Plan ID" in page_payment_module.get_table_label()[0].text
-        assert "Status" in page_payment_module.get_table_label()[1].text
-        assert "Target Population" in page_payment_module.get_table_label()[2].text
-        assert "Num. of Items Groups" in page_payment_module.get_table_label()[3].text
-        assert "Currency" in page_payment_module.get_table_label()[4].text
-        assert "Total Entitled Quantity" in page_payment_module.get_table_label()[5].text
-        assert "Total Delivered Quantity" in page_payment_module.get_table_label()[6].text
-        assert "Total Undelivered Quantity" in page_payment_module.get_table_label()[7].text
-        assert "Dispersion Start Date" in page_payment_module.get_table_label()[8].text
-        assert "Dispersion End Date" in page_payment_module.get_table_label()[9].text
-        assert "Export Batch" in page_payment_module.get_table_label()[10].text
-        assert "Linked Payment Plans" in page_payment_module.get_table_label()[11].text
-        assert "ACCEPTED" in page_payment_module.get_status_container().text
-        assert "Rows per page: 5 1–1 of 1" in page_payment_module.get_table_pagination().text.replace("\n", " ")
+        assert "Cycle" in page_payment_module.get_table_label()[0].text
+        assert "Name" in page_payment_module.get_table_label()[1].text
+        assert "Payment Plan ID" in page_payment_module.get_table_label()[2].text
+        assert "Status" in page_payment_module.get_table_label()[3].text
+        page_payment_module.wait_for_text(
+            create_payment_plan.payment_plan_group.unicef_id, page_payment_module.main_content
+        )
 
     def test_smoke_new_payment_plan(
         self,
@@ -515,7 +506,7 @@ class TestSmokePaymentModule:
         page_new_payment_plan.assert_page_header_title("New Payment Plan")
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
-        assert "Currency" in page_new_payment_plan.get_input_currency().text
+        assert "CURRENCY" in page_new_payment_plan.get_label_group_currency().text.upper()
         # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
         # strip the thin space so the bare-asterisk assertion still matches.
         assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(
@@ -531,10 +522,7 @@ class TestSmokePaymentModule:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan)
         assert "ACCEPTED" in page_payment_module_details.get_status_container().text
         assert "EXPORT XLSX" in page_payment_module_details.get_button_export_xlsx().text
         assert "USD" in page_payment_module_details.get_label_currency().text
@@ -598,11 +586,9 @@ class TestSmokePaymentModule:
         page_program_cycle_details.get_button_create_payment_plan().click()
         page_new_payment_plan.get_input_target_population().click()
         page_new_payment_plan.select_listbox_element(payment_plan.name)
-        page_new_payment_plan.get_input_currency().click()
-        page_new_payment_plan.select_listbox_element("Afghan afghani")
+        assert "AFN" in page_new_payment_plan.get_label_group_currency().text
         page_new_payment_plan.fill_input_dispersion_start_date(FormatTime(22, 1, 2026).numerically_formatted_date)
         page_new_payment_plan.fill_input_dispersion_end_date(FormatTime(30, 6, 2030).numerically_formatted_date)
-        page_new_payment_plan.get_input_currency().click()
         page_new_payment_plan.get_button_save_payment_plan().click()
         assert "OPEN" in page_payment_module_details.get_status_container().text
         assert "AFN" in page_payment_module_details.get_label_currency().text
@@ -622,25 +608,33 @@ class TestSmokePaymentModule:
         # the status is LOCKED before the formula runs too; the snackbar only shows once the apply request is done
         page_payment_module_details.check_alert("Formula is executing, please wait until completed")
         page_payment_module_details.check_status("LOCKED")
-        page_payment_module_details.click_button_lock_plan()
-        page_payment_module_details.get_button_submit().click()
-        page_payment_module_details.check_alert("Payment Plan FSPs are locked.")
-        page_payment_module_details.check_status("LOCKED FSP")
+        payment_plan.refresh_from_db()
+        group = payment_plan.payment_plan_group
+        group.financial_service_provider = FinancialServiceProvider.objects.get(name="FSP_1")
+        group.save(update_fields=["financial_service_provider"])
+        group_status = 'div[data-cy="group-status"]'
+        page_payment_module_details.driver.get(
+            f"{page_payment_module_details.driver.current_url.split('/payment-module/')[0]}"
+            f"/payment-module/groups/{group.id}"
+        )
+        page_payment_module_details.click('button[data-cy="button-lock-group"]')
+        page_payment_module_details.click('button[data-cy="button-confirm"]')
+        page_payment_module_details.wait_for_text("LOCKED", group_status)
         page_payment_module_details.click_button_send_for_approval()
         page_payment_module_details.check_alert("Payment Plan has been sent for approval.")
-        page_payment_module_details.check_status("IN APPROVAL")
+        page_payment_module_details.wait_for_text("IN APPROVAL", group_status)
         page_payment_module_details.click_button_approve()
         page_payment_module_details.get_button_submit().click()
         page_payment_module_details.check_alert("Payment Plan has been approved.")
-        page_payment_module_details.check_status("IN AUTHORIZATION")
+        page_payment_module_details.wait_for_text("IN AUTHORIZATION", group_status)
         page_payment_module_details.click_button_authorize()
         page_payment_module_details.get_button_submit().click()
         page_payment_module_details.check_alert("Payment Plan has been authorized")
-        page_payment_module_details.check_status("IN REVIEW")
+        page_payment_module_details.wait_for_text("IN REVIEW", group_status)
         page_payment_module_details.click_button_mark_as_released()
         page_payment_module_details.get_button_submit().click()
         page_payment_module_details.check_alert("Payment Plan has been marked as released.")
-        page_payment_module_details.check_status("ACCEPTED")
+        page_payment_module_details.wait_for_text("ACCEPTED", group_status)
 
 
 @pytest.mark.usefixtures("login")
@@ -667,10 +661,7 @@ class TestPaymentPlans:
         page_program_cycle: ProgramCyclePage,
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan)
         with pytest.raises(ElementClickInterceptedException):
             page_payment_module_details.get_button_create_exclusions().click()
 
@@ -680,10 +671,7 @@ class TestPaymentPlans:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan_lock_social_worker)
         page_payment_module_details.get_button_create_exclusions()
         page_payment_module_details.get_label_total_number_of_people()
         assert "5" in page_payment_module_details.get_label_female_children().text
@@ -717,10 +705,7 @@ class TestPaymentPlans:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan_lock)
         page_payment_module_details.get_button_create_exclusions()
         page_payment_module_details.get_label_targeted_individuals()
         assert "5" in page_payment_module_details.get_label_female_children().text
@@ -759,22 +744,13 @@ class TestPaymentPlans:
         page_new_payment_plan: NewPaymentPlan,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_rows()
-        for i in range(len(page_payment_module.get_rows())):
-            if "OPEN" in page_payment_module.get_row(i).text:
-                payment_plan = page_payment_module.get_row(i).text
-                page_payment_module.get_row(i).click()
-                break
-        else:
-            raise AssertionError("No payment plan has Open status")
+        follow_up = PaymentPlan.objects.get(source_payment_plan=create_payment_plan_open)
+        page_payment_module.open_payment_plan(create_payment_plan_open)
         page_payment_module_details.get_delete_button().click()
         page_payment_module_details.get_button_submit().click()
-        page_payment_module.wait_for_text("Payment Plans", page_payment_module.table_title)
-        page_payment_module.get_row(0)
-        assert payment_plan not in page_payment_module.get_row(0).text
-        assert "LOCKED" in page_payment_module.get_row(0).text
+        # Deleting a component goes back to its Payment Plan (group), which still lists the locked follow-up.
+        page_payment_module.wait_for_text(follow_up.unicef_id, page_payment_module.main_content)
+        assert create_payment_plan_open.unicef_id not in page_payment_module.get_main_content().text
 
     def test_payment_plan_creation_error(
         self,
@@ -804,7 +780,6 @@ class TestPaymentPlans:
         assert "Target Population is required" in page_new_payment_plan.get_input_target_population().text
         assert "Dispersion Start Date is required" in page_new_payment_plan.get_input_start_date_error().text
         assert "Dispersion End Date is required" in page_new_payment_plan.get_input_end_date_error().text
-        assert "Currency is required" in page_new_payment_plan.get_input_currency().text
 
     def test_payment_plan_supporting_documents(
         self,
@@ -812,10 +787,7 @@ class TestPaymentPlans:
         page_payment_module: PaymentModule,
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.open_nav_section("Payment Module")
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_row(0).click()
+        page_payment_module.open_payment_plan(create_payment_plan_lock)
         page_payment_module_details.get_upload_file_button().click()
         page_payment_module_details.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
         page_payment_module_details.get_title_input().find_element(By.TAG_NAME, "input").send_keys("title input")

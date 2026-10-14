@@ -75,7 +75,9 @@ export const PaymentPlansFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Title>
-        <Typography variant="h6">{t('Payment Plans Filters')}</Typography>
+        <Typography variant="h6">
+          {t('Payment Plan Components Filters')}
+        </Typography>
       </Title>
       <Grid
         container

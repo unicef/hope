@@ -12,6 +12,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -19,7 +20,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, ProgramCycle, User
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -60,12 +61,20 @@ def source_pp(business_area: Any, cycle: ProgramCycle, purpose: Any) -> PaymentP
 
 
 @pytest.fixture
+def top_up_group(cycle: ProgramCycle, source_pp: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP, source_group=source_pp.payment_plan_group
+    )
+
+
+@pytest.fixture
 def three_payments(source_pp: PaymentPlan) -> list[Payment]:
     return [PaymentFactory(parent=source_pp, status=Payment.STATUS_PENDING) for _ in range(3)]
 
 
 def _create_and_run(
     source_pp: PaymentPlan,
+    top_up_group: PaymentPlanGroup,
     user: User,
     on_commit: Any,
     *,
@@ -79,7 +88,9 @@ def _create_and_run(
     """
     start = source_pp.dispersion_start_date + timedelta(days=1)
     end = source_pp.dispersion_end_date + timedelta(days=1)
-    top_up = PaymentPlanService(source_pp).create_top_up(user, start, end, fixed_amount=fixed_amount, amounts=amounts)
+    top_up = PaymentPlanService(source_pp).create_top_up(
+        user, start, end, payment_plan_group=top_up_group, fixed_amount=fixed_amount, amounts=amounts
+    )
     extra_config = (
         {"fixed_amount": str(fixed_amount)}
         if amounts is None
@@ -98,8 +109,11 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_every_beneficiar
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
-    top_up = _create_and_run(source_pp, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("25.00"))
+    top_up = _create_and_run(
+        source_pp, top_up_group, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("25.00")
+    )
 
     assert top_up.payment_items.count() == 3
     assert set(top_up.payment_items.values_list("entitlement_quantity", flat=True)) == {Decimal("25.00")}
@@ -112,11 +126,12 @@ def test_create_top_up_arrange_per_beneficiary_amounts_act_run_task_assert_only_
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
     funded, _skipped, also_funded = three_payments
     amounts = {funded.unicef_id: Decimal("10.00"), also_funded.unicef_id: Decimal("30.00")}
 
-    top_up = _create_and_run(source_pp, user, django_capture_on_commit_callbacks, amounts=amounts)
+    top_up = _create_and_run(source_pp, top_up_group, user, django_capture_on_commit_callbacks, amounts=amounts)
 
     assert top_up.payment_items.count() == 2
     assert dict(top_up.payment_items.values_list("source_payment__unicef_id", "entitlement_quantity")) == amounts
@@ -129,10 +144,12 @@ def test_create_top_up_arrange_beneficiary_left_out_act_check_eligibility_assert
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
     funded, skipped, _other = three_payments
     _create_and_run(
         source_pp,
+        top_up_group,
         user,
         django_capture_on_commit_callbacks,
         amounts={funded.unicef_id: Decimal("10.00")},
@@ -151,6 +168,7 @@ def test_create_top_up_arrange_beneficiary_already_topped_up_act_exclude_them_as
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
     """Excluding someone from a Top-Up must not recycle them into the eligible pool.
 
@@ -160,6 +178,7 @@ def test_create_top_up_arrange_beneficiary_already_topped_up_act_exclude_them_as
     funded = three_payments[0]
     top_up = _create_and_run(
         source_pp,
+        top_up_group,
         user,
         django_capture_on_commit_callbacks,
         amounts={funded.unicef_id: Decimal("10.00")},
@@ -188,6 +207,7 @@ def test_create_top_up_arrange_source_outside_accepted_or_finished_act_create_as
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     status: str,
+    top_up_group: Any,
 ) -> None:
     source_pp.status = status
     source_pp.save(update_fields=["status"])
@@ -195,7 +215,9 @@ def test_create_top_up_arrange_source_outside_accepted_or_finished_act_create_as
     end = source_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(Exception, match="Accepted or Finished"):
-        PaymentPlanService(source_pp).create_top_up(user, start, end, fixed_amount=Decimal("5.00"))
+        PaymentPlanService(source_pp).create_top_up(
+            user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00")
+        )
 
 
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
@@ -205,11 +227,14 @@ def test_create_top_up_arrange_finished_source_act_create_assert_top_up_created(
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
     source_pp.status = PaymentPlan.Status.FINISHED
     source_pp.save(update_fields=["status"])
 
-    top_up = _create_and_run(source_pp, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("25.00"))
+    top_up = _create_and_run(
+        source_pp, top_up_group, user, django_capture_on_commit_callbacks, fixed_amount=Decimal("25.00")
+    )
 
     assert top_up.plan_type == PaymentPlan.PlanType.TOP_UP
     assert top_up.payment_items.count() == 3
@@ -222,16 +247,19 @@ def test_create_top_up_arrange_second_top_up_for_remaining_act_run_task_assert_d
     source_pp: PaymentPlan,
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
     first_payment, second_payment, third_payment = three_payments
     first_top_up = _create_and_run(
         source_pp,
+        top_up_group,
         user,
         django_capture_on_commit_callbacks,
         amounts={first_payment.unicef_id: Decimal("10.00")},
     )
     second_top_up = _create_and_run(
         source_pp,
+        top_up_group,
         user,
         django_capture_on_commit_callbacks,
         amounts={second_payment.unicef_id: Decimal("20.00")},
@@ -250,14 +278,17 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     django_assert_num_queries: Any,
+    top_up_group: Any,
 ) -> None:
     start = source_pp.dispersion_start_date + timedelta(days=1)
     end = source_pp.dispersion_end_date + timedelta(days=1)
     # Django never clears this between tests, so without it the count depends on what ran before.
     ContentType.objects.clear_cache()
 
-    with django_assert_num_queries(78), django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanService(source_pp).create_top_up(user, start, end, fixed_amount=Decimal("25.00"))
+    with django_assert_num_queries(77), django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(source_pp).create_top_up(
+            user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("25.00")
+        )
 
 
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
@@ -270,13 +301,16 @@ def test_create_top_up_arrange_beneficiary_claimed_between_validation_and_copy_a
     three_payments: list[Payment],
     django_capture_on_commit_callbacks: Any,
     caplog: Any,
+    top_up_group: Any,
 ) -> None:
     """A beneficiary claimed by a sibling Top-Up after validation is skipped, but never silently."""
     claimed, funded, _other = three_payments
     amounts = {claimed.unicef_id: Decimal("10.00"), funded.unicef_id: Decimal("30.00")}
     start = source_pp.dispersion_start_date + timedelta(days=1)
     end = source_pp.dispersion_end_date + timedelta(days=1)
-    top_up = PaymentPlanService(source_pp).create_top_up(user, start, end, amounts=amounts)
+    top_up = PaymentPlanService(source_pp).create_top_up(
+        user, start, end, payment_plan_group=top_up_group, amounts=amounts
+    )
     competing_pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,

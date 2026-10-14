@@ -695,59 +695,6 @@ def test_filter_by_created_date(target_population_filter_context: dict[str, Any]
     assert response_data[0]["name"] == tp_2.name
 
 
-def test_filter_by_group_and_export_tag_returns_only_plans_in_same_batch(
-    api_client: Callable,
-    business_area: Any,
-    create_user_role_with_permissions: Any,
-) -> None:
-    partner = PartnerFactory(name="unittest")
-    user = UserFactory(partner=partner)
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, cycle=False)
-    cycle = ProgramCycleFactory(program=program)
-
-    group = PaymentPlanGroupFactory(cycle=cycle)
-    other_group = PaymentPlanGroupFactory(cycle=cycle)
-
-    pp_match = PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=group,
-        status=PaymentPlan.Status.TP_OPEN,
-        export_tag=1,
-    )
-    # Same group, different tag
-    PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=group,
-        status=PaymentPlan.Status.TP_OPEN,
-        export_tag=2,
-    )
-    # Same tag, different group
-    PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=cycle,
-        payment_plan_group=other_group,
-        status=PaymentPlan.Status.TP_OPEN,
-        export_tag=1,
-    )
-
-    create_user_role_with_permissions(user, [Permissions.TARGETING_VIEW_LIST], business_area, program)
-    list_url = reverse(
-        "api:payments:target-populations-list",
-        kwargs={"business_area_slug": business_area.slug, "program_code": program.code},
-    )
-
-    response = api_client(user).get(
-        list_url,
-        {"payment_plan_group": str(group.id), "export_tag": 1},
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    result_ids = {r["id"] for r in response.data["results"]}
-    assert result_ids == {str(pp_match.id)}
-
-
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
@@ -942,7 +889,7 @@ def test_update_payment_plan_group_rejects_group_from_wrong_cycle(
     assert "Payment Plan Group does not exist in the given Programme Cycle." in str(response.data)
 
 
-def test_create_tp_rejects_fsp_conflicting_with_group(
+def test_create_tp_copies_group_fsp(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -954,26 +901,16 @@ def test_create_tp_rejects_fsp_conflicting_with_group(
     )
     purpose = target_population_create_update_context["purpose"]
     cycle = target_population_create_update_context["cycle"]
-    group = cycle.payment_plan_groups.first()
+    fsp = FinancialServiceProviderFactory()
+    group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
     dm = DeliveryMechanismFactory()
-    fsp_in_group = FinancialServiceProviderFactory()
-    PaymentPlanFactory(
-        business_area=target_population_create_update_context["business_area"],
-        program_cycle=cycle,
-        payment_plan_group=group,
-        financial_service_provider=fsp_in_group,
-        status=PaymentPlan.Status.TP_OPEN,
-    )
-    different_fsp = FinancialServiceProviderFactory()
-    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
 
     response = target_population_create_update_context["client"].post(
         target_population_create_update_context["create_url"],
         {
-            "name": "TP conflicting FSP",
+            "name": "TP with group FSP",
             "program_cycle_id": str(cycle.id),
             "payment_plan_group_id": str(group.id),
-            "fsp_id": str(different_fsp.id),
             "delivery_mechanism_code": dm.code,
             "rules": target_population_create_update_context["rules"],
             "flag_exclude_if_on_sanction_list": False,
@@ -983,11 +920,13 @@ def test_create_tp_rejects_fsp_conflicting_with_group(
         format="json",
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment plans in the same group must share the same FSP." in str(response.data)
+    assert response.status_code == status.HTTP_201_CREATED
+    created = PaymentPlan.objects.get(name="TP with group FSP")
+    assert created.financial_service_provider == fsp
+    assert created.delivery_mechanism == dm
 
 
-def test_update_tp_rejects_fsp_conflicting_with_group(
+def test_update_tp_group_change_copies_group_fsp(
     target_population_create_update_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -999,70 +938,22 @@ def test_update_tp_rejects_fsp_conflicting_with_group(
     )
     tp = target_population_create_update_context["tp"]
     cycle = target_population_create_update_context["cycle"]
-    group = tp.payment_plan_group
-    fsp_in_group = FinancialServiceProviderFactory()
-    dm = DeliveryMechanismFactory()
-    PaymentPlanFactory(
-        business_area=target_population_create_update_context["business_area"],
-        program_cycle=cycle,
-        payment_plan_group=group,
-        financial_service_provider=fsp_in_group,
-        status=PaymentPlan.Status.TP_OPEN,
-    )
-    different_fsp = FinancialServiceProviderFactory()
-    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
+    fsp = FinancialServiceProviderFactory()
+    new_group = PaymentPlanGroupFactory(cycle=cycle, financial_service_provider=fsp)
 
     response = target_population_create_update_context["client"].patch(
         target_population_create_update_context["update_url"],
         {
-            "fsp_id": str(different_fsp.id),
-            "delivery_mechanism_code": dm.code,
-            "version": tp.version,
-        },
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment plans in the same group must share the same FSP." in str(response.data)
-
-
-def test_update_tp_rejects_group_change_with_fsp_conflict(
-    target_population_create_update_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        target_population_create_update_context["user"],
-        [Permissions.TARGETING_UPDATE],
-        target_population_create_update_context["business_area"],
-        target_population_create_update_context["program_active"],
-    )
-    tp = target_population_create_update_context["tp"]
-    cycle = target_population_create_update_context["cycle"]
-    tp.financial_service_provider = FinancialServiceProviderFactory()
-    tp.save()
-    new_group = PaymentPlanGroupFactory(cycle=cycle)
-    different_fsp = FinancialServiceProviderFactory()
-    different_fsp.allowed_business_areas.add(target_population_create_update_context["business_area"])
-    PaymentPlanFactory(
-        business_area=target_population_create_update_context["business_area"],
-        program_cycle=cycle,
-        payment_plan_group=new_group,
-        financial_service_provider=different_fsp,
-        status=PaymentPlan.Status.TP_OPEN,
-    )
-
-    response = target_population_create_update_context["client"].patch(
-        target_population_create_update_context["update_url"],
-        {
-            "program_cycle_id": str(cycle.id),
             "payment_plan_group_id": str(new_group.id),
             "version": tp.version,
         },
         format="json",
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment plans in the same group must share the same FSP." in str(response.data)
+    assert response.status_code == status.HTTP_200_OK
+    tp.refresh_from_db()
+    assert tp.payment_plan_group == new_group
+    assert tp.financial_service_provider == fsp
 
 
 @pytest.mark.parametrize(
@@ -1166,9 +1057,9 @@ def test_mark_ready(
         target_population_actions_context["business_area"],
         target_population_actions_context["program_active"],
     )
-    target_population_actions_context[
-        "target_population"
-    ].financial_service_provider = FinancialServiceProviderFactory()
+    group = target_population_actions_context["target_population"].payment_plan_group
+    group.financial_service_provider = FinancialServiceProviderFactory()
+    group.save(update_fields=["financial_service_provider"])
     target_population_actions_context["target_population"].delivery_mechanism = DeliveryMechanismFactory()
     target_population_actions_context["target_population"].status = PaymentPlan.Status.TP_LOCKED
     target_population_actions_context["target_population"].save()

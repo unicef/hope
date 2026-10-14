@@ -1,3 +1,4 @@
+import type { FspChoices } from '@restgenerated/models/FspChoices';
 import type { TargetingCriteriaRule } from '@restgenerated/models/TargetingCriteriaRule';
 import * as Yup from 'yup';
 
@@ -248,13 +249,11 @@ export function mapCriteriaToInitialValues(criteria) {
   const householdIds = criteria.householdIds || '';
   const alternativeCollectorsIds = criteria.alternativeCollectorsIds || '';
   const deliveryMechanism = criteria.deliveryMechanism || '';
-  const fsp = criteria.fsp || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
 
   return {
     deliveryMechanism,
-    fsp,
     individualIds,
     householdIds,
     alternativeCollectorsIds,
@@ -494,4 +493,18 @@ export function getTargetingCriteriaVariables(
       ),
     })) as TargetingCriteriaRule[],
   };
+}
+
+export function deliveryMechanismChoicesForFsp(
+  fspChoices: FspChoices[],
+  fspId: string | null | undefined,
+): Array<{ name: string; value: string; accountType?: number | null }> {
+  if (!fspId) return [];
+  return fspChoices
+    .filter((el) => el.fsps.some((fsp) => fsp.id === fspId))
+    .map((el) => ({
+      name: el.deliveryMechanism.name,
+      value: el.deliveryMechanism.code,
+      accountType: el.deliveryMechanism.accountType,
+    }));
 }

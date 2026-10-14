@@ -52,10 +52,9 @@ class FollowUpInstructionService:
             .filter(has_follow_up_child=False)
             .select_related(
                 "business_area",
-                "currency",
                 "delivery_mechanism",
-                "financial_service_provider",
-                "payment_plan_group",
+                "payment_plan_group__currency",
+                "payment_plan_group__financial_service_provider",
                 "program_cycle",
             )
             .prefetch_related("payment_plan_purposes")
@@ -76,9 +75,9 @@ class FollowUpInstructionService:
 
     @staticmethod
     def _validate_shared_configuration(source_plans: list[PaymentPlan]) -> None:
-        fsp_ids = {payment_plan.financial_service_provider_id for payment_plan in source_plans}
+        fsp_ids = {payment_plan.payment_plan_group.financial_service_provider_id for payment_plan in source_plans}
         delivery_mechanism_ids = {payment_plan.delivery_mechanism_id for payment_plan in source_plans}
-        currency_ids = {payment_plan.currency_id for payment_plan in source_plans}
+        currency_ids = {payment_plan.payment_plan_group.currency_id for payment_plan in source_plans}
         if None in fsp_ids or len(fsp_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Financial Service Provider.")
         if None in delivery_mechanism_ids or len(delivery_mechanism_ids) != 1:
@@ -99,10 +98,13 @@ class FollowUpInstructionService:
         dispersion_end_date: datetime.date,
     ) -> FollowUpInstruction:
         source_plans = self._get_applicable_source_payment_plans(payment_plan_group_ids)
+        source_group = source_plans[0].payment_plan_group
         instruction = FollowUpInstruction.objects.create(
             business_area=self.program.business_area,
             program=self.program,
             created_by=user,
+            financial_service_provider=source_group.financial_service_provider,
+            currency=source_group.currency,
         )
         for source_plan in source_plans:
             follow_up_payment_plan = PaymentPlanService(source_plan).create_follow_up(
@@ -123,9 +125,7 @@ class FollowUpInstructionService:
 
     def _get_child_payment_plans(self) -> list[PaymentPlan]:
         instruction = self._require_instruction()
-        return list(
-            instruction.payment_plans.select_related("program_cycle__program", "currency").order_by("created_at")
-        )
+        return list(instruction.payment_plans.select_related("program_cycle__program").order_by("created_at"))
 
     def _require_instruction(self) -> FollowUpInstruction:
         if self.instruction is None:
@@ -208,7 +208,7 @@ class FollowUpInstructionService:
             updated_payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
                 input_data=input_data,
                 user=user,
-                allow_instruction_managed=True,
+                as_manager=True,
             )
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
         return instruction
@@ -223,9 +223,7 @@ class FollowUpInstructionService:
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             service = PaymentPlanService(payment_plan)
-            # Bulk close auto-advances FINISHED → READY_FOR_CLOSURE → CLOSED with no manual pause,
-            # so suppress the "ready for closure" email.
-            service.ready_for_closure(user, notify=False)
+            service.ready_for_closure()
             updated_payment_plan = service.close(
                 closure_comment="Comment",
                 user_id=str(user.pk),

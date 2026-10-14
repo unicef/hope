@@ -11,7 +11,15 @@ from extras.test_utils.factories import (
     ProgramFactory,
     UserFactory,
 )
-from hope.models import BeneficiaryGroup, BusinessArea, DataCollectingType, PaymentPlan, Program, User
+from hope.models import (
+    BeneficiaryGroup,
+    BusinessArea,
+    DataCollectingType,
+    PaymentPlan,
+    PaymentPlanGroup,
+    Program,
+    User,
+)
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db()
@@ -48,11 +56,12 @@ def create_program(
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
     program_cycle_second = second_test_program.cycles.first()
     ba = BusinessArea.objects.get(slug="afghanistan")
-    PaymentPlanFactory(
+    other_plan = PaymentPlanFactory(
         program_cycle=program_cycle_second,
         status=PaymentPlan.Status.IN_APPROVAL,
         business_area=ba,
     )
+    _set_group_in_approval(other_plan)
 
     payment_plan = PaymentPlanFactory(
         name="Test Payment Plan",
@@ -66,12 +75,21 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     )
     approval_user = UserFactory()
     approval_date = datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
+    group = _set_group_in_approval(payment_plan)
     ApprovalProcessFactory(
-        payment_plan=payment_plan,
+        payment_plan_group=group,
         sent_for_approval_date=approval_date,
         sent_for_approval_by=approval_user,
     )
     return payment_plan
+
+
+def _set_group_in_approval(payment_plan: PaymentPlan) -> PaymentPlanGroup:
+    """The console lists and approves Payment Plans (groups), so the group carries the status."""
+    group = payment_plan.payment_plan_group
+    group.status = PaymentPlanGroup.Status.IN_APPROVAL
+    group.save(update_fields=["status"])
+    return group
 
 
 @pytest.mark.usefixtures("login")
@@ -119,4 +137,6 @@ def test_managerial_console_happy_path(
     page_managerial_console.get_release_button().click()
     page_managerial_console.get_button_save().click()
     # Check Released Payment Plans
-    assert create_payment_plan.unicef_id in page_managerial_console.get_column_field_released().text
+    group = create_payment_plan.payment_plan_group
+    group.refresh_from_db()
+    assert group.unicef_id in page_managerial_console.get_column_field_released().text

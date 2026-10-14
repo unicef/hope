@@ -47,6 +47,7 @@ from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PeriodicAsyncRetryJob,
 )
@@ -167,7 +168,7 @@ def uba_fsp():
 
 @pytest.fixture
 def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
-    return PaymentPlanFactory(
+    payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
         financial_service_provider=pg_fsp,
@@ -176,6 +177,9 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd)
         exchange_rate=Decimal("2.0"),
         currency=currency_usd,
     )
+    payment_plan.payment_plan_group.status = PaymentPlanGroup.Status.ACCEPTED
+    payment_plan.payment_plan_group.save(update_fields=["status"])
+    return payment_plan
 
 
 @pytest.fixture
@@ -368,9 +372,9 @@ def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
 
 @pytest.fixture
 def payment_gateway_setup_in_inactive_currency(payment_gateway_setup, currency_syp_deprecated):
-    """The plan and its payments priced in a currency deactivated after they were created."""
+    """The plan's group and its payments priced in a currency deactivated after they were created."""
     payment_plan = payment_gateway_setup["payment_plan"]
-    PaymentPlan.objects.filter(pk=payment_plan.pk).update(currency=currency_syp_deprecated)
+    PaymentPlanGroup.objects.filter(pk=payment_plan.payment_plan_group_id).update(currency=currency_syp_deprecated)
     Payment.objects.filter(parent=payment_plan).update(currency=currency_syp_deprecated)
     payment_plan.refresh_from_db()
     return payment_gateway_setup

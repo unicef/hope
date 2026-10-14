@@ -24,7 +24,6 @@ interface PaymentPlansTableProps {
   canViewDetails: boolean;
   title?: string;
   paymentPlanGroupId?: string;
-  tag?: string;
 }
 
 export const PaymentPlansTable = ({
@@ -33,7 +32,6 @@ export const PaymentPlansTable = ({
   canViewDetails,
   title,
   paymentPlanGroupId,
-  tag,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
@@ -52,7 +50,6 @@ export const PaymentPlansTable = ({
       program: programId,
       programCycle: programCycle?.id,
       paymentPlanGroup: paymentPlanGroupId,
-      exportTag: tag,
       isPaymentPlan: true,
     }),
     [
@@ -66,7 +63,6 @@ export const PaymentPlansTable = ({
       programId,
       programCycle?.id,
       paymentPlanGroupId,
-      tag,
     ],
   );
 

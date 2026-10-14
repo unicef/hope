@@ -11,6 +11,7 @@ import {
 import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/LinkedPaymentPlansModal';
 import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 interface PaymentPlanTableRowProps {
   paymentPlan: PaymentPlanList;
@@ -22,11 +23,17 @@ export const PaymentPlanTableRow = ({
   canViewDetails,
 }: PaymentPlanTableRowProps): ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const paymentPlanPath = `/${baseUrl}/payment-module/${
-    paymentPlan.planType === 'FOLLOW_UP'
-      ? 'followup-payment-plans'
-      : 'payment-plans'
-  }/${paymentPlan.id}`;
+  // A group lists its target populations too; those still live in Targeting.
+  const isTargetPopulation =
+    paymentPlan.status === PaymentPlanStatusEnum.DRAFT ||
+    !!paymentPlan.status?.startsWith('TP_');
+  const paymentPlanPath = isTargetPopulation
+    ? `/${baseUrl}/target-population/${paymentPlan.id}`
+    : `/${baseUrl}/payment-module/${
+        paymentPlan.planType === 'FOLLOW_UP'
+          ? 'followup-payment-plans'
+          : 'payment-plans'
+      }/${paymentPlan.id}`;
 
   return (
     <ClickableTableRow key={paymentPlan.id}>
@@ -63,17 +70,6 @@ export const PaymentPlanTableRow = ({
         <UniversalMoment>{paymentPlan.dispersionEndDate}</UniversalMoment>
       </TableCell>
 
-      <TableCell align="left">
-        {paymentPlan.exportTag && paymentPlan.paymentPlanGroup?.id ? (
-          <BlackLink
-            to={`/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}/batches/${paymentPlan.exportTag}`}
-          >
-            {paymentPlan.exportTag}
-          </BlackLink>
-        ) : (
-          '-'
-        )}
-      </TableCell>
       <TableCell align="left">
         <LinkedPaymentPlansModal
           paymentPlan={paymentPlan}

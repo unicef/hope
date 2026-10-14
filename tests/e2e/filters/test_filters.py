@@ -341,12 +341,11 @@ class TestSmokeFilters:
                 filters.date_picker_filter_from,
                 filters.date_picker_filter_to,
             ],
+            # The Payment Plans menu opens the groups list.
             "Payment Plans": [
-                filters.select_filter,
-                filters.filters_total_entitled_quantity_from,
-                filters.filters_total_entitled_quantity_to,
-                filters.date_picker_filter_from,
-                filters.date_picker_filter_to,
+                filters.filters_search,
+                'div[data-cy="filters-cycle"]',
+                filters.filters_status,
             ],
             "Payment Verification": [
                 filters.filter_search,
@@ -444,15 +443,6 @@ class TestSmokeFilters:
                 id="Payment Verification",
             ),
             pytest.param([["Grievance"], "filters-search", "GRV-0000123", 2], id="Grievance"),
-            pytest.param(
-                [
-                    ["Payment Module", "Payment Plans"],
-                    "filter-search",
-                    "PP-0060-22-11223344",
-                    2,
-                ],
-                id="Payment Module",
-            ),
             pytest.param(
                 # add_household's household plus one per verification plan.
                 [["Main Menu", "Items Groups"], "hh-filters-search", "HH-00-0000.1380", 3],

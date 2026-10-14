@@ -171,12 +171,13 @@ class PaymentNotification:
 
     def __init__(
         self,
-        payment_plan: PaymentPlan,
+        payment_plan: PaymentPlan | PaymentPlanGroup,
         action: str,
         action_user: User,
         action_date: datetime,
     ) -> None:
         self.payment_plan = payment_plan
+        self.page_path = "groups" if isinstance(payment_plan, PaymentPlanGroup) else "payment-plans"
         self.action = action
         self.action_user = action_user
         self.action_date = action_date
@@ -256,7 +257,7 @@ class PaymentNotification:
             "action_name": self.action_name,
             "payment_plan_url": frontend_url(
                 f"{self.payment_plan.business_area.slug}/programs/"
-                f"{self.payment_plan.program.code}/payment-module/payment-plans/"
+                f"{self.payment_plan.program.code}/payment-module/{self.page_path}/"
                 f"{self.payment_plan.id}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,

@@ -7,6 +7,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { Grid, MenuItem } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import { PAYMENT_PLAN_GROUP_STATES } from '@utils/constants';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -71,7 +72,7 @@ export const PaymentPlanGroupsFilters = ({
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={4}>
+        <Grid size={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -80,7 +81,7 @@ export const PaymentPlanGroupsFilters = ({
             data-cy="filters-search"
           />
         </Grid>
-        <Grid size={4}>
+        <Grid size={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('cycle', e.target.value)}
             variant="outlined"
@@ -92,6 +93,23 @@ export const PaymentPlanGroupsFilters = ({
             {(cycles?.results ?? []).map((cycle) => (
               <MenuItem key={cycle.id} value={cycle.id}>
                 {cycle.title}
+              </MenuItem>
+            ))}
+          </SelectFilter>
+        </Grid>
+        <Grid size={3}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            variant="outlined"
+            label={t('Status')}
+            multiple
+            value={filter.status}
+            fullWidth
+            data-cy="filters-status"
+          >
+            {Object.entries(PAYMENT_PLAN_GROUP_STATES).map(([value, name]) => (
+              <MenuItem key={value} value={value}>
+                {t(name)}
               </MenuItem>
             ))}
           </SelectFilter>

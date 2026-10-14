@@ -1,8 +1,6 @@
-"""A no-op round-trip must not repoint a plan onto the active currency row.
+"""A no-op round-trip must not repoint a Payment Plan Group onto the active currency row.
 
-Echoing back the code a ``GET`` handed out must leave the plan and its payments where they were.
-Covers both the ``PATCH`` and the ``POST`` that opens a target population -- the latter reads as
-a create but overwrites an existing plan's currency.
+Echoing back the code a ``GET`` handed out must leave the group on the row it was on.
 """
 
 from typing import Any, Callable
@@ -14,14 +12,13 @@ from rest_framework.reverse import reverse
 from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.models import Currency, PaymentPlan, Program
+from hope.models import Currency, PaymentPlanGroup, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -42,212 +39,111 @@ def currency_eur() -> Currency:
 
 
 @pytest.fixture
-def round_trip_context(api_client: Callable, deprecated_syp: Currency, active_syp: Currency) -> dict[str, Any]:
+def round_trip_context(
+    api_client: Callable,
+    create_user_role_with_permissions: Any,
+    deprecated_syp: Currency,
+    active_syp: Currency,
+) -> dict[str, Any]:
     business_area = BusinessAreaFactory(slug="afghanistan")
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
     cycle = ProgramCycleFactory(program=program)
     user = UserFactory()
-    payment_plan = PaymentPlanFactory(
-        name="Old SYP plan",
-        business_area=business_area,
-        program_cycle=cycle,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        status=PaymentPlan.Status.ACCEPTED,
-        currency=deprecated_syp,
-    )
-    payments = [PaymentFactory(parent=payment_plan, currency=deprecated_syp) for _ in range(2)]
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program)
+    payment_plan_group = PaymentPlanGroupFactory(name="Old SYP group", cycle=cycle, currency=deprecated_syp)
     url = reverse(
-        "api:payments:payment-plans-detail",
+        "api:payments:payment-plan-groups-detail",
         kwargs={
             "business_area_slug": business_area.slug,
             "program_code": program.code,
-            "pk": payment_plan.pk,
+            "pk": payment_plan_group.pk,
         },
     )
     return {
-        "business_area": business_area,
-        "program": program,
-        "user": user,
-        "payment_plan": payment_plan,
-        "payments": payments,
+        "payment_plan_group": payment_plan_group,
         "client": api_client(user),
         "url": url,
     }
-
-
-def test_partial_update_arrange_plan_on_deprecated_currency_act_patch_dates_assert_currency_unchanged(
-    round_trip_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    deprecated_syp: Currency,
-) -> None:
-    create_user_role_with_permissions(
-        round_trip_context["user"],
-        [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
-        round_trip_context["business_area"],
-        round_trip_context["program"],
-    )
-    payment_plan = round_trip_context["payment_plan"]
-
-    response = round_trip_context["client"].patch(
-        round_trip_context["url"],
-        {
-            "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2099-12-31",
-            "currency": "SYP",
-        },
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.currency_id == deprecated_syp.pk
-    assert str(payment_plan.dispersion_end_date) == "2099-12-31"
-    assert list(payment_plan.payment_items.values_list("currency_id", flat=True)) == [
-        deprecated_syp.pk,
-        deprecated_syp.pk,
-    ]
-
-
-def test_partial_update_arrange_plan_on_deprecated_currency_act_patch_other_code_assert_resolves_to_active(
-    round_trip_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    currency_eur: Currency,
-) -> None:
-    create_user_role_with_permissions(
-        round_trip_context["user"],
-        [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
-        round_trip_context["business_area"],
-        round_trip_context["program"],
-    )
-    payment_plan = round_trip_context["payment_plan"]
-
-    response = round_trip_context["client"].patch(
-        round_trip_context["url"],
-        {"currency": "EUR"},
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.currency_id == currency_eur.pk
-
-
-def test_partial_update_arrange_plan_on_active_currency_act_patch_same_code_assert_stays_on_active(
-    round_trip_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    active_syp: Currency,
-) -> None:
-    create_user_role_with_permissions(
-        round_trip_context["user"],
-        [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
-        round_trip_context["business_area"],
-        round_trip_context["program"],
-    )
-    payment_plan = round_trip_context["payment_plan"]
-    payment_plan.currency = active_syp
-    payment_plan.save(update_fields=["currency"])
-
-    response = round_trip_context["client"].patch(
-        round_trip_context["url"],
-        {"currency": "SYP"},
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.currency_id == active_syp.pk
 
 
 @pytest.fixture
-def open_context(api_client: Callable, deprecated_syp: Currency, active_syp: Currency) -> dict[str, Any]:
+def create_context(api_client: Callable, create_user_role_with_permissions: Any) -> dict[str, Any]:
     business_area = BusinessAreaFactory(slug="afghanistan")
     program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    cycle = program.cycles.first()
+    cycle = ProgramCycleFactory(program=program)
     user = UserFactory()
-    payment_plan = PaymentPlanFactory(
-        name="Target population on old SYP",
-        business_area=business_area,
-        program_cycle=cycle,
-        status=PaymentPlan.Status.DRAFT,
-        currency=deprecated_syp,
-    )
-    payments = [PaymentFactory(parent=payment_plan, currency=deprecated_syp) for _ in range(2)]
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program)
     url = reverse(
-        "api:payments:payment-plans-list",
+        "api:payments:payment-plan-groups-list",
         kwargs={"business_area_slug": business_area.slug, "program_code": program.code},
     )
-    return {
-        "business_area": business_area,
-        "program": program,
-        "user": user,
-        "payment_plan": payment_plan,
-        "payments": payments,
-        "client": api_client(user),
-        "url": url,
-    }
+    return {"cycle": cycle, "client": api_client(user), "url": url}
 
 
-def test_open_arrange_target_population_on_deprecated_currency_act_post_same_code_assert_currency_unchanged(
-    open_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+def test_update_arrange_group_on_deprecated_currency_act_put_same_code_assert_currency_unchanged(
+    round_trip_context: dict[str, Any],
     deprecated_syp: Currency,
 ) -> None:
-    create_user_role_with_permissions(
-        open_context["user"],
-        [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
-        open_context["business_area"],
-        open_context["program"],
-    )
-    payment_plan = open_context["payment_plan"]
+    payment_plan_group = round_trip_context["payment_plan_group"]
 
-    response = open_context["client"].post(
-        open_context["url"],
-        {
-            "target_population_id": str(payment_plan.pk),
-            "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2099-12-31",
-            "currency": "SYP",
-        },
+    response = round_trip_context["client"].put(
+        round_trip_context["url"],
+        {"name": "Renamed SYP group", "currency": "SYP"},
         format="json",
     )
 
-    assert response.status_code == status.HTTP_201_CREATED
-    payment_plan.refresh_from_db()
-    assert payment_plan.currency_id == deprecated_syp.pk
-    assert list(payment_plan.payment_items.values_list("currency_id", flat=True)) == [
-        deprecated_syp.pk,
-        deprecated_syp.pk,
-    ]
+    assert response.status_code == status.HTTP_200_OK
+    payment_plan_group.refresh_from_db()
+    assert payment_plan_group.currency_id == deprecated_syp.pk
+    assert payment_plan_group.name == "Renamed SYP group"
 
 
-def test_open_arrange_target_population_on_deprecated_currency_act_post_other_code_assert_resolves_to_active(
-    open_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
+def test_update_arrange_group_on_deprecated_currency_act_put_other_code_assert_resolves_to_active(
+    round_trip_context: dict[str, Any],
     currency_eur: Currency,
 ) -> None:
-    create_user_role_with_permissions(
-        open_context["user"],
-        [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
-        open_context["business_area"],
-        open_context["program"],
-    )
-    payment_plan = open_context["payment_plan"]
+    payment_plan_group = round_trip_context["payment_plan_group"]
 
-    response = open_context["client"].post(
-        open_context["url"],
-        {
-            "target_population_id": str(payment_plan.pk),
-            "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2099-12-31",
-            "currency": "EUR",
-        },
+    response = round_trip_context["client"].put(
+        round_trip_context["url"],
+        {"name": payment_plan_group.name, "currency": "EUR"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    payment_plan_group.refresh_from_db()
+    assert payment_plan_group.currency_id == currency_eur.pk
+
+
+def test_update_arrange_group_on_active_currency_act_put_same_code_assert_stays_on_active(
+    round_trip_context: dict[str, Any],
+    active_syp: Currency,
+) -> None:
+    payment_plan_group = round_trip_context["payment_plan_group"]
+    payment_plan_group.currency = active_syp
+    payment_plan_group.save(update_fields=["currency"])
+
+    response = round_trip_context["client"].put(
+        round_trip_context["url"],
+        {"name": payment_plan_group.name, "currency": "SYP"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    payment_plan_group.refresh_from_db()
+    assert payment_plan_group.currency_id == active_syp.pk
+
+
+def test_create_arrange_two_syp_rows_act_post_code_assert_group_on_active_row(
+    create_context: dict[str, Any],
+    deprecated_syp: Currency,
+    active_syp: Currency,
+) -> None:
+    response = create_context["client"].post(
+        create_context["url"],
+        {"name": "New SYP group", "cycle": str(create_context["cycle"].id), "currency": "SYP"},
         format="json",
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    payment_plan.refresh_from_db()
-    assert payment_plan.currency_id == currency_eur.pk
-    assert list(payment_plan.payment_items.values_list("currency_id", flat=True)) == [
-        currency_eur.pk,
-        currency_eur.pk,
-    ]
+    assert PaymentPlanGroup.objects.get(id=response.json()["id"]).currency_id == active_syp.pk

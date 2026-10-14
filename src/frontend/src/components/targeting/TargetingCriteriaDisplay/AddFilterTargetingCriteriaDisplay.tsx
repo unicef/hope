@@ -18,6 +18,7 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
+import { usePaymentPlanGroup } from '@hooks/usePaymentPlanGroup';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Title = styled.div`
@@ -75,6 +76,9 @@ interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
   targetPopulation?: TargetPopulationDetail;
+  // The group the TP is (being) assigned to; its FSP limits the delivery
+  // mechanisms.
+  paymentPlanGroupId?: string;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -85,6 +89,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
+  paymentPlanGroupId,
   isEdit,
   screenBeneficiary,
   isSocialDctType,
@@ -94,6 +99,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const { businessArea, isAllPrograms } = useBaseUrl();
+  const { data: paymentPlanGroup } = usePaymentPlanGroup(paymentPlanGroupId);
 
   const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
     queryKey: restQueryKey(
@@ -162,7 +168,6 @@ const AddFilterTargetingCriteriaDisplay = ({
       individualIds: values.individualIds,
       alternativeCollectorsIds: values.alternativeCollectorsIds,
       deliveryMechanism: values.deliveryMechanism,
-      fsp: values.fsp,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -235,6 +240,7 @@ const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           criteriaIndex={criteriaIndex}
+          paymentPlanGroup={paymentPlanGroup}
         />
         <ContentWrapper>
           <Box
@@ -268,7 +274,9 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         deliveryMechanism={targetPopulation?.deliveryMechanism}
                         financialServiceProvider={
-                          targetPopulation?.financialServiceProvider
+                          paymentPlanGroup
+                            ? paymentPlanGroup.financialServiceProvider
+                            : targetPopulation?.financialServiceProvider
                         }
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}

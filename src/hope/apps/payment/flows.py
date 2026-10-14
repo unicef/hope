@@ -5,6 +5,7 @@ from viewflow import fsm
 
 from hope.models.follow_up_instruction import FollowUpInstruction
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_group import PaymentPlanGroup
 
 
 class PaymentPlanFlow:
@@ -511,6 +512,125 @@ class PaymentPlanFlow:
     def status_reactivate_abort(self) -> None:
         self.payment_plan.status_date = timezone.now()
         self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
+
+
+class PaymentPlanGroupFlow:
+    status = fsm.State(PaymentPlanGroup.Status)
+
+    def __init__(self, payment_plan_group: "PaymentPlanGroup"):
+        self.payment_plan_group = payment_plan_group
+
+    @status.setter()
+    def _set_status(self, value: str) -> None:
+        self.payment_plan_group.status = value
+
+    @status.getter()
+    def _get_status(self) -> str:
+        return self.payment_plan_group.status
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.OPEN,
+        target=PaymentPlanGroup.Status.LOCKED,
+    )
+    def status_lock(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.LOCKED,
+        target=PaymentPlanGroup.Status.OPEN,
+    )
+    def status_unlock(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.LOCKED,
+        target=PaymentPlanGroup.Status.IN_APPROVAL,
+    )
+    def status_send_for_approval(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_APPROVAL,
+        target=PaymentPlanGroup.Status.IN_AUTHORIZATION,
+    )
+    def status_approve(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_AUTHORIZATION,
+        target=PaymentPlanGroup.Status.IN_REVIEW,
+    )
+    def status_authorize(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_REVIEW,
+        target=PaymentPlanGroup.Status.ACCEPTED,
+    )
+    def status_mark_as_reviewed(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ],
+        target=PaymentPlanGroup.Status.LOCKED,
+    )
+    def status_reject(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.ACCEPTED,
+            PaymentPlanGroup.Status.FINISHED,
+            PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+        ],
+        target=PaymentPlanGroup.Status.FINISHED,
+    )
+    def status_finished(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.FINISHED,
+        target=PaymentPlanGroup.Status.ACCEPTED,
+    )
+    def status_reopen_for_reconciliation(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.FINISHED,
+        target=PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+    )
+    def status_ready_for_closure(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+        target=PaymentPlanGroup.Status.CLOSED,
+    )
+    def status_close(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.LOCKED,
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ],
+        target=PaymentPlanGroup.Status.ABORTED,
+    )
+    def status_abort(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.ABORTED,
+        target=PaymentPlanGroup.Status.OPEN,
+    )
+    def status_reactivate_abort(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
 
 
 class FollowUpInstructionFlow:

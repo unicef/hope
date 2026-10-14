@@ -11,6 +11,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -18,7 +19,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, ProgramCycle, User
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -60,6 +61,13 @@ def regular_pp(business_area: Any, cycle: ProgramCycle, user: User, purpose: Any
 
 
 @pytest.fixture
+def top_up_group(cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP, source_group=regular_pp.payment_plan_group
+    )
+
+
+@pytest.fixture
 def source_payments(regular_pp: PaymentPlan) -> dict[str, Payment]:
     return {
         "delivered": PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS),
@@ -76,11 +84,12 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
     purpose: Any,
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
+    top_up_group: Any,
 ) -> None:
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
 
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end, payment_plan_group=top_up_group)
 
     top_up_pp.refresh_from_db()
     assert top_up_pp.plan_type == PaymentPlan.PlanType.TOP_UP
@@ -88,7 +97,7 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
     assert top_up_pp.name == "Test Payment Plan Top Up"
     assert top_up_pp.source_payment_plan == regular_pp
     assert top_up_pp.created_by == user
-    assert top_up_pp.payment_plan_group == regular_pp.payment_plan_group
+    assert top_up_pp.payment_plan_group == top_up_group
     assert top_up_pp.program_cycle == regular_pp.program_cycle
     assert top_up_pp.currency == regular_pp.currency
     assert top_up_pp.financial_service_provider == regular_pp.financial_service_provider
@@ -107,11 +116,14 @@ def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
     django_capture_on_commit_callbacks: Any,
+    top_up_group: Any,
 ) -> None:
     """Every source payment is copied whatever its status, funded with the flat amount."""
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end, fixed_amount=Decimal("15.00"))
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(
+        user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("15.00")
+    )
 
     with django_capture_on_commit_callbacks(execute=True):
         prepare_child_payment_plan_async_task(top_up_pp, extra_config={"fixed_amount": "15.00"})
@@ -134,16 +146,17 @@ def test_create_top_up_arrange_query_budget_act_create_assert_within_limit(
     regular_pp: PaymentPlan,
     source_payments: dict[str, Payment],
     django_assert_num_queries: Any,
+    top_up_group: Any,
 ) -> None:
     start = regular_pp.dispersion_start_date + timedelta(days=1)
     end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with django_assert_num_queries(11):
-        PaymentPlanService(regular_pp).create_top_up(user, start, end)
+        PaymentPlanService(regular_pp).create_top_up(user, start, end, payment_plan_group=top_up_group)
 
 
 def test_create_top_up_arrange_follow_up_origin_act_create_assert_raises(
-    user: User, business_area: Any, cycle: ProgramCycle
+    user: User, business_area: Any, cycle: ProgramCycle, top_up_group: Any
 ) -> None:
     follow_up_pp = PaymentPlanFactory(
         business_area=business_area,
@@ -154,13 +167,13 @@ def test_create_top_up_arrange_follow_up_origin_act_create_assert_raises(
     end = follow_up_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(follow_up_pp).create_top_up(user, start, end)
+        PaymentPlanService(follow_up_pp).create_top_up(user, start, end, payment_plan_group=top_up_group)
 
     assert "Standard plan" in str(error.value.detail[0])
 
 
 def test_create_top_up_arrange_no_eligible_payments_act_create_assert_raises(
-    user: User, regular_pp: PaymentPlan
+    user: User, regular_pp: PaymentPlan, top_up_group: Any
 ) -> None:
     # Excluded payments are the remaining way to have none eligible; payment status no longer gates.
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR, excluded=True)
@@ -168,6 +181,8 @@ def test_create_top_up_arrange_no_eligible_payments_act_create_assert_raises(
     end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(regular_pp).create_top_up(user, start, end, fixed_amount=Decimal("5.00"))
+        PaymentPlanService(regular_pp).create_top_up(
+            user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00")
+        )
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()

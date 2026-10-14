@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
+import { StatusBox } from '@core/StatusBox';
+import { paymentPlanStatusToColor } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
 
@@ -24,6 +26,13 @@ export const PaymentPlanGroupTableRow = ({
         <BlackLink to={groupPath}>{group.name}</BlackLink>
       </TableCell>
       <TableCell align="left">{group.unicefId || '-'}</TableCell>
+      <TableCell align="left">
+        <StatusBox
+          status={group.status}
+          statusToColor={paymentPlanStatusToColor}
+          dataCy="payment-plan-group-status"
+        />
+      </TableCell>
     </ClickableTableRow>
   );
 };

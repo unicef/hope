@@ -11,13 +11,14 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  Tooltip,
   Typography,
 } from '@mui/material';
+import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   chooseFieldType,
+  deliveryMechanismChoicesForFsp,
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
@@ -61,7 +62,6 @@ const StyledBox = styled(Box)`
 
 const requiredSchema = Yup.object().shape({
   deliveryMechanism: Yup.string().required('Delivery Mechanism is required'),
-  fsp: Yup.string().required('FSP is required'),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   alternativeCollectorsIds: HhIndIdValidation,
@@ -107,7 +107,6 @@ const requiredSchema = Yup.object().shape({
 
 const optionalSchema = Yup.object().shape({
   deliveryMechanism: Yup.string(),
-  fsp: Yup.string(),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   alternativeCollectorsIds: HhIndIdValidation,
@@ -175,6 +174,7 @@ interface TargetingCriteriaFormPropTypes {
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
   criteriaIndex: number;
+  paymentPlanGroup?: PaymentPlanGroupDetail;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -188,6 +188,7 @@ export const TargetingCriteriaForm = ({
   individualFiltersAvailable,
   householdFiltersAvailable,
   criteriaIndex,
+  paymentPlanGroup,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, isAllPrograms } = useBaseUrl();
@@ -289,7 +290,6 @@ export const TargetingCriteriaForm = ({
     const householdIds = values.householdIds;
     const alternativeCollectorsIds = values.alternativeCollectorsIds;
     const deliveryMechanism = values.deliveryMechanism;
-    const fsp = values.fsp;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
@@ -301,13 +301,13 @@ export const TargetingCriteriaForm = ({
       householdIds,
       alternativeCollectorsIds,
       deliveryMechanism,
-      fsp,
     });
     return bag.resetForm();
   };
 
+  const groupFsp = paymentPlanGroup?.financialServiceProvider;
   const validationSchema =
-    criteriaIndex === 0 && openPaymentChannelCollapse
+    criteriaIndex === 0 && openPaymentChannelCollapse && groupFsp
       ? requiredSchema
       : optionalSchema;
 
@@ -322,26 +322,22 @@ export const TargetingCriteriaForm = ({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, setFieldValue, errors }) => {
-          const fsps = availableFspsForDeliveryMechanismData || [];
-          const mappedDeliveryMechanisms = fsps.map((el) => ({
-            name: el.deliveryMechanism.name,
-            value: el.deliveryMechanism.code,
-            accountType: el.deliveryMechanism.accountType,
-          }));
-          const mappedFsps =
-            fsps
-              .find(
-                (el) => el.deliveryMechanism.code === values.deliveryMechanism,
-              )
-              ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+        {({ submitForm, values, resetForm, errors }) => {
+          const mappedDeliveryMechanisms = deliveryMechanismChoicesForFsp(
+            availableFspsForDeliveryMechanismData,
+            groupFsp?.id,
+          );
+          let deliveryMechanismHint = '';
+          if (!paymentPlanGroup) {
+            deliveryMechanismHint = t('Select a Payment Plan first.');
+          } else if (!groupFsp) {
+            deliveryMechanismHint = t(
+              'The selected Payment Plan has no FSP yet. Set the FSP on the Payment Plan to choose a delivery mechanism.',
+            );
+          }
           const handleSave = () => {
             // case 1: user didn't choose payment channel at all
-            if (
-              criteriaIndex === 0 &&
-              !values.deliveryMechanism &&
-              !values.fsp
-            ) {
+            if (criteriaIndex === 0 && !values.deliveryMechanism) {
               return confirm({
                 title: t('Warning'),
                 content: noPaymentChannelChosenConfirmationText,
@@ -606,49 +602,40 @@ export const TargetingCriteriaForm = ({
                           }}
                         >
                           <Grid container spacing={3}>
+                            {groupFsp && (
+                              <Grid size={{ xs: 12 }}>
+                                <Typography variant="body2" data-cy="group-fsp">
+                                  {t('FSP')}: <strong>{groupFsp.name}</strong>
+                                </Typography>
+                              </Grid>
+                            )}
                             <Grid size={{ xs: 12 }}>
                               <Field
                                 name="deliveryMechanism"
                                 label="Select Delivery Mechanism"
                                 type="text"
                                 fullWidth
-                                required={openPaymentChannelCollapse}
+                                required={
+                                  openPaymentChannelCollapse && !!groupFsp
+                                }
+                                disabled={!groupFsp}
                                 variant="outlined"
                                 choices={mappedDeliveryMechanisms}
                                 component={FormikSelectField}
-                                onChange={() => {
-                                  setFieldValue('fsp', '');
-                                }}
-                                onClear={() => {
-                                  setFieldValue('fsp', '');
-                                }}
                                 data-cy="input-delivery-mechanism"
                               />
                             </Grid>
-                            <Grid size={{ xs: 12 }}>
-                              <Tooltip
-                                title={
-                                  !values.deliveryMechanism
-                                    ? 'Select delivery mechanism first'
-                                    : ''
-                                }
-                              >
-                                <div>
-                                  <Field
-                                    name="fsp"
-                                    label="Select FSP"
-                                    type="text"
-                                    fullWidth
-                                    disabled={!values.deliveryMechanism}
-                                    required={openPaymentChannelCollapse}
-                                    variant="outlined"
-                                    component={FormikSelectField}
-                                    choices={mappedFsps}
-                                    data-cy="input-fsp"
-                                  />
-                                </div>
-                              </Tooltip>
-                            </Grid>
+                            {deliveryMechanismHint && (
+                              <Grid size={{ xs: 12 }}>
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                  data-cy="delivery-mechanism-hint"
+                                >
+                                  {deliveryMechanismHint}
+                                </Typography>
+                              </Grid>
+                            )}
                           </Grid>
                         </Box>
                       </Collapse>

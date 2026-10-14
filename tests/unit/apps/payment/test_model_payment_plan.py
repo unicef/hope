@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 import json
-from unittest.mock import Mock, patch
-import uuid
+from unittest.mock import Mock
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.admin.options import get_content_type_for_model
@@ -55,7 +54,7 @@ def test_get_last_approval_process_date_in_approval(user, program_cycle):
     sent_for_approval_date = timezone.datetime(2000, 10, 10, tzinfo=dt_timezone.utc)
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_APPROVAL)
     ApprovalProcessFactory(
-        payment_plan=payment_plan,
+        payment_plan_group=payment_plan.payment_plan_group,
         sent_for_approval_date=sent_for_approval_date,
         sent_for_approval_by=user,
     )
@@ -74,7 +73,7 @@ def test_get_last_approval_process_date_in_approval_without_process(user, progra
 
 def test_get_last_approval_process_date_in_authorization_with_approval(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_AUTHORIZATION)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     approval = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.APPROVAL,
@@ -90,7 +89,7 @@ def test_get_last_approval_process_date_in_authorization_with_approval(user, pro
 
 def test_get_last_approval_process_date_in_authorization_without_approval(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_AUTHORIZATION)
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == payment_plan.updated_at
@@ -99,7 +98,7 @@ def test_get_last_approval_process_date_in_authorization_without_approval(user, 
 
 def test_get_last_approval_process_date_in_review_with_authorizations(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_REVIEW)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     first_authorization = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.AUTHORIZATION,
@@ -122,7 +121,7 @@ def test_get_last_approval_process_date_in_review_with_authorizations(user, prog
 
 def test_get_last_approval_process_date_in_review_without_authorization(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_REVIEW)
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == payment_plan.updated_at
@@ -131,7 +130,7 @@ def test_get_last_approval_process_date_in_review_without_authorization(user, pr
 
 def test_get_last_approval_process_date_accepted_with_finance_release(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.ACCEPTED)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     finance_release = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
@@ -147,7 +146,7 @@ def test_get_last_approval_process_date_accepted_with_finance_release(user, prog
 
 def test_get_last_approval_process_date_accepted_without_finance_release(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.ACCEPTED)
-    ApprovalProcessFactory(payment_plan=payment_plan)
+    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     modified_data = payment_plan._get_last_approval_process_data()
     assert modified_data.modified_date == payment_plan.updated_at
@@ -156,7 +155,7 @@ def test_get_last_approval_process_date_accepted_without_finance_release(user, p
 
 def test_get_last_approval_process_date_other_status_fallback(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.LOCKED)
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     approval = ApprovalFactory(
         approval_process=approval_process,
         type=Approval.FINANCE_RELEASE,
@@ -181,7 +180,7 @@ def test_currency_exchange_date():
     payment_plan.status = PaymentPlan.Status.ACCEPTED
     payment_plan.save()
 
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
+    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     approval = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
     assert str(payment_plan.currency_exchange_date) == str(approval.created_at.date())
 
@@ -193,9 +192,10 @@ def test_payment_plan_create(user):
 
 def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gateway(payment_plan):
     PaymentFactory(parent=payment_plan)
-    payment_plan.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.use_payment_gateway = True
-    payment_plan.save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    payment_plan.save(update_fields=["use_payment_gateway"])
     payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_PG)
 
     assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is False
@@ -203,9 +203,10 @@ def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gatewa
 
 def test_is_payment_gateway_and_all_sent_to_fsp_true_for_sent_to_fsp(payment_plan):
     PaymentFactory(parent=payment_plan)
-    payment_plan.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
     payment_plan.use_payment_gateway = True
-    payment_plan.save(update_fields=["financial_service_provider", "use_payment_gateway"])
+    payment_plan.save(update_fields=["use_payment_gateway"])
     payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_FSP)
 
     assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is True
@@ -990,76 +991,6 @@ def test_payment_plan_flow_xlsx_import_error_from_importing_fsp_extra_fields(
     )
 
 
-def test_remove_export_file_delivery_skips_when_no_file_temp_id() -> None:
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
-    # no export_file_delivery set → file_temp_id is None
-    payment_plan.remove_export_file_delivery()
-
-    payment_plan.refresh_from_db()
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_file_delivery_skips_deletion_when_another_plan_references_file() -> None:
-    file_temp = FileTempFactory()
-    plan_a = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
-    plan_b = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        export_file_delivery=file_temp,
-        payment_plan_group=plan_a.payment_plan_group,
-        program_cycle=plan_a.program_cycle,
-    )
-
-    plan_a.remove_export_file_delivery()
-
-    assert FileTemp.objects.filter(pk=file_temp.pk).exists()
-    assert plan_a.export_file_delivery is None
-    plan_b.refresh_from_db()
-    assert plan_b.export_file_delivery_id == file_temp.pk
-
-
-def test_remove_export_file_delivery_skips_when_file_temp_missing() -> None:
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
-    payment_plan.export_file_delivery_id = uuid.uuid4()
-
-    payment_plan.remove_export_file_delivery()
-
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_file_delivery_deletes_file_temp_when_last_reference() -> None:
-    file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
-
-    with patch("django.db.models.fields.files.FieldFile.delete"):
-        payment_plan.remove_export_file_delivery()
-
-    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
-    payment_plan.refresh_from_db()
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_files_removes_delivery_when_accepted_with_file() -> None:
-    file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, export_file_delivery=file_temp)
-
-    with patch("django.db.models.fields.files.FieldFile.delete"):
-        payment_plan.remove_export_files()
-
-    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
-    payment_plan.refresh_from_db()
-    assert payment_plan.export_file_delivery is None
-
-
-def test_remove_export_files_removes_delivery_when_finished_with_file() -> None:
-    file_temp = FileTempFactory()
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, export_file_delivery=file_temp)
-
-    with patch("django.db.models.fields.files.FieldFile.delete"):
-        payment_plan.remove_export_files()
-
-    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
-
-
 @pytest.fixture
 def removed_payment_plan_without_group(program_cycle):
     return PaymentPlanFactory(program_cycle=program_cycle, payment_plan_group=None, is_removed=True)
@@ -1068,7 +999,53 @@ def removed_payment_plan_without_group(program_cycle):
 def test_live_payment_plan_without_group_violates_constraint(payment_plan):
     payment_plan.payment_plan_group = None
 
-    with pytest.raises(IntegrityError, match="payment_plan_group_required_unless_removed"):
+    with pytest.raises(IntegrityError, match="payment_plan_in_group_or_instruction_unless_removed"):
+        payment_plan.save()
+
+
+@pytest.fixture
+def follow_up_instruction(program_cycle):
+    return FollowUpInstructionFactory(program=program_cycle.program)
+
+
+@pytest.fixture
+def instruction_child_payment_plan(program_cycle, follow_up_instruction):
+    return PaymentPlanFactory(
+        program_cycle=program_cycle,
+        follow_up_instruction=follow_up_instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        currency=CurrencyFactory(code="EUR", name="Euro"),
+        financial_service_provider=FinancialServiceProviderFactory(),
+    )
+
+
+def test_follow_up_instruction_child_has_no_group(instruction_child_payment_plan):
+    assert instruction_child_payment_plan.payment_plan_group_id is None
+
+
+def test_follow_up_instruction_child_reads_currency_and_fsp_from_instruction(
+    instruction_child_payment_plan, follow_up_instruction
+):
+    assert instruction_child_payment_plan.currency == follow_up_instruction.currency
+    assert instruction_child_payment_plan.currency.code == "EUR"
+    assert instruction_child_payment_plan.financial_service_provider == follow_up_instruction.financial_service_provider
+
+
+@pytest.fixture
+def instruction_child_approval_process(instruction_child_payment_plan):
+    return ApprovalProcessFactory(payment_plan=instruction_child_payment_plan)
+
+
+def test_follow_up_instruction_child_last_approval_process_is_its_own(
+    instruction_child_payment_plan, instruction_child_approval_process
+):
+    assert instruction_child_payment_plan.last_approval_process == instruction_child_approval_process
+
+
+def test_payment_plan_in_group_and_instruction_violates_constraint(payment_plan, follow_up_instruction):
+    payment_plan.follow_up_instruction = follow_up_instruction
+
+    with pytest.raises(IntegrityError, match="payment_plan_in_group_or_instruction_unless_removed"):
         payment_plan.save()
 
 

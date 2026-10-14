@@ -22,7 +22,7 @@ from django.utils.html import format_html
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
-from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentHeaderAssignmentForm
+from hope.apps.payment.forms import GroupReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import get_quantity_in_usd
@@ -227,7 +227,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
-        ("currency", AutoCompleteFilter),
+        ("payment_plan_group__currency", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         "use_payment_gateway",
         ("background_action_status", ChoicesFieldComboFilter),
@@ -242,7 +242,6 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
-        "export_pdf_file_summary",
         "reconciliation_import_file",
     )
     readonly_fields = (
@@ -296,7 +295,6 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
         "steficon_targeting_applied_date",
         "steficon_applied_date",
         "plan_type",
-        "export_tag",
         "exclude_household_error",
         "status_date",
     )
@@ -520,6 +518,7 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
                 input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
                 user=request.user,
+                as_manager=True,
             )
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -555,6 +554,8 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "unicef_id",
         "cycle",
         "name",
+        "financial_service_provider",
+        "currency",
     )
 
     def frontend_url(self, obj: PaymentPlanGroup) -> str | None:
@@ -567,21 +568,17 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
 
     @button(permission="payment.restart_exporting_payment_plan_list")
-    def reexport_batch(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+    def reexport_payment_list(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         from hope.apps.payment.celery_tasks import (
             export_payment_plan_group_delivery_xlsx_async_task,
         )
 
         group = PaymentPlanGroup.objects.get(pk=pk)
         if request.method == "POST":
-            form = BatchReexportForm(request.POST, payment_plan_group=group)
+            form = GroupReexportForm(request.POST)
             if form.is_valid():
-                export_tag = int(form.cleaned_data["export_tag"])
-                if not group.can_reexport_batch(export_tag):
-                    messages.error(
-                        request,
-                        f"Batch {export_tag} cannot be re-exported: it has no stored export file.",
-                    )
+                if not (group.can_regenerate_export and group.can_start_background_action):
+                    messages.error(request, "The payment list cannot be re-exported: no stored export file.")
                     return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
                 template_obj = form.cleaned_data.get("template")
                 fsp_xlsx_template_id = str(template_obj.id) if template_obj else None
@@ -596,18 +593,16 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                     old_object=old_group,
                     new_object=group,
                 )
-                export_payment_plan_group_delivery_xlsx_async_task(
-                    group, str(request.user.pk), fsp_xlsx_template_id, export_tag
-                )
-                messages.success(request, f"Re-export started for batch {export_tag}.")
+                export_payment_plan_group_delivery_xlsx_async_task(group, str(request.user.pk), fsp_xlsx_template_id)
+                messages.success(request, "Re-export of the payment list started.")
                 return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
         else:
-            form = BatchReexportForm(payment_plan_group=group)
+            form = GroupReexportForm()
 
         return render(
             request,
-            "admin/payment/reexport_batch_form.html",
-            {"form": form, "payment_plan_group": group, "title": "Re-export a delivered batch"},
+            "admin/payment/reexport_group_form.html",
+            {"form": form, "payment_plan_group": group, "title": "Re-export the payment list"},
         )
 
     @button(
@@ -646,8 +641,6 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
                     group,
                     user_id,
                     config.get("fsp_xlsx_template_id"),
-                    config.get("export_tag"),
-                    config.get("plan_type"),
                 )
 
             messages.success(request, "Successfully restarted delivery XLSX export.")

@@ -1,84 +1,52 @@
 import { Box, Button, Typography } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
-import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
-import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
-import { showApiErrorMessages } from '@utils/utils';
+import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
 `;
 
+export interface AcceptanceProcessClosure {
+  closedBy: string | null;
+  closedDate: string;
+}
+
 interface AcceptanceProcessProps {
-  paymentPlan: PaymentPlanDetail;
+  approvalProcess: ApprovalProcess[] | undefined;
+  closure?: AcceptanceProcessClosure | null;
+  headerAction?: ReactNode;
 }
 
 function AcceptanceProcess({
-  paymentPlan,
+  approvalProcess,
+  closure = null,
+  headerAction,
 }: AcceptanceProcessProps): ReactElement {
   const { t } = useTranslation();
-  const { showMessage } = useSnackbar();
-  const permissions = usePermissions();
-  const { isActiveProgram } = useProgramContext();
-  const { businessArea, programId: programCode } = useBaseUrl();
-
-  const { approvalProcess } = paymentPlan;
   const [showAll, setShowAll] = useState(false);
-
-  const exportPdfMutation = useMutation({
-    mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansExportPdfPaymentPlanSummaryRetrieve(
-        {
-          businessAreaSlug: businessArea,
-          programCode: programCode,
-          id: paymentPlan.id,
-        },
-      ),
-  });
-
-  const matchDataSize = (data) => (showAll ? data : [data[0]]);
 
   if (!approvalProcess?.length) {
     return null;
   }
-  const handleExportPdf = async (): Promise<void> => {
-    try {
-      await exportPdfMutation.mutateAsync();
-      showMessage(t('PDF generated. Please check your email.'));
-    } catch (e) {
-      showApiErrorMessages(e, showMessage, t('Failed to generate PDF.'));
-    }
-  };
 
-  const canExportPdf =
-    hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
-    (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
-      paymentPlan.status === PaymentPlanStatusEnum.FINISHED ||
-      paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW ||
-      paymentPlan.status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
-      paymentPlan.status === PaymentPlanStatusEnum.CLOSED);
+  // The backend orders approval processes newest first.
+  const shown = showAll ? approvalProcess : [approvalProcess[0]];
 
   return (
     <Box
       sx={{
         m: 5,
       }}
+      data-cy="acceptance-process"
     >
       <ContainerColumnWithBorder>
         <Box
@@ -91,24 +59,14 @@ function AcceptanceProcess({
           <Title>
             <Typography variant="h6">{t('Acceptance Process')}</Typography>
           </Title>
-          {canExportPdf && (
-            <LoadingButton
-              loading={exportPdfMutation.isPending}
-              color="primary"
-              variant="contained"
-              onClick={handleExportPdf}
-              disabled={!isActiveProgram}
-              data-perm={PERMISSIONS.PM_EXPORT_PDF_SUMMARY}
-            >
-              {t('Download Payment Plan Summary')}
-            </LoadingButton>
-          )}
+          {headerAction}
         </Box>
-        {matchDataSize(approvalProcess).map((item) => (
+        {shown.map((item, index) => (
           <AcceptanceProcessRow
-            key={item.id}
+            key={item.sentForApprovalDate ?? index}
             acceptanceProcess={item}
-            paymentPlan={paymentPlan}
+            closure={index === 0 ? closure : null}
+            showDivider={approvalProcess.length > 1}
           />
         ))}
         {approvalProcess.length > 1 && (

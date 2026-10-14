@@ -25,34 +25,33 @@ export function SendToPaymentGatewayGroupButton({
   const queryClient = useQueryClient();
   const permissions = usePermissions();
 
-  const { mutate: sendToPaymentGateway, isPending: loadingSend } =
-    useMutation({
-      mutationFn: () =>
-        RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate(
-          {
-            businessAreaSlug: businessArea,
-            programCode: programId,
-            id: group?.id,
-          },
+  const { mutate: sendToPaymentGateway, isPending: loadingSend } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate(
+        {
+          businessAreaSlug: businessArea,
+          programCode: programId,
+          id: group?.id,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Sending to Payment Gateway started'));
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
         ),
-      onSuccess: () => {
-        showMessage(t('Sending to Payment Gateway started'));
-        queryClient.invalidateQueries({
-          queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
-          ),
-        });
-      },
-      onError: (error) => {
-        showApiErrorMessages(
-          error,
-          showMessage,
-          t('Send to Payment Gateway failed'),
-        );
-      },
-    });
+      });
+    },
+    onError: (error) => {
+      showApiErrorMessages(
+        error,
+        showMessage,
+        t('Send to Payment Gateway failed'),
+      );
+    },
+  });
 
-  if (!group) return null;
+  if (!group?.canSendToPaymentGateway) return null;
   if (
     !hasPermissions(
       PERMISSIONS.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY,

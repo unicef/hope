@@ -53,6 +53,20 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         on_delete=models.PROTECT,
         related_name="created_follow_up_instructions",
     )
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider",
+        on_delete=models.PROTECT,
+        related_name="follow_up_instructions",
+        null=True,
+        blank=True,
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.PROTECT,
+        related_name="follow_up_instructions",
+        null=True,
+        blank=True,
+    )
     background_action_status = models.CharField(
         max_length=255,
         null=True,

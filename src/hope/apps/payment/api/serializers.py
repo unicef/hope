@@ -6,7 +6,7 @@ from typing import Any, cast
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -36,6 +36,7 @@ from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -58,7 +59,6 @@ from hope.models import (
     AccountAttachment,
     Approval,
     ApprovalProcess,
-    Currency,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialServiceProvider,
@@ -185,17 +185,7 @@ class AcceptanceProcessSerializer(serializers.Serializer):
 
 
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1, required=False, allow_null=True, default=None)
     fsp_xlsx_template_id = serializers.CharField(required=False, allow_null=True, default=None)
-    plan_type = serializers.ChoiceField(
-        choices=PaymentPlan.PlanType.choices,
-        required=False,
-        default=PaymentPlan.PlanType.REGULAR,
-    )
-
-
-class PaymentPlanGroupSendXlsxPasswordSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField(min_value=1)
 
 
 class SplitPaymentPlanSerializer(serializers.Serializer):
@@ -487,6 +477,12 @@ class PaymentPlanGroupSmallSerializer(serializers.ModelSerializer):
         fields = ["id", "unicef_id", "name"]
 
 
+class PaymentPlanGroupLinkedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanGroup
+        fields = ["id", "unicef_id", "name", "plan_type", "status"]
+
+
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
@@ -494,7 +490,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlan
@@ -521,7 +517,6 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "updated_at",
             "program",
             "payment_plan_group",
-            "export_tag",
         )
 
     @staticmethod
@@ -694,10 +689,6 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     target_population_id = serializers.UUIDField(source="id")
     dispersion_start_date = serializers.DateField()
     dispersion_end_date = serializers.DateField()
-    currency = CurrencySlugRelatedField(
-        on_unchanged_code=OnUnchangedCode.KEEP_CURRENT_ROW,
-        allow_null=True,
-    )
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
@@ -713,7 +704,6 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
             "target_population_id",
             "dispersion_start_date",
             "dispersion_end_date",
-            "currency",
             "version",
         )
 
@@ -753,7 +743,10 @@ class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
         if (fixed_amount is None) == (file is None):
             raise serializers.ValidationError("Provide either a fixed amount or an amount file, not both.")
         if file is not None:
-            attrs["amounts"] = parse_top_up_amount_file(self.context["payment_plan"], file)
+            source_payment_plans = self.context["payment_plan_group"].plans_qualifying_for_linked_group(
+                self.context["plan_type"]
+            )
+            attrs["amounts"] = parse_top_up_amount_file(source_payment_plans, file)
         return attrs
 
 
@@ -869,8 +862,8 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
     status = serializers.CharField(read_only=True)
     background_action_status = serializers.CharField(read_only=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
-    currency = serializers.SerializerMethodField()
-    currency_vision_code = serializers.SerializerMethodField()
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
     child_payment_plans_count = serializers.SerializerMethodField()
     households_count = serializers.SerializerMethodField()
     total_entitled_quantity = serializers.SerializerMethodField()
@@ -915,21 +908,6 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
 
     def get_child_payment_plans_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["child_payment_plans_count"]
-
-    @staticmethod
-    def _currency(obj: FollowUpInstruction) -> Currency | None:
-        if not hasattr(obj, "_currency_cache"):
-            payment_plan = obj.payment_plans.first()
-            obj._currency_cache = payment_plan.currency if payment_plan else None
-        return obj._currency_cache
-
-    def get_currency(self, obj: FollowUpInstruction) -> str | None:
-        currency = self._currency(obj)
-        return currency.code if currency else None
-
-    def get_currency_vision_code(self, obj: FollowUpInstruction) -> str | None:
-        currency = self._currency(obj)
-        return currency.vision_code if currency else None
 
     def get_households_count(self, obj: FollowUpInstruction) -> int:
         return self._payments_summary(obj)["households_count"]
@@ -987,21 +965,14 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     reconciliation_summary = serializers.SerializerMethodField()
     excluded_households = serializers.SerializerMethodField()
     excluded_individuals = serializers.SerializerMethodField()
-    can_create_follow_up = serializers.SerializerMethodField()
-    can_create_top_up = serializers.BooleanField()
-    can_create_top_up_amendment = serializers.BooleanField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    can_send_to_payment_gateway = serializers.BooleanField(source="can_manually_send_to_payment_gateway")
     vision_integration_enabled = serializers.BooleanField(read_only=True)
     vision_managed = serializers.BooleanField(read_only=True)
     vision = serializers.SerializerMethodField()
-    can_split = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    split_choices = serializers.SerializerMethodField()
-    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
@@ -1030,7 +1001,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "payments_conflicts_count",
             "delivery_mechanism",
             "volume_by_delivery_mechanism",
-            "split_choices",
             "exclusion_reason",
             "exclude_household_error",
             "bank_reconciliation_success",
@@ -1040,21 +1010,15 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "reconciliation_summary",
             "excluded_households",
             "excluded_individuals",
-            "can_create_follow_up",
-            "can_create_top_up",
-            "can_create_top_up_amendment",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
-            "can_send_to_payment_gateway",
             "vision_integration_enabled",
             "vision_managed",
             "vision",
-            "can_split",
             "can_delete",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
-            "approval_process",
             "total_entitled_quantity_usd",
             "total_entitled_quantity_revised_usd",
             "total_delivered_quantity_usd",
@@ -1214,20 +1178,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
         return IndividualSmallSerializer(qs, many=True).data
 
-    def get_can_create_follow_up(self, obj: PaymentPlan) -> bool:
-        # Check there are payments in error/not distributed status and excluded withdrawn households
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP or obj.is_instruction_managed:
-            return False
-
-        qs = obj.unsuccessful_payments_for_follow_up()
-
-        # Check if all payments are used in FPPs
-        follow_up_payment = obj.payments_used_in_follow_payment_plans()
-
-        return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
-            qs.values_list("id", flat=True)
-        )
-
     def get_total_withdrawn_households_count(self, obj: PaymentPlan) -> int:
         follow_up_households = Payment.objects.filter(
             is_follow_up=True,
@@ -1241,16 +1191,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_unsuccessful_payments_count(self, obj: PaymentPlan) -> int:
         return obj.unsuccessful_payments_for_follow_up().count()
 
-    def get_can_split(self, obj: PaymentPlan) -> bool:
-        if obj.is_instruction_managed:
-            return False
-        if obj.status != PaymentPlan.Status.ACCEPTED:
-            return False
-
-        return not obj.splits.filter(
-            sent_to_payment_gateway=True,
-        ).exists()
-
     def get_total_households_count_with_valid_phone_no(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["valid_phone_count"]
 
@@ -1263,9 +1203,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_bank_reconciliation_error(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["error_count"]
-
-    def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
         return VolumeByDeliveryMechanismSerializer([obj], many=True).data
@@ -1333,7 +1270,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     payment_plan_purposes = PaymentPlanPurposeSerializer(many=True, read_only=True)
     is_purposes_editable = serializers.SerializerMethodField()
-    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True)
+    payment_plan_group = PaymentPlanGroupSmallSerializer(read_only=True, allow_null=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -1878,7 +1815,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     payment_plan_group_id = serializers.UUIDField()
-    fsp_id = serializers.UUIDField(required=False, allow_null=True)
     delivery_mechanism_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
@@ -1901,7 +1837,6 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
             "rules",
             "excluded_ids",
             "exclusion_reason",
-            "fsp_id",
             "delivery_mechanism_code",
             "vulnerability_score_min",
             "vulnerability_score_max",
@@ -2067,18 +2002,96 @@ class PaymentPlanCloseSerializer(serializers.Serializer):
 
 class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
     cycle = ProgramCycleSmallSerializer()
+    financial_service_provider = FinancialServiceProviderSerializer(read_only=True, allow_null=True)
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    source_group = PaymentPlanGroupSmallSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle", "created_at"]
+        fields = [
+            "id",
+            "unicef_id",
+            "name",
+            "cycle",
+            "status",
+            "plan_type",
+            "source_group",
+            "financial_service_provider",
+            "currency",
+            "currency_vision_code",
+            "created_at",
+        ]
 
 
-class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
+class PaymentPlanGroupManagerialSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    """Row of the managerial console: the group with its programme, totals and the last approval step."""
+
+    status_display = serializers.CharField(source="get_status_display")
+    program = serializers.CharField(source="cycle.program.name")
+    program_id = serializers.UUIDField(source="cycle.program.id")
+    program_code = serializers.CharField(source="cycle.program.code")
+    cycle_title = serializers.CharField(source="cycle.title")
+    financial_service_provider = serializers.CharField(
+        source="financial_service_provider.name", read_only=True, allow_null=True
+    )
+    currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
+    payment_plans_count = serializers.IntegerField(read_only=True)
+    total_households_count = serializers.IntegerField(source="households_total", read_only=True)
+    total_entitled_quantity_usd = serializers.DecimalField(
+        source="entitled_usd_total", max_digits=15, decimal_places=2, read_only=True
+    )
+    last_approval_process_date = serializers.DateTimeField(read_only=True)
+    last_approval_process_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PaymentPlanGroup
+        fields = (
+            "id",
+            "unicef_id",
+            "name",
+            "status",
+            "status_display",
+            "program",
+            "program_id",
+            "program_code",
+            "cycle_title",
+            "financial_service_provider",
+            "currency",
+            "currency_vision_code",
+            "payment_plans_count",
+            "total_households_count",
+            "total_entitled_quantity_usd",
+            "last_approval_process_date",
+            "last_approval_process_by",
+            "admin_url",
+        )
+
+    @staticmethod
+    def get_last_approval_process_by(obj: PaymentPlanGroup) -> str | None:
+        return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
+
+
+class PaymentPlanGroupConfigurationMixin(serializers.Serializer):
+    financial_service_provider = ScopedRelatedField(
+        queryset=FinancialServiceProvider.objects.all(),
+        scope="business_area",
+        scope_path="allowed_business_areas",
+        required=False,
+        allow_null=True,
+    )
+
+
+class PaymentPlanGroupCreateSerializer(PaymentPlanGroupConfigurationMixin, serializers.ModelSerializer):
     cycle = ScopedRelatedField(queryset=ProgramCycle.objects.all(), scope="program")
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.ALWAYS_ACTIVE, required=False, allow_null=True
+    )
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle"]
+        fields = ["id", "unicef_id", "name", "cycle", "financial_service_provider", "currency"]
         read_only_fields = ["id", "unicef_id"]
         validators = []
 
@@ -2090,10 +2103,14 @@ class PaymentPlanGroupCreateSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
+class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, serializers.ModelSerializer):
+    currency = CurrencySlugRelatedField(
+        on_unchanged_code=OnUnchangedCode.KEEP_CURRENT_ROW, required=False, allow_null=True
+    )
+
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name"]
+        fields = ["id", "unicef_id", "name", "financial_service_provider", "currency"]
         read_only_fields = ["id", "unicef_id"]
 
     def validate_name(self, value: str) -> str:
@@ -2102,99 +2119,101 @@ class PaymentPlanGroupUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"A group named '{value}' already exists in this cycle.")
         return value
 
-
-class PaymentPlanGroupBatchSerializer(serializers.Serializer):
-    export_tag = serializers.IntegerField()
-    plan_type = serializers.ChoiceField(choices=PaymentPlan.PlanType.choices)
-    export_file_link = serializers.CharField(allow_null=True)
-    has_password = serializers.BooleanField()
+    def update(self, instance: PaymentPlanGroup, validated_data: dict) -> PaymentPlanGroup:
+        service = PaymentPlanGroupService(instance)
+        if "financial_service_provider" in validated_data:
+            service.assign_financial_service_provider(validated_data.pop("financial_service_provider"))
+        if "currency" in validated_data:
+            service.assign_currency(validated_data.pop("currency"))
+        return super().update(instance, validated_data)
 
 
 class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    closed_by = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
     total_undelivered_quantity_usd = serializers.SerializerMethodField()
     payment_plans_count = serializers.SerializerMethodField()
     can_send_to_payment_gateway = serializers.SerializerMethodField()
-    batches = serializers.SerializerMethodField()
+    export_file_delivery = serializers.SerializerMethodField()
+    export_file_has_password = serializers.SerializerMethodField()
     delivery_import_file = serializers.SerializerMethodField()
-    can_export_regular = serializers.SerializerMethodField()
-    can_export_follow_up = serializers.SerializerMethodField()
-    can_export_top_up = serializers.SerializerMethodField()
-    can_export_top_up_amendment = serializers.SerializerMethodField()
+    export_pdf_file_summary = serializers.SerializerMethodField()
+    can_export = serializers.SerializerMethodField()
+    can_regenerate_export = serializers.SerializerMethodField()
+    linked_groups = PaymentPlanGroupLinkedSerializer(read_only=True, many=True)
+    can_split = serializers.BooleanField(read_only=True)
+    split_choices = serializers.SerializerMethodField()
+    can_create_follow_up = serializers.SerializerMethodField()
+    can_create_top_up = serializers.SerializerMethodField()
+    can_create_top_up_amendment = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
             "admin_url",
             "background_action_status",
+            "approval_process",
+            "abort_comment",
+            "closure_comment",
+            "closed_by",
+            "status_date",
             "total_entitled_quantity_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
             "payment_plans_count",
             "can_send_to_payment_gateway",
-            "batches",
+            "export_file_delivery",
+            "export_file_has_password",
             "delivery_import_file",
-            "can_export_regular",
-            "can_export_follow_up",
-            "can_export_top_up",
-            "can_export_top_up_amendment",
+            "export_pdf_file_summary",
+            "can_export",
+            "can_regenerate_export",
+            "linked_groups",
+            "can_split",
+            "split_choices",
+            "can_create_follow_up",
+            "can_create_top_up",
+            "can_create_top_up_amendment",
         ]
 
-    @extend_schema_field(PaymentPlanGroupBatchSerializer(many=True))
-    def get_batches(self, obj: PaymentPlanGroup) -> list[dict]:
-        tags_qs = (
-            obj.payment_plans.filter(export_tag__isnull=False)
-            .order_by()
-            .values("export_tag")
-            .annotate(
-                has_file=Max(
-                    Case(When(export_file_delivery__isnull=False, then=1), default=0, output_field=IntegerField())
-                ),
-                has_password=Max(
-                    Case(
-                        When(export_file_delivery__password__isnull=False, then=1),
-                        default=0,
-                        output_field=IntegerField(),
-                    )
-                ),
-                # a batch is exported for a single plan type, so Max just picks that type
-                batch_plan_type=Max("plan_type"),
-            )
-            .order_by("export_tag")
-        )
-        return [
-            {
-                "export_tag": row["export_tag"],
-                "plan_type": row["batch_plan_type"],
-                "export_file_link": (
-                    reverse("download-payment-plan-group-batch", args=[str(obj.id), row["export_tag"]])
-                    if row["has_file"]
-                    else None
-                ),
-                "has_password": bool(row["has_password"]),
-            }
-            for row in tags_qs
-        ]
+    @staticmethod
+    def get_split_choices(obj: PaymentPlanGroup) -> list[dict[str, Any]]:
+        return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    def _has_exportable_plans(self, obj: PaymentPlanGroup, plan_type: str) -> bool:
-        """Whether any plan of a plan_type can be exported."""
-        return obj.payment_plans.filter(
-            plan_type=plan_type,
-            status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
-            export_tag__isnull=True,
-        ).exists()
+    @staticmethod
+    def get_can_create_follow_up(obj: PaymentPlanGroup) -> bool:
+        return bool(obj.plans_qualifying_for_linked_group(PaymentPlan.PlanType.FOLLOW_UP))
 
-    def get_can_export_regular(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.REGULAR)
+    @staticmethod
+    def get_can_create_top_up(obj: PaymentPlanGroup) -> bool:
+        return bool(obj.plans_qualifying_for_linked_group(PaymentPlan.PlanType.TOP_UP))
 
-    def get_can_export_follow_up(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.FOLLOW_UP)
+    @staticmethod
+    def get_can_create_top_up_amendment(obj: PaymentPlanGroup) -> bool:
+        return bool(obj.plans_qualifying_for_linked_group(PaymentPlan.PlanType.TOP_UP_AMENDMENT))
 
-    def get_can_export_top_up(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP)
+    @staticmethod
+    def get_closed_by(obj: PaymentPlanGroup) -> str | None:
+        return f"{obj.closed_by.first_name} {obj.closed_by.last_name}" if obj.closed_by_id else None
 
-    def get_can_export_top_up_amendment(self, obj: PaymentPlanGroup) -> bool:
-        return self._has_exportable_plans(obj, PaymentPlan.PlanType.TOP_UP_AMENDMENT)
+    @staticmethod
+    def get_export_file_delivery(obj: PaymentPlanGroup) -> str | None:
+        if obj.export_file_delivery_id is None:
+            return None
+        return reverse("download-payment-plan-group-xlsx", args=[str(obj.id)])
+
+    @staticmethod
+    def get_export_file_has_password(obj: PaymentPlanGroup) -> bool:
+        return obj.export_file_delivery_id is not None and obj.export_file_delivery.password is not None
+
+    @staticmethod
+    def get_can_export(obj: PaymentPlanGroup) -> bool:
+        return obj.can_export
+
+    @staticmethod
+    def get_can_regenerate_export(obj: PaymentPlanGroup) -> bool:
+        return obj.can_regenerate_export
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
@@ -2214,6 +2233,11 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
     def get_delivery_import_file(self, obj: PaymentPlanGroup) -> str | None:
         if obj.delivery_import_file_id and obj.delivery_import_file.file:
             return obj.delivery_import_file.file.url
+        return None
+
+    def get_export_pdf_file_summary(self, obj: PaymentPlanGroup) -> str | None:
+        if obj.export_pdf_file_summary_id and obj.export_pdf_file_summary.file:
+            return obj.export_pdf_file_summary.file.url
         return None
 
     def get_can_send_to_payment_gateway(self, obj: PaymentPlanGroup) -> bool:

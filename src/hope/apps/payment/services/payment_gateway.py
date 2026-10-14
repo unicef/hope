@@ -15,6 +15,7 @@ from hope.apps.core.api.mixins import BaseAPI
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.core.utils import chunks
 from hope.apps.payment.flows import PaymentPlanFlow
+from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     get_payment_delivered_quantity_status_and_value,
@@ -459,6 +460,15 @@ class PaymentGatewayService:
         if reason := inactive_currency_reason(payment_plan):
             raise ValueError(reason)
 
+    def _mark_reconciled(self, payment_plan: PaymentPlan, old_payment_plan: PaymentPlan) -> None:
+        if payment_plan.is_instruction_managed or payment_plan.payment_plan_group is None:
+            flow = PaymentPlanFlow(payment_plan)
+            flow.status_finished()
+            payment_plan.save()
+            log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+            return
+        PaymentPlanGroupService(payment_plan.payment_plan_group).sync_finished(self.user_id)
+
     def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
         if payment_plan.is_payment_gateway:
             self._ensure_currency_is_active(payment_plan)
@@ -756,7 +766,7 @@ class PaymentGatewayService:
             PaymentPlan.objects.annotate(
                 has_eligible_payments=Exists(Payment.objects.eligible().filter(parent_id=OuterRef("pk"))),
             )
-            .select_related("currency", "financial_service_provider")
+            .select_related("payment_plan_group__currency", "payment_plan_group__financial_service_provider")
             .prefetch_related(
                 "splits",
                 Prefetch(
@@ -772,10 +782,10 @@ class PaymentGatewayService:
                 Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
                 Q(use_payment_gateway=True)
                 | Q(
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+                    payment_plan_group__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
                 ),
                 status=PaymentPlan.Status.ACCEPTED,
-                financial_service_provider__isnull=False,
+                payment_plan_group__financial_service_provider__isnull=False,
             )
         )
 
@@ -816,10 +826,7 @@ class PaymentGatewayService:
                 if has_eligible_payments and all(
                     payment.status not in Payment.PENDING_STATUSES for payment in pending_payments
                 ):
-                    flow = PaymentPlanFlow(payment_plan)
-                    flow.status_finished()
-                    payment_plan.save()
-                    log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+                    self._mark_reconciled(payment_plan, old_payment_plan)
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
@@ -846,10 +853,7 @@ class PaymentGatewayService:
             payment_plan.update_money_fields()
 
             if payment_plan.is_reconciled:
-                flow = PaymentPlanFlow(payment_plan)
-                flow.status_finished()
-                payment_plan.save()
-                log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+                self._mark_reconciled(payment_plan, old_payment_plan)
                 for instruction in payment_plan.splits.filter(sent_to_payment_gateway=True):
                     self.change_payment_instruction_status(
                         PaymentInstructionStatus.FINALIZED,
@@ -893,10 +897,7 @@ class PaymentGatewayService:
 
         payment_plan.update_money_fields()
         if payment_plan.is_reconciled:
-            flow = PaymentPlanFlow(payment_plan)
-            flow.status_finished()
-            payment_plan.save()
-            log_payment_plan_change(payment_plan, old_payment_plan, self.user_id)
+            self._mark_reconciled(payment_plan, old_payment_plan)
             for instruction in payment_instructions:
                 self.change_payment_instruction_status(
                     PaymentInstructionStatus.FINALIZED,

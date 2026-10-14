@@ -3,17 +3,16 @@ import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { useTranslation } from 'react-i18next';
 import type { ReactElement } from 'react';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
 
 interface AcceptanceProcessStepperProps {
-  acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
-  paymentPlan: PaymentPlanDetail;
+  acceptanceProcess: ApprovalProcess;
+  isClosed: boolean;
 }
 
 export function AcceptanceProcessStepper({
   acceptanceProcess,
-  paymentPlan,
+  isClosed,
 }: AcceptanceProcessStepperProps): ReactElement {
   const {
     rejectedOn,
@@ -23,7 +22,6 @@ export function AcceptanceProcessStepper({
     financeReleaseNumberRequired,
   } = acceptanceProcess;
   const { t } = useTranslation();
-  const isClosed = paymentPlan.status === PaymentPlanStatusEnum.CLOSED;
   const steps = [
     {
       name: `${t('Approval')} (${

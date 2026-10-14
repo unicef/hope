@@ -230,13 +230,14 @@ def create_custom_household() -> Household:
 @pytest.fixture
 def create_payment_plan(standard_program: Program) -> PaymentPlan:
     cycle = standard_program.cycles.first()
-    group, _ = PaymentPlanGroup.objects.get_or_create(cycle=cycle, defaults={"name": "Default Group"})
+    group, _ = PaymentPlanGroup.objects.get_or_create(
+        cycle=cycle, defaults={"name": "Default Group", "currency": Currency.objects.get(code="USD")}
+    )
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=BusinessArea.objects.get(slug="afghanistan"),
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        currency=Currency.objects.get(code="USD"),
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),

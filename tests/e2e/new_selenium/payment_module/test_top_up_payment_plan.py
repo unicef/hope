@@ -33,6 +33,13 @@ def _fill_fixed_amount(browser: HopeTestBrowser, amount: str) -> None:
     field.send_keys(amount)
 
 
+def _open_group_of(browser: HopeTestBrowser, business_area: BusinessArea, plan: PaymentPlan) -> None:
+    """Follow-up, Top-Up and Amendment are created from the Payment Plan (group) page."""
+    group = plan.payment_plan_group
+    browser.open(f"/{business_area.slug}/programs/{plan.program.code}/payment-module/groups/{group.id}")
+    browser.wait_for_text(group.name, 'h5[data-cy="page-header-title"]')
+
+
 def _amount_file_funding_first_beneficiary(source_plan: PaymentPlan) -> str:
     """Amount template funding only the first of three eligible beneficiaries. Returns its path.
 
@@ -40,7 +47,7 @@ def _amount_file_funding_first_beneficiary(source_plan: PaymentPlan) -> str:
     this Top-Up", and the two are worth distinguishing because only the zero is something the
     operator actually typed.
     """
-    workbook = TopUpAmountTemplateService(source_plan).generate_workbook()
+    workbook = TopUpAmountTemplateService([source_plan]).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
     amount_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
@@ -84,6 +91,10 @@ def _create_source_plan(
         plan_type=PaymentPlan.PlanType.REGULAR,
         status=plan_status,
     )
+    # Linked groups are created from the group, which must itself be Accepted or Finished.
+    group = plan.payment_plan_group
+    group.status = plan_status
+    group.save(update_fields=["status"])
 
     for payment_status in payment_statuses:
         household = HouseholdFactory(business_area=ba, program=program)
@@ -160,14 +171,12 @@ def test_create_top_up_payment_plan(
     topup_eligible_plan: PaymentPlan,
 ) -> None:
     source = topup_eligible_plan
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_text("ACCEPTED")
 
-    # Top-up creation is a Payment-Plan-level action, available only on an
-    # Accepted/Finished Standard plan with eligible payments.
+    # Top-up creation is a group action, available only on an Accepted/Finished
+    # Standard group with eligible payments.
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -184,14 +193,12 @@ def test_create_top_up_payment_plan(
 
     login.wait_for_text("Payment Plan Created")
 
-    # A distinct Top-Up child plan is created and the UI navigates to its detail page.
+    # A Top-Up group with a child plan is created and the UI navigates to the new group.
     new_pp = PaymentPlan.objects.get(source_payment_plan=source, plan_type=PaymentPlan.PlanType.TOP_UP)
-    assert new_pp.id != source.id
-    # Waiting on the new plan's unicef_id in the header guarantees the navigation +
-    # render to the child plan completed. It comes from the primary plan query, so
-    # unlike the plan-type label (a separate async choices request) it can't race.
-    login.wait_for_text(new_pp.unicef_id, '[data-cy="pp-unicef-id"]')
-    assert str(new_pp.id) in login.get_current_url()
+    new_group = new_pp.payment_plan_group
+    assert new_group.source_group_id == source.payment_plan_group_id
+    login.wait_for_text(new_group.name, 'h5[data-cy="page-header-title"]')
+    assert str(new_group.id) in login.get_current_url()
 
 
 def test_top_up_button_hidden_when_no_eligible_payments(
@@ -201,10 +208,8 @@ def test_top_up_button_hidden_when_no_eligible_payments(
     topup_ineligible_plan: PaymentPlan,
 ) -> None:
     source = topup_ineligible_plan
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_text("ACCEPTED")
 
     # Accepted-state header renders, but the Top-Up action is gated by canCreateTopUp.
@@ -219,10 +224,8 @@ def test_create_top_up_from_finished_plan_with_mixed_payment_statuses(
 ) -> None:
     """Delivered, pending and failed are all topped up alike when a flat amount is given."""
     source = topup_finished_plan_with_mixed_payments
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -248,10 +251,8 @@ def test_create_top_up_with_amount_file_funds_only_listed_beneficiaries(
     """Only rows carrying a positive amount are funded; a zero and a blank both stay out."""
     source = topup_finished_plan_with_mixed_payments
     amount_file = mixed_plan_amount_file
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -284,10 +285,8 @@ def test_top_up_dialog_without_dispersion_dates_shows_validation_errors(
 ) -> None:
     """Submitting with the required dates empty must say so rather than sit silent."""
     source = topup_eligible_plan
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -305,10 +304,8 @@ def test_top_up_requires_a_fixed_amount_or_an_amount_file(
 ) -> None:
     """Submitting with neither funding source is caught in the dialog, not by the server."""
     source = topup_eligible_plan
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -328,6 +325,10 @@ def topup_plan_with_pending_payments(topup_program: Program, topup_eligible_plan
     top_up.plan_type = PaymentPlan.PlanType.TOP_UP
     top_up.source_payment_plan = topup_eligible_plan
     top_up.save(update_fields=["plan_type", "source_payment_plan"])
+    top_up_group = top_up.payment_plan_group
+    top_up_group.plan_type = PaymentPlan.PlanType.TOP_UP
+    top_up_group.source_group = topup_eligible_plan.payment_plan_group
+    top_up_group.save(update_fields=["plan_type", "source_group"])
     return top_up
 
 
@@ -344,10 +345,8 @@ def test_create_top_up_amendment_from_pending_top_up(
 ) -> None:
     """The Amendment dialog funds the same two ways a Top-Up does, on payments of any status."""
     source = topup_plan_with_pending_payments
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-amendment"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -376,10 +375,8 @@ def test_create_second_top_up_for_the_beneficiaries_left_over(
     """Beneficiaries left out of the first Top-Up can be picked up by a second one."""
     source = topup_finished_plan_with_mixed_payments
     amount_file = mixed_plan_amount_file
-    plan_url = f"/{business_area.slug}/programs/{topup_program.code}/payment-module/payment-plans/{source.id}"
 
-    login.open(plan_url)
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
     _fill_date(login, "dispersionStartDate", "2027-01-01")
@@ -389,9 +386,8 @@ def test_create_second_top_up_for_the_beneficiaries_left_over(
     login.click('[data-cy="button-submit"]')
     login.wait_for_text("Payment Plan Created")
 
-    # Back on the source plan the action is still offered, because two beneficiaries are free.
-    login.open(plan_url)
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    # Back on the source group the action is still offered, because two beneficiaries are free.
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-topup"]').click()
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
     _fill_date(login, "dispersionStartDate", "2027-01-01")
@@ -423,6 +419,10 @@ def topup_plan_with_failed_payments(topup_program: Program, topup_eligible_plan:
     top_up.plan_type = PaymentPlan.PlanType.TOP_UP
     top_up.source_payment_plan = topup_eligible_plan
     top_up.save(update_fields=["plan_type", "source_payment_plan"])
+    top_up_group = top_up.payment_plan_group
+    top_up_group.plan_type = PaymentPlan.PlanType.TOP_UP
+    top_up_group.source_group = topup_eligible_plan.payment_plan_group
+    top_up_group.save(update_fields=["plan_type", "source_group"])
     return top_up
 
 
@@ -434,10 +434,8 @@ def test_create_follow_up_from_top_up_with_failed_payments(
 ) -> None:
     """A Top-Up is an ordinary plan for Follow-Up purposes: its failures can be retried."""
     source = topup_plan_with_failed_payments
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-followup"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')
@@ -461,10 +459,8 @@ def test_create_top_up_amendment_with_amount_file(
     """The Amendment upload goes out through its own generated client, so it is worth its own run."""
     source = topup_plan_with_pending_payments
     amount_file = pending_top_up_amount_file
-    base_url = f"/{business_area.slug}/programs/{topup_program.code}"
 
-    login.open(f"{base_url}/payment-module/payment-plans/{source.id}")
-    login.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
+    _open_group_of(login, business_area, source)
     login.wait_for_element_clickable('[data-cy="button-create-amendment"]').click()
 
     login.wait_for_element_visible('input[name="dispersionStartDate"]')

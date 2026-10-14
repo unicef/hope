@@ -158,7 +158,7 @@ export const ProgramCycleDetailsHeader = ({
   const handleCreateGroup = async (): Promise<void> => {
     try {
       await createGroup(newGroupName.trim());
-      showMessage(t('Payment Plan Group created'));
+      showMessage(t('Payment Plan created'));
       setCreateGroupOpen(false);
       setNewGroupName('');
     } catch (e) {
@@ -187,7 +187,7 @@ export const ProgramCycleDetailsHeader = ({
                 data-cy="button-create-payment-plan"
                 data-perm={PERMISSIONS.PM_CREATE}
               >
-                {t('Create Payment Plan')}
+                {t('Create Payment Plan Component')}
               </Button>
             </Box>
           )}
@@ -209,7 +209,7 @@ export const ProgramCycleDetailsHeader = ({
               data-cy="button-create-payment-plan-group"
               data-perm={PERMISSIONS.PM_PAYMENT_PLAN_GROUP_CREATE}
             >
-              {t('Create Payment Plan Group')}
+              {t('Create Payment Plan')}
             </Button>
           </Box>
         )}
@@ -266,12 +266,12 @@ export const ProgramCycleDetailsHeader = ({
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>{t('Create Payment Plan Group')}</DialogTitle>
+        <DialogTitle>{t('Create Payment Plan')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label={t('Group Name')}
+            label={t('Payment Plan Name')}
             name="groupName"
             fullWidth
             value={newGroupName}
