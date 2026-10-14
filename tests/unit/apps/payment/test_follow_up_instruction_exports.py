@@ -362,6 +362,23 @@ def test_merge_rows_fills_empty_non_summable_field_from_payment_row() -> None:
     assert merged["delivery_mechanism"] == "Cash"
 
 
+@pytest.fixture
+def high_precision_follow_up_rows() -> tuple[dict[str, Any], dict[str, Any]]:
+    return (
+        {"household_id": "HH-01", "entitlement_quantity": Decimal("1000000000000000000.0000000001")},
+        {"household_id": "HH-01", "entitlement_quantity": Decimal("0.0000000001")},
+    )
+
+
+def test_merge_rows_preserves_full_precision_in_export(high_precision_follow_up_rows) -> None:
+    service = object.__new__(_MinimalExportService)
+    service.headers = ["household_id", "entitlement_quantity"]
+
+    merged = service._merge_rows(*high_precision_follow_up_rows)
+
+    assert service.right_format_for_xlsx(merged["entitlement_quantity"]) == "1000000000000000000.0000000002"
+
+
 def test_merge_rows_sets_empty_string_when_both_summable_values_empty() -> None:
     service = object.__new__(_MinimalExportService)
     service.headers = ["household_id", "entitlement_quantity", "delivered_quantity"]
