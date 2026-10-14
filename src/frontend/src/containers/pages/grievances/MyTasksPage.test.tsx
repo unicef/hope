@@ -3,7 +3,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import type { ReactElement } from 'react';
 import { TestProviders } from 'src/testUtils/testProviders';
+import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { restQueryKey } from '@utils/queryKeys';
 import { PERMISSIONS } from '../../../config/permissions';
 import { MyTasksPage } from './MyTasksPage';
 
@@ -28,13 +30,23 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock('@restgenerated/services/RestService', () => ({
-  RestService: {
+vi.mock('@restgenerated/services/RestService', () => {
+  // restQueryKey derives the cache key root from fn.name, so name the spies.
+  const methods = {
     restChoicesGrievanceTicketsRetrieve: vi.fn(),
     restBusinessAreasGrievanceTicketsMyTasksVisitCreate: vi.fn(),
     restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate: vi.fn(),
-  },
-}));
+    // Not called here (the table is stubbed), but mark-read builds query keys from their names.
+    restBusinessAreasGrievanceTicketsList: vi.fn(),
+    restBusinessAreasGrievanceTicketsCountRetrieve: vi.fn(),
+    restBusinessAreasProgramsGrievanceTicketsList: vi.fn(),
+    restBusinessAreasProgramsGrievanceTicketsCountRetrieve: vi.fn(),
+  };
+  for (const [name, fn] of Object.entries(methods)) {
+    Object.defineProperty(fn, 'name', { value: name, configurable: true });
+  }
+  return { RestService: methods };
+});
 
 // The table and the filter bar are exercised elsewhere; here we only care that the page hands
 // the table the right preset params, so both are stubbed out.
@@ -67,6 +79,20 @@ const LocationProbe = (): ReactElement => {
   return <div data-cy="location-search">{location.search}</div>;
 };
 
+// Stands in for the stubbed table's list query, so a test can see it being invalidated.
+const ListProbe = (): ReactElement => {
+  useQuery({
+    queryKey: restQueryKey(RestService.restBusinessAreasGrievanceTicketsList, {
+      businessAreaSlug: 'afghanistan',
+    }),
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsList({
+        businessAreaSlug: 'afghanistan',
+      }),
+  });
+  return null;
+};
+
 const renderPage = (search: string) =>
   render(
     <MemoryRouter
@@ -74,6 +100,7 @@ const renderPage = (search: string) =>
     >
       <MyTasksPage />
       <LocationProbe />
+      <ListProbe />
     </MemoryRouter>,
     { wrapper: TestProviders },
   );
@@ -95,6 +122,9 @@ describe('MyTasksPage', () => {
     (
       RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate as any
     ).mockResolvedValue({ unreadTabs: [] });
+    (
+      RestService.restBusinessAreasGrievanceTicketsList as any
+    ).mockResolvedValue({ count: 0, results: [] });
   });
 
   it('sends the needs-assignment tab and pins it to active tickets', async () => {
@@ -288,6 +318,11 @@ describe('MyTasksPage', () => {
     renderPage('?tab=mine');
 
     await screen.findByTestId('tab-unread-dot-mine');
+    await waitFor(() =>
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsList,
+      ).toHaveBeenCalledTimes(1),
+    );
     const { toolbarActions } = lastTableProps();
     render(toolbarActions, { wrapper: TestProviders });
     const button = screen.getByTestId('button-mark-all-read');
@@ -304,6 +339,30 @@ describe('MyTasksPage', () => {
       formData: { tab: 'mine' },
     });
     expect(screen.getByTestId('tab-unread-dot-needs-assignment')).toBeTruthy();
+    // The rows just marked read must lose their highlight, so the list is refetched.
+    await waitFor(() =>
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsList,
+      ).toHaveBeenCalledTimes(2),
+    );
+  });
+
+  it('asks for the dots again on a tab switch', async () => {
+    renderPage('?tab=mine');
+
+    await screen.findByTestId('grievances-table');
+    await waitFor(() =>
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
+      ).toHaveBeenCalledTimes(1),
+    );
+    fireEvent.click(screen.getByRole('tab', { name: 'NEEDS ASSIGNMENT' }));
+
+    await waitFor(() =>
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
+      ).toHaveBeenCalledTimes(2),
+    );
   });
 
   it('denies access to a user with none of the preset permissions', async () => {
@@ -312,6 +371,10 @@ describe('MyTasksPage', () => {
 
     expect(await screen.findByText('Permission Denied')).toBeTruthy();
     expect(screen.queryByTestId('grievances-table')).toBeNull();
+    // The visit would 403 and the global handler would replace the page with Access Denied.
+    expect(
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
+    ).not.toHaveBeenCalled();
   });
 
   it('denies access to a user who can assign but holds no list-view grant', async () => {

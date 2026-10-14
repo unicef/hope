@@ -91,13 +91,18 @@ export const MyTasksPage = (): ReactElement => {
     queryFn: () => RestService.restChoicesGrievanceTicketsRetrieve(),
   });
 
+  const availableTabs = useMemo(
+    () => availableMyTasksTabs(permissions),
+    [permissions],
+  );
+
   // A POST, but read through useQuery so it reruns on every visit, including the return from a
   // ticket, and so mark-read can drop its answer into the same cache entry.
   const visitQueryKey = restQueryKey(
     RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
     { businessAreaSlug },
   );
-  const { data: visitData } = useQuery({
+  const { data: visitData, refetch: refetchVisit } = useQuery({
     queryKey: visitQueryKey,
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate({
@@ -105,13 +110,11 @@ export const MyTasksPage = (): ReactElement => {
       }),
     staleTime: 0,
     refetchOnMount: 'always',
+    // The visit needs a list-view grant; a user with no tab would get a 403 here and be sent
+    // to the access-denied page instead of seeing the Permission Denied message below.
+    enabled: availableTabs.length > 0,
   });
   const unreadTabs = visitData?.unreadTabs ?? [];
-
-  const availableTabs = useMemo(
-    () => availableMyTasksTabs(permissions),
-    [permissions],
-  );
 
   const requestedTab = new URLSearchParams(location.search).get('tab');
   const activeTab =
@@ -239,6 +242,9 @@ export const MyTasksPage = (): ReactElement => {
     navigate({ search: params.toString() });
     setFilter({ ...filter, ...reset });
     setAppliedFilter({ ...appliedFilter, ...reset });
+    // The dots are only fetched on mount otherwise, so a colleague's change made while the page
+    // was open would not show on the tab being switched to.
+    refetchVisit();
   };
 
   if (choicesLoading) return <LoadingComponent />;
