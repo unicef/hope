@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FundsCommitmentFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -38,7 +39,6 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan, PaymentPlanSplit
 

@@ -333,6 +333,7 @@ class InternalDataFieldModel(models.Model):
         abstract = True
 
 
+# Looks unused, but payment migration 0001 imports it, so removing it breaks migrations.
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
