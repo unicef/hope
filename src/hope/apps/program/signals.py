@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.db import transaction
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import m2m_changed, post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
 from hope.api.caches import (
@@ -50,6 +50,12 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
 @receiver([post_save, post_delete], sender=BeneficiaryGroup)
 def increment_beneficiary_group_version_cache(sender: Any, instance: BeneficiaryGroup, **kwargs: dict) -> None:
     transaction.on_commit(lambda: increment_cache_key("beneficiary_group_list"))
+
+
+@receiver(m2m_changed, sender=BeneficiaryGroup.data_collecting_types.through)
+def increment_beneficiary_group_version_cache_on_dct_change(sender: Any, action: str, **kwargs: Any) -> None:
+    if action in ("post_add", "post_remove", "post_clear"):
+        transaction.on_commit(lambda: increment_cache_key("beneficiary_group_list"))
 
 
 @receiver([post_save, post_delete], sender=Program)

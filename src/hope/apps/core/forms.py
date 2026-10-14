@@ -2,10 +2,14 @@ from typing import Any
 
 from django import forms
 from django.conf import settings
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
-from hope.models import BusinessArea, DataCollectingType, Program
+from hope.models import BusinessArea, DataCollectingType, PayeeType, Program
+
+DCT_ASSIGNED_TO_OTHER_PAYEE_TYPE_ERROR = "This DCT is already assigned to another Payee Type"
+MIXED_DCT_TYPES_IN_PAYEE_TYPE_ERROR = "All Data Collecting Types of a Payee Type must have the same type"
 
 
 class StorageFileForm(forms.Form):
@@ -60,6 +64,7 @@ class DataCollectingTypeForm(forms.ModelForm):
             "recalculate_composition",
             "collects_individual_data",
             "weight",
+            "payee_type",
             "compatible_types",
             "limit_to",
         )
@@ -67,6 +72,7 @@ class DataCollectingTypeForm(forms.ModelForm):
     def clean(self) -> None:
         household_filters_available = self.cleaned_data["household_filters_available"]
         dct = self.cleaned_data.get("type")
+        self._validate_payee_type(dct)
 
         # validate household filters for SOCIAL type
         if dct == DataCollectingType.Type.SOCIAL and household_filters_available is True:
@@ -86,7 +92,102 @@ class DataCollectingTypeForm(forms.ModelForm):
             )
             self.add_error("compatible_types", forms.ValidationError(msg))
 
+    def _validate_payee_type(self, dct_type: str | None) -> None:
+        payee_type = self.cleaned_data.get("payee_type")
+        if payee_type is None:
+            if not self.cleaned_data.get("deprecated"):
+                self.add_error("payee_type", "Payee Type is required for a Data Collecting Type that is not deprecated")
+        elif (
+            dct_type
+            and DataCollectingType.objects.filter(payee_type=payee_type)
+            .exclude(pk=self.instance.pk)
+            .exclude(type=dct_type)
+            .exists()
+        ):
+            self.add_error("payee_type", MIXED_DCT_TYPES_IN_PAYEE_TYPE_ERROR)
+
+        if not self.instance.pk or self.instance.payee_type_id is None:
+            return
+        if payee_type is not None and payee_type.pk == self.instance.payee_type_id:
+            return
+        if PayeeType.objects.filter(default_data_collecting_type=self.instance).exists():
+            self.add_error("payee_type", "Cannot move or unassign the default Data Collecting Type of its Payee Type")
+        if self.instance.payee_labels.exists():
+            self.add_error(
+                "payee_type", "Cannot move or unassign a Data Collecting Type that Payee Labels are restricted to"
+            )
+        if Program.all_objects.filter(data_collecting_type=self.instance).exists():
+            self.add_error("payee_type", "Cannot move or unassign a Data Collecting Type used by programs")
+
     def is_valid(self) -> bool:
         # Set a flag to skip validation of type vs compatible types as they might be changed in the same form
         self.instance.skip_type_validation = True
         return super().is_valid()
+
+
+class PayeeTypeForm(forms.ModelForm):
+    data_collecting_types = forms.ModelMultipleChoiceField(
+        queryset=DataCollectingType.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple("Data Collecting Types", is_stacked=False),
+    )
+
+    class Meta:
+        model = PayeeType
+        fields = (
+            "name",
+            "gl_code",
+            "description",
+            "active",
+            "weight",
+            "data_collecting_types",
+            "default_data_collecting_type",
+        )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["data_collecting_types"].initial = self.instance.data_collecting_types.all()
+
+    def clean(self) -> dict[str, Any]:
+        cleaned_data = super().clean()
+        selected = cleaned_data.get("data_collecting_types", DataCollectingType.objects.none())
+        default_dct = cleaned_data.get("default_data_collecting_type")
+
+        assigned_elsewhere = selected.filter(payee_type__isnull=False).exclude(payee_type=self.instance.pk)
+        if assigned_elsewhere.exists():
+            labels = ", ".join(assigned_elsewhere.values_list("label", flat=True))
+            self.add_error("data_collecting_types", f"{DCT_ASSIGNED_TO_OTHER_PAYEE_TYPE_ERROR}: {labels}")
+        if selected.order_by().values("type").distinct().count() > 1:
+            self.add_error("data_collecting_types", MIXED_DCT_TYPES_IN_PAYEE_TYPE_ERROR)
+        if self.instance.pk:
+            removed = self.instance.data_collecting_types.exclude(pk__in=selected)
+            restricted = removed.filter(payee_labels__isnull=False).distinct()
+            if restricted.exists():
+                labels = ", ".join(restricted.values_list("label", flat=True))
+                self.add_error(
+                    "data_collecting_types",
+                    f"Cannot remove Data Collecting Types that Payee Labels are restricted to: {labels}",
+                )
+            used_by_programs = removed.filter(programs__isnull=False).distinct()
+            if used_by_programs.exists():
+                labels = ", ".join(used_by_programs.values_list("label", flat=True))
+                self.add_error(
+                    "data_collecting_types", f"Cannot remove Data Collecting Types used by programs: {labels}"
+                )
+
+        if default_dct and default_dct not in selected:
+            self.add_error(
+                "default_data_collecting_type", "Default Data Collecting Type must belong to this Payee Type"
+            )
+        if cleaned_data.get("active") and not default_dct:
+            self.add_error("default_data_collecting_type", "Active Payee Type must have a default Data Collecting Type")
+        return cleaned_data
+
+    def _save_m2m(self) -> None:
+        super()._save_m2m()
+        # data_collecting_types is the reverse side of DataCollectingType.payee_type, so the FK is synced here;
+        # clean() has already rejected DCTs owned elsewhere and removals of DCTs in use.
+        selected = self.cleaned_data["data_collecting_types"]
+        DataCollectingType.objects.filter(payee_type=self.instance).exclude(pk__in=selected).update(payee_type=None)
+        DataCollectingType.objects.filter(pk__in=selected).update(payee_type=self.instance)

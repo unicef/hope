@@ -227,7 +227,11 @@ def test_program_list_with_permissions(
     assert beneficiary_group_program_data1["group_label_plural"] == program.beneficiary_group.group_label_plural
     assert beneficiary_group_program_data1["member_label"] == program.beneficiary_group.member_label
     assert beneficiary_group_program_data1["member_label_plural"] == program.beneficiary_group.member_label_plural
-    assert beneficiary_group_program_data1["master_detail"] == program.beneficiary_group.master_detail
+    assert program_data1["payee_type"] == {
+        "id": str(program.data_collecting_type.payee_type.id),
+        "name": "Household",
+        "gl_code": "7700410",
+    }
 
     assert str(pdu_field1.id) in program_data1["pdu_fields"]
     assert str(pdu_field2.id) in program_data1["pdu_fields"]

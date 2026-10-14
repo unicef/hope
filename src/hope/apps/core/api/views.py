@@ -1,7 +1,7 @@
 from typing import Any
 from zoneinfo import available_timezones
 
-from django.db.models import Q, QuerySet
+from django.db.models import Exists, OuterRef, Q, QuerySet
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -35,6 +35,7 @@ from hope.apps.core.api.serializers import (
     FieldAttributeSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
+    PayeeTypeChoiceSerializer,
 )
 from hope.apps.core.field_attributes.fields_types import TYPE_STRING
 from hope.apps.core.languages import Languages
@@ -62,6 +63,7 @@ from hope.models import (
     DocumentType,
     Feedback,
     LogEntry,
+    PayeeType,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -170,6 +172,15 @@ class BusinessAreaViewSet(
         return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
 
 
+def data_collecting_types_available_in(business_area: BusinessArea) -> QuerySet[DataCollectingType]:
+    """Return the data collecting types a program in this business area can use."""
+    return DataCollectingType.objects.filter(
+        Q(limit_to=business_area) | Q(limit_to__isnull=True),
+        active=True,
+        deprecated=False,
+    ).exclude(code__iexact="unknown")
+
+
 class DataCollectingTypeViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
     """Serve the data collecting types available in a business area."""
 
@@ -182,21 +193,39 @@ class DataCollectingTypeViewSet(BusinessAreaMixin, SerializerActionMixin, BaseVi
     }
 
     def get_queryset(self) -> QuerySet:
-        return (
-            DataCollectingType.objects.filter(
-                Q(limit_to=self.business_area) | Q(limit_to__isnull=True),
-                active=True,
-                deprecated=False,
-            )
-            .exclude(code__iexact="unknown")
-            .distinct()
-            .order_by("label")
-        )
+        return data_collecting_types_available_in(self.business_area).distinct().order_by("label")
 
     @extend_schema(responses={200: DataCollectingTypeChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="choices", url_name="choices", pagination_class=None)
     def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Return the data collecting types a program in this business area can use."""
+        return Response(self.get_serializer(self.get_queryset(), many=True).data)
+
+
+class PayeeTypeViewSet(BusinessAreaMixin, SerializerActionMixin, BaseViewSet):
+    """Serve the payee types a program in a business area can use."""
+
+    queryset = PayeeType.objects.all()
+    permissions_by_action = {
+        "choices": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+    }
+    serializer_classes_by_action = {
+        "choices": PayeeTypeChoiceSerializer,
+    }
+
+    def get_queryset(self) -> QuerySet:
+        available_data_collecting_types = data_collecting_types_available_in(self.business_area)
+        return (
+            PayeeType.objects.filter(active=True)
+            .filter(Exists(available_data_collecting_types.filter(payee_type=OuterRef("pk"))))
+            .select_related("default_data_collecting_type")
+            .prefetch_related("default_data_collecting_type__limit_to")
+        )
+
+    @extend_schema(responses={200: PayeeTypeChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="choices", url_name="choices", pagination_class=None)
+    def choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Return the active payee types usable in this business area with their GL code and default DCT."""
         return Response(self.get_serializer(self.get_queryset(), many=True).data)
 
 

@@ -42,8 +42,12 @@
                     "group_label": "Household",
                     "group_label_plural": "Households",
                     "member_label": "Individual",
-                    "member_label_plural": "Individuals",
-                    "master_detail": true
+                    "member_label_plural": "Individuals"
+                },
+                "payee_type": {
+                    "id": "8d1f5a4e-2c7b-4f0e-9b3a-6e1d2c4b5a70",
+                    "name": "Household",
+                    "gl_code": "7700410"
                 },
                 "status": "ACTIVE",
                 "pdu_fields": [],

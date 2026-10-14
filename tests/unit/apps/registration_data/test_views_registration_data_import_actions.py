@@ -1040,7 +1040,7 @@ def test_create_rdi_social_worker_program_with_household_ids(
         code="social",
         type=DataCollectingType.Type.SOCIAL,
     )
-    beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="Social")
 
     # Create source and target programs with social worker DCT
     import_from_program = ProgramFactory(
@@ -1126,7 +1126,7 @@ def test_create_rdi_social_worker_program_with_individual_ids(
         code="social",
         type=DataCollectingType.Type.SOCIAL,
     )
-    beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="Social")
 
     # Create source and target programs with social worker DCT
     import_from_program = ProgramFactory(

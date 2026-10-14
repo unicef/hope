@@ -104,7 +104,7 @@ def test_frontend_url_individual(program):
 def test_frontend_url_individual_social(program):
     program = program(
         data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL),
-        beneficiary_group=BeneficiaryGroupFactory(master_detail=False),
+        beneficiary_group=BeneficiaryGroupFactory(),
     )
     individual = IndividualFactory(program=program, business_area=program.business_area)
     assert (

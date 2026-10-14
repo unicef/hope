@@ -50,7 +50,6 @@ def household_update_program(business_area: BusinessArea) -> Program:
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
-        master_detail=True,
     )
     return ProgramFactory(
         name="HH Update Program",
@@ -234,7 +233,6 @@ def na_program(business_area: BusinessArea) -> Program:
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
-        master_detail=True,
     )
     return ProgramFactory(
         name="NA Program",
@@ -421,7 +419,6 @@ def individual_in_other_program(business_area: BusinessArea) -> Individual:
             group_label_plural="Households",
             member_label="Individual",
             member_label_plural="Individuals",
-            master_detail=True,
         ),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
