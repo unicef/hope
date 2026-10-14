@@ -2556,13 +2556,11 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         attachment = self.get_object()
         file = attachment.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentPlanSupportingDocumentViewSet(
@@ -2609,13 +2607,11 @@ class PaymentPlanSupportingDocumentViewSet(
         document = self.get_object()
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentViewSet(
