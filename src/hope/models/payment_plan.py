@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
@@ -735,8 +735,11 @@ class PaymentPlan(
             self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
             self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
 
-            self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
-            self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
+            with localcontext(prec=50):
+                self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
+                self.total_undelivered_quantity_usd = (
+                    self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
+                )
 
             self.save(
                 update_fields=[
