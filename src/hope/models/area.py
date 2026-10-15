@@ -52,6 +52,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         ]
         permissions = (("import_areas", "Can import areas"),)
 
+    # Looks unused, but django-mptt's metaclass reads it to keep areas ordered by name and p_code.
     class MPTTMeta:
         order_insertion_by = ("name", "p_code")
 

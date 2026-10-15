@@ -18,7 +18,6 @@ from adminactions.helpers import AdminActionPermMixin
 from adminfilters.mixin import AdminFiltersMixin
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
@@ -35,6 +34,7 @@ from hope.apps.utils.security import is_root
 from hope.models import AsyncJob, BusinessArea, PaymentPlan
 
 if TYPE_CHECKING:
+    from django.contrib.admin import ModelAdmin
     from django.contrib.admin.options import _FieldGroups
 
 
@@ -211,22 +211,6 @@ class ViewOnUiMixin:
 
     def frontend_url(self, obj: Any) -> str | None:
         raise NotImplementedError
-
-
-class HUBBusinessAreaFilter(SimpleListFilter):
-    parameter_name = "ba"
-    title = "Business Area"
-    template = "adminfilters/combobox.html"
-
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> list[tuple[str, str]]:
-        from hope.models import BusinessArea  # pragma: no cover
-
-        return list(BusinessArea.objects.values_list("code", "name").distinct())
-
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
-        if self.value():
-            return queryset.filter(session__business_area=self.value()).distinct()
-        return queryset
 
 
 class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
