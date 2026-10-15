@@ -2,6 +2,7 @@ from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from django.db.models import QuerySet
 from django.forms import ModelForm
 from django.http import HttpRequest
 from django.urls import reverse
@@ -28,6 +29,9 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
     # parent is restricted to root-level partners (level=0) via get_form;
     # the autocomplete widget bypasses that queryset, so it must be excluded.
     autocomplete_exclude_fields = ("parent",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Partner]:
+        return super().get_queryset(request).select_related("parent")
 
     def get_inline_instances(self, request: HttpRequest, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines

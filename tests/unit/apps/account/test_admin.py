@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.admin.account_forms import (
+    ImportCSVForm,
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
@@ -916,6 +917,34 @@ def test_partner_admin_get_inline_instances(
     inline_instances = admin.get_inline_instances(request, partner)
     assert len(inline_instances) == 1
     assert isinstance(inline_instances[0], RoleAssignmentInline)
+
+
+def test_partner_admin_get_queryset_renders_sub_partner_labels_in_one_query(
+    request_factory: RequestFactory,
+    admin_site: AdminSite,
+    superuser: User,
+    unicef_subpartner: Partner,
+    django_assert_num_queries: Any,
+):
+    admin = PartnerAdmin(model=Partner, admin_site=admin_site)
+    request = get_mock_request(request_factory, user=superuser)
+
+    with django_assert_num_queries(1):
+        labels = [str(partner) for partner in admin.get_queryset(request)]
+
+    assert f"{unicef_subpartner.name} [Sub-Partner of UNICEF]" in labels
+
+
+def test_import_csv_form_renders_sub_partner_labels_in_one_query(
+    unicef_subpartner: Partner,
+    django_assert_num_queries: Any,
+):
+    form = ImportCSVForm()
+
+    with django_assert_num_queries(1):
+        labels = [label for _, label in form.fields["partner"].choices]
+
+    assert f"{unicef_subpartner.name} [Sub-Partner of UNICEF]" in labels
 
 
 def test_partner_admin_get_readonly_fields(
