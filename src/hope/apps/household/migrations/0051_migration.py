@@ -1,8 +1,21 @@
-from django.db import migrations
+from decimal import Decimal
+
+from django.db import migrations, models
+from django.db.models.functions import Abs, Round
+from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
 HOUSEHOLD_CASH_COLUMNS = ("total_cash_received", "total_cash_received_usd")
+
+
+def household_cash_precision_constraint() -> models.CheckConstraint:
+    condition = models.Q()
+    for column in HOUSEHOLD_CASH_COLUMNS:
+        condition &= models.Q(**{f"{column}__isnull": True}) | (
+            models.Q(LessThan(Abs(column), Decimal(100000000000000000000))) & models.Q(**{column: Round(column, 10)})
+        )
+    return models.CheckConstraint(condition=condition, name="household_cash_precision")
 
 
 def change_household_cash_columns(apps, schema_editor):
@@ -59,6 +72,10 @@ class Migration(migrations.Migration):
                         null=True,
                         verbose_name="Total cash received in USD",
                     ),
+                ),
+                migrations.AddConstraint(
+                    model_name="household",
+                    constraint=household_cash_precision_constraint(),
                 ),
             ],
         ),

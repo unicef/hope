@@ -3,7 +3,9 @@
 from decimal import Decimal
 
 import django.core.validators
-from django.db import migrations
+from django.db import migrations, models
+from django.db.models.functions import Abs, Round
+from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
@@ -18,6 +20,15 @@ PAYMENT_PLAN_COLUMNS = (
     "total_undelivered_quantity",
     "total_undelivered_quantity_usd",
 )
+
+
+def payment_plan_currency_precision_constraint() -> models.CheckConstraint:
+    condition = models.Q()
+    for column in PAYMENT_PLAN_COLUMNS:
+        condition &= models.Q(**{f"{column}__isnull": True}) | (
+            models.Q(LessThan(Abs(column), Decimal(100000000000000000000))) & models.Q(**{column: Round(column, 10)})
+        )
+    return models.CheckConstraint(condition=condition, name="payment_plan_currency_precision")
 
 
 def change_payment_plan_columns(apps, schema_editor):
@@ -168,6 +179,10 @@ class Migration(migrations.Migration):
                         validators=[django.core.validators.MinValueValidator(Decimal(0))],
                         verbose_name="Total undelivered quantity in USD",
                     ),
+                ),
+                migrations.AddConstraint(
+                    model_name="paymentplan",
+                    constraint=payment_plan_currency_precision_constraint(),
                 ),
             ],
         ),

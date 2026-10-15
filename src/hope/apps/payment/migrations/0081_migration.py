@@ -1,11 +1,21 @@
 from decimal import Decimal
 
 import django.core.validators
-from django.db import migrations
+from django.db import migrations, models
+from django.db.models.functions import Abs, Round
+from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
 PAYMENT_VERIFICATION_COLUMNS = ("received_amount",)
+
+
+def payment_verification_currency_precision_constraint() -> models.CheckConstraint:
+    column = "received_amount"
+    condition = models.Q(**{f"{column}__isnull": True}) | (
+        models.Q(LessThan(Abs(column), Decimal(100000000000000000000))) & models.Q(**{column: Round(column, 10)})
+    )
+    return models.CheckConstraint(condition=condition, name="payment_verification_currency_precision")
 
 
 def change_verification_amount_column(apps, schema_editor):
@@ -46,6 +56,10 @@ class Migration(migrations.Migration):
                         validators=[django.core.validators.MinValueValidator(Decimal("0.0000000001"))],
                         verbose_name="Received amount in base currency",
                     ),
+                ),
+                migrations.AddConstraint(
+                    model_name="paymentverification",
+                    constraint=payment_verification_currency_precision_constraint(),
                 ),
             ],
         ),

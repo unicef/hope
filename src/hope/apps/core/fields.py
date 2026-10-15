@@ -4,10 +4,23 @@ from typing import Any
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Abs, Round
+from django.db.models.lookups import LessThan
 
 CURRENCY_DECIMAL_PLACES = 10
 CURRENCY_MAX_DIGITS = 30
 CURRENCY_QUANTUM = Decimal("0.0000000001")
+CURRENCY_MAX_ABSOLUTE_VALUE = Decimal(10) ** (CURRENCY_MAX_DIGITS - CURRENCY_DECIMAL_PLACES)
+
+
+def currency_precision_check(*fields: str, name: str) -> models.CheckConstraint:
+    condition = models.Q()
+    for field in fields:
+        condition &= models.Q(**{f"{field}__isnull": True}) | (
+            models.Q(LessThan(Abs(field), CURRENCY_MAX_ABSOLUTE_VALUE))
+            & models.Q(**{field: Round(field, CURRENCY_DECIMAL_PLACES)})
+        )
+    return models.CheckConstraint(condition=condition, name=name)
 
 
 def normalize_currency_decimal(value: Any) -> Decimal:

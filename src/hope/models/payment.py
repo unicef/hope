@@ -15,7 +15,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.fields import HopeCurrencyField
+from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, get_role_choices
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -283,6 +283,13 @@ class Payment(
                 fields=["program_id", "token_number"],
                 condition=Q(is_removed=False),
                 name="token_number_unique_per_program",
+            ),
+            currency_precision_check(
+                "entitlement_quantity",
+                "entitlement_quantity_usd",
+                "delivered_quantity",
+                "delivered_quantity_usd",
+                name="payment_currency_precision",
             ),
         ]
         ordering = ("-created_at",)

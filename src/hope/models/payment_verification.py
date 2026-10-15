@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.fields import HopeCurrencyField
+from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.models.business_area import BusinessArea
 from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
@@ -59,6 +59,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        constraints = [currency_precision_check("received_amount", name="payment_verification_currency_precision")]
 
     @property
     def is_manually_editable(self) -> bool:

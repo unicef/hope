@@ -26,7 +26,7 @@ from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
-from hope.apps.core.fields import HopeCurrencyField
+from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
@@ -655,6 +655,18 @@ class PaymentPlan(
             models.CheckConstraint(
                 condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
                 name="payment_plan_group_required_unless_removed",
+            ),
+            currency_precision_check(
+                "flat_amount_value",
+                "total_entitled_quantity",
+                "total_entitled_quantity_usd",
+                "total_entitled_quantity_revised",
+                "total_entitled_quantity_revised_usd",
+                "total_delivered_quantity",
+                "total_delivered_quantity_usd",
+                "total_undelivered_quantity",
+                "total_undelivered_quantity_usd",
+                name="payment_plan_currency_precision",
             ),
         ]
 
