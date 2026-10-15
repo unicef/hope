@@ -348,8 +348,6 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
 
     def frontend_url(self, obj: PaymentPlan) -> str:
         base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
-        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
-            return f"{base}/target-population/{obj.id}"
         if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             return f"{base}/payment-module/followup-payment-plans/{obj.id}"
         if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
@@ -569,6 +567,11 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
 
     @button(permission="payment.view_paymentplan")
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_paymentplan_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
+
+    @button(permission="payment.view_paymentplan")
+    def target_populations(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_targetpopulation_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
 
@@ -774,7 +777,10 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
     )
     cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
-    exclude = ("delivery_type_choice",)
+    exclude = (
+        "delivery_type_choice",
+        "parent",
+    )
     readonly_fields = (
         "is_removed",
         "id",
@@ -783,7 +789,7 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
         "unicef_id",
         "signature_hash",
         "internal_data",
-        "parent",
+        "parent_link",
         "parent_split",
         "business_area",
         "program",
@@ -858,6 +864,10 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
 
     def frontend_url(self, obj: Payment) -> str | None:
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/payments/{obj.id}"
+
+    @admin.display(description="Parent")
+    def parent_link(self, obj: Payment) -> str:
+        return format_html('<a href="{}">{}</a>', obj.parent.admin_url, obj.parent)
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
