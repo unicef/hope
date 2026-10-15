@@ -373,6 +373,15 @@ def test_opening_the_ticket_detail_ends_the_email_cycle(
     assert (tracking.first_email_at, tracking.last_reminder_at) == (None, None)
 
 
+@pytest.mark.usefixtures("tracking")
+def test_the_unread_filter_on_the_ticket_detail_filters_instead_of_failing(
+    api_client: Any, user: User, detail_url: str
+) -> None:
+    response = api_client(user).get(detail_url, {"unread": "true"})
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
 # --- the list: unread rows and the unread filter ---
 
 

@@ -8,8 +8,9 @@ tags:
 # My Tasks
 
 **My Tasks** is a page for the tickets that wait on you: the unassigned ones waiting for somebody
-with the right to assign them, and the ones already assigned to you. Each has its own tab, so
-neither has to be dug out of the Grievance Tickets list.
+with the right to assign them, the ones already assigned to you, and the ones sent for an approval
+you may give. Each has its own tab, so none has to be dug out of the Grievance Tickets list, and
+the tickets you have not looked at since somebody else changed them are marked as unread.
 
 It is also where the [My Tasks emails](my-tasks-emails.md) land when a recipient follows a link.
 
@@ -28,21 +29,28 @@ The Grievance Tickets list carries a **MY TASKS** button in its page header:
 
 ---
 
-## The two tabs
+## The three tabs
 
 | Tab | What it lists |
 |---|---|
 | **NEEDS ASSIGNMENT** | Every active ticket with no assignee that you are allowed to assign |
 | **ASSIGNED TO ME** | Tickets assigned to you |
+| **PENDING APPROVAL** | Tickets in the For Approval status whose category you may approve |
 
 ![The NEEDS ASSIGNMENT tab: no ticket-status filter and no CLOSE TICKETS action](./_screenshots/my-tasks/needs-assignment-tab.png)
 
 ![The ASSIGNED TO ME tab, which adds the ticket-status filter and CLOSE TICKETS](./_screenshots/my-tasks/assigned-to-me-tab.png)
 
-**NEEDS ASSIGNMENT** lists active tickets only, so it carries no ticket-status filter.
+**NEEDS ASSIGNMENT** and **PENDING APPROVAL** list active tickets only, so they carry no
+ticket-status filter.
 
 **ASSIGNED TO ME** shows active tickets by default; switch its status filter to **All Tickets** to
 include closed ones.
+
+**PENDING APPROVAL** follows the approval grants per category: a ticket is listed when you hold the
+approve grant for its category in its programme, the "as creator" grant and you created it, or the
+"as owner" grant and it is assigned to you. Only tickets in an active programme are listed on any
+tab.
 
 Switching tabs clears your ticket selection: a ticket ticked on one tab can never be carried into a
 bulk action on the other.
@@ -98,12 +106,30 @@ The list is ordered by **Total Days**, longest-waiting first.
 
 ---
 
+## Unread tickets
+
+A ticket is unread when somebody else created it, assigned it to you, edited it, changed its status
+or added a note after you last opened it. The full rule, and what never counts, is in
+[What counts as unread](my-tasks-emails.md#what-counts-as-unread).
+
+| Where | What you see |
+|---|---|
+| Tab label | A dot while the tab holds an unread ticket |
+| Row | A dot before the ticket ID and a tinted row |
+| **Only unread** filter | Narrows the tab to its unread tickets |
+| **Mark all as read** | Marks every unread ticket on the tab as read; disabled while the tab has none |
+
+Opening a ticket marks it as read. Mark all as read covers the whole tab, not only the rows on the
+current page or matching the other filters.
+
+---
+
 ## Arriving from an email
 
 The [My Tasks emails](my-tasks-emails.md) link straight into this page, one link per tab holding
-a ticket you have not opened since somebody else changed it. Opening the ticket, or **Mark all as
-read** on the tab, is what tells HOPE you have seen it: the reminders stop, and the next email comes
-only once something else is waiting.
+an unread ticket. Opening the ticket, or **Mark all as read** on the tab, is what tells HOPE you
+have seen it: once nothing is unread the reminders stop, and the next email comes only once
+something else is waiting.
 
 ---
 
@@ -113,11 +139,12 @@ only once something else is waiting.
 |---|---|
 | **NEEDS ASSIGNMENT** | `GRIEVANCE_ASSIGN` and any grievance list-view grant |
 | **ASSIGNED TO ME** | any grievance list-view grant |
+| **PENDING APPROVAL** | any grievance approve or close grant and any grievance list-view grant |
 
 Only the tabs you hold permissions for are shown, and the first of them opens by default. A user
-holding neither does not get the **MY TASKS** button, and is refused the page if they open it
+holding none of them does not get the **MY TASKS** button, and is refused the page if they open it
 directly.
 
-On **NEEDS ASSIGNMENT** the list is scoped to the programmes you may assign in, which is what the
-**Tickets Needing Assignment** email counts. A programme you may only view has nothing here for you
-to act on.
+**NEEDS ASSIGNMENT** is scoped to the programmes you may assign in, and **PENDING APPROVAL** to the
+programmes you may approve in. A programme you may only view has nothing on either tab for you to
+act on.

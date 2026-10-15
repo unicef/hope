@@ -100,12 +100,14 @@ class GrievanceListBatchMixin:
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
     def with_unread(self, tickets: QuerySet) -> QuerySet:
-        """Annotate `unread` for the My Tasks list and count; a constant False without `my_tasks_tab`."""
-        if self.action not in ("list", "count"):
-            return tickets
+        """Annotate `unread` for the My Tasks list and count; a constant False everywhere else.
+
+        The constant keeps `?unread=` harmless on the detail and action routes, where the filterset
+        still runs through DRF's get_object().
+        """
         user = cast("User", self.request.user)
         tracking = None
-        if self.request.GET.get("my_tasks_tab") in MY_TASKS_TABS:
+        if self.action in ("list", "count") and self.request.GET.get("my_tasks_tab") in MY_TASKS_TABS:
             tracking = MyTasksTracking.objects.filter(user=user, business_area=self.business_area).first()
         if tracking is None:
             return tickets.annotate(unread=Value(False))

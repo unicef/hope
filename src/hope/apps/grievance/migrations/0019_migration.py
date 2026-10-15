@@ -96,4 +96,8 @@ class Migration(migrations.Migration):
                 ],
             },
         ),
+        migrations.RemoveField(
+            model_name="grievanceticket",
+            name="last_notification_sent",
+        ),
     ]
