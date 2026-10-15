@@ -127,13 +127,25 @@ export const ProgramDetails = ({
           </Grid>
           <Grid size={4}>
             <LabelizedField
+              label={t('Payee Type')}
+              value={program?.payeeType?.name}
+            />
+          </Grid>
+          <Grid size={4}>
+            <LabelizedField
+              label={t('GL Code')}
+              value={program?.payeeType?.glCode}
+            />
+          </Grid>
+          <Grid size={4}>
+            <LabelizedField
               label={t('Data Collecting Type')}
               value={program?.dataCollectingType?.label}
             />
           </Grid>
           <Grid size={4}>
             <LabelizedField
-              label={t('Beneficiary Group')}
+              label={t('Payee Label')}
               value={program?.beneficiaryGroup?.name}
             />
           </Grid>
