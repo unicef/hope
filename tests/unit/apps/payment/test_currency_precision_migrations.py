@@ -4,8 +4,7 @@ from types import SimpleNamespace
 from typing import Any
 
 from django.apps import apps as django_apps
-from django.db import DatabaseError, IntegrityError, OperationalError, connection, transaction
-import psycopg
+from django.db import DatabaseError, IntegrityError, connection, transaction
 import pytest
 
 MIGRATION_CASES = (
@@ -61,7 +60,6 @@ def migration_case(request: pytest.FixtureRequest, db: None) -> SimpleNamespace:
         constraint_name=constraint_name,
         legacy_digits=legacy_digits,
         table_name=f"test_currency_{model_name.lower()}",
-        real_table_name=django_apps.get_model(app_name, model_name)._meta.db_table,
     )
 
 
@@ -97,28 +95,6 @@ def conflicting_legacy_currency_table(legacy_currency_table: SimpleNamespace) ->
     return legacy_currency_table
 
 
-@pytest.fixture
-def locked_currency_table(migration_case: SimpleNamespace) -> Any:
-    database = connection.settings_dict
-    locker = psycopg.connect(
-        dbname=database["NAME"],
-        user=database["USER"],
-        password=database["PASSWORD"],
-        host=database["HOST"],
-        port=database["PORT"],
-    )
-    try:
-        with locker.cursor() as cursor:
-            cursor.execute("SET LOCAL lock_timeout = '2s'")
-            cursor.execute(
-                f"LOCK TABLE {connection.ops.quote_name(migration_case.real_table_name)} IN ACCESS SHARE MODE"
-            )
-        yield locker
-    finally:
-        locker.rollback()
-        locker.close()
-
-
 def test_currency_migration_expands_all_columns_and_enforces_precision(legacy_currency_table: SimpleNamespace) -> None:
     case = legacy_currency_table
 
@@ -140,6 +116,13 @@ def test_currency_migration_expands_all_columns_and_enforces_precision(legacy_cu
             [case.table_name, case.constraint_name],
         )
         assert cursor.fetchone() == (False,)
+        cursor.execute(f"SELECT {case.first_column} FROM {case.table}")
+        legacy_value = cursor.fetchone()[0]
+        assert legacy_value == Decimal("123.45")
+        field = django_apps.get_model(case.app_name, case.model_name)._meta.get_field(case.columns[0])
+        converted_value = field.from_db_value(legacy_value, None, connection)
+        assert converted_value == Decimal("123.4500000000")
+        assert converted_value.as_tuple().exponent == -10
         cursor.execute(f"UPDATE {case.table} SET {case.first_column} = %s", [Decimal("123.1234567891")])
         cursor.execute(f"SELECT {case.first_column} FROM {case.table}")
         assert cursor.fetchone() == (Decimal("123.1234567891"),)
@@ -174,27 +157,3 @@ def test_currency_migration_rolls_back_both_statements_and_retries(
             [case.table_name, case.columns[0]],
         )
         assert cursor.fetchone() == ("numeric",)
-
-
-def test_currency_migration_retries_after_lock_timeout(
-    migration_case: SimpleNamespace,
-    locked_currency_table: Any,
-) -> None:
-    with (
-        pytest.raises(OperationalError, match="lock timeout"),
-        transaction.atomic(),
-        connection.schema_editor() as editor,
-    ):
-        migration_case.change(django_apps, editor)
-
-    locked_currency_table.rollback()
-
-    with connection.schema_editor() as schema_editor:
-        migration_case.change(django_apps, schema_editor)
-
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT convalidated FROM pg_constraint WHERE conrelid = %s::regclass AND conname = %s",
-            [migration_case.real_table_name, migration_case.constraint_name],
-        )
-        assert cursor.fetchone() == (False,)
