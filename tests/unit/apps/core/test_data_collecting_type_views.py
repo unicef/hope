@@ -113,7 +113,7 @@ def unlimited_dct(household_payee_type: PayeeType) -> DataCollectingType:
 
 
 @pytest.fixture
-def afghanistan_dct(afghanistan: BusinessArea) -> DataCollectingType:
+def afghanistan_dct(afghanistan: BusinessArea, household_payee_type: PayeeType) -> DataCollectingType:
     """Active, not deprecated, limited to Afghanistan."""
     dct = DataCollectingType.objects.create(
         label="DCT 2",
@@ -122,13 +122,14 @@ def afghanistan_dct(afghanistan: BusinessArea) -> DataCollectingType:
         type=DataCollectingType.Type.STANDARD,
         active=True,
         deprecated=False,
+        payee_type=household_payee_type,
     )
     dct.limit_to.add(afghanistan)
     return dct
 
 
 @pytest.fixture
-def ukraine_dct(ukraine: BusinessArea) -> DataCollectingType:
+def ukraine_dct(ukraine: BusinessArea, household_payee_type: PayeeType) -> DataCollectingType:
     """Active, not deprecated, limited to Ukraine."""
     dct = DataCollectingType.objects.create(
         label="DCT 3",
@@ -137,6 +138,7 @@ def ukraine_dct(ukraine: BusinessArea) -> DataCollectingType:
         type=DataCollectingType.Type.STANDARD,
         active=True,
         deprecated=False,
+        payee_type=household_payee_type,
     )
     dct.limit_to.add(ukraine)
     return dct
@@ -173,6 +175,28 @@ def unknown_dct(db: Any) -> DataCollectingType:
         code="unknown",
         description="Description for DCT 6",
         type=DataCollectingType.Type.STANDARD,
+        active=True,
+        deprecated=False,
+    )
+
+
+@pytest.fixture
+def inactive_payee_type_dct(inactive_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingType.objects.create(
+        label="Head of Facility",
+        code="head_of_facility",
+        type=DataCollectingType.Type.SOCIAL,
+        active=True,
+        deprecated=False,
+        payee_type=inactive_payee_type,
+    )
+
+
+@pytest.fixture
+def dct_without_payee_type(db: Any) -> DataCollectingType:
+    return DataCollectingType.objects.create(
+        label="Delegate for payment",
+        code="delegate",
         active=True,
         deprecated=False,
     )
@@ -220,9 +244,39 @@ def test_choices_returns_unlimited_and_business_area_types_only(
             "value": afghanistan_dct.code,
             "description": afghanistan_dct.description,
             "type": afghanistan_dct.type,
-            "payee_type": None,
+            "payee_type": str(afghanistan_dct.payee_type_id),
         },
     ]
+
+
+@pytest.mark.parametrize(
+    "hidden_dct_fixture",
+    [
+        pytest.param("inactive_payee_type_dct", id="inactive-payee-type"),
+        pytest.param("dct_without_payee_type", id="no-payee-type"),
+    ],
+)
+def test_choices_excludes_dct_without_active_payee_type(
+    request: pytest.FixtureRequest,
+    hidden_dct_fixture: str,
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    create_user_role_with_permissions: Callable,
+    unlimited_dct: DataCollectingType,
+) -> None:
+    request.getfixturevalue(hidden_dct_fixture)
+    create_user_role_with_permissions(
+        user=user,
+        permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        business_area=afghanistan,
+        whole_business_area_access=True,
+    )
+
+    response = authenticated_client.get(_choices_url(afghanistan.slug))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [row["value"] for row in response.json()] == ["dct_1"]
 
 
 def test_choices_returns_a_different_list_per_business_area(

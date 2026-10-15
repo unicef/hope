@@ -178,6 +178,7 @@ def data_collecting_types_available_in(business_area: BusinessArea) -> QuerySet[
         Q(limit_to=business_area) | Q(limit_to__isnull=True),
         active=True,
         deprecated=False,
+        payee_type__active=True,
     ).exclude(code__iexact="unknown")
 
 
