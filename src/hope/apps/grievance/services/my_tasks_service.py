@@ -2,8 +2,9 @@
 
 A ticket is unread for a user when somebody else changed it after the user last opened it. A user with
 unread tickets is told once by email, reminded after MY_TASKS_ALARM_WINDOW days and then every
-MY_TASKS_REPEAT_EACH days, for as long as something stays unread. Opening a ticket ends the cycle, and
-so does a check that finds nothing unread. Nothing a user did themselves counts as a change.
+MY_TASKS_REPEAT_EACH days, for as long as something stays unread. The cycle ends once nothing is unread
+any more: the user opened the last unread ticket, marked the last unread tab as read, or a check finds
+nothing unread. Nothing a user did themselves counts as a change.
 
 One run covers one (business area, recipient timezone, day) and evaluates only the recipients in
 that timezone, so every email goes out at the local notification hour.
@@ -21,12 +22,7 @@ from django.utils import timezone
 from hope.apps.core.timezones import resolve_timezone_name
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT, PRESET_PENDING_APPROVAL
 from hope.apps.grievance.models import GrievanceTicket, MyTasksTracking, TicketSeen
-from hope.apps.grievance.my_tasks import (
-    MY_TASKS_PERMISSIONS,
-    TAB_SCOPES,
-    annotate_unread,
-    in_active_program_q,
-)
+from hope.apps.grievance.my_tasks import MY_TASKS_PERMISSIONS, TAB_SCOPES, annotate_unread
 from hope.apps.grievance.utils import my_tasks_url
 from hope.apps.grievance.visibility import VIEW_LIST_PERMISSIONS, visible_tickets_q
 from hope.apps.utils.mailjet import MailjetClient
@@ -47,8 +43,10 @@ TAB_LABELS = {
     PRESET_PENDING_APPROVAL: "Pending approval",
 }
 
+NEW_TASKS_SUBJECT = "HOPE: you have new tasks"
 NEW_TASKS_INTRO = "Tickets on your My Tasks page were created or changed and you have not opened them yet."
-REMINDER_INTRO = "Tickets on your My Tasks page are still waiting for you."
+REMINDER_SUBJECT = "HOPE reminder: you have new tasks"
+REMINDER_INTRO = f"Reminder: {NEW_TASKS_INTRO}"
 
 
 def start_tracking(user: "User", business_area: "BusinessArea") -> MyTasksTracking:
@@ -67,11 +65,13 @@ def _stamp_seen(user: "User", ticket_ids: "Iterable[Any]", now: datetime) -> Non
 
 
 def mark_seen(user: "User", ticket: GrievanceTicket, now: datetime | None = None) -> None:
-    """Stamp that the user opened the ticket and end their email cycle in its business area."""
+    """Stamp that the user opened the ticket; their email cycle ends once nothing on My Tasks is unread."""
     _stamp_seen(user, [ticket.pk], now or timezone.now())
-    MyTasksTracking.objects.filter(user=user, business_area=ticket.business_area).update(
-        first_email_at=None, last_reminder_at=None
-    )
+    tracking = MyTasksTracking.objects.filter(
+        user=user, business_area=ticket.business_area, first_email_at__isnull=False
+    ).first()
+    if tracking is not None:
+        _end_cycle_if_nothing_unread(tracking, unread_tabs(user, ticket.business_area, tracking.created_at))
 
 
 def mark_tab_seen(
@@ -83,19 +83,22 @@ def mark_tab_seen(
         TAB_SCOPES[tab](user, business_area), unread=True
     )
     _stamp_seen(user, unread.values_list("pk", flat=True), now or timezone.now())
-    tracking.first_email_at = None
-    tracking.last_reminder_at = None
-    tracking.save(update_fields=["first_email_at", "last_reminder_at"])
-    return unread_tabs(user, business_area, tracking.created_at)
+    tabs = unread_tabs(user, business_area, tracking.created_at)
+    _end_cycle_if_nothing_unread(tracking, tabs)
+    return tabs
+
+
+def _end_cycle_if_nothing_unread(tracking: MyTasksTracking, tabs: dict[str, bool]) -> None:
+    # while something stays unread the user was already told about it: the reminders keep their schedule
+    if any(tabs.values()):
+        return
+    MyTasksTracking.objects.filter(pk=tracking.pk).update(first_email_at=None, last_reminder_at=None)
 
 
 def _my_tasks_tickets(user: "User", business_area: "BusinessArea") -> "QuerySet[GrievanceTicket]":
-    # closed tickets are what the tabs hide by default, so a closure never lights a tab or mails
     return GrievanceTicket.objects.filter(
-        in_active_program_q(),
-        visible_tickets_q(user, business_area, VIEW_LIST_PERMISSIONS),
-        business_area=business_area,
-    ).exclude(status=GrievanceTicket.STATUS_CLOSED)
+        visible_tickets_q(user, business_area, VIEW_LIST_PERMISSIONS), business_area=business_area
+    )
 
 
 def unread_tabs(user: "User", business_area: "BusinessArea", tracking_start: datetime) -> dict[str, bool]:
@@ -169,7 +172,7 @@ class MyTasksNotificationService:
             return 0
 
         if tracking.first_email_at is None:
-            self._send(user, NEW_TASKS_INTRO, tabs)
+            self._send(user, NEW_TASKS_SUBJECT, NEW_TASKS_INTRO, tabs)
             tracking.first_email_at = self.notification_time
             tracking.save(update_fields=["first_email_at"])
             return 1
@@ -186,25 +189,29 @@ class MyTasksNotificationService:
             and self.notification_time < tracking.last_reminder_at + repeat_each - slack
         ):
             return 0
-        self._send(user, REMINDER_INTRO, tabs)
+        self._send(user, REMINDER_SUBJECT, REMINDER_INTRO, tabs)
         tracking.last_reminder_at = self.notification_time
         tracking.save(update_fields=["last_reminder_at"])
         return 1
 
-    def _send(self, user: "User", intro: str, tabs: dict[str, bool]) -> None:
+    def _send(self, user: "User", subject: str, intro: str, tabs: dict[str, bool]) -> None:
+        unread_presets = [preset for preset, unread in tabs.items() if unread]
         context = {
             "first_name": user.first_name or getattr(user, "username", ""),
             "last_name": user.last_name,
             "intro": intro,
             "tabs": [
                 {"label": TAB_LABELS[preset], "url": my_tasks_url(self.business_area, preset)}
-                for preset, changed in tabs.items()
-                if changed
+                for preset in unread_presets
             ],
         }
         MailjetClient(
-            subject=f"[{self.business_area.name}] HOPE: you have new tasks",
+            subject=f"[{self.business_area.name}] {subject}",
             recipients=[user.email],
             text_body=render_to_string("my_tasks_notification_email.txt", context=context),
             html_body=render_to_string("my_tasks_notification_email.html", context=context),
         ).send_email()
+        logger.info(
+            f"My Tasks email queued for user {user.pk} in {self.business_area.slug}: "
+            f"'{subject}' about {', '.join(unread_presets)}"
+        )

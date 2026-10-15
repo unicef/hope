@@ -31,10 +31,8 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 
-// The tab values travel in the URL as ?tab= and are what the daily digest emails deep-link to;
-// they are also sent as my_tasks_tab, so they must stay in step with hope.apps.grievance.constants
-// (PRESET_*). Sensitivity is not a tab: every email counts sensitive and other tickets separately
-// and links each count with ?sensitive=, which lands on the filter below.
+// The tab values travel in the URL as ?tab= (what the My Tasks emails link to) and are sent as
+// my_tasks_tab, so they must stay in step with hope.apps.grievance.constants (PRESET_*).
 // A tab lists groups of alternatives and needs a match in every one of them: loading any tab
 // calls the ticket list, which refuses a user holding no list-view grant of its own.
 export const MY_TASKS_TABS = [
@@ -61,7 +59,7 @@ export const MY_TASKS_TABS = [
   },
 ];
 
-// Both tabs only ever list active tickets (unassigned ones, and ones waiting for approval), so
+// These tabs only ever list active tickets (unassigned ones, and ones waiting for approval), so
 // neither offers the ticket-status choice.
 const ACTIVE_ONLY_TABS = ['needs-assignment', 'pending-approval'];
 

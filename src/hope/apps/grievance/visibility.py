@@ -67,7 +67,8 @@ def without_program_q() -> Q:
 def visible_tickets_q(user: "User", business_area: "BusinessArea", permissions: Sequence[Permissions]) -> Q:
     """Tickets `user` may see under a six-permission set (all / creator / owner, non-sensitive then sensitive).
 
-    A programme-scoped grant covers that programme's tickets plus the ones in no programme.
+    A programme-scoped grant covers that programme's tickets plus the ones in no programme. Without any grant
+    nothing is visible (an empty Q() would filter nothing out).
     """
     is_sensitive = Q(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
     scopes = (
@@ -78,7 +79,7 @@ def visible_tickets_q(user: "User", business_area: "BusinessArea", permissions: 
         (permissions[4], Q(created_by=user), is_sensitive),
         (permissions[5], Q(assigned_to=user), is_sensitive),
     )
-    visible = Q()
+    visible = Q(pk__in=[])
     for permission, role_scope, category_scope in scopes:
         program_ids = _program_ids_for(user, business_area, permission)
         if program_ids:

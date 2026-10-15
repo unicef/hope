@@ -31,18 +31,38 @@ def user(business_area: BusinessArea, program: Program, create_user_role_with_pe
     return user
 
 
-def test_every_tab_holds_an_unread_and_a_read_ticket(user: User, business_area: BusinessArea) -> None:
+@pytest.mark.parametrize("tab", MY_TASKS_TABS)
+def test_every_tab_holds_an_unread_and_a_read_ticket(user: User, business_area: BusinessArea, tab: str) -> None:
     generate_my_tasks_demo([user])
 
     tracking = MyTasksTracking.objects.get(user=user, business_area=business_area)
     tickets = annotate_unread(GrievanceTicket.objects.filter(business_area=business_area), user, tracking.created_at)
-    for tab in MY_TASKS_TABS:
-        in_tab = tickets.filter(TAB_SCOPES[tab](user, business_area))
-        assert {bool(ticket.unread) for ticket in in_tab} == {True, False}, tab
+    in_tab = tickets.filter(TAB_SCOPES[tab](user, business_area))
+    assert set(in_tab.values_list("unread", flat=True)) == {True, False}
+    assert unread_tabs(user, business_area, tracking.created_at)[tab] is True
+
+
+def test_every_label_says_whether_its_ticket_is_unread(user: User, business_area: BusinessArea) -> None:
+    generate_my_tasks_demo([user])
+
+    tracking = MyTasksTracking.objects.get(user=user, business_area=business_area)
+    tickets = annotate_unread(GrievanceTicket.objects.filter(business_area=business_area), user, tracking.created_at)
     # each label says what the user should see, so a wrong backdate shows up as a mismatch here
-    for ticket in tickets:
-        assert bool(ticket.unread) == ticket.description.endswith("- unread"), ticket.description
-    assert unread_tabs(user, business_area, tracking.created_at) == dict.fromkeys(MY_TASKS_TABS, True)
+    assert set(tickets.filter(unread=True).values_list("description", flat=True)) == {
+        "[My Tasks demo] unassigned, created after tracking started - unread",
+        "[My Tasks demo] assigned to you by a colleague yesterday - unread",
+        "[My Tasks demo] sensitive, assigned to you yesterday - unread",
+        "[My Tasks demo] colleague added a note yesterday - unread",
+        "[My Tasks demo] colleague edited it yesterday - unread",
+        "[My Tasks demo] sent for approval yesterday - unread",
+    }
+    assert set(tickets.filter(unread=False).values_list("description", flat=True)) == {
+        "[My Tasks demo] unassigned, created before tracking started - read",
+        "[My Tasks demo] assigned to you before tracking started - read",
+        "[My Tasks demo] colleague edited it, you opened it since - read",
+        "[My Tasks demo] you edited it yourself yesterday - read",
+        "[My Tasks demo] sent for approval before tracking started - read",
+    }
 
 
 def test_running_twice_does_not_duplicate_the_tickets(user: User) -> None:

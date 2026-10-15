@@ -97,6 +97,15 @@ def approver(business_area: BusinessArea, program: Program, create_user_role_wit
 
 
 @pytest.fixture
+def assigner_without_view_grant(
+    business_area: BusinessArea, program: Program, create_user_role_with_permissions: Callable
+) -> User:
+    user = UserFactory(first_name="No", last_name="View", email="no-view@example.com")
+    create_user_role_with_permissions(user, [Permissions.GRIEVANCE_ASSIGN], business_area, program=program)
+    return user
+
+
+@pytest.fixture
 def assignee_tracking(assignee: User, business_area: BusinessArea) -> MyTasksTracking:
     with freeze_time(TRACKING_START):
         return MyTasksTrackingFactory(user=assignee, business_area=business_area)
@@ -464,6 +473,21 @@ def test_opening_a_ticket_ends_the_email_cycle(
     assert (assignee_tracking.first_email_at, assignee_tracking.last_reminder_at) == (None, None)
 
 
+@freeze_time(NEXT_MORNING)
+@pytest.mark.usefixtures("ticket_assigned_after_start")
+def test_opening_another_ticket_keeps_the_email_cycle_while_one_stays_unread(
+    assignee_tracking: MyTasksTracking, ticket_assigned_before_start: GrievanceTicket
+) -> None:
+    assignee_tracking.first_email_at = TRACKING_START
+    assignee_tracking.last_reminder_at = AFTER_START
+    assignee_tracking.save(update_fields=["first_email_at", "last_reminder_at"])
+
+    mark_seen(assignee_tracking.user, ticket_assigned_before_start)
+
+    assignee_tracking.refresh_from_db()
+    assert (assignee_tracking.first_email_at, assignee_tracking.last_reminder_at) == (TRACKING_START, AFTER_START)
+
+
 # --- marking a tab as read ---
 
 
@@ -501,6 +525,21 @@ def test_marking_the_tab_as_read_ends_the_email_cycle(assignee_tracking: MyTasks
 
     assignee_tracking.refresh_from_db()
     assert (assignee_tracking.first_email_at, assignee_tracking.last_reminder_at) == (None, None)
+
+
+@freeze_time(NEXT_MORNING)
+@pytest.mark.usefixtures("unassigned_ticket_created_after_start")
+def test_marking_a_tab_as_read_keeps_the_email_cycle_while_another_tab_is_unread(
+    assigner_tracking: MyTasksTracking,
+) -> None:
+    assigner_tracking.first_email_at = TRACKING_START
+    assigner_tracking.last_reminder_at = AFTER_START
+    assigner_tracking.save(update_fields=["first_email_at", "last_reminder_at"])
+
+    mark_tab_seen(assigner_tracking.user, assigner_tracking.business_area, PRESET_MINE)
+
+    assigner_tracking.refresh_from_db()
+    assert (assigner_tracking.first_email_at, assigner_tracking.last_reminder_at) == (TRACKING_START, AFTER_START)
 
 
 @freeze_time(NEXT_MORNING)
@@ -562,6 +601,16 @@ def test_nothing_unread_sends_nothing(
         sent, _ = MyTasksNotificationService(business_area, "UTC", NEXT_MORNING).send()
 
     assert sent == 0
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True)
+@pytest.mark.usefixtures("assigner_without_view_grant", "unassigned_ticket_created_after_start")
+def test_a_user_without_a_view_list_grant_is_not_emailed(business_area: BusinessArea) -> None:
+    with patch.object(my_tasks_service.MailjetClient, "send_email") as mock_send:
+        sent, _ = MyTasksNotificationService(business_area, "UTC", NEXT_MORNING).send()
+
+    assert sent == 0
+    mock_send.assert_not_called()
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True)
@@ -628,6 +677,20 @@ def test_the_alarm_window_sends_a_reminder(
     assert sent == 1
     assert assignee_tracking.last_reminder_at == alarm_time
     assert assignee_tracking.first_email_at == NEXT_MORNING
+
+
+@override_config(SEND_GRIEVANCES_NOTIFICATION=True, MY_TASKS_ALARM_WINDOW=7)
+@pytest.mark.usefixtures("ticket_assigned_after_start")
+def test_the_reminder_has_its_own_subject(business_area: BusinessArea, assignee_tracking: MyTasksTracking) -> None:
+    assignee_tracking.first_email_at = NEXT_MORNING
+    assignee_tracking.save(update_fields=["first_email_at"])
+
+    with patch.object(my_tasks_service, "MailjetClient") as mock_client:
+        MyTasksNotificationService(business_area, "UTC", NEXT_MORNING + timedelta(days=7)).send()
+
+    kwargs = mock_client.call_args.kwargs
+    assert kwargs["subject"] == "[Afghanistan] HOPE reminder: you have new tasks"
+    assert "Reminder: Tickets on your My Tasks page" in kwargs["text_body"]
 
 
 @override_config(SEND_GRIEVANCES_NOTIFICATION=True, MY_TASKS_ALARM_WINDOW=7, MY_TASKS_REPEAT_EACH=2)

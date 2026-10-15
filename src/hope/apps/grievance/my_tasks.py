@@ -123,18 +123,22 @@ def annotate_unread(
     """Add `unread`: somebody else created, assigned, edited, moved or annotated the ticket after `user` last opened it.
 
     A ticket the user never opened counts from `tracking_start`. A status change stamps `user_modified`, so a
-    ticket sent back or sent for approval counts as edited.
+    ticket sent back or sent for approval counts as edited. Closed tickets and tickets of a finished programme
+    are never unread: the tabs hide them by default, so a closure never lights a row, a tab or an email.
     """
     seen_at = TicketSeen.objects.filter(user=user, ticket=OuterRef("pk")).values("seen_at")[:1]
     note_by_someone_else = TicketNote.objects.filter(ticket=OuterRef("pk"), created_at__gt=OuterRef("seen_at")).exclude(
         created_by=user
     )
-    return tickets.annotate(seen_at=Coalesce(Subquery(seen_at), Value(tracking_start))).annotate(
-        unread=(Q(created_at__gt=F("seen_at")) & ~Q(created_by=user))
+    changed_by_someone_else = (
+        (Q(created_at__gt=F("seen_at")) & ~Q(created_by=user))
         | (Q(assigned_at__gt=F("seen_at"), assigned_at__isnull=False) & ~Q(assigned_by=user))
         | (
             Q(user_modified__gt=F("seen_at"), user_modified__isnull=False, user_modified_by__isnull=False)
             & ~Q(user_modified_by=user)
         )
         | Q(Exists(note_by_someone_else))
+    )
+    return tickets.annotate(seen_at=Coalesce(Subquery(seen_at), Value(tracking_start))).annotate(
+        unread=in_active_program_q() & ~Q(status=GrievanceTicket.STATUS_CLOSED) & changed_by_someone_else
     )

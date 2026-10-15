@@ -58,6 +58,21 @@ def test_log_forging_filter_sanitizes_dict_args() -> None:
     assert str(record.args["key"]) == "evilvalue"
 
 
+def test_log_forging_filter_keeps_numbers_so_percent_d_still_formats() -> None:
+    record = logging.LogRecord(
+        name="test",
+        level=logging.WARNING,
+        pathname="",
+        lineno=0,
+        msg="%s: %d payment(s) skipped, %.2f total",
+        args=("plan\nA", 2, 10.5),
+        exc_info=None,
+    )
+    f = LogForgingFilter()
+    f.filter(record)
+    assert record.getMessage() == "planA: 2 payment(s) skipped, 10.50 total"
+
+
 def test_log_forging_filter_unknown_args_type_passes_through() -> None:
     # args is neither dict nor tuple — filter leaves it untouched (covers elif False branch)
     record = logging.LogRecord(

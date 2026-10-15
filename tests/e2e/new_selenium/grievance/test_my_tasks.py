@@ -22,9 +22,10 @@ pytestmark = pytest.mark.django_db()
 # --- My Tasks ------------------------------------------------------------------------
 #
 # The My Tasks page has three tabs: Needs Assignment (unassigned, active), Assigned To Me and
-# Pending Approval (waiting for an approval the user may give). The My Tasks emails deep-link into
-# them with ?tab=, ?sensitive= and ?overdue=. Every fixture below is one ticket placed on exactly
-# one side of one of those axes, so each test can list a handful and state which of them must show.
+# Pending Approval (waiting for an approval the user may give). The My Tasks emails link into them
+# with ?tab=; the sensitivity and overdue filters travel in the URL as ?sensitive= and ?overdue=.
+# Every fixture below is one ticket placed on exactly one side of one of those axes, so each test
+# can list a handful and state which of them must show.
 #
 # A ticket is unread when somebody else created, assigned, edited or annotated it after the user
 # was last tracked (the ``tracking`` fixture) or last opened it. Unread rows and tabs carry a dot.
@@ -272,8 +273,8 @@ def _open(browser: HopeTestBrowser, business_area: BusinessArea, query: str = ""
     browser.wait_for_text("My Tasks", PAGE_TITLE, timeout=60)
 
 
-def _open_email_link(browser: HopeTestBrowser, url: str) -> None:
-    """Open the exact URL the digest email carries, minus the host the live server replaces."""
+def _open_url(browser: HopeTestBrowser, url: str) -> None:
+    """Open an absolute My Tasks URL (as the email carries it), minus the host the live server replaces."""
     parts = urlsplit(url)
     browser.open(f"{parts.path}?{parts.query}")
     browser.wait_for_text("My Tasks", PAGE_TITLE, timeout=60)
@@ -505,16 +506,16 @@ def test_program_scoped_page_lists_only_that_programs_tickets(
     login.assert_element_absent('th[data-cy="programs"]')
 
 
-# --- Email deep links ----------------------------------------------------------------
+# --- URL parameters ------------------------------------------------------------------
 
 
 @pytest.mark.usefixtures("my_sensitive", "my_overdue_complaint")
-def test_email_deep_link_lands_on_mine_overdue_sensitive(
+def test_url_with_overdue_and_sensitive_lands_on_the_filtered_mine_tab(
     login: HopeTestBrowser,
     business_area: BusinessArea,
     my_recent_sensitive_overdue: GrievanceTicket,
 ) -> None:
-    _open_email_link(login, my_tasks_url(business_area, PRESET_MINE, overdue=True, sensitive=True))
+    _open_url(login, f"{my_tasks_url(business_area, PRESET_MINE)}&overdue=true&sensitive=true")
 
     login.assert_element(f'{TAB_MINE}[aria-selected="true"]')
     login.assert_text("Overdue Only", FILTER_OVERDUE)
@@ -524,12 +525,12 @@ def test_email_deep_link_lands_on_mine_overdue_sensitive(
 
 
 @pytest.mark.usefixtures("unassigned_sensitive", "my_complaint")
-def test_needs_assignment_deep_link_selects_the_tab(
+def test_email_link_selects_the_needs_assignment_tab(
     login: HopeTestBrowser,
     business_area: BusinessArea,
     unassigned_complaint: GrievanceTicket,
 ) -> None:
-    _open_email_link(login, my_tasks_url(business_area, PRESET_NEEDS_ASSIGNMENT, sensitive=False))
+    _open_url(login, f"{my_tasks_url(business_area, PRESET_NEEDS_ASSIGNMENT)}&sensitive=false")
 
     login.assert_element(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
     login.assert_text("Other", FILTER_SENSITIVE)

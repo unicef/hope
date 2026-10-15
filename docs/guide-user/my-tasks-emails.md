@@ -45,7 +45,8 @@ One email per business area, with the business area in the subject:
 > Pending approval - *open My Tasks*
 
 It names the tabs holding unread tickets, each with a link that opens My Tasks on that tab. It
-carries no counts and no ticket IDs.
+carries no counts and no ticket IDs. The reminders are the same email with the subject
+**[Somalia] HOPE reminder: you have new tasks** and "Reminder:" in front of the first sentence.
 
 ---
 
@@ -62,8 +63,10 @@ in the business area's timezone.
 4. The reminder repeats every `MY_TASKS_REPEAT_EACH` days (two by default) for as long as
    something stays unread.
 
-Opening a ticket ends the cycle, and so do **Mark all as read** on a tab and a check that finds
-nothing unread: the next unread ticket starts again with a "you have new tasks" email.
+The cycle ends once nothing is unread any more: you opened the last unread ticket, used **Mark all
+as read** on the last tab with unread tickets, or a check found nothing unread. The next unread
+ticket starts again with a "you have new tasks" email. Opening other tickets while one stays unread
+does not restart the cycle, so the reminders keep their schedule.
 
 ---
 

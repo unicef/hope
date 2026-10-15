@@ -149,6 +149,22 @@ def ticket_assigned_before_start(
 
 
 @pytest.fixture
+def closed_ticket_assigned_after_start(
+    business_area: BusinessArea, program: Program, user: User, colleague: User
+) -> GrievanceTicket:
+    with freeze_time(TRACKING_START):
+        ticket = GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=user,
+            assigned_at=ASSIGNED_AT,
+            assigned_by=colleague,
+            status=GrievanceTicket.STATUS_CLOSED,
+        )
+    ticket.programs.set([program])
+    return ticket
+
+
+@pytest.fixture
 def ticket_assigned_without_a_timestamp(
     business_area: BusinessArea, program: Program, user: User, colleague: User
 ) -> GrievanceTicket:
@@ -388,6 +404,14 @@ def test_the_program_list_flags_the_unread_rows(
     flags = {result["id"]: result["unread"] for result in response.data["results"]}
     assert response.status_code == status.HTTP_200_OK
     assert flags == {str(ticket_assigned_after_start.id): True, str(ticket_assigned_before_start.id): False}
+
+
+@pytest.mark.usefixtures("tracking", "closed_ticket_assigned_after_start")
+def test_a_closed_ticket_is_not_flagged_even_when_the_list_shows_it(api_client: Any, user: User, list_url: str) -> None:
+    response = api_client(user).get(list_url, {"my_tasks_tab": PRESET_MINE, "grievance_status": "all"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [result["unread"] for result in response.data["results"]] == [False]
 
 
 def test_an_opened_ticket_is_no_longer_flagged(

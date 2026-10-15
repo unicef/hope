@@ -1,5 +1,6 @@
 from functools import wraps
 import logging
+from numbers import Number
 from typing import Any, Callable, ParamSpec, TypeVar
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,12 @@ class LogForgingFilter(logging.Filter):
         if not args:
             return True
         if isinstance(args, dict):
-            record.args = {k: _SanitizedValue(v) for k, v in args.items()}
+            record.args = {k: _sanitize(v) for k, v in args.items()}
         elif isinstance(args, tuple):
-            record.args = tuple(_SanitizedValue(a) for a in args)
+            record.args = tuple(_sanitize(a) for a in args)
         return True
+
+
+def _sanitize(value: Any) -> Any:
+    # numbers carry no CR/LF, and wrapping them would break %d / %f formatting
+    return value if isinstance(value, Number) else _SanitizedValue(value)
