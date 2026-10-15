@@ -9,7 +9,7 @@ from hope.apps.household.const import (
     UNIQUE_IN_BATCH,
 )
 from hope.apps.registration_data.api.deduplication_engine import (
-    BiometricDeduplicationEngineAPI,
+    DeduplicationEngineAPI,
     SimilarityPair,
 )
 from hope.models import (
@@ -25,7 +25,7 @@ from hope.models.utils import MergeStatusModel
 logger = logging.getLogger(__name__)
 
 
-PERSISTED_FINDINGS_STATUS_CODES = (
+PERSISTED_BIOMETRIC_FINDINGS_STATUS_CODES = (
     BiometricDedupeSimilarityPair.StatusCode.STATUS_200.value,
     BiometricDedupeSimilarityPair.StatusCode.STATUS_412.value,
     BiometricDedupeSimilarityPair.StatusCode.STATUS_429.value,
@@ -34,18 +34,18 @@ PERSISTED_FINDINGS_STATUS_CODES = (
 )
 
 
-class BiometricDeduplicationService:
-    class BiometricDeduplicationServiceError(Exception):
+class DeduplicationEngineService:
+    class DeduplicationEngineServiceError(Exception):
         pass
 
     def __init__(self) -> None:
-        self.api = BiometricDeduplicationEngineAPI()
+        self.api = DeduplicationEngineAPI()
 
     def parse_findings(self, findings: list[dict]) -> list[SimilarityPair]:
         similarity_pairs: list[SimilarityPair] = []
         for finding in findings:
             status_code = str(finding["status_code"])
-            if status_code not in PERSISTED_FINDINGS_STATUS_CODES:
+            if status_code not in PERSISTED_BIOMETRIC_FINDINGS_STATUS_CODES:
                 logger.debug(f"Dedup Engine Findings, skipping non-persisted status_code={status_code}")
                 continue
             first = finding["first"].get("reference_pk") or None
@@ -63,7 +63,7 @@ class BiometricDeduplicationService:
             )
         return similarity_pairs
 
-    def store_similarity_pairs(
+    def store_biometric_similarity_pairs(
         self,
         program: Program,
         similarity_pairs: list[SimilarityPair],
@@ -169,7 +169,7 @@ class BiometricDeduplicationService:
 
         return qs.distinct()
 
-    def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
+    def create_grievance_tickets_for_biometric_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
         from hope.apps.grievance.services.biometric_photo_ticket import (
             create_biometrics_photo_data_change_tickets,
@@ -188,5 +188,5 @@ class BiometricDeduplicationService:
         )
         create_biometrics_photo_data_change_tickets(deduplication_pairs.filter(status_code__in=photo_error_codes), rdi)
 
-    def get_rdi_findings(self, rdi_country_workspace_id: str) -> list[dict]:
-        return self.api.get_rdi_findings(rdi_country_workspace_id)
+    def get_rdi_biometric_findings(self, rdi_country_workspace_id: str) -> list[dict]:
+        return self.api.get_rdi_biometric_findings(rdi_country_workspace_id)

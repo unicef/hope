@@ -58,6 +58,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             models.Index(fields=["tree_id", "lft"], name="geo_area_tree_id_lft_idx"),
         ]
 
+    # Looks unused, but django-mptt's metaclass reads it to keep areas ordered by name and p_code.
     class MPTTMeta:
         order_insertion_by = ("name", "p_code")
 
