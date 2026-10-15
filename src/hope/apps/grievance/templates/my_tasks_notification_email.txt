@@ -1,7 +1,7 @@
 {% extends 'base_notification_email.txt' %}
 
 {% block content %}
-    {{ intro }} ({{ business_area_name }})
+    {{ intro }}
     {% for tab in tabs %}
     {{ tab.label }} - {{ tab.url|safe }}
     {% endfor %}

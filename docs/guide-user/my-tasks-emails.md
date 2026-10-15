@@ -38,11 +38,11 @@ One email per business area, with the business area in the subject:
 
 > **[Somalia] HOPE: you have new tasks**
 >
-> Tickets on your My Tasks page were created or changed and you have not opened them yet. (Somalia)
+> Tickets on your My Tasks page were created or changed and you have not opened them yet.
 >
-> Assigned to you — *open My Tasks*
+> Assigned to you - *open My Tasks*
 >
-> Pending approval — *open My Tasks*
+> Pending approval - *open My Tasks*
 
 It names the tabs holding unread tickets, each with a link that opens My Tasks on that tab. It
 carries no counts and no ticket IDs.

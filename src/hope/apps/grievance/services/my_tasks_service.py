@@ -195,7 +195,6 @@ class MyTasksNotificationService:
         context = {
             "first_name": user.first_name or getattr(user, "username", ""),
             "last_name": user.last_name,
-            "business_area_name": self.business_area.name,
             "intro": intro,
             "tabs": [
                 {"label": TAB_LABELS[preset], "url": my_tasks_url(self.business_area, preset)}
