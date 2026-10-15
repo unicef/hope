@@ -13,7 +13,7 @@ from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
 )
-from hope.models import BeneficiaryGroup, Program, ProgramCycle
+from hope.models import BeneficiaryGroup, PayeeType, Program, ProgramCycle
 
 program_copied = Signal()
 
@@ -66,6 +66,23 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         version_key = f"{business_area_slug}:{business_area_version}:program_list"
         increment_cache_key(version_key)
+
+    transaction.on_commit(_increment)
+
+
+@receiver(post_save, sender=PayeeType)
+def increase_program_version_cache_on_payee_type_change(sender: Any, instance: PayeeType, **kwargs: dict) -> None:
+    business_area_slugs = list(
+        Program.all_objects.filter(data_collecting_type__payee_type=instance)
+        .order_by()
+        .values_list("business_area__slug", flat=True)
+        .distinct()
+    )
+
+    def _increment() -> None:
+        for business_area_slug in business_area_slugs:
+            business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+            increment_cache_key(f"{business_area_slug}:{business_area_version}:program_list")
 
     transaction.on_commit(_increment)
 

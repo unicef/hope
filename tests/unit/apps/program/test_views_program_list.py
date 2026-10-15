@@ -366,6 +366,29 @@ def test_program_list_caching(
     _test_response_len_and_queries(2, no_queries_cached)
 
 
+def test_program_list_returns_updated_gl_code_after_payee_type_change(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    program: Program,
+    list_url: str,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        create_user_role_with_permissions(user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], afghanistan, program)
+    cached_response = authenticated_client.get(list_url)
+    payee_type = program.data_collecting_type.payee_type
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        payee_type.gl_code = "7700999"
+        payee_type.save()
+    response = authenticated_client.get(list_url)
+
+    assert cached_response.json()["results"][0]["payee_type"]["gl_code"] == "7700410"
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["payee_type"]["gl_code"] == "7700999"
+
+
 def test_program_count_with_permission(
     authenticated_client: Any,
     user: User,
