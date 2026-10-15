@@ -741,10 +741,9 @@ export function formatFigure(
     return '-';
   }
 
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  const numValue = typeof value === 'string' ? value.trim() : value;
 
-  // If parsing failed or value is NaN, return '-'
-  if (isNaN(numValue)) {
+  if (numValue === '' || !Number.isFinite(Number(numValue))) {
     return '-';
   }
 
@@ -754,10 +753,11 @@ export function formatFigure(
   };
 
   // Use Intl.NumberFormat to format number with proper punctuation (thousands separator and decimal point)
-  return new Intl.NumberFormat(undefined, {
+  const formatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: opts.minimumFractionDigits,
     maximumFractionDigits: opts.maximumFractionDigits,
-  }).format(numValue);
+  });
+  return formatter.format(numValue as number | Intl.StringNumericLiteral);
 }
 
 export function paymentPlanStatusMapping(status): string {

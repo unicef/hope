@@ -2,6 +2,7 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { formatFigure } from '@utils/utils';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   InputAdornment,
@@ -64,7 +65,14 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       field: 'totalEntitledQuantityUsd',
       headerName: t('Total Entitled Quantity (USD)'),
       width: 200,
-      renderCell: (params) => <>{params.value || '-'}</>,
+      renderCell: (params) => (
+        <>
+          {formatFigure(params.value, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </>
+      ),
     },
     {
       field: 'lastApprovalProcessDate',

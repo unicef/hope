@@ -14,6 +14,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { Box, Grid, Link, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
+import { formatFigure } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -116,17 +117,26 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Entitled (USD)')}>
-                  {group?.totalEntitledQuantityUsd ?? '-'}
+                  {formatFigure(group?.totalEntitledQuantityUsd, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Delivered (USD)')}>
-                  {group?.totalDeliveredQuantityUsd ?? '-'}
+                  {formatFigure(group?.totalDeliveredQuantityUsd, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Undelivered (USD)')}>
-                  {group?.totalUndeliveredQuantityUsd ?? '-'}
+                  {formatFigure(group?.totalUndeliveredQuantityUsd, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </LabelizedField>
               </Grid>
             </Grid>
