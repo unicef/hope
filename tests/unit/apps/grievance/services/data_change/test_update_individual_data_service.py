@@ -466,7 +466,10 @@ def test_edit_account(update_context: dict[str, Any]) -> None:
             "value": {
                 "number": "2222",
                 "financial_institution": str(fi1.id),
-                "data_fields": [{"key": "new_field", "value": "new_value"}],
+                "data_fields": [
+                    {"key": "new_field", "value": "new_value"},
+                    {"key": "number", "value": "wrong_new_number"},
+                ],
                 "account_type": "mobile",
             },
         }
@@ -485,6 +488,7 @@ def test_edit_account(update_context: dict[str, Any]) -> None:
                     "value": "updated_value",
                 },
                 {"name": "new_field", "previous_value": None, "value": "new_value"},
+                {"name": "number", "previous_value": None, "value": "wrong_updated_number"},
             ],
             "id": "e0a7605f-62f4-4280-99f6-b7a2c4001680",
             "name": "mobile",

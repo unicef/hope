@@ -24,8 +24,8 @@ from hope.apps.household.documents import (
     get_individual_doc,
 )
 from hope.apps.registration_data.celery_tasks import deduplicate_documents_for_rdi
-from hope.apps.registration_data.services.biometric_deduplication import (
-    BiometricDeduplicationService,
+from hope.apps.registration_data.services.deduplication_engine import (
+    DeduplicationEngineService,
 )
 from hope.apps.registration_data.signals import rdi_merged
 from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
@@ -116,10 +116,12 @@ class RdiMergeTask:
                 ):
                     cache.delete(key)
 
-    def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
+    def _create_adjudication_tickets_from_deduplication_engine_findings(
+        self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list
+    ) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
-            dedupe_service = BiometricDeduplicationService()
-            dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
+            dedupe_service = DeduplicationEngineService()
+            dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
 
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
@@ -237,7 +239,9 @@ class RdiMergeTask:
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     deduplicate_documents_for_rdi(str(obj_hct.id))
-                    self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
+                    self._create_adjudication_tickets_from_deduplication_engine_findings(
+                        obj_hct, individuals_to_merge_ids
+                    )
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()

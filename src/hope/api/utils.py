@@ -153,5 +153,6 @@ def _humanize_members_info(members: Any) -> list | dict:
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
+    # Looks unused, but DRF calls it on every session-authenticated request; this override skips the CSRF check.
     def enforce_csrf(self, request: HttpRequest) -> None:
         return

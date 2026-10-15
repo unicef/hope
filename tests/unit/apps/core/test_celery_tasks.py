@@ -1,7 +1,11 @@
 from datetime import timedelta
+import io
+import logging
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from celery.exceptions import Retry
+from celery.signals import after_setup_logger, after_setup_task_logger
+from celery.utils.dispatch import Signal
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 import pytest
@@ -55,6 +59,14 @@ def expired_and_live_sessions() -> None:
         session_data="",
         expire_date=timezone.now() + timedelta(days=1),
     )
+
+
+@pytest.fixture
+def worker_logger() -> logging.Logger:
+    logger = logging.getLogger("test_celery_worker_logger")
+    logger.handlers = [logging.StreamHandler(io.StringIO())]
+    logger.propagate = False
+    return logger
 
 
 ON_FAILURE_ACTION = "unit.apps.core.on_failure_handlers.record_failure"
@@ -434,6 +446,30 @@ def test_celery_configuration_uses_shared_queue_constants() -> None:
     }
     assert celery_fragment.CELERY_TASK_DEFAULT_QUEUE == CELERY_QUEUE_DEFAULT
     assert celery_fragment.CELERY_TASK_PERIODIC_QUEUE == CELERY_QUEUE_PERIODIC
+
+
+@pytest.mark.parametrize(
+    "signal",
+    [
+        pytest.param(after_setup_logger, id="root-logger"),
+        pytest.param(after_setup_task_logger, id="task-logger"),
+    ],
+)
+def test_worker_logging_setup_strips_cr_lf_from_log_args(signal: Signal, worker_logger: logging.Logger) -> None:
+    signal.send(sender=None, logger=worker_logger, loglevel=logging.INFO, logfile=None, format="", colorize=False)
+
+    record = logging.LogRecord(
+        name="test",
+        level=logging.WARNING,
+        pathname="",
+        lineno=0,
+        msg="value: %s",
+        args=("evil\nINJECTED",),
+        exc_info=None,
+    )
+    worker_logger.handlers[0].handle(record)
+
+    assert worker_logger.handlers[0].stream.getvalue() == "value: evilINJECTED\n"
 
 
 @pytest.mark.django_db
