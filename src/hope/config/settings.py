@@ -375,10 +375,8 @@ MAX_STORAGE_FILE_SIZE = 30
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
-    "DEVELOP_DEBUG_TOOLBAR": [],
     "SILK_MIDDLEWARE": [],
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
-    "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
     "IS_ROOT": [{"condition": "boolean", "value": False}],
