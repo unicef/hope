@@ -2,14 +2,13 @@ from typing import Any
 
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory
+from extras.test_utils.factories import BusinessAreaFactory, FundsCommitmentFactory
 from hope.contrib.api.serializers.vision import (
     FundsCommitmentItemSerializer,
     FundsCommitmentSerializer,
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
 )
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db

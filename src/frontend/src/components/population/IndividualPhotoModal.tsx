@@ -24,7 +24,7 @@ export function IndividualPhotoModal({
     id: individual?.id,
   };
 
-  const { data } = useQuery<IndividualPhotoDetail>({
+  const { data, isFetching, refetch } = useQuery<IndividualPhotoDetail>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve,
       individualPhotosParams,
@@ -33,12 +33,14 @@ export function IndividualPhotoModal({
       RestService.restBusinessAreasProgramsIndividualsPhotosRetrieve(
         individualPhotosParams,
       ),
-    enabled: !!businessArea && !!selectedProgram?.code && !!individual?.id,
+    // Signed blob URLs expire quickly, so fetch a fresh one each time the modal opens.
+    enabled: false,
   });
 
   return (
     <PhotoModal
-      src={data?.photo}
+      src={isFetching ? undefined : data?.photo}
+      onOpen={() => refetch()}
       variant="button"
       title="Individuals's Photo"
     />

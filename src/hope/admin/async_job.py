@@ -3,7 +3,7 @@ from typing import Any, cast
 
 from admin_extra_buttons.buttons import StandardButton
 from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from django.contrib import admin, messages
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, QuerySet
@@ -67,16 +67,6 @@ class UsedValuesListFilter(admin.SimpleListFilter):
     @staticmethod
     def async_job_queryset(request: HttpRequest, model_admin: admin.ModelAdmin[Any]) -> QuerySet[AsyncJob]:
         return cast("QuerySet[AsyncJob]", model_admin.get_queryset(request))
-
-
-class AsyncJobAdminAutoCompleteFilter(AutoCompleteFilter):
-    autocomplete_view_name_suffix: str = ""
-
-    def get_url(self) -> str:
-        return reverse(
-            f"{self.admin_site.name}:{self.model_admin.model._meta.app_label}_"
-            f"{self.model_admin.model._meta.model_name}_{self.autocomplete_view_name_suffix}"
-        )
 
 
 class AsyncJobAdminLinkedAutoCompleteFilter(LinkedAutoCompleteFilter):
