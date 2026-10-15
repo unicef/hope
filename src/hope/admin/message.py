@@ -50,8 +50,6 @@ class MessageAdmin(ViewOnUiMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         return HttpResponseRedirect(f"{url}?message_id={pk}")
 
     def frontend_url(self, obj: Message) -> str | None:
-        if not obj.program:
-            return None
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/accountability/communication/{obj.id}"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

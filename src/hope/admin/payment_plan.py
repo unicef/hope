@@ -20,7 +20,6 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
-from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import BatchReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
@@ -195,13 +194,6 @@ def can_retry_payment_gateway_send(payment_plan: PaymentPlan) -> bool:
     return (
         payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
         and payment_plan.can_send_to_payment_gateway
-    )
-
-
-def has_payment_plan_pg_sync_permission(request: HttpRequest, payment_plan: PaymentPlan) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
-        payment_plan.program,
     )
 
 
@@ -851,10 +843,7 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
         return False
 
     def frontend_url(self, obj: Payment) -> str | None:
-        program = obj.program
-        if program is None:
-            return None
-        return f"/{obj.business_area.slug}/programs/{program.code}/payment-module/payments/{obj.id}"
+        return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/payments/{obj.id}"
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),

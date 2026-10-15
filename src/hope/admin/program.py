@@ -416,6 +416,7 @@ class ProgramAdmin(
             return TemplateResponse(request, "admin/program/program/program_area_limits.html", context)
         return TemplateResponse(request, "admin/program/program/program_area_limits_readonly.html", context)
 
+    # Looks unused, but admin_extra_buttons renders it as the "ES Index" dropdown with check_index and reindex_program.
     @choice(permission="account.can_reindex_programs", label="ES Index", change_list=False)
     def es_index_menu(self, button: Any) -> None:
         button.choices = [self.check_index, self.reindex_program]

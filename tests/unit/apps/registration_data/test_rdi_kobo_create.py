@@ -218,7 +218,7 @@ def test_execute(
     }
     assert individuals_obj_data == expected_ind
 
-    pending_household = individual.pending_household
+    pending_household = PendingHousehold.objects.get(pk=individual.household_id)
     household_obj_data = {
         "residence_status": pending_household.residence_status,
         "country": pending_household.country.iso_code2,

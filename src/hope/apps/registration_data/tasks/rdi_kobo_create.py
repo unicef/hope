@@ -84,7 +84,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         super().__init__()
 
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> str | File | None:
-        logger.info(f"Processing image field: {value}")
+        logger.info("Processing image field: %s", value)
         if not self.registration_data_import.pull_pictures:
             return None
         if self.attachments is None:
@@ -99,7 +99,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         file = File(image_bytes, name=value)
         if is_flex_field:
             return default_storage.save(upload_path(self.registration_data_import, value), file)
-        logger.info(f"Image field processed: {value}")
+        logger.info("Image field processed: %s", value)
         return file
 
     def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> tuple[float, float]:
