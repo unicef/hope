@@ -348,6 +348,8 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
 
     def frontend_url(self, obj: PaymentPlan) -> str:
         base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
+        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+            return f"{base}/target-population/{obj.id}"
         if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             return f"{base}/payment-module/followup-payment-plans/{obj.id}"
         if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
