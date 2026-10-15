@@ -77,7 +77,10 @@ jobs:
     - name: Package Source code
       continue-on-error: true
       run: |
-          zip -r output.zip src
+          zip -r output.zip src \
+            -x '*.test.ts' '*.test.tsx' \
+               'src/frontend/src/mocks/*' 'src/frontend/src/testUtils/*' \
+               '*/migrations/*' 'src/hope/migrations_script/*'
 
     - name: Veracode Pipeline
       id: pipeline-scan

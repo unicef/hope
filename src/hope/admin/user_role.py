@@ -95,12 +95,6 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
     def get_actions(self, request: HttpRequest, action_location: ActionLocation | None = None) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride
 
-    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return request.user.is_staff
-
-    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return False
-
 
 @admin.register(UserRoleAssignment)
 class UserRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
