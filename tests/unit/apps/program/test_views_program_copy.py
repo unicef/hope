@@ -94,7 +94,7 @@ def dct_compatible_of_other_payee_type(
     dct_original: DataCollectingType, incentive_payee_type: PayeeType
 ) -> DataCollectingType:
     dct = DataCollectingTypeFactory(
-        label="Compatible DCT Of Other Payee Type",
+        label="Compatible Other Payee Type",
         code="compother",
         type=DataCollectingType.Type.STANDARD,
         active=True,
