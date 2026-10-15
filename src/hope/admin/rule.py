@@ -9,7 +9,6 @@ from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
 from admin_sync.mixins.admin import SyncModelAdmin
-from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import messages
 from django.contrib.admin import register
@@ -21,6 +20,7 @@ from django.forms.fields import Field as FormField
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.http import content_disposition_header
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -266,7 +266,7 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
                         response = HttpResponse(
                             content_type="text/csv",
                             headers={
-                                "Content-Disposition": 'attachment; filename="{}"'.format(form.cleaned_data["filename"])
+                                "Content-Disposition": content_disposition_header(True, form.cleaned_data["filename"])
                             },
                         )
 
@@ -422,19 +422,3 @@ class RuleAdmin(SyncModelAdmin, ImportExportMixin, TestRuleMixin, LinkedObjectsM
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
-
-    def _get_data(self, record: Any) -> str:
-        roles = RuleCommit.objects.filter(rule=record)
-        collector = ForeignKeysCollector("")
-        objs = []
-        for qs in [roles]:
-            objs.extend(qs)
-        objs.extend(Rule.objects.filter(pk=record.pk))
-        collector.collect(objs)
-        serializer = self.get_serializer("json")
-        return serializer.serialize(
-            collector.data,
-            use_natural_foreign_keys=True,
-            use_natural_primary_keys=True,
-            indent=3,
-        )

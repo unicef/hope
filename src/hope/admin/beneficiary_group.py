@@ -22,7 +22,7 @@ class BeneficiaryGroupForm(forms.ModelForm):
             "active",
         )
 
-    def clean(self) -> dict[str, Any]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         payee_type = cleaned_data.get("payee_type")
         data_collecting_types = cleaned_data.get("data_collecting_types")
