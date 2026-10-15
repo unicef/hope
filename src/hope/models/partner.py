@@ -29,7 +29,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
 
     _tree_manager = TreeManager()
-    objects = models.Manager()
+    objects = models.Manager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "account"
