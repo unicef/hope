@@ -640,7 +640,7 @@ class PaymentPlanService:
 
     @staticmethod
     def _resolve_collectors(
-        payment_plan: PaymentPlan, households: "QuerySet[Household]"
+        payment_plan: PaymentPlan, households: "QuerySet"
     ) -> tuple[list[dict[str, Any]], dict[UUID, Individual], dict[UUID, bool]]:
         """Pick each household's collector and check its wallet against the plan's FSP and delivery mechanism."""
         use_alt_collector_set = {

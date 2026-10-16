@@ -1,4 +1,3 @@
-from decimal import Decimal
 from functools import wraps
 import logging
 import numbers
@@ -70,10 +69,3 @@ class LogForgingFilter(logging.Filter):
         elif isinstance(args, tuple):
             record.args = tuple(_sanitize(a) for a in args)
         return True
-
-
-def _sanitize(value: Any) -> Any:
-    # Numbers can't carry CR/LF, and wrapping them breaks %d / %f placeholders.
-    if isinstance(value, int | float | Decimal):
-        return value
-    return _SanitizedValue(value)
