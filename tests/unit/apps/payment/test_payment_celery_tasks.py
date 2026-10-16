@@ -21,6 +21,7 @@ from extras.test_utils.factories import (
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     HouseholdFactory,
+    IndividualFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
@@ -28,11 +29,11 @@ from extras.test_utils.factories import (
     PaymentVerificationPlanFactory,
     RuleCommitFactory,
     RuleFactory,
-    TargetingCriteriaRuleFactory,
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
 from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task,
     create_payment_plan_payment_list_xlsx_async_task_action,
@@ -59,6 +60,7 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_exclude_beneficiaries_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
+    payment_plan_refresh_payees_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
     periodic_send_payment_plan_reconciliation_overdue_emails_async_task,
     periodic_sync_payment_gateway_account_types_async_task,
@@ -96,6 +98,7 @@ from hope.models import (
     AsyncJobModel,
     AsyncRetryJob,
     FileTemp,
+    IndividualRoleInHousehold,
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
@@ -148,24 +151,67 @@ def financial_service_provider(delivery_mechanism_cash):
 
 
 @pytest.fixture
-def aborted_regular_plan_payment(delivery_mechanism_cash, financial_service_provider):
-    payment_plan = PaymentPlanFactory(
+def aborted_regular_plan(delivery_mechanism_cash, financial_service_provider):
+    return PaymentPlanFactory(
         status=PaymentPlan.Status.ABORTED,
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         currency=CurrencyFactory(code="AFN"),
         delivery_mechanism=delivery_mechanism_cash,
         financial_service_provider=financial_service_provider,
+        total_entitled_quantity=Decimal("100.00"),
     )
-    household = HouseholdFactory(business_area=payment_plan.business_area, program=payment_plan.program, size=1)
-    TargetingCriteriaRuleFactory(household_ids=household.unicef_id, payment_plan=payment_plan)
-    return PaymentFactory(
-        parent=payment_plan,
+
+
+@pytest.fixture
+def entitled_payment(aborted_regular_plan):
+    household = HouseholdFactory(business_area=aborted_regular_plan.business_area, program=aborted_regular_plan.program)
+    payment = PaymentFactory(
+        parent=aborted_regular_plan,
         household=household,
         collector=household.head_of_household,
-        currency=payment_plan.currency,
+        head_of_household=household.head_of_household,
+        currency=aborted_regular_plan.currency,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        conflicted=True,
         entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("100.00"),
+        entitlement_date=timezone.now(),
     )
+    PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={"stale": True})
+    return payment
+
+
+@pytest.fixture
+def score_removed_payment(aborted_regular_plan):
+    return PaymentFactory(
+        parent=aborted_regular_plan,
+        currency=aborted_regular_plan.currency,
+        vulnerability_score=Decimal("1.000"),
+        is_removed=True,
+    )
+
+
+@pytest.fixture
+def excluded_payment(aborted_regular_plan):
+    return PaymentFactory(
+        parent=aborted_regular_plan,
+        currency=aborted_regular_plan.currency,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        excluded=True,
+    )
+
+
+@pytest.fixture
+def new_primary_collector(entitled_payment):
+    household = entitled_payment.household
+    individual = IndividualFactory(
+        household=household,
+        business_area=household.business_area,
+        program=household.program,
+        registration_data_import=household.registration_data_import,
+    )
+    IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).update(individual=individual)
+    return individual
 
 
 @pytest.fixture
@@ -524,37 +570,86 @@ def test_payment_plan_full_rebuild(
     mock_full_rebuild.assert_called_once()
 
 
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
-def test_payment_plan_full_rebuild_of_reactivated_open_plan(mock_full_rebuild: Mock) -> None:
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_reactivate_abort_queues_payees_refresh_for_regular_plan(
+    mock_refresh_payees: Mock,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
     payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ABORTED)
     PaymentFactory(parent=payment_plan)
 
-    PaymentPlanService(payment_plan).reactivate_abort()
-    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+    with (
+        patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        PaymentPlanService(payment_plan).reactivate_abort()
+    job = AsyncRetryJob.objects.latest("pk")
+    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
 
     payment_plan.refresh_from_db(fields=["status", "build_status"])
     assert payment_plan.status == PaymentPlan.Status.OPEN
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    mock_full_rebuild.assert_called_once()
+    assert job.action == "hope.apps.payment.celery_tasks.payment_plan_refresh_payees_async_task_action"
+    mock_refresh_payees.assert_called_once()
 
 
-def test_reactivate_abort_rebuilds_regular_plan_payments_in_plan_currency(
-    aborted_regular_plan_payment: Payment,
+def test_refresh_payees_keeps_payments_and_clears_entitlements(
+    aborted_regular_plan: PaymentPlan,
+    entitled_payment: Payment,
+    score_removed_payment: Payment,
 ) -> None:
-    payment_plan = aborted_regular_plan_payment.parent
+    payment_plan = aborted_regular_plan
+    stale_snapshot_pk = entitled_payment.household_snapshot.pk
 
     PaymentPlanService(payment_plan).reactivate_abort()
-    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, payment_plan)
 
     payment_plan.refresh_from_db()
-    rebuilt_payment = Payment.all_objects.get(parent=payment_plan)
+    entitled_payment.refresh_from_db()
+    score_removed_payment.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.OPEN
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     assert payment_plan.total_entitled_quantity == Decimal("0.00")
-    assert rebuilt_payment.pk != aborted_regular_plan_payment.pk
-    assert rebuilt_payment.household_id == aborted_regular_plan_payment.household_id
-    assert rebuilt_payment.entitlement_quantity is None
-    assert rebuilt_payment.currency.code == "AFN"
+    assert set(Payment.all_objects.filter(parent=payment_plan).values_list("pk", flat=True)) == {
+        entitled_payment.pk,
+        score_removed_payment.pk,
+    }
+    assert entitled_payment.entitlement_quantity is None
+    assert entitled_payment.entitlement_quantity_usd is None
+    assert entitled_payment.entitlement_date is None
+    assert entitled_payment.conflicted is False
+    assert entitled_payment.status == Payment.STATUS_PENDING
+    assert entitled_payment.currency.code == "AFN"
+    assert entitled_payment.household_snapshot.pk != stale_snapshot_pk
+    assert "stale" not in entitled_payment.household_snapshot.snapshot_data
+    assert score_removed_payment.is_removed is True
+    assert score_removed_payment.vulnerability_score == Decimal("1.000")
+
+
+def test_refresh_payees_resolves_current_collector(
+    aborted_regular_plan: PaymentPlan,
+    entitled_payment: Payment,
+    new_primary_collector: Any,
+) -> None:
+    PaymentPlanService(aborted_regular_plan).reactivate_abort()
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, aborted_regular_plan)
+
+    entitled_payment.refresh_from_db()
+    assert entitled_payment.collector == new_primary_collector
+    assert entitled_payment.collector_type == ROLE_PRIMARY
+
+
+def test_refresh_payees_keeps_excluded_payment_not_eligible(
+    aborted_regular_plan: PaymentPlan,
+    excluded_payment: Payment,
+) -> None:
+    PaymentPlanService(aborted_regular_plan).reactivate_abort()
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, aborted_regular_plan)
+
+    excluded_payment.refresh_from_db()
+    assert excluded_payment.status == Payment.STATUS_NOT_ELIGIBLE
+    assert excluded_payment.excluded is True
+    assert excluded_payment.has_valid_wallet is True
 
 
 @pytest.mark.parametrize(
@@ -583,18 +678,18 @@ def test_reactivate_abort_of_child_plan_keeps_its_payments(
     ]
 
 
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_payment_plan_full_rebuild_of_open_plan_marks_failed(mock_retry: Mock, mock_full_rebuild: Mock) -> None:
+def test_payment_plan_refresh_payees_marks_failed(mock_retry: Mock, mock_refresh_payees: Mock) -> None:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.OPEN,
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
     )
     PaymentFactory(parent=payment_plan)
-    mock_full_rebuild.side_effect = Exception("test")
+    mock_refresh_payees.side_effect = Exception("test")
     mock_retry.side_effect = Retry("retry")
     with pytest.raises(Retry):
-        queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan)
+        queue_and_run_retry_task(payment_plan_refresh_payees_async_task, payment_plan)
 
     payment_plan.refresh_from_db(fields=["build_status"])
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED

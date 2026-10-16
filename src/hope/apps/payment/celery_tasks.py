@@ -1660,6 +1660,48 @@ def payment_plan_full_rebuild_async_task(payment_plan: PaymentPlan, update_money
     )
 
 
+def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models import PaymentPlan
+
+    payment_plan_id = job.config["payment_plan_id"]
+
+    with cache.lock(
+        f"{PAYMENT_PLAN_FULL_REBUILD_LOCK_PREFIX}{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
+        try:
+            with transaction.atomic():
+                PaymentPlanService(payment_plan).refresh_payees()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
+        except Exception:
+            logger.exception("Payment plan payees refresh failed")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.build_status_failed()
+            payment_plan.save(update_fields=("build_status", "built_at"))
+            raise
+
+
+def payment_plan_refresh_payees_async_task(payment_plan: PaymentPlan) -> None:
+    payment_plan_id = str(payment_plan.id)
+    AsyncRetryJob.queue_task(
+        instance=payment_plan,
+        job_name=payment_plan_refresh_payees_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.payment_plan_refresh_payees_async_task_action",
+        config={"payment_plan_id": payment_plan_id},
+        group_key="payment",
+        description=f"Refresh payees of reactivated payment plan {payment_plan_id}",
+    )
+
+
 class CheckRapidProVerificationTask:
     def execute(self) -> None:
         from hope.models import PaymentVerificationPlan

@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 
 import pytest
 
@@ -105,10 +106,10 @@ def test_reactivate_aborted_payment_plan(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    aborted_targeted_payment_plan: PaymentPlan,
+    aborted_payment_plan: PaymentPlan,
 ) -> None:
-    payment_plan = aborted_targeted_payment_plan
-    old_payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
+    payment_plan = aborted_payment_plan
+    payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
     with grant_permission(
         user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_REACTIVATE_ABORT
     ):
@@ -120,9 +121,10 @@ def test_reactivate_aborted_payment_plan(
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.OPEN
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    new_payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
-    assert len(new_payment_ids) == 3
-    assert new_payment_ids.isdisjoint(old_payment_ids)
+    assert payment_plan.total_entitled_quantity == Decimal("0.00")
+    assert set(payment_plan.payment_items.values_list("id", flat=True)) == payment_ids
+    assert len(payment_ids) == 3
+    assert not payment_plan.payment_items.filter(entitlement_quantity__isnull=False).exists()
 
 
 def test_split_payment_plan_by_records(
@@ -240,9 +242,7 @@ def test_delete_payment_plan(
             id="reject-at-authorization",
         ),
         pytest.param("locked_fsp_payment_plan", "LOCKED FSP", Permissions.PM_ABORT, ABORT, id="abort"),
-        pytest.param(
-            "aborted_targeted_payment_plan", "ABORTED", Permissions.PM_REACTIVATE_ABORT, REACTIVATE, id="reactivate"
-        ),
+        pytest.param("aborted_payment_plan", "ABORTED", Permissions.PM_REACTIVATE_ABORT, REACTIVATE, id="reactivate"),
         pytest.param("accepted_payment_plan", "ACCEPTED", Permissions.PM_SPLIT, f"{SPLIT}:enabled", id="split"),
         pytest.param("open_payment_plan", "OPEN", Permissions.PM_CREATE, EDIT, id="edit"),
         pytest.param("open_payment_plan", "OPEN", Permissions.PM_CREATE, DELETE, id="delete"),
@@ -270,7 +270,7 @@ def test_lifecycle_action_shown_with_permission(
         pytest.param("in_approval_payment_plan", "IN APPROVAL", REJECT, id="reject-at-approval"),
         pytest.param("in_authorization_payment_plan", "IN AUTHORIZATION", REJECT, id="reject-at-authorization"),
         pytest.param("locked_fsp_payment_plan", "LOCKED FSP", ABORT, id="abort"),
-        pytest.param("aborted_targeted_payment_plan", "ABORTED", REACTIVATE, id="reactivate"),
+        pytest.param("aborted_payment_plan", "ABORTED", REACTIVATE, id="reactivate"),
         pytest.param("open_payment_plan", "OPEN", EDIT, id="edit"),
         pytest.param("open_payment_plan", "OPEN", DELETE, id="delete"),
     ],
