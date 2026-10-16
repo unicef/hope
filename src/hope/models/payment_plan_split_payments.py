@@ -1,6 +1,6 @@
 from django.db import models
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class PaymentPlanSplitPayments(TimeStampedUUIDModel):
@@ -19,3 +19,7 @@ class PaymentPlanSplitPayments(TimeStampedUUIDModel):
         app_label = "payment"
         unique_together = ("payment_plan_split", "payment")
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentplansplitpayments_created_at_e95fd4c6"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentplansplitpayments_updated_at_ced8e717"),
+        ]

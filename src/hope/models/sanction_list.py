@@ -4,7 +4,7 @@ from django.db import models
 from strategy_field.fields import StrategyField
 
 from hope.apps.sanction_list.strategies import registry
-from hope.models.utils import TimeStampedModel, TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedModel, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from hope.apps.sanction_list.strategies._base import BaseSanctionList
@@ -22,6 +22,10 @@ class SanctionList(TimeStampedModel):
             ("refresh_sanction_list", "Can Refresh Sanction List"),
             ("empty_sanction_list", "Can Empty Sanction List"),
         )
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="sanction_list_sanctionlist_created_at_116e1da0"),
+            LongNameIndex(fields=["updated_at"], name="sanction_list_sanctionlist_updated_at_2ecc22f2"),
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -37,3 +41,7 @@ class UploadedXLSXFile(TimeStampedUUIDModel):
 
     class Meta:
         app_label = "sanction_list"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="sanction_list_uploadedxlsxfile_created_at_3bb5c1e7"),
+            LongNameIndex(fields=["updated_at"], name="sanction_list_uploadedxlsxfile_updated_at_6c0e45cf"),
+        ]
