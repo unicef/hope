@@ -201,6 +201,25 @@ def xlsx_invalid_file(payment_plan, user):
 
 
 @pytest.fixture
+def invalid_entitlement_import_case(payment_plan, payments):
+    export_service = XlsxPaymentPlanExportService(payment_plan)
+    workbook = export_service.generate_workbook()
+    payment_id_column = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
+    entitlement_column = export_service.headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY) + 1
+    workbook.active.cell(row=2, column=payment_id_column).value = str(payments[0].unicef_id)
+    cell = workbook.active.cell(row=2, column=entitlement_column)
+    cell.value = "NaN"
+
+    file = BytesIO()
+    workbook.save(file)
+    file.seek(0)
+    import_service = XlsxPaymentPlanImportService(payment_plan, file)
+    import_service.open_workbook()
+    row = next(import_service.ws_payments.iter_rows(min_row=2))
+    return import_service, row, cell.coordinate
+
+
+@pytest.fixture
 def payment_with_alternate_collector(payment_plan, payments, business_area, program):
     payment = payment_plan.eligible_payments.order_by("unicef_id").first()
     alternate_collector = IndividualFactory(
@@ -257,6 +276,16 @@ def test_import_invalid_file(payment_plan, xlsx_invalid_file, payments):
 
     service.validate()
     assert service.errors == error_msg
+
+
+def test_import_invalid_entitlement_amount(invalid_entitlement_import_case, django_assert_num_queries):
+    import_service, row, coordinate = invalid_entitlement_import_case
+
+    with django_assert_num_queries(0):
+        import_service._validate_entitlement(row)
+
+    assert import_service.errors == [XlsxError(import_service.TITLE, coordinate, "Invalid amount")]
+    assert import_service.is_updated is False
 
 
 def test_import_invalid_file_without_required_columns(payment_plan):
@@ -659,8 +688,10 @@ def test_export_payment_plan_payment_list(payment_plan, payments, user):
     wb = export_service.generate_workbook()
 
     assert wb.active["A2"].value == str(payment.unicef_id)
-    assert wb.active["K2"].value == payment.entitlement_quantity
-    assert wb.active["L2"].value == payment.entitlement_quantity_usd
+    assert wb.active["K2"].value == format(payment.entitlement_quantity, "f")
+    assert wb.active["L2"].value == format(payment.entitlement_quantity_usd, "f")
+    assert wb.active["K2"].data_type == "s"
+    assert wb.active["L2"].data_type == "s"
     assert wb.active["F2"].value == "TEST_VILLAGE"
     assert wb.active["N1"].value == "national_id"
     assert wb.active["N2"].value == "Test_Number_National_Id_123"

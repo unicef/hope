@@ -11,7 +11,9 @@ from django.utils.timezone import now
 from rest_framework import serializers
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.api.fields import HopeCurrencyDecimalField
 from hope.apps.core.api.mixins import BaseAPI
+from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.core.utils import chunks
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -21,7 +23,6 @@ from hope.apps.payment.utils import (
     get_quantity_in_usd,
     inactive_currency_reason,
     log_payment_plan_change,
-    to_decimal,
 )
 from hope.models import (
     AccountType,
@@ -110,7 +111,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
 
 
 class PaymentPayloadSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
+    amount = HopeCurrencyDecimalField(required=True)
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
@@ -243,7 +244,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     status: str
     auth_code: str
     fsp_code: str
-    payout_amount: float | None = None
+    payout_amount: Decimal | float | str | None = None
     payout_date: str | None = None
     message: str | None = None
 
@@ -707,7 +708,7 @@ class PaymentGatewayService:
             return None
 
         old_payment = cast("Payment", copy_model_object(payment))
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)  # type: ignore[arg-type]
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -731,9 +732,9 @@ class PaymentGatewayService:
 
             update_fields.extend(["delivered_quantity", "delivered_quantity_usd", "delivery_date"])
             payment.delivery_date = to_utc_midnight(delivery_date) if delivery_date else None
-            payment.delivered_quantity = to_decimal(delivered_quantity)
+            payment.delivered_quantity = normalize_currency_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity),  # type: ignore[arg-type]
+                amount=payment.delivered_quantity,
                 currency=payment_plan.currency,
                 exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
                 currency_exchange_date=payment_plan.currency_exchange_date,

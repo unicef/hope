@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from io import BytesIO
 import json
 from pathlib import Path
@@ -1124,6 +1125,38 @@ def verify_permissions(verification_context: dict[str, Any], create_user_role_wi
         verification_context["business_area"],
         verification_context["program_active"],
     )
+
+
+@pytest.fixture
+def ten_place_manual_verification(verification_context: dict[str, Any]) -> dict[str, Any]:
+    _activate_manual_pvp(verification_context)
+    payment = verification_context["payment_1"]
+    payment.delivered_quantity = Decimal("123.1234567891")
+    payment.save(update_fields=["delivered_quantity"])
+    return verification_context
+
+
+def test_partial_update_preserves_ten_place_received_amount(
+    ten_place_manual_verification: dict[str, Any],
+    verification_record_url: str,
+    verify_permissions: None,
+) -> None:
+    context = ten_place_manual_verification
+
+    response = context["client"].patch(
+        verification_record_url,
+        {
+            "version": context["verification_1"].version,
+            "received_amount": "123.1234567891",
+            "received": True,
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    context["verification_1"].refresh_from_db()
+    assert context["verification_1"].received_amount == Decimal("123.1234567891")
+    assert context["verification_1"].status == PaymentVerification.STATUS_RECEIVED
 
 
 def test_partial_update_rejects_non_manual_channel(

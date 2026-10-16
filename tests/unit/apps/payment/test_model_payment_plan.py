@@ -385,6 +385,31 @@ def test_update_money_fields(payment_plan):
     assert payment_plan.total_undelivered_quantity_usd == Decimal("200.00")
 
 
+@pytest.fixture
+def high_precision_payment_plan(payment_plan):
+    PaymentFactory(
+        parent=payment_plan,
+        entitlement_quantity=Decimal("1000000000000000000.0000000002"),
+        entitlement_quantity_usd=Decimal("1000000000000000000.0000000002"),
+        delivered_quantity=Decimal("0.0000000001"),
+        delivered_quantity_usd=Decimal("0.0000000001"),
+    )
+    return payment_plan
+
+
+def test_update_money_fields_preserves_tenth_place(high_precision_payment_plan, django_assert_num_queries):
+    high_precision_payment_plan.update_money_fields()
+
+    with django_assert_num_queries(1):
+        high_precision_payment_plan.refresh_from_db(
+            fields=["total_undelivered_quantity", "total_undelivered_quantity_usd"]
+        )
+
+    expected = Decimal("1000000000000000000.0000000001")
+    assert high_precision_payment_plan.total_undelivered_quantity == expected
+    assert high_precision_payment_plan.total_undelivered_quantity_usd == expected
+
+
 def test_not_excluded_payments():
     payment_plan = PaymentPlanFactory()
     PaymentFactory(parent=payment_plan, conflicted=False, currency=CurrencyFactory(code="PLN", name="Polish Zloty"))

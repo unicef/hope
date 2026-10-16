@@ -205,6 +205,8 @@ class Importer:
             "collect_type",
             "registration_method",
             "representatives",
+            "total_cash_received",
+            "total_cash_received_usd",
         ]
 
         if currency_code := household_data.get("currency"):

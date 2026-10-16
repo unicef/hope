@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any
 
@@ -79,9 +79,10 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
                 if self._is_empty(existing_row.get(header)) and self._is_empty(payment_row.get(header)):
                     merged[header] = ""
                 else:
-                    merged[header] = self._as_decimal(existing_row.get(header)) + self._as_decimal(
-                        payment_row.get(header)
-                    )
+                    with localcontext(prec=50):
+                        merged[header] = self._as_decimal(existing_row.get(header)) + self._as_decimal(
+                            payment_row.get(header)
+                        )
                 continue
             if self._is_empty(merged.get(header)) and not self._is_empty(payment_row.get(header)):
                 merged[header] = payment_row.get(header)

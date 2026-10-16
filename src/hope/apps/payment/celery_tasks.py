@@ -34,6 +34,7 @@ from hope.apps.payment.utils import (
     log_payment_plan_change,
     log_payment_plan_group_change,
     normalize_score,
+    to_decimal,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
@@ -1718,7 +1719,7 @@ class CheckRapidProVerificationTask:
             return None
         delivered_amount = payment_record_verification.payment.delivered_quantity
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
-        payment_record_verification.received_amount = received_amount
+        payment_record_verification.received_amount = to_decimal(received_amount)
         return payment_record_verification
 
 

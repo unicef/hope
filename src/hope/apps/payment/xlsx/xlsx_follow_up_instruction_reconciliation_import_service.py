@@ -6,11 +6,13 @@ from io import BytesIO
 import logging
 from typing import IO, TYPE_CHECKING, Any, cast
 
+from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.utils import timezone
 import openpyxl
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.handle_total_cash_in_households import (
@@ -22,7 +24,6 @@ from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
     log_payment_plan_change,
-    to_decimal,
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -151,8 +152,9 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 )
             )
             return
-        delivered_quantity_decimal = to_decimal(delivered_quantity)
-        if delivered_quantity_decimal is None:
+        try:
+            delivered_quantity_decimal = normalize_currency_decimal(delivered_quantity)
+        except ValidationError:
             self.errors.append(
                 XlsxError(
                     self.sheetname,
