@@ -1,9 +1,8 @@
 from argparse import ArgumentParser
 from datetime import timedelta
-import os
 from typing import Any
 
-from django.core.management import BaseCommand, execute_from_command_line
+from django.core.management import BaseCommand
 from django.utils import timezone
 from faker import Faker
 
@@ -92,11 +91,6 @@ def init_targeting(seed: str) -> None:
     )
 
 
-def init_clear(seed: str) -> None:
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hope.config.settings")
-    execute_from_command_line(["init_e2e_scenario.py", "--skip-drop"])
-
-
 def init_payment_plan(seed: str) -> None:
     afghanistan = BusinessArea.objects.get(name="Afghanistan")
     addresses = [
@@ -157,7 +151,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "scenario",
             action="store",
-            choices=["targeting", "payment_plan", "init_clear"],
+            choices=["targeting", "payment_plan"],
         )
 
         parser.add_argument(
@@ -172,5 +166,4 @@ class Command(BaseCommand):
         {
             "targeting": init_targeting,
             "payment_plan": init_payment_plan,
-            "init_clear": init_clear,
         }[options["scenario"]](options["seed"])
