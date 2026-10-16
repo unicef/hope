@@ -167,6 +167,8 @@ export const Drawer = ({
       variant={isMobile ? 'temporary' : 'permanent'}
       open={open}
       onClose={handleDrawerClose}
+      // GlobalProgramSelect syncs the selected programme from the URL, so it must stay mounted while closed.
+      ModalProps={{ keepMounted: true }}
       $overlay={isMobile}
       style={{ height: '100vh' }}
       data-cy={dataCy}
