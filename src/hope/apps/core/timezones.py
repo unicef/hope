@@ -75,15 +75,6 @@ def format_human_datetime(
     return f"{localized_value.day} {localized_value:%B %Y} {hour}:{localized_value:%M %p} ({timezone_name})"
 
 
-def local_date(
-    *,
-    user: User | None = None,
-    business_area: BusinessArea | None = None,
-    at: datetime | None = None,
-) -> date:
-    return timezone.localdate(at or timezone.now(), timezone=resolve_timezone(user=user, business_area=business_area))
-
-
 def latest_local_schedule_time(
     timezone_name: str,
     at: datetime,

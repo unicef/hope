@@ -3,7 +3,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from django.db.models import Count, Exists, F, Func, OuterRef, Q, QuerySet, Window
+from django.db.models import Count, Exists, F, OuterRef, Q, QuerySet, Window
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -24,10 +24,6 @@ from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Individual, Program
 
 logger = logging.getLogger(__name__)
-
-
-class IsNull(Func):
-    template = "%(expressions)s IS NULL"
 
 
 def program_with_status_exists(program_status: str) -> Exists:

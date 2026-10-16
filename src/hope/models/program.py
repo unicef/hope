@@ -408,9 +408,3 @@ class Program(
 
     def is_active(self) -> bool:
         return self.status == self.ACTIVE
-
-    @property
-    def can_finish(self) -> bool:
-        from hope.models.program_cycle import ProgramCycle
-
-        return not self.cycles.filter(status=ProgramCycle.ACTIVE).exists()

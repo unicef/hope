@@ -1074,16 +1074,6 @@ class PaymentPlan(
         return self.is_payment_gateway and not has_blocking_payments
 
     @property
-    def can_regenerate_delivery_export_file(self) -> bool:
-        """Can regenerate export_file_delivery."""
-        return (
-            self.status
-            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_delivery is not None
-            and self.background_action_status is None
-        )
-
-    @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
@@ -1108,21 +1098,6 @@ class PaymentPlan(
         if self.status != PaymentPlan.Status.TP_OPEN:
             query &= Q(size__gt=0)
         return query
-
-    @property
-    def has_empty_criteria(self) -> bool:
-        return self.rules.count() == 0
-
-    @property
-    def has_empty_ids_criteria(self) -> bool:
-        has_hh_ids, has_ind_ids = False, False
-        for rule in self.rules.all():
-            if rule.household_ids:
-                has_hh_ids = True
-            if rule.individual_ids:
-                has_ind_ids = True
-
-        return not has_hh_ids and not has_ind_ids
 
     @property
     def excluded_beneficiaries_ids(self) -> list[str | None]:

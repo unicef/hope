@@ -1,6 +1,7 @@
 from decimal import Decimal
 from functools import wraps
 import logging
+import numbers
 from typing import Any, Callable, ParamSpec, TypeVar
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,11 @@ class _SanitizedValue:
 
     def __repr__(self) -> str:
         return safe_log(repr(self._value))
+
+
+def _sanitize(value: Any) -> Any:
+    # Numbers carry no CR/LF, and wrapping them breaks %d / %f - on the record every handler shares.
+    return value if isinstance(value, numbers.Number) else _SanitizedValue(value)
 
 
 # Looks unused, but LOGGING wires it by dotted path in config/fragments/loggers.py.
