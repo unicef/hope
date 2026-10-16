@@ -5,6 +5,7 @@ import type { BreadCrumbsItem } from './BreadCrumbs';
 import { BreadCrumbs } from './BreadCrumbs';
 import type { ReactElement } from 'react';
 import { isValidElement } from 'react';
+import { responsiveValue } from 'src/responsive';
 
 const Wrapper = styled('div')({
   boxShadow:
@@ -17,15 +18,12 @@ const Wrapper = styled('div')({
 const Container = styled('div')({
   display: 'flex',
   alignItems: 'center',
-  padding: '28px 44px',
 });
 
 const HeaderContainer = styled('div')({
   flex: 1,
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center',
-  marginLeft: '20px',
 });
 
 const ActionsContainer = styled('div')({
@@ -42,8 +40,6 @@ const TabsWrapper = styled('div')({
 });
 
 const TitleWrapper = styled('div')({
-  width: '60%',
-  minWidth: '600px',
   transform: 'translateY(-12px)',
   '& label:first-child': {
     fontSize: '24px',
@@ -83,7 +79,7 @@ export function PageHeader({
 }: Props): ReactElement {
   return (
     <Wrapper data-cy="page-header-container">
-      <Container>
+      <Container sx={{ padding: responsiveValue('16px', '28px 44px') }}>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
           <BackButton
@@ -93,10 +89,26 @@ export function PageHeader({
             <ArrowBackRoundedIcon fontSize="large" />
           </BackButton>
         ) : null}
-        <HeaderContainer>
+        <HeaderContainer
+          sx={{
+            flexDirection: responsiveValue('column', 'row'),
+            alignItems: responsiveValue('flex-start', 'center'),
+            gap: responsiveValue(2, 0),
+            minWidth: responsiveValue('0', 'auto'),
+            marginLeft: responsiveValue('8px', '20px'),
+          }}
+        >
           <div>
             {isValidElement(title) && hasInputComponent ? (
-              <TitleWrapper data-cy="page-header-title">{title}</TitleWrapper>
+              <TitleWrapper
+                data-cy="page-header-title"
+                sx={{
+                  width: responsiveValue('100%', '60%'),
+                  minWidth: responsiveValue('0', '600px'),
+                }}
+              >
+                {title}
+              </TitleWrapper>
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
@@ -124,7 +136,14 @@ export function PageHeader({
               </>
             )}
           </div>
-          <ActionsContainer>{children || null}</ActionsContainer>
+          <ActionsContainer
+            sx={{
+              flexWrap: responsiveValue('wrap', 'nowrap'),
+              gap: responsiveValue(2, 0),
+            }}
+          >
+            {children || null}
+          </ActionsContainer>
         </HeaderContainer>
       </Container>
       <TabsWrapper>{tabs}</TabsWrapper>
