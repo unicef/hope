@@ -140,6 +140,7 @@ export function PageHeader({
             sx={{
               flexWrap: responsiveValue('wrap', 'nowrap'),
               gap: responsiveValue(2, 0),
+              width: responsiveValue('100%', 'auto'),
             }}
           >
             {children || null}
