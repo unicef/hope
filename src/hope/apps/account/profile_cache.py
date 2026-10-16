@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from django.core.cache import cache
 from rest_framework_extensions.key_constructor import bits
@@ -39,10 +39,6 @@ class ProfileVersioner:
         key = self._user_key(user_id)
         self._get_or_init(key)
         cache.incr(key)
-
-    def bump_users(self, user_ids: Iterable[UUID]) -> None:
-        for uid in set(filter(None, user_ids)):
-            self.bump_user(uid)
 
     def etag_for(self, user_id: UUID) -> str:
         g, u = self.get_versions(user_id)
