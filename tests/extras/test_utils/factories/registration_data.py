@@ -7,6 +7,7 @@ import factory
 from factory.django import DjangoModelFactory
 
 from hope.models import (
+    BiographicDedupeSimilarityPair,
     BiometricDedupeSimilarityPair,
     BusinessArea,
     ImportData,
@@ -80,6 +81,13 @@ class BiometricDeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
             kwargs["individual1"], kwargs["individual2"] = individual2, individual1
 
         return super()._create(model_class, *args, **kwargs)
+
+
+class BiographicDeduplicationEngineSimilarityPairFactory(BiometricDeduplicationEngineSimilarityPairFactory):
+    class Meta:
+        model = BiographicDedupeSimilarityPair
+
+    status_code = BiographicDedupeSimilarityPair.StatusCode.STATUS_200
 
 
 def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:

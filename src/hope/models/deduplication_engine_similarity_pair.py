@@ -14,7 +14,106 @@ if TYPE_CHECKING:
 IndividualIdField = Literal["country_workspace_id", "id"]
 
 
-class BiometricDedupeSimilarityPair(models.Model):
+class DedupEngineSimilarityPair(models.Model):
+    if TYPE_CHECKING:
+        program: models.ForeignKey["Program"]
+        individual1: models.ForeignKey[Individual | None]
+        individual2: models.ForeignKey[Individual | None]
+
+    similarity_score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+    )  # 0 represents invalid pair (ex. multiple faces detected)
+
+    class Meta:
+        abstract = True
+        app_label = "registration_data"
+        ordering = ("id",)
+        unique_together = ("individual1", "individual2")
+
+    def __str__(self) -> str:
+        return f"[{self._meta.verbose_name}] {self.program} - {self.individual1} / {self.individual2}"
+
+    @classmethod
+    def bulk_add_pairs(
+        cls,
+        program: "Program",
+        duplicates_data: list[SimilarityPair],
+        id_field_name: IndividualIdField = "id",
+    ) -> None:
+        if not duplicates_data:
+            return
+
+        all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
+        id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_field_name, program)
+
+        duplicates: list[DedupEngineSimilarityPair] = []
+        for pair in duplicates_data:
+            if not (pair.first or pair.second):
+                logger.warning("Dedup Engine Findings, both Individuals empty")
+                continue
+
+            first_pk = id_to_hope_pk.get(pair.first) if pair.first else None
+            second_pk = id_to_hope_pk.get(pair.second) if pair.second else None
+
+            if (pair.first and not first_pk) or (pair.second and not second_pk):
+                logger.warning(
+                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist"
+                )
+                continue
+
+            individual1: str | None
+            individual2: str | None
+            if first_pk and second_pk:
+                individual1, individual2 = sorted([first_pk, second_pk])
+            else:
+                individual1, individual2 = first_pk, second_pk
+
+            if individual1 == individual2:
+                logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
+                continue
+
+            duplicates.append(cls._build_pair(program, individual1, individual2, pair))
+
+        if duplicates:
+            with transaction.atomic():
+                cls.objects.bulk_create(duplicates, ignore_conflicts=True)
+
+    @classmethod
+    def _build_pair(
+        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
+    ) -> "DedupEngineSimilarityPair":
+        raise NotImplementedError
+
+    @staticmethod
+    def _extract_unique_ids(duplicates_data: list[SimilarityPair]) -> set[str]:
+        unique_ids: set[str] = set()
+        for pair in duplicates_data:
+            if pair.first:
+                unique_ids.add(pair.first)
+            if pair.second:
+                unique_ids.add(pair.second)
+        return unique_ids
+
+    @staticmethod
+    def _resolve_id_to_hope_pk(
+        unique_ids: set[str], id_field_name: IndividualIdField, program: "Program"
+    ) -> dict[str, str]:
+        # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids.
+        # Otherwise SimilarityPair.first/second is HOPE individual id.
+        # _resolve_id_to_hope_pk returns a map HOPE_ID | country_workspace_id -> HOPE_ID
+        return {
+            str(key): str(pk)
+            for key, pk in Individual.all_objects.filter(
+                program=program,
+                is_removed=False,
+                withdrawn=False,
+                **{f"{id_field_name}__in": unique_ids},
+            ).values_list(id_field_name, "id")
+        }
+
+
+class BiometricDedupeSimilarityPair(DedupEngineSimilarityPair):
     class StatusCode(models.TextChoices):
         STATUS_200 = "200", "Deduplication success"
         STATUS_404 = "404", "No file found"
@@ -53,107 +152,29 @@ class BiometricDedupeSimilarityPair(models.Model):
         null=True,
         blank=True,
     )
-    similarity_score = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-    )  # 0 represents invalid pair (ex. multiple faces detected)
     status_code = models.CharField(max_length=20, choices=StatusCode._status_code_choices)
 
-    class Meta:
-        app_label = "registration_data"
-        ordering = ("id",)
-        unique_together = ("individual1", "individual2")
+    class Meta(DedupEngineSimilarityPair.Meta):
         constraints = [
             # Prevent an Individual from being marked as a duplicate of itself
             # Enforce a consistent ordering to avoid duplicate entries in reverse
             models.CheckConstraint(
                 condition=models.Q(individual1__lt=models.F("individual2")),
-                name="individual1_lt_individual2",
+                name="biometric_individual1_lt_individual2",
             ),
         ]
 
-    def __str__(self) -> str:
-        return f"{self.program} - {self.individual1} / {self.individual2}"
-
     @classmethod
-    def bulk_add_pairs(
-        cls,
-        program: "Program",
-        duplicates_data: list[SimilarityPair],
-        id_field_name: IndividualIdField = "id",
-    ) -> None:
-        if not duplicates_data:
-            return
-
-        all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
-        id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_field_name, program)
-
-        duplicates: list[BiometricDedupeSimilarityPair] = []
-        for pair in duplicates_data:
-            if not (pair.first or pair.second):
-                logger.warning("Dedup Engine Findings, both Individuals empty")
-                continue
-
-            first_pk = id_to_hope_pk.get(pair.first) if pair.first else None
-            second_pk = id_to_hope_pk.get(pair.second) if pair.second else None
-
-            if (pair.first and not first_pk) or (pair.second and not second_pk):
-                logger.warning(
-                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist"
-                )
-                continue
-
-            individual1: str | None
-            individual2: str | None
-            if first_pk and second_pk:
-                individual1, individual2 = sorted([first_pk, second_pk])
-            else:
-                individual1, individual2 = first_pk, second_pk
-
-            if individual1 == individual2:
-                logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
-                continue
-
-            duplicates.append(
-                cls(
-                    program=program,
-                    individual1_id=individual1,
-                    individual2_id=individual2,
-                    status_code=pair.status_code,
-                    similarity_score=pair.score * 100,
-                )
-            )
-
-        if duplicates:
-            with transaction.atomic():
-                cls.objects.bulk_create(duplicates, ignore_conflicts=True)  # type: ignore[arg-type]
-
-    @staticmethod
-    def _extract_unique_ids(duplicates_data: list[SimilarityPair]) -> set[str]:
-        unique_ids: set[str] = set()
-        for pair in duplicates_data:
-            if pair.first:
-                unique_ids.add(pair.first)
-            if pair.second:
-                unique_ids.add(pair.second)
-        return unique_ids
-
-    @staticmethod
-    def _resolve_id_to_hope_pk(
-        unique_ids: set[str], id_field_name: IndividualIdField, program: "Program"
-    ) -> dict[str, str]:
-        # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids.
-        # Otherwise SimilarityPair.first/second is HOPE individual id.
-        # _resolve_id_to_hope_pk returns a map HOPE_ID | country_workspace_id -> HOPE_ID
-        return {
-            str(key): str(pk)
-            for key, pk in Individual.all_objects.filter(
-                program=program,
-                is_removed=False,
-                withdrawn=False,
-                **{f"{id_field_name}__in": unique_ids},
-            ).values_list(id_field_name, "id")
-        }
+    def _build_pair(
+        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
+    ) -> "BiometricDedupeSimilarityPair":
+        return cls(
+            program=program,
+            individual1_id=individual1_id,
+            individual2_id=individual2_id,
+            status_code=pair.status_code,
+            similarity_score=pair.score * 100,
+        )
 
     def serialize_for_ticket(self) -> dict[str, Any]:
         results = {
@@ -194,3 +215,54 @@ class BiometricDedupeSimilarityPair(models.Model):
             )
 
         return duplicates
+
+
+class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
+    class StatusCode(models.TextChoices):
+        STATUS_200 = "200", "Deduplication success"
+        STATUS_500 = "500", "Generic error"
+
+    program = models.ForeignKey(
+        "program.Program",
+        related_name="biographic_dedup_similarity_pairs",
+        on_delete=models.CASCADE,
+    )
+    individual1 = models.ForeignKey(
+        "household.Individual",
+        related_name="biographic_duplicates_1",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    individual2 = models.ForeignKey(
+        "household.Individual",
+        related_name="biographic_duplicates_2",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    status_code = models.CharField(max_length=20, choices=StatusCode.choices)
+    proximity_to_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    class Meta(DedupEngineSimilarityPair.Meta):
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(individual1__lt=models.F("individual2")),
+                name="biographic_individual1_lt_individual2",
+            ),
+        ]
+
+    @classmethod
+    def _build_pair(
+        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
+    ) -> "BiographicDedupeSimilarityPair":
+        # TODO: Biographic score scaling (x100) is not confirmed yet - discuss with Data whether HDE
+        #  biographic scores should be scaled the same way as biometric ones.
+        return cls(
+            program=program,
+            individual1_id=individual1_id,
+            individual2_id=individual2_id,
+            status_code=pair.status_code,
+            similarity_score=pair.score * 100,
+            proximity_to_score=None,  # TODO(05): take proximity_to_score from SimilarityPair
+        )
