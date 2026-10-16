@@ -438,7 +438,7 @@ class PaymentGatewayAPI(BaseAPI):
 
 
 class PaymentGatewayService:
-    ADD_RECORDS_CHUNK_SIZE = 500
+    ADD_RECORDS_CHUNK_SIZE = 50
     SYNC_RECORDS_CHUNK_SIZE = 500
     PENDING_UPDATE_PAYMENT_STATUSES = [
         Payment.STATUS_PENDING,
