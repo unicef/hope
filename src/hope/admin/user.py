@@ -538,7 +538,7 @@ class UserAdmin(
         self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
     ) -> ModelChoiceField | None:
         if db_field.name == "partner":  # Exclude partners that are parent partners
-            kwargs["queryset"] = Partner.objects.select_related("parent").exclude(
+            kwargs["queryset"] = Partner.objects.exclude(
                 id__in=Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
-            )
+            ).select_related("parent")
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

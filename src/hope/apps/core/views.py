@@ -31,11 +31,6 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     return redirect("/login")
 
 
-class CommandForm(forms.Form):
-    command = forms.CharField(label="Command", max_length=255, required=True)
-    no_input = forms.BooleanField(label="No input", required=False)
-
-
 def trigger_error(request: HttpRequest) -> HttpResponse:
     return HttpResponse(1 / 0)
 

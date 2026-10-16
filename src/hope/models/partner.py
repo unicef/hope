@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 from mptt.fields import TreeForeignKey
+from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
 from hope.apps.account.permissions import Permissions
@@ -26,6 +27,9 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         verbose_name=_("Parent"),
     )
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
+
+    _tree_manager = TreeManager()
+    objects = models.Manager()  # type: ignore[assignment]
 
     class Meta:
         app_label = "account"

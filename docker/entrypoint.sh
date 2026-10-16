@@ -10,12 +10,6 @@ else
       python manage.py migrate
       python manage.py runserver 0.0.0.0:8000 --classic
       ;;
-    "cy")
-      python manage.py collectstatic --no-input --no-default-ignore
-      python manage.py migrate
-      python manage.py initcypress --skip-drop
-      python manage.py runserver 0.0.0.0:8000
-      ;;
     "celery-beat")
       celery -A hope.apps.core.celery beat -l INFO --scheduler hope.apps.core.models:CustomDatabaseScheduler
       ;;

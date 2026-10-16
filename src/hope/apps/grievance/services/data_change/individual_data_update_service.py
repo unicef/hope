@@ -1,4 +1,3 @@
-import dataclasses
 from datetime import date, datetime
 from typing import Any
 
@@ -53,22 +52,6 @@ from hope.apps.household.services.locking import lock_household_then_individual
 from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.phone import is_valid_phone_number
 from hope.models import Account, Area, Country, Document, Household, Individual, IndividualIdentity, log_create
-
-
-@dataclasses.dataclass
-class AccountPayloadField:
-    name: str
-    value: str | None = None
-    previous_value: str | None = None
-
-
-@dataclasses.dataclass
-class AccountPayload:
-    id: str
-    name: str
-    approve_status: bool
-    data_fields: list[AccountPayloadField]
-
 
 # core field names picked in the UI that differ from the model attribute they update
 INDIVIDUAL_FIELD_NAME_MAP = {"ind_identification_key": "identification_key"}
