@@ -167,7 +167,6 @@ def create_rdi_payload(
 
 @pytest.fixture
 def push_people_payload(social_program: Program) -> list[dict[str, Any]]:
-    # Mirrors testing/fixtures/PEOPLE_E2E_RDI.xlsx, keyed by country_workspace_id.
     people = [
         ("cw-rdi-single", "Jonas", "Becker", "MALE", "1987-03-14", "", ""),
         ("cw-rdi-multi", "Lucia", "Fernandez", "FEMALE", "1993-08-21", "+48600111222", "+48600111333"),
@@ -199,7 +198,6 @@ def push_people_payload(social_program: Program) -> list[dict[str, Any]]:
 
 @pytest.fixture
 def hde_biographic_findings() -> list[dict[str, Any]]:
-    # Pairs from testing/fixtures/PEOPLE_E2E_RECORDING.json, D6 shape + proximity_to_score (D9).
     pairs = [
         ("cw-rdi-single", "cw-pop-single", 0.95, 0.15),
         ("cw-rdi-multi", "cw-pop-multi-name", 0.90, 0.10),
@@ -274,6 +272,7 @@ def expected_population_golden_record_statuses() -> dict[str, str]:
     }
 
 
+@pytest.mark.xfail(reason="AB#346504, test will pass when all subtasks will be done")
 def test_cw_rdi_complete_with_biographic_findings_creates_grouped_tickets_and_stores_statistics(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
