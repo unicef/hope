@@ -31,7 +31,6 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
-    STATUS_INACTIVE,
     STATUS_WITHDRAWN,
     UNIQUE,
     UNIQUE_IN_BATCH,
@@ -531,10 +530,6 @@ class Individual(
         return STATUS_ACTIVE
 
     @property
-    def cash_assist_status(self) -> str:
-        return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
-
-    @property
     def sanction_list_last_check(self) -> datetime | None:
         if self.program.sanction_lists.exists():
             return cache.get(sanction_list_last_check_key(self.program_id))
@@ -699,9 +694,6 @@ class Individual(
             self.save(update_fields=update_fields)
 
         return self, update_fields
-
-    def count_all_roles(self) -> int:
-        return self.households_and_roles.count()
 
     def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()

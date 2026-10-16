@@ -399,10 +399,6 @@ class Payment(
     def collector_is_alternate(self) -> bool:
         return self.collector_type == ROLE_ALTERNATE
 
-    @property
-    def collector_is_primary(self) -> bool:
-        return self.collector_type == ROLE_PRIMARY
-
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
