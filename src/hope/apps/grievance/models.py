@@ -606,11 +606,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             return ""
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
-    def issue_type_to_string(self) -> "str | _StrPromise | None":
-        if self.category in range(2, 5):
-            return self.get_issue_type()
-        return None
-
     def grievance_type_to_string(self) -> str:
         return "user" if self.category in range(2, 8) else "system"
 
