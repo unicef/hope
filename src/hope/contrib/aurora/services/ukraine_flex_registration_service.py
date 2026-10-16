@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.forms import modelform_factory
 
+from hope.apps.core.upload_paths import upload_path
 from hope.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
@@ -429,7 +430,10 @@ class UkraineUSDCRegistrationService(UkraineBaseRegistrationService):
             individual.detail_id = record.source_id
             # Written only once the individual has validated, so a validation failure leaves no orphan files.
             individual.flex_fields.update(
-                {field_name: default_storage.save(image.name, image) for field_name, image in flex_images.items()}
+                {
+                    field_name: default_storage.save(upload_path(registration_data_import, image.name or ""), image)
+                    for field_name, image in flex_images.items()
+                }
             )
             individual.save()
         except ValidationError as e:

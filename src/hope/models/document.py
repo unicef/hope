@@ -5,6 +5,7 @@ from django.db.models import BooleanField, F, Func, Q, UniqueConstraint, Value
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from hope.apps.core.upload_paths import upload_path
 from hope.models.household import logger
 from hope.models.utils import (
     AbstractSyncable,
@@ -46,7 +47,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=get_document_status_choices, default=STATUS_PENDING, blank=True)
-    photo = models.ImageField(blank=True)
+    photo = models.ImageField(upload_to=upload_path, max_length=255, blank=True)
     cleared = models.BooleanField(default=False, help_text="Cleared used to confirm FOSTER_CHILD relationship")
     cleared_date = models.DateTimeField(default=timezone.now, blank=True)
     cleared_by = models.ForeignKey("account.User", null=True, blank=True, on_delete=models.SET_NULL)

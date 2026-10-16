@@ -98,11 +98,11 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
         to_date_string(individual_data, "birth_date")
-        handle_image_field(individual_data, "photo")
-        handle_image_field(individual_data, "consent_sign")
+        handle_image_field(individual_data, "photo", individual)
+        handle_image_field(individual_data, "consent_sign", individual)
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals")
+        save_images(flex_fields, "individuals", individual)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
@@ -120,7 +120,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document), "approve_status": False} for document in documents
+            {"value": handle_document(document, individual), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove
@@ -184,10 +184,10 @@ class IndividualDataUpdateService(DataChangeService):
         to_phone_number_str(new_individual_data, "phone_no_alternative")
         to_phone_number_str(new_individual_data, "payment_delivery_phone_no")
         to_date_string(new_individual_data, "birth_date")
-        handle_image_field(new_individual_data, "photo")
-        handle_image_field(new_individual_data, "consent_sign")
+        handle_image_field(new_individual_data, "photo", individual)
+        handle_image_field(new_individual_data, "consent_sign", individual)
         verify_flex_fields(flex_fields, "individuals")
-        save_images(flex_fields, "individuals")
+        save_images(flex_fields, "individuals", individual)
         individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
@@ -206,7 +206,7 @@ class IndividualDataUpdateService(DataChangeService):
                 current_value = current_value.name if current_value else ""
             value["previous_value"] = current_value
         documents_with_approve_status = [
-            {"value": handle_document(document), "approve_status": False} for document in documents
+            {"value": handle_document(document, individual), "approve_status": False} for document in documents
         ]
         documents_to_remove_with_approve_status = [
             {"value": document_id, "approve_status": False} for document_id in documents_to_remove

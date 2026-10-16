@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
+from hope.apps.core.upload_paths import upload_path
 from hope.models.utils import TimeStampedUUIDModel
 
 
@@ -43,7 +44,7 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    file = models.FileField()
+    file = models.FileField(upload_to=upload_path, max_length=255)
     error_description = models.TextField(blank=True)
     status = models.CharField(max_length=200, choices=get_kobo_status_choices)
     template_id = models.CharField(max_length=200, blank=True)
