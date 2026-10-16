@@ -40,6 +40,10 @@ logger = logging.getLogger(__name__)
 
 _WILDCARD_ESCAPE = str.maketrans({"\\": r"\\", "*": r"\*", "?": r"\?"})
 
+# Household flex keys matched by `search`
+SEARCHABLE_HOUSEHOLD_FLEX_KEYS = ("facility_name_h_f",)
+_FLEX_KEYS_SAMPLE_SIZE = 50
+
 
 def _prepare_kobo_asset_id_value(code: str) -> str:
     """Prepare value for filter by kobo_asset_id.
@@ -173,7 +177,7 @@ class HouseholdFilter(UpdatedAtFilter):
             .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(Q(id__in=es_ids) | inner_query)
+        return qs.filter(Q(id__in=es_ids) | inner_query | self._flex_search_q(program, search))
 
     def _get_elasticsearch_query_for_households(self, search: str, program: Program) -> dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
@@ -225,8 +229,31 @@ class HouseholdFilter(UpdatedAtFilter):
                 | Q(phone_no_alt_normalized__icontains=search)
                 | Q(detail_id__icontains=search)
                 | Q(program_registration_id__icontains=search)
+                | self._flex_search_q(program, search)
             )
         )
+
+    @staticmethod
+    def _flex_search_q(program: Program | None, search: str) -> Q:
+        """Match `search` against the program's households flex keys.
+
+        Nothing records which flex fields a program uses, so the keys are read from a
+        sample of its oldest households; a key absent from the whole sample is not searched.
+        """
+        if program is None:
+            return Q()
+
+        sampled_keys = set().union(
+            *Household.objects.filter(program=program)
+            .order_by("created_at")
+            .values_list("flex_fields", flat=True)[:_FLEX_KEYS_SAMPLE_SIZE]
+        )
+
+        flex_q = Q()
+        for key in SEARCHABLE_HOUSEHOLD_FLEX_KEYS:
+            if key in sampled_keys:
+                flex_q |= Q(**{f"flex_fields__{key}__icontains": search})
+        return flex_q
 
     def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
         try:
