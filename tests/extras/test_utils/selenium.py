@@ -1,4 +1,5 @@
 from contextlib import suppress
+from datetime import date
 import time
 
 from django.conf import settings
@@ -10,6 +11,12 @@ from seleniumbase import BaseCase
 
 from e2e.helpers.date_picker import fill_mui_date
 from hope.models import User
+
+
+def ui_date(day: date) -> str:
+    """Format a date the way the frontend shows it, e.g. "5 Jan 2026"."""
+    return day.strftime("%-d %b %Y")
+
 
 CLEAR_BROWSER_STORAGE_JS = """
 window.indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)));
@@ -199,6 +206,10 @@ class HopeTestBrowser(BaseCase):
     def assert_value(self, selector: str, expected: str, timeout: int = 10):
         actual = self.get_value(selector, timeout=timeout)
         assert actual == expected, f"Expected value '{expected}' for {selector}, got '{actual}'"
+
+    def assert_elements_absent(self, *selectors: str) -> None:
+        for selector in selectors:
+            self.assert_element_absent(selector)
 
     def select_chip_option(self, name: str, select_selector: str) -> None:
         """Pick one option from a MUI multiple-Select chip field and dismiss the listbox.

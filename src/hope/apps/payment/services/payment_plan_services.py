@@ -36,6 +36,7 @@ from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_rebuild_stats_async_task,
+    payment_plan_refresh_payees_async_task,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
     send_payment_notification_emails_async_task,
@@ -58,10 +59,12 @@ from hope.models import (
     Currency,
     DeliveryMechanism,
     FinancialServiceProvider,
+    Household,
     Individual,
     IndividualRoleInHousehold,
     Payment,
     PaymentDataCollector,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanGroup,
     PaymentPlanSplit,
@@ -596,8 +599,50 @@ class PaymentPlanService:
             pp_split = PaymentPlanSplit.objects.create(payment_plan=payment_plan)
 
         payments_to_create = []
-        households = payment_plan.household_list
+        household_rows, collectors_by_id, wallet_validity_by_collector_id = PaymentPlanService._resolve_collectors(
+            payment_plan, payment_plan.household_list
+        )
+        delivery_mechanism = payment_plan.delivery_mechanism
+        financial_service_provider = payment_plan.financial_service_provider
 
+        for household in household_rows:
+            collector, collector_type = PaymentPlanService._get_collector(household, collectors_by_id)
+
+            payments_to_create.append(
+                Payment(
+                    parent=payment_plan,
+                    parent_split=pp_split,
+                    program_id=payment_plan.program_cycle.program_id,
+                    business_area_id=payment_plan.business_area_id,
+                    status=(
+                        Payment.STATUS_PENDING
+                        if wallet_validity_by_collector_id[collector.id]
+                        else Payment.STATUS_NOT_ELIGIBLE
+                    ),
+                    status_date=timezone.now(),
+                    household_id=household["pk"],
+                    head_of_household_id=household["head_of_household"],
+                    collector=collector,
+                    collector_type=collector_type,
+                    currency=payment_plan.currency,
+                    financial_service_provider=financial_service_provider,
+                    delivery_type=delivery_mechanism,
+                    has_valid_wallet=wallet_validity_by_collector_id[collector.id],
+                )
+            )
+        try:
+            Payment.objects.bulk_create(payments_to_create)
+        except IntegrityError as e:
+            raise ValidationError("Duplicated Households in provided Targeting List") from e
+        payment_plan.refresh_from_db()
+        create_payment_plan_snapshot_data(payment_plan)
+        PaymentPlanService.generate_signature(payment_plan)
+
+    @staticmethod
+    def _resolve_collectors(
+        payment_plan: PaymentPlan, households: "QuerySet"
+    ) -> tuple[list[dict[str, Any]], dict[UUID, Individual], dict[UUID, bool]]:
+        """Pick each household's collector and check its wallet against the plan's FSP and delivery mechanism."""
         use_alt_collector_set = {
             i.strip()
             for row in payment_plan.rules.all().values_list("alternative_collectors_ids", flat=True)
@@ -641,45 +686,12 @@ class PaymentPlanService:
             collector.id: collector
             for collector in Individual.objects.filter(id__in=collector_ids).select_related("household__country")
         }
-        delivery_mechanism = payment_plan.delivery_mechanism
-        financial_service_provider = payment_plan.financial_service_provider
         wallet_validity_by_collector_id = PaymentDataCollector.validate_accounts(
-            financial_service_provider,
-            delivery_mechanism,
+            payment_plan.financial_service_provider,
+            payment_plan.delivery_mechanism,
             collectors_by_id.values(),
         )
-
-        for household in household_rows:
-            collector, collector_type = PaymentPlanService._get_collector(household, collectors_by_id)
-
-            payments_to_create.append(
-                Payment(
-                    parent=payment_plan,
-                    parent_split=pp_split,
-                    program_id=payment_plan.program_cycle.program_id,
-                    business_area_id=payment_plan.business_area_id,
-                    status=(
-                        Payment.STATUS_PENDING
-                        if wallet_validity_by_collector_id[collector.id]
-                        else Payment.STATUS_NOT_ELIGIBLE
-                    ),
-                    status_date=timezone.now(),
-                    household_id=household["pk"],
-                    head_of_household_id=household["head_of_household"],
-                    collector=collector,
-                    collector_type=collector_type,
-                    financial_service_provider=financial_service_provider,
-                    delivery_type=delivery_mechanism,
-                    has_valid_wallet=wallet_validity_by_collector_id[collector.id],
-                )
-            )
-        try:
-            Payment.objects.bulk_create(payments_to_create)
-        except IntegrityError as e:
-            raise ValidationError("Duplicated Households in provided Targeting List") from e
-        payment_plan.refresh_from_db()
-        create_payment_plan_snapshot_data(payment_plan)
-        PaymentPlanService.generate_signature(payment_plan)
+        return household_rows, collectors_by_id, wallet_validity_by_collector_id
 
     @staticmethod
     def _get_collector(
@@ -936,6 +948,8 @@ class PaymentPlanService:
             )
             if program_cycle == self.payment_plan.program_cycle:
                 return
+            if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+                raise ValidationError("Programme Cycle can be changed only within Open status")
             self._validate_pp_cycle(program_cycle)
             self.payment_plan.program_cycle = program_cycle
             if not (payment_plan_group_id := input_data.get("payment_plan_group_id")):
@@ -1726,9 +1740,61 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "build_status"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "build_status"])
 
-        transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan, True))
+        # Child plans take their collectors and entitlements from the source plan, so only regular plans are refreshed.
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
+            transaction.on_commit(lambda: payment_plan_refresh_payees_async_task(self.payment_plan))
 
         return self.payment_plan
+
+    def refresh_payees(self) -> None:
+        """Bring the payments of a reactivated plan up to date without changing the targeted population.
+
+        Collectors, wallet validity and household snapshots are resolved again from the current household data.
+        Entitlements and conflicts are cleared because the plan goes through locking and entitlement setup again.
+        """
+        payment_plan = self.payment_plan
+        payments = list(payment_plan.payment_items(manager="all_objects").all())
+        payments_by_household_id = {payment.household_id: payment for payment in payments}
+        household_rows, collectors_by_id, wallet_validity_by_collector_id = self._resolve_collectors(
+            payment_plan, Household.objects.filter(id__in=payments_by_household_id.keys())
+        )
+        now = timezone.now()
+        for payment in payments:
+            payment.conflicted = False
+            payment.entitlement_quantity = None
+            payment.entitlement_quantity_usd = None
+            payment.entitlement_date = None
+        for household in household_rows:
+            payment = payments_by_household_id[household["pk"]]
+            collector, collector_type = self._get_collector(household, collectors_by_id)
+            has_valid_wallet = wallet_validity_by_collector_id[collector.id]
+            payment.collector = collector
+            payment.collector_type = collector_type
+            payment.head_of_household_id = household["head_of_household"]
+            payment.has_valid_wallet = has_valid_wallet
+            payment.status = (
+                Payment.STATUS_PENDING if has_valid_wallet and not payment.excluded else Payment.STATUS_NOT_ELIGIBLE
+            )
+            payment.status_date = now
+        Payment.all_objects.bulk_update(
+            payments,
+            [
+                "conflicted",
+                "entitlement_quantity",
+                "entitlement_quantity_usd",
+                "entitlement_date",
+                "collector",
+                "collector_type",
+                "head_of_household",
+                "has_valid_wallet",
+                "status",
+                "status_date",
+            ],
+            batch_size=500,
+        )
+        PaymentHouseholdSnapshot.objects.filter(payment__parent=payment_plan).delete()
+        create_payment_plan_snapshot_data(payment_plan)
+        payment_plan.update_money_fields()
 
     @classmethod
     def send_reconciliation_overdue_emails(cls) -> None:
