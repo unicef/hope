@@ -44,7 +44,7 @@ HopeTestBrowser (extends seleniumbase.BaseCase)
 
 `HopeTestBrowser` provides HOPE-specific helpers on top of SeleniumBase:
 
-- `login(username, password)` — logs in via Django admin, clears browser storage
+- `login(username)` — clears browser storage and logs in with a server-side session cookie (no login form)
 - `select_listbox_element(name)` — selects from MUI `ul[role="listbox"]` dropdowns
 - `select_option_by_name(name)` — selects from `data-cy="select-option-*"` dropdowns
 - `scroll_main_content(scroll_by)` — scrolls the MUI main content area
@@ -68,6 +68,12 @@ These fixtures already exist and run automatically. Do **not** add new autouse f
 | `create_unicef_partner`            | UNICEF + UNICEF HQ partners                           |
 | `create_role_with_all_permissions` | Role with all permissions                             |
 | `clear_default_cache`              | Clears Django cache                                   |
+| `cache_per_xdist_worker`           | Gives each xdist worker its own Redis database        |
+| `never_answer_304`                 | Stops the API answering `304 Not Modified`            |
+| `reuse_browser_session`            | One Chrome per xdist worker (new_selenium)            |
+
+The browser is shared by all tests on a worker. The `browser` fixture resets it after each test
+(cookies, storage, extra tabs, alerts), so a test must not rely on state left by another one.
 
 ### On-demand fixtures
 

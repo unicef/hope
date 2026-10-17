@@ -19,6 +19,7 @@ from model_utils.models import SoftDeletableModel
 from strategy_field.fields import StrategyField
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.household.const import NON_BENEFICIARY
 from hope.apps.program.collision_detectors import collision_detectors_registry
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.beneficiary_group import BeneficiaryGroup
@@ -336,8 +337,10 @@ class Program(
         )
 
     def adjust_program_size(self) -> None:
-        self.household_count = self.households.count()
-        self.individual_count = self.individuals.count()
+        self.household_count = self.households.filter(withdrawn=False).count()
+        self.individual_count = (
+            self.individuals.filter(withdrawn=False, duplicate=False).exclude(relationship=NON_BENEFICIARY).count()
+        )
 
     @property
     def households_with_payments_in_program(self) -> QuerySet:
@@ -405,9 +408,3 @@ class Program(
 
     def is_active(self) -> bool:
         return self.status == self.ACTIVE
-
-    @property
-    def can_finish(self) -> bool:
-        from hope.models.program_cycle import ProgramCycle
-
-        return not self.cycles.filter(status=ProgramCycle.ACTIVE).exists()

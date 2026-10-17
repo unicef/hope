@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class AccountabilitySurveysDetails(BaseComponents):
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     label_category = 'div[data-cy="label-Category"]'
     label_survey_title = 'div[data-cy="label-Survey Title"]'
     label_created_by = 'div[data-cy="label-Created By"]'
@@ -27,9 +26,6 @@ class AccountabilitySurveysDetails(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_label_category(self) -> WebElement:
         return self.wait_for(self.label_category)

@@ -77,7 +77,7 @@ class TestSmokeHouseholds:
         page_households: Households,
     ) -> None:
         page_households.select_global_program_filter("Test Programm")
-        page_households.get_nav_programme_population().click()
+        page_households.open_nav_section("Main Menu")
         page_households.get_nav_households().click()
         assert len(page_households.get_households_rows()) == 1
         assert "Items Groups" in page_households.get_table_title().text
@@ -98,7 +98,7 @@ class TestSmokeHouseholds:
         page_households_details: HouseholdsDetails,
     ) -> None:
         page_households.select_global_program_filter("Test Programm")
-        page_households.get_nav_programme_population().click()
+        page_households.open_nav_section("Main Menu")
         page_households.get_nav_households().click()
         page_households.get_households_row_by_number(0).click()
         assert "3" in page_households_details.get_label_household_size().text

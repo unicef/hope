@@ -2,7 +2,6 @@ import contextlib
 from datetime import date, datetime
 import logging
 import os
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -428,11 +427,6 @@ class LoadSanctionListXMLTask:
             correct_value = correct_value.strip()
 
         return correct_value
-
-    def load_from_file(self, file_path: str | Path) -> None:
-        tree = ElementTree.parse(str(file_path))
-        root = tree.getroot()
-        self.parse(root)
 
     def load_from_url(self) -> None:  # pragma: no cover
         parsed_url = urlparse(self.url)

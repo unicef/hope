@@ -25,7 +25,7 @@ def test_create_new_ticket_referral(
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
         Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     ):
-        browser.login(username="noperm_user", password="testtest2", wait_for_drawer=False)
+        browser.login(username="noperm_user", wait_for_drawer=False)
         browser.open(f"/{business_area.slug}/programs/all/grievance/tickets/user-generated")
         browser.wait_for_text("Grievance Tickets", 'h5[data-cy="page-header-title"]', timeout=60)
 
@@ -39,7 +39,7 @@ def test_create_new_ticket_referral(
 
         browser.click('button[data-cy="button-submit"]')
         browser.wait_for_ready_state_complete()
-        browser.click('[data-cy="input-consent"]')
+        browser.check_checkbox('[data-cy="input-consent"]')
         browser.click('button[data-cy="button-submit"]')
         browser.type('textarea[name="description"]', "Happy path test 1234!")
         browser.click('button[data-cy="button-submit"]')

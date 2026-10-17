@@ -5,6 +5,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IconButton, TableCell } from '@mui/material';
@@ -16,7 +17,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 const updatesHeadCells: HeadCell<PDUXlsxUploadList>[] = [
   {
@@ -68,21 +69,12 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
-  const initialQueryVariables = useMemo(
-    () => ({
-      ordering: 'created_at',
-      businessAreaSlug,
-      programCode: programId,
-    }),
-    [businessAreaSlug, programId],
+  const table = useTableState({ defaultOrdering: 'created_at' });
+  const { page } = table;
+  const uploadsListParams = createApiParams(
+    { businessAreaSlug, programCode: programId },
+    table.paginationParams,
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
 
   const {
     data: updatesData,
@@ -92,21 +84,12 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
   } = useQuery<PaginatedPDUXlsxUploadListList>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList,
-      createApiParams(
-        { businessAreaSlug, programCode: programId },
-        queryVariables,
-        { withPagination: true, rowsPerPage: 5 },
-      ),
+      uploadsListParams,
     ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
-        createApiParams(
-          { businessAreaSlug, programCode: programId },
-          queryVariables,
-          { withPagination: true, rowsPerPage: 5 },
-        ),
-      );
-    },
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
+        uploadsListParams,
+      ),
     placeholderData: keepPreviousData,
   });
 
@@ -188,11 +171,8 @@ export const PeriodicDataUpdatesOfflineEdits = (): ReactElement => {
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
       />
     </>
   );

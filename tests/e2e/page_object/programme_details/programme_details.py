@@ -135,7 +135,7 @@ class ProgrammeDetails(BaseComponents):
     # MUI X v9 date fields have no typeable single input; fill via the visible
     # field wrapper (see BaseComponents.fill_date_picker).
     def fill_data_picker_filter(self, value: str) -> None:
-        self.fill_date_picker(self.get_elements(self.data_picker_filter)[0], value)
+        self.fill_date_picker(self.wait_for(self.data_picker_filter), value)
 
     def fill_start_date_cycle(self, value: str) -> None:
         self.fill_date_picker(self.get_start_date_cycle_div(), value)
@@ -148,6 +148,10 @@ class ProgrammeDetails(BaseComponents):
 
     def get_label_partner_name(self) -> WebElement:
         return self.wait_for(self.label_partner_name)
+
+    def get_partner_names(self, number: int) -> list[str]:
+        """Wait until exactly ``number`` partners are listed and return their names."""
+        return [element.text.strip() for element in self.wait_for_count(self.label_partner_name, number)]
 
     def get_label_area_access(self) -> WebElement:
         return self.wait_for(self.label_area_access)

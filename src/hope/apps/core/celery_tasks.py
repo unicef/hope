@@ -1,4 +1,5 @@
 from datetime import timedelta
+from importlib import import_module
 import logging
 from typing import Any
 
@@ -272,3 +273,12 @@ def cleanup_old_periodic_async_jobs_async_task(
     retention_days: int = DEFAULT_PERIODIC_ASYNC_JOBS_RETENTION_DAYS,
 ) -> int:
     return cleanup_old_periodic_async_jobs_async_task_action(retention_days=retention_days)
+
+
+def clear_expired_sessions_async_task_action() -> None:
+    import_module(settings.SESSION_ENGINE).SessionStore.clear_expired()
+
+
+@app.task()
+def clear_expired_sessions_async_task() -> None:
+    clear_expired_sessions_async_task_action()

@@ -2,6 +2,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionHeadCells';
 import { FollowUpInstructionTableRow } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { FollowUpInstructionList } from '@restgenerated/models/FollowUpInstructionList';
@@ -9,22 +10,17 @@ import type { PaginatedFollowUpInstructionListList } from '@restgenerated/models
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { createApiParams } from '@utils/apiUtils';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
 
 export const FollowUpInstructionTable = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
-  const [queryVariables, setQueryVariables] = useState({
-    businessAreaSlug: businessArea,
-    programCode: programId,
-  });
-  const [page, setPage] = useState(0);
+  const table = useTableState();
+  const { page } = table;
 
   const instructionsListParams = {
     businessAreaSlug: businessArea,
     programCode: programId,
-    ...queryVariables,
+    ...table.paginationParams,
   };
   const { data, isLoading, error } =
     useQuery<PaginatedFollowUpInstructionListList>({
@@ -49,10 +45,10 @@ export const FollowUpInstructionTable = (): ReactElement => {
       refetchIntervalInBackground: true,
     });
 
-  const instructionsCountParams = createApiParams(
-    { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-  );
+  const instructionsCountParams = {
+    businessAreaSlug: businessArea,
+    programCode: programId,
+  };
   const { data: dataCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
       RestService.restBusinessAreasProgramsFollowUpInstructionsCountRetrieve,
@@ -71,14 +67,11 @@ export const FollowUpInstructionTable = (): ReactElement => {
     <UniversalRestTable
       title="Follow-up Instructions"
       headCells={headCells}
-      queryVariables={queryVariables}
+      tableState={table}
       data={data}
       error={error}
       isLoading={isLoading}
-      setQueryVariables={setQueryVariables}
       itemsCount={itemsCount}
-      page={page}
-      setPage={setPage}
       renderRow={(row: FollowUpInstructionList) => (
         <FollowUpInstructionTableRow key={row.id} instruction={row} />
       )}

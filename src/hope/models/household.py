@@ -21,6 +21,7 @@ from sorl.thumbnail import ImageField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.household.const import (
     BLANK,
+    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     STATUS_ACTIVE,
@@ -51,7 +52,6 @@ from hope.models.utils import (
 )
 
 if TYPE_CHECKING:
-    from hope.contrib.aurora.models import Record
     from hope.models.area import Area
     from hope.models.business_area import BusinessArea
     from hope.models.individual import Individual
@@ -158,6 +158,7 @@ class Household(
         ],
         {
             "currency.code": "currency",
+            "currency.vision_code": "currency_vision_code",
         },
     )
     business_area = models.ForeignKey(
@@ -767,7 +768,7 @@ class Household(
 
     @property
     def active_individuals(self) -> QuerySet:
-        return self.individuals.filter(withdrawn=False, duplicate=False)
+        return self.individuals.filter(withdrawn=False, duplicate=False).exclude(relationship=NON_BENEFICIARY)
 
     @cached_property
     def primary_collector(self) -> "Individual" | None:
@@ -776,12 +777,6 @@ class Household(
     @cached_property
     def alternate_collector(self) -> "Individual" | None:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
-
-    @property
-    def flex_registrations_record(self) -> "Record" | None:
-        from hope.contrib.aurora.models import Record
-
-        return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
     @property
     def geopoint(self) -> str | None:

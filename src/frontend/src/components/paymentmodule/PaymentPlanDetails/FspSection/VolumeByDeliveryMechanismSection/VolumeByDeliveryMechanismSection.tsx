@@ -7,7 +7,7 @@ import { FieldBorder } from '@core/FieldBorder';
 import type { ChartData, ChartOptions } from 'chart.js';
 import type { FC } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { formatFigure } from '@utils/utils';
+import { formatCurrencyCode, formatFigure } from '@utils/utils';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -66,7 +66,7 @@ export const VolumeByDeliveryMechanismSection: FC<
         >
           <LabelizedField
             label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name ?? '-'})`}
-            value={`${formatFigure(vdm.volume ?? '0.00')} ${paymentPlan.currency} (${formatFigure(vdm.volume_usd ?? '0.00')} USD)`}
+            value={`${formatFigure(vdm.volume ?? '0.00')} ${formatCurrencyCode(paymentPlan.currency, paymentPlan.currencyVisionCode)} (${formatFigure(vdm.volume_usd ?? '0.00')} USD)`}
           />
         </FieldBorder>
       </Grid>

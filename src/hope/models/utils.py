@@ -10,6 +10,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
+from django.forms.fields import Field as FormField
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -205,42 +206,6 @@ class AbstractSyncable(models.Model):
         abstract = True
 
 
-class SoftDeletableDefaultManagerModel(models.Model):
-    """Default manager returns only not-removed entries.
-
-    An abstract base class model with a ``is_removed`` field that
-    marks entries that are not going to be used anymore, but are
-    kept in db for any reason.
-    """
-
-    is_removed = models.BooleanField(default=False)
-
-    active_objects = SoftDeletableManager()
-    objects = BaseManager()
-
-    class Meta:
-        abstract = True
-
-    def delete(
-        self,
-        using: Any = None,
-        keep_parents: bool = False,
-        soft: bool = True,
-        *args: Any,
-        **kwargs: Any,
-    ) -> tuple[int, dict[str, int]]:
-        """Soft delete object (set its ``is_removed`` field to True).
-
-        Actually delete object if setting ``soft`` to False.
-        """
-        if soft:
-            self.is_removed = True
-            self.save(using=using)
-            return 1, {self._meta.label: 1}
-
-        return super().delete(*args, **kwargs, using=using)
-
-
 class ConcurrencyModel(models.Model):
     version = IntegerVersionField()
 
@@ -262,18 +227,6 @@ class UnicefIdentifiedModel(models.Model):
 
 
 class SignatureManager(models.Manager):
-    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> list[T]:
-        from hope.apps.payment.services.payment_household_snapshot_service import (
-            bulk_create_payment_snapshot_data,
-        )
-
-        created_objects = super().bulk_create(objs, *args, **kwargs)
-        bulk_create_payment_snapshot_data([x.id for x in created_objects])
-        for obj in created_objects:
-            obj.update_signature_hash()
-        super().bulk_update(created_objects, ["signature_hash"])
-        return created_objects
-
     def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args: Any, **kwargs: Any) -> int:
         for obj in objs:
             if any(field in fields for field in obj.signature_fields):
@@ -332,13 +285,14 @@ class InternalDataFieldModel(models.Model):
         abstract = True
 
 
+# Looks unused, but payment migration 0001 imports it, so removing it breaks migrations.
 class HorizontalChoiceArrayField(ArrayField):
     def formfield(
         self,
-        form_class: Any | None = ...,
-        choices_form_class: Any | None = ...,
+        form_class: type[forms.Field] | None = None,
+        choices_form_class: type[forms.ChoiceField] | None = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> FormField | None:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,

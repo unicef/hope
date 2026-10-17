@@ -67,6 +67,7 @@ describe('HouseholdMembersTable', () => {
     size: 3,
     residenceStatus: null,
     currency: null,
+    currencyVisionCode: null,
     maleChildrenCount: 0,
     femaleChildrenCount: 1,
     childrenDisabledCount: 0,

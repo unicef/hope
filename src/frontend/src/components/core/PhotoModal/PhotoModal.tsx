@@ -4,20 +4,21 @@ import CloseIcon from '@mui/icons-material/Close';
 import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { PhotoModalFooter } from './PhotoModalFooter';
 import { PhotoModalHeader } from './PhotoModalHeader';
 import withErrorBoundary from '../withErrorBoundary';
 
-export const StyledLink = styled(Link)`
+export const StyledLink = styled.a`
   color: #000;
   width: 200px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   display: inline-block;
+  text-decoration: underline;
+  cursor: pointer;
 `;
 
 export const StyledImage = styled.img`
@@ -52,20 +53,27 @@ function PhotoModal({
   closeHandler,
   showRotate = true,
   alt = 'photo',
+  onOpen,
   children,
 }: {
-  src: string;
+  src?: string;
   alt?: string;
   linkText?: string;
   variant?: 'picture' | 'button' | 'link' | 'pictureClose';
   title?: string;
   closeHandler?;
+  onOpen?: () => void;
   showRotate?: boolean;
   children?: ReactNode;
 }): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
   const { t } = useTranslation();
+
+  const openDialog = (): void => {
+    onOpen?.();
+    setDialogOpen(true);
+  };
 
   const matchVariant = (): ReactElement => {
     let element;
@@ -76,7 +84,7 @@ function PhotoModal({
             data-cy="mini-image"
             alt={alt}
             src={src}
-            onClick={() => setDialogOpen(true)}
+            onClick={openDialog}
           />
         );
         break;
@@ -86,9 +94,7 @@ function PhotoModal({
             data-cy="button-show-photo"
             color="primary"
             variant="outlined"
-            onClick={() => {
-              setDialogOpen(true);
-            }}
+            onClick={openDialog}
           >
             {t('Show Photo')}
           </Button>
@@ -98,10 +104,9 @@ function PhotoModal({
         element = (
           <StyledLink
             data-cy="link-show-photo"
-            onClick={() => {
-              setDialogOpen(true);
-            }}
-            to={null}
+            role="button"
+            tabIndex={0}
+            onClick={openDialog}
           >
             {linkText}
           </StyledLink>
@@ -119,7 +124,7 @@ function PhotoModal({
               data-cy="mini-image-close"
               alt={alt}
               src={src}
-              onClick={() => setDialogOpen(true)}
+              onClick={openDialog}
             />
             <IconButton data-cy="close-icon" onClick={() => closeHandler()}>
               <CloseIcon />
@@ -133,7 +138,7 @@ function PhotoModal({
             data-cy="mini-image"
             alt="photo"
             src={src}
-            onClick={() => setDialogOpen(true)}
+            onClick={openDialog}
           />
         );
     }
@@ -145,7 +150,7 @@ function PhotoModal({
       {children ? (
         <Box
           data-cy="photo-modal-trigger"
-          onClick={() => setDialogOpen(true)}
+          onClick={openDialog}
           sx={{ cursor: 'pointer', display: 'inline-block' }}
         >
           {children}

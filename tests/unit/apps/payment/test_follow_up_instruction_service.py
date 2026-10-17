@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+import re
 from typing import Any
 from unittest.mock import patch
 import uuid
@@ -59,6 +60,16 @@ def currency():
 @pytest.fixture
 def second_currency():
     return CurrencyFactory(code="USD")
+
+
+@pytest.fixture
+def deprecated_syp():
+    return CurrencyFactory(code="SYP", vision_code="SYP", name="Syrian Pound", active=False)
+
+
+@pytest.fixture
+def active_syp():
+    return CurrencyFactory(code="SYP", vision_code="SYP01", name="Syrian Pound")
 
 
 @pytest.fixture
@@ -448,6 +459,45 @@ def test_create_raises_validation_error_for_mixed_currency(
         FollowUpInstructionService(program).create(
             user=user,
             payment_plan_group_ids=[str(group.id)],
+            dispersion_start_date=cycle.start_date + timedelta(days=1),
+            dispersion_end_date=cycle.start_date + timedelta(days=2),
+        )
+
+
+@pytest.fixture
+def group_paid_in_both_syp_denominations(cycle, business_area, deprecated_syp, active_syp, delivery_mechanism, fsp):
+    group = PaymentPlanGroupFactory(cycle=cycle)
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=deprecated_syp,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=active_syp,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    return group
+
+
+def test_create_rejects_currency_variants_sharing_a_code_and_names_both(
+    user,
+    program,
+    cycle,
+    group_paid_in_both_syp_denominations,
+):
+    with pytest.raises(ValidationError, match=re.escape("Found: SYP (SYP01) - Syrian Pound, SYP - Syrian Pound.")):
+        FollowUpInstructionService(program).create(
+            user=user,
+            payment_plan_group_ids=[str(group_paid_in_both_syp_denominations.id)],
             dispersion_start_date=cycle.start_date + timedelta(days=1),
             dispersion_end_date=cycle.start_date + timedelta(days=2),
         )

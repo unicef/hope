@@ -1,7 +1,7 @@
-from typing import Any
-
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
+from rest_framework.request import Request
+from rest_framework.views import APIView
 
 from hope.apps.account.permissions import check_permissions
 
@@ -9,7 +9,7 @@ from hope.apps.account.permissions import check_permissions
 class BaseRestPermission(BasePermission):
     """Base class for custom permissions."""
 
-    def has_permission(self, request: Any, view: Any) -> bool:
+    def has_permission(self, request: Request, view: APIView) -> bool:
         user = request.user
         permissions = view.get_permissions_for_action()
         kwargs = {

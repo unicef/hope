@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, Tooltip, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -43,6 +43,7 @@ export function ReconciliationSummary({
       notDelivered,
       numberOfPayments,
       pending,
+      pendingBreakdown,
       reconciled,
     },
   } = paymentPlan;
@@ -94,13 +95,33 @@ export function ReconciliationSummary({
                   justifyContent: 'flex-start',
                 }}
               >
-                {datasets.map(({ color, label, value }) => (
-                  <Grid size={2} key={label}>
+                {datasets.map(({ color, label, value }) => {
+                  const field = (
                     <FieldBorder color={color}>
                       <LabelizedField label={label} value={value} />
                     </FieldBorder>
-                  </Grid>
-                ))}
+                  );
+                  return (
+                    <Grid size={2} key={label}>
+                      {label === t('Pending') ? (
+                        <Tooltip
+                          arrow
+                          title={
+                            <Box>
+                              <div>{`${t('Pending')}: ${pendingBreakdown.pending}`}</div>
+                              <div>{`${t('Sent to Payment Gateway')}: ${pendingBreakdown.sentToPaymentGateway}`}</div>
+                              <div>{`${t('Sent to FSP')}: ${pendingBreakdown.sentToFsp}`}</div>
+                            </Box>
+                          }
+                        >
+                          <Box tabIndex={0}>{field}</Box>
+                        </Tooltip>
+                      ) : (
+                        field
+                      )}
+                    </Grid>
+                  );
+                })}
                 <Grid size={2}>
                   <ChartContainer data-cy="chart-container">
                     <Pie

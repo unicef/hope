@@ -180,12 +180,12 @@ def test_payment_plan_split_fk_is_autocomplete():
     assert "parent_split" in fields
 
 
-def test_funds_commitment_group_fk_is_autocomplete():
+def test_funds_commitment_header_fk_is_autocomplete():
     model_admin = FundsCommitmentItemAdmin(FundsCommitmentItem, admin.site)
     request = HttpRequest()
     request.user = type("User", (), {"is_superuser": True, "has_perm": lambda *a: True})()
     fields = model_admin.get_autocomplete_fields(request)
-    assert "funds_commitment_group" in fields
+    assert "funds_commitment_header" in fields
 
 
 def test_async_job_recover_button_is_enabled_only_for_missing_jobs(program) -> None:

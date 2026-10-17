@@ -11,6 +11,7 @@ import { getIssueTypeToDisplay } from '../utils/createGrievanceUtils';
 interface NaTicketListItemProps {
   ticket: GrievanceTicketList;
   urgencyChoices: Array<Record<string, any>>;
+  issueTypeChoices: Array<Record<string, any>>;
   selected: boolean;
   managed: boolean;
   needsReassignment: boolean;
@@ -21,6 +22,7 @@ interface NaTicketListItemProps {
 export const NaTicketListItem = ({
   ticket,
   urgencyChoices,
+  issueTypeChoices,
   selected,
   managed,
   needsReassignment,
@@ -31,7 +33,10 @@ export const NaTicketListItem = ({
   const urgencyLabel =
     urgencyChoices.find((choice) => choice.value === ticket.urgency)?.name ||
     '-';
-  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
+  const issueTypeToDisplay = getIssueTypeToDisplay(
+    ticket.issueType,
+    issueTypeChoices,
+  );
 
   let warning: { label: string; dataCy: string } | null = null;
   if (incomplete) {

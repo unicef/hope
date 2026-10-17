@@ -1,11 +1,9 @@
-from typing import Any
-
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import Error, transaction
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
@@ -39,12 +37,13 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area", "rdi", "program", "uploaded_by")
 
+    # Looks unused, but Django admin routes the "add" page here: it starts the xlsx update wizard.
     def add_view(
         self,
         request: HttpRequest,
         form_url: str = "",
         extra_context: dict | None = None,
-    ) -> Any:
+    ) -> HttpResponse:
         return self.xlsx_update(request)
 
     def _stage1(self, request: HttpRequest) -> TemplateResponse:
@@ -153,7 +152,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
                 context,
             )
 
-    def xlsx_update(self, request: HttpRequest) -> Any:
+    def xlsx_update(self, request: HttpRequest) -> TemplateResponse | HttpResponseRedirect:
         if request.method == "GET":
             return self._stage1(request)
 

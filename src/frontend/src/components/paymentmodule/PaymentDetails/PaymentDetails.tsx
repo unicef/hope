@@ -13,6 +13,7 @@ import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
+  formatCurrencyCode,
   formatCurrencyWithSymbol,
   formatFigure,
   formatNormalCaseValue,
@@ -85,7 +86,13 @@ function PaymentDetails({
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField label={t('CURRENCY')} value={payment.currency} />
+            <LabelizedField
+              label={t('CURRENCY')}
+              value={formatCurrencyCode(
+                payment.currency,
+                payment.currencyVisionCode,
+              )}
+            />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
@@ -152,6 +159,7 @@ function PaymentDetails({
                 value={formatCurrencyWithSymbol(
                   paymentVerification.receivedAmount,
                   payment.currency,
+                  payment.currencyVisionCode,
                 )}
               />
             </Grid>

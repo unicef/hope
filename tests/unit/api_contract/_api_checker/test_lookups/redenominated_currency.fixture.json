@@ -1,0 +1,17 @@
+{
+    "redenominated_currency": {
+        "master": {
+            "model": "core.currency",
+            "pk": 2,
+            "fields": {
+                "code": "SYP",
+                "name": "Syrian pound",
+                "is_crypto": false,
+                "vision_code": "SYP01",
+                "active": true,
+                "number_of_decimals": 2
+            }
+        },
+        "deps": []
+    }
+}

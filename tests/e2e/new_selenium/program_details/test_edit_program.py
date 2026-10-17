@@ -25,7 +25,7 @@ def test_edit_programme_updates_details(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program_with_purpose.code}/details/{program_with_purpose.code}")
         browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
@@ -64,7 +64,7 @@ def test_edit_programme_cannot_remove_existing_purpose(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program_with_purpose.code}/details/{program_with_purpose.code}")
         browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
@@ -93,7 +93,7 @@ def test_edit_programme_adds_new_purpose(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program_with_purpose.code}/details/{program_with_purpose.code}")
         browser.wait_for_element_clickable('button[data-cy="button-edit-program"]').click()
         browser.wait_for_element_clickable('li[data-cy="menu-item-edit-details"]').click()
@@ -125,7 +125,7 @@ def test_edit_programme_max_ten_purposes_enforced(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         browser.open(
             f"/{business_area.slug}/programs/{program_with_ten_purposes.code}/details/{program_with_ten_purposes.code}"
         )

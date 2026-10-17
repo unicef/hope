@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Optional
@@ -27,7 +27,7 @@ from model_utils.models import SoftDeletableModel
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hope.apps.household.const import FEMALE, MALE
+from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.contrib.vision.choices import VisionStatus
@@ -125,6 +125,7 @@ class PaymentPlan(
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
             "currency.code": "currency",
+            "currency.vision_code": "currency_vision_code",
         },
     )
 
@@ -665,6 +666,14 @@ class PaymentPlan(
             ),
         ]
 
+    @property
+    def admin_url(self) -> str:
+        from django.urls import reverse
+
+        if self.status in self.PRE_PAYMENT_PLAN_STATUSES:
+            return reverse("admin:payment_targetpopulation_change", args=[self.id])
+        return super().admin_url
+
     def __str__(self) -> str:
         return self.unicef_id or ""
 
@@ -697,7 +706,11 @@ class PaymentPlan(
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
 
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+        active_beneficiary = Q(withdrawn=False, duplicate=False) & ~Q(relationship=NON_BENEFICIARY)
+
+        targeted_individuals = Individual.objects.filter(
+            active_beneficiary, household__id__in=households_ids
+        ).aggregate(
             male_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
             female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
             male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
@@ -965,7 +978,7 @@ class PaymentPlan(
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(
-            self.currency.code, self.currency_exchange_date
+            self.currency.vision_code, self.currency_exchange_date
         )
 
     def available_payment_records(
@@ -1069,16 +1082,6 @@ class PaymentPlan(
         return self.is_payment_gateway and not has_blocking_payments
 
     @property
-    def can_regenerate_delivery_export_file(self) -> bool:
-        """Can regenerate export_file_delivery."""
-        return (
-            self.status
-            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_delivery is not None
-            and self.background_action_status is None
-        )
-
-    @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
@@ -1105,21 +1108,6 @@ class PaymentPlan(
         return query
 
     @property
-    def has_empty_criteria(self) -> bool:
-        return self.rules.count() == 0
-
-    @property
-    def has_empty_ids_criteria(self) -> bool:
-        has_hh_ids, has_ind_ids = False, False
-        for rule in self.rules.all():
-            if rule.household_ids:
-                has_hh_ids = True
-            if rule.individual_ids:
-                has_ind_ids = True
-
-        return not has_hh_ids and not has_ind_ids
-
-    @property
     def excluded_beneficiaries_ids(self) -> list[str | None]:
         """Return HH or Ind IDs based on Program DCT."""
         return (
@@ -1129,7 +1117,7 @@ class PaymentPlan(
         )
 
     @property
-    def currency_exchange_date(self) -> Any:
+    def currency_exchange_date(self) -> date:
         if (
             self.status
             in [

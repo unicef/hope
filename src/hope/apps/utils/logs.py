@@ -1,5 +1,6 @@
 from functools import wraps
 import logging
+import numbers
 from typing import Any, Callable, ParamSpec, TypeVar
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,12 @@ class _SanitizedValue:
         return safe_log(repr(self._value))
 
 
+def _sanitize(value: Any) -> Any:
+    # Numbers carry no CR/LF, and wrapping them breaks %d / %f - on the record every handler shares.
+    return value if isinstance(value, numbers.Number) else _SanitizedValue(value)
+
+
+# Looks unused, but LOGGING wires it by dotted path in config/fragments/loggers.py.
 class LogForgingFilter(logging.Filter):
     """Defense-in-depth filter that strips CR/LF from interpolated log args.
 
@@ -58,7 +65,7 @@ class LogForgingFilter(logging.Filter):
         if not args:
             return True
         if isinstance(args, dict):
-            record.args = {k: _SanitizedValue(v) for k, v in args.items()}
+            record.args = {k: _sanitize(v) for k, v in args.items()}
         elif isinstance(args, tuple):
-            record.args = tuple(_SanitizedValue(a) for a in args)
+            record.args = tuple(_sanitize(a) for a in args)
         return True
