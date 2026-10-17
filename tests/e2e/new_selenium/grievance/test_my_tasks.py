@@ -82,7 +82,6 @@ def my_tasks_program(business_area: BusinessArea) -> Program:
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
-        master_detail=True,
     )
     return ProgramFactory(
         name="My Tasks Program",

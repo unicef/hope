@@ -81,7 +81,13 @@ from e2e.page_object.registration_data_import.registration_data_import import (
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
-from extras.test_utils.factories import BeneficiaryGroupFactory, DocumentTypeFactory, RoleFactory, UserFactory
+from extras.test_utils.factories import (
+    BeneficiaryGroupFactory,
+    DocumentTypeFactory,
+    PayeeTypeFactory,
+    RoleFactory,
+    UserFactory,
+)
 from extras.test_utils.factories.geo import generate_small_areas_for_afghanistan_only
 from extras.test_utils.selenium import CLEAR_BROWSER_STORAGE_JS, reset_browser, session_cookie_for
 from hope.apps.account.permissions import Permissions
@@ -686,6 +692,8 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
+    household_payee_type = PayeeTypeFactory(name="Household", gl_code="7700410", weight=30)
+
     BeneficiaryGroupFactory(
         id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
         name="Main Menu",
@@ -693,7 +701,6 @@ def create_super_user(business_area: BusinessArea) -> User:
         group_label_plural="Items Groups",
         member_label="Item",
         member_label_plural="Items",
-        master_detail=True,
     )
 
     BeneficiaryGroupFactory(
@@ -703,7 +710,6 @@ def create_super_user(business_area: BusinessArea) -> User:
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
-        master_detail=False,
     )
 
     Partner.objects.get_or_create(name="TEST")
@@ -801,9 +807,13 @@ def create_super_user(business_area: BusinessArea) -> User:
     ]
 
     for dct in dct_list:
-        data_collecting_type, _ = DataCollectingType.objects.get_or_create(**dct)
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
+            **{"payee_type": household_payee_type, **dct}
+        )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
+    household_payee_type.default_data_collecting_type = DataCollectingType.objects.filter(code="full").first()
+    household_payee_type.save()
     partner_role_assignment, _ = RoleAssignment.objects.get_or_create(
         business_area=business_area, partner=partner, role=role
     )

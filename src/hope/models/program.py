@@ -21,6 +21,7 @@ from strategy_field.fields import StrategyField
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.household.const import NON_BENEFICIARY
 from hope.apps.program.collision_detectors import collision_detectors_registry
+from hope.apps.program.validators import get_payee_configuration_errors
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 from hope.models.beneficiary_group import BeneficiaryGroup
 from hope.models.data_collecting_type import DataCollectingType
@@ -164,7 +165,7 @@ class Program(
         BeneficiaryGroup,
         on_delete=models.PROTECT,
         related_name="programs",
-        help_text="Program beneficiary group",
+        help_text="Program payee label",
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
     admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
@@ -285,13 +286,15 @@ class Program(
             )
         if not self.data_collecting_type_id or not self.beneficiary_group_id:
             return
-        if (
-            self.data_collecting_type.type == DataCollectingType.Type.SOCIAL and self.beneficiary_group.master_detail
-        ) or (
-            self.data_collecting_type.type == DataCollectingType.Type.STANDARD
-            and not self.beneficiary_group.master_detail
+        previous_program = (
+            None
+            if self._state.adding or self.pk is None
+            else Program.all_objects.select_related("data_collecting_type").filter(pk=self.pk).first()
+        )
+        if errors := get_payee_configuration_errors(
+            self.data_collecting_type, self.beneficiary_group, previous_program=previous_program
         ):
-            raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+            raise ValidationError(errors)
         if self.pk and not self._state.adding and not self.payment_plan_purposes.exists():
             raise ValidationError("Program must have at least one Payment Plan Purpose.")
         if (

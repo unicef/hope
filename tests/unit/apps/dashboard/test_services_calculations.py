@@ -341,7 +341,7 @@ def individuals_count_test_data(afghanistan):
         cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
 
         dct = DataCollectingTypeFactory(type=dct_type)
-        beneficiary_group = BeneficiaryGroupFactory(master_detail=(dct_type != "SOCIAL"))
+        beneficiary_group = BeneficiaryGroupFactory()
         program = ProgramFactory(
             business_area=afghanistan,
             data_collecting_type=dct,
@@ -433,7 +433,7 @@ def children_count_test_data(afghanistan):
         cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
 
         dct = DataCollectingTypeFactory(type=dct_type)
-        beneficiary_group = BeneficiaryGroupFactory(master_detail=(dct_type != "SOCIAL"))
+        beneficiary_group = BeneficiaryGroupFactory()
         program = ProgramFactory(
             business_area=afghanistan,
             data_collecting_type=dct,

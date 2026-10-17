@@ -56,7 +56,6 @@ export const fakeContextProgram = {
       groupLabelPlural: 'Households',
       memberLabel: 'Individual',
       memberLabelPlural: 'Individuals',
-      masterDetail: true,
     },
   },
   setSelectedProgram: () => {},

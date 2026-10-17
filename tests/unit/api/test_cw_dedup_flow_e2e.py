@@ -486,7 +486,7 @@ def social_program(user_business_area: BusinessArea) -> Program:
         type=DataCollectingType.Type.SOCIAL.value,
     )
     dct.limit_to.add(user_business_area)
-    beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory()
     return ProgramFactory(
         status=Program.DRAFT,
         business_area=user_business_area,
