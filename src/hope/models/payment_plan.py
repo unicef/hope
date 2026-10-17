@@ -666,6 +666,14 @@ class PaymentPlan(
             ),
         ]
 
+    @property
+    def admin_url(self) -> str:
+        from django.urls import reverse
+
+        if self.status in self.PRE_PAYMENT_PLAN_STATUSES:
+            return reverse("admin:payment_targetpopulation_change", args=[self.id])
+        return super().admin_url
+
     def __str__(self) -> str:
         return self.unicef_id or ""
 
