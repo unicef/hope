@@ -403,13 +403,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         help_text=_("Date this ticket was most recently changed."),
         db_index=True,
     )
-    last_notification_sent = models.DateTimeField(
-        verbose_name=_("Modified"),
-        null=True,
-        blank=True,
-        help_text=_("Date this ticket was most recently changed."),
-        db_index=True,
-    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -654,6 +647,40 @@ class TicketNote(TimeStampedUUIDModel):
         null=True,
         verbose_name=_("Created by"),
     )
+
+
+class MyTasksTracking(TimeStampedUUIDModel):
+    """Where a user's My Tasks email cycle stands in a business area.
+
+    A row appears the first time the user opens My Tasks or the first time the email check looks at
+    them, so `created_at` is where unread tracking starts: a ticket the user never opened counts as
+    unread only for changes after it.
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="my_tasks_trackings", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="my_tasks_trackings", on_delete=models.CASCADE)
+    # the "you have new tasks" email of the current cycle; ALARM_WINDOW counts from it
+    first_email_at = models.DateTimeField(null=True, blank=True)
+    # the latest alarm or repeat reminder of the current cycle; REPEAT_EACH counts from it
+    last_reminder_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["user", "business_area"], name="unique_my_tasks_tracking_user_business_area"),
+        ]
+
+
+class TicketSeen(TimeStampedUUIDModel):
+    """When a user last opened a ticket; changes made by somebody else after that make it unread again."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="tickets_seen", on_delete=models.CASCADE)
+    ticket = models.ForeignKey(GrievanceTicket, related_name="seen_by", on_delete=models.CASCADE)
+    seen_at = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["user", "ticket"], name="unique_ticket_seen_user_ticket"),
+        ]
 
 
 GENERAL_STATUS_FLOW = {

@@ -141,8 +141,23 @@ CONSTANCE_CONFIG = {
     ),
     "GRIEVANCE_NOTIFICATION_HOUR": (
         6,
-        "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",
+        "Local hour of the My Tasks email check in 24-hour format (0-23; 6 means 06:00)",
         "hour_of_day",
+    ),
+    "MY_TASKS_MONITOR_WINDOW": (
+        1,
+        "Days between My Tasks email checks (1 means every day)",
+        "positive_integers",
+    ),
+    "MY_TASKS_ALARM_WINDOW": (
+        7,
+        "Days without a My Tasks visit after the first email before the reminders start",
+        "positive_integers",
+    ),
+    "MY_TASKS_REPEAT_EACH": (
+        2,
+        "Days between My Tasks reminders while the user still has not visited the page",
+        "positive_integers",
     ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,

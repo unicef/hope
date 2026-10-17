@@ -173,6 +173,7 @@ function ConversionToUsd({
                 color="primary"
                 loading={isPending}
                 disabled={isApplyDisabled}
+                data-cy="button-apply-exchange-rate"
                 onClick={() => {
                   applyExchangeRate({
                     businessAreaSlug: businessArea,
@@ -208,6 +209,7 @@ function ConversionToUsd({
             <FormControlLabel
               value="unore"
               control={<Radio />}
+              data-cy="radio-unore-exchange-rate"
               disabled={areOptionsDisabled}
               label={t('Use UNORE exchange rate')}
             />
@@ -219,6 +221,7 @@ function ConversionToUsd({
             <FormControlLabel
               value="custom"
               control={<Radio />}
+              data-cy="radio-custom-exchange-rate"
               disabled={areOptionsDisabled}
               label={t('Custom exchange rate')}
             />
@@ -230,6 +233,7 @@ function ConversionToUsd({
                   'Enter the amount of local currency against 1 USD',
                 )}
                 value={customExchangeRate}
+                data-cy="input-custom-exchange-rate"
                 disabled={selectedOption !== 'custom' || !isSupportedStatus}
                 onChange={(event) => setCustomExchangeRate(event.target.value)}
                 sx={{ width: { xs: '100%', sm: 280 } }}

@@ -150,6 +150,8 @@ class GrievanceDetailsPage(BaseComponents):
     pagination = 'div[data-cy="pagination"]'
     button_admin = 'div[data-cy="button-admin"]'
     log_row = 'div[data-cy="log-row"]'
+    log_row_multiple = 'div[data-cy^="log-row-"]'
+    detail_row_status = 'div[data-cy="detail-row-status"]'
     payment_record = 'span[data-cy="payment-record"]'
     label_gender = 'div[data-cy="label-GENDER"]'
     grievance_verify = '[data-cy="grievance-verify"]'
@@ -658,6 +660,14 @@ class GrievanceDetailsPage(BaseComponents):
     def get_log_row(self) -> [WebElement]:
         self.wait_for(self.log_row)
         return self.get_elements(self.log_row)
+
+    def get_log_row_multiple(self) -> [WebElement]:
+        self.wait_for(self.log_row_multiple)
+        return self.get_elements(self.log_row_multiple)
+
+    def get_detail_row_status(self) -> [WebElement]:
+        self.wait_for(self.detail_row_status)
+        return self.get_elements(self.detail_row_status)
 
     def get_payment_record(self) -> WebElement:
         return self.wait_for(self.payment_record)
