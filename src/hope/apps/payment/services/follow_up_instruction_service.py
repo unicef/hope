@@ -105,12 +105,12 @@ class FollowUpInstructionService:
             created_by=user,
             financial_service_provider=source_group.financial_service_provider,
             currency=source_group.currency,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
         )
         for source_plan in source_plans:
             follow_up_payment_plan = PaymentPlanService(source_plan).create_follow_up(
                 user=user,
-                dispersion_start_date=dispersion_start_date,
-                dispersion_end_date=dispersion_end_date,
                 follow_up_instruction=instruction,
             )
             log_create(

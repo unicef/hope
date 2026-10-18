@@ -48,6 +48,8 @@ class PaymentPlanGroupFactory(DjangoModelFactory):
 
     cycle = factory.SubFactory(ProgramCycleFactory)
     name = factory.Sequence(lambda n: f"Payment Plan Group {n}")
+    dispersion_start_date = factory.LazyFunction(date.today)
+    dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
 
 
 class FollowUpInstructionFactory(DjangoModelFactory):
@@ -58,6 +60,19 @@ class FollowUpInstructionFactory(DjangoModelFactory):
     business_area = factory.SelfAttribute("program.business_area")
     created_by = factory.SubFactory(UserFactory)
     background_action_status = None
+    dispersion_start_date = factory.LazyFunction(date.today)
+    dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
+
+
+def _set_owner_dispersion_date(payment_plan, create, field, extracted, default):
+    """Dispersion dates live on the plan's group or instruction; a plan's owner without dates gets the default."""
+    owner = payment_plan.payment_plan_group or payment_plan.follow_up_instruction
+    if not create or owner is None:
+        return
+    value = extracted if extracted is not None else getattr(owner, field) or default
+    if getattr(owner, field) != value:
+        setattr(owner, field, value)
+        owner.save(update_fields=[field])
 
 
 class PaymentPlanFactory(DjangoModelFactory):
@@ -66,8 +81,6 @@ class PaymentPlanFactory(DjangoModelFactory):
 
     status_date = factory.LazyFunction(timezone.now)
     status = PaymentPlan.Status.OPEN
-    dispersion_start_date = factory.LazyFunction(date.today)
-    dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     program_cycle = factory.SubFactory(ProgramCycleFactory)
     follow_up_instruction = None
     payment_plan_group = factory.LazyAttribute(
@@ -93,6 +106,14 @@ class PaymentPlanFactory(DjangoModelFactory):
             owner = self.payment_plan_group or self.follow_up_instruction
             owner.financial_service_provider = extracted
             owner.save(update_fields=["financial_service_provider"])
+
+    @factory.post_generation
+    def dispersion_start_date(self, create, extracted, **kwargs):
+        _set_owner_dispersion_date(self, create, "dispersion_start_date", extracted, date.today())
+
+    @factory.post_generation
+    def dispersion_end_date(self, create, extracted, **kwargs):
+        _set_owner_dispersion_date(self, create, "dispersion_end_date", extracted, date.today() + timedelta(days=30))
 
     @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):

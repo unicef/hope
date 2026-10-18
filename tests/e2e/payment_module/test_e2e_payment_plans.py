@@ -1,4 +1,4 @@
-from datetime import UTC
+from datetime import UTC, date
 import os
 from time import sleep
 
@@ -190,6 +190,8 @@ def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
         build_status="OK",
         financial_service_provider=fsp_1,
         currency=Currency.objects.get(code="AFN"),
+        dispersion_start_date=date(2026, 1, 22),
+        dispersion_end_date=date(2030, 6, 30),
         delivery_mechanism=dm_cash,
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
@@ -223,6 +225,8 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         cycle=cycle,
         currency=Currency.objects.get(code="USD"),
         financial_service_provider=fsp,
+        dispersion_start_date=(timezone.now() + relativedelta(days=10)).date(),
+        dispersion_end_date=(timezone.now() + relativedelta(days=15)).date(),
     )
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
@@ -230,8 +234,6 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
             "business_area": program.business_area,
             "program_cycle": cycle,
             "payment_plan_group": group,
-            "dispersion_start_date": timezone.now() + relativedelta(days=10),
-            "dispersion_end_date": timezone.now() + relativedelta(days=15),
             "status_date": timezone.now(),
             "status": PaymentPlan.Status.ACCEPTED,
             "created_by": User.objects.first(),
@@ -507,14 +509,8 @@ class TestSmokePaymentModule:
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
         assert "CURRENCY" in page_new_payment_plan.get_label_group_currency().text.upper()
-        # MUI renders the required-field asterisk as a thin space (U+2009) + "*";
-        # strip the thin space so the bare-asterisk assertion still matches.
-        assert "Dispersion Start Date*" in page_new_payment_plan.wait_for(
-            page_new_payment_plan.input_dispersion_start_date
-        ).text.replace("\u2009", "")
-        assert "Dispersion End Date*" in page_new_payment_plan.wait_for(
-            page_new_payment_plan.input_dispersion_end_date
-        ).text.replace("\u2009", "")
+        assert "DISPERSION START DATE" in page_new_payment_plan.get_label_group_dispersion_start_date().text.upper()
+        assert "DISPERSION END DATE" in page_new_payment_plan.get_label_group_dispersion_end_date().text.upper()
 
     def test_smoke_details_payment_plan(
         self,
@@ -587,8 +583,8 @@ class TestSmokePaymentModule:
         page_new_payment_plan.get_input_target_population().click()
         page_new_payment_plan.select_listbox_element(payment_plan.name)
         assert "AFN" in page_new_payment_plan.get_label_group_currency().text
-        page_new_payment_plan.fill_input_dispersion_start_date(FormatTime(22, 1, 2026).numerically_formatted_date)
-        page_new_payment_plan.fill_input_dispersion_end_date(FormatTime(30, 6, 2030).numerically_formatted_date)
+        assert "2026-01-22" in page_new_payment_plan.get_label_group_dispersion_start_date().text
+        assert "2030-06-30" in page_new_payment_plan.get_label_group_dispersion_end_date().text
         page_new_payment_plan.get_button_save_payment_plan().click()
         assert "OPEN" in page_payment_module_details.get_status_container().text
         assert "AFN" in page_payment_module_details.get_label_currency().text
@@ -778,8 +774,6 @@ class TestPaymentPlans:
         page_new_payment_plan.get_button_save_payment_plan().click()
 
         assert "Target Population is required" in page_new_payment_plan.get_input_target_population().text
-        assert "Dispersion Start Date is required" in page_new_payment_plan.get_input_start_date_error().text
-        assert "Dispersion End Date is required" in page_new_payment_plan.get_input_end_date_error().text
 
     def test_payment_plan_supporting_documents(
         self,

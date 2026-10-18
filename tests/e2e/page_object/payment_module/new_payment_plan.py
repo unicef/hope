@@ -10,12 +10,10 @@ class NewPaymentPlan(BaseComponents):
     input_target_population = 'div[data-cy="input-target-population"]'
     select_targeting_id = 'div[data-cy="select-targetingId"]'
     input_start_date = 'div[data-cy="input-start-date"]'
-    input_start_date_error = 'div[data-cy="input-dispersion-start-date"]'
     input_end_date = 'div[data-cy="input-end-date"]'
-    input_end_date_error = 'div[data-cy="input-dispersion-end-date"]'
     label_group_currency = 'div[data-cy="labelized-field-container-group-currency"]'
-    input_dispersion_start_date = 'div[data-cy="input-dispersion-start-date"]'
-    input_dispersion_end_date = 'div[data-cy="input-dispersion-end-date"]'
+    label_group_dispersion_start_date = 'div[data-cy="labelized-field-container-group-dispersion-start-date"]'
+    label_group_dispersion_end_date = 'div[data-cy="labelized-field-container-group-dispersion-end-date"]'
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
@@ -37,25 +35,11 @@ class NewPaymentPlan(BaseComponents):
         self.wait_for(self.input_end_date)
         return self.wait_for(self.input_end_date).find_elements(By.TAG_NAME, "input")[0]
 
-    def get_input_start_date_error(self) -> WebElement:
-        return self.wait_for(self.input_start_date_error)
-
-    def get_input_end_date_error(self) -> WebElement:
-        return self.wait_for(self.input_end_date_error)
-
     def get_label_group_currency(self) -> WebElement:
         return self.wait_for(self.label_group_currency)
 
-    def get_input_dispersion_start_date(self) -> WebElement:
-        return self.wait_for(self.input_dispersion_start_date).find_elements(By.TAG_NAME, "input")[0]
+    def get_label_group_dispersion_start_date(self) -> WebElement:
+        return self.wait_for(self.label_group_dispersion_start_date)
 
-    def get_input_dispersion_end_date(self) -> WebElement:
-        return self.wait_for(self.input_dispersion_end_date).find_elements(By.TAG_NAME, "input")[0]
-
-    # MUI X v9 date fields have no typeable single input; fill via the visible
-    # field wrapper (see BaseComponents.fill_date_picker).
-    def fill_input_dispersion_start_date(self, value: str) -> None:
-        self.fill_date_picker(self.wait_for(self.input_dispersion_start_date), value)
-
-    def fill_input_dispersion_end_date(self, value: str) -> None:
-        self.fill_date_picker(self.wait_for(self.input_dispersion_end_date), value)
+    def get_label_group_dispersion_end_date(self) -> WebElement:
+        return self.wait_for(self.label_group_dispersion_end_date)

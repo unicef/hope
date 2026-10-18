@@ -304,6 +304,8 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
 
 class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
 
     class Meta:
         model = PaymentPlan
@@ -386,6 +388,8 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.end_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
@@ -412,6 +416,8 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
     status_display = serializers.CharField(source="get_status_display")
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
@@ -484,6 +490,8 @@ class PaymentPlanGroupLinkedSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
+    dispersion_start_date = serializers.DateField(read_only=True, allow_null=True)
+    dispersion_end_date = serializers.DateField(read_only=True, allow_null=True)
     follow_ups = serializers.SerializerMethodField()
     top_ups = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
@@ -687,8 +695,6 @@ class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     target_population_id = serializers.UUIDField(source="id")
-    dispersion_start_date = serializers.DateField()
-    dispersion_end_date = serializers.DateField()
     version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: int | None) -> int | None:
@@ -702,8 +708,6 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "target_population_id",
-            "dispersion_start_date",
-            "dispersion_end_date",
             "version",
         )
 
@@ -2020,6 +2024,8 @@ class PaymentPlanGroupListSerializer(serializers.ModelSerializer):
             "financial_service_provider",
             "currency",
             "currency_vision_code",
+            "dispersion_start_date",
+            "dispersion_end_date",
             "created_at",
         ]
 
@@ -2091,7 +2097,16 @@ class PaymentPlanGroupCreateSerializer(PaymentPlanGroupConfigurationMixin, seria
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "cycle", "financial_service_provider", "currency"]
+        fields = [
+            "id",
+            "unicef_id",
+            "name",
+            "cycle",
+            "financial_service_provider",
+            "currency",
+            "dispersion_start_date",
+            "dispersion_end_date",
+        ]
         read_only_fields = ["id", "unicef_id"]
         validators = []
 
@@ -2100,6 +2115,9 @@ class PaymentPlanGroupCreateSerializer(PaymentPlanGroupConfigurationMixin, seria
         cycle = attrs["cycle"]
         if PaymentPlanGroup.objects.filter(cycle=cycle, name=name).exists():
             raise serializers.ValidationError({"name": f"A group named '{name}' already exists in this cycle."})
+        PaymentPlanGroupService.validate_dispersion_dates(
+            attrs.get("dispersion_start_date"), attrs.get("dispersion_end_date")
+        )
         return attrs
 
 
@@ -2110,7 +2128,15 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["id", "unicef_id", "name", "financial_service_provider", "currency"]
+        fields = [
+            "id",
+            "unicef_id",
+            "name",
+            "financial_service_provider",
+            "currency",
+            "dispersion_start_date",
+            "dispersion_end_date",
+        ]
         read_only_fields = ["id", "unicef_id"]
 
     def validate_name(self, value: str) -> str:
@@ -2125,6 +2151,11 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
             service.assign_financial_service_provider(validated_data.pop("financial_service_provider"))
         if "currency" in validated_data:
             service.assign_currency(validated_data.pop("currency"))
+        if "dispersion_start_date" in validated_data or "dispersion_end_date" in validated_data:
+            service.assign_dispersion_dates(
+                validated_data.pop("dispersion_start_date", instance.dispersion_start_date),
+                validated_data.pop("dispersion_end_date", instance.dispersion_end_date),
+            )
         return super().update(instance, validated_data)
 
 

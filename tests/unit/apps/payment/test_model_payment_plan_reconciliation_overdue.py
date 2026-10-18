@@ -72,8 +72,8 @@ def test_has_payments_reconciliation_overdue_raises_type_error_when_dispersion_s
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         status=PaymentPlan.Status.ACCEPTED,
-        dispersion_start_date=None,
     )
+    payment_plan.payment_plan_group.dispersion_start_date = None
 
     with pytest.raises(TypeError):
         _ = payment_plan.has_payments_reconciliation_overdue

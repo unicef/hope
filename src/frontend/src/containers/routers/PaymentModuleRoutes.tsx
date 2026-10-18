@@ -1,6 +1,4 @@
 import { useRoutes, Navigate } from 'react-router-dom';
-import EditFollowUpPaymentPlanPage from '@containers/pages/paymentmodule/EditFollowUpPaymentPlanPage';
-import EditPaymentPlanPage from '@containers/pages/paymentmodule/EditPaymentPlanPage';
 import FollowUpPaymentPlanDetailsPage from '@containers/pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import PaymentDetailsPage from '@containers/pages/paymentmodule/PaymentDetailsPage';
 import CreatePaymentPlanPage from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
@@ -29,10 +27,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
               path: '',
               element: <PaymentPlanDetailsPage />,
             },
-            {
-              path: 'edit',
-              element: <EditPaymentPlanPage />,
-            },
           ],
         },
       ],
@@ -44,10 +38,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
           path: '',
           element: <FollowUpPaymentPlanDetailsPage />,
         },
-        {
-          path: 'edit',
-          element: <EditFollowUpPaymentPlanPage />,
-        },
       ],
     },
     {
@@ -56,10 +46,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
         {
           path: '',
           element: <FollowUpPaymentPlanDetailsPage />,
-        },
-        {
-          path: 'edit',
-          element: <EditFollowUpPaymentPlanPage />,
         },
       ],
     },
@@ -129,10 +115,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
                     {
                       path: '',
                       element: <PaymentPlanDetailsPage />,
-                    },
-                    {
-                      path: 'edit',
-                      element: <EditPaymentPlanPage />,
                     },
                   ],
                 },

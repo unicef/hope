@@ -76,8 +76,6 @@
                     "name": null,
                     "start_date": null,
                     "end_date": null,
-                    "dispersion_start_date": "2025-01-01",
-                    "dispersion_end_date": "2025-01-31",
                     "excluded_ids": null,
                     "exclusion_reason": null,
                     "vulnerability_score_min": null,
@@ -273,7 +271,9 @@
                     "unicef_id": "PPG-4",
                     "cycle": "4c0417f1-076e-4a8b-bbea-933fa49f3c45",
                     "name": "Default Group",
-                    "background_action_status": null
+                    "background_action_status": null,
+                    "dispersion_start_date": "2025-01-01",
+                    "dispersion_end_date": "2025-01-31"
                 }
             },
             {

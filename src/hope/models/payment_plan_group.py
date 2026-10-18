@@ -34,6 +34,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "plan_type",
             "source_group",
             "financial_service_provider",
+            "dispersion_start_date",
+            "dispersion_end_date",
             "background_action_status",
             "export_file_delivery",
             "delivery_import_file",
@@ -113,6 +115,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         null=True,
         blank=True,
     )
+    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
+    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

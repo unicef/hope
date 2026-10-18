@@ -32,6 +32,8 @@ interface CreatePaymentPlanGroupModalProps {
 const emptySettings: PaymentPlanGroupSettings = {
   financialServiceProvider: null,
   currency: null,
+  dispersionStartDate: null,
+  dispersionEndDate: null,
 };
 
 export const CreatePaymentPlanGroupModal = ({
@@ -61,6 +63,8 @@ export const CreatePaymentPlanGroupModal = ({
           cycle: cycleId,
           financialServiceProvider: settings.financialServiceProvider,
           currency: settings.currency,
+          dispersionStartDate: settings.dispersionStartDate,
+          dispersionEndDate: settings.dispersionEndDate,
         } as unknown as PaymentPlanGroupCreate,
       }),
     onSuccess: () => {

@@ -238,8 +238,6 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         business_area=BusinessArea.objects.get(slug="afghanistan"),
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
-        dispersion_start_date=datetime.now(),
-        dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
         status=PaymentPlan.Status.ACCEPTED,
         created_by=User.objects.first(),

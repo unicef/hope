@@ -379,14 +379,17 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     pp_group, _ = PaymentPlanGroup.objects.update_or_create(
         cycle=program_cycle,
         name=f"{pp_name} Group",
-        defaults={"currency": usd, "financial_service_provider": fsp_1},
+        defaults={
+            "currency": usd,
+            "financial_service_provider": fsp_1,
+            "dispersion_start_date": now,
+            "dispersion_end_date": now + timedelta(days=14),
+        },
     )
     payment_plan = PaymentPlan.objects.update_or_create(
         name=pp_name,
         pk=payment_plan_pk,
         business_area=afghanistan,
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
@@ -435,14 +438,17 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     pp2_group, _ = PaymentPlanGroup.objects.update_or_create(
         cycle=program_cycle,
         name=f"{pp2_name} Group",
-        defaults={"currency": usd, "financial_service_provider": fsp_1},
+        defaults={
+            "currency": usd,
+            "financial_service_provider": fsp_1,
+            "dispersion_start_date": now,
+            "dispersion_end_date": now + timedelta(days=14),
+        },
     )
     pp2 = PaymentPlan.objects.update_or_create(
         name=pp2_name,
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
@@ -537,14 +543,17 @@ def generate_reconciled_payment_plan() -> None:
     reconciled_group, _ = PaymentPlanGroup.objects.update_or_create(
         cycle=program_cycle,
         name=f"{reconciled_name} Group",
-        defaults={"currency": usd, "financial_service_provider": fsp_1},
+        defaults={
+            "currency": usd,
+            "financial_service_provider": fsp_1,
+            "dispersion_start_date": now,
+            "dispersion_end_date": now + timedelta(days=14),
+        },
     )
     payment_plan = PaymentPlan.objects.update_or_create(
         name=reconciled_name,
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
@@ -721,14 +730,16 @@ def generate_payment_plan_large() -> None:
     large_pp_group = program_cycle.payment_plan_groups.first()
     large_pp_group.currency = usd
     large_pp_group.financial_service_provider = fsp
-    large_pp_group.save(update_fields=["currency", "financial_service_provider"])
+    large_pp_group.dispersion_start_date = now
+    large_pp_group.dispersion_end_date = now + timedelta(days=14)
+    large_pp_group.save(
+        update_fields=["currency", "financial_service_provider", "dispersion_start_date", "dispersion_end_date"]
+    )
     payment_plan = PaymentPlan.objects.update_or_create(
         pk=UUID("bbbbbbbb-0000-0000-0000-000000311246"),
         defaults={
             "name": "Large Payment Plan (311246)",
             "business_area": afghanistan,
-            "dispersion_start_date": now,
-            "dispersion_end_date": now + timedelta(days=14),
             "status_date": now,
             "created_by": root,
             "program_cycle": program_cycle,

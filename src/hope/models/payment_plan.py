@@ -99,8 +99,6 @@ class PaymentPlan(
             "created_by",
             "status",
             "status_date",
-            "dispersion_start_date",
-            "dispersion_end_date",
             "start_date",
             "end_date",
             "background_action_status",
@@ -436,8 +434,6 @@ class PaymentPlan(
         null=True,
         help_text="Payment Plan end date",
     )
-    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
-    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
     excluded_ids = models.TextField(blank=True, null=True, help_text="Targeting level exclusion IDs")
     exclusion_reason = models.TextField(blank=True, null=True, help_text="Exclusion reason (Targeting level)")
     vulnerability_score_min = models.DecimalField(
@@ -1012,6 +1008,18 @@ class PaymentPlan(
         if self.payment_plan_group_id:
             return self.payment_plan_group.currency
         return self.follow_up_instruction.currency if self.follow_up_instruction_id else None
+
+    @property
+    def dispersion_start_date(self) -> date | None:
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.dispersion_start_date
+        return self.follow_up_instruction.dispersion_start_date if self.follow_up_instruction_id else None
+
+    @property
+    def dispersion_end_date(self) -> date | None:
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.dispersion_end_date
+        return self.follow_up_instruction.dispersion_end_date if self.follow_up_instruction_id else None
 
     @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover

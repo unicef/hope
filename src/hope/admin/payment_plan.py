@@ -556,6 +556,8 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "name",
         "financial_service_provider",
         "currency",
+        "dispersion_start_date",
+        "dispersion_end_date",
     )
 
     def frontend_url(self, obj: PaymentPlanGroup) -> str | None:

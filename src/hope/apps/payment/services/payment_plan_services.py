@@ -20,6 +20,7 @@ from django.db.models import (
     Value,
     When,
 )
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -360,30 +361,20 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status_date", "status", "updated_at"))
         return self.payment_plan
 
-    def open(self, input_data: dict) -> PaymentPlan:
+    def open(self) -> PaymentPlan:
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_open()
-        dispersion_end_date = input_data["dispersion_end_date"]
-        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
-            raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-
         payment_plan_group = self.payment_plan.payment_plan_group
         if payment_plan_group is None or payment_plan_group.currency_id is None:
             raise ValidationError("Payment Plan Group needs a Currency before a Payment Plan can be opened.")
-        self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
-        self.payment_plan.dispersion_end_date = dispersion_end_date
+        dispersion_end_date = payment_plan_group.dispersion_end_date
+        if payment_plan_group.dispersion_start_date is None or dispersion_end_date is None:
+            raise ValidationError("Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened.")
+        if dispersion_end_date <= timezone.now().date():
+            raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
 
-        self.payment_plan.save(
-            update_fields=(
-                "status_date",
-                "status",
-                "dispersion_start_date",
-                "dispersion_end_date",
-                "exchange_rate",
-                "updated_at",
-            )
-        )
+        self.payment_plan.save(update_fields=("status_date", "status", "exchange_rate", "updated_at"))
         self.payment_plan.program_cycle.set_active()
 
         Payment.objects.filter(parent=self.payment_plan).update(currency=payment_plan_group.currency)
@@ -808,12 +799,8 @@ class PaymentPlanService:
         rules = input_data.get("rules")
         vulnerability_score_min = input_data.get("vulnerability_score_min")
         vulnerability_score_max = input_data.get("vulnerability_score_max")
-        dispersion_start_date = input_data.get("dispersion_start_date")
-        dispersion_end_date = input_data.get("dispersion_end_date")
 
         self._validate_pp_status(
-            dispersion_end_date,
-            dispersion_start_date,
             excluded_ids,
             exclusion_reason,
             input_data,
@@ -868,8 +855,6 @@ class PaymentPlanService:
 
         name = input_data.get("name")
         rules = input_data.get("rules")
-        dispersion_start_date = input_data.get("dispersion_start_date")
-        dispersion_end_date = input_data.get("dispersion_end_date")
 
         if name:
             name = self._validate_pp_name(name, program)
@@ -897,8 +882,6 @@ class PaymentPlanService:
         if exclusion_reason != self.payment_plan.exclusion_reason:
             should_rebuild_list = True
             self.payment_plan.exclusion_reason = exclusion_reason
-
-        self._set_dispersion_dates(dispersion_end_date, dispersion_start_date)
 
         if self._update_delivery_mechanism(input_data.get("delivery_mechanism_code")):
             should_rebuild_list = True
@@ -980,18 +963,8 @@ class PaymentPlanService:
             )
         self.payment_plan.payment_plan_group = payment_plan_group
 
-    def _set_dispersion_dates(self, dispersion_end_date: Any | None, dispersion_start_date: Any | None) -> None:
-        if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
-            self.payment_plan.dispersion_start_date = dispersion_start_date
-
-        if dispersion_end_date and dispersion_end_date != self.payment_plan.dispersion_end_date:
-            self._validate_dispersion_end_date(dispersion_end_date)
-            self.payment_plan.dispersion_end_date = dispersion_end_date
-
     def _validate_pp_status(
         self,
-        dispersion_end_date: Any,
-        dispersion_start_date: Any,
         excluded_ids: Any,
         exclusion_reason: Any,
         input_data: dict,
@@ -1008,12 +981,6 @@ class PaymentPlanService:
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
             )
 
-        if any([dispersion_start_date, dispersion_end_date]) and self.payment_plan.status not in [
-            PaymentPlan.Status.OPEN,
-            PaymentPlan.Status.DRAFT,
-        ]:
-            raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
-
     @staticmethod
     def validate_currency_for_delivery_mechanism(currency: Currency, delivery_mechanism: DeliveryMechanism) -> None:
         is_digital = delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
@@ -1021,10 +988,6 @@ class PaymentPlanService:
             raise ValidationError(
                 "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
             )
-
-    def _validate_dispersion_end_date(self, dispersion_end_date: datetime.date) -> None:
-        if dispersion_end_date <= timezone.now().date():
-            raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
     def _set_additional_flags_for_tp(self, input_data: dict, targeting_criteria_input: dict) -> None:
         if "flag_exclude_if_on_sanction_list" in input_data:
@@ -1127,8 +1090,6 @@ class PaymentPlanService:
     def _create_child_payment_plan(  # noqa: PLR0913
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
         plan_type: "PaymentPlan.PlanType",
         *,
         payment_plan_group: PaymentPlanGroup | None,
@@ -1138,7 +1099,8 @@ class PaymentPlanService:
 
         Shared core for all three flows: the child inherits the source plan's purposes, dates and
         delivery mechanism and is created OPEN, in the linked group it was created for or, for a
-        Follow-Up Instruction child, under the instruction with no group.
+        Follow-Up Instruction child, under the instruction with no group. Its dispersion dates are the
+        linked group's or the instruction's.
         """
         source_pp = self.payment_plan
         child_pp = PaymentPlan.objects.create(
@@ -1152,8 +1114,6 @@ class PaymentPlanService:
             business_area=source_pp.business_area,
             created_by=user,
             program_cycle=source_pp.program_cycle,
-            dispersion_start_date=dispersion_start_date,
-            dispersion_end_date=dispersion_end_date,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
             use_payment_gateway=source_pp.use_payment_gateway,
@@ -1296,8 +1256,6 @@ class PaymentPlanService:
     def create_follow_up(
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
         *,
         payment_plan_group: PaymentPlanGroup | None = None,
         follow_up_instruction: "FollowUpInstruction | None" = None,
@@ -1313,8 +1271,6 @@ class PaymentPlanService:
 
         follow_up_pp = self._create_child_payment_plan(
             user,
-            dispersion_start_date,
-            dispersion_end_date,
             PaymentPlan.PlanType.FOLLOW_UP,
             payment_plan_group=payment_plan_group,
             follow_up_instruction=follow_up_instruction,
@@ -1326,8 +1282,6 @@ class PaymentPlanService:
     def create_top_up(  # noqa: PLR0913
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
         *,
         payment_plan_group: PaymentPlanGroup,
         fixed_amount: Decimal | None = None,
@@ -1356,8 +1310,6 @@ class PaymentPlanService:
 
         top_up_pp = self._create_child_payment_plan(
             user,
-            dispersion_start_date,
-            dispersion_end_date,
             PaymentPlan.PlanType.TOP_UP,
             payment_plan_group=payment_plan_group,
         )
@@ -1368,8 +1320,6 @@ class PaymentPlanService:
     def create_top_up_amendment(  # noqa: PLR0913
         self,
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
         *,
         payment_plan_group: PaymentPlanGroup,
         fixed_amount: Decimal | None = None,
@@ -1395,8 +1345,6 @@ class PaymentPlanService:
 
         amendment_pp = self._create_child_payment_plan(
             user,
-            dispersion_start_date,
-            dispersion_end_date,
             PaymentPlan.PlanType.TOP_UP_AMENDMENT,
             payment_plan_group=payment_plan_group,
         )
@@ -1428,8 +1376,6 @@ class PaymentPlanService:
         *,
         plan_type: "PaymentPlan.PlanType",
         user: Union["User", "AbstractBaseUser", "AnonymousUser"],
-        dispersion_start_date: datetime.date,
-        dispersion_end_date: datetime.date,
         payment_plan_group: PaymentPlanGroup,
         top_up_amount: "Decimal | dict[str, Decimal] | None" = None,
     ) -> PaymentPlan:
@@ -1443,14 +1389,10 @@ class PaymentPlanService:
         fixed_amount = top_up_amount if isinstance(top_up_amount, Decimal) else None
         match plan_type:
             case PaymentPlan.PlanType.FOLLOW_UP:
-                return self.create_follow_up(
-                    user, dispersion_start_date, dispersion_end_date, payment_plan_group=payment_plan_group
-                )
+                return self.create_follow_up(user, payment_plan_group=payment_plan_group)
             case PaymentPlan.PlanType.TOP_UP:
                 return self.create_top_up(
                     user,
-                    dispersion_start_date,
-                    dispersion_end_date,
                     payment_plan_group=payment_plan_group,
                     fixed_amount=fixed_amount,
                     amounts=amounts,
@@ -1458,8 +1400,6 @@ class PaymentPlanService:
             case PaymentPlan.PlanType.TOP_UP_AMENDMENT:
                 return self.create_top_up_amendment(
                     user,
-                    dispersion_start_date,
-                    dispersion_end_date,
                     payment_plan_group=payment_plan_group,
                     fixed_amount=fixed_amount,
                     amounts=amounts,
@@ -1747,7 +1687,10 @@ class PaymentPlanService:
         overdue_payment_plans = (
             PaymentPlan.objects.annotate(
                 due_date=ExpressionWrapper(
-                    F("dispersion_start_date")
+                    Coalesce(
+                        F("payment_plan_group__dispersion_start_date"),
+                        F("follow_up_instruction__dispersion_start_date"),
+                    )
                     + F("program_cycle__program__reconciliation_window_in_days") * datetime.timedelta(days=1),
                     output_field=DateField(),
                 )

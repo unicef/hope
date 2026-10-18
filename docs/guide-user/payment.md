@@ -27,7 +27,7 @@ When payments are provided through an Implementing Partner and are included in t
 
     ![Image](_screenshots/payment/pay_18.png)
 
-2. Select the corresponding target plan and fill in the parameters for the payment plan (currency, dispersion start date and dispersion end date).
+2. Select the corresponding target plan. The currency and the dispersion start and end dates come from the Payment Plan Group and are shown read-only. Set them on the group (**Edit Payment Plan** on the group page) before saving; the dispersion end date cannot be in the past.
     ![Image](_screenshots/payment/pay_19.png)
 
 3. Once you click save, a summary of the payment plan will be displayed for review before creation. This includes the payment plan ID, a summary of the payment plan parameters and payees list. You also have an option to exclude households from the payment plan by pasting a list of household IDs in the Exclude field (click CREATE to view the input box). You can also upload supporting documents by clicking the “UPLOAD FILE.”

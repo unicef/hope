@@ -46,7 +46,6 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   const canRemove =
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
-  const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
 
@@ -57,7 +56,6 @@ export function FollowUpPaymentPlanDetailsHeader({
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
-          canEdit={canEdit}
           canLock={canLock}
         />
       );

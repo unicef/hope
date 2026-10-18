@@ -43,12 +43,14 @@ export const headCells: HeadCell<PaymentPlanList>[] = [
     label: 'Dispersion Start Date',
     id: 'dispersionStartDate',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,
     label: 'Dispersion End Date',
     id: 'dispersionEndDate',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,

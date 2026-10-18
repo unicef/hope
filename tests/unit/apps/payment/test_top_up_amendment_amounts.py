@@ -1,6 +1,5 @@
 """A Top-Up Amendment is funded at creation exactly like the Top-Up it amends."""
 
-from datetime import timedelta
 from decimal import Decimal
 from typing import Any
 from unittest import mock
@@ -96,10 +95,8 @@ def _create_and_run(
     amounts: dict[str, Decimal] | None = None,
 ) -> PaymentPlan:
     """Create the Amendment and run the copy job the way the API does."""
-    start = top_up_pp.dispersion_start_date + timedelta(days=1)
-    end = top_up_pp.dispersion_end_date + timedelta(days=1)
     amendment = PaymentPlanService(top_up_pp).create_top_up_amendment(
-        user, start, end, payment_plan_group=amendment_group, fixed_amount=fixed_amount, amounts=amounts
+        user, payment_plan_group=amendment_group, fixed_amount=fixed_amount, amounts=amounts
     )
     extra_config = (
         {"amounts": {unicef_id: str(amount) for unicef_id, amount in amounts.items()}}

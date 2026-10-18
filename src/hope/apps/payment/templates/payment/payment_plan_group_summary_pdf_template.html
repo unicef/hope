@@ -81,7 +81,7 @@
       <td>{{ payment_plan.unicef_id }}</td>
       <td>{{ payment_plan.name }}</td>
       <td>{{ payment_plan.delivery_mechanism|default_if_none:"-" }}</td>
-      <td>{{ payment_plan.dispersion_start_date|date:"j N Y" }} - {{ payment_plan.dispersion_end_date|date:"j N Y" }}</td>
+      <td>{{ payment_plan_group.dispersion_start_date|date:"j N Y" }} - {{ payment_plan_group.dispersion_end_date|date:"j N Y" }}</td>
       <td>{% if is_social_worker_program %}{{ payment_plan.total_individuals_count }}{% else %}{{ payment_plan.total_households_count }}{% endif %}</td>
       <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
     </tr>

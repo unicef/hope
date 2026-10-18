@@ -149,6 +149,16 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Dispersion Start Date')}>
+                  {group?.dispersionStartDate ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
+                <LabelizedField label={t('Dispersion End Date')}>
+                  {group?.dispersionEndDate ?? '-'}
+                </LabelizedField>
+              </Grid>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Total Entitled (USD)')}>
                   {group?.totalEntitledQuantityUsd ?? '-'}
                 </LabelizedField>

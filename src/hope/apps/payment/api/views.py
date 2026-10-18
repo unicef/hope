@@ -9,7 +9,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Count, Q, QuerySet, Sum
+from django.db.models import Count, Prefetch, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
@@ -767,12 +767,10 @@ class PaymentPlanViewSet(
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
     BLOCKED_ACTIONS_FOR_INSTRUCTION_MANAGED = {
-        "partial_update",
         "destroy",
         "lock",
         "unlock",
@@ -783,17 +781,21 @@ class PaymentPlanViewSet(
         PaymentPlan.objects.select_related(
             "program_cycle__program", "payment_plan_group__currency", "follow_up_instruction__currency"
         )
-        .prefetch_related("child_plans")
+        .prefetch_related(
+            Prefetch(
+                "child_plans",
+                queryset=PaymentPlan.objects.select_related("payment_plan_group", "follow_up_instruction"),
+            )
+        )
         .order_by("-created_at")
     )
     filterset_class = PaymentPlanListFilter
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get", "post", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
         "retrieve": PaymentPlanDetailSerializer,
         "create": PaymentPlanCreateUpdateSerializer,
-        "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
         "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
@@ -811,7 +813,6 @@ class PaymentPlanViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
         "create": [Permissions.PM_CREATE],
-        "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
         "apply_engine_formula": [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
@@ -855,7 +856,7 @@ class PaymentPlanViewSet(
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).open(input_data=serializer.validated_data)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).open()
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1339,7 +1340,12 @@ class PaymentPlanGlobalViewSet(
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         .select_related("payment_plan_group__currency", "follow_up_instruction__currency")
-        .prefetch_related("child_plans")
+        .prefetch_related(
+            Prefetch(
+                "child_plans",
+                queryset=PaymentPlan.objects.select_related("payment_plan_group", "follow_up_instruction"),
+            )
+        )
         .order_by("-created_at")
     )
     serializer_classes_by_action = {

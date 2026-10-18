@@ -421,7 +421,12 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     program.payment_plan_purposes.add(purpose)
     currency_usd = CurrencyFactory(code="USD", name="United States Dollar")
     create_input_data["name"] = "TEST"
-    create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(cycle=program_cycle, currency=currency_usd).id
+    create_input_data["payment_plan_group_id"] = PaymentPlanGroupFactory(
+        cycle=program_cycle,
+        currency=currency_usd,
+        dispersion_start_date=parse_date("2020-09-10"),
+        dispersion_end_date=parse_date("2020-09-11"),
+    ).id
     create_input_data["payment_plan_purposes"] = [purpose]
     pp = PaymentPlanService.create(
         input_data=create_input_data,
@@ -431,27 +436,22 @@ def test_create_validation_errors(user: User, business_area: Any) -> None:
     pp.status = PaymentPlan.Status.TP_OPEN
     pp.save()
 
-    open_input_data = {
-        "dispersion_start_date": parse_date("2020-09-10"),
-        "dispersion_end_date": parse_date("2020-09-11"),
-    }
     with pytest.raises(TransitionNotAllowed) as error:
-        PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
+        PaymentPlanService(payment_plan=pp).open()
     assert str(error.value) == 'Status_Open :: no transition from "TP_OPEN"'
 
     pp.status = PaymentPlan.Status.DRAFT
     pp.save()
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
-    assert (
-        error.value.detail[0] == f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date"
-    )
+        PaymentPlanService(payment_plan=pp).open()
+    assert error.value.detail[0] == "Dispersion End Date [2020-09-11] cannot be a past date"
 
-    open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.DRAFT
+    pp.payment_plan_group.dispersion_end_date = parse_date("2020-11-11")
+    pp.payment_plan_group.save(update_fields=["dispersion_end_date"])
 
-    pp = PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
+    pp = PaymentPlanService(payment_plan=pp).open()
     pp.refresh_from_db()
 
     assert pp.status == PaymentPlan.Status.OPEN
@@ -606,29 +606,6 @@ def test_create_raises_when_payment_plan_group_is_not_open(user: User, business_
     assert error.value.detail[0] == "Adding Target Population to Payment Plan Group is possible only within Status OPEN"
 
 
-@freeze_time("2020-10-10")
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
-def test_update_validation_errors(get_exchange_rate_mock: Any, payment_plan_base: PaymentPlan) -> None:
-    payment_plan_base.status = PaymentPlan.Status.LOCKED
-    payment_plan_base.save()
-
-    input_data = {
-        "dispersion_start_date": parse_date("2020-09-10"),
-        "dispersion_end_date": parse_date("2020-09-11"),
-    }
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=payment_plan_base).update(input_data=input_data)
-    assert error.value.detail[0] == "Not Allow edit Payment Plan within status LOCKED"
-
-    payment_plan_base.status = PaymentPlan.Status.OPEN
-    payment_plan_base.save()
-
-    with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan=payment_plan_base).update(input_data=input_data)
-    assert error.value.detail[0] == f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
-
-
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_create_follow_up_pp(
@@ -672,13 +649,8 @@ def test_create_follow_up_pp(
         )
         payments.append(payment)
 
-    dispersion_start_date = pp.dispersion_start_date + timedelta(days=1)
-    dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
-
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(pp).create_follow_up(
-            user, dispersion_start_date, dispersion_end_date, payment_plan_group=follow_up_group
-        )
+        PaymentPlanService(pp).create_follow_up(user, payment_plan_group=follow_up_group)
     assert error.value.detail[0] == "Cannot create a follow-up for a payment plan with no unsuccessful payments"
 
     for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=True):
@@ -694,9 +666,7 @@ def test_create_follow_up_pp(
     p_manually_cancelled = payments[3]
 
     with django_assert_num_queries(11):
-        follow_up_pp = PaymentPlanService(pp).create_follow_up(
-            user, dispersion_start_date, dispersion_end_date, payment_plan_group=follow_up_group
-        )
+        follow_up_pp = PaymentPlanService(pp).create_follow_up(user, payment_plan_group=follow_up_group)
 
     follow_up_pp.refresh_from_db()
     assert follow_up_pp.status == PaymentPlan.Status.OPEN
@@ -705,8 +675,8 @@ def test_create_follow_up_pp(
     assert follow_up_pp.business_area == pp.business_area
     assert follow_up_pp.created_by == user
     assert follow_up_pp.currency == pp.currency
-    assert follow_up_pp.dispersion_start_date == dispersion_start_date
-    assert follow_up_pp.dispersion_end_date == dispersion_end_date
+    assert follow_up_pp.dispersion_start_date == follow_up_group.dispersion_start_date
+    assert follow_up_pp.dispersion_end_date == follow_up_group.dispersion_end_date
     assert follow_up_pp.program_cycle.start_date == pp.program_cycle.start_date
     assert follow_up_pp.program_cycle.end_date == pp.program_cycle.end_date
     assert follow_up_pp.total_households_count == 0
@@ -747,9 +717,7 @@ def test_create_follow_up_pp(
     follow_up_payment.save()
 
     with django_assert_num_queries(11):
-        follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
-            user, dispersion_start_date, dispersion_end_date, payment_plan_group=follow_up_group
-        )
+        follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(user, payment_plan_group=follow_up_group)
 
     assert pp.child_plans.count() == 2
 
@@ -771,11 +739,8 @@ def test_create_follow_up_pp_from_follow_up_validation(user: User, business_area
         status=PaymentPlan.Status.FINISHED,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
-    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
-
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).create_follow_up(user, dispersion_start_date, dispersion_end_date)
+        PaymentPlanService(payment_plan).create_follow_up(user)
 
     assert error.value.detail[0] == "Cannot create a follow-up of a follow-up Payment Plan"
 
@@ -807,9 +772,6 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
         business_area=business_area,
         plan_type=plan_type,
     )
-    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
-    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
-
     linked_group = PaymentPlanGroupFactory(
         cycle=cycle, plan_type=plan_type, source_group=payment_plan.payment_plan_group
     )
@@ -818,15 +780,11 @@ def test_create_child_plan_arrange_supported_type_act_dispatch_assert_expected_s
         result = PaymentPlanService(payment_plan).create_child_plan(
             plan_type=plan_type,
             user=user,
-            dispersion_start_date=dispersion_start_date,
-            dispersion_end_date=dispersion_end_date,
             payment_plan_group=linked_group,
         )
 
     assert result == expected_child_plan
-    service_method.assert_called_once_with(
-        user, dispersion_start_date, dispersion_end_date, payment_plan_group=linked_group, **expected_kwargs
-    )
+    service_method.assert_called_once_with(user, payment_plan_group=linked_group, **expected_kwargs)
 
 
 def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validation_error(
@@ -837,15 +795,10 @@ def test_create_child_plan_arrange_unsupported_type_act_dispatch_assert_validati
         created_by=user,
         business_area=business_area,
     )
-    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
-    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
-
     with pytest.raises(ValidationError) as error:
         PaymentPlanService(payment_plan).create_child_plan(
             plan_type=PaymentPlan.PlanType.REGULAR,
             user=user,
-            dispersion_start_date=dispersion_start_date,
-            dispersion_end_date=dispersion_end_date,
             payment_plan_group=payment_plan.payment_plan_group,
         )
 
@@ -899,28 +852,6 @@ def test_create_child_plan_payments_arrange_unsupported_type_act_dispatch_assert
         PaymentPlanService(payment_plan).create_child_plan_payments()
 
     assert str(error.value.detail[0]) == "Unsupported child payment plan type: REGULAR"
-
-
-def test_update_follow_up_dates_and_not_currency(user: User, business_area: Any, cycle: ProgramCycle) -> None:
-    payment_plan = PaymentPlanFactory(
-        program_cycle=cycle,
-        created_by=user,
-        business_area=business_area,
-        status=PaymentPlan.Status.OPEN,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
-    )
-    dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
-    dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
-    payment_plan = PaymentPlanService(payment_plan).update(
-        {
-            "dispersion_start_date": dispersion_start_date,
-            "dispersion_end_date": dispersion_end_date,
-        }
-    )
-    assert payment_plan.currency.code == "PLN"
-    assert payment_plan.dispersion_start_date == dispersion_start_date
-    assert payment_plan.dispersion_end_date == dispersion_end_date
 
 
 @freeze_time("2023-10-10")
@@ -1119,8 +1050,6 @@ def test_create_with_program_cycle_validation_error(user: User, business_area: A
     program.payment_plan_purposes.add(purpose)
     input_data = {
         "business_area_slug": "afghanistan",
-        "dispersion_start_date": parse_date("2020-11-11"),
-        "dispersion_end_date": parse_date("2020-11-20"),
         "currency": "USD",
         "name": "TestName123",
         "program_cycle_id": str(cycle.id),
@@ -1833,28 +1762,39 @@ def test_open_rejects_group_without_currency(
         delivery_mechanism=dm_transfer_to_account,
         financial_service_provider=fsp,
     )
-    open_input_data = {
-        "dispersion_start_date": timezone.now().date(),
-        "dispersion_end_date": timezone.now().date() + timedelta(days=3),
-    }
-
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(payment_plan).open(input_data=open_input_data)
+        PaymentPlanService(payment_plan).open()
     assert error.value.detail[0] == "Payment Plan Group needs a Currency before a Payment Plan can be opened."
 
 
-def test_update_dispersion_end_date(user: User, business_area: Any, cycle: ProgramCycle) -> None:
+def test_open_rejects_group_without_dispersion_dates(
+    user: User,
+    business_area: Any,
+    cycle: ProgramCycle,
+    fsp: FinancialServiceProvider,
+    dm_transfer_to_account: Any,
+) -> None:
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=cycle, financial_service_provider=fsp, currency=CurrencyFactory(code="PLN", name="Polish Zloty")
+        ),
         created_by=user,
         business_area=business_area,
-        status=PaymentPlan.Status.OPEN,
-        currency=CurrencyFactory(code="AMD", name="Armenian Dram"),
+        status=PaymentPlan.Status.DRAFT,
+        delivery_mechanism=dm_transfer_to_account,
     )
-    new_end_date = timezone.now().date() + timedelta(days=3)
-    PaymentPlanService(payment_plan).update({"dispersion_end_date": new_end_date})
+    PaymentPlanGroup.objects.filter(pk=payment_plan.payment_plan_group_id).update(
+        dispersion_start_date=None, dispersion_end_date=None
+    )
+    payment_plan.payment_plan_group.refresh_from_db()
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanService(payment_plan).open()
+
+    assert error.value.detail[0] == "Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened."
     payment_plan.refresh_from_db()
-    assert payment_plan.dispersion_end_date == new_end_date
+    assert payment_plan.status == PaymentPlan.Status.DRAFT
 
 
 def test_update_pp_delivery_mechanism(
@@ -2220,6 +2160,26 @@ def test_send_reconciliation_overdue_emails_skips_payment_plans_without_overdue_
     ) as mock_task:
         PaymentPlanService.send_reconciliation_overdue_emails()
         mock_task.assert_not_called()
+
+
+def test_send_reconciliation_overdue_emails_reads_instruction_dispersion_start_date() -> None:
+    program = ProgramFactory(reconciliation_window_in_days=10, send_reconciliation_window_expiry_notifications=True)
+    pp = PaymentPlanFactory(
+        program_cycle=program.cycles.first(),
+        follow_up_instruction=FollowUpInstructionFactory(
+            program=program, dispersion_start_date=now().date() - timedelta(days=10)
+        ),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(parent=pp, status=Payment.STATUS_PENDING, delivered_quantity=None)
+
+    with mock.patch(
+        "hope.apps.payment.services.payment_plan_services.send_payment_plan_reconciliation_overdue_email_async_task"
+    ) as mock_task:
+        PaymentPlanService.send_reconciliation_overdue_emails()
+
+    mock_task.assert_called_once_with(pp)
 
 
 def test_send_reconciliation_overdue_email(business_area: Any) -> None:

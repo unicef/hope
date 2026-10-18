@@ -67,6 +67,8 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         null=True,
         blank=True,
     )
+    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
+    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
     background_action_status = models.CharField(
         max_length=255,
         null=True,

@@ -40,6 +40,7 @@ from hope.models import (
     LogEntry,
     Payment,
     PaymentPlan,
+    PaymentPlanGroup,
     Program,
     Rule,
 )
@@ -411,11 +412,7 @@ def test_create_pp(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    data = {
-        "dispersion_start_date": "2025-02-01",
-        "dispersion_end_date": "2099-03-01",
-        "target_population_id": str(payment_plan_actions_context["pp"].id),
-    }
+    data = {"target_population_id": str(payment_plan_actions_context["pp"].id)}
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
         data,
@@ -430,7 +427,7 @@ def test_create_pp(
         assert resp_data["status"] == "OPEN"
 
 
-def test_create_pp_validation_errors(
+def test_create_pp_rejects_group_without_dispersion_dates(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -440,14 +437,18 @@ def test_create_pp_validation_errors(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
+    PaymentPlanGroup.objects.filter(pk=payment_plan_actions_context["pp"].payment_plan_group_id).update(
+        dispersion_start_date=None, dispersion_end_date=None
+    )
+
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
         {"target_population_id": str(payment_plan_actions_context["pp"].pk)},
         format="json",
     )
+
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "dispersion_start_date" in response.json()
-    assert "dispersion_end_date" in response.json()
+    assert "Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened." in response.json()
 
 
 @pytest.mark.parametrize(
@@ -1292,7 +1293,7 @@ def test_create_pp_without_target_population_id_returns_400(
     )
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
-        {"dispersion_start_date": "2025-02-01", "dispersion_end_date": "2099-03-01"},
+        {},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST

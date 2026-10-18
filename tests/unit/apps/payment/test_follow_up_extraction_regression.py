@@ -5,7 +5,6 @@
 top-up, follow-up must still COPY the source entitlement and keep ``is_follow_up``.
 """
 
-from datetime import timedelta
 from decimal import Decimal
 from typing import Any
 from unittest import mock
@@ -76,10 +75,8 @@ def test_create_follow_up_arrange_failed_payment_act_run_task_assert_entitlement
     failed_payment.entitlement_quantity = Decimal("250.00")
     failed_payment.entitlement_quantity_usd = Decimal("125.00")
     failed_payment.save()
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
 
-    follow_up_pp = PaymentPlanService(regular_pp).create_follow_up(user, start, end, payment_plan_group=follow_up_group)
+    follow_up_pp = PaymentPlanService(regular_pp).create_follow_up(user, payment_plan_group=follow_up_group)
     with django_capture_on_commit_callbacks(execute=True):
         prepare_child_payment_plan_async_task(follow_up_pp)
 
@@ -101,11 +98,9 @@ def test_create_follow_up_arrange_follow_up_origin_act_create_assert_raises(
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    start = follow_up_pp.dispersion_start_date + timedelta(days=1)
-    end = follow_up_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(follow_up_pp).create_follow_up(user, start, end, payment_plan_group=follow_up_group)
+        PaymentPlanService(follow_up_pp).create_follow_up(user, payment_plan_group=follow_up_group)
 
     assert "follow-up of a follow-up" in str(error.value.detail[0])
 
@@ -114,10 +109,8 @@ def test_create_follow_up_arrange_no_unsuccessful_payments_act_create_assert_rai
     user: User, regular_pp: PaymentPlan, follow_up_group: Any
 ) -> None:
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(regular_pp).create_follow_up(user, start, end, payment_plan_group=follow_up_group)
+        PaymentPlanService(regular_pp).create_follow_up(user, payment_plan_group=follow_up_group)
 
     assert "no unsuccessful payments" in str(error.value.detail[0])

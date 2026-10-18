@@ -220,6 +220,15 @@ def test_create_takes_fsp_and_currency_from_the_source_group(instruction_over_on
     assert instruction_over_one_group.currency == currency
 
 
+def test_create_stores_dispersion_dates_on_the_instruction(instruction_over_one_group, cycle):
+    child_plan = instruction_over_one_group.payment_plans.get()
+
+    assert instruction_over_one_group.dispersion_start_date == cycle.start_date + timedelta(days=1)
+    assert instruction_over_one_group.dispersion_end_date == cycle.start_date + timedelta(days=2)
+    assert child_plan.dispersion_start_date == instruction_over_one_group.dispersion_start_date
+    assert child_plan.dispersion_end_date == instruction_over_one_group.dispersion_end_date
+
+
 def test_create_leaves_child_payment_plans_outside_any_group(instruction_over_one_group, fsp, currency):
     child_plan = instruction_over_one_group.payment_plans.get()
 

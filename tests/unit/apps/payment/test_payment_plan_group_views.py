@@ -616,6 +616,78 @@ def test_create_group_with_fsp_and_currency(
     assert group.currency == currency
 
 
+def test_create_group_with_dispersion_dates(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+
+    response = client.post(
+        _list_url(business_area.slug, program.code),
+        {
+            "name": "Dated Group",
+            "cycle": str(cycle.id),
+            "dispersion_start_date": "2099-01-01",
+            "dispersion_end_date": "2099-01-31",
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    group = PaymentPlanGroup.objects.get(id=response.json()["id"])
+    assert group.dispersion_start_date == date(2099, 1, 1)
+    assert group.dispersion_end_date == date(2099, 1, 31)
+
+
+def test_create_group_with_dispersion_end_before_start_rejected(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+
+    response = client.post(
+        _list_url(business_area.slug, program.code),
+        {
+            "name": "Backwards Group",
+            "cycle": str(cycle.id),
+            "dispersion_start_date": "2099-01-31",
+            "dispersion_end_date": "2099-01-01",
+        },
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Dispersion End Date [2099-01-01] cannot be earlier than Dispersion Start Date [2099-01-31]" in str(
+        response.json()
+    )
+    assert not PaymentPlanGroup.objects.filter(name="Backwards Group").exists()
+
+
+def test_create_group_with_past_dispersion_end_date_rejected(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_CREATE], business_area, program=program)
+
+    response = client.post(
+        _list_url(business_area.slug, program.code),
+        {"name": "Past Group", "cycle": str(cycle.id), "dispersion_end_date": "2020-01-01"},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Dispersion End Date [2020-01-01] cannot be a past date" in str(response.json())
+
+
 def test_create_group_with_fsp_not_allowed_in_business_area_rejected(
     client: Any,
     user: Any,
@@ -1133,6 +1205,99 @@ def test_update_group_fsp_and_currency_succeeds(
     group.refresh_from_db()
     assert group.financial_service_provider == fsp
     assert group.currency == currency
+
+
+def test_update_group_dispersion_dates_succeeds(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": group.name, "dispersion_start_date": "2099-02-01", "dispersion_end_date": "2099-02-28"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["dispersion_start_date"] == "2099-02-01"
+    group.refresh_from_db()
+    assert group.dispersion_start_date == date(2099, 2, 1)
+    assert group.dispersion_end_date == date(2099, 2, 28)
+
+
+def test_update_group_dispersion_dates_rejected_when_group_is_locked(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanGroup.objects.filter(pk=group.pk).update(status=PaymentPlanGroup.Status.LOCKED)
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": group.name, "dispersion_start_date": "2099-02-01", "dispersion_end_date": "2099-02-28"},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Dispersion Dates can be changed only while the Payment Plan Group is Open." in str(response.json())
+    group.refresh_from_db()
+    assert group.dispersion_start_date is None
+
+
+def test_update_group_past_dispersion_end_date_rejected(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": group.name, "dispersion_start_date": "2020-01-01", "dispersion_end_date": "2020-01-31"},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Dispersion End Date [2020-01-31] cannot be a past date" in str(response.json())
+    group.refresh_from_db()
+    assert group.dispersion_end_date is None
+
+
+def test_update_group_start_date_keeps_unchanged_past_end_date(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    cycle: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = cycle.payment_plan_groups.first()
+    PaymentPlanGroup.objects.filter(pk=group.pk).update(
+        dispersion_start_date=date(2020, 1, 10), dispersion_end_date=date(2020, 1, 31)
+    )
+
+    response = client.put(
+        _detail_url(business_area.slug, program.code, group.id),
+        {"name": group.name, "dispersion_start_date": "2020-01-01", "dispersion_end_date": "2020-01-31"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    group.refresh_from_db()
+    assert group.dispersion_start_date == date(2020, 1, 1)
+    assert group.dispersion_end_date == date(2020, 1, 31)
 
 
 def test_update_group_fsp_rejected_when_target_population_is_locked(
@@ -3482,6 +3647,8 @@ def test_create_follow_up_on_group_with_permission_returns_linked_group(
     assert data["status"] == PaymentPlanGroup.Status.OPEN
     assert data["source_group"]["id"] == str(accepted_group_with_failed_payment.id)
     assert data["currency"] == "PLN"
+    assert data["dispersion_start_date"] == "2099-01-01"
+    assert data["dispersion_end_date"] == "2099-12-31"
     assert data["payment_plans_count"] == 1
 
 

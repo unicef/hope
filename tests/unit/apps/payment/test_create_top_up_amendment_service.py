@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Any
 from unittest import mock
 
@@ -100,12 +99,8 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_create_assert_inh
     top_up_payments: dict[str, Payment],
     amendment_group: Any,
 ) -> None:
-    start = top_up_pp.dispersion_start_date + timedelta(days=1)
-    end = top_up_pp.dispersion_end_date + timedelta(days=1)
 
-    amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(
-        user, start, end, payment_plan_group=amendment_group
-    )
+    amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
 
     amendment_pp.refresh_from_db()
     assert amendment_pp.plan_type == PaymentPlan.PlanType.TOP_UP_AMENDMENT
@@ -129,11 +124,7 @@ def test_create_top_up_amendment_arrange_eligible_payments_act_run_task_assert_c
     amendment_group: Any,
 ) -> None:
     """Delivered and pending alike are copied: payment status does not gate an amendment."""
-    start = top_up_pp.dispersion_start_date + timedelta(days=1)
-    end = top_up_pp.dispersion_end_date + timedelta(days=1)
-    amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(
-        user, start, end, payment_plan_group=amendment_group
-    )
+    amendment_pp = PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
 
     with django_capture_on_commit_callbacks(execute=True):
         prepare_child_payment_plan_async_task(amendment_pp)
@@ -159,11 +150,9 @@ def test_create_top_up_amendment_arrange_query_budget_act_create_assert_within_l
     django_assert_num_queries: Any,
     amendment_group: Any,
 ) -> None:
-    start = top_up_pp.dispersion_start_date + timedelta(days=1)
-    end = top_up_pp.dispersion_end_date + timedelta(days=1)
 
     with django_assert_num_queries(11):
-        PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end, payment_plan_group=amendment_group)
+        PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
 
 
 @pytest.mark.parametrize(
@@ -183,11 +172,9 @@ def test_create_top_up_amendment_arrange_non_top_up_origin_act_create_assert_rai
         plan_type=plan_type,
         status=PaymentPlan.Status.ACCEPTED,
     )
-    start = source_pp.dispersion_start_date + timedelta(days=1)
-    end = source_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(source_pp).create_top_up_amendment(user, start, end, payment_plan_group=amendment_group)
+        PaymentPlanService(source_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
 
     assert "Top Up plan" in str(error.value.detail[0])
 
@@ -199,11 +186,9 @@ def test_create_top_up_amendment_arrange_no_eligible_payments_act_create_assert_
     payment = PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING)
     payment.household.withdrawn = True
     payment.household.save()
-    start = top_up_pp.dispersion_start_date + timedelta(days=1)
-    end = top_up_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end, payment_plan_group=amendment_group)
+        PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()
 
@@ -217,10 +202,8 @@ def test_create_top_up_amendment_arrange_source_outside_release_window_act_creat
 ) -> None:
     top_up_pp.status = status
     top_up_pp.save(update_fields=["status"])
-    start = top_up_pp.dispersion_start_date + timedelta(days=1)
-    end = top_up_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(top_up_pp).create_top_up_amendment(user, start, end, payment_plan_group=amendment_group)
+        PaymentPlanService(top_up_pp).create_top_up_amendment(user, payment_plan_group=amendment_group)
 
     assert "Accepted or Finished" in str(error.value.detail[0])

@@ -1,6 +1,5 @@
 """A Top-Up or an Amendment carrying failed payments can itself be the source of a Follow-Up."""
 
-from datetime import timedelta
 from typing import Any
 
 import pytest
@@ -97,12 +96,8 @@ def test_create_follow_up_arrange_top_up_with_failed_payment_act_create_assert_c
     user: User, top_up_with_failed_payment: PaymentPlan, follow_up_group_of_top_up: PaymentPlanGroup
 ) -> None:
     source = top_up_with_failed_payment
-    start = source.dispersion_start_date + timedelta(days=1)
-    end = source.dispersion_end_date + timedelta(days=1)
 
-    follow_up = PaymentPlanService(source).create_follow_up(
-        user, start, end, payment_plan_group=follow_up_group_of_top_up
-    )
+    follow_up = PaymentPlanService(source).create_follow_up(user, payment_plan_group=follow_up_group_of_top_up)
 
     assert follow_up.plan_type == PaymentPlan.PlanType.FOLLOW_UP
     assert follow_up.source_payment_plan == source
@@ -152,12 +147,8 @@ def test_create_follow_up_arrange_amendment_with_failed_payment_act_create_asser
     user: User, amendment_with_failed_payment: PaymentPlan, follow_up_group_of_amendment: PaymentPlanGroup
 ) -> None:
     source = amendment_with_failed_payment
-    start = source.dispersion_start_date + timedelta(days=1)
-    end = source.dispersion_end_date + timedelta(days=1)
 
-    follow_up = PaymentPlanService(source).create_follow_up(
-        user, start, end, payment_plan_group=follow_up_group_of_amendment
-    )
+    follow_up = PaymentPlanService(source).create_follow_up(user, payment_plan_group=follow_up_group_of_amendment)
 
     assert follow_up.plan_type == PaymentPlan.PlanType.FOLLOW_UP
     assert follow_up.source_payment_plan == source

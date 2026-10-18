@@ -654,19 +654,25 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
         name="PP_abc",
         business_area=payment_plan_filter_context["business_area"],
         program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=payment_plan_filter_context["cycle"],
+            dispersion_start_date=date.fromisoformat("2022-02-24"),
+            dispersion_end_date=date.fromisoformat("2022-03-03"),
+        ),
         status=PaymentPlan.Status.LOCKED_FSP,
         created_by=payment_plan_filter_context["user"],
-        dispersion_start_date="2022-02-24",
-        dispersion_end_date="2022-03-03",
     )
     PaymentPlanFactory(
         name="PP_xyz",
         business_area=payment_plan_filter_context["business_area"],
         program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=payment_plan_filter_context["cycle"],
+            dispersion_start_date=date.fromisoformat("2022-01-01"),
+            dispersion_end_date=date.fromisoformat("2022-01-17"),
+        ),
         status=PaymentPlan.Status.LOCKED_FSP,
         created_by=payment_plan_filter_context["user"],
-        dispersion_start_date="2022-01-01",
-        dispersion_end_date="2022-01-17",
     )
     response = payment_plan_filter_context["client"].get(
         payment_plan_filter_context["list_url"],
@@ -685,6 +691,31 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == "PP_xyz"
+
+
+def test_filter_by_dispersion_date_reads_instruction_dates(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="PP_instruction_child",
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        follow_up_instruction=FollowUpInstructionFactory(
+            program=payment_plan_filter_context["cycle"].program,
+            dispersion_start_date=date(2022, 2, 24),
+            dispersion_end_date=date(2022, 3, 3),
+        ),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"start_date": "2022-02-23", "end_date": "2022-03-04"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [plan["name"] for plan in response.json()["results"]] == ["PP_instruction_child"]
+    assert response.json()["results"][0]["dispersion_start_date"] == "2022-02-24"
 
 
 def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:

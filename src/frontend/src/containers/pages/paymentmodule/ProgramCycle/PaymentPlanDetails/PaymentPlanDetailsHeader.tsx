@@ -78,7 +78,6 @@ export const PaymentPlanDetailsHeader = ({
 
   const canRemove =
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
-  const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
 
   let buttons: ReactElement | null = null;
@@ -88,7 +87,6 @@ export const PaymentPlanDetailsHeader = ({
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
-          canEdit={canEdit}
           canLock={canLock}
         />
       );

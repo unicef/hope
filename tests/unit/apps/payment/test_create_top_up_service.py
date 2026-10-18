@@ -1,4 +1,3 @@
-from datetime import timedelta
 from decimal import Decimal
 from typing import Any
 from unittest import mock
@@ -86,10 +85,8 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
     source_payments: dict[str, Payment],
     top_up_group: Any,
 ) -> None:
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
 
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end, payment_plan_group=top_up_group)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
 
     top_up_pp.refresh_from_db()
     assert top_up_pp.plan_type == PaymentPlan.PlanType.TOP_UP
@@ -102,8 +99,8 @@ def test_create_top_up_arrange_eligible_payments_act_create_assert_inherits_attr
     assert top_up_pp.currency == regular_pp.currency
     assert top_up_pp.financial_service_provider == regular_pp.financial_service_provider
     assert top_up_pp.delivery_mechanism == regular_pp.delivery_mechanism
-    assert top_up_pp.dispersion_start_date == start
-    assert top_up_pp.dispersion_end_date == end
+    assert top_up_pp.dispersion_start_date == top_up_group.dispersion_start_date
+    assert top_up_pp.dispersion_end_date == top_up_group.dispersion_end_date
     assert list(top_up_pp.payment_plan_purposes.values_list("pk", flat=True)) == [purpose.pk]
     assert regular_pp.child_plans.count() == 1
 
@@ -119,10 +116,8 @@ def test_create_top_up_arrange_eligible_payments_act_run_task_assert_copies_with
     top_up_group: Any,
 ) -> None:
     """Every source payment is copied whatever its status, funded with the flat amount."""
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
     top_up_pp = PaymentPlanService(regular_pp).create_top_up(
-        user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("15.00")
+        user, payment_plan_group=top_up_group, fixed_amount=Decimal("15.00")
     )
 
     with django_capture_on_commit_callbacks(execute=True):
@@ -148,11 +143,9 @@ def test_create_top_up_arrange_query_budget_act_create_assert_within_limit(
     django_assert_num_queries: Any,
     top_up_group: Any,
 ) -> None:
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with django_assert_num_queries(11):
-        PaymentPlanService(regular_pp).create_top_up(user, start, end, payment_plan_group=top_up_group)
+        PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
 
 
 def test_create_top_up_arrange_follow_up_origin_act_create_assert_raises(
@@ -163,11 +156,9 @@ def test_create_top_up_arrange_follow_up_origin_act_create_assert_raises(
         program_cycle=cycle,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
-    start = follow_up_pp.dispersion_start_date + timedelta(days=1)
-    end = follow_up_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
-        PaymentPlanService(follow_up_pp).create_top_up(user, start, end, payment_plan_group=top_up_group)
+        PaymentPlanService(follow_up_pp).create_top_up(user, payment_plan_group=top_up_group)
 
     assert "Standard plan" in str(error.value.detail[0])
 
@@ -177,12 +168,10 @@ def test_create_top_up_arrange_no_eligible_payments_act_create_assert_raises(
 ) -> None:
     # Excluded payments are the remaining way to have none eligible; payment status no longer gates.
     PaymentFactory(parent=regular_pp, status=Payment.STATUS_ERROR, excluded=True)
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(ValidationError) as error:
         PaymentPlanService(regular_pp).create_top_up(
-            user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00")
+            user, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00")
         )
 
     assert "no eligible payments" in str(error.value.detail[0]).lower()
