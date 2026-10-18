@@ -24,7 +24,9 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
+from requests import RequestException
 from rest_framework.exceptions import ValidationError
+from rest_framework.status import is_client_error
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
@@ -372,7 +374,14 @@ class PaymentPlanService:
             raise ValidationError("Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened.")
         if dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        try:
+            self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        except RequestException as e:
+            if e.response is not None and is_client_error(e.response.status_code):
+                logger.error("UNORE rejected exchange rate request for PaymentPlan %s: %s", self.payment_plan.pk, e)
+            else:
+                logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", self.payment_plan.pk, e)
+            self.payment_plan.exchange_rate = None
 
         self.payment_plan.save(update_fields=("status_date", "status", "exchange_rate", "updated_at"))
         self.payment_plan.program_cycle.set_active()

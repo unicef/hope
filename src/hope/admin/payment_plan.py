@@ -9,6 +9,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
+from django.contrib.admin import FieldListFilter
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import Model, Prefetch, QuerySet
@@ -20,7 +21,6 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
-from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.payment.forms import GroupReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
@@ -198,53 +198,38 @@ def can_retry_payment_gateway_send(payment_plan: PaymentPlan) -> bool:
     )
 
 
-def has_payment_plan_pg_sync_permission(request: HttpRequest, payment_plan: PaymentPlan) -> bool:
-    return request.user.has_perm(
-        Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
-        payment_plan.program,
-    )
-
-
 def has_payment_instruction_download_permission(request: HttpRequest) -> bool:
     permission = "payment.download_payment_instruction"
     return request.user.has_perm(permission)
 
 
-@admin.register(PaymentPlan)
-class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
-    list_display = (
+class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
+    list_display: tuple[str, ...] = (
         "unicef_id",
         "name",
         "business_area",
         "program_cycle",
         "status",
-        "use_payment_gateway",
-        "background_action_status",
         "build_status",
-        "plan_type",
     )
-    list_filter = (
+    list_filter: tuple[str | tuple[str, type[FieldListFilter]], ...] = (
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
         ("payment_plan_group__currency", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
-        "use_payment_gateway",
-        ("background_action_status", ChoicesFieldComboFilter),
         ("build_status", ChoicesFieldComboFilter),
         ("created_by", AutoCompleteFilter),
-        ("plan_type", ChoicesFieldComboFilter),
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     filter_horizontal = ("payment_plan_purposes",)
-    inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
         "reconciliation_import_file",
     )
-    readonly_fields = (
+    readonly_fields: tuple[str, ...] = (
         "is_removed",
         "id",
         "created_at",
@@ -294,29 +279,22 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
         "total_undelivered_quantity_usd",
         "steficon_targeting_applied_date",
         "steficon_applied_date",
-        "plan_type",
         "exclude_household_error",
         "status_date",
     )
 
-    @button(permission="payment.view_paymentplan")
-    def wu_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
-        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
-
-    def frontend_url(self, obj: PaymentPlan) -> str | None:
-        base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
-        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
-            return f"{base}/target-population/{obj.id}"
-        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
-            return f"{base}/payment-module/followup-payment-plans/{obj.id}"
-        if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
-            return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
-        return f"{base}/payment-module/payment-plans/{obj.id}"
-
     def get_form(self, request: HttpRequest, obj: Any = None, change: bool = False, **kwargs: Any) -> type[ModelForm]:
         request._payment_plan_obj = obj
         return super().get_form(request, obj, change, **kwargs)
+
+    def formfield_for_manytomany(
+        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
+    ) -> ModelMultipleChoiceField | None:
+        if db_field.name == "payment_plan_purposes":
+            obj = getattr(request, "_payment_plan_obj", None)
+            if obj is not None:
+                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def save_model(self, request: HttpRequest, obj: PaymentPlan, form: Any, change: bool) -> None:
         old_payment_plan = copy_model_object(PaymentPlan.objects.get(pk=obj.pk)) if change and obj.pk else None
@@ -333,17 +311,48 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             new_object=obj,
         )
 
-    def formfield_for_manytomany(
-        self, db_field: ManyToManyField, request: HttpRequest, **kwargs: Any
-    ) -> ModelMultipleChoiceField | None:
-        if db_field.name == "payment_plan_purposes":
-            obj = getattr(request, "_payment_plan_obj", None)
-            if obj is not None:
-                kwargs["queryset"] = obj.program_cycle.program.payment_plan_purposes.all()
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
+    def frontend_url(self, obj: PaymentPlan) -> str:
+        raise NotImplementedError
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
 
     def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
+
+
+@admin.register(PaymentPlan)
+class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
+    list_display = BasePaymentPlanAdmin.list_display + (
+        "background_action_status",
+        "use_payment_gateway",
+        "plan_type",
+    )
+    list_filter = BasePaymentPlanAdmin.list_filter + (
+        ("background_action_status", ChoicesFieldComboFilter),
+        "use_payment_gateway",
+        ("plan_type", ChoicesFieldComboFilter),
+    )
+    readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type",)
+    inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+
+    @button(permission="payment.view_paymentplan")
+    def western_union_reports(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_westernunionpaymentplanreport_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan__id__exact={pk}")
+
+    def frontend_url(self, obj: PaymentPlan) -> str:
+        base = f"/{obj.business_area.slug}/programs/{obj.program.code}"
+        if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+            return f"{base}/target-population/{obj.id}"
+        if obj.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return f"{base}/payment-module/followup-payment-plans/{obj.id}"
+        if obj.plan_type in (PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT):
+            return f"{base}/payment-module/top-up-payment-plans/{obj.id}"
+        return f"{base}/payment-module/payment-plans/{obj.id}"
 
     @button(
         visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
@@ -537,9 +546,6 @@ class PaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase, PaymentPlanCeleryTasks
             message="Do you confirm retrying the Payment Gateway send for this Payment Plan?",
         )
 
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
-
 
 @admin.register(PaymentPlanGroup)
 class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
@@ -567,6 +573,11 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     @button(permission="payment.view_paymentplan")
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_paymentplan_changelist")
+        return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
+
+    @button(permission="payment.view_paymentplan")
+    def target_populations(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
+        url = reverse("admin:payment_targetpopulation_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
 
     @button(permission="payment.restart_exporting_payment_plan_list")
@@ -763,7 +774,10 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
     )
     cursor_ordering_field = "-created_at"
     inlines = [PaymentHouseholdSnapshotInline]
-    exclude = ("delivery_type_choice",)
+    exclude = (
+        "delivery_type_choice",
+        "parent",
+    )
     readonly_fields = (
         "is_removed",
         "id",
@@ -772,7 +786,7 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
         "unicef_id",
         "signature_hash",
         "internal_data",
-        "parent",
+        "parent_link",
         "parent_split",
         "business_area",
         "program",
@@ -847,6 +861,10 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
 
     def frontend_url(self, obj: Payment) -> str | None:
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/payment-module/payments/{obj.id}"
+
+    @admin.display(description="Parent")
+    def parent_link(self, obj: Payment) -> str:
+        return format_html('<a href="{}">{}</a>', obj.parent.admin_url, obj.parent)
 
     @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),

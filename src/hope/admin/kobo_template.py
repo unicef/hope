@@ -104,6 +104,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         upload_new_kobo_template_and_update_flex_fields_async_task(xlsx_kobo_template_id=str(pk))
         return redirect(".")
 
+    # Looks unused, but Django admin routes the "add" page here: it's the Kobo template upload form.
     def add_view(
         self,
         request: HttpRequest,

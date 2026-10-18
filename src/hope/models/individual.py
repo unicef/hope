@@ -31,7 +31,6 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     STATUS_ACTIVE,
     STATUS_DUPLICATE,
-    STATUS_INACTIVE,
     STATUS_WITHDRAWN,
     UNIQUE,
     UNIQUE_IN_BATCH,
@@ -51,7 +50,6 @@ from hope.apps.household.signals import individual_deleted, individual_withdrawn
 from hope.apps.utils.phone import calculate_phone_numbers_validity, recalculate_phone_numbers_validity
 from hope.models.business_area import BusinessArea
 from hope.models.document import Document
-from hope.models.household import PendingHousehold
 from hope.models.utils import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -532,10 +530,6 @@ class Individual(
         return STATUS_ACTIVE
 
     @property
-    def cash_assist_status(self) -> str:
-        return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
-
-    @property
     def sanction_list_last_check(self) -> datetime | None:
         if self.program.sanction_lists.exists():
             return cache.get(sanction_list_last_check_key(self.program_id))
@@ -701,9 +695,6 @@ class Individual(
 
         return self, update_fields
 
-    def count_all_roles(self) -> int:
-        return self.households_and_roles.count()
-
     def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
@@ -786,10 +777,6 @@ class PendingIndividual(Individual):
     @identities.setter
     def identities(self, value: Any) -> None:
         pass
-
-    @property
-    def pending_household(self) -> "PendingHousehold":
-        return PendingHousehold.objects.get(pk=self.household.pk)
 
     class Meta:
         app_label = "household"

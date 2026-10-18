@@ -31,6 +31,8 @@ if TYPE_CHECKING:
     from django.contrib.admin.options import _ListDisplayT
     from django.db.models.fields.related import RelatedField
     from django.http import HttpRequest, HttpResponsePermanentRedirect, HttpResponseRedirect
+
+    # Looks unused, but it's needed for the string annotation on AreaTypeFilter.field_choices.
     from django.utils.functional import _StrOrPromise
 
 logger = logging.getLogger(__name__)

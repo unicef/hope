@@ -11,7 +11,7 @@ from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0085_migration")
 
 
 def build_apps() -> SimpleNamespace:
@@ -25,7 +25,7 @@ def build_apps() -> SimpleNamespace:
 
 @pytest.fixture
 def without_plan_owner_constraint() -> None:
-    """The state the data step runs in: 0083 drops the old constraint before it and adds the new one after."""
+    """The state the data step runs in: 0084 drops the old constraint before it and adds the new one after."""
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" DROP CONSTRAINT "payment_plan_in_group_or_instruction_unless_removed"'

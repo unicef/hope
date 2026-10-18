@@ -97,10 +97,6 @@ class PaymentPlanCallbackRequestSerializer(serializers.Serializer):
         return self.initial_value("payplan_sno")
 
     @property
-    def validated_message_id(self) -> str:
-        return self.validated_data.get("message_id", "")
-
-    @property
     def validated_payplan_sno(self) -> str:
         return self.validated_data.get("payplan_sno", "")
 

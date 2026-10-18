@@ -9,7 +9,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Count, Prefetch, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
@@ -672,9 +672,8 @@ class PaymentVerificationRecordViewSet(
         )
 
     def get_queryset(self) -> QuerySet:
-        return with_payment_related_data(
-            self.payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
-        )
+        has_verification = Exists(PaymentVerification.objects.filter(payment=OuterRef("pk")))
+        return with_payment_related_data(self.payment_plan.eligible_payments.filter(has_verification))
 
     @extend_schema(
         responses={
@@ -2093,13 +2092,11 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         attachment = self.get_object()
         file = attachment.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentPlanSupportingDocumentViewSet(
@@ -2146,13 +2143,11 @@ class PaymentPlanSupportingDocumentViewSet(
         document = self.get_object()
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentViewSet(

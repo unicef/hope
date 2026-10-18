@@ -1,2 +1,0 @@
-class SearchError(Exception):
-    pass

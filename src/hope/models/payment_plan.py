@@ -646,6 +646,14 @@ class PaymentPlan(
             ),
         ]
 
+    @property
+    def admin_url(self) -> str:
+        from django.urls import reverse
+
+        if self.status in self.PRE_PAYMENT_PLAN_STATUSES:
+            return reverse("admin:payment_targetpopulation_change", args=[self.id])
+        return super().admin_url
+
     def __str__(self) -> str:
         return self.unicef_id or ""
 
@@ -1046,21 +1054,6 @@ class PaymentPlan(
         if self.status != PaymentPlan.Status.TP_OPEN:
             query &= Q(size__gt=0)
         return query
-
-    @property
-    def has_empty_criteria(self) -> bool:
-        return self.rules.count() == 0
-
-    @property
-    def has_empty_ids_criteria(self) -> bool:
-        has_hh_ids, has_ind_ids = False, False
-        for rule in self.rules.all():
-            if rule.household_ids:
-                has_hh_ids = True
-            if rule.individual_ids:
-                has_ind_ids = True
-
-        return not has_hh_ids and not has_ind_ids
 
     @property
     def excluded_beneficiaries_ids(self) -> list[str | None]:

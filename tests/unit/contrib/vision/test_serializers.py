@@ -2,14 +2,13 @@ from typing import Any
 
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory
+from extras.test_utils.factories import BusinessAreaFactory, FundsCommitmentFactory
 from hope.contrib.api.serializers.vision import (
     FundsCommitmentItemSerializer,
     FundsCommitmentSerializer,
     PaymentPlanCallbackAckSerializer,
     PaymentPlanCallbackRequestSerializer,
 )
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentHeader, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db
@@ -166,7 +165,6 @@ def test_payment_plan_callback_request_serializer_to_internal_value() -> None:
         "status": "SUCCESS",
         "fc_numbers": ["FC123", "FC456"],
     }
-    assert serializer.validated_message_id == "msg-001"
 
 
 def test_payment_plan_callback_request_serializer_defaults_fc_numbers_for_creation_acknowledgement() -> None:
