@@ -3,7 +3,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from django.db.models import Count, Exists, F, Func, OuterRef, Q, QuerySet, Window
+from django.db.models import Count, Exists, F, OuterRef, Q, QuerySet, Window
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -24,10 +24,6 @@ from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Individual, Program
 
 logger = logging.getLogger(__name__)
-
-
-class IsNull(Func):
-    template = "%(expressions)s IS NULL"
 
 
 def program_with_status_exists(program_status: str) -> Exists:
@@ -225,8 +221,8 @@ class GrievanceTicketFilter(FilterSet):
                         )
                     )
                 )
-            if search.startswith("GRV-"):
-                return qs.filter(unicef_id__istartswith=search)
+            if search.upper().startswith("GRV-"):
+                return qs.filter(unicef_id__iexact=search)
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (

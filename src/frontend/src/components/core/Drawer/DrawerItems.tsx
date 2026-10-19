@@ -83,7 +83,7 @@ export const DrawerItems = ({
     }
     return (
       item.secondaryActions.findIndex((secondaryItem) =>
-        Boolean(secondaryItem.selectedRegexp.exec(clearLocation)),
+        secondaryItem.selectedRegexp.test(clearLocation),
       ) !== -1
     );
   });
@@ -211,6 +211,7 @@ export const DrawerItems = ({
                 component={NavLink}
                 data-cy={`nav-${item?.name}`}
                 to={`/${baseUrl}${hrefForCollapsibleItem}`}
+                aria-expanded={expandedItem === index}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -250,8 +251,8 @@ export const DrawerItems = ({
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
                             to={`/${baseUrl}${secondary.href}`}
-                            selected={Boolean(
-                              secondary.selectedRegexp.exec(clearLocation),
+                            selected={secondary.selectedRegexp.test(
+                              clearLocation,
                             )}
                           >
                             <Icon>{secondary.icon}</Icon>
@@ -291,7 +292,7 @@ export const DrawerItems = ({
             onClick={() => {
               setExpandedItem(null);
             }}
-            selected={Boolean(item.selectedRegexp.exec(clearLocation))}
+            selected={item.selectedRegexp.test(clearLocation)}
           >
             <Icon>{item.icon}</Icon>
             <Text primary={item?.name} />

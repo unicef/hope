@@ -8,7 +8,6 @@ from e2e.page_object.base_components import BaseComponents
 class RegistrationDataImport(BaseComponents):
     # Locators
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_import = 'button[data-cy="button-import"]'
     filter_search = 'div[data-cy="filter-search"]'
     imported_by_input = 'div[data-cy="Imported By-input"]'
@@ -50,9 +49,6 @@ class RegistrationDataImport(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_import(self) -> WebElement:
         return self.wait_for(self.button_import)

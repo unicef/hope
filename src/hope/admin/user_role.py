@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
+from urllib.parse import urlencode
 
 if TYPE_CHECKING:
     from django.contrib.admin.options import ActionLocation
     from django.db.models import QuerySet
+    from django.db.models.fields.related import ForeignKey
+    from django.forms import ModelChoiceField
     from django.http import HttpRequest
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from django.contrib.admin.widgets import AutocompleteSelect
 
 from hope.admin.account_forms import (
     RoleAssignmentAdminForm,
@@ -21,41 +25,67 @@ from hope.models import BusinessArea, Partner, PartnerRoleAssignment, Role, Role
 logger = logging.getLogger(__name__)
 
 
+class PartnerAutocompleteSelect(AutocompleteSelect):
+    """Autocomplete widget passing the edited partner id so the search can apply partner-scoped restrictions."""
+
+    def __init__(self, field: ForeignKey, admin_site: admin.AdminSite, partner_id: str | None, **kwargs: Any) -> None:
+        super().__init__(field, admin_site, **kwargs)
+        self.partner_id = partner_id
+
+    def get_url(self) -> str:
+        return f"{super().get_url()}?{urlencode({'partner_id': self.partner_id or ''})}"
+
+
+def is_autocomplete_for(request: HttpRequest, model_name: str, field_name: str) -> bool:
+    return (
+        "partner_id" in request.GET
+        and request.GET.get("app_label") == "account"
+        and request.GET.get("model_name") == model_name
+        and request.GET.get("field_name") == field_name
+    )
+
+
+def get_autocomplete_partner(request: HttpRequest) -> Partner | None:
+    partner_id = request.GET.get("partner_id", "")
+    return Partner.objects.filter(id=partner_id).first() if partner_id.isdigit() else None
+
+
+def limit_business_areas_for_partner(queryset: QuerySet, partner: Partner | None) -> QuerySet:
+    queryset = queryset.filter(is_split=False)
+    if partner:
+        queryset = queryset.filter(id__in=partner.allowed_business_areas.all().values("id"))
+    return queryset
+
+
+def limit_roles_for_partner(queryset: QuerySet, partner: Partner | None) -> QuerySet:
+    if partner and not partner.is_unicef_subpartner:
+        return queryset.filter(is_available_for_partner=True)
+    return queryset
+
+
 class RoleAssignmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
     model = RoleAssignment
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
     ordering = ["business_area__name"]
-    # business_area is restricted to the partner's allowed_business_areas via
-    # formfield_for_foreignkey; role is restricted to is_available_for_partner=True.
-    # The autocomplete widget bypasses those querysets, so both fields must be excluded.
-    autocomplete_exclude_fields = ("business_area", "role")
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
-        partner_id = request.resolver_match.kwargs.get("object_id")
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).select_related("business_area", "role", "user", "partner__parent")
 
-        if db_field.name == "business_area":
-            if partner_id and partner_id.isdigit():
-                partner = Partner.objects.get(id=partner_id)
-                kwargs["queryset"] = BusinessArea.objects.filter(
-                    id__in=partner.allowed_business_areas.all().values("id"),
-                    is_split=False,
-                )
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
+        if db_field.name in ("business_area", "role"):
+            partner_id = request.resolver_match.kwargs.get("object_id")
+            if not (partner_id and partner_id.isdigit()):
+                partner_id = None
+            partner = Partner.objects.get(id=partner_id) if partner_id else None
+            if db_field.name == "business_area":
+                kwargs["queryset"] = limit_business_areas_for_partner(BusinessArea.objects.all(), partner)
             else:
-                kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
-
-        elif db_field.name == "role":
-            if partner_id and partner_id.isdigit():
-                partner = Partner.objects.get(id=partner_id)
-                if partner.is_unicef_subpartner:
-                    kwargs["queryset"] = Role.objects.all()
-                else:
-                    kwargs["queryset"] = Role.objects.filter(
-                        is_available_for_partner=True,
-                    )
-            else:
-                kwargs["queryset"] = Role.objects.all()
+                kwargs["queryset"] = limit_roles_for_partner(Role.objects.all(), partner)
+            kwargs["widget"] = PartnerAutocompleteSelect(db_field, self.admin_site, partner_id)
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -79,7 +109,9 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
             )
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "role":
             kwargs["queryset"] = Role.objects.order_by("name")
         elif db_field.name == "business_area":
@@ -88,12 +120,6 @@ class BaseRoleAssignmentAdmin(HOPEModelAdminBase):
 
     def get_actions(self, request: HttpRequest, action_location: ActionLocation | None = None) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride
-
-    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return request.user.is_staff
-
-    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
-        return False
 
 
 @admin.register(UserRoleAssignment)
@@ -141,10 +167,13 @@ class PartnerRoleAssignmentAdmin(BaseRoleAssignmentAdmin):
     def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list:
         return ["partner", "business_area", "program", "role", "expiry_date", "group"]
 
-    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "role":
-            obj = self.get_object(request, request.resolver_match.kwargs.get("object_id")) if request else None
+            object_id = request.resolver_match.kwargs.get("object_id")
+            obj = self.get_object(request, cast("str", object_id)) if object_id else None
             if obj and obj.partner and obj.partner.is_unicef_subpartner:
                 field.queryset = Role.objects.order_by("name")
             else:

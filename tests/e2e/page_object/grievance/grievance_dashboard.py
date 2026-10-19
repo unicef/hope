@@ -5,7 +5,6 @@ from e2e.page_object.base_components import BaseComponents
 
 class GrievanceDashboard(BaseComponents):
     # Locators
-    page_header_title = 'h5[data-cy="page-header-title"]'
     total_number_of_tickets_top_number = 'div[data-cy="total-number-of-tickets-top-number"]'
     labelized_field_container_total_number_of_tickets_system_generated = (
         'div[data-cy="labelized-field-container-total-number-of-tickets-system-generated"]'
@@ -37,9 +36,6 @@ class GrievanceDashboard(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_total_number_of_tickets_top_number(self) -> WebElement:
         return self.wait_for(self.total_number_of_tickets_top_number)

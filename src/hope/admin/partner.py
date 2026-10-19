@@ -1,23 +1,30 @@
 from typing import Any
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from django import forms
 from django.contrib import admin
-from django.forms import CheckboxSelectMultiple, ModelForm
+from django.db.models import ForeignKey, QuerySet
+from django.forms import ModelChoiceField, ModelForm
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
-from mptt.forms import TreeNodeMultipleChoiceField
 
-from hope.admin.user_role import RoleAssignmentInline
+from hope.admin.user_role import (
+    PartnerAutocompleteSelect,
+    RoleAssignmentInline,
+    get_autocomplete_partner,
+    is_autocomplete_for,
+)
 from hope.admin.utils import AutocompleteForeignKeyMixin, HopeModelAdminMixin
-from hope.models import Area, BusinessArea, Partner, Program
+from hope.models import Partner
 
 
-class ProgramAreaForm(forms.Form):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), required=True)
-    program = forms.ModelChoiceField(queryset=Program.objects.all(), required=True)
-    areas = TreeNodeMultipleChoiceField(queryset=Area.objects.all(), widget=CheckboxSelectMultiple(), required=False)
+def limit_parent_candidates(queryset: QuerySet, partner: Partner | None) -> QuerySet:
+    if partner and partner.is_parent:
+        return queryset.none()
+    queryset = queryset.filter(level=0)
+    if partner:
+        queryset = queryset.exclude(id=partner.id)
+    return queryset
 
 
 @admin.register(Partner)
@@ -33,11 +40,26 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
     )
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
-    # parent is restricted to root-level partners (level=0) via get_form;
-    # the autocomplete widget bypasses that queryset, so it must be excluded.
-    autocomplete_exclude_fields = ("parent",)
 
-    def get_inline_instances(self, request: Any, obj: Partner | None = None) -> list:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
+        if db_field.name == "parent":
+            partner_id = request.resolver_match.kwargs.get("object_id")
+            kwargs["widget"] = PartnerAutocompleteSelect(
+                db_field, self.admin_site, partner_id if partner_id and partner_id.isdigit() else None
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_search_results(self, request: HttpRequest, queryset: QuerySet, search_term: str) -> tuple[QuerySet, bool]:
+        if is_autocomplete_for(request, "partner", "parent"):
+            queryset = limit_parent_candidates(queryset, get_autocomplete_partner(request))
+        return super().get_search_results(request, queryset, search_term)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Partner]:
+        return super().get_queryset(request).select_related("parent")
+
+    def get_inline_instances(self, request: HttpRequest, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
@@ -68,12 +90,5 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
         form = super().get_form(request, obj, **kwargs)
 
         if not (obj and (obj.is_unicef_subpartner or obj.is_unicef)):
-            queryset = Partner.objects.filter(level=0)  # pragma: no cover
-            if obj:
-                if obj.is_parent:
-                    queryset = Partner.objects.none()  # pragma: no cover
-                else:
-                    queryset = queryset.exclude(id=obj.id)
-
-            form.base_fields["parent"].queryset = queryset
+            form.base_fields["parent"].queryset = limit_parent_candidates(Partner.objects.all(), obj)
         return form

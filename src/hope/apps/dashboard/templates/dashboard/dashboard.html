@@ -131,6 +131,7 @@
 
                 const processedPayments = (data || []).map((item) => ({
                         currency: item.currency || "USD",
+                        currency_vision_code: item.currency_vision_code || item.currency || "USD",
                         delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
                         delivered_quantity: Number.parseFloat(item.total_delivered_quantity) || 0.0,
                         total_planned_usd: Number.parseFloat(item.total_planned_usd) || 0.0,
@@ -163,7 +164,13 @@
                     const programDim = ndx.dimension((d) => d.program);
                     const monthDim = ndx.dimension((d) => d.month);
                     const admin1Dim = ndx.dimension((d) => d.admin1);
-                    const currencyDim = ndx.dimension((d) => d.currency || "UNK");
+                    // Two denominations share one ISO code but their units are not comparable,
+                    // so the bucket key carries the vision code.
+                    const currencyDim = ndx.dimension((d) => {
+                        const code = d.currency || "UNK";
+                        const visionCode = d.currency_vision_code || code;
+                        return visionCode === code ? code : `${code} (${visionCode})`;
+                    });
 
                     const disbursedPaymentsByCurrencyGroup = currencyDim.group().reduce(
                         (p, v) => {

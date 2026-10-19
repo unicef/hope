@@ -128,6 +128,22 @@ def test_get_query_for_lookup_select_many_requires_at_least_one_argument() -> No
         flt.get_query_for_lookup("lookup", {"type": TYPE_SELECT_MANY})
 
 
+@pytest.mark.parametrize(
+    ("comparison_method", "arguments", "expected_message"),
+    [
+        pytest.param("EQUALS", None, "f EQUALS filter query expect 1 arguments", id="arguments-missing"),
+        pytest.param("RANGE", [1], "f RANGE filter query expect 2 arguments gets 1", id="argument-count-mismatch"),
+    ],
+)
+def test_get_query_for_lookup_raises_on_invalid_arguments(
+    comparison_method: str, arguments: list | None, expected_message: str
+) -> None:
+    flt = _Filter(field_name="f", comparison_method=comparison_method, arguments=arguments)
+
+    with pytest.raises(ValidationError, match=expected_message):
+        flt.get_query_for_lookup("lookup", {"type": "STRING"})
+
+
 def test_get_query_for_lookup_select_many_single_argument_uses_contains() -> None:
     flt = _Filter(
         field_name="f",

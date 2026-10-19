@@ -57,7 +57,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       const data = query.state.data;
       const visionProcessing =
         data?.visionManaged &&
-        ['NOT_SENT', 'WAITING_FOR_CALLBACK'].includes(data.vision.status);
+        ['NOT_SENT', 'WAITING_FOR_CALLBACK', 'PP_CREATED'].includes(
+          data.vision.status,
+        );
       if (visionProcessing) {
         return 60000;
       }

@@ -5,6 +5,8 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
+from django.db.models.fields.related import ForeignKey
+from django.forms import ModelChoiceField
 from django.http import HttpRequest
 from django.utils import timezone
 
@@ -66,7 +68,9 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
             .defer("photo")
         )
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "individual":
             kwargs["queryset"] = Individual.all_objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

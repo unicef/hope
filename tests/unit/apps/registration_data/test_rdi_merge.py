@@ -553,10 +553,10 @@ def test_merging_external_collector(
     DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
 )
 @mock.patch(
-    "hope.apps.registration_data.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+    "hope.apps.registration_data.services.deduplication_engine.DeduplicationEngineService.create_grievance_tickets_for_biometric_duplicates"
 )
 def test_merge_biometric_deduplication_cw_path(
-    create_grievance_tickets_for_duplicates_mock: mock.Mock,
+    create_grievance_tickets_for_biometric_duplicates_mock: mock.Mock,
     rdi: object,
     areas: dict,
     pending_head_individual: object,
@@ -578,7 +578,7 @@ def test_merge_biometric_deduplication_cw_path(
     with django_capture_on_commit_callbacks(execute=True):
         RdiMergeTask().execute(rdi.pk)
 
-    create_grievance_tickets_for_duplicates_mock.assert_called_once_with(rdi)
+    create_grievance_tickets_for_biometric_duplicates_mock.assert_called_once_with(rdi)
 
 
 def test_merge_empty_rdi(rdi: object, django_capture_on_commit_callbacks) -> None:
@@ -635,19 +635,21 @@ def test_run_deduplication_raises_when_business_area_is_none(rdi_merge_task):
         rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
 
 
-def test_run_biometric_deduplication_skips_when_program_is_none(rdi_merge_task):
+def test_create_adjudication_tickets_from_deduplication_engine_findings_skips_when_program_is_none(rdi_merge_task):
     rdi = mock.MagicMock()
     rdi.program = None
 
-    rdi_merge_task._run_biometric_deduplication(rdi, [])
+    rdi_merge_task._create_adjudication_tickets_from_deduplication_engine_findings(rdi, [])
 
 
-def test_run_biometric_deduplication_skips_when_biometric_deduplication_disabled(rdi_merge_task):
+def test_create_adjudication_tickets_from_deduplication_engine_findings_skips_when_biometric_deduplication_disabled(
+    rdi_merge_task,
+):
     rdi = mock.MagicMock()
     rdi.program = mock.MagicMock()
     rdi.program.biometric_deduplication_enabled = False
 
-    rdi_merge_task._run_biometric_deduplication(rdi, [])
+    rdi_merge_task._create_adjudication_tickets_from_deduplication_engine_findings(rdi, [])
 
 
 @mock.patch("hope.apps.registration_data.tasks.rdi_merge.get_individual_doc")

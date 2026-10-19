@@ -11,9 +11,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { PROGRAM_STATE_FILTER } from '@utils/constants';
-import { adjustHeadCells } from '@utils/utils';
+import { adjustHeadCells, sanitizePhoneSearch } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
@@ -22,6 +22,7 @@ import {
 } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -79,21 +80,22 @@ export function LookUpIndividualTable({
       : null;
   }
 
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
-      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      ageMin: filter.ageMin,
+      ageMax: filter.ageMax,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
-      admin2: [filter.admin2],
+      admin2: filter.admin2,
       flags: filter.flags,
       status: filter.status,
-      lastRegistrationDate: JSON.stringify({
-        min: filter.lastRegistrationDateMin,
-        max: filter.lastRegistrationDateMax,
-      }),
+      lastRegistrationDateAfter: filter.lastRegistrationDateMin,
+      lastRegistrationDateBefore: filter.lastRegistrationDateMax,
       orderBy: filter.orderBy,
+      birthDate: filter.birthDate ?? '',
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
       program: isAllPrograms ? filter.program : undefined,
@@ -107,6 +109,7 @@ export function LookUpIndividualTable({
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin2,
@@ -115,6 +118,7 @@ export function LookUpIndividualTable({
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
       filter.orderBy,
+      filter.birthDate,
       filter.program,
       filter.programState,
       householdId,
@@ -124,19 +128,20 @@ export function LookUpIndividualTable({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  // Add page state for pagination
-  const [page, setPage] = useState(0);
+  const table = useTableState({
+    rowsPerPageOptions: [5, 10, 15, 20],
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   // Selected Program Individuals
   const selectedProgramIndividualsParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: selectedProgramIndividualsData,
@@ -159,7 +164,7 @@ export function LookUpIndividualTable({
   // Selected Program Count
   const selectedProgramIndividualsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: selectedProgramIndividualsCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -176,8 +181,7 @@ export function LookUpIndividualTable({
   // All Programs Individuals
   const allProgramsIndividualsParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: allProgramsIndividualsData,
@@ -200,7 +204,7 @@ export function LookUpIndividualTable({
   // All Programs Count
   const allProgramsIndividualsCountParams = createApiParams(
     { businessAreaSlug: businessArea },
-    queryVariables,
+    filterVariables,
   );
   const { data: allProgramsIndividualsCount } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -254,10 +258,7 @@ export function LookUpIndividualTable({
     <UniversalRestTable
       headCells={preparedHeadcells}
       allowSort={false}
-      rowsPerPageOptions={[5, 10, 15, 20]}
-      filterOrderBy={filter.orderBy}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       data={
         isAllPrograms
           ? allProgramsIndividualsData
@@ -279,8 +280,6 @@ export function LookUpIndividualTable({
           individual={row}
         />
       )}
-      page={page}
-      setPage={setPage}
     />
   );
   return noTableStyling ? (

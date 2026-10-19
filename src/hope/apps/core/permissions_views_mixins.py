@@ -2,7 +2,7 @@ from typing import Any
 
 from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 
 from hope.apps.account.permissions import Permissions
 
@@ -11,7 +11,7 @@ class ViewPermissionsMixinBase(AccessMixin):
     def has_permissions(self) -> bool:
         raise NotImplementedError()
 
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Any:
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if not self.has_permissions():

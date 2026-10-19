@@ -1,8 +1,7 @@
-from typing import Any
-
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
@@ -23,5 +22,5 @@ class WesternUnionPaymentPlanReportAdmin(AutocompleteForeignKeyMixin, AdminFilte
 
     payment_plan_admin_link.short_description = "Payment Plan"
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False

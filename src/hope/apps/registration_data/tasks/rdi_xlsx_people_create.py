@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from django.db import transaction
 import openpyxl
 
+from hope.apps.core.currency_resolution import resolve_active_currency
 from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.core.utils import SheetImageLoader, serialize_flex_attributes
@@ -36,7 +37,6 @@ from hope.models import (
     RegistrationDataImport,
     log_create,
 )
-from hope.models.currency import Currency
 
 if TYPE_CHECKING:
     from openpyxl.cell import Cell
@@ -165,7 +165,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 self._process_people_cell(cell, header_cell, obj_to_create)
             except Exception as e:
                 raise Exception(
-                    f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
+                    f"Error processing cell {cell.coordinate} in sheet 'People', "
+                    f"field {header_cell.value!r}, value {cell.value!r}: {e.__class__.__name__}({e})"
                 ) from e
 
         obj_to_create.last_registration_date = obj_to_create.first_registration_date
@@ -245,22 +246,30 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             "pp_admin3_i_c",
             "pp_admin4_i_c",
         ):
+            try:
+                area = Area.objects.get(p_code=cell.value)
+            except Area.DoesNotExist as exc:
+                raise ValueError(f"Area with code {cell.value!r} does not exist") from exc
             setattr(
                 obj_to_create,
                 current_field["name"],
-                Area.objects.get(p_code=cell.value),
+                area,
             )
         elif header in ("pp_country_i_c", "pp_country_origin_i_c"):
+            try:
+                country = GeoCountry.objects.get(iso_code3=value)
+            except GeoCountry.DoesNotExist as exc:
+                raise ValueError(f"Country with ISO3 code {cell.value!r} does not exist") from exc
             setattr(
                 obj_to_create,
                 current_field["name"],
-                GeoCountry.objects.get(iso_code3=cell.value),
+                country,
             )
         elif header == "pp_currency_i_c":
             setattr(
                 obj_to_create,
                 current_field["name"],
-                Currency.objects.get(code=value),
+                resolve_active_currency(value),
             )
         else:
             setattr(

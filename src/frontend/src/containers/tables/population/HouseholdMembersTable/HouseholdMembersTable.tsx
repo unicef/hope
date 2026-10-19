@@ -6,6 +6,7 @@ import type { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import TableCell from '@mui/material/TableCell';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import type { HouseholdMember } from '@restgenerated/models/HouseholdMember';
@@ -23,7 +24,6 @@ import {
   sexToCapitalize,
 } from '@utils/utils';
 import type { ReactElement, ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 
@@ -103,17 +103,7 @@ export const HouseholdMembersTable = ({
 
   const { programId, businessArea } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(() => {
-    return {
-      businessAreaSlug: businessArea,
-      programCode: programId,
-    };
-  }, [businessArea, programId]);
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState();
 
   const membersParams = {
     businessAreaSlug: businessArea,
@@ -138,8 +128,7 @@ export const HouseholdMembersTable = ({
       data={data}
       error={error}
       isLoading={isLoading}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       renderRow={(row: HouseholdMember) => {
         const isHead = row.relationship === 'HEAD';
 

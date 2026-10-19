@@ -41,7 +41,7 @@ export function MarkAsReleasedPaymentPlan({
     useState(false);
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
-  const { mutateAsync: markAsReleased, isPending: loadingMarkAsReleased } =
+  const { mutate: markAsReleased, isPending: loadingMarkAsReleased } =
     useMutation({
       mutationFn: ({
         businessAreaSlug,

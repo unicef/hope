@@ -43,6 +43,7 @@ const PeoplePage = (): ReactElement => {
 
   const initialFilter = {
     search: '',
+    phone: '',
     documentType: '',
     documentNumber: '',
     admin1: '',
@@ -56,6 +57,7 @@ const PeoplePage = (): ReactElement => {
     lastRegistrationDateMin: '',
     lastRegistrationDateMax: '',
     rdiId: '',
+    birthDate: '',
   };
 
   const [filter, setFilter] = useState(

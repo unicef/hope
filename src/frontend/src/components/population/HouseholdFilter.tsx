@@ -32,6 +32,7 @@ interface HouseholdFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
   isOnPaper?: boolean;
+  showStatusFilter?: boolean;
 }
 
 export function HouseholdFilters({
@@ -43,6 +44,7 @@ export function HouseholdFilters({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
+  showStatusFilter = true,
 }: HouseholdFiltersProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
@@ -188,24 +190,26 @@ export function HouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs: 3 }}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
-            label={t('Status')}
-            value={filter.withdrawn}
-            data-cy="hh-filters-status"
-          >
-            <MenuItem key="all" value="null">
-              All
-            </MenuItem>
-            <MenuItem key="active" value="false">
-              Active
-            </MenuItem>
-            <MenuItem key="inactive" value="true">
-              Inactive (Withdrawn)
-            </MenuItem>
-          </SelectFilter>
-        </Grid>
+        {showStatusFilter && (
+          <Grid size={{ xs: 3 }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
+              label={t('Status')}
+              value={filter.withdrawn}
+              data-cy="hh-filters-status"
+            >
+              <MenuItem key="all" value="null">
+                All
+              </MenuItem>
+              <MenuItem key="active" value="false">
+                Active
+              </MenuItem>
+              <MenuItem key="inactive" value="true">
+                Inactive (Withdrawn)
+              </MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>
             <SelectFilter

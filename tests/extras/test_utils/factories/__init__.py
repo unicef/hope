@@ -95,6 +95,7 @@ from .payment import (
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    TargetPopulationFactory,
     WesternUnionDataFactory,
     WesternUnionInvoiceFactory,
     WesternUnionPaymentPlanReportFactory,
@@ -130,7 +131,7 @@ from .targeting import (
     TargetingIndividualRuleFilterBlockFactory,
 )
 from .third_party import FlagStateFactory, GroupFactory
-from .vision import DownPaymentFactory, FundsCommitmentFactory, FundsCommitmentGroupFactory, FundsCommitmentItemFactory
+from .vision import DownPaymentFactory, FundsCommitmentFactory, FundsCommitmentHeaderFactory, FundsCommitmentItemFactory
 
 __all__ = [
     "AdminAreaLimitedToFactory",
@@ -174,7 +175,7 @@ __all__ = [
     "FlexibleAttributeGroupFactory",
     "FspXlsxTemplatePerDeliveryMechanismFactory",
     "FundsCommitmentFactory",
-    "FundsCommitmentGroupFactory",
+    "FundsCommitmentHeaderFactory",
     "FundsCommitmentItemFactory",
     "GroupFactory",
     "GrievanceComplaintTicketWithoutExtrasFactory",
@@ -224,6 +225,7 @@ __all__ = [
     "PaymentVerificationFactory",
     "PaymentVerificationPlanFactory",
     "PaymentVerificationSummaryFactory",
+    "TargetPopulationFactory",
     "WesternUnionDataFactory",
     "PDUOnlineEditFactory",
     "PDUOnlineEditSentBackCommentFactory",

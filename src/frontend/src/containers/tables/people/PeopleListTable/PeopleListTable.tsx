@@ -8,11 +8,13 @@ import { restQueryKey } from '@utils/queryKeys';
 import type { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
+import { sanitizePhoneSearch } from '@utils/utils';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeopleListTableProps {
@@ -29,9 +31,7 @@ export const PeopleListTable = ({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       programCode: programId,
@@ -39,6 +39,7 @@ export const PeopleListTable = ({
       ageMin: filter.ageMin,
       sex: [filter.sex],
       search: filter.search.trim(),
+      phone: sanitizePhoneSearch(filter.phone),
       documentType: filter.documentType,
       documentNumber: filter.documentNumber.trim(),
       admin1: [filter.admin1],
@@ -50,13 +51,14 @@ export const PeopleListTable = ({
       rdiMergeStatus: 'MERGED',
       orderBy: filter.orderBy,
       rdiId: filter.rdiId,
-      page,
+      birthDate: filter.birthDate,
     }),
     [
       filter.ageMin,
       filter.ageMax,
       filter.sex,
       filter.search,
+      filter.phone,
       filter.documentType,
       filter.documentNumber,
       filter.admin1,
@@ -68,20 +70,24 @@ export const PeopleListTable = ({
       filter.orderBy,
       programId,
       businessArea,
-      page,
       filter.rdiId,
+      filter.birthDate,
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const individualsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    filterVariables,
   );
   const { data: countData } = useQuery<CountResponse>({
     queryKey: restQueryKey(
@@ -99,8 +105,7 @@ export const PeopleListTable = ({
 
   const individualsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedIndividualListList>({
@@ -120,18 +125,13 @@ export const PeopleListTable = ({
       <UniversalRestTable
         title={t('People')}
         headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         data={data}
         error={error}
         isLoading={isLoading}
         isFetching={isFetching}
         allowSort={false}
-        filterOrderBy={filter.orderBy}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
         renderRow={(row: IndividualList) => (
           <PeopleListTableRow
             key={row.id}

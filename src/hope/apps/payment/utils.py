@@ -288,7 +288,7 @@ def get_quantity_in_usd(
     amount: Decimal | None,
     currency: "Currency | None",
     exchange_rate: None | Decimal | float,
-    currency_exchange_date: datetime.datetime,
+    currency_exchange_date: datetime.date,
     exchange_rates_client: "ExchangeRates | ExchangeRateClient | None" = None,
 ) -> Decimal | None:
     if amount is None:
@@ -297,7 +297,7 @@ def get_quantity_in_usd(
     if amount == 0:
         return Decimal(0)
 
-    currency_code = currency.code if currency else None
+    currency_code = currency.vision_code if currency else None
 
     if not exchange_rate:
         if not exchange_rates_client:
@@ -308,6 +308,21 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:
+    """Why the plan's amounts must not be sent to a Financial Service Provider, or None when they may.
+
+    FSPs receive only the ISO code, which after a redenomination names the active variant, so amounts
+    in an inactive variant would be paid out in the wrong denomination.
+    """
+    currency = payment_plan.currency
+    if currency is None or currency.active:
+        return None
+    return (
+        f"Payment Plan {payment_plan.unicef_id}: currency {currency} is inactive; "
+        f"its amounts cannot be sent to the Financial Service Provider."
+    )
 
 
 def normalize_score(value: float | str | Decimal | None) -> Decimal | None:
@@ -346,9 +361,12 @@ def get_payment_delivered_quantity_status_and_value(
     raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
 
+PREPARE_PAYMENT_PLAN_LOCK_PREFIX = "prepare_payment_plan_async_task_"
+
+
 def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
-    return hashlib.sha256(task_params_str.encode()).hexdigest()
+    return PREPARE_PAYMENT_PLAN_LOCK_PREFIX + hashlib.sha256(task_params_str.encode()).hexdigest()
 
 
 def get_link(api_url: str) -> str:

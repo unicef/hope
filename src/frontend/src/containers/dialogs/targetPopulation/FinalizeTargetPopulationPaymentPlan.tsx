@@ -34,7 +34,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
-  const { mutateAsync: markReady, isPending: loadingFinish } = useMutation({
+  const { mutate: markReady, isPending: loadingFinish } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsMarkReadyRetrieve({
         businessAreaSlug: businessArea,

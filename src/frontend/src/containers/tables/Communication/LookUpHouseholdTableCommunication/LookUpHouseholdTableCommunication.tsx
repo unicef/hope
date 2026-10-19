@@ -7,12 +7,13 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
 import type { MouseEvent, ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import type { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import type { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import type { HouseholdList } from '@restgenerated/models/HouseholdList';
@@ -55,7 +56,7 @@ function LookUpHouseholdTableCommunication({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const initialQueryVariables = useMemo(() => {
+  const filterVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
       if (filter.withdrawn === 'true') {
         return true;
@@ -96,17 +97,15 @@ function LookUpHouseholdTableCommunication({
     filter.orderBy,
   ]);
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({ resetPageOn: filterVariables });
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const householdsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const { data, isLoading, isFetching, error } =
     useQuery<PaginatedHouseholdListList>({
@@ -203,14 +202,11 @@ function LookUpHouseholdTableCommunication({
       allowSort={false}
       onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
       numSelected={householdMultiSelect && selected.length}
-      queryVariables={queryVariables}
-      setQueryVariables={setQueryVariables}
+      tableState={table}
       data={data}
       isLoading={isLoading}
       isFetching={isFetching}
       error={error}
-      page={page}
-      setPage={setPage}
     />
   );
   return noTableStyling ? (

@@ -1,10 +1,11 @@
 from django.db import models
 
 from hope.models.registration_data_import import RegistrationDataImport
+from hope.models.utils import LongNameIndex
 
 
 class KoboImportedSubmission(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     kobo_submission_uuid = models.UUIDField()  # ImportedHousehold.kobo_submission_uuid
     kobo_asset_id = models.CharField(max_length=150)  # ImportedHousehold.detail_id
     kobo_submission_time = models.DateTimeField()  # ImportedHousehold.kobo_submission_time
@@ -21,6 +22,9 @@ class KoboImportedSubmission(models.Model):
     class Meta:
         app_label = "registration_data"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="registration_data_koboimportedsubmission_created_at_b80e8453"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.kobo_submission_uuid} ({self.kobo_asset_id})"

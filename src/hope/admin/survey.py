@@ -30,6 +30,4 @@ class SurveyAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id", "title")
 
     def frontend_url(self, obj: Survey) -> str | None:
-        if not obj.program:
-            return None
         return f"/{obj.business_area.slug}/programs/{obj.program.code}/accountability/surveys/{obj.id}"

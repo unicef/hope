@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from uuid import UUID
+
+    from django.core.files.uploadedfile import UploadedFile
 import zipfile
 
 from admin_extra_buttons.buttons import StandardButton
@@ -21,7 +23,9 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import Q, QuerySet
-from django.forms import CheckboxSelectMultiple, formset_factory
+from django.db.models.fields.related import ForeignKey
+from django.forms import CheckboxSelectMultiple, ModelChoiceField, formset_factory
+from django.forms.models import BaseInlineFormSet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -104,11 +108,13 @@ class PaymentPlanPurposeInline(admin.TabularInline):
     verbose_name = "Payment Plan Purpose"
     verbose_name_plural = "Payment Plan Purposes"
 
-    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> Any:
+    def get_formset(self, request: HttpRequest, obj: Any = None, **kwargs: Any) -> type[BaseInlineFormSet]:
         request._program_obj = obj
         return super().get_formset(request, obj, **kwargs)
 
-    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(
+        self, db_field: ForeignKey, request: HttpRequest, **kwargs: Any
+    ) -> ModelChoiceField | None:
         if db_field.name == "paymentplanpurpose":
             obj = getattr(request, "_program_obj", None)
             if obj is not None:
@@ -130,7 +136,7 @@ class PartnerAreaLimitForm(forms.Form):
 class BulkUploadIndividualsPhotosForm(forms.Form):
     file = forms.FileField(widget=forms.ClearableFileInput(attrs={"accept": ".zip"}))
 
-    def clean_file(self) -> Any:
+    def clean_file(self) -> "UploadedFile":
         file = self.cleaned_data["file"]
 
         if not file.name.lower().endswith(".zip"):
@@ -319,7 +325,7 @@ class ProgramAdmin(
             create_tp_from_list_async_task(request.POST.dict(), str(request.user.pk), str(program.pk))
             message = format_html("Creation of target population <b>{}</b> scheduled.", request.POST["name"])
             messages.success(request, message)
-            url = reverse("admin:payment_paymentplan_changelist")
+            url = reverse("admin:payment_targetpopulation_changelist")
             return HttpResponseRedirect(url)
 
         else:
@@ -410,6 +416,7 @@ class ProgramAdmin(
             return TemplateResponse(request, "admin/program/program/program_area_limits.html", context)
         return TemplateResponse(request, "admin/program/program/program_area_limits_readonly.html", context)
 
+    # Looks unused, but admin_extra_buttons renders it as the "ES Index" dropdown with check_index and reindex_program.
     @choice(permission="account.can_reindex_programs", label="ES Index", change_list=False)
     def es_index_menu(self, button: Any) -> None:
         button.choices = [self.check_index, self.reindex_program]

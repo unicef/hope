@@ -4,7 +4,6 @@ from typing import Any
 
 import openpyxl
 import pytest
-from selenium.common.exceptions import TimeoutException
 
 from e2e.page_object.programme_population.individuals import Individuals
 from e2e.page_object.programme_population.periodic_data_update_templates import (
@@ -181,7 +180,7 @@ class TestPDUXlsxUpload:
             program,
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
+        page_individuals.open_nav_section("Main Menu")
         page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
@@ -224,12 +223,8 @@ class TestPDUXlsxUpload:
             program,
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
-        try:
-            page_individuals.get_nav_individuals().click()
-        except TimeoutException:
-            page_individuals.get_nav_programme_population().click()
-            page_individuals.get_nav_individuals().click()
+        page_individuals.open_nav_section("Main Menu")
+        page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
         page_individuals.get_button_import().click()
@@ -281,7 +276,7 @@ class TestPDUXlsxUpload:
             wb.save(tmp_file.name)
             tmp_file.seek(0)
             page_individuals.select_global_program_filter(program.name)
-            page_individuals.get_nav_programme_population().click()
+            page_individuals.open_nav_section("Main Menu")
             page_individuals.get_nav_individuals().click()
             page_individuals.get_tab_periodic_data_updates().click()
             page_individuals.get_tab_offline_edits().click()
@@ -321,12 +316,8 @@ class TestPDUXlsxUpload:
             status=PDUXlsxUpload.Status.SUCCESSFUL,
         )
         page_individuals.select_global_program_filter(program.name)
-        page_individuals.get_nav_programme_population().click()
-        try:
-            page_individuals.get_nav_individuals().click()
-        except TimeoutException:
-            page_individuals.get_nav_programme_population().click()
-            page_individuals.get_nav_individuals().click()
+        page_individuals.open_nav_section("Main Menu")
+        page_individuals.get_nav_individuals().click()
         page_individuals.get_tab_periodic_data_updates().click()
         page_individuals.get_tab_offline_edits().click()
 

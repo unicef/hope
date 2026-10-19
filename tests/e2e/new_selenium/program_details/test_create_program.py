@@ -74,7 +74,7 @@ def test_create_programme_mandatory_fields_only(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         _navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')
@@ -317,7 +317,7 @@ def test_create_programme_purposes_scoped_to_ba(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         _navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')
@@ -343,7 +343,7 @@ def test_create_programme_max_ten_purposes_enforced(
         Permissions.GEO_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_PURPOSE_VIEW_LIST,
     ):
-        browser.login(username="noperm_user", password="testtest2")
+        browser.login(username="noperm_user")
         _navigate_to_programme_management(browser)
 
         browser.click('a[data-cy="button-new-program"]')
