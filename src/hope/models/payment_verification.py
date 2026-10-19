@@ -7,7 +7,7 @@ from django.utils import timezone
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.models.business_area import BusinessArea
 from hope.models.payment_verification_plan import PaymentVerificationPlan
-from hope.models.utils import AdminUrlMixin, ConcurrencyModel, TimeStampedUUIDModel
+from hope.models.utils import AdminUrlMixin, ConcurrencyModel, LongNameIndex, TimeStampedUUIDModel
 
 
 def get_status_choices() -> tuple:
@@ -58,6 +58,10 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     class Meta:
         app_label = "payment"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentverification_created_at_aeebbe97"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentverification_updated_at_4f0cb4e9"),
+        ]
 
     @property
     def is_manually_editable(self) -> bool:

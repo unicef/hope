@@ -16,7 +16,6 @@ from django_filters import (
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.core.api.filters import OfficeSearchFilterMixin, UpdatedAtFilter
-from hope.apps.core.exceptions import SearchError
 from hope.apps.core.utils import CustomOrderingFilter
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import (
@@ -227,13 +226,6 @@ class HouseholdFilter(UpdatedAtFilter):
                 | Q(program_registration_id__icontains=search)
             )
         )
-
-    def _filter_detail_id(self, qs: QuerySet[Household], search: str) -> QuerySet[Household]:
-        try:
-            int(search)
-        except ValueError:
-            raise SearchError("The search value for a given search type should be a number")
-        return qs.filter(detail_id__istartswith=search)
 
     def document_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs

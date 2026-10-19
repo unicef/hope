@@ -31,6 +31,7 @@ from hope.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
+    TargetPopulation,
     WesternUnionData,
     WesternUnionInvoice,
     WesternUnionPaymentPlanReport,
@@ -99,6 +100,13 @@ class PaymentPlanFactory(DjangoModelFactory):
                 purpose = PaymentPlanPurposeFactory()
                 program.payment_plan_purposes.add(purpose)
             self.payment_plan_purposes.add(purpose)
+
+
+class TargetPopulationFactory(PaymentPlanFactory):
+    class Meta:
+        model = TargetPopulation
+
+    status = PaymentPlan.Status.TP_OPEN
 
 
 class ApprovalProcessFactory(DjangoModelFactory):

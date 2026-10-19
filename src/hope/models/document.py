@@ -9,6 +9,7 @@ from hope.apps.core.upload_paths import upload_path
 from hope.models.household import logger
 from hope.models.utils import (
     AbstractSyncable,
+    LongNameIndex,
     MergeStatusModel,
     PendingManager,
     SoftDeletableMergeStatusModel,
@@ -23,6 +24,10 @@ class DocumentValidator(TimeStampedUUIDModel):
     class Meta:
         app_label = "household"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="household_documentvalidator_created_at_114c7571"),
+            LongNameIndex(fields=["updated_at"], name="household_documentvalidator_updated_at_e5956004"),
+        ]
 
 
 def get_document_status_choices() -> tuple:
@@ -43,7 +48,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     program = models.ForeignKey("program.Program", null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
+    document_number = models.CharField(max_length=255, blank=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=get_document_status_choices, default=STATUS_PENDING, blank=True)
@@ -52,7 +57,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
     cleared_date = models.DateTimeField(default=timezone.now, blank=True)
     cleared_by = models.ForeignKey("account.User", null=True, blank=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
-    expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -80,6 +85,11 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
                 fields=["type", "individual"],
                 name="doc_type_individual_idx",
             ),
+            LongNameIndex(fields=["is_removed"], name="household_document_is_removed_ef7efe5b"),
+            LongNameIndex(fields=["created_at"], name="household_document_created_at_3bc5e22a"),
+            LongNameIndex(fields=["updated_at"], name="household_document_updated_at_f16babb8"),
+            LongNameIndex(fields=["document_number"], name="household_document_document_number_43773c34"),
+            LongNameIndex(fields=["expiry_date"], name="household_document_expiry_date_623fe225"),
         ]
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
@@ -113,12 +123,6 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
         if self.type.valid_for_deduplication:
             return f"{self.type_id}--{self.document_number}--{self.country_id}"
         return f"{self.document_number}--{self.country_id}"
-
-    def mark_as_need_investigation(self) -> None:
-        self.status = self.STATUS_NEED_INVESTIGATION
-
-    def mark_as_valid(self) -> None:
-        self.status = self.STATUS_VALID
 
     def erase(self) -> None:
         self.is_removed = True

@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from hope.apps.core.upload_paths import upload_path
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
@@ -17,3 +17,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     class Meta:
         app_label = "household"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="household_xlsxupdatefile_created_at_185a6021"),
+            LongNameIndex(fields=["updated_at"], name="household_xlsxupdatefile_updated_at_018bdcb9"),
+        ]
