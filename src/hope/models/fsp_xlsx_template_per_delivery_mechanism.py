@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
@@ -30,6 +30,14 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         app_label = "payment"
         unique_together = ("financial_service_provider", "delivery_mechanism")
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(
+                fields=["created_at"], name="payment_fspxlsxtemplateperdeliverymechanism_created_at_aa00fa2f"
+            ),
+            LongNameIndex(
+                fields=["updated_at"], name="payment_fspxlsxtemplateperdeliverymechanism_updated_at_d262f049"
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"

@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from hope.models.approval_process import ApprovalProcess
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 def get_approval_type_choices() -> tuple:
@@ -35,6 +35,10 @@ class Approval(TimeStampedUUIDModel):
     class Meta:
         app_label = "payment"
         ordering = ("-created_at",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_approval_created_at_e97382ec"),
+            LongNameIndex(fields=["updated_at"], name="payment_approval_updated_at_b0fc5def"),
+        ]
 
     def __str__(self) -> str:
         return self.type or ""  # pragma: no cover
