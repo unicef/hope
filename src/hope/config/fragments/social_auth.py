@@ -27,16 +27,5 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.load_extra_data",
     "hope.apps.account.authentication.user_details",
 )
-SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_USER_FIELDS = [
-    "email",
-    "fullname",
-]
-
-SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_SCOPE = [
-    "openid",
-    "email",
-    "profile",
-]
-
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool("SOCIAL_AUTH_REDIRECT_IS_HTTPS")
