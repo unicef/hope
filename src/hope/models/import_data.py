@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 def get_data_type_choices() -> tuple:
@@ -48,3 +48,7 @@ class ImportData(TimeStampedUUIDModel):
     class Meta:
         app_label = "registration_data"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="registration_data_importdata_created_at_22e35892"),
+            LongNameIndex(fields=["updated_at"], name="registration_data_importdata_updated_at_631db42b"),
+        ]

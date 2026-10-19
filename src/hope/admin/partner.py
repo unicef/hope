@@ -56,6 +56,9 @@ class PartnerAdmin(AutocompleteForeignKeyMixin, HopeModelAdminMixin, admin.Model
             queryset = limit_parent_candidates(queryset, get_autocomplete_partner(request))
         return super().get_search_results(request, queryset, search_term)
 
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Partner]:
+        return super().get_queryset(request).select_related("parent")
+
     def get_inline_instances(self, request: HttpRequest, obj: Partner | None = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []

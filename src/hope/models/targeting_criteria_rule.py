@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import Q
 
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaRuleQueryingBase
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -25,6 +25,10 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
     class Meta:
         app_label = "targeting"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="targeting_targetingcriteriarule_created_at_2ca50d1d"),
+            LongNameIndex(fields=["updated_at"], name="targeting_targetingcriteriarule_updated_at_e3aeeb64"),
+        ]
 
     def get_filters(self) -> "QuerySet":
         return self.filters.all()
