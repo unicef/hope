@@ -33,7 +33,7 @@ class HopeCurrencyDecimalField(serializers.DecimalField):
             value = normalize_currency_decimal(data)
         except DjangoValidationError:
             self.fail("invalid")
-        return super().to_internal_value(str(value))
+        return super().to_internal_value(value)
 
     def to_representation(self, value: Any) -> Any:
         representation = super().to_representation(value)
