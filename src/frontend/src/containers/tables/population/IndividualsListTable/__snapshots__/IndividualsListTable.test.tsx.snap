@@ -16,10 +16,10 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
           class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
         >
           <div
-            class="styled-normalized MuiBox-root css-0"
+            class="styled-normalized MuiBox-root css-1b626uw"
           >
             <div
-              class="styled-normalized MuiBox-root css-1ruxp1v"
+              class="styled-normalized MuiBox-root css-7yim04"
             />
           </div>
           <table
@@ -295,10 +295,10 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
           class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
         >
           <div
-            class="styled-normalized MuiBox-root css-0"
+            class="styled-normalized MuiBox-root css-1b626uw"
           >
             <div
-              class="styled-normalized MuiBox-root css-1ruxp1v"
+              class="styled-normalized MuiBox-root css-7yim04"
             />
           </div>
           <table
@@ -574,10 +574,10 @@ exports[`IndividualsListTable > should render IndividualsListTable correctly 1`]
           class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
         >
           <div
-            class="styled-normalized MuiBox-root css-0"
+            class="styled-normalized MuiBox-root css-1b626uw"
           >
             <div
-              class="styled-normalized MuiBox-root css-1ruxp1v"
+              class="styled-normalized MuiBox-root css-7yim04"
             />
           </div>
           <table
