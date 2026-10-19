@@ -192,9 +192,8 @@ def test_payment_plan_create(user):
 def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gateway(payment_plan):
     PaymentFactory(parent=payment_plan)
     payment_plan.payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
-    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
-    payment_plan.use_payment_gateway = True
-    payment_plan.save(update_fields=["use_payment_gateway"])
+    payment_plan.payment_plan_group.use_payment_gateway = True
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider", "use_payment_gateway"])
     payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_PG)
 
     assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is False
@@ -203,9 +202,8 @@ def test_is_payment_gateway_and_all_sent_to_fsp_false_for_sent_to_payment_gatewa
 def test_is_payment_gateway_and_all_sent_to_fsp_true_for_sent_to_fsp(payment_plan):
     PaymentFactory(parent=payment_plan)
     payment_plan.payment_plan_group.financial_service_provider = FinancialServiceProviderFactory()
-    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider"])
-    payment_plan.use_payment_gateway = True
-    payment_plan.save(update_fields=["use_payment_gateway"])
+    payment_plan.payment_plan_group.use_payment_gateway = True
+    payment_plan.payment_plan_group.save(update_fields=["financial_service_provider", "use_payment_gateway"])
     payment_plan.eligible_payments.update(status=Payment.STATUS_SENT_TO_FSP)
 
     assert payment_plan.is_payment_gateway_and_all_sent_to_fsp is True
@@ -1014,6 +1012,20 @@ def test_follow_up_instruction_child_reads_currency_and_fsp_from_instruction(
     assert instruction_child_payment_plan.currency == follow_up_instruction.currency
     assert instruction_child_payment_plan.currency.code == "EUR"
     assert instruction_child_payment_plan.financial_service_provider == follow_up_instruction.financial_service_provider
+
+
+@pytest.fixture
+def payment_gateway_instruction_child_payment_plan(instruction_child_payment_plan, follow_up_instruction):
+    follow_up_instruction.use_payment_gateway = True
+    follow_up_instruction.save(update_fields=["use_payment_gateway"])
+    return instruction_child_payment_plan
+
+
+def test_follow_up_instruction_child_reads_use_payment_gateway_from_instruction(
+    payment_gateway_instruction_child_payment_plan,
+):
+    assert payment_gateway_instruction_child_payment_plan.use_payment_gateway is True
+    assert payment_gateway_instruction_child_payment_plan.is_payment_gateway is True
 
 
 @pytest.fixture

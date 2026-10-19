@@ -51,7 +51,6 @@
                     "built_at": null,
                     "exchange_rate": null,
                     "custom_exchange_rate": false,
-                    "use_payment_gateway": false,
                     "custom_exchange_rate_set_by": null,
                     "female_children_count": 0,
                     "male_children_count": 0,

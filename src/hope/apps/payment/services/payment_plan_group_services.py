@@ -62,8 +62,8 @@ class PaymentPlanGroupService:
         """Create a Follow-Up / Top-Up / Amendment of this group as a new linked group.
 
         The linked group holds one child plan per plan of this group that qualifies for it, takes this
-        group's FSP and currency, gets the given dispersion dates and starts OPEN. ``top_up_amount``
-        funds a Top-Up or Amendment: a ``Decimal`` for every eligible beneficiary, or
+        group's FSP, currency and payment gateway flag, gets the given dispersion dates and starts OPEN.
+        ``top_up_amount`` funds a Top-Up or Amendment: a ``Decimal`` for every eligible beneficiary, or
         ``{payment unicef_id: amount}`` from the group's amount file, split here per source plan.
         """
         source_group = self._locked_for_update()
@@ -95,6 +95,7 @@ class PaymentPlanGroupService:
             source_group=source_group,
             financial_service_provider=source_group.financial_service_provider,
             currency=source_group.currency,
+            use_payment_gateway=source_group.use_payment_gateway,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
             created_by=user,

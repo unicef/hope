@@ -3652,6 +3652,35 @@ def test_create_follow_up_on_group_with_permission_returns_linked_group(
     assert data["payment_plans_count"] == 1
 
 
+@pytest.fixture
+def accepted_payment_gateway_group_with_failed_payment(accepted_group_with_failed_payment: Any) -> Any:
+    accepted_group_with_failed_payment.use_payment_gateway = True
+    accepted_group_with_failed_payment.save(update_fields=["use_payment_gateway"])
+    return accepted_group_with_failed_payment
+
+
+def test_create_follow_up_on_payment_gateway_group_keeps_use_payment_gateway(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    accepted_payment_gateway_group_with_failed_payment: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_CREATE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(
+            business_area.slug, program.code, accepted_payment_gateway_group_with_failed_payment.id, "create-follow-up"
+        ),
+        {"dispersion_start_date": "2099-01-01", "dispersion_end_date": "2099-12-31"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert PaymentPlanGroup.objects.get(pk=response.json()["id"]).use_payment_gateway is True
+
+
 def test_create_follow_up_on_group_without_permission_returns_403(
     client: Any,
     user: Any,

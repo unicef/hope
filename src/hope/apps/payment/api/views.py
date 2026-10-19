@@ -2836,8 +2836,8 @@ class PaymentPlanGroupViewSet(
     def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Queue an async send-to-payment-gateway job for the group's sendable payment plans.
 
-        A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
-        gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+        A payment plan is sendable when it is ACCEPTED, its group routes through the payment gateway
+        (the group's use_payment_gateway flag is True or its FSP communication_channel is API),
         still has splits not yet sent to the gateway, and is not already being sent. The group object
         is locked for update to prevent double processing the same objects.
         """

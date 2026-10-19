@@ -126,7 +126,6 @@ class PaymentPlan(
             "closed_by",
             "reconciliation_import_file",
             "flat_amount_value",
-            "use_payment_gateway",
             "exchange_rate",
             "total_entitled_quantity",
             "total_entitled_quantity_usd",
@@ -500,10 +499,6 @@ class PaymentPlan(
     custom_exchange_rate = models.BooleanField(
         default=False,
         help_text="Custom Exchange Rate flag [sys]",
-    )
-    use_payment_gateway = models.BooleanField(
-        default=False,
-        help_text="Send this payment plan through the payment gateway regardless of the FSP communication channel",
     )
     custom_exchange_rate_set_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -1028,6 +1023,12 @@ class PaymentPlan(
         if self.payment_plan_group_id:
             return self.payment_plan_group.dispersion_end_date
         return self.follow_up_instruction.dispersion_end_date if self.follow_up_instruction_id else None
+
+    @property
+    def use_payment_gateway(self) -> bool:
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.use_payment_gateway
+        return self.follow_up_instruction.use_payment_gateway if self.follow_up_instruction_id else False
 
     @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover

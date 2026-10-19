@@ -1108,8 +1108,8 @@ class PaymentPlanService:
 
         Shared core for all three flows: the child inherits the source plan's purposes, dates and
         delivery mechanism and is created OPEN, in the linked group it was created for or, for a
-        Follow-Up Instruction child, under the instruction with no group. Its dispersion dates are the
-        linked group's or the instruction's.
+        Follow-Up Instruction child, under the instruction with no group. Its dispersion dates and payment
+        gateway flag are the linked group's or the instruction's.
         """
         source_pp = self.payment_plan
         child_pp = PaymentPlan.objects.create(
@@ -1125,7 +1125,6 @@ class PaymentPlanService:
             program_cycle=source_pp.program_cycle,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
-            use_payment_gateway=source_pp.use_payment_gateway,
             delivery_mechanism=source_pp.delivery_mechanism,
             payment_plan_group=payment_plan_group,
             follow_up_instruction=follow_up_instruction,

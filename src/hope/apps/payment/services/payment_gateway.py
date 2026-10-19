@@ -780,7 +780,7 @@ class PaymentGatewayService:
             )
             .filter(
                 Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
-                Q(use_payment_gateway=True)
+                Q(payment_plan_group__use_payment_gateway=True)
                 | Q(
                     payment_plan_group__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
                 ),

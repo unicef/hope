@@ -330,10 +330,11 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
     )
     list_filter = BasePaymentPlanAdmin.list_filter + (
         ("background_action_status", ChoicesFieldComboFilter),
-        "use_payment_gateway",
+        "payment_plan_group__use_payment_gateway",
         ("plan_type", ChoicesFieldComboFilter),
     )
-    readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type",)
+    readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type", "use_payment_gateway")
+    list_select_related = ("business_area", "program_cycle", "payment_plan_group", "follow_up_instruction")
     inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

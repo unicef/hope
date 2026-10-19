@@ -414,8 +414,9 @@ def test_payment_get_sync_missing_records_with_payment_gateway(admin_client, pay
 )
 def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gateway, expected) -> None:
     payment_plan.status = pp_status
-    payment_plan.use_payment_gateway = use_payment_gateway
-    payment_plan.save(update_fields=["status", "use_payment_gateway"])
+    payment_plan.save(update_fields=["status"])
+    payment_plan.payment_plan_group.use_payment_gateway = use_payment_gateway
+    payment_plan.payment_plan_group.save(update_fields=["use_payment_gateway"])
 
     assert can_sync_with_payment_gateway(payment_plan) is expected
 

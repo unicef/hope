@@ -78,8 +78,13 @@ class FollowUpInstructionService:
         fsp_ids = {payment_plan.payment_plan_group.financial_service_provider_id for payment_plan in source_plans}
         delivery_mechanism_ids = {payment_plan.delivery_mechanism_id for payment_plan in source_plans}
         currency_ids = {payment_plan.payment_plan_group.currency_id for payment_plan in source_plans}
+        use_payment_gateway_values = {
+            payment_plan.payment_plan_group.use_payment_gateway for payment_plan in source_plans
+        }
         if None in fsp_ids or len(fsp_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Financial Service Provider.")
+        if len(use_payment_gateway_values) != 1:
+            raise ValidationError("Applicable Payment Plans must share the same Use Payment Gateway setting.")
         if None in delivery_mechanism_ids or len(delivery_mechanism_ids) != 1:
             raise ValidationError("Applicable Payment Plans must share the same Delivery Mechanism.")
         if None in currency_ids or len(currency_ids) != 1:
@@ -105,6 +110,7 @@ class FollowUpInstructionService:
             created_by=user,
             financial_service_provider=source_group.financial_service_provider,
             currency=source_group.currency,
+            use_payment_gateway=source_group.use_payment_gateway,
             dispersion_start_date=dispersion_start_date,
             dispersion_end_date=dispersion_end_date,
         )

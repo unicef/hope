@@ -69,6 +69,10 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
     )
     dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
     dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
+    )
     background_action_status = models.CharField(
         max_length=255,
         null=True,

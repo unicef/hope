@@ -117,6 +117,13 @@ class PaymentPlanFactory(DjangoModelFactory):
         _set_owner_dispersion_date(self, create, "dispersion_end_date", extracted, date.today() + timedelta(days=30))
 
     @factory.post_generation
+    def use_payment_gateway(self, create, extracted, **kwargs):
+        owner = self.payment_plan_group or self.follow_up_instruction
+        if create and extracted is not None and owner is not None and owner.use_payment_gateway != extracted:
+            owner.use_payment_gateway = extracted
+            owner.save(update_fields=["use_payment_gateway"])
+
+    @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
             return

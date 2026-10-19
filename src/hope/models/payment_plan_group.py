@@ -34,6 +34,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "plan_type",
             "source_group",
             "financial_service_provider",
+            "use_payment_gateway",
             "dispersion_start_date",
             "dispersion_end_date",
             "background_action_status",
@@ -117,6 +118,10 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     )
     dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
     dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -316,13 +321,17 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         """Narrow the group's payment plans to the ones that can be sent to the payment gateway.
 
         A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
-        (use_payment_gateway is True or the FSP communication_channel is API), still has splits
+        (the group's use_payment_gateway is True or the FSP communication_channel is API), still has splits
         not yet sent to the gateway, and is not already being sent. When both Vision feature flags
         are active, plans already managed by Vision are also excluded.
         """
         from hope.models import FinancialServiceProvider, PaymentPlanSplit
 
-        if self.financial_service_provider is None:
+        if self.financial_service_provider is None or not (
+            self.use_payment_gateway
+            or self.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ):
             return self.payment_plans.none()
         payment_plans = self.payment_plans.annotate(
             has_unsent_splits=Exists(
@@ -333,8 +342,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             & Q(has_unsent_splits=True)
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
-        if self.financial_service_provider.communication_channel != FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
-            payment_plans = payment_plans.filter(use_payment_gateway=True)
         if flag_state("VISION_INTEGRATION_ACTIVE"):
             payment_plans = payment_plans.annotate(
                 # PaymentPlan.vision_status treats missing Vision data as NOT_SENT. Apply the same fallback in SQL;
