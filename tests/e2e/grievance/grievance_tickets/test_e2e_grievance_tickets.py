@@ -590,7 +590,6 @@ class TestSmokeGrievanceTickets:
         assert "IND-00-0000.0011" in page_grievance_details_page.get_ticket_target_id().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
     @pytest.mark.parametrize(
@@ -1234,8 +1233,11 @@ class TestGrievanceTickets:
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.driver.refresh()
         page_grievance_details_page.get_expand_collapse_button().click()
-        assert "Assigned" in page_grievance_details_page.get_log_row()[0].text
-        assert "In Progress" in page_grievance_details_page.get_log_row()[0].text
+        # a status change also stamps user_modified, so the entry lists several changes and opens on click
+        page_grievance_details_page.get_log_row_multiple()[0].click()
+        status_change = page_grievance_details_page.get_detail_row_status()[0].text
+        assert "Assigned" in status_change
+        assert "In Progress" in status_change
 
     def test_grievance_tickets_go_to_admin_panel_button(
         self,

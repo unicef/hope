@@ -1,8 +1,7 @@
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, cast
 
-from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Q, QuerySet
+from django.db.models import Count, Exists, OuterRef, Q, QuerySet, Value
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.request import Request
@@ -10,14 +9,16 @@ from rest_framework.response import Response
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.utils import nested_dict_get
-from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
+from hope.apps.grievance.constants import MY_TASKS_TABS
+from hope.apps.grievance.models import GrievanceTicket, MyTasksTracking
+from hope.apps.grievance.my_tasks import annotate_unread
 from hope.apps.grievance.utils import (
     create_grievance_documents,
     delete_grievance_documents,
     update_grievance_documents,
 )
 from hope.apps.grievance.validators import validate_grievance_documents_size
+from hope.apps.grievance.visibility import visible_tickets_q
 from hope.apps.household.const import HEAD
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models import BusinessArea, Household, Individual, IndividualRoleInHousehold, Program, User
@@ -94,18 +95,22 @@ class GrievanceListBatchMixin:
         self.existing_tickets_counts = get_existing_tickets_counts(page, self.business_area)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
+    def with_unread(self, tickets: QuerySet) -> QuerySet:
+        """Annotate `unread` for the My Tasks list and count; a constant False everywhere else.
+
+        The constant keeps `?unread=` harmless on the detail and action routes, where the filterset
+        still runs through DRF's get_object().
+        """
+        user = cast("User", self.request.user)
+        tracking = None
+        if self.action in ("list", "count") and self.request.GET.get("my_tasks_tab") in MY_TASKS_TABS:
+            tracking = MyTasksTracking.objects.filter(user=user, business_area=self.business_area).first()
+        if tracking is None:
+            return tickets.annotate(unread=Value(False))
+        return annotate_unread(tickets, user, tracking.created_at)
+
 
 class GrievancePermissionsMixin:
-    @staticmethod
-    def _tickets_without_programs_query() -> Q:
-        through_model = GrievanceTicket.programs.through
-        return Q(~Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
-
-    @staticmethod
-    def _tickets_for_program_ids_query(program_ids: set) -> Q:
-        through_model = GrievanceTicket.programs.through
-        return Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program_id__in=program_ids)))
-
     @property
     def grievance_permissions_query(self) -> Q:
         user = self.request.user
@@ -119,6 +124,15 @@ class GrievancePermissionsMixin:
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
             ],
             "retrieve": [
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+            ],
+            # the details page reports the ticket as seen, so it sees exactly what retrieve sees
+            "my_tasks_seen": [
                 Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
                 Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
@@ -157,80 +171,7 @@ class GrievancePermissionsMixin:
             )
         # global viewset
         else:
-            programs_can_view_ex_sensitive_all = set(
-                user.get_program_ids_for_permissions_in_business_area(
-                    self.business_area.id, [permissions_map[action][0]]
-                )
-            )
-            programs_can_view_ex_sensitive_creator = set(
-                user.get_program_ids_for_permissions_in_business_area(
-                    self.business_area.id, [permissions_map[action][1]]
-                )
-            )
-            programs_can_view_ex_sensitive_owner = set(
-                user.get_program_ids_for_permissions_in_business_area(
-                    self.business_area.id, [permissions_map[action][2]]
-                )
-            )
-            programs_can_view_sensitive_all = set(
-                user.get_program_ids_for_permissions_in_business_area(
-                    self.business_area.id, [permissions_map[action][3]]
-                )
-            )
-            programs_can_view_sensitive_creator = set(
-                user.get_program_ids_for_permissions_in_business_area(
-                    self.business_area.id, [permissions_map[action][4]]
-                )
-            )
-            programs_can_view_sensitive_owner = set(
-                user.get_program_ids_for_permissions_in_business_area(
-                    self.business_area.id, [permissions_map[action][5]]
-                )
-            )
-
-            tickets_without_programs = self._tickets_without_programs_query()
-
-            if programs_can_view_ex_sensitive_all:
-                filters |= (
-                    self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_all) | tickets_without_programs
-                ) & ~Q(**sensitive_category_filter)
-            if programs_can_view_sensitive_all:
-                filters |= (
-                    self._tickets_for_program_ids_query(programs_can_view_sensitive_all) | tickets_without_programs
-                ) & Q(**sensitive_category_filter)
-            if programs_can_view_ex_sensitive_creator:
-                filters |= (
-                    (
-                        self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_creator)
-                        | tickets_without_programs
-                    )
-                    & Q(**created_by_filter)
-                    & ~Q(**sensitive_category_filter)
-                )
-            if programs_can_view_ex_sensitive_owner:
-                filters |= (
-                    (
-                        self._tickets_for_program_ids_query(programs_can_view_ex_sensitive_owner)
-                        | tickets_without_programs
-                    )
-                    & Q(**assigned_to_filter)
-                    & ~Q(**sensitive_category_filter)
-                )
-            if programs_can_view_sensitive_creator:
-                filters |= (
-                    (
-                        self._tickets_for_program_ids_query(programs_can_view_sensitive_creator)
-                        | tickets_without_programs
-                    )
-                    & Q(**created_by_filter)
-                    & Q(**sensitive_category_filter)
-                )
-            if programs_can_view_sensitive_owner:
-                filters |= (
-                    (self._tickets_for_program_ids_query(programs_can_view_sensitive_owner) | tickets_without_programs)
-                    & Q(**assigned_to_filter)
-                    & Q(**sensitive_category_filter)
-                )
+            filters = visible_tickets_q(user, self.business_area, permissions_map[action])
 
         return filters
 
@@ -519,28 +460,18 @@ class GrievanceMutationMixin:
         approver: User,
         ticket: GrievanceTicket,
         assigned_to: User | None,
-        messages: list,
         *,
         assignment_provided: bool,
     ) -> None:
         if assignment_provided and assigned_to != ticket.assigned_to:
-            self._set_status_based_on_assigned_to(approver, ticket, messages)
+            self._set_status_based_on_assigned_to(ticket)
             ticket.assigned_to = assigned_to
             ticket.assigned_at = timezone.now()
             ticket.assigned_by = approver
         elif ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
             ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-            messages.append(
-                GrievanceNotification(
-                    ticket,
-                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                    approver=approver,
-                    editor=approver,
-                )
-            )
 
     def update_basic_data(self, approver: User, input_data: dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
-        messages = []
         # Partial update: `None` is a legitimate value here (explicit unassign), so the assignment
         # may only be touched when the request actually carries the key.
         assignment_provided = "assigned_to" in input_data
@@ -554,35 +485,19 @@ class GrievanceMutationMixin:
         # Documents take their upload path from the ticket's programme, so they are stored after
         # the programme has been attached.
         self._handle_document_operations(approver, grievance_ticket, document_operations)
-        self._handle_assignment_change(
-            approver, grievance_ticket, assigned_to, messages, assignment_provided=assignment_provided
-        )
+        self._handle_assignment_change(approver, grievance_ticket, assigned_to, assignment_provided=assignment_provided)
 
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
-
-        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(messages))
         return grievance_ticket
 
-    def _set_status_based_on_assigned_to(
-        self, approver: User, grievance_ticket: GrievanceTicket, messages: list
-    ) -> None:
+    @staticmethod
+    def _set_status_based_on_assigned_to(grievance_ticket: GrievanceTicket) -> None:
         if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
             grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
 
-        if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
+        if grievance_ticket.status in (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL):
             grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-
-        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-            messages.append(
-                GrievanceNotification(
-                    grievance_ticket,
-                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                    approver=approver,
-                    editor=approver,
-                )
-            )
 
     def get_permissions_for_status_change(
         self, status: int, current_status: int, is_feedback: bool

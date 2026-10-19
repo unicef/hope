@@ -23,8 +23,8 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute="*/20"),
         "options": periodic_queue_options(),
     },
-    "daily_grievance_digest_async_task": {
-        "task": "hope.apps.grievance.celery_tasks.daily_grievance_digest_async_task",
+    "my_tasks_notification_async_task": {
+        "task": "hope.apps.grievance.celery_tasks.my_tasks_notification_async_task",
         "schedule": crontab(minute=0),
         "options": periodic_queue_options(),
     },

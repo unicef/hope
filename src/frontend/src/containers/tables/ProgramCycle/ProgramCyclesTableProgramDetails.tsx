@@ -35,6 +35,10 @@ const ProgramCyclesTableProgramDetails = ({
   const { page } = table;
   const { businessAreaSlug, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
+  const canViewList = hasPermissions(
+    PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+    permissions,
+  );
   const programCyclesListParams = createApiParams(
     { businessAreaSlug, programCode: program.code },
     table.paginationParams,
@@ -50,6 +54,7 @@ const ProgramCyclesTableProgramDetails = ({
       );
     },
     placeholderData: keepPreviousData,
+    enabled: canViewList,
   });
 
   const programCyclesCountParams = {
@@ -65,7 +70,7 @@ const ProgramCyclesTableProgramDetails = ({
       RestService.restBusinessAreasProgramsCyclesCountRetrieve(
         programCyclesCountParams,
       ),
-    enabled: page === 0,
+    enabled: canViewList && page === 0,
   });
 
   const itemsCount = usePersistedCount(page, dataProgramCyclesCount);

@@ -167,7 +167,6 @@ class TestPeriodicDataTemplates:
             is True
         )
 
-    @pytest.mark.night
     def test_periodic_data_template_list(
         self,
         program: Program,
@@ -215,7 +214,6 @@ class TestPeriodicDataTemplates:
 
         assert "Exported" in page_pdu_xlsx_templates.get_template_status(index).text
 
-    @pytest.mark.night
     def test_periodic_data_template_details(
         self,
         program: Program,
@@ -263,7 +261,6 @@ class TestPeriodicDataTemplates:
             in page_pdu_xlsx_templates.get_template_number_of_individuals(0).text
         )
 
-    @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,

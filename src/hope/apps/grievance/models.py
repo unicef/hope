@@ -405,12 +405,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
     )
-    last_notification_sent = models.DateTimeField(
-        verbose_name=_("Modified"),
-        null=True,
-        blank=True,
-        help_text=_("Date this ticket was most recently changed."),
-    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -558,22 +552,21 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
                 name="idx_gt_ba_updated_not_ign",
             ),
             models.Index(fields=["assigned_at"], name="idx_gt_assigned_at"),
-            # _unassigned_tickets(): one business area, no assignee, `.exclude(status=STATUS_CLOSED)`
+            # the NEEDS ASSIGNMENT tab (assignable_tickets_q): one business area, no assignee, not closed
             models.Index(
                 fields=["business_area", "category"],
                 condition=models.Q(assigned_to__isnull=True) & ~models.Q(status=6),  # STATUS_CLOSED
                 name="idx_gt_ba_cat_unassigned_open",
             ),
-            # _overdue_tickets(): one business area, grouped by assignee, a created_at cutoff per
-            # category, and the same `.exclude(status=STATUS_CLOSED)`
+            # the overdue filter (overdue_q): one business area, a created_at cutoff per category, not closed
             models.Index(
                 fields=["business_area", "assigned_to", "category", "created_at"],
                 condition=~models.Q(status=6),  # STATUS_CLOSED
                 name="idx_gt_ba_asgn_cat_crtd_open",
             ),
-            # _updated_tickets(): one business area, a one-day user_modified window
+            # annotate_unread: one business area, user_modified after the user last opened the ticket
             models.Index(fields=["business_area", "user_modified"], name="idx_gt_ba_user_modified"),
-            # recipient_timezone_names(): one EXISTS per user, for tickets they own or created
+            # the "as owner" and "as creator" grants in visible_tickets_q
             models.Index(fields=["assigned_to", "business_area"], name="idx_gt_assigned_to_ba"),
             models.Index(fields=["created_by", "business_area"], name="idx_gt_created_by_ba"),
             LongNameIndex(fields=["created_at"], name="grievance_grievanceticket_created_at_4ec795a8"),
@@ -594,9 +587,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ),
             LongNameIndex(fields=["ignored"], name="grievance_grievanceticket_ignored_9bb17664"),
             LongNameIndex(fields=["user_modified"], name="grievance_grievanceticket_user_modified_ee994ac6"),
-            LongNameIndex(
-                fields=["last_notification_sent"], name="grievance_grievanceticket_last_notification_sent_9ea770a0"
-            ),
         ]
 
     def clean(self) -> None:
@@ -685,6 +675,40 @@ class TicketNote(TimeStampedUUIDModel):
         indexes = [
             LongNameIndex(fields=["created_at"], name="grievance_ticketnote_created_at_233d0bae"),
             LongNameIndex(fields=["updated_at"], name="grievance_ticketnote_updated_at_7222cd6e"),
+        ]
+
+
+class MyTasksTracking(TimeStampedUUIDModel):
+    """Where a user's My Tasks email cycle stands in a business area.
+
+    A row appears the first time the user opens My Tasks or the first time the email check looks at
+    them, so `created_at` is where unread tracking starts: a ticket the user never opened counts as
+    unread only for changes after it.
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="my_tasks_trackings", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="my_tasks_trackings", on_delete=models.CASCADE)
+    # the "you have new tasks" email of the current cycle; ALARM_WINDOW counts from it
+    first_email_at = models.DateTimeField(null=True, blank=True)
+    # the latest alarm or repeat reminder of the current cycle; REPEAT_EACH counts from it
+    last_reminder_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["user", "business_area"], name="unique_my_tasks_tracking_user_business_area"),
+        ]
+
+
+class TicketSeen(TimeStampedUUIDModel):
+    """When a user last opened a ticket; changes made by somebody else after that make it unread again."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="tickets_seen", on_delete=models.CASCADE)
+    ticket = models.ForeignKey(GrievanceTicket, related_name="seen_by", on_delete=models.CASCADE)
+    seen_at = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["user", "ticket"], name="unique_ticket_seen_user_ticket"),
         ]
 
 

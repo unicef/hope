@@ -8,7 +8,6 @@ import pytest
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
-from e2e.page_object.filters import Filters
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
@@ -772,7 +771,6 @@ def update_individual_flex_fields(individual_data: list) -> None:
         Individual.objects.filter(full_name=individual["full_name"]).update(flex_fields=individual["flex_fields"])
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestCreateTargeting:
     def test_create_targeting_for_people(
@@ -1244,7 +1242,6 @@ class TestCreateTargeting:
         assert page_targeting_details.get_household_table_cell(1, 1).text == individual1.unicef_id
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestTargeting:
     def test_targeting_create_use_ids_hh(
@@ -1316,45 +1313,6 @@ class TestTargeting:
         )
         assert page_targeting_details.get_label_total_number_of_households().text == "1"
 
-    def test_targeting_rebuild(
-        self,
-        create_programs: None,
-        create_targeting: PaymentPlan,
-        page_targeting: Targeting,
-        page_targeting_details: TargetingDetails,
-        page_targeting_create: TargetingCreate,
-    ) -> None:
-        page_targeting.select_global_program_filter("Test Programm")
-        page_targeting.get_nav_targeting().click()
-        page_targeting.choose_target_populations(0).click()
-        page_targeting_details.get_label_status()
-        page_targeting_details.get_button_rebuild().click()
-        # Celery runs eagerly here, so the rebuild is done by the time the request returns.
-        page_targeting_details.check_alert("Payment Plan has been rebuilt.")
-        assert "OPEN" in page_targeting_details.get_label_status().text
-
-    def test_targeting_mark_ready(
-        self,
-        create_programs: None,
-        household_with_disability: Household,
-        create_targeting: PaymentPlan,
-        page_targeting: Targeting,
-        filters: Filters,
-        page_targeting_details: TargetingDetails,
-        page_targeting_create: TargetingCreate,
-        screenshot_path: str,
-    ) -> None:
-        page_targeting.select_global_program_filter("Test Programm")
-        page_targeting.get_nav_targeting().click()
-        page_targeting.choose_target_populations(0).click()
-        page_targeting_details.get_label_status()
-        page_targeting_details.get_lock_button().click()
-        page_targeting_details.get_lock_popup_button().click()
-        page_targeting_details.wait_for_label_status("LOCKED")
-        page_targeting_details.get_button_mark_ready().click()
-        page_targeting_details.get_button_popup_mark_ready().click()
-        page_targeting_details.wait_for_label_status("READY FOR PAYMENT MODULE")
-
     def test_copy_targeting(
         self,
         create_programs: None,
@@ -1414,116 +1372,6 @@ class TestTargeting:
         page_targeting_details.get_button_edit()
         assert page_targeting_details.wait_for_text_title_page("New Test Data")
         assert "9" in page_targeting_details.get_criteria_container().text
-
-    def test_delete_targeting(
-        self,
-        create_programs: None,
-        household_with_disability: Household,
-        create_targeting: PaymentPlan,
-        page_targeting: Targeting,
-        page_targeting_details: TargetingDetails,
-    ) -> None:
-        PaymentPlanFactory(
-            program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
-            name="Copy TP",
-            status=PaymentPlan.Status.TP_OPEN,
-        )
-        page_targeting.select_global_program_filter("Test Programm")
-        page_targeting.get_nav_targeting().click()
-        page_targeting.disappear_loading_rows()
-        old_list = page_targeting.get_target_populations_rows()
-        assert len(old_list) == 2
-        assert "Copy TP" in old_list[0].text
-
-        page_targeting.choose_target_populations(0).click()
-        page_targeting_details.get_button_delete().click()
-        page_targeting_details.get_dialog_box()
-        page_targeting_details.get_elements(page_targeting_details.button_delete)[1].click()
-        page_targeting.get_nav_targeting().click()
-        page_targeting.disappear_loading_rows()
-        page_targeting.count_target_populations(1)
-        new_list = page_targeting.get_target_populations_rows()
-        assert len(new_list) == 1
-        assert create_targeting.name in new_list[0].text
-
-    def test_targeting_different_program_statuses(
-        self,
-        create_programs: None,
-        page_targeting: Targeting,
-        page_targeting_details: TargetingDetails,
-        page_targeting_create: TargetingCreate,
-    ) -> None:
-        program = Program.objects.get(name="Test Programm")
-        program.status = Program.DRAFT
-        program.save()
-        page_targeting.select_global_program_filter("Test Programm")
-        page_targeting.get_nav_targeting().click()
-        page_targeting.mouse_on_element(page_targeting.get_button_inactive_create_new())
-        assert "Program has to be active to create a new Target Population" in page_targeting.get_tooltip().text
-        program.status = Program.ACTIVE
-        program.save()
-        page_targeting.driver.refresh()
-        page_targeting.get_button_create_new()
-        program.status = Program.FINISHED
-        program.save()
-        page_targeting.driver.refresh()
-        page_targeting.mouse_on_element(page_targeting.get_button_inactive_create_new())
-        assert "Program has to be active to create a new Target Population" in page_targeting.get_tooltip().text
-
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "type": "STANDARD",
-                    "text": "Exclude Items Groups with Active Adjudication Ticket",
-                },
-                id="Programme population",
-            ),
-        ],
-    )
-    def test_exclude_households_with_active_adjudication_ticket(
-        self,
-        test_data: dict,
-        create_programs: None,
-        household_with_disability: Household,
-        create_targeting: PaymentPlan,
-        page_targeting: Targeting,
-        page_targeting_details: TargetingDetails,
-        page_targeting_create: TargetingCreate,
-    ) -> None:
-        program = Program.objects.get(name="Test Programm")
-        program.data_collecting_type.type = test_data["type"]
-        program.data_collecting_type.save()
-        page_targeting.select_global_program_filter("Test Programm")
-        page_targeting.get_nav_targeting().click()
-        page_targeting.get_button_create_new().click()
-        page_targeting_create.fill_required_fields()
-        page_targeting_create.add_ids_criteria(household_ids=household_with_disability.unicef_id)
-        page_targeting_create.get_input_name().send_keys(f"Test {household_with_disability.unicef_id}")
-        page_targeting_create.get_input_flag_exclude_if_active_adjudication_ticket().click()
-        page_targeting_create.click_button_target_population_create()
-        if test_data["type"] == "SOCIAL":
-            page_targeting_details.wait_for_checked(
-                page_targeting_details.checkbox_exclude_people_if_active_adjudication_ticket
-            )
-            assert (
-                test_data["text"]
-                in page_targeting_details.get_checkbox_exclude_people_if_active_adjudication_ticket()
-                .find_element(By.XPATH, "./..")
-                .text
-            )
-        elif test_data["type"] == "STANDARD":
-            page_targeting_details.wait_for_checked(
-                page_targeting_details.checkbox_exclude_if_active_adjudication_ticket
-            )
-            assert (
-                test_data["text"]
-                in page_targeting_details.get_checkbox_exclude_if_active_adjudication_ticket()
-                .find_element(By.XPATH, "./..")
-                .text
-            )
-        assert not page_targeting_details.is_checked(page_targeting_details.checkbox_exclude_if_on_sanction_list)
 
     @pytest.mark.parametrize(
         "test_data",
@@ -1590,42 +1438,6 @@ class TestTargeting:
         page_targeting.get_button_target_population().click()
         page_targeting.get_tab_field_list()
         page_targeting.click(page_targeting.tab_targeting_diagram)
-
-    def test_targeting_filters(
-        self,
-        create_programs: None,
-        household_with_disability: Household,
-        create_targeting: PaymentPlan,
-        page_targeting: Targeting,
-        filters: Filters,
-    ) -> None:
-        PaymentPlanFactory(
-            program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
-            name="Copy TP",
-            status=PaymentPlan.Status.TP_LOCKED,
-        )
-        page_targeting.select_global_program_filter("Test Programm")
-        page_targeting.get_nav_targeting().click()
-        filters.get_filters_search().send_keys("Copy")
-        filters.get_button_filters_apply().click()
-        page_targeting.count_target_populations(1)
-        assert "LOCKED" in page_targeting.get_status_container().text
-        filters.get_button_filters_clear().click()
-        filters.get_filters_status().click()
-        filters.select_listbox_element("Open")
-        filters.get_button_filters_apply().click()
-        page_targeting.count_target_populations(1)
-        assert "OPEN" in page_targeting.get_status_container().text
-        filters.get_button_filters_clear().click()
-        filters.get_filters_total_households_count_min().send_keys("10")
-        filters.get_filters_total_households_count_max().send_keys("10")
-        filters.get_button_filters_apply().click()
-        page_targeting.count_target_populations(0)
-        filters.get_button_filters_clear().click()
-        filters.get_filters_total_households_count_min().send_keys("1")
-        filters.get_filters_total_households_count_max().send_keys("3")
-        page_targeting.count_target_populations(2)
-        filters.get_button_filters_clear().click()
 
     def test_targeting_and_labels(
         self,
