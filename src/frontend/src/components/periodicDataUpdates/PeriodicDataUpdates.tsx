@@ -8,6 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PeriodDataUpdatesUploadDialog } from './PeriodicDataUpdatesUploadDialog';
 import { useProgramContext } from 'src/programContext';
+import { responsiveValue } from 'src/responsive';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
@@ -69,7 +70,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
     <>
       <Box
         sx={{
-          p: 3,
+          p: responsiveValue(1, 3),
         }}
       >
         <Paper elevation={1} sx={{ mb: 0, borderRadius: 2 }}>
@@ -99,7 +100,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
           {value === 0 && (
             <Box
               sx={{
-                p: 3,
+                p: responsiveValue(1, 3),
               }}
             >
               <Paper>
@@ -107,7 +108,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
                   sx={{
                     display: 'flex',
                     justifyContent: 'flex-end',
-                    p: 6,
+                    p: responsiveValue(2, 6),
                   }}
                 >
                   <ButtonTooltip
@@ -130,7 +131,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
           {value === 1 && (
             <Box
               sx={{
-                p: 3,
+                p: responsiveValue(1, 3),
               }}
             >
               <Paper>
@@ -138,7 +139,7 @@ export const PeriodicDataUpdates = (): ReactElement => {
                   sx={{
                     display: 'flex',
                     justifyContent: 'flex-end',
-                    p: 6,
+                    p: responsiveValue(2, 6),
                   }}
                 >
                   <PeriodDataUpdatesUploadDialog />
