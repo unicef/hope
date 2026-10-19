@@ -120,7 +120,8 @@ or added a note after you last opened it. The full rule, and what never counts, 
 | **Mark all as read** | Marks every unread ticket on the tab as read; disabled while the tab has none |
 
 Opening a ticket marks it as read. Mark all as read covers the whole tab, not only the rows on the
-current page or matching the other filters.
+current page or matching the other filters. Opened inside a programme, the dots and Mark all as
+read cover that programme's tickets only, like the list.
 
 ---
 

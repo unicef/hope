@@ -131,6 +131,15 @@ class GrievancePermissionsMixin:
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
             ],
+            # the details page reports the ticket as seen, so it sees exactly what retrieve sees
+            "my_tasks_seen": [
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+            ],
             "count": [
                 Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
                 Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,

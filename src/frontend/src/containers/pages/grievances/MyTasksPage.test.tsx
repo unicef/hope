@@ -14,14 +14,15 @@ vi.mock('@hooks/usePermissions', () => ({
   usePermissions: () => mockPermissions,
 }));
 
+let mockProgramCode = 'all';
 vi.mock('@hooks/useBaseUrl', () => ({
   useBaseUrl: () => ({
-    baseUrl: 'afghanistan/programs/all',
+    baseUrl: `afghanistan/programs/${mockProgramCode}`,
     businessArea: 'afghanistan',
     businessAreaSlug: 'afghanistan',
-    programCode: 'all',
-    programId: 'all',
-    isAllPrograms: true,
+    programCode: mockProgramCode,
+    programId: mockProgramCode,
+    isAllPrograms: mockProgramCode === 'all',
     isGlobal: false,
   }),
 }));
@@ -112,6 +113,7 @@ describe('MyTasksPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPermissions = [...ALL_PERMISSIONS];
+    mockProgramCode = 'all';
     (RestService.restChoicesGrievanceTicketsRetrieve as any).mockResolvedValue({
       grievanceTicketCategoryChoices: [],
       grievanceTicketIssueTypeChoices: [],
@@ -344,6 +346,37 @@ describe('MyTasksPage', () => {
       expect(
         RestService.restBusinessAreasGrievanceTicketsList,
       ).toHaveBeenCalledTimes(2),
+    );
+  });
+
+  it('scopes the dots and Mark all as read to the selected programme', async () => {
+    mockProgramCode = 'PRG1';
+    (
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate as any
+    ).mockResolvedValue({ unreadTabs: ['mine'] });
+    (
+      RestService.restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate as any
+    ).mockResolvedValue({ unreadTabs: [] });
+    renderPage('?tab=mine');
+
+    await screen.findByTestId('tab-unread-dot-mine');
+    expect(
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
+    ).toHaveBeenCalledWith({
+      businessAreaSlug: 'afghanistan',
+      formData: { program: 'PRG1' },
+    });
+    const { toolbarActions } = lastTableProps();
+    render(toolbarActions, { wrapper: TestProviders });
+    fireEvent.click(screen.getByTestId('button-mark-all-read'));
+
+    await waitFor(() =>
+      expect(
+        RestService.restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate,
+      ).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        formData: { tab: 'mine', program: 'PRG1' },
+      }),
     );
   });
 

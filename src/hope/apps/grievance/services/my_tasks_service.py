@@ -24,7 +24,7 @@ from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT, 
 from hope.apps.grievance.models import GrievanceTicket, MyTasksTracking, TicketSeen
 from hope.apps.grievance.my_tasks import MY_TASKS_PERMISSIONS, TAB_SCOPES, annotate_unread
 from hope.apps.grievance.utils import my_tasks_url
-from hope.apps.grievance.visibility import VIEW_LIST_PERMISSIONS, visible_tickets_q
+from hope.apps.grievance.visibility import VIEW_LIST_PERMISSIONS, in_programs_q, visible_tickets_q
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
 
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
     from django.db.models import QuerySet
 
-    from hope.models import BusinessArea, User
+    from hope.models import BusinessArea, Program, User
 
 logger = logging.getLogger(__name__)
 
@@ -75,16 +75,27 @@ def mark_seen(user: "User", ticket: GrievanceTicket, now: datetime | None = None
 
 
 def mark_tab_seen(
-    user: "User", business_area: "BusinessArea", tab: str, now: datetime | None = None
+    user: "User",
+    business_area: "BusinessArea",
+    tab: str,
+    program: "Program | None" = None,
+    now: datetime | None = None,
 ) -> dict[str, bool]:
-    """Stamp every unread ticket of one My Tasks tab as seen now and return which tabs still hold unread ones."""
+    """Mark every unread ticket of one My Tasks tab as seen and return which tabs still hold unread tickets.
+
+    `program` is the programme My Tasks is opened in. It limits what is stamped and what is returned
+    to that programme, since that is all the user sees there. The email cycle is not limited: it ends
+    only when nothing is unread anywhere in the business area, as the emails cover the whole area.
+    """
     tracking = start_tracking(user, business_area)
-    unread = annotate_unread(_my_tasks_tickets(user, business_area), user, tracking.created_at).filter(
+    unread = annotate_unread(_my_tasks_tickets(user, business_area, program), user, tracking.created_at).filter(
         TAB_SCOPES[tab](user, business_area), unread=True
     )
     _stamp_seen(user, unread.values_list("pk", flat=True), now or timezone.now())
-    tabs = unread_tabs(user, business_area, tracking.created_at)
-    _end_cycle_if_nothing_unread(tracking, tabs)
+    tabs = unread_tabs(user, business_area, tracking.created_at, program)
+    _end_cycle_if_nothing_unread(
+        tracking, tabs if program is None else unread_tabs(user, business_area, tracking.created_at)
+    )
     return tabs
 
 
@@ -95,15 +106,20 @@ def _end_cycle_if_nothing_unread(tracking: MyTasksTracking, tabs: dict[str, bool
     MyTasksTracking.objects.filter(pk=tracking.pk).update(first_email_at=None, last_reminder_at=None)
 
 
-def _my_tasks_tickets(user: "User", business_area: "BusinessArea") -> "QuerySet[GrievanceTicket]":
-    return GrievanceTicket.objects.filter(
+def _my_tasks_tickets(
+    user: "User", business_area: "BusinessArea", program: "Program | None" = None
+) -> "QuerySet[GrievanceTicket]":
+    tickets = GrievanceTicket.objects.filter(
         visible_tickets_q(user, business_area, VIEW_LIST_PERMISSIONS), business_area=business_area
     )
+    return tickets.filter(in_programs_q([program.pk])) if program is not None else tickets
 
 
-def unread_tabs(user: "User", business_area: "BusinessArea", tracking_start: datetime) -> dict[str, bool]:
+def unread_tabs(
+    user: "User", business_area: "BusinessArea", tracking_start: datetime, program: "Program | None" = None
+) -> dict[str, bool]:
     """Per My Tasks tab, whether it holds a ticket the user has not opened since somebody else changed it."""
-    unread = annotate_unread(_my_tasks_tickets(user, business_area), user, tracking_start)
+    unread = annotate_unread(_my_tasks_tickets(user, business_area, program), user, tracking_start)
     return {
         preset: unread.filter(scope(user, business_area), unread=True).exists() for preset, scope in TAB_SCOPES.items()
     }

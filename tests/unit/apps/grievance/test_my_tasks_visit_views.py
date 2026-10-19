@@ -189,6 +189,52 @@ def detail_url(business_area: BusinessArea, ticket_assigned_after_start: Grievan
 
 
 @pytest.fixture
+def seen_url(business_area: BusinessArea, ticket_assigned_after_start: GrievanceTicket) -> str:
+    return reverse(
+        "api:grievance:grievance-tickets-global-my-tasks-seen",
+        kwargs={"business_area_slug": business_area.slug, "pk": str(ticket_assigned_after_start.id)},
+    )
+
+
+@pytest.fixture
+def seen_url_in_other_program(
+    business_area: BusinessArea, ticket_assigned_after_start_in_other_program: GrievanceTicket
+) -> str:
+    return reverse(
+        "api:grievance:grievance-tickets-global-my-tasks-seen",
+        kwargs={
+            "business_area_slug": business_area.slug,
+            "pk": str(ticket_assigned_after_start_in_other_program.id),
+        },
+    )
+
+
+@pytest.fixture
+def other_program(business_area: BusinessArea, user: User, create_user_role_with_permissions: Callable) -> Program:
+    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE, name="other program")
+    create_user_role_with_permissions(
+        user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], business_area, program=program
+    )
+    return program
+
+
+@pytest.fixture
+def ticket_assigned_after_start_in_other_program(
+    business_area: BusinessArea, other_program: Program, user: User, colleague: User
+) -> GrievanceTicket:
+    with freeze_time(TRACKING_START):
+        ticket = GrievanceTicketFactory(
+            business_area=business_area,
+            assigned_to=user,
+            assigned_at=ASSIGNED_AT,
+            assigned_by=colleague,
+            status=GrievanceTicket.STATUS_ASSIGNED,
+        )
+    ticket.programs.set([other_program])
+    return ticket
+
+
+@pytest.fixture
 def ticket_opened_after_the_assignment(user: User, ticket_assigned_after_start: GrievanceTicket) -> TicketSeen:
     return TicketSeenFactory(
         user=user, ticket=ticket_assigned_after_start, seen_at=datetime(2026, 10, 10, 16, 0, tzinfo=UTC)
@@ -287,6 +333,28 @@ def test_a_user_without_a_grievance_grant_cannot_visit(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
+def test_a_visit_inside_a_programme_ignores_unread_tickets_of_other_programmes(
+    api_client: Any,
+    user: User,
+    visit_url: str,
+    program: Program,
+    tracking: MyTasksTracking,
+    ticket_assigned_after_start_in_other_program: GrievanceTicket,
+) -> None:
+    response = api_client(user).post(visit_url, {"program": program.code})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {"unread_tabs": []}
+
+
+def test_a_visit_inside_an_unknown_programme_is_not_found(
+    api_client: Any, user: User, visit_url: str, tracking: MyTasksTracking
+) -> None:
+    response = api_client(user).post(visit_url, {"program": "XXXX"})
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
 # --- mark all as read ---
 
 
@@ -335,47 +403,117 @@ def test_a_user_without_a_grievance_grant_cannot_mark_read(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-# --- opening a ticket marks it seen ---
+@freeze_time(NEXT_DAY)
+def test_mark_read_inside_a_programme_stamps_only_that_programmes_tickets(
+    api_client: Any,
+    user: User,
+    mark_read_url: str,
+    program: Program,
+    tracking: MyTasksTracking,
+    ticket_assigned_after_start: GrievanceTicket,
+    ticket_assigned_after_start_in_other_program: GrievanceTicket,
+) -> None:
+    response = api_client(user).post(mark_read_url, {"tab": PRESET_MINE, "program": program.code})
+
+    stamped = list(TicketSeen.objects.filter(user=user).values_list("ticket_id", flat=True))
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == {"unread_tabs": []}
+    assert stamped == [ticket_assigned_after_start.id]
 
 
 @freeze_time(NEXT_DAY)
-def test_opening_the_ticket_detail_marks_it_seen(
-    api_client: Any, user: User, detail_url: str, ticket_assigned_after_start: GrievanceTicket
+def test_mark_read_inside_a_programme_keeps_the_email_cycle_while_another_programme_is_unread(
+    api_client: Any,
+    user: User,
+    mark_read_url: str,
+    program: Program,
+    tracking: MyTasksTracking,
+    ticket_assigned_after_start: GrievanceTicket,
+    ticket_assigned_after_start_in_other_program: GrievanceTicket,
 ) -> None:
-    response = api_client(user).get(detail_url)
+    tracking.first_email_at = TRACKING_START
+    tracking.save(update_fields=["first_email_at"])
+
+    api_client(user).post(mark_read_url, {"tab": PRESET_MINE, "program": program.code})
+
+    tracking.refresh_from_db()
+    assert tracking.first_email_at == TRACKING_START
+
+
+# --- the details page reports the ticket as seen ---
+
+
+@freeze_time(NEXT_DAY)
+def test_reporting_the_ticket_as_seen_stamps_it(
+    api_client: Any, user: User, seen_url: str, ticket_assigned_after_start: GrievanceTicket
+) -> None:
+    response = api_client(user).post(seen_url)
 
     seen = TicketSeen.objects.get(user=user, ticket=ticket_assigned_after_start)
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
     assert seen.seen_at == NEXT_DAY
 
 
 @freeze_time(NEXT_DAY)
-def test_opening_the_ticket_detail_again_moves_the_seen_stamp(
-    api_client: Any, user: User, detail_url: str, ticket_opened_before_the_assignment: TicketSeen
+def test_reporting_the_ticket_as_seen_again_moves_the_seen_stamp(
+    api_client: Any, user: User, seen_url: str, ticket_opened_before_the_assignment: TicketSeen
 ) -> None:
-    api_client(user).get(detail_url)
+    api_client(user).post(seen_url)
 
     ticket_opened_before_the_assignment.refresh_from_db()
     assert ticket_opened_before_the_assignment.seen_at == NEXT_DAY
 
 
 @freeze_time(NEXT_DAY)
-def test_opening_the_ticket_detail_ends_the_email_cycle(
-    api_client: Any, user: User, detail_url: str, tracking: MyTasksTracking
+def test_reporting_the_ticket_as_seen_ends_the_email_cycle(
+    api_client: Any, user: User, seen_url: str, tracking: MyTasksTracking
 ) -> None:
     tracking.first_email_at = TRACKING_START
     tracking.last_reminder_at = ASSIGNED_AT
     tracking.save(update_fields=["first_email_at", "last_reminder_at"])
 
-    api_client(user).get(detail_url)
+    api_client(user).post(seen_url)
 
     tracking.refresh_from_db()
     assert (tracking.first_email_at, tracking.last_reminder_at) == (None, None)
 
 
-@pytest.mark.usefixtures("tracking")
+def test_a_user_without_a_details_grant_cannot_report_a_ticket_as_seen(
+    api_client: Any, user_without_permissions: User, seen_url: str
+) -> None:
+    response = api_client(user_without_permissions).post(seen_url)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_a_ticket_the_user_may_not_view_cannot_be_reported_as_seen(
+    api_client: Any,
+    user: User,
+    seen_url_in_other_program: str,
+    tracking: MyTasksTracking,
+    ticket_assigned_after_start_in_other_program: GrievanceTicket,
+) -> None:
+    response = api_client(user).post(seen_url_in_other_program)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert not TicketSeen.objects.filter(user=user, ticket=ticket_assigned_after_start_in_other_program).exists()
+
+
+def test_fetching_the_ticket_detail_does_not_stamp_it(
+    api_client: Any,
+    user: User,
+    detail_url: str,
+    tracking: MyTasksTracking,
+    ticket_assigned_after_start: GrievanceTicket,
+) -> None:
+    response = api_client(user).get(detail_url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert not TicketSeen.objects.filter(user=user, ticket=ticket_assigned_after_start).exists()
+
+
 def test_the_unread_filter_on_the_ticket_detail_filters_instead_of_failing(
-    api_client: Any, user: User, detail_url: str
+    api_client: Any, user: User, detail_url: str, tracking: MyTasksTracking
 ) -> None:
     response = api_client(user).get(detail_url, {"unread": "true"})
 
@@ -415,8 +553,13 @@ def test_the_program_list_flags_the_unread_rows(
     assert flags == {str(ticket_assigned_after_start.id): True, str(ticket_assigned_before_start.id): False}
 
 
-@pytest.mark.usefixtures("tracking", "closed_ticket_assigned_after_start")
-def test_a_closed_ticket_is_not_flagged_even_when_the_list_shows_it(api_client: Any, user: User, list_url: str) -> None:
+def test_a_closed_ticket_is_not_flagged_even_when_the_list_shows_it(
+    api_client: Any,
+    user: User,
+    list_url: str,
+    tracking: MyTasksTracking,
+    closed_ticket_assigned_after_start: GrievanceTicket,
+) -> None:
     response = api_client(user).get(list_url, {"my_tasks_tab": PRESET_MINE, "grievance_status": "all"})
 
     assert response.status_code == status.HTTP_200_OK

@@ -83,6 +83,7 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     GrievanceUpdateApproveStatusSerializer,
     MyTasksTabSerializer,
     MyTasksUnreadTabsSerializer,
+    MyTasksVisitSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
@@ -305,6 +306,14 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
+        "my_tasks_seen": [
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [
             Permissions.GRIEVANCES_UPDATE,
@@ -487,18 +496,26 @@ class GrievanceTicketGlobalViewSet(
             .order_by("-created_at")
         )
 
-    def get_object(self) -> Any:
-        ticket = super().get_object()
-        if self.action == "retrieve":
-            mark_seen(cast("User", self.request.user), ticket)
-        return ticket
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=True, methods=["post"], url_path="my-tasks/seen")
+    def my_tasks_seen(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Record that the user opened the ticket on its details page."""
+        mark_seen(cast("User", request.user), self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(request=None, responses={200: MyTasksUnreadTabsSerializer})
+    @extend_schema(request=MyTasksVisitSerializer, responses={200: MyTasksUnreadTabsSerializer})
     @action(detail=False, methods=["post"], url_path="my-tasks/visit")
     def my_tasks_visit(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Start unread tracking for the user if needed and say which My Tasks tabs hold unread tickets."""
+        serializer = MyTasksVisitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         user = cast("User", request.user)
-        tabs = unread_tabs(user, self.business_area, start_tracking(user, self.business_area).created_at)
+        tabs = unread_tabs(
+            user,
+            self.business_area,
+            start_tracking(user, self.business_area).created_at,
+            self._my_tasks_program(serializer.validated_data),
+        )
         return self._unread_tabs_response(tabs)
 
     @extend_schema(request=MyTasksTabSerializer, responses={200: MyTasksUnreadTabsSerializer})
@@ -507,8 +524,19 @@ class GrievanceTicketGlobalViewSet(
         """Mark every unread ticket of one My Tasks tab as seen and say which tabs still hold unread tickets."""
         serializer = MyTasksTabSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        tabs = mark_tab_seen(cast("User", request.user), self.business_area, serializer.validated_data["tab"])
+        tabs = mark_tab_seen(
+            cast("User", request.user),
+            self.business_area,
+            serializer.validated_data["tab"],
+            self._my_tasks_program(serializer.validated_data),
+        )
         return self._unread_tabs_response(tabs)
+
+    def _my_tasks_program(self, data: dict[str, Any]) -> Program | None:
+        """Resolve the programme My Tasks is opened in; None in the all-programmes scope."""
+        if "program" not in data:
+            return None
+        return get_object_or_404(Program, business_area=self.business_area, code=data["program"])
 
     @staticmethod
     def _unread_tabs_response(tabs: dict[str, bool]) -> Response:
@@ -1279,6 +1307,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["priority"],
             self.business_area_slug,  # type: ignore
+            cast("User", request.user),
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
@@ -1298,6 +1327,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["urgency"],
             self.business_area_slug,  # type: ignore
+            cast("User", request.user),
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,

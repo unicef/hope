@@ -908,7 +908,12 @@ class BulkNeedsAdjudicationSerializer(serializers.Serializer):
         return value
 
 
-class MyTasksTabSerializer(serializers.Serializer):
+class MyTasksVisitSerializer(serializers.Serializer):
+    # the programme code when My Tasks is opened inside a programme: the dots then cover that programme only
+    program = serializers.CharField(required=False, allow_blank=False)
+
+
+class MyTasksTabSerializer(MyTasksVisitSerializer):
     tab = serializers.ChoiceField(choices=MY_TASKS_TABS)
 
 

@@ -77,7 +77,7 @@ export const availableMyTasksTabs = (
 
 export const MyTasksPage = (): ReactElement => {
   const [shouldScroll, setShouldScroll] = useState(false);
-  const { businessAreaSlug } = useBaseUrl();
+  const { businessAreaSlug, programCode, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const permissions = usePermissions();
@@ -94,18 +94,26 @@ export const MyTasksPage = (): ReactElement => {
     [permissions],
   );
 
+  // Inside a programme the table lists that programme only, so the dots and Mark all as read are
+  // scoped the same way; the all-programmes page leaves the scope out.
+  const programScope = isAllPrograms ? {} : { program: programCode };
+  const visitParams = {
+    businessAreaSlug,
+    ...(isAllPrograms ? {} : { formData: programScope }),
+  };
+
   // A POST, but read through useQuery so it reruns on every visit, including the return from a
   // ticket, and so mark-read can drop its answer into the same cache entry.
   const visitQueryKey = restQueryKey(
     RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate,
-    { businessAreaSlug },
+    visitParams,
   );
   const { data: visitData, refetch: refetchVisit } = useQuery({
     queryKey: visitQueryKey,
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate({
-        businessAreaSlug,
-      }),
+      RestService.restBusinessAreasGrievanceTicketsMyTasksVisitCreate(
+        visitParams,
+      ),
     staleTime: 0,
     refetchOnMount: 'always',
     // The visit needs a list-view grant; a user with no tab would get a 403 here and be sent
@@ -207,7 +215,7 @@ export const MyTasksPage = (): ReactElement => {
     mutationFn: () =>
       RestService.restBusinessAreasGrievanceTicketsMyTasksMarkReadCreate({
         businessAreaSlug,
-        formData: { tab: activeTab as MyTasksTab['tab'] },
+        formData: { tab: activeTab as MyTasksTab['tab'], ...programScope },
       }),
     onSuccess: (data) => {
       queryClient.setQueryData(visitQueryKey, data);

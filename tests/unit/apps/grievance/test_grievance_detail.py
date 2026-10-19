@@ -3096,7 +3096,7 @@ def test_needs_adjudication_comparison_query_count_for_three_duplicates(
 
     # This count also pins that the global viewset prefetches linked_tickets for `list` only.
     # If the number grew by one, look at GrievanceTicketGlobalViewSet.get_queryset before raising it.
-    with django_assert_num_queries(85):
+    with django_assert_num_queries(83):
         response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
