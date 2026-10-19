@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 from django.db.models import Max, Min, OuterRef, Subquery
-from django.db.models.functions import Coalesce
 
 
 def copy_dates_from_payment_plans(apps, schema_editor):
@@ -27,21 +26,6 @@ def _plans_aggregate(payment_plan_model, owner_field, aggregate):
         .values(owner_field)
         .annotate(value=aggregate)
         .values("value")[:1]
-    )
-
-
-def copy_dates_to_payment_plans(apps, schema_editor):
-    PaymentPlan = apps.get_model("payment", "PaymentPlan")
-    PaymentPlanGroup = apps.get_model("payment", "PaymentPlanGroup")
-    FollowUpInstruction = apps.get_model("payment", "FollowUpInstruction")
-    PaymentPlan.objects.update(
-        **{
-            field: Coalesce(
-                Subquery(PaymentPlanGroup.objects.filter(pk=OuterRef("payment_plan_group_id")).values(field)[:1]),
-                Subquery(FollowUpInstruction.objects.filter(pk=OuterRef("follow_up_instruction_id")).values(field)[:1]),
-            )
-            for field in ("dispersion_start_date", "dispersion_end_date")
-        }
     )
 
 
@@ -71,7 +55,7 @@ class Migration(migrations.Migration):
             name="dispersion_start_date",
             field=models.DateField(blank=True, help_text="Dispersion Start Date", null=True),
         ),
-        migrations.RunPython(copy_dates_from_payment_plans, copy_dates_to_payment_plans),
+        migrations.RunPython(copy_dates_from_payment_plans, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="paymentplan",
             name="dispersion_end_date",
