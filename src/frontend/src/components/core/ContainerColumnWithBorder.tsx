@@ -1,7 +1,7 @@
 import { Paper } from '@mui/material';
 import type { ReactNode, ReactElement } from 'react';
 import styled from 'styled-components';
-import { responsiveValue } from 'src/responsive';
+import { SECTION_PADDING } from 'src/responsive';
 
 const Container = styled(Paper)`
   display: flex;
@@ -20,9 +20,5 @@ interface ContainerColumnWithBorderProps {
 export function ContainerColumnWithBorder({
   children,
 }: ContainerColumnWithBorderProps): ReactElement {
-  return (
-    <Container sx={{ padding: responsiveValue('16px', '32px 44px') }}>
-      {children}
-    </Container>
-  );
+  return <Container sx={{ padding: SECTION_PADDING }}>{children}</Container>;
 }

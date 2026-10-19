@@ -8,3 +8,4 @@ export {
 } from './ResponsiveGrid';
 export type { ResponsiveGridSize } from './ResponsiveGrid';
 export { Row } from './Row';
+export { SECTION_PADDING } from './spacing';
