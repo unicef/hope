@@ -1,3 +1,5 @@
+import { HeaderActions } from '@components/core/HeaderActions';
+import { HeaderIconAction } from '@components/core/HeaderIconAction';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -79,21 +81,23 @@ export function LockedTargetPopulationHeaderButtons({
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canDuplicate && (
-        <IconContainer>
-          <Button
-            onClick={() => setOpenDuplicate(true)}
-            disabled={!isActiveProgram}
-          >
-            <FileCopy />
-          </Button>
-        </IconContainer>
+        <HeaderIconAction
+          icon={<FileCopy />}
+          label={t('Duplicate')}
+          onClick={() => setOpenDuplicate(true)}
+          disabled={!isActiveProgram}
+        >
+          <IconContainer>
+            <Button
+              onClick={() => setOpenDuplicate(true)}
+              disabled={!isActiveProgram}
+            >
+              <FileCopy />
+            </Button>
+          </IconContainer>
+        </HeaderIconAction>
       )}
       {canUnlock && (
         <Box
@@ -151,6 +155,6 @@ export function LockedTargetPopulationHeaderButtons({
         targetPopulationId={targetPopulation.id}
         totalHouseholds={targetPopulation.totalHouseholdsCount}
       />
-    </Box>
+    </HeaderActions>
   );
 }

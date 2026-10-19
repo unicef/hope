@@ -1,3 +1,5 @@
+import { HeaderActions } from '@components/core/HeaderActions';
+import { HeaderIconAction } from '@components/core/HeaderIconAction';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -78,31 +80,44 @@ export function OpenTargetPopulationHeaderButtons({
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canDuplicate && (
-        <IconButton
+        <HeaderIconAction
+          icon={<FileCopy />}
+          label={t('Duplicate')}
           onClick={() => setOpenDuplicate(true)}
-          data-cy="button-target-population-duplicate"
           disabled={!isActiveProgram}
-          data-perm={PERMISSIONS.TARGETING_DUPLICATE}
+          dataCy="button-target-population-duplicate"
+          dataPerm={PERMISSIONS.TARGETING_DUPLICATE}
         >
-          <FileCopy />
-        </IconButton>
+          <IconButton
+            onClick={() => setOpenDuplicate(true)}
+            data-cy="button-target-population-duplicate"
+            disabled={!isActiveProgram}
+            data-perm={PERMISSIONS.TARGETING_DUPLICATE}
+          >
+            <FileCopy />
+          </IconButton>
+        </HeaderIconAction>
       )}
       {canRemove && (
-        <IconButton
-          data-cy="button-delete"
+        <HeaderIconAction
+          icon={<Delete />}
+          label={t('Delete')}
           onClick={() => setOpenDelete(true)}
           disabled={!isActiveProgram}
-          data-perm={PERMISSIONS.TARGETING_REMOVE}
+          dataCy="button-delete"
+          dataPerm={PERMISSIONS.TARGETING_REMOVE}
         >
-          <Delete />
-        </IconButton>
+          <IconButton
+            data-cy="button-delete"
+            onClick={() => setOpenDelete(true)}
+            disabled={!isActiveProgram}
+            data-perm={PERMISSIONS.TARGETING_REMOVE}
+          >
+            <Delete />
+          </IconButton>
+        </HeaderIconAction>
       )}
       {canEdit && (
         <Box
@@ -182,6 +197,6 @@ export function OpenTargetPopulationHeaderButtons({
         setOpen={setOpenLock}
         targetPopulationId={targetPopulation.id}
       />
-    </Box>
+    </HeaderActions>
   );
 }
