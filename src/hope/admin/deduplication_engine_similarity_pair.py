@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 @admin.register(BiometricDedupeSimilarityPair)
 class BiometricDeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
     list_display = ("program", "individual1", "individual2", "similarity_score")
+    list_select_related = ("program", "individual1", "individual2")
     list_filter = (("program", AutoCompleteFilter),)
     readonly_fields = ("program", "individual1", "individual2", "similarity_score")
     search_fields = ("program", "individual1", "individual2")
@@ -20,6 +21,7 @@ class BiometricDeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
 @admin.register(BiographicDedupeSimilarityPair)
 class BiographicDeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
     list_display = ("program", "individual1", "individual2", "similarity_score", "proximity_to_score")
+    list_select_related = ("program", "individual1", "individual2")
     list_filter = (("program", AutoCompleteFilter),)
     readonly_fields = ("program", "individual1", "individual2", "similarity_score", "proximity_to_score")
     search_fields = ("program", "individual1", "individual2")
