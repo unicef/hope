@@ -33,6 +33,13 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0)],
         },
     ),
+    "days_at_least_one": (
+        "django.forms.fields.IntegerField",
+        {
+            "min_value": 1,
+            "widget": "django.forms.widgets.NumberInput",
+        },
+    ),
     "positive_floats": (
         "django.forms.fields.FloatField",
         {
@@ -147,17 +154,17 @@ CONSTANCE_CONFIG = {
     "MY_TASKS_MONITOR_WINDOW": (
         1,
         "Days between My Tasks email checks (1 means every day)",
-        "positive_integers",
+        "days_at_least_one",
     ),
     "MY_TASKS_ALARM_WINDOW": (
         7,
-        "Days without a My Tasks visit after the first email before the reminders start",
-        "positive_integers",
+        "Days after the first My Tasks email before the reminders start, while something stays unread",
+        "days_at_least_one",
     ),
     "MY_TASKS_REPEAT_EACH": (
         2,
-        "Days between My Tasks reminders while the user still has not visited the page",
-        "positive_integers",
+        "Days between My Tasks reminders while something stays unread",
+        "days_at_least_one",
     ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,
