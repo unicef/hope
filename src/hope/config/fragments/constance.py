@@ -33,6 +33,13 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0)],
         },
     ),
+    "days_at_least_one": (
+        "django.forms.fields.IntegerField",
+        {
+            "min_value": 1,
+            "widget": "django.forms.widgets.NumberInput",
+        },
+    ),
     "positive_floats": (
         "django.forms.fields.FloatField",
         {
@@ -141,8 +148,23 @@ CONSTANCE_CONFIG = {
     ),
     "GRIEVANCE_NOTIFICATION_HOUR": (
         6,
-        "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",
+        "Local hour of the My Tasks email check in 24-hour format (0-23; 6 means 06:00)",
         "hour_of_day",
+    ),
+    "MY_TASKS_MONITOR_WINDOW": (
+        1,
+        "Days between My Tasks email checks (1 means every day)",
+        "days_at_least_one",
+    ),
+    "MY_TASKS_ALARM_WINDOW": (
+        7,
+        "Days after the first My Tasks email before the reminders start, while something stays unread",
+        "days_at_least_one",
+    ),
+    "MY_TASKS_REPEAT_EACH": (
+        2,
+        "Days between My Tasks reminders while something stays unread",
+        "days_at_least_one",
     ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,

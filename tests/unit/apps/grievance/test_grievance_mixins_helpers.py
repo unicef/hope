@@ -4,7 +4,6 @@ import pytest
 
 from hope.apps.grievance.api.mixins import GrievanceMutationMixin
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 
 
 @pytest.fixture
@@ -71,15 +70,12 @@ def test_handle_assignment_change_same_assignee_for_approval(
 ):
     mock_ticket.assigned_to = mock_assigned_to
     mock_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
-    messages = []
 
     GrievanceMutationMixin._handle_assignment_change(
-        mock_mixin_self, mock_approver, mock_ticket, mock_assigned_to, messages, assignment_provided=True
+        mock_mixin_self, mock_approver, mock_ticket, mock_assigned_to, assignment_provided=True
     )
 
     assert mock_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
-    assert len(messages) == 1
-    assert messages[0].action == GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS
 
 
 @pytest.mark.django_db

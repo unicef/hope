@@ -11,13 +11,8 @@ import { AdminButton } from '@core/AdminButton';
 import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { restQueryKey } from '@utils/queryKeys';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
@@ -40,26 +35,7 @@ export const PaymentPlanDetailsHeader = ({
   const visionManaged = paymentPlan.visionManaged;
   const { isInstructionManaged } = paymentPlan;
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsCyclesRetrieve,
-      {
-        businessAreaSlug: businessArea,
-        id: programCycleId,
-        programCode: programId,
-      },
-    ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsCyclesRetrieve({
-        businessAreaSlug: businessArea,
-        id: programCycleId,
-        programCode: programId,
-      });
-    },
-    enabled: !!programCycleId,
-  });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
@@ -69,7 +45,7 @@ export const PaymentPlanDetailsHeader = ({
       to: '../../..',
     });
     breadCrumbsItems.push({
-      title: `${programCycleData?.title || ''}`,
+      title: paymentPlan.programCycle?.title || '',
       to: '../..',
     });
   } else {

@@ -74,10 +74,6 @@ from e2e.page_object.programme_population.periodic_data_update_uploads import (
     PDUXlsxUploads,
 )
 from e2e.page_object.programme_users.programme_users import ProgrammeUsers
-from e2e.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
-from e2e.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
 from e2e.page_object.targeting.targeting import Targeting
 from e2e.page_object.targeting.targeting_create import TargetingCreate
 from e2e.page_object.targeting.targeting_details import TargetingDetails
@@ -260,11 +256,6 @@ def _retry_flush_on_deadlock() -> None:
 def pytest_configure(config) -> None:  # type: ignore
     _patch_sync_apps_for_no_migrations()
     _retry_flush_on_deadlock()
-
-    config.addinivalue_line(
-        "markers",
-        "night: This marker is intended for e2e tests conducted during the night on CI",
-    )
 
     SCREENSHOT_DIRECTORY.mkdir(parents=True, exist_ok=True)
     for file in SCREENSHOT_DIRECTORY.iterdir():
@@ -450,16 +441,6 @@ def page_feedback_details(request: FixtureRequest, browser: Chrome) -> FeedbackD
 @pytest.fixture
 def page_new_feedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
     return NewFeedback(browser)
-
-
-@pytest.fixture
-def page_registration_data_import(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
-    return RegistrationDataImport(browser)
-
-
-@pytest.fixture
-def page_details_registration_data_import(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
-    return RDIDetailsPage(browser)
 
 
 @pytest.fixture
