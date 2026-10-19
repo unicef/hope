@@ -156,7 +156,7 @@ class ImportCSVForm(forms.Form):
 
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
 
-    partner = forms.ModelChoiceField(queryset=Partner.objects.all())
+    partner = forms.ModelChoiceField(queryset=Partner.objects.select_related("parent"))
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     role = forms.ModelChoiceField(queryset=Role.objects.all())
 

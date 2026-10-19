@@ -56,7 +56,7 @@ curl -sSL https://pdm-project.org/install-pdm.py | python -
 pdm sync --no-editable --no-self --no-isolation
 
 # admin required:
-brew install wkhtmltopdf pango postgis gdal
+brew install wkhtmltopdf pango postgis
 ```
 
 <b><h3>Start tests:</h3></b>

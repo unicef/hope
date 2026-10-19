@@ -5,7 +5,7 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import Grid from '@mui/material/Grid';
-import { MenuItem } from '@mui/material';
+import { Checkbox, FormControlLabel, MenuItem } from '@mui/material';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
@@ -285,6 +285,22 @@ export const MyTasksFilters = ({
             <MenuItem value="">{t('All Tickets')}</MenuItem>
             <MenuItem value="true">{t('Overdue Only')}</MenuItem>
           </SelectFilter>
+        </Grid>
+        <Grid size={{ xs: 2 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                color="primary"
+                // Unchecked writes '' so the param is dropped rather than sent as unread=false.
+                checked={Boolean(filter.unread)}
+                onChange={(e) =>
+                  handleFilterChange('unread', e.target.checked ? true : '')
+                }
+                data-cy="filters-unread"
+              />
+            }
+            label={t('Only unread')}
+          />
         </Grid>
       </Grid>
     </FiltersSection>

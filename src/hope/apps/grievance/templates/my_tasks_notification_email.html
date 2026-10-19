@@ -1,0 +1,10 @@
+{% extends 'base_notification_email.html' %}
+
+{% block content %}
+    <p>{{ intro }}</p>
+    {% for tab in tabs %}
+        <p style="font-size: 15px;">
+            {{ tab.label }} - <a href="{{ tab.url }}">open My Tasks</a>
+        </p>
+    {% endfor %}
+{% endblock content %}
