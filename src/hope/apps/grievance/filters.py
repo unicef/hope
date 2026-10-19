@@ -17,9 +17,16 @@ from django_filters import (
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.api.filters import OfficeSearchFilterMixin
-from hope.apps.grievance.constants import PRIORITY_CHOICES, SUBMISSION_CHANNEL_CHOICES, URGENCY_CHOICES
+from hope.apps.grievance.constants import (
+    PRIORITY_CHOICES,
+    SUBMISSION_CHANNEL_CHOICES,
+    URGENCY_CHOICES,
+    get_my_tasks_tab_choices,
+)
 from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.my_tasks import TAB_SCOPES, assignable_tickets_q
 from hope.apps.grievance.utils import overdue_q
+from hope.apps.grievance.visibility import without_program_q
 from hope.apps.household.const import HEAD
 from hope.models import BusinessArea, Individual, Program
 
@@ -34,11 +41,6 @@ def program_with_status_exists(program_status: str) -> Exists:
 def program_with_id_exists(program_id: UUID) -> Exists:
     through_model = GrievanceTicket.programs.through
     return Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"), program__id=program_id))
-
-
-def without_program_q() -> Q:
-    through_model = GrievanceTicket.programs.through
-    return ~Q(Exists(through_model.objects.filter(grievanceticket=OuterRef("pk"))))
 
 
 class GrievanceOrderingFilter(OrderingFilter):
@@ -126,6 +128,8 @@ class GrievanceTicketFilter(FilterSet):
     overdue = BooleanFilter(method="filter_overdue")
     sensitive = BooleanFilter(method="filter_sensitive")
     unassigned = BooleanFilter(method="filter_unassigned")
+    my_tasks_tab = ChoiceFilter(choices=get_my_tasks_tab_choices, method="filter_my_tasks_tab")
+    unread = BooleanFilter(method="filter_unread")
 
     class Meta:
         fields = {
@@ -169,18 +173,15 @@ class GrievanceTicketFilter(FilterSet):
         """Unassigned tickets the user could actually assign."""
         if not value:
             return qs.filter(assigned_to__isnull=False)
-        assignable_program_ids = set(
-            self.request.user.get_program_ids_for_permissions_in_business_area(
-                self.business_area.id, [Permissions.GRIEVANCE_ASSIGN]
-            )
-        )
-        if not assignable_program_ids:
-            return qs.none()
-        through_model = GrievanceTicket.programs.through
-        in_assignable_program = Exists(
-            through_model.objects.filter(grievanceticket=OuterRef("pk"), program_id__in=assignable_program_ids)
-        )
-        return qs.filter(Q(in_assignable_program) | without_program_q(), assigned_to__isnull=True)
+        return qs.filter(assignable_tickets_q(self.request.user, self.business_area))
+
+    def filter_my_tasks_tab(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        """Narrow the list to the tickets of the given My Tasks tab: needs-assignment, mine or pending-approval."""
+        return qs.filter(TAB_SCOPES[value](self.request.user, self.business_area))
+
+    def filter_unread(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        """Keep (or drop) the rows My Tasks highlights; the viewset annotates `unread` for the list and the count."""
+        return qs.filter(unread=value)
 
     @cached_property
     def business_area(self) -> BusinessArea:

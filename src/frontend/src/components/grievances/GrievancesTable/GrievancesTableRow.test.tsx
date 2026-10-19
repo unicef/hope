@@ -74,13 +74,16 @@ const urgencyChoicesData = [
   { value: 2, name: 'Urgent' },
 ];
 
-const renderRow = (columns: GrievanceColumnId[]) =>
+const renderRow = (
+  columns: GrievanceColumnId[],
+  rowTicket: GrievanceTicketList = ticket,
+) =>
   render(
     <MemoryRouter>
       <table>
         <tbody>
           <GrievancesTableRow
-            ticket={ticket}
+            ticket={rowTicket}
             statusChoices={statusChoices}
             categoryChoices={categoryChoices}
             issueTypeChoicesData={[]}
@@ -122,5 +125,27 @@ describe('GrievancesTableRow', () => {
     // The preset pins both, so neither column is built for this list.
     expect(screen.queryByText('Assigned')).toBeNull();
     expect(screen.queryByRole('combobox')).toBeNull();
+  });
+
+  it('marks a ticket the user has not opened since it changed with a dot and a tint', () => {
+    renderRow(MY_TASKS_COLUMNS, { ...ticket, unread: true });
+
+    const row = screen.getByTestId('ticket-row-GRV-0001');
+    expect(row.getAttribute('data-unread')).toBe('true');
+    expect(getComputedStyle(row).backgroundColor).toBe(
+      'rgba(0, 173, 239, 0.05)',
+    );
+    expect(screen.getByTestId('ticket-unread-dot')).toBeTruthy();
+  });
+
+  it('leaves a read ticket unmarked', () => {
+    renderRow(MY_TASKS_COLUMNS, { ...ticket, unread: false });
+
+    const row = screen.getByTestId('ticket-row-GRV-0001');
+    expect(row.getAttribute('data-unread')).toBeNull();
+    expect(getComputedStyle(row).backgroundColor).not.toBe(
+      'rgba(0, 173, 239, 0.05)',
+    );
+    expect(screen.queryByTestId('ticket-unread-dot')).toBeNull();
   });
 });

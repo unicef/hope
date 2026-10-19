@@ -86,6 +86,7 @@ from hope.apps.payment.celery_tasks import (
     update_exchange_rate_on_release_payments_async_task_action,
 )
 from hope.apps.payment.services import western_union_reports_service
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     AsyncJob,
@@ -487,6 +488,37 @@ def test_payment_plan_full_rebuild(
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     assert payment_plan.built_at is not None
     mock_full_rebuild.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+def test_payment_plan_full_rebuild_of_reactivated_open_plan(mock_full_rebuild: Mock) -> None:
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ABORTED)
+    PaymentFactory(parent=payment_plan)
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+
+    payment_plan.refresh_from_db(fields=["status", "build_status"])
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    mock_full_rebuild.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_payment_plan_full_rebuild_of_open_plan_marks_failed(mock_retry: Mock, mock_full_rebuild: Mock) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.OPEN,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+    )
+    PaymentFactory(parent=payment_plan)
+    mock_full_rebuild.side_effect = Exception("test")
+    mock_retry.side_effect = Retry("retry")
+    with pytest.raises(Retry):
+        queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan)
+
+    payment_plan.refresh_from_db(fields=["build_status"])
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
 
 
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
