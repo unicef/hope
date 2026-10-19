@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import IntegrityError
 import pytest
 
@@ -73,16 +75,22 @@ def test_bulk_add_pairs_stores_lower_id_as_individual1_when_hde_sends_reversed_o
     assert (pair.individual1_id, pair.individual2_id) == (lower.id, higher.id)
 
 
-@pytest.mark.parametrize("pair_model", PAIR_MODELS)
-def test_bulk_add_pairs_scales_score_to_percent(
-    pair_model: type, program: Program, individuals: list[Individual]
-) -> None:
+def test_biometric_bulk_add_pairs_scales_score_to_percent(program: Program, individuals: list[Individual]) -> None:
     lower, higher = individuals
     findings = [SimilarityPair(score=0.75, status_code="200", first=str(lower.id), second=str(higher.id))]
 
-    pair_model.bulk_add_pairs(program, findings)
+    BiometricDedupeSimilarityPair.bulk_add_pairs(program, findings)
 
-    assert pair_model.objects.get().similarity_score == 75
+    assert BiometricDedupeSimilarityPair.objects.get().similarity_score == 75
+
+
+def test_biographic_bulk_add_pairs_stores_raw_es_score(program: Program, individuals: list[Individual]) -> None:
+    lower, higher = individuals
+    findings = [SimilarityPair(score=12.34, status_code="200", first=str(lower.id), second=str(higher.id))]
+
+    BiographicDedupeSimilarityPair.bulk_add_pairs(program, findings)
+
+    assert BiographicDedupeSimilarityPair.objects.get().similarity_score == Decimal("12.34")
 
 
 @pytest.mark.parametrize("pair_model", PAIR_MODELS)

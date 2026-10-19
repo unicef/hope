@@ -256,13 +256,11 @@ class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
     def _build_pair(
         cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
     ) -> "BiographicDedupeSimilarityPair":
-        # TODO: Biographic score scaling (x100) is not confirmed yet - discuss with Data whether HDE
-        #  biographic scores should be scaled the same way as biometric ones.
         return cls(
             program=program,
             individual1_id=individual1_id,
             individual2_id=individual2_id,
             status_code=pair.status_code,
-            similarity_score=pair.score * 100,
+            similarity_score=pair.score,
             proximity_to_score=None,  # TODO(05): take proximity_to_score from SimilarityPair
         )
