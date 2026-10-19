@@ -5,10 +5,11 @@ import { responsiveValue } from './breakpoints';
 import type { ResponsiveValue } from './breakpoints';
 
 export type ResponsiveGridSize =
-  'full' | 'half' | 'third' | 'quarter' | 'sixth';
+  'full' | 'twoThirds' | 'half' | 'third' | 'quarter' | 'sixth';
 
 const COLUMNS: Record<ResponsiveGridSize, number> = {
   full: 12,
+  twoThirds: 8,
   half: 6,
   third: 4,
   quarter: 3,

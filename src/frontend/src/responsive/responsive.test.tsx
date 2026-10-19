@@ -23,6 +23,7 @@ describe('responsiveValue', () => {
 describe('responsiveGridSize', () => {
   it.each([
     ['full', 12],
+    ['twoThirds', 8],
     ['half', 6],
     ['third', 4],
     ['quarter', 3],
