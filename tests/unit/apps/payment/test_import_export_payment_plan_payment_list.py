@@ -688,8 +688,8 @@ def test_export_payment_plan_payment_list(payment_plan, payments, user):
     wb = export_service.generate_workbook()
 
     assert wb.active["A2"].value == str(payment.unicef_id)
-    assert wb.active["K2"].value == format(payment.entitlement_quantity, "f")
-    assert wb.active["L2"].value == format(payment.entitlement_quantity_usd, "f")
+    assert wb.active["K2"].value == "100.00"
+    assert wb.active["L2"].value == "10.00"
     assert wb.active["K2"].data_type == "s"
     assert wb.active["L2"].data_type == "s"
     assert wb.active["F2"].value == "TEST_VILLAGE"

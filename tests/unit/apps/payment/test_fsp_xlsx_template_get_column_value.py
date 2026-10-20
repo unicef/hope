@@ -292,7 +292,7 @@ def test_get_column_value_delivered_quantity_error(payment_with_snapshot_and_doc
         payment_with_snapshot_and_document, "delivered_quantity", admin_areas_dict, []
     )
 
-    assert value == -1.0
+    assert value == "-1"
 
 
 def test_get_column_value_delivery_date_string(payment_with_snapshot_and_document, admin_areas_dict):

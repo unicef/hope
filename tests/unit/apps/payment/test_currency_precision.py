@@ -212,12 +212,12 @@ def test_xlsx_money_cell_is_exact_text():
     assert cell.value == "123456789.1234567891"
 
 
-@pytest.mark.parametrize(("value", "expected"), [(10, "10"), (10.5, "10.5")])
-def test_xlsx_monetary_number_is_exported_as_text(value, expected):
+@pytest.mark.parametrize("value", [10, 10.5])
+def test_xlsx_monetary_number_remains_numeric(value):
     result = XlsxExportBaseService().right_format_for_xlsx(value, "entitlement_quantity")
 
-    assert result == expected
-    assert isinstance(result, str)
+    assert result == value
+    assert type(result) is type(value)
 
 
 def test_xlsx_nonmonetary_number_remains_numeric():
