@@ -15,3 +15,16 @@ This is the documentation for aligning HOPE to new biographic deduplication flow
       2. Push people using HOPE API,
       3. Complete RDI using HOPE API which should trigger fetching the findings and merging in HOPE
     It asserts that specific deduplication statistics are achieved and expected adjudication tickets are created.
+
+## Branch `346504-ticket-helpers-refactor`
+
+### Summary
+
+This PR provides no behavioral changes in HOPE. It's purpose is to simplify next task related to handling biographic deduplication using hope dedupliation engine results.
+
+### Why?
+
+`create_grievance_ticket_with_details` can't be reused out of the box in a way it's designed today. It's EITHER:
+ - create grievance tickets with PAIRS using Hope Deduplication Engine findings
+ - create grievance tickets that GROUPS duplicates using HOPE deduplication findings.
+What I need here is: Use HDE deduplication results (SimilarityPairs) and create grievance ticket which GROUP together findings. Because of that I'll implement `create_grouped_grievance_tickets_from_hde_findings_with_details` that will be similar to `create_grievance_ticket_with_details`. In order to do that, I need to extract some steps to keep it DRY.
