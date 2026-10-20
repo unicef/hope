@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import type { ReactElement } from 'react';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;
@@ -61,8 +62,8 @@ export function LookUpTargetPopulationFiltersCommunication({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'flex-end' }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -70,8 +71,8 @@ export function LookUpTargetPopulationFiltersCommunication({
             data-cy="filters-search"
             fullWidth
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -86,8 +87,8 @@ export function LookUpTargetPopulationFiltersCommunication({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
@@ -101,8 +102,8 @@ export function LookUpTargetPopulationFiltersCommunication({
             icon={<Group />}
             data-cy="filters-total-households-count-min"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder={t('To')}
@@ -115,23 +116,23 @@ export function LookUpTargetPopulationFiltersCommunication({
             icon={<Group />}
             data-cy="filters-total-households-count-max"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }
