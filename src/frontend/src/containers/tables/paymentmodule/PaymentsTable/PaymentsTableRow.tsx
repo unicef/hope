@@ -204,7 +204,7 @@ export function PaymentsTableRow({
           {payment.fspName ? payment.fspName : '-'}
         </TableCell>
       )}
-      <TableCell align="left">
+      <TableCell data-cy="entitlement-quantity-cell" align="left">
         {payment.entitlementQuantity != null &&
         Number(payment.entitlementQuantity) >= 0
           ? `${formatCurrencyWithSymbol(

@@ -252,18 +252,6 @@ class PaymentVerificationSerializer(HopeCurrencyModelSerializer):
         fields = ("id", "status", "status_date", "received_amount")
 
 
-class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentVerificationPlan
-        fields = (
-            "id",
-            "status",
-            # "verification_channel",
-            "activation_date",
-            "completion_date",
-        )
-
-
 class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status_display = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
@@ -1795,8 +1783,6 @@ class VerificationListSerializer(HopeCurrencyModelSerializer):
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name")
-
-
 class FullListSerializer(serializers.Serializer):
     excluded_admin_areas = serializers.ListField(child=serializers.CharField())
 

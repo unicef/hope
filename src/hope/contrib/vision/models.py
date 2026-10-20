@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import OuterRef, Subquery, Sum
 
 from hope.models import BusinessArea, PaymentPlan
+from hope.models.utils import LongNameIndex
 
 
 class FundsCommitmentHeaderQuerySet(models.QuerySet):
@@ -56,7 +57,7 @@ class FundsCommitmentItem(models.Model):
         on_delete=models.CASCADE,
         related_name="funds_commitment_items",
     )
-    funds_commitment_item = models.CharField(max_length=3, db_index=True)
+    funds_commitment_item = models.CharField(max_length=3)
 
     rec_serial_number = models.IntegerField(primary_key=True)
     vendor_id = models.CharField(max_length=10, blank=True, null=True)
@@ -115,13 +116,25 @@ class FundsCommitmentItem(models.Model):
         help_text="This can be a business office or a business area",
     )
 
+    class Meta:
+        indexes = [
+            LongNameIndex(
+                fields=["funds_commitment_item"], name="vision_fundscommitmentitem_funds_commitment_item_ab1d46fb"
+            ),
+            LongNameIndex(
+                fields=["funds_commitment_item"],
+                opclasses=["varchar_pattern_ops"],
+                name="vision_fundscommitmentitem_funds_commitment_item_ab1d46fb_like",
+            ),
+        ]
+
     def __str__(self) -> str:
         return f"{self.funds_commitment_header} - {self.funds_commitment_item}"
 
 
 class FundsCommitment(models.Model):
     rec_serial_number = models.IntegerField(primary_key=True)
-    funds_commitment_number = models.CharField(max_length=10, blank=True, null=True, db_index=True)
+    funds_commitment_number = models.CharField(max_length=10, blank=True, null=True)
     vendor_id = models.CharField(max_length=10, blank=True, null=True)
     business_area = models.CharField(max_length=4, blank=True, null=True)
     posting_date = models.DateField(blank=True, null=True)
@@ -178,6 +191,18 @@ class FundsCommitment(models.Model):
         blank=True,
         help_text="This can be a business office or a business area",
     )
+
+    class Meta:
+        indexes = [
+            LongNameIndex(
+                fields=["funds_commitment_number"], name="vision_fundscommitment_funds_commitment_number_7eeae3be"
+            ),
+            LongNameIndex(
+                fields=["funds_commitment_number"],
+                opclasses=["varchar_pattern_ops"],
+                name="vision_fundscommitment_funds_commitment_number_7eeae3be_like",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.funds_commitment_number or ""

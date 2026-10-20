@@ -11,6 +11,7 @@ from hope.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
 from hope.apps.grievance.constants import (
+    MY_TASKS_TABS,
     PRIORITY_CHOICES,
     SUBMISSION_CHANNEL_CHOICES,
     SUBMISSION_CHANNEL_HOPE,
@@ -139,6 +140,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     total_days = serializers.SerializerMethodField()
     created_by = UserSerializer()
     target_id = serializers.SerializerMethodField()
+    unread = serializers.SerializerMethodField()
 
     class Meta:
         model = GrievanceTicket
@@ -164,6 +166,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
             "related_tickets_count",
             "programs",
             "target_id",
+            "unread",
         ]
 
     def get_programs(self, obj: GrievanceTicket) -> dict:
@@ -183,6 +186,10 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 
     def get_total_days(self, obj: GrievanceTicket) -> int | None:
         return getattr(obj, "total_days", None)
+
+    def get_unread(self, obj: GrievanceTicket) -> bool:
+        # qs annotated in the list view when my_tasks_tab is given, False otherwise
+        return bool(getattr(obj, "unread", False))
 
     def get_target_id(self, obj: GrievanceTicket) -> str | None:
         # qs annotated values in the list view
@@ -899,3 +906,17 @@ class BulkNeedsAdjudicationSerializer(serializers.Serializer):
                 "An individual cannot be marked duplicate on one ticket and distinct on another."
             )
         return value
+
+
+class MyTasksVisitSerializer(serializers.Serializer):
+    # the programme code when My Tasks is opened inside a programme: the dots then cover that programme only
+    program = serializers.CharField(required=False, allow_blank=False)
+
+
+class MyTasksTabSerializer(MyTasksVisitSerializer):
+    tab = serializers.ChoiceField(choices=MY_TASKS_TABS)
+
+
+class MyTasksUnreadTabsSerializer(serializers.Serializer):
+    # presets of the tabs holding a ticket the user has not opened since somebody else changed it
+    unread_tabs = serializers.ListField(child=serializers.CharField())

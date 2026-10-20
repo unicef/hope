@@ -6,10 +6,6 @@ from django.core.exceptions import ValidationError
 from hope.contrib.aurora.models import Registration
 
 
-class ProjectForm(forms.ModelForm):
-    pass
-
-
 class FetchForm(forms.Form):
     registration = forms.ModelChoiceField(required=False, queryset=Registration.objects.all().order_by("name"))
     from_id = forms.IntegerField(required=False)

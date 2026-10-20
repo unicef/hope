@@ -61,7 +61,6 @@ class PaymentModuleDetails(BaseComponents):
     button_mark_as_released = 'button[data-cy="button-mark-as-released"]'
     button_import_submit = 'button[data-cy="button-import-submit"]'
     errors_container = 'div[data-cy="errors-container"]'
-    delete_button = 'button[data-cy="button-delete-pp"]'
     upload_file_button = 'button[data-cy="upload-file-button"]'
     title_input = 'div[data-cy="title-input"]'
     expand_supporting_documents_button = 'button[data-cy="expand-button"]'
@@ -91,9 +90,6 @@ class PaymentModuleDetails(BaseComponents):
 
     def get_button_import_submit(self) -> WebElement:
         return self.wait_for(self.button_import_submit)
-
-    def get_delete_button(self) -> WebElement:
-        return self.wait_for(self.delete_button)
 
     def get_upload_file_button(self) -> WebElement:
         return self.wait_for(self.upload_file_button)

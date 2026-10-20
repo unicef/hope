@@ -1754,7 +1754,7 @@ def send_western_union_report_email_notifications_async_task_action(job: AsyncRe
     from hope.apps.payment.services.western_union_reports_service import WesternUnionReportsService
     from hope.models import WesternUnionPaymentPlanReport
 
-    report_id = job.config.get("western_union_report_id") or job.config["qcf_report_id"]
+    report_id = job.config["western_union_report_id"]
     with cache.lock(
         f"{SEND_WESTERN_UNION_REPORT_EMAIL_LOCK_PREFIX}{report_id}",
         blocking_timeout=60 * 10,
@@ -1779,15 +1779,6 @@ def send_western_union_report_email_notifications_async_task(report_id: str) -> 
         group_key="payment",
         description=f"Send Western Union report email notifications for {report_id}",
     )
-
-
-# Looks unused, but AsyncJob rows queued by release 4.15 still point here by dotted path.
-def send_qcf_report_email_notifications_async_task_action(job: AsyncRetryJob) -> None:
-    send_western_union_report_email_notifications_async_task_action(job)
-
-
-def send_qcf_report_email_notifications_async_task(qcf_report_id: str) -> None:
-    send_western_union_report_email_notifications_async_task(qcf_report_id)
 
 
 def periodic_send_payment_plan_reconciliation_overdue_emails_async_task_action(
