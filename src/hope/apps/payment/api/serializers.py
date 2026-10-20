@@ -1783,6 +1783,8 @@ class VerificationListSerializer(HopeCurrencyModelSerializer):
 
     def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
         return PaymentListSerializer.get_collector_field(obj, "full_name")
+
+
 class FullListSerializer(serializers.Serializer):
     excluded_admin_areas = serializers.ListField(child=serializers.CharField())
 
