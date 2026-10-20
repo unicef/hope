@@ -52,4 +52,3 @@ This PR provides no behavioral changes in HOPE. It's purpose is to simplify next
  - create grievance tickets with PAIRS using Hope Deduplication Engine findings
  - create grievance tickets that GROUPS duplicates using HOPE deduplication findings.
 What I need here is: Use HDE deduplication results (SimilarityPairs) and create grievance ticket which GROUP together findings. Because of that I'll implement `create_grouped_grievance_tickets_from_hde_findings_with_details` that will be similar to `create_grievance_ticket_with_details`. In order to do that, I need to extract some steps to keep it DRY.
-
