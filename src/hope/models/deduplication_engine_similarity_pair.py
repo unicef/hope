@@ -1,17 +1,60 @@
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Literal
 
 from django.db import models, transaction
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
-from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
-from hope.models.individual import Individual
+from hope.apps.registration_data.api.deduplication_engine import (
+    BiographicHDEFinding,
+    BiometricHDEFinding,
+    HDEFinding,
+)
+from hope.models.individual import Individual, PendingIndividual
 from hope.models.registration_data_import import logger
+from hope.models.utils import MergeStatusModel
 
 if TYPE_CHECKING:
     from hope.models.program import Program
+    from hope.models.registration_data_import import RegistrationDataImport
 
 
 IndividualIdField = Literal["country_workspace_id", "id"]
+
+
+class DedupEngineSimilarityPairQuerySet(models.QuerySet):
+    def for_rdi_against_batch(self, rdi: "RegistrationDataImport") -> QuerySet:
+        rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
+        return self.filter(
+            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+        ).distinct()
+
+    def for_rdi_against_population(self, rdi: "RegistrationDataImport", rdi_merged: bool = False) -> QuerySet:
+        if rdi_merged:
+            rdi_individuals = Individual.objects.filter(registration_data_import=rdi).only("id")
+            other_pending_rdis_individuals = PendingIndividual.objects.filter(program=rdi.program)
+        else:
+            rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
+            other_pending_rdis_individuals = PendingIndividual.objects.filter(program=rdi.program).exclude(
+                id__in=rdi_individuals
+            )
+
+        qs = self.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            (Q(individual1__duplicate=False) | Q(individual1__isnull=True))
+            & (Q(individual2__duplicate=False) | Q(individual2__isnull=True)),
+            (Q(individual1__withdrawn=False) | Q(individual1__isnull=True))
+            & (Q(individual2__withdrawn=False) | Q(individual2__isnull=True)),
+            (
+                Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
+                | Q(individual1__isnull=True)
+                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED)
+                | Q(individual2__isnull=True)
+            ),
+            program=rdi.program,
+        ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
+
+        return qs.distinct()
 
 
 class DedupEngineSimilarityPair(models.Model):
@@ -23,7 +66,9 @@ class DedupEngineSimilarityPair(models.Model):
     similarity_score = models.DecimalField(
         max_digits=5,
         decimal_places=2,
-    )  # 0 represents invalid pair (ex. multiple faces detected)
+    )
+
+    objects = DedupEngineSimilarityPairQuerySet.as_manager()
 
     class Meta:
         abstract = True
@@ -38,27 +83,27 @@ class DedupEngineSimilarityPair(models.Model):
     def bulk_add_pairs(
         cls,
         program: "Program",
-        duplicates_data: list[SimilarityPair],
+        hde_findings: Sequence[HDEFinding],
         id_field_name: IndividualIdField = "id",
     ) -> None:
-        if not duplicates_data:
+        if not hde_findings:
             return
 
-        all_unique_ind_ids = cls._extract_unique_ids(duplicates_data)
+        all_unique_ind_ids = cls._extract_unique_ids(hde_findings)
         id_to_hope_pk = cls._resolve_id_to_hope_pk(all_unique_ind_ids, id_field_name, program)
 
         duplicates: list[DedupEngineSimilarityPair] = []
-        for pair in duplicates_data:
-            if not (pair.first or pair.second):
+        for finding in hde_findings:
+            if not (finding.first or finding.second):
                 logger.warning("Dedup Engine Findings, both Individuals empty")
                 continue
 
-            first_pk = id_to_hope_pk.get(pair.first) if pair.first else None
-            second_pk = id_to_hope_pk.get(pair.second) if pair.second else None
+            first_pk = id_to_hope_pk.get(finding.first) if finding.first else None
+            second_pk = id_to_hope_pk.get(finding.second) if finding.second else None
 
-            if (pair.first and not first_pk) or (pair.second and not second_pk):
+            if (finding.first and not first_pk) or (finding.second and not second_pk):
                 logger.warning(
-                    f"Dedup Engine Findings, one of Individuals ({pair.first}, {pair.second}) does not exist"
+                    f"Dedup Engine Findings, one of Individuals ({finding.first}, {finding.second}) does not exist"
                 )
                 continue
 
@@ -73,7 +118,7 @@ class DedupEngineSimilarityPair(models.Model):
                 logger.warning(f"Dedup Engine Findings, skipping duplicate pair ({individual1}, {individual2})")
                 continue
 
-            duplicates.append(cls._build_pair(program, individual1, individual2, pair))
+            duplicates.append(cls._build_pair(program, individual1, individual2, finding))
 
         if duplicates:
             with transaction.atomic():
@@ -81,26 +126,26 @@ class DedupEngineSimilarityPair(models.Model):
 
     @classmethod
     def _build_pair(
-        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
+        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, finding: HDEFinding
     ) -> "DedupEngineSimilarityPair":
         raise NotImplementedError
 
     @staticmethod
-    def _extract_unique_ids(duplicates_data: list[SimilarityPair]) -> set[str]:
+    def _extract_unique_ids(hde_findings: Sequence[HDEFinding]) -> set[str]:
         unique_ids: set[str] = set()
-        for pair in duplicates_data:
-            if pair.first:
-                unique_ids.add(pair.first)
-            if pair.second:
-                unique_ids.add(pair.second)
+        for finding in hde_findings:
+            if finding.first:
+                unique_ids.add(finding.first)
+            if finding.second:
+                unique_ids.add(finding.second)
         return unique_ids
 
     @staticmethod
     def _resolve_id_to_hope_pk(
         unique_ids: set[str], id_field_name: IndividualIdField, program: "Program"
     ) -> dict[str, str]:
-        # When an RDI is pushed from CW, SimilarityPair.first/second carry country_workspace_ids.
-        # Otherwise SimilarityPair.first/second is HOPE individual id.
+        # When an RDI is pushed from CW, HDEFinding.first/second carry country_workspace_ids.
+        # Otherwise HDEFinding.first/second is HOPE individual id.
         # _resolve_id_to_hope_pk returns a map HOPE_ID | country_workspace_id -> HOPE_ID
         return {
             str(key): str(pk)
@@ -166,14 +211,16 @@ class BiometricDedupeSimilarityPair(DedupEngineSimilarityPair):
 
     @classmethod
     def _build_pair(
-        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
+        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, finding: HDEFinding
     ) -> "BiometricDedupeSimilarityPair":
+        if not isinstance(finding, BiometricHDEFinding):
+            raise TypeError(f"Expected BiometricHDEFinding, got {type(finding).__name__}")
         return cls(
             program=program,
             individual1_id=individual1_id,
             individual2_id=individual2_id,
-            status_code=pair.status_code,
-            similarity_score=pair.score * 100,
+            status_code=finding.status_code,
+            similarity_score=finding.score * 100,
         )
 
     def serialize_for_ticket(self) -> dict[str, Any]:
@@ -218,10 +265,6 @@ class BiometricDedupeSimilarityPair(DedupEngineSimilarityPair):
 
 
 class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
-    class StatusCode(models.TextChoices):
-        STATUS_200 = "200", "Deduplication success"
-        STATUS_500 = "500", "Generic error"
-
     program = models.ForeignKey(
         "program.Program",
         related_name="biographic_dedup_similarity_pairs",
@@ -241,8 +284,7 @@ class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
         null=True,
         blank=True,
     )
-    status_code = models.CharField(max_length=20, choices=StatusCode.choices)
-    proximity_to_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    proximity_to_score = models.DecimalField(max_digits=5, decimal_places=2)
 
     class Meta(DedupEngineSimilarityPair.Meta):
         constraints = [
@@ -254,13 +296,14 @@ class BiographicDedupeSimilarityPair(DedupEngineSimilarityPair):
 
     @classmethod
     def _build_pair(
-        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, pair: SimilarityPair
+        cls, program: "Program", individual1_id: str | None, individual2_id: str | None, finding: HDEFinding
     ) -> "BiographicDedupeSimilarityPair":
+        if not isinstance(finding, BiographicHDEFinding):
+            raise TypeError(f"Expected BiographicHDEFinding, got {type(finding).__name__}")
         return cls(
             program=program,
             individual1_id=individual1_id,
             individual2_id=individual2_id,
-            status_code=pair.status_code,
-            similarity_score=pair.score,
-            proximity_to_score=None,  # TODO(05): take proximity_to_score from SimilarityPair
+            similarity_score=finding.score,
+            proximity_to_score=finding.proximity_to_score,
         )

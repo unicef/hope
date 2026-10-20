@@ -57,9 +57,9 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory, business_area=factory.SelfAttribute("..business_area"))
 
 
-class BiometricDeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
+class _DeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
     class Meta:
-        model = BiometricDedupeSimilarityPair
+        abstract = True
 
     program = factory.SubFactory(ProgramFactory)
     individual1 = factory.SubFactory(
@@ -71,10 +71,11 @@ class BiometricDeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
         program=factory.SelfAttribute("..program"),
     )
     similarity_score = Decimal("55.55")
-    status_code = BiometricDedupeSimilarityPair.StatusCode.STATUS_200
 
     @classmethod
-    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> BiometricDedupeSimilarityPair:
+    def _create(
+        cls, model_class: Any, *args: Any, **kwargs: Any
+    ) -> BiometricDedupeSimilarityPair | BiographicDedupeSimilarityPair:
         individual1 = kwargs.get("individual1")
         individual2 = kwargs.get("individual2")
         if individual1 and individual2 and individual1.id > individual2.id:
@@ -83,11 +84,18 @@ class BiometricDeduplicationEngineSimilarityPairFactory(DjangoModelFactory):
         return super()._create(model_class, *args, **kwargs)
 
 
-class BiographicDeduplicationEngineSimilarityPairFactory(BiometricDeduplicationEngineSimilarityPairFactory):
+class BiometricDeduplicationEngineSimilarityPairFactory(_DeduplicationEngineSimilarityPairFactory):
+    class Meta:
+        model = BiometricDedupeSimilarityPair
+
+    status_code = BiometricDedupeSimilarityPair.StatusCode.STATUS_200
+
+
+class BiographicDeduplicationEngineSimilarityPairFactory(_DeduplicationEngineSimilarityPairFactory):
     class Meta:
         model = BiographicDedupeSimilarityPair
 
-    status_code = BiographicDedupeSimilarityPair.StatusCode.STATUS_200
+    proximity_to_score = Decimal("5.55")
 
 
 def _generate_rdi_dedup_demo(ba: BusinessArea, user_root: User) -> None:

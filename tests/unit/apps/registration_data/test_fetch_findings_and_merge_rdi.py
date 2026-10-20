@@ -17,16 +17,15 @@ from extras.test_utils.factories import (
 from hope.api.caches import get_or_create_cache_key
 from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.household.const import DUPLICATE, DUPLICATE_IN_BATCH, UNIQUE, UNIQUE_IN_BATCH
-from hope.apps.registration_data.api.deduplication_engine import SimilarityPair
 from hope.apps.registration_data.celery_tasks import (
     fetch_findings_and_merge_rdi,
     fetch_findings_and_merge_rdi_action,
     handle_rdi_exception,
     mark_merge_error_if_still_owned,
 )
-from hope.apps.registration_data.services.deduplication_engine import DeduplicationEngineService
 from hope.models import (
     AsyncRetryJob,
+    BiographicDedupeSimilarityPair,
     BiometricDedupeSimilarityPair,
     BusinessArea,
     Individual,
@@ -111,6 +110,90 @@ def two_pending_individuals(cw_rdi, cw_program):
     return ind_a, ind_b
 
 
+@pytest.fixture
+def mock_get_biographic_findings() -> Mock:
+    with patch(
+        "hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biographic_findings",
+        return_value=[],
+    ) as mocked:
+        yield mocked
+
+
+@pytest.fixture
+def non_bio_two_pending_individuals(non_bio_rdi, non_bio_program):
+    ind_a = PendingIndividualFactory(
+        program=non_bio_program,
+        business_area=non_bio_program.business_area,
+        registration_data_import=non_bio_rdi,
+        country_workspace_id="3001",
+    )
+    ind_b = PendingIndividualFactory(
+        program=non_bio_program,
+        business_area=non_bio_program.business_area,
+        registration_data_import=non_bio_rdi,
+        country_workspace_id="3002",
+    )
+    return ind_a, ind_b
+
+
+@pytest.fixture
+def biometric_findings_for_two_pending_individuals(two_pending_individuals) -> list[dict]:
+    ind_a, ind_b = two_pending_individuals
+    return [_finding(first_pk=ind_a.country_workspace_id, second_pk=ind_b.country_workspace_id)]
+
+
+@pytest.fixture
+def biographic_findings_for_two_pending_individuals(two_pending_individuals) -> list[dict]:
+    ind_a, ind_b = two_pending_individuals
+    return [_biographic_finding(first_pk=ind_a.country_workspace_id, second_pk=ind_b.country_workspace_id)]
+
+
+@pytest.fixture
+def biographic_findings_for_non_bio_individuals(non_bio_two_pending_individuals) -> list[dict]:
+    ind_a, ind_b = non_bio_two_pending_individuals
+    return [_biographic_finding(first_pk=ind_a.country_workspace_id, second_pk=ind_b.country_workspace_id)]
+
+
+@pytest.fixture
+def individuals_per_status_code(cw_rdi, cw_program) -> dict[str, tuple[Individual, Individual]]:
+    return {
+        code: (
+            PendingIndividualFactory(
+                program=cw_program,
+                business_area=cw_program.business_area,
+                registration_data_import=cw_rdi,
+                country_workspace_id=f"{code}A",
+            ),
+            PendingIndividualFactory(
+                program=cw_program,
+                business_area=cw_program.business_area,
+                registration_data_import=cw_rdi,
+                country_workspace_id=f"{code}B",
+            ),
+        )
+        for code in ["200", "404", "412", "416", "418", "429", "500"]
+    }
+
+
+@pytest.fixture
+def findings_per_status_code(individuals_per_status_code: dict[str, tuple[Individual, Individual]]) -> list[dict]:
+    return [
+        _finding(first_pk=ind_a.country_workspace_id, second_pk=ind_b.country_workspace_id, status_code=code)
+        for code, (ind_a, ind_b) in individuals_per_status_code.items()
+    ]
+
+
+def _biographic_finding(first_pk: str, second_pk: str) -> dict:
+    return {
+        "first": {"reference_pk": first_pk},
+        "second": {"reference_pk": second_pk},
+        "score": 12.5,
+        "proximity_to_score": 2.5,
+        "config": "default",
+        "updated_at": "2026-04-29T00:00:00Z",
+    }
+
+
 def _finding(first_pk: str, second_pk: str, *, score: float = 0.95, status_code: str = "200") -> dict:
     return {
         "first": {"reference_pk": first_pk},
@@ -124,14 +207,18 @@ def _finding(first_pk: str, second_pk: str, *, score: float = 0.95, status_code:
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-def test_fetch_findings_and_merge_rdi_persists_pairs_and_enqueues_merge(
+def test_fetch_findings_and_merge_rdi_persists_biometric_and_biographic_pairs_and_enqueues_merge(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
+    mock_get_biographic_findings: Mock,
     cw_rdi: RegistrationDataImport,
     two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
+    biographic_findings_for_two_pending_individuals: list[dict],
 ) -> None:
     ind_a, ind_b = two_pending_individuals
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
+    mock_get_biographic_findings.return_value = biographic_findings_for_two_pending_individuals
 
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -141,11 +228,20 @@ def test_fetch_findings_and_merge_rdi_persists_pairs_and_enqueues_merge(
     assert persisted_ids == {ind_a.id, ind_b.id}
     assert pairs[0].similarity_score == Decimal("95.00")
 
+    biographic_pair = BiographicDedupeSimilarityPair.objects.get(program=cw_rdi.program)
+    assert (
+        {biographic_pair.individual1_id, biographic_pair.individual2_id},
+        biographic_pair.similarity_score,
+        biographic_pair.proximity_to_score,
+    ) == ({ind_a.id, ind_b.id}, Decimal("12.50"), Decimal("2.50"))
+    mock_get_biographic_findings.assert_called_once_with(cw_rdi.country_workspace_id)
+
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGING
     mock_rdi_merge.return_value.execute.assert_called_once_with(str(cw_rdi.id))
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_consumes_full_findings_iterator(
@@ -173,6 +269,7 @@ def test_fetch_findings_and_merge_rdi_consumes_full_findings_iterator(
     assert BiometricDedupeSimilarityPair.objects.filter(program=cw_program).count() == len(findings)
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_empty_findings_still_enqueues_merge(
@@ -194,21 +291,28 @@ def test_fetch_findings_and_merge_rdi_empty_findings_still_enqueues_merge(
 
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-def test_fetch_findings_and_merge_rdi_skips_findings_when_biometric_dedup_disabled(
+def test_fetch_findings_and_merge_rdi_skips_biometric_but_persists_biographic_when_biometric_dedup_disabled(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
+    mock_get_biographic_findings: Mock,
     non_bio_rdi: RegistrationDataImport,
+    non_bio_two_pending_individuals: tuple[Individual, Individual],
+    biographic_findings_for_non_bio_individuals: list[dict],
 ) -> None:
+    mock_get_biographic_findings.return_value = biographic_findings_for_non_bio_individuals
+
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=non_bio_rdi)
 
     mock_get_findings.assert_not_called()
     assert BiometricDedupeSimilarityPair.objects.filter(program=non_bio_rdi.program).count() == 0
+    assert BiographicDedupeSimilarityPair.objects.filter(program=non_bio_rdi.program).count() == 1
 
     non_bio_rdi.refresh_from_db()
     assert non_bio_rdi.status == RegistrationDataImport.MERGING
     mock_rdi_merge.return_value.execute.assert_called_once_with(str(non_bio_rdi.id))
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_classifies_batch_when_both_sides_pending(
@@ -216,12 +320,13 @@ def test_fetch_findings_and_merge_rdi_classifies_batch_when_both_sides_pending(
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
     two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
     ind_a, ind_b = two_pending_individuals
     assert ind_a.rdi_merge_status == MergeStatusModel.PENDING
     assert ind_b.rdi_merge_status == MergeStatusModel.PENDING
 
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
 
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -237,6 +342,7 @@ def test_fetch_findings_and_merge_rdi_classifies_batch_when_both_sides_pending(
     assert ind_b.biometric_deduplication_golden_record_results == []
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_classifies_population_when_one_side_merged(
@@ -321,22 +427,23 @@ def test_fetch_findings_and_merge_rdi_skips_rdi_without_country_workspace_id(
     assert rdi.status == RegistrationDataImport.MERGE_SCHEDULED
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_rerun_does_not_double_persist_pairs(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
     rows_after_first = BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count()
 
     cw_rdi.refresh_from_db()
     cw_rdi.status = RegistrationDataImport.MERGE_SCHEDULED
     cw_rdi.save(update_fields=["status"])
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
 
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -344,6 +451,7 @@ def test_fetch_findings_and_merge_rdi_rerun_does_not_double_persist_pairs(
     assert rows_after_first == rows_after_second == 1
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_skips_findings_with_unknown_country_workspace_id(
@@ -368,19 +476,20 @@ def test_fetch_findings_and_merge_rdi_skips_findings_with_unknown_country_worksp
     mock_rdi_merge.return_value.execute.assert_called_once_with(str(cw_rdi.id))
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_self_heals_import_error_to_merge_scheduled(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
     cw_rdi.status = RegistrationDataImport.IMPORT_ERROR
     cw_rdi.error_message = "engine 503"
     cw_rdi.sentry_id = "abc123"
     cw_rdi.save(update_fields=["status", "error_message", "sentry_id"])
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
 
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -391,6 +500,7 @@ def test_fetch_findings_and_merge_rdi_self_heals_import_error_to_merge_scheduled
     mock_rdi_merge.return_value.execute.assert_called_once_with(str(cw_rdi.id))
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_skips_self_pair_findings(
@@ -412,28 +522,7 @@ def test_fetch_findings_and_merge_rdi_skips_self_pair_findings(
     mock_rdi_merge.return_value.execute.assert_called_once_with(str(cw_rdi.id))
 
 
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-def test_fetch_findings_and_merge_rdi_orders_pair_by_individual_id(
-    mock_get_findings: mock.Mock,
-    mock_rdi_merge: mock.Mock,
-    cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
-) -> None:
-    ind_a, ind_b = two_pending_individuals
-    lower, higher = sorted([ind_a, ind_b], key=lambda i: i.id)
-
-    mock_get_findings.return_value = [
-        _finding(first_pk=higher.country_workspace_id, second_pk=lower.country_workspace_id)
-    ]
-
-    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
-
-    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_rdi.program)
-    assert pair.individual1_id == lower.id
-    assert pair.individual2_id == higher.id
-
-
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_classifies_mixed_batch_and_population_for_same_individual(
@@ -481,6 +570,7 @@ def test_fetch_findings_and_merge_rdi_classifies_mixed_batch_and_population_for_
     assert pending_a.biometric_deduplication_golden_record_results[0]["id"] == str(merged_c.id)
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
@@ -489,6 +579,7 @@ def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
     cw_rdi: RegistrationDataImport,
     cw_program,
     two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
     in_program_a, in_program_b = two_pending_individuals
     # A different business area: ``country_workspace_id_ind_unique_constraint`` makes the same
@@ -507,7 +598,7 @@ def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
         country_workspace_id="1001",
     )
 
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
 
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -517,114 +608,34 @@ def test_fetch_findings_and_merge_rdi_resolves_cw_id_within_correct_program(
     assert other_program_collision.id not in persisted_ids
 
 
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-def test_fetch_findings_and_merge_rdi_status_200_persists_with_scaled_score(
-    mock_get_findings: mock.Mock,
-    mock_rdi_merge: mock.Mock,
-    cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
-) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", score=0.87, status_code="200")]
-
-    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
-
-    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_rdi.program)
-    assert pair.similarity_score == Decimal("87.00")
-    assert pair.status_code == "200"
-
-
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-@pytest.mark.parametrize("status_code", ["412", "416", "418", "429"])
-def test_fetch_findings_and_merge_rdi_invalid_pair_status_codes_persist_with_scaled_score(
-    mock_get_findings: mock.Mock,
-    mock_rdi_merge: mock.Mock,
-    status_code: str,
-    cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
-) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", score=0.95, status_code=status_code)]
-
-    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
-
-    pair = BiometricDedupeSimilarityPair.objects.get(program=cw_rdi.program)
-    assert pair.similarity_score == Decimal("95.00")
-    assert pair.status_code == status_code
-
-
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-@pytest.mark.parametrize("status_code", ["404", "500"])
-def test_fetch_findings_and_merge_rdi_dropped_status_codes_skip_persist(
-    mock_get_findings: mock.Mock,
-    mock_rdi_merge: mock.Mock,
-    status_code: str,
-    cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
-) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", status_code=status_code)]
-
-    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
-
-    assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
-    cw_rdi.refresh_from_db()
-    assert cw_rdi.status == RegistrationDataImport.MERGING
-    mock_rdi_merge.return_value.execute.assert_called_once_with(str(cw_rdi.id))
-
-
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_mixed_status_codes_persist_correct_subset(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
-    cw_program,
+    individuals_per_status_code: dict[str, tuple[Individual, Individual]],
+    findings_per_status_code: list[dict],
 ) -> None:
-    codes = ["200", "404", "412", "416", "418", "429", "500"]
-    for i, _code in enumerate(codes):
-        PendingIndividualFactory(
-            program=cw_program,
-            business_area=cw_program.business_area,
-            registration_data_import=cw_rdi,
-            country_workspace_id=f"{i}A",
-        )
-        PendingIndividualFactory(
-            program=cw_program,
-            business_area=cw_program.business_area,
-            registration_data_import=cw_rdi,
-            country_workspace_id=f"{i}B",
-        )
-    findings = [_finding(first_pk=f"{i}A", second_pk=f"{i}B", status_code=code) for i, code in enumerate(codes)]
-    mock_get_findings.return_value = findings
+    mock_get_findings.return_value = findings_per_status_code
 
     queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
     persisted_codes = sorted(
         BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).values_list("status_code", flat=True)
     )
+    dropped_a, dropped_b = individuals_per_status_code["404"]
+    dropped_a.refresh_from_db()
+    dropped_b.refresh_from_db()
     assert persisted_codes == ["200", "412", "416", "418", "429"]
+    assert (dropped_a.biometric_deduplication_batch_results, dropped_b.biometric_deduplication_batch_results) == (
+        [],
+        [],
+    )
 
 
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
-@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-def test_fetch_findings_and_merge_rdi_dropped_finding_does_not_touch_individual_snapshots(
-    mock_get_findings: mock.Mock,
-    mock_rdi_merge: mock.Mock,
-    cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
-) -> None:
-    ind_a, ind_b = two_pending_individuals
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002", status_code="404")]
-
-    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
-
-    ind_a.refresh_from_db()
-    ind_b.refresh_from_db()
-    assert ind_a.biometric_deduplication_batch_results == []
-    assert ind_b.biometric_deduplication_batch_results == []
-
-
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_invalid_pair_surfaces_zero_score_in_individual_snapshot(
@@ -643,81 +654,7 @@ def test_fetch_findings_and_merge_rdi_invalid_pair_surfaces_zero_score_in_indivi
     assert ind_a.biometric_deduplication_batch_results[0]["similarity_score"] == 95.0
 
 
-def test_parse_findings_happy_path() -> None:
-    findings = [
-        {
-            "first": {"reference_pk": "CW-001"},
-            "second": {"reference_pk": "CW-002"},
-            "score": 0.95,
-            "status_code": "200",
-        },
-        {
-            "first": {"reference_pk": "CW-003"},
-            "second": {"reference_pk": "CW-004"},
-            "score": 0.0,
-            "status_code": "412",
-        },
-    ]
-
-    pairs = DeduplicationEngineService().parse_findings(findings)
-
-    assert pairs == [
-        SimilarityPair(score=0.95, status_code="200", first="CW-001", second="CW-002"),
-        SimilarityPair(score=0.0, status_code="412", first="CW-003", second="CW-004"),
-    ]
-
-
-def test_parse_findings_drops_non_persisted_status_code() -> None:
-    findings = [
-        {
-            "first": {"reference_pk": "CW-001"},
-            "second": {"reference_pk": "CW-002"},
-            "score": 0.0,
-            "status_code": "404",
-        },
-        {
-            "first": {"reference_pk": "CW-003"},
-            "second": {"reference_pk": "CW-004"},
-            "score": 0.0,
-            "status_code": "500",
-        },
-    ]
-
-    assert DeduplicationEngineService().parse_findings(findings) == []
-
-
-def test_parse_findings_drops_finding_with_both_reference_pks_empty() -> None:
-    findings = [
-        {
-            "first": {"reference_pk": None},
-            "second": {"reference_pk": ""},
-            "score": 0.0,
-            "status_code": "200",
-        },
-    ]
-
-    assert DeduplicationEngineService().parse_findings(findings) == []
-
-
-def test_parse_findings_normalises_empty_string_to_none() -> None:
-    findings = [
-        {
-            "first": {"reference_pk": "CW-001"},
-            "second": {"reference_pk": ""},
-            "score": 0.5,
-            "status_code": "429",
-        },
-    ]
-
-    pairs = DeduplicationEngineService().parse_findings(findings)
-
-    assert pairs == [SimilarityPair(score=0.5, status_code="429", first="CW-001", second=None)]
-
-
-def test_parse_findings_empty_input() -> None:
-    assert DeduplicationEngineService().parse_findings([]) == []
-
-
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_updates_rdi_counters_and_individual_dedup_statuses(
@@ -776,18 +713,19 @@ def test_fetch_findings_and_merge_rdi_updates_rdi_counters_and_individual_dedup_
     assert pending_c.biometric_deduplication_golden_record_status == DUPLICATE
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_delegates_statistics_to_biometric_dedup_service(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
 
     with patch(
-        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.DeduplicationEngineService.store_rdi_deduplication_statistics"
+        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.BiometricDeduplicationEngineService.store_rdi_deduplication_statistics"
     ) as mock_store_stats:
         queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
 
@@ -796,21 +734,22 @@ def test_fetch_findings_and_merge_rdi_delegates_statistics_to_biometric_dedup_se
     assert called_rdi.id == cw_rdi.id
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_skips_merge_when_status_changed_under_lock(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
 
     def flip_status_to_merging(rdi: RegistrationDataImport) -> None:
         RegistrationDataImport.objects.filter(pk=rdi.pk).update(status=RegistrationDataImport.MERGING)
 
     with patch(
-        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.DeduplicationEngineService.store_rdi_deduplication_statistics",
+        "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.BiometricDeduplicationEngineService.store_rdi_deduplication_statistics",
         side_effect=flip_status_to_merging,
     ):
         queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
@@ -834,13 +773,14 @@ def test_fetch_findings_and_merge_rdi_returns_true_when_lock_not_acquired(
     mock_execute.assert_not_called()
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
 def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and_lock(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
     # Concurrency re-check: the pre-lock read passes the status filter, then a competing
     # worker advances the RDI out of a processable status before this one takes the row
@@ -850,7 +790,7 @@ def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and
     # before transitioning to MERGING or scheduling the merge.
     def steal_rdi_then_return_findings(_country_workspace_id: str) -> list[dict]:
         RegistrationDataImport.objects.filter(pk=cw_rdi.pk).update(status=RegistrationDataImport.MERGED)
-        return [_finding(first_pk="1001", second_pk="1002")]
+        return biometric_findings_for_two_pending_individuals
 
     mock_get_findings.side_effect = steal_rdi_then_return_findings
 
@@ -866,15 +806,18 @@ def test_fetch_findings_and_merge_rdi_bails_when_status_changes_between_read_and
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.remove_elasticsearch_documents_by_matching_ids")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
-def test_fetch_and_merge_merge_failure_rolls_back_and_cleans_es(
+def test_fetch_and_merge_merge_failure_rolls_back_biometric_and_biographic_pairs_and_cleans_es(
     mock_get_findings: mock.Mock,
     mock_rdi_merge: mock.Mock,
     mock_remove_es: mock.Mock,
     mock_retry: Mock,
+    mock_get_biographic_findings: Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
+    biographic_findings_for_two_pending_individuals: list[dict],
 ) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
+    mock_get_biographic_findings.return_value = biographic_findings_for_two_pending_individuals
     mock_rdi_merge.return_value.execute.side_effect = RuntimeError("merge boom")
     mock_retry.side_effect = Retry("retry")
 
@@ -883,12 +826,14 @@ def test_fetch_and_merge_merge_failure_rolls_back_and_cleans_es(
 
     mock_rdi_merge.return_value.execute.assert_called_once_with(str(cw_rdi.id))
     assert BiometricDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
+    assert BiographicDedupeSimilarityPair.objects.filter(program=cw_rdi.program).count() == 0
     assert mock_remove_es.called
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.MERGE_ERROR
     assert "merge boom" in cw_rdi.error_message
 
 
+@pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.remove_elasticsearch_documents_by_matching_ids")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
@@ -899,14 +844,14 @@ def test_fetch_and_merge_store_failure_rolls_back_and_cleans_es(
     mock_remove_es: mock.Mock,
     mock_retry: Mock,
     cw_rdi: RegistrationDataImport,
-    two_pending_individuals: tuple[Individual, Individual],
+    biometric_findings_for_two_pending_individuals: list[dict],
 ) -> None:
-    mock_get_findings.return_value = [_finding(first_pk="1001", second_pk="1002")]
+    mock_get_findings.return_value = biometric_findings_for_two_pending_individuals
     mock_retry.side_effect = Retry("retry")
 
     with patch(
         "hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi."
-        "DeduplicationEngineService.store_rdi_deduplication_statistics",
+        "BiometricDeduplicationEngineService.store_rdi_deduplication_statistics",
         side_effect=RuntimeError("stats write failed"),
     ):
         with pytest.raises(Retry):
@@ -945,20 +890,20 @@ def test_fetch_and_merge_fetch_failure_before_txn_is_merge_error(
     mock_remove_es.assert_not_called()
 
 
-def test_handle_rdi_exception_defaults_to_import_error(cw_rdi: RegistrationDataImport) -> None:
-    handle_rdi_exception(str(cw_rdi.id), Exception("boom"))
+@pytest.mark.parametrize(
+    ("status_kwargs", "expected_status"),
+    [
+        ({}, RegistrationDataImport.IMPORT_ERROR),
+        ({"new_status": RegistrationDataImport.MERGE_ERROR}, RegistrationDataImport.MERGE_ERROR),
+    ],
+)
+def test_handle_rdi_exception_sets_status_and_error_message(
+    status_kwargs: dict, expected_status: str, cw_rdi: RegistrationDataImport
+) -> None:
+    handle_rdi_exception(str(cw_rdi.id), Exception("boom"), **status_kwargs)
 
     cw_rdi.refresh_from_db()
-    assert cw_rdi.status == RegistrationDataImport.IMPORT_ERROR
-    assert cw_rdi.error_message == "boom"
-
-
-def test_handle_rdi_exception_accepts_merge_error_status(cw_rdi: RegistrationDataImport) -> None:
-    handle_rdi_exception(str(cw_rdi.id), Exception("merge boom"), new_status=RegistrationDataImport.MERGE_ERROR)
-
-    cw_rdi.refresh_from_db()
-    assert cw_rdi.status == RegistrationDataImport.MERGE_ERROR
-    assert cw_rdi.error_message == "merge boom"
+    assert (cw_rdi.status, cw_rdi.error_message) == (expected_status, "boom")
 
 
 @patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
@@ -1030,24 +975,34 @@ def _status_flips_then_engine_fails(rdi: RegistrationDataImport, new_status: str
     return side_effect
 
 
+@pytest.mark.parametrize(
+    "concurrent_status",
+    [
+        RegistrationDataImport.DELETE_SCHEDULED,
+        # A competing job for the same RDI already merged it (queue_task, not requeue, so two jobs
+        # are possible). The slow loser must not drag a successful merge back to MERGE_ERROR.
+        RegistrationDataImport.MERGED,
+        # The wipe job hit protected dependents and parked the RDI in DELETE_FAILED. Flipping that
+        # back to MERGE_ERROR would hand a failed delete to the merge queue.
+        RegistrationDataImport.DELETE_FAILED,
+    ],
+)
 @patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
-def test_action_fetch_failure_does_not_overwrite_delete_scheduled(
+def test_action_fetch_failure_does_not_overwrite_concurrent_status(
     mock_task_cls: Mock,
     mock_dispatcher: Mock,
+    concurrent_status: str,
     cw_rdi: RegistrationDataImport,
 ) -> None:
-    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(
-        cw_rdi, RegistrationDataImport.DELETE_SCHEDULED
-    )
+    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(cw_rdi, concurrent_status)
     job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
 
     with pytest.raises(RequestException, match="engine 503"):
         fetch_findings_and_merge_rdi_action(job)
 
     cw_rdi.refresh_from_db()
-    assert cw_rdi.status == RegistrationDataImport.DELETE_SCHEDULED
-    assert cw_rdi.error_message == ""
+    assert (cw_rdi.status, cw_rdi.error_message) == (concurrent_status, "")
     mock_dispatcher.assert_not_called()
 
 
@@ -1073,50 +1028,6 @@ def test_action_delete_scheduled_rdi_is_not_picked_up_by_retry(
     cw_rdi.refresh_from_db()
     assert cw_rdi.status == RegistrationDataImport.DELETE_SCHEDULED
     mock_rdi_merge.return_value.execute.assert_not_called()
-    mock_dispatcher.assert_not_called()
-
-
-@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
-def test_action_fetch_failure_does_not_overwrite_merged(
-    mock_task_cls: Mock,
-    mock_dispatcher: Mock,
-    cw_rdi: RegistrationDataImport,
-) -> None:
-    # A competing job for the same RDI already merged it (queue_task, not requeue, so two jobs
-    # are possible). The slow loser must not drag a successful merge back to MERGE_ERROR.
-    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(
-        cw_rdi, RegistrationDataImport.MERGED
-    )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
-
-    with pytest.raises(RequestException, match="engine 503"):
-        fetch_findings_and_merge_rdi_action(job)
-
-    cw_rdi.refresh_from_db()
-    assert cw_rdi.status == RegistrationDataImport.MERGED
-    mock_dispatcher.assert_not_called()
-
-
-@patch("hope.apps.registration_data.celery_tasks.rdi_dispatcher_task")
-@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.FetchFindingsAndMergeRdi")
-def test_action_fetch_failure_does_not_overwrite_delete_failed(
-    mock_task_cls: Mock,
-    mock_dispatcher: Mock,
-    cw_rdi: RegistrationDataImport,
-) -> None:
-    # The wipe job hit protected dependents and parked the RDI in DELETE_FAILED. Flipping that
-    # back to MERGE_ERROR would hand a failed delete to the merge queue.
-    mock_task_cls.return_value.execute.side_effect = _status_flips_then_engine_fails(
-        cw_rdi, RegistrationDataImport.DELETE_FAILED
-    )
-    job = AsyncRetryJob(config={"registration_data_import_id": str(cw_rdi.id), "program_id": str(cw_rdi.program_id)})
-
-    with pytest.raises(RequestException, match="engine 503"):
-        fetch_findings_and_merge_rdi_action(job)
-
-    cw_rdi.refresh_from_db()
-    assert cw_rdi.status == RegistrationDataImport.DELETE_FAILED
     mock_dispatcher.assert_not_called()
 
 

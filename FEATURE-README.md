@@ -52,3 +52,18 @@ This PR provides no behavioral changes in HOPE. It's purpose is to simplify next
  - create grievance tickets with PAIRS using Hope Deduplication Engine findings
  - create grievance tickets that GROUPS duplicates using HOPE deduplication findings.
 What I need here is: Use HDE deduplication results (SimilarityPairs) and create grievance ticket which GROUP together findings. Because of that I'll implement `create_grouped_grievance_tickets_from_hde_findings_with_details` that will be similar to `create_grievance_ticket_with_details`. In order to do that, I need to extract some steps to keep it DRY.
+
+
+## Branch `346504-service-and-api`
+
+### Summary
+
+In HOPE we put logic into services. Since biographic deduplication for country workspace BAs will use hope deduplication engine to get findings I had to create a separate service for biographic and extend the DeduplicationEngineAPI so that it can talk with two (biometric and biographic) endpoints.
+
+### For revierwers
+
+1. Migration was modified but the earlier version of it wasn't deployed anywhere.
+2. SimilarityPair rename to HDEFinding: since the endpoint is called `findings` and during our interanl talks we started calling HDE deduplication results as findings I decided to rename it. The model keeping the HDE findings is still called used the `SimilarityPair` patterns, altough I believe for this purpose, when it refers to individuals that exist in DB calling it `SimilarityPair` makes more sense.
+3. `src/hope/apps/registration_data/tasks/fetch_findings_and_merge_rdi.py` adjusted to unconditionally fetch biographic findings
+4. Since DedupEngineSimilarityPair base class is used by two children now I decided to implement query set to make things more flexible and not hardcode the query logic within the models / services.
+5. `status_code` is used only for BiometricFinding. `proximity_to_score` is an attribute only for BiographicFinding.
