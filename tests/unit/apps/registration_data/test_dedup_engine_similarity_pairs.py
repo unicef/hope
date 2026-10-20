@@ -1,4 +1,5 @@
 from decimal import Decimal
+import uuid
 
 from django.db import IntegrityError
 import pytest
@@ -39,6 +40,24 @@ def removed_individual(program: Program) -> Individual:
 @pytest.fixture
 def withdrawn_individual(program: Program) -> Individual:
     return IndividualFactory(program=program, business_area=program.business_area, withdrawn=True)
+
+
+@pytest.fixture
+def live_individual_with_dead_twin(request: pytest.FixtureRequest, program: Program) -> Individual:
+    live = IndividualFactory(
+        id=uuid.UUID("00000000-0000-4000-8000-000000000001"),
+        program=program,
+        business_area=program.business_area,
+        country_workspace_id="cw-twin",
+    )
+    IndividualFactory(
+        id=uuid.UUID("ffffffff-ffff-4fff-8fff-ffffffffffff"),
+        program=program,
+        business_area=program.business_area,
+        country_workspace_id="cw-twin",
+        **{request.param: True},
+    )
+    return live
 
 
 @pytest.fixture
@@ -104,6 +123,27 @@ def test_bulk_add_pairs_resolves_country_workspace_ids(
 
     pair = pair_model.objects.get()
     assert {pair.individual1_id, pair.individual2_id} == {lower.id, higher.id}
+
+
+@pytest.mark.parametrize("live_individual_with_dead_twin", ["withdrawn", "is_removed"], indirect=True)
+@pytest.mark.parametrize("pair_model", PAIR_MODELS)
+def test_bulk_add_pairs_binds_live_individual_when_country_workspace_id_has_dead_twin(
+    pair_model: type, program: Program, individuals: list[Individual], live_individual_with_dead_twin: Individual
+) -> None:
+    other = individuals[0]
+    findings = [SimilarityPair(score=0.5, status_code="200", first="cw-twin", second=other.country_workspace_id)]
+
+    pair_model.bulk_add_pairs(program, findings, id_field_name="country_workspace_id")
+
+    pair = pair_model.objects.get()
+    assert {pair.individual1_id, pair.individual2_id} == {live_individual_with_dead_twin.id, other.id}
+
+
+@pytest.mark.parametrize("pair_model", PAIR_MODELS)
+def test_bulk_add_pairs_with_empty_findings_stores_nothing(pair_model: type, program: Program) -> None:
+    pair_model.bulk_add_pairs(program, [])
+
+    assert pair_model.objects.count() == 0
 
 
 @pytest.mark.parametrize("pair_model", PAIR_MODELS)
