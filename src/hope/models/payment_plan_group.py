@@ -15,7 +15,7 @@ from flags.state import flag_state
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
 from hope.models.payment_plan import PaymentPlan, last_approval_step
-from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -98,7 +98,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     status = models.CharField(
         max_length=50,
         default=Status.OPEN,
-        db_index=True,
         choices=Status.choices,
     )
     status_date = models.DateTimeField(blank=True, null=True)
@@ -165,7 +164,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     background_action_status = models.CharField(
         max_length=50,
         default=None,
-        db_index=True,
         blank=True,
         null=True,
         choices=BackgroundActionStatus.choices,
@@ -175,7 +173,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         max_length=20,
         choices=PaymentPlan.PlanType.choices,
         default=PaymentPlan.PlanType.REGULAR,
-        db_index=True,
         help_text="Type of the Payment Plans the group runs; a Follow-Up / Top-Up / Amendment group is linked [sys]",
     )
     source_group = models.ForeignKey(
@@ -197,6 +194,36 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
                 condition=Q(plan_type=PaymentPlan.PlanType.REGULAR, source_group__isnull=True)
                 | (~Q(plan_type=PaymentPlan.PlanType.REGULAR) & Q(source_group__isnull=False)),
                 name="payment_plan_group_source_group_only_on_linked",
+            ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentplangroup_created_at_14a802c0"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentplangroup_updated_at_b23558fe"),
+            LongNameIndex(fields=["unicef_id"], name="payment_paymentplangroup_unicef_id_3fb17c90"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_unicef_id_3fb17c90_like",
+            ),
+            LongNameIndex(
+                fields=["background_action_status"], name="payment_paymentplangroup_background_action_status_2aeaeb44"
+            ),
+            LongNameIndex(
+                fields=["background_action_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_background_action_status_2aeaeb44_like",
+            ),
+            LongNameIndex(fields=["status"], name="payment_paymentplangroup_status_c68e4ae6"),
+            LongNameIndex(
+                fields=["status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_status_c68e4ae6_like",
+            ),
+            LongNameIndex(fields=["plan_type"], name="payment_paymentplangroup_plan_type_1e21f341"),
+            LongNameIndex(
+                fields=["plan_type"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_plan_type_1e21f341_like",
             ),
         ]
 

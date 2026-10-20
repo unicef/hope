@@ -322,6 +322,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_WAIT,
                     obj.payment_plan.Status.TP_STEFICON_COMPLETED,
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
+                    obj.payment_plan.Status.OPEN,
                 ]
             )
         ],
@@ -341,6 +342,7 @@ class PaymentPlanFlow:
                     obj.payment_plan.Status.TP_STEFICON_COMPLETED,
                     obj.payment_plan.Status.TP_STEFICON_ERROR,
                     obj.payment_plan.Status.TP_STEFICON_WAIT,
+                    obj.payment_plan.Status.OPEN,
                 ]
             )
         ],

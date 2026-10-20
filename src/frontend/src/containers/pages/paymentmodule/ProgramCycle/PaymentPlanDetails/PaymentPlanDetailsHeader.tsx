@@ -29,6 +29,7 @@ export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
+  const { isInstructionManaged } = paymentPlan;
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
@@ -83,7 +84,7 @@ export const PaymentPlanDetailsHeader = ({
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case PaymentPlanStatusEnum.OPEN:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
@@ -92,7 +93,7 @@ export const PaymentPlanDetailsHeader = ({
       );
       break;
     case PaymentPlanStatusEnum.LOCKED:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}

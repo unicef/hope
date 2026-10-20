@@ -47,30 +47,9 @@ def grievance_tickets_page_url(
     return f"{url}?{urlencode(params)}" if params else url
 
 
-def my_tasks_url(
-    business_area: "BusinessArea",
-    preset: str,
-    *,
-    overdue: bool = False,
-    sensitive: bool | None = None,
-) -> str:
-    """Deep link to one My Tasks preset, optionally narrowed to overdue or to one category."""
-    params = {"tab": preset}
-    if sensitive is not None:
-        params["sensitive"] = "true" if sensitive else "false"
-    if overdue:
-        params["overdue"] = "true"
-    return grievance_tickets_page_url(business_area, MY_TASKS_PAGE, params)
-
-
-def grievance_ticket_url(grievance_ticket: GrievanceTicket) -> str | None:
-    # sensitive grievance shouldn't contain any urls
-    if grievance_ticket.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
-        return None
-    return frontend_url(
-        f"{grievance_ticket.business_area.slug}/programs/all/grievance/tickets/"
-        f"{grievance_ticket.grievance_type_to_string()}-generated/{grievance_ticket.id}"
-    )
+def my_tasks_url(business_area: "BusinessArea", preset: str) -> str:
+    """Deep link to one My Tasks tab, the link the My Tasks email carries."""
+    return grievance_tickets_page_url(business_area, MY_TASKS_PAGE, {"tab": preset})
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:

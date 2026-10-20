@@ -186,6 +186,27 @@ def test_bulk_update_priority(grievance_context: dict[str, Any]) -> None:
     assert grievance_ticket2.priority == PRIORITY_HIGH
 
 
+def test_bulk_update_priority_stamps_who_changed_the_tickets(grievance_context: dict[str, Any]) -> None:
+    user_two = grievance_context["users"]["user_two"]
+    business_area = grievance_context["business_area"]
+    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
+
+    BulkActionService().bulk_set_priority(
+        [grievance_ticket1.id, grievance_ticket2.id],
+        PRIORITY_HIGH,
+        business_area.slug,
+        action_user=user_two,
+    )
+
+    grievance_ticket1.refresh_from_db()
+    grievance_ticket2.refresh_from_db()
+
+    assert grievance_ticket1.user_modified is not None
+    assert grievance_ticket1.user_modified_by == user_two
+    assert grievance_ticket2.user_modified is not None
+    assert grievance_ticket2.user_modified_by == user_two
+
+
 def test_bulk_update_urgency(grievance_context: dict[str, Any]) -> None:
     business_area = grievance_context["business_area"]
     grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
@@ -204,6 +225,27 @@ def test_bulk_update_urgency(grievance_context: dict[str, Any]) -> None:
 
     assert grievance_ticket1.urgency == URGENCY_VERY_URGENT
     assert grievance_ticket2.urgency == URGENCY_VERY_URGENT
+
+
+def test_bulk_update_urgency_stamps_who_changed_the_tickets(grievance_context: dict[str, Any]) -> None:
+    user_two = grievance_context["users"]["user_two"]
+    business_area = grievance_context["business_area"]
+    grievance_ticket1, grievance_ticket2, _, _ = grievance_context["grievance_tickets"]
+
+    BulkActionService().bulk_set_urgency(
+        [grievance_ticket1.id, grievance_ticket2.id],
+        URGENCY_VERY_URGENT,
+        business_area.slug,
+        action_user=user_two,
+    )
+
+    grievance_ticket1.refresh_from_db()
+    grievance_ticket2.refresh_from_db()
+
+    assert grievance_ticket1.user_modified is not None
+    assert grievance_ticket1.user_modified_by == user_two
+    assert grievance_ticket2.user_modified is not None
+    assert grievance_ticket2.user_modified_by == user_two
 
 
 def test_bulk_add_note(grievance_context: dict[str, Any]) -> None:

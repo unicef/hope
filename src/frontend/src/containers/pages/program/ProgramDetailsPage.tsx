@@ -148,9 +148,14 @@ function ProgramDetailsPage(): ReactElement {
             </NoCashPlansTitle>
           </NoCashPlansContainer>
         ) : (
-          <TableWrapper>
-            <ProgramCyclesTableProgramDetails program={program} />
-          </TableWrapper>
+          hasPermissions(
+            PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+            permissions,
+          ) && (
+            <TableWrapper>
+              <ProgramCyclesTableProgramDetails program={program} />
+            </TableWrapper>
+          )
         )}
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={program?.id} />

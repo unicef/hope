@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class ApprovalProcess(TimeStampedUUIDModel):
@@ -39,4 +39,8 @@ class ApprovalProcess(TimeStampedUUIDModel):
                 | Q(payment_plan__isnull=True, payment_plan_group__isnull=False),
                 name="approval_process_owned_by_plan_or_group",
             )
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_approvalprocess_created_at_6a9c5d12"),
+            LongNameIndex(fields=["updated_at"], name="payment_approvalprocess_updated_at_1ff18c46"),
         ]
