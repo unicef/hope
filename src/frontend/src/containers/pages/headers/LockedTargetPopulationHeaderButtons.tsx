@@ -86,11 +86,13 @@ export function LockedTargetPopulationHeaderButtons({
         <HeaderIconAction
           icon={<FileCopy />}
           label={t('Duplicate')}
+          dataCy="button-target-population-duplicate"
           onClick={() => setOpenDuplicate(true)}
           disabled={!isActiveProgram}
         >
           <IconContainer>
             <Button
+              data-cy="button-target-population-duplicate"
               onClick={() => setOpenDuplicate(true)}
               disabled={!isActiveProgram}
             >

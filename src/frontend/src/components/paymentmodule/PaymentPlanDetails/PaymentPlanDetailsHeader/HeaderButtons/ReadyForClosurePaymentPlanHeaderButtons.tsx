@@ -18,12 +18,14 @@ export interface ReadyForClosurePaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canSendBack: boolean;
   canClose: boolean;
+  isInstructionManaged?: boolean;
 }
 
 export function ReadyForClosurePaymentPlanHeaderButtons({
   paymentPlan,
   canSendBack,
   canClose,
+  isInstructionManaged = false,
 }: ReadyForClosurePaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -80,7 +82,7 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
           </Box>
         )}
 
-        {canClose && (
+        {canClose && !isInstructionManaged && (
           <Box
             sx={{
               m: 2,

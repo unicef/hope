@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class LongNameIndex(models.Index):
+    max_name_length = 63  # PostgreSQL NAMEDATALEN - 1
+
+
 class BulkSignalsManagerMixin:
     def bulk_create(self, objs: Iterable[Any], *args: Any, **kwargs: Any) -> list[Any]:
         val = super().bulk_create(objs, *args, **kwargs)
@@ -105,7 +109,7 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     anymore, but are kept in db for any reason.
     """
 
-    is_removed = models.BooleanField(default=False, db_index=True)
+    is_removed = models.BooleanField(default=False)
     removed_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -148,16 +152,16 @@ class AdminUrlMixin:
 
 
 class TimeStampedModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
 
 
 class TimeStampedUUIDModel(UUIDModel):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
@@ -206,42 +210,6 @@ class AbstractSyncable(models.Model):
         abstract = True
 
 
-class SoftDeletableDefaultManagerModel(models.Model):
-    """Default manager returns only not-removed entries.
-
-    An abstract base class model with a ``is_removed`` field that
-    marks entries that are not going to be used anymore, but are
-    kept in db for any reason.
-    """
-
-    is_removed = models.BooleanField(default=False)
-
-    active_objects = SoftDeletableManager()
-    objects = BaseManager()
-
-    class Meta:
-        abstract = True
-
-    def delete(
-        self,
-        using: Any = None,
-        keep_parents: bool = False,
-        soft: bool = True,
-        *args: Any,
-        **kwargs: Any,
-    ) -> tuple[int, dict[str, int]]:
-        """Soft delete object (set its ``is_removed`` field to True).
-
-        Actually delete object if setting ``soft`` to False.
-        """
-        if soft:
-            self.is_removed = True
-            self.save(using=using)
-            return 1, {self._meta.label: 1}
-
-        return super().delete(*args, **kwargs, using=using)
-
-
 class ConcurrencyModel(models.Model):
     version = IntegerVersionField()
 
@@ -250,7 +218,7 @@ class ConcurrencyModel(models.Model):
 
 
 class UnicefIdentifiedModel(models.Model):
-    unicef_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    unicef_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -263,18 +231,6 @@ class UnicefIdentifiedModel(models.Model):
 
 
 class SignatureManager(models.Manager):
-    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> list[T]:
-        from hope.apps.payment.services.payment_household_snapshot_service import (
-            bulk_create_payment_snapshot_data,
-        )
-
-        created_objects = super().bulk_create(objs, *args, **kwargs)
-        bulk_create_payment_snapshot_data([x.id for x in created_objects])
-        for obj in created_objects:
-            obj.update_signature_hash()
-        super().bulk_update(created_objects, ["signature_hash"])
-        return created_objects
-
     def bulk_update_with_signature(self, objs: Iterable[T], fields: Sequence[str], *args: Any, **kwargs: Any) -> int:
         for obj in objs:
             if any(field in fields for field in obj.signature_fields):

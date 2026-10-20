@@ -19,6 +19,7 @@ export interface FinishedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canMarkReadyForClosure: boolean;
+  isInstructionManaged?: boolean;
 }
 
 export function FinishedPaymentPlanHeaderButtons({
@@ -26,6 +27,7 @@ export function FinishedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canMarkReadyForClosure,
+  isInstructionManaged = false,
 }: FinishedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -126,16 +128,18 @@ export function FinishedPaymentPlanHeaderButtons({
             />
           </Box>
         )}
-        <Box
-          sx={{
-            p: 2,
-          }}
-        >
-          <SplitIntoPaymentLists
-            paymentPlan={paymentPlan}
-            canSplit={canSplit}
-          />
-        </Box>
+        {!isInstructionManaged && (
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <SplitIntoPaymentLists
+              paymentPlan={paymentPlan}
+              canSplit={canSplit}
+            />
+          </Box>
+        )}
         {canSendToPaymentGateway && (
           <Box
             sx={{

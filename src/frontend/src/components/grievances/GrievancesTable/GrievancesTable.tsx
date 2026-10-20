@@ -20,7 +20,7 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import { choicesToDict } from '@utils/utils';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -55,6 +55,10 @@ interface GrievancesTableProps {
   title?: string;
   /** Hidden on lists that can never contain a closable ticket, e.g. Needs Assignment. */
   showBulkClose?: boolean;
+  /** Extra buttons shown next to the bulk actions. */
+  toolbarActions?: ReactNode;
+  /** 'always' when rows carry per-user state the server changes behind the cache, e.g. `unread`. */
+  refetchOnMount?: boolean | 'always';
 }
 
 export const GrievancesTable = ({
@@ -64,6 +68,8 @@ export const GrievancesTable = ({
   defaultOrderBy = 'created_at',
   title,
   showBulkClose = true,
+  toolbarActions,
+  refetchOnMount,
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, businessAreaSlug, programCode, isAllPrograms } =
     useBaseUrl();
@@ -234,6 +240,7 @@ export const GrievancesTable = ({
       ),
     enabled: isAllPrograms,
     placeholderData: keepPreviousData,
+    refetchOnMount,
   });
 
   //ALL PROGRAMS COUNT
@@ -251,6 +258,7 @@ export const GrievancesTable = ({
         allGrievanceTicketsCountParams,
       ),
     enabled: isAllPrograms && page === 0,
+    refetchOnMount,
   });
 
   // SELECTED PROGRAM
@@ -274,6 +282,7 @@ export const GrievancesTable = ({
       ),
     enabled: !isAllPrograms,
     placeholderData: keepPreviousData,
+    refetchOnMount,
   });
   //SELECTED PROGRAM COUNT
   const selectedProgramGrievanceTicketsCountParams = createApiParams(
@@ -291,6 +300,7 @@ export const GrievancesTable = ({
           selectedProgramGrievanceTicketsCountParams,
         ),
       enabled: !isAllPrograms && page === 0,
+      refetchOnMount,
     });
 
   const persistedCountAll = usePersistedCount(
@@ -467,6 +477,7 @@ export const GrievancesTable = ({
               setSelected={setSelectedTickets}
             />
           )}
+          {toolbarActions}
         </Box>
         <UniversalRestTable
           isOnPaper={false}

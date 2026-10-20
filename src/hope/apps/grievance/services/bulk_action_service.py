@@ -101,12 +101,16 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_set_priority(
-        self, tickets_ids: Sequence[str], priority: int, business_area_slug: str
+        self,
+        tickets_ids: Sequence[str],
+        priority: int,
+        business_area_slug: str,
+        action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         if priority not in [x for x, y in PRIORITY_CHOICES]:
             raise ValidationError("Invalid priority")
         queryset = self._open_tickets(tickets_ids, business_area_slug)
-        updated_count = queryset.update(priority=priority)
+        updated_count = queryset.update(priority=priority, user_modified=timezone.now(), user_modified_by=action_user)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))
@@ -115,12 +119,16 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_set_urgency(
-        self, tickets_ids: Sequence[str], urgency: int, business_area_slug: str
+        self,
+        tickets_ids: Sequence[str],
+        urgency: int,
+        business_area_slug: str,
+        action_user: User | None = None,
     ) -> QuerySet[GrievanceTicket]:
         if urgency not in [x for x, y in URGENCY_CHOICES]:
             raise ValidationError("Invalid priority")
         queryset = self._open_tickets(tickets_ids, business_area_slug)
-        updated_count = queryset.update(urgency=urgency)
+        updated_count = queryset.update(urgency=urgency, user_modified=timezone.now(), user_modified_by=action_user)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
         increment_grievance_ticket_version_cache_for_ticket_ids(business_area_slug, list(map(str, tickets_ids)))

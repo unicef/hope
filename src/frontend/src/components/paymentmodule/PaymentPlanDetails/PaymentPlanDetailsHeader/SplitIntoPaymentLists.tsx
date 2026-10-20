@@ -146,6 +146,7 @@ export const SplitIntoPaymentLists = ({
             onClick={() => setDialogOpen(true)}
             endIcon={<ReorderIcon />}
             disabled={!canSplit}
+            data-cy="button-split-payment-plan"
             data-perm={PERMISSIONS.PM_SPLIT}
           >
             {t('Split')}

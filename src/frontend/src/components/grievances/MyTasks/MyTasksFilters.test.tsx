@@ -44,6 +44,7 @@ const baseFilter = {
   grievanceStatus: 'active',
   overdue: '',
   sensitive: '',
+  unread: '',
 };
 
 const setFilter = vi.fn();
@@ -154,5 +155,35 @@ describe('MyTasksFilters', () => {
     renderFilters({ showSensitiveFilter: false });
 
     expect(screen.queryByTestId('filters-sensitive')).toBeNull();
+  });
+
+  it('toggles Only unread between true and an absent value', () => {
+    const { rerender } = renderFilters();
+    fireEvent.click(
+      within(screen.getByTestId('filters-unread')).getByRole('checkbox'),
+    );
+    expect(setFilter).toHaveBeenCalledWith(
+      expect.objectContaining({ unread: true }),
+    );
+
+    const checked = { ...baseFilter, unread: true };
+    rerender(
+      <MemoryRouter>
+        <MyTasksFilters
+          choicesData={choicesData}
+          filter={checked}
+          setFilter={setFilter}
+          initialFilter={baseFilter}
+          appliedFilter={checked}
+          setAppliedFilter={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+    fireEvent.click(
+      within(screen.getByTestId('filters-unread')).getByRole('checkbox'),
+    );
+    expect(setFilter).toHaveBeenLastCalledWith(
+      expect.objectContaining({ unread: '' }),
+    );
   });
 });

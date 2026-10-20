@@ -105,6 +105,7 @@ export function EditPaymentPlanHeader({
           <Button
             component={Link}
             to={`/${baseUrl}/payment-module/${planType === PlanTypeEnum.FOLLOW_UP ? 'followup-payment-plans' : 'payment-plans'}/${id}`}
+            data-cy="button-cancel"
           >
             {t('Cancel')}
           </Button>
@@ -114,6 +115,7 @@ export function EditPaymentPlanHeader({
           variant="contained"
           color="primary"
           onClick={handleSubmit}
+          data-cy="button-save"
         >
           {t('Save')}
         </LoadingButton>

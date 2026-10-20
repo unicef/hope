@@ -39,11 +39,13 @@ export function FinalizedTargetPopulationHeaderButtons({
         <HeaderIconAction
           icon={<FileCopy />}
           label={t('Duplicate')}
+          dataCy="button-target-population-duplicate"
           onClick={() => setOpenDuplicate(true)}
           dataPerm={PERMISSIONS.TARGETING_DUPLICATE}
         >
           <IconContainer>
             <Button
+              data-cy="button-target-population-duplicate"
               data-perm={PERMISSIONS.TARGETING_DUPLICATE}
               onClick={() => setOpenDuplicate(true)}
             >

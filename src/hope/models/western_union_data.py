@@ -1,6 +1,7 @@
 from django.db import models
 
 from hope.models.file_temp import FileTemp
+from hope.models.utils import LongNameIndex
 
 
 def get_status_choices() -> tuple:
@@ -27,7 +28,7 @@ class WesternUnionData(models.Model):
         null=True,
     )
     amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=get_status_choices, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(max_length=20, choices=get_status_choices, default=STATUS_PENDING)
     error_msg = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -35,6 +36,14 @@ class WesternUnionData(models.Model):
         verbose_name = "Western Union Data"
         verbose_name_plural = "Western Union Data"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["status"], name="payment_westernuniondata_status_986d9c0a"),
+            LongNameIndex(
+                fields=["status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_westernuniondata_status_986d9c0a_like",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.name

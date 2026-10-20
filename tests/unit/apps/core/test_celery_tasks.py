@@ -479,8 +479,8 @@ def test_all_beat_schedules_use_periodic_queue() -> None:
         assert schedule["options"] == {"queue": CELERY_QUEUE_PERIODIC}
 
 
-def test_grievance_digest_dispatcher_runs_hourly() -> None:
-    schedule = TASKS_SCHEDULES["daily_grievance_digest_async_task"]["schedule"]
+def test_my_tasks_dispatcher_runs_hourly() -> None:
+    schedule = TASKS_SCHEDULES["my_tasks_notification_async_task"]["schedule"]
 
     assert schedule.minute == {0}
     assert schedule.hour == set(range(24))
