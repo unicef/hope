@@ -107,6 +107,7 @@ from .periodic_data_update import (
 )
 from .program import ProgramCycleFactory, ProgramFactory
 from .registration_data import (
+    BiographicDeduplicationEngineSimilarityPairFactory,
     BiometricDeduplicationEngineSimilarityPairFactory,
     ImportDataFactory,
     KoboImportDataFactory,
@@ -151,6 +152,7 @@ __all__ = [
     "CountryCodeMapFactory",
     "CurrencyFactory",
     "DataCollectingTypeFactory",
+    "BiographicDeduplicationEngineSimilarityPairFactory",
     "BiometricDeduplicationEngineSimilarityPairFactory",
     "DeliveryMechanismConfigFactory",
     "DeliveryMechanismFactory",
