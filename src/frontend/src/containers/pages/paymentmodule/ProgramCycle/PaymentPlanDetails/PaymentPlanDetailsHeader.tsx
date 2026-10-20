@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
+import { responsiveValue } from 'src/responsive';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -237,6 +238,8 @@ export const PaymentPlanDetailsHeader = ({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            rowGap: 2,
             alignItems: 'center',
           }}
         >

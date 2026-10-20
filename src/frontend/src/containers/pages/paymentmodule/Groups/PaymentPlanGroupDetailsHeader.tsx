@@ -14,6 +14,8 @@ import { DeliveryExportXlsxWithAuthCodeGroupButton } from './actions/DeliveryExp
 import { DeliveryImportXlsxGroupButton } from './actions/DeliveryImportXlsxGroupButton';
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import type { PaymentPlanGroupDetail } from './types';
+import { responsiveValue } from 'src/responsive';
+import { HeaderActions } from '@core/HeaderActions';
 
 interface PaymentPlanGroupDetailsHeaderProps {
   group: PaymentPlanGroupDetail | null;
@@ -42,6 +44,7 @@ export function PaymentPlanGroupDetailsHeader({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
             alignItems: 'baseline',
             gap: 1,
           }}
@@ -71,19 +74,14 @@ export function PaymentPlanGroupDetailsHeader({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={group?.adminUrl} />}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <HeaderActions spacing="none">
         <EditGroupName group={group} />
         <DeliveryExportXlsxGroupButton group={group} />
         <DeliveryExportXlsxWithAuthCodeGroupButton group={group} />
         <DeliveryImportXlsxGroupButton group={group} />
         <SendToPaymentGatewayGroupButton group={group} />
         <DeletePaymentPlanGroup group={group} />
-      </Box>
+      </HeaderActions>
     </PageHeader>
   );
 }

@@ -3,7 +3,7 @@
 exports[`IndividualsListTable > should handle empty data 1`] = `
 <div>
   <div
-    class="styled-normalized"
+    class="MuiBox-root css-7yim04"
   >
     <div
       class="styled-normalized"
@@ -282,7 +282,7 @@ exports[`IndividualsListTable > should handle empty data 1`] = `
 exports[`IndividualsListTable > should handle no view details permission 1`] = `
 <div>
   <div
-    class="styled-normalized"
+    class="MuiBox-root css-7yim04"
   >
     <div
       class="styled-normalized"
@@ -561,7 +561,7 @@ exports[`IndividualsListTable > should handle no view details permission 1`] = `
 exports[`IndividualsListTable > should render IndividualsListTable correctly 1`] = `
 <div>
   <div
-    class="styled-normalized"
+    class="MuiBox-root css-7yim04"
   >
     <div
       class="styled-normalized"

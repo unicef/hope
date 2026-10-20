@@ -20,6 +20,7 @@ import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEn
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 import { showApiErrorMessages } from '@utils/utils';
+import { responsiveValue } from 'src/responsive';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -77,13 +78,15 @@ function AcceptanceProcess({
   return (
     <Box
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
     >
       <ContainerColumnWithBorder>
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            gap: responsiveValue(2, 0),
             justifyContent: 'space-between',
             mt: 4,
           }}

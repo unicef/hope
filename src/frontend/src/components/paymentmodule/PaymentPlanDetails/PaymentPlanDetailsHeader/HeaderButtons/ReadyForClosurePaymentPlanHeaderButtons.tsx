@@ -12,6 +12,7 @@ import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail'
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 import { ClosePaymentPlanDialog } from '../ClosePaymentPlanDialog';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface ReadyForClosurePaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -58,12 +59,7 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       <>
         {canSendBack && (
           <Box
@@ -107,6 +103,6 @@ export function ReadyForClosurePaymentPlanHeaderButtons({
           onClose={() => setCloseDialogOpen(false)}
         />
       </>
-    </Box>
+    </HeaderActions>
   );
 }

@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogActions,
   DialogTitle,
-  Grid,
   Typography,
 } from '@mui/material';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -27,6 +26,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
+import {
+  responsiveValue,
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+} from 'src/responsive';
 
 interface FspExtraFieldsProps {
   paymentPlan: PaymentPlanDetail;
@@ -96,7 +100,7 @@ export function FspExtraFields({
   };
 
   return (
-    <Box sx={{ m: 5 }}>
+    <Box sx={{ m: responsiveValue(2, 5) }}>
       <ContainerColumnWithBorder>
         <Box sx={{ mt: 4 }}>
           <Title>
@@ -108,8 +112,8 @@ export function FspExtraFields({
             )}
           </Typography>
         </Box>
-        <Grid container spacing={3} sx={{ py: 4 }}>
-          <Grid size={{ xs: 6 }} sx={{ textAlign: 'center' }}>
+        <ResponsiveGridContainer spacing={3} sx={{ py: 4 }}>
+          <ResponsiveGrid size="half" sx={{ textAlign: 'center' }}>
             <Button
               component="a"
               download
@@ -120,8 +124,8 @@ export function FspExtraFields({
             >
               {t('Download Template')}
             </Button>
-          </Grid>
-          <Grid size={{ xs: 6 }} sx={{ textAlign: 'center' }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half" sx={{ textAlign: 'center' }}>
             <Button
               startIcon={<Publish />}
               disabled={actionsDisabled || !canImport}
@@ -131,8 +135,8 @@ export function FspExtraFields({
             >
               {t('Upload File')}
             </Button>
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </ContainerColumnWithBorder>
       <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
         <DialogTitleWrapper data-cy="dialog-fsp-extra-fields-import">

@@ -3,7 +3,7 @@
 exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
 <div>
   <div
-    class="styled-normalized"
+    class="MuiBox-root css-7yim04"
   >
     <div
       class="styled-normalized"

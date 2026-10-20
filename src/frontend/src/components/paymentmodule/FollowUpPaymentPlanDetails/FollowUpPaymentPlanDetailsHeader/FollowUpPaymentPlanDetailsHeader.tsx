@@ -21,6 +21,7 @@ import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPl
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AdminButton } from '@components/core/AdminButton';
+import { responsiveValue } from 'src/responsive';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -195,6 +196,8 @@ export function FollowUpPaymentPlanDetailsHeader({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            rowGap: 2,
             alignItems: 'center',
           }}
         >
