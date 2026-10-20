@@ -320,7 +320,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         elif column_name in map_obj_name_column:
             obj, nested_field = map_obj_name_column[column_name]
             if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:
-                result = float(-1)
+                result = "-1"
             elif column_name == "delivery_date" and payment.delivery_date is not None:
                 result = utc_date(payment.delivery_date).isoformat()
             elif isinstance(obj, dict):

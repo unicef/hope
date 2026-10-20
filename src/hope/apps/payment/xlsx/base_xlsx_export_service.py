@@ -100,9 +100,12 @@ class XlsxExportBaseService:
         if value is None:
             return ""
         if isinstance(value, decimal.Decimal):
-            return format(value, "f")
-        if column_name in self.monetary_headers and isinstance(value, int | float):
-            return str(value)
+            formatted_value = format(value, "f")
+            if column_name not in self.monetary_headers or not value.is_finite():
+                return formatted_value
+            integer, _, fraction = formatted_value.partition(".")
+            fraction = fraction.rstrip("0").ljust(2, "0")
+            return f"{integer}.{fraction}"
         if isinstance(value, str | int | float | datetime):
             return value
         return str(value)

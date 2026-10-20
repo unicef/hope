@@ -116,7 +116,9 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         self._create_workbook()
         self.ws_export_list.append(self.headers)
         for payment_row in self._iter_aggregated_rows():
-            self.ws_export_list.append([self.right_format_for_xlsx(payment_row.get(header)) for header in self.headers])
+            self.ws_export_list.append(
+                [self.right_format_for_xlsx(payment_row.get(header), header) for header in self.headers]
+            )
         self._adjust_column_width_from_col(self.ws_export_list)
         highlighted_columns = [
             self.headers.index(header) + 1

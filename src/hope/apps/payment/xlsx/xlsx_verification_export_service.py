@@ -139,8 +139,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         )
         self.ws_export_list.append(
             [
-                self.right_format_for_xlsx(value) if isinstance(value, Decimal) else value
-                for value in payment_record_verification_row
+                self.right_format_for_xlsx(value, column_name) if isinstance(value, Decimal) else value
+                for column_name, value in zip(self.HEADERS, payment_record_verification_row, strict=True)
             ]
         )
 
@@ -169,8 +169,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         )
         self.ws_export_list.append(
             [
-                self.right_format_for_xlsx(value) if isinstance(value, Decimal) else value
-                for value in payment_record_verification_row
+                self.right_format_for_xlsx(value, column_name) if isinstance(value, Decimal) else value
+                for column_name, value in zip(self.HEADERS, payment_record_verification_row, strict=True)
             ]
         )
 
