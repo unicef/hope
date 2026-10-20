@@ -303,8 +303,9 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                     XlsxError(
                         self.sheetname,
                         cell.coordinate,
-                        f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
-                        f"Entitlement quantity {entitlement_quantity}",
+                        f"Payment {payment_id}: Delivered quantity "
+                        f"{_format_quantity_for_message(delivered_quantity)} is bigger than "
+                        f"Entitlement quantity {_format_quantity_for_message(entitlement_quantity)}",
                     )
                 )
         return action, delivered_quantity
