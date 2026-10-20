@@ -1539,10 +1539,19 @@ class PaymentPlanService:
 
     def full_rebuild(self) -> None:
         payment_plan: PaymentPlan = self.payment_plan
-        # remove all payment and recreate
-        payment_plan.payment_items(manager="all_objects").all().delete()
-
-        self.create_payments(payment_plan)
+        match payment_plan.plan_type:
+            case PaymentPlan.PlanType.FOLLOW_UP:
+                # Lock the source plan, as on creation, so two Follow-Ups of the same source
+                # can't copy the same beneficiary at once.
+                PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
+                payment_plan.payment_items(manager="all_objects").all().delete()
+                self.create_follow_up_payments()
+            case PaymentPlan.PlanType.TOP_UP | PaymentPlan.PlanType.TOP_UP_AMENDMENT:
+                # The amounts were chosen when the plan was created and can't be rebuilt, so keep the payments.
+                pass
+            case _:
+                payment_plan.payment_items(manager="all_objects").all().delete()
+                self.create_payments(payment_plan)
 
         payment_plan.update_population_count_fields()
 

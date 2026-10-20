@@ -1274,6 +1274,159 @@ def test_full_rebuild(
         assert payment_unicef_id not in old_payment_unicef_ids
 
 
+@pytest.fixture
+def finished_source_plan(payment_plan_base: PaymentPlan) -> PaymentPlan:
+    payment_plan_base.status = PaymentPlan.Status.FINISHED
+    payment_plan_base.save(update_fields=["status"])
+    return payment_plan_base
+
+
+@pytest.fixture
+def failed_source_payment(finished_source_plan: PaymentPlan, program: Program) -> Payment:
+    return PaymentFactory(
+        parent=finished_source_plan,
+        household=HouseholdFactory(business_area=finished_source_plan.business_area, program=program, size=1),
+        status=Payment.STATUS_ERROR,
+    )
+
+
+@pytest.fixture
+def delivered_source_payment(finished_source_plan: PaymentPlan, program: Program) -> Payment:
+    return PaymentFactory(
+        parent=finished_source_plan,
+        household=HouseholdFactory(business_area=finished_source_plan.business_area, program=program, size=1),
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+
+
+@pytest.fixture
+def open_follow_up(
+    finished_source_plan: PaymentPlan, failed_source_payment: Payment, delivered_source_payment: Payment
+) -> PaymentPlan:
+    follow_up = PaymentPlanFactory(
+        program_cycle=finished_source_plan.program_cycle,
+        created_by=finished_source_plan.created_by,
+        business_area=finished_source_plan.business_area,
+        status=PaymentPlan.Status.OPEN,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        source_payment_plan=finished_source_plan,
+        delivery_mechanism=finished_source_plan.delivery_mechanism,
+        financial_service_provider=finished_source_plan.financial_service_provider,
+    )
+    TargetingCriteriaRuleFactory(
+        payment_plan=follow_up,
+        household_ids=f"{failed_source_payment.household.unicef_id}, {delivered_source_payment.household.unicef_id}",
+    )
+    return follow_up
+
+
+@pytest.fixture
+def old_follow_up_payment(open_follow_up: PaymentPlan, delivered_source_payment: Payment) -> Payment:
+    return PaymentFactory(
+        parent=open_follow_up,
+        household=delivered_source_payment.household,
+        source_payment=delivered_source_payment,
+        is_follow_up=True,
+    )
+
+
+@pytest.fixture
+def open_top_up(
+    finished_source_plan: PaymentPlan, failed_source_payment: Payment, delivered_source_payment: Payment
+) -> PaymentPlan:
+    top_up = PaymentPlanFactory(
+        program_cycle=finished_source_plan.program_cycle,
+        created_by=finished_source_plan.created_by,
+        business_area=finished_source_plan.business_area,
+        status=PaymentPlan.Status.OPEN,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_payment_plan=finished_source_plan,
+    )
+    TargetingCriteriaRuleFactory(
+        payment_plan=top_up,
+        household_ids=f"{failed_source_payment.household.unicef_id}, {delivered_source_payment.household.unicef_id}",
+    )
+    return top_up
+
+
+@pytest.fixture
+def top_up_payment(open_top_up: PaymentPlan, delivered_source_payment: Payment) -> Payment:
+    return PaymentFactory(
+        parent=open_top_up,
+        household=delivered_source_payment.household,
+        source_payment=delivered_source_payment,
+        entitlement_quantity=Decimal("50.00"),
+    )
+
+
+@pytest.fixture
+def open_amendment(
+    open_top_up: PaymentPlan, failed_source_payment: Payment, delivered_source_payment: Payment
+) -> PaymentPlan:
+    amendment = PaymentPlanFactory(
+        program_cycle=open_top_up.program_cycle,
+        created_by=open_top_up.created_by,
+        business_area=open_top_up.business_area,
+        status=PaymentPlan.Status.OPEN,
+        plan_type=PaymentPlan.PlanType.TOP_UP_AMENDMENT,
+        source_payment_plan=open_top_up,
+    )
+    TargetingCriteriaRuleFactory(
+        payment_plan=amendment,
+        household_ids=f"{failed_source_payment.household.unicef_id}, {delivered_source_payment.household.unicef_id}",
+    )
+    return amendment
+
+
+@pytest.fixture
+def amendment_payment(open_amendment: PaymentPlan, top_up_payment: Payment) -> Payment:
+    return PaymentFactory(
+        parent=open_amendment,
+        household=top_up_payment.household,
+        source_payment=top_up_payment,
+        entitlement_quantity=Decimal("20.00"),
+    )
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+def test_full_rebuild_of_follow_up_copies_unsuccessful_source_payments(
+    get_exchange_rate_mock: Any,
+    open_follow_up: PaymentPlan,
+    failed_source_payment: Payment,
+    delivered_source_payment: Payment,
+    old_follow_up_payment: Payment,
+) -> None:
+    PaymentPlanService(payment_plan=open_follow_up).full_rebuild()
+
+    assert not Payment.all_objects.filter(parent=open_follow_up, household=delivered_source_payment.household).exists()
+    payment = Payment.all_objects.get(parent=open_follow_up)
+    assert payment.source_payment_id == failed_source_payment.id
+    assert payment.household_id == failed_source_payment.household_id
+    assert payment.is_follow_up is True
+
+
+def test_full_rebuild_of_top_up_keeps_payments_and_amounts(
+    open_top_up: PaymentPlan, failed_source_payment: Payment, top_up_payment: Payment
+) -> None:
+    PaymentPlanService(payment_plan=open_top_up).full_rebuild()
+
+    assert not Payment.all_objects.filter(parent=open_top_up, household=failed_source_payment.household).exists()
+    payment = Payment.all_objects.get(parent=open_top_up)
+    assert payment.id == top_up_payment.id
+    assert payment.entitlement_quantity == Decimal("50.00")
+
+
+def test_full_rebuild_of_top_up_amendment_keeps_payments_and_amounts(
+    open_amendment: PaymentPlan, failed_source_payment: Payment, amendment_payment: Payment
+) -> None:
+    PaymentPlanService(payment_plan=open_amendment).full_rebuild()
+
+    assert not Payment.all_objects.filter(parent=open_amendment, household=failed_source_payment.household).exists()
+    payment = Payment.all_objects.get(parent=open_amendment)
+    assert payment.id == amendment_payment.id
+    assert payment.entitlement_quantity == Decimal("20.00")
+
+
 def test_get_approval_type_by_action_value_error(payment_plan_base: PaymentPlan) -> None:
     with pytest.raises(ValueError, match="Action cannot be None"):
         PaymentPlanService(payment_plan=payment_plan_base).get_approval_type_by_action()
