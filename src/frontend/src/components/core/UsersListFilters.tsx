@@ -1,4 +1,5 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -88,15 +89,15 @@ export function UsersListFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('partner', e.target.value)}
             label={t('Partner')}
@@ -109,8 +110,8 @@ export function UsersListFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('roles', e.target.value)}
             label={t('Role')}
@@ -123,8 +124,8 @@ export function UsersListFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -137,8 +138,8 @@ export function UsersListFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }
