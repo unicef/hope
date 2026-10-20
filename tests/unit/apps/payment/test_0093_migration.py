@@ -17,7 +17,7 @@ migration_module = importlib.import_module("hope.apps.payment.migrations.0093_mi
 
 @pytest.fixture
 def historical_apps(settings: Any) -> Apps:
-    """The models the data step runs with: 0090 plus the two new fields, the plan column not yet dropped."""
+    """The models the data step runs with: 0092 plus the two new fields, the plan column not yet dropped."""
     settings.MIGRATION_MODULES = {}
     state = MigrationLoader(connection).project_state(("payment", "0092_migration"))
     for operation in migration_module.Migration.operations[:2]:
