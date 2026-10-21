@@ -29,17 +29,19 @@ def payment_plan_group(cycle):
     return PaymentPlanGroupFactory(cycle=cycle)
 
 
-@pytest.fixture
-def vision_managed_sendable_payment_plan(cycle, payment_plan_group):
+@pytest.fixture(params=[VisionStatus.RELEASED, VisionStatus.PP_CREATED])
+def vision_managed_sendable_payment_plan(request, cycle, payment_plan_group):
     payment_plan = PaymentPlanFactory(
         program_cycle=cycle,
         payment_plan_group=payment_plan_group,
         status=PaymentPlan.Status.ACCEPTED,
         financial_service_provider=FinancialServiceProviderFactory(),
         use_payment_gateway=True,
-        internal_data={"vision": {"status": VisionStatus.RELEASED.value}},
+        internal_data={"vision": {"status": VisionStatus.NOT_SENT.value}},
     )
     PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+    payment_plan_group.internal_data = {"vision": {"status": request.param.value}}
+    payment_plan_group.save(update_fields=["internal_data"])
     return payment_plan
 
 
@@ -96,6 +98,21 @@ def not_sent_to_vision_sendable_payment_plan(cycle, payment_plan_group):
     return payment_plan
 
 
+@pytest.fixture
+def sendable_plan_with_historical_vision_state(not_sent_to_vision_sendable_payment_plan):
+    not_sent_to_vision_sendable_payment_plan.internal_data = {"vision": {"status": VisionStatus.RELEASED.value}}
+    not_sent_to_vision_sendable_payment_plan.save(update_fields=["internal_data"])
+    FlagState.objects.update_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        defaults={"value": "True"},
+    )
+    business_area = not_sent_to_vision_sendable_payment_plan.business_area
+    business_area.vision_integration_active = True
+    business_area.save(update_fields=["vision_integration_active"])
+    return not_sent_to_vision_sendable_payment_plan
+
+
 @pytest.fixture(params=[PaymentPlan.PlanType.REGULAR, PaymentPlan.PlanType.FOLLOW_UP])
 def vision_enabled_sendable_payment_plan_without_vision_state(request, cycle, payment_plan_group):
     payment_plan = PaymentPlanFactory(
@@ -119,15 +136,19 @@ def vision_enabled_sendable_payment_plan_without_vision_state(request, cycle, pa
 
 
 @pytest.fixture
-def vision_enabled_sendable_follow_up_with_historical_vision_state(vision_enabled_sendable_payment_plan):
+def vision_enabled_sendable_follow_up_with_historical_vision_state(
+    vision_enabled_sendable_payment_plan,
+):
     vision_enabled_sendable_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
-    vision_enabled_sendable_payment_plan.save(update_fields=["plan_type"])
+    vision_enabled_sendable_payment_plan.internal_data = {"vision": {"status": VisionStatus.RELEASED.value}}
+    vision_enabled_sendable_payment_plan.save(update_fields=["plan_type", "internal_data"])
     return vision_enabled_sendable_payment_plan
 
 
 def test_group_send_excludes_vision_managed_plan(
     payment_plan_group, vision_enabled_sendable_payment_plan, django_assert_num_queries
 ) -> None:
+    _ = payment_plan_group.business_area
     with django_assert_num_queries(2):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
@@ -146,10 +167,26 @@ def test_group_send_includes_vision_managed_plan_when_global_flag_is_disabled(
 def test_group_send_includes_vision_managed_plan_when_business_area_flag_is_disabled(
     payment_plan_group, business_area_vision_disabled_sendable_payment_plan, django_assert_num_queries
 ) -> None:
+    _ = payment_plan_group.business_area
     with django_assert_num_queries(2):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert business_area_vision_disabled_sendable_payment_plan.pk in sendable_plan_ids
+
+
+def test_group_send_excludes_failed_gateway_send_for_vision_managed_group(
+    payment_plan_group, vision_enabled_sendable_payment_plan, django_assert_num_queries
+) -> None:
+    vision_enabled_sendable_payment_plan.background_action_status = (
+        PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR
+    )
+    vision_enabled_sendable_payment_plan.save(update_fields=["background_action_status"])
+    _ = payment_plan_group.business_area
+
+    with django_assert_num_queries(2):
+        sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
+
+    assert vision_enabled_sendable_payment_plan.pk not in sendable_plan_ids
 
 
 def test_group_send_includes_plan_with_not_sent_vision_status(
@@ -159,6 +196,15 @@ def test_group_send_includes_plan_with_not_sent_vision_status(
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert not_sent_to_vision_sendable_payment_plan.pk in sendable_plan_ids
+
+
+def test_group_send_ignores_historical_plan_vision_status(
+    payment_plan_group, sendable_plan_with_historical_vision_state, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(2):
+        sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
+
+    assert sendable_plan_with_historical_vision_state.pk in sendable_plan_ids
 
 
 def test_group_send_includes_plan_without_vision_state(

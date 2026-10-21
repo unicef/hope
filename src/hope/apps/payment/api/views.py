@@ -800,7 +800,6 @@ class PaymentPlanViewSet(
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_extra_fields_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
-        "assign_funds_commitments": AssignFundsCommitmentsSerializer,
         "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
@@ -826,7 +825,6 @@ class PaymentPlanViewSet(
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
-        "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "custom_exchange_rate": [
             Permissions.PM_CUSTOM_EXCHANGE_RATE,
         ],
@@ -1290,40 +1288,6 @@ class PaymentPlanViewSet(
 
         return Response(
             data=FSPXlsxTemplateSerializer(qs, many=True).data,
-            status=status.HTTP_200_OK,
-        )
-
-    @extend_schema(
-        request=AssignFundsCommitmentsSerializer,
-        responses={200: PaymentPlanDetailSerializer},
-    )
-    @action(detail=True, methods=["post"], url_path="assign-funds-commitments")
-    @transaction.atomic
-    def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        requested_numbers = set(serializer.validated_data["funds_commitment_numbers"])
-
-        payment_plan = self.get_object()
-        if payment_plan.vision_managed:
-            raise ValidationError("Funds Commitments are assigned automatically for Vision-managed Payment Plans")
-        if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
-            raise ValidationError("Payment plan must be in review")
-
-        funds_commitment_headers = list(
-            FundsCommitmentHeader.objects.filter(funds_commitment_number__in=requested_numbers)
-        )
-        if len(funds_commitment_headers) != len(requested_numbers):
-            raise ValidationError("One or more Funds Commitment Headers were not found")
-        try:
-            VisionService.assign_selected_funds_commitment_headers(payment_plan, funds_commitment_headers)
-        except FundsCommitmentAssignmentError as error:
-            message = "One or more Funds Commitment Headers are not available for this Business Area"
-            raise ValidationError(message) from error
-
-        payment_plan.refresh_from_db()
-        return Response(
-            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
 
@@ -1985,9 +1949,7 @@ class PaymentPlanManagerialViewSet(
     def _perform_group_action(
         self, payment_plan_group: PaymentPlanGroup, action_name: str, comment: str, request: Request
     ) -> None:
-        if action_name == PaymentPlan.Action.REVIEW.value and any(
-            payment_plan.vision_managed for payment_plan in payment_plan_group.payment_plans.all()
-        ):
+        if action_name == PaymentPlan.Action.REVIEW.value and payment_plan_group.vision_managed:
             return
         permission = self.ACTION_PERMISSIONS[action_name]
         if not request.user.has_perm(permission.value, payment_plan_group.cycle.program):
@@ -2372,6 +2334,7 @@ class PaymentPlanGroupViewSet(
         "create_top_up": PaymentPlanCreateTopUpSerializer,
         "create_top_up_amendment": PaymentPlanCreateTopUpSerializer,
         "split": SplitPaymentPlanSerializer,
+        "assign_funds_commitments": AssignFundsCommitmentsSerializer,
     }
 
     permissions_by_action = {
@@ -2405,6 +2368,7 @@ class PaymentPlanGroupViewSet(
         "top_up_amount_template": [Permissions.PM_CREATE],
         "create_top_up_amendment": [Permissions.PM_CREATE],
         "split": [Permissions.PM_SPLIT],
+        "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
     }
 
@@ -2412,6 +2376,29 @@ class PaymentPlanGroupViewSet(
     @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(request=AssignFundsCommitmentsSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="assign-funds-commitments")
+    @transaction.atomic
+    def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        requested_numbers = set(serializer.validated_data["funds_commitment_numbers"])
+        group = PaymentPlanGroup.objects.select_for_update().get(pk=self.get_object().pk)
+        if not group.can_assign_funds_commitments:
+            raise ValidationError("Payment Plan Group must be in review and not managed by Vision")
+        headers = list(FundsCommitmentHeader.objects.filter(funds_commitment_number__in=requested_numbers))
+        if len(headers) != len(requested_numbers):
+            raise ValidationError("One or more Funds Commitment Headers were not found")
+        try:
+            VisionService.assign_selected_funds_commitment_headers(group, headers)
+        except FundsCommitmentAssignmentError as error:
+            message = "One or more Funds Commitment Headers are not available for this Business Area"
+            raise ValidationError(message) from error
+        return Response(
+            PaymentPlanGroupDetailSerializer(group, context={"request": request}).data,
+            status=status.HTTP_200_OK,
+        )
 
     @transaction.atomic
     def perform_create(self, serializer: Any) -> None:

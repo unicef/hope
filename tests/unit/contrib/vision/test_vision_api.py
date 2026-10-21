@@ -422,7 +422,7 @@ def test_callback_view_gets_payment_plan_with_related_data(
 
     payment_plan = vision_api_payment_plan_factory(unicef_id="PP-LOOKUP")
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         selected_payment_plan = PaymentPlanCallbackView._get_payment_plan("PP-LOOKUP")
 
     assert selected_payment_plan.pk == payment_plan.pk

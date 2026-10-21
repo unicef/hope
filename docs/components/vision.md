@@ -1,211 +1,70 @@
 # Vision Integration
 
-## Overview
+## Ownership
 
-HOPE integrates with Vision to obtain a Funds Commitment (FC) for an authorized Payment Plan. For eligible Payment
-Plans, HOPE sends the plan to Vision automatically, processes the Vision callback, assigns the returned FC headers, and
-releases the plan for delivery.
+Vision works with a Payment Plan Group. HOPE sends one request for an authorized group, and the callback's
+`payplanSno` is `PaymentPlanGroup.unicef_id`. The group owns the Vision status, Vision ID, request and callback log,
+errors, and Funds Commitment (FC) headers. Its member Payment Plans retain their normal payment statuses and delivery
+processing, but have no Vision send or recovery actions.
 
-The integration uses the Payment Plan's `IN_REVIEW` status while it waits for Vision. A plan cannot proceed to release
-or delivery until its FC is assigned successfully.
+Group Vision data is stored in `PaymentPlanGroup.internal_data["vision"]`. Existing Vision data in
+`PaymentPlan.internal_data` is left untouched and is not read by the new workflow. There is no backfill of old plan
+Vision state into groups.
 
-## Enablement and Eligibility
+## Eligibility
 
-Vision automation requires both of these flags:
+Automation requires the `VISION_INTEGRATION_ACTIVE` flag and `BusinessArea.vision_integration_active`. Regular,
+Top-Up, and Top-Up Amendment groups are eligible. Follow-Up groups reuse funds reserved for their source group and do
+not request a new FC from Vision. Follow-Up Instruction plans have no group and do not use this workflow.
 
-```python
-VISION_INTEGRATION_ACTIVE and payment_plan.business_area.vision_integration_active
-```
+If either flag is disabled, callbacks are logged without changing FC assignments or group status. Manual group FC
+assignment and finance release use their normal rules. Completing manual finance release resets an active group
+Vision attempt while retaining its log.
 
-`VISION_INTEGRATION_ACTIVE` enables the integration for the HOPE installation.
-`BusinessArea.vision_integration_active` enables it for an individual Business Area.
+## Request
 
-The standard Vision workflow applies to regular Payment Plans, Top-Ups, and Top-Up Amendments. Follow-Up Payment Plans
-do not use Vision because their funds were reserved for the source Payment Plan.
+After group authorization moves the group and its plans to `IN_REVIEW`, HOPE queues one Vision request on transaction
+commit. The payload uses the group's UNICEF ID as `payplanSno`, its currency and FSP, and sums the plans'
+`total_entitled_quantity` and `total_entitled_quantity_usd` as `authAmt` and `authAmtUsd`. `exchangeRate` is currently
+`null`; it will come from the group when the exchange rate moves there.
 
-When either flag is disabled:
+Successful sending records `WAITING_FOR_CALLBACK`. Failure records `SEND_FAILED`. Sending and retry are available in
+the Payment Plan Group's Django admin page. The React UI shows status but has no send or retry action. Send responses
+and callbacks update group Vision data under a database lock so a late response cannot overwrite a newer callback.
 
-- Vision automation does not run.
-- Vision callbacks are logged without changing FC assignments or Payment Plan status.
-- Manual FC assignment, release, Payment Gateway sending, and XLSX export use their standard rules.
-- Stored Vision state remains available while the plan waits in `IN_REVIEW` and becomes active again if both flags are
-  enabled.
-- Completing finance release through the manual flow resets the pending Vision attempt, so enabling the flags later
-  does not block delivery with stale Vision state. Vision log entries are retained.
+## Callback and FC assignment
 
-## Automatic Workflow
+Vision calls `systems/vision/payment-plan-callback/`. HOPE locks the group identified by `payplanSno`, records the
+callback payload and response, and processes it only for an active group in `IN_REVIEW`. The first successful callback
+without FC numbers records `PP_CREATED`; a later successful callback can provide one or more FC numbers. Failed
+callbacks record `CALLBACK_FAILED`.
 
-1. Authorization moves the Payment Plan to `IN_REVIEW`.
-2. HOPE queues the Vision request after the database transaction commits.
-3. A successful request sets the Vision state to `WAITING_FOR_CALLBACK`.
-4. The first callback confirms that Vision created the Payment Plan and sets `PP_CREATED`.
-5. The second successful callback provides one or more FC numbers.
-6. HOPE validates and assigns all matching FC headers.
-7. Successful assignment releases the Payment Plan automatically and moves it to `ACCEPTED`.
-8. A Payment Gateway plan is sent to Payment Gateway automatically. A non-Payment Gateway plan becomes available for
-   the standard XLSX export flow.
+Each FC number must match a header with an item in the group's Business Area. All matching headers are assigned to
+the group. A missing header records `FC_NOT_FOUND`, leaves the group in review, and returns a failed callback response.
+A corrected callback can complete a recoverable attempt. Callbacks after release, rejection, or abort are logged and
+do not repeat release or delivery.
 
-While a Vision-managed plan is in `IN_REVIEW`, the regular UI and API block manual FC assignment, manual release, and
-manual Payment Gateway sending. XLSX export is unavailable because the plan has not reached `ACCEPTED`.
+The callback acknowledgement contains `status`, `messageId`, `payplanSno`, and `message`. Unknown group IDs return
+HTTP 404. Invalid payloads and FC assignment failures return HTTP 400.
 
-Enabling Vision for a Business Area does not automatically send Payment Plans that were already in `IN_REVIEW`.
-Administrators must send each eligible `NOT_SENT` plan from the Payment Plan's Django admin page. This avoids sending
-an existing backlog to Vision as a side effect of enabling a feature flag.
+## Release and delivery
 
-## Sending and Retry
+Successful FC assignment records one group finance-release approval. HOPE accepts the group and every member plan in
+one transaction, sends one group release notification, and updates the plans' exchange-rate dependent payments. Each
+eligible Payment Gateway plan is dispatched after the group has been accepted. Other plans use the standard group
+delivery XLSX export.
 
-Each request and response is recorded in `payment_plan.internal_data["vision"]["log"]`.
+If automatic FC assignment cannot finish, a group admin can assign one or more eligible FC headers and complete the
+same release flow. The recovery page warns when HOPE cannot confirm that Vision received the group request.
 
-- A successful request sets `WAITING_FOR_CALLBACK` and records that the plan was sent.
-- A failed request sets `SEND_FAILED` and stores a sanitized error.
-- A failed request can be retried from Django admin or recovered by assigning FC headers manually in Django admin.
-- The React UI does not provide a Vision send or retry action.
-- A request cannot be resent while the plan is in `WAITING_FOR_CALLBACK` or `PP_CREATED`.
+Aborting or rejecting a group resets its active Vision attempt and sends one `ABORTED` or `REJECTED` status notification
+to Vision if the group request was received. Notification failure does not roll back the local status change.
 
-Request scheduling and processing are idempotent. Concurrent send responses and callbacks merge their Vision data
-under a database lock so that one response does not overwrite the other.
+## User interface
 
-## Callback Processing
+The Payment Plan Group detail API and page show Vision status, Vision ID, FC numbers, errors, and assigned FC headers.
+They also provide manual FC assignment when the group is not managed by Vision. Individual Payment Plan detail pages
+do not show Vision actions or state. Their normal payment and Payment Gateway details remain available.
 
-Vision sends callbacks to:
-
-```text
-systems/vision/payment-plan-callback/
-```
-
-The callback identifies the Payment Plan by matching `payplanSno` to `PaymentPlan.unicef_id`.
-`vision_payplanSno` contains the identifier assigned by Vision. Workflow data is processed only when:
-
-- both Vision flags are enabled,
-- the Payment Plan is in `IN_REVIEW`, and
-- its Vision state represents an active request or a previous send, callback, or FC-assignment failure.
-
-Every callback associated with a Payment Plan is logged with HOPE's receipt timestamp. The logged payload contains
-the full parsed JSON notification. Callbacks received after a completed release, abort, rejection, or while Vision is
-disabled do not change FC assignments or Payment Plan status.
-Any callback with a Vision plan identifier for an active request confirms that Vision received
-the Payment Plan, even when Vision reports an error or the FC cannot be assigned.
-Duplicate callbacks do not repeat release or delivery side effects.
-
-### Callback Outcomes
-
-| Callback result | Vision state | Payment Plan result |
-| --- | --- | --- |
-| Invalid payload | Unchanged | HTTP `400`; no FC changes |
-| Missing Vision identifier on an active plan in review | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
-| Plan has no active Vision request | Unchanged | Callback is logged; no workflow changes |
-| `SUCCESS` without `fc_numbers` after Vision creates the plan | `PP_CREATED` | Remains `IN_REVIEW` and waits for the FC callback |
-| Vision reports failure | `CALLBACK_FAILED` | Remains `IN_REVIEW`; no FC changes |
-| Any FC number has no eligible HOPE header | `FC_NOT_FOUND` | Remains `IN_REVIEW`; no FC changes |
-| FC assignment succeeds | `FC_ASSOCIATED`, then `RELEASED` | Moves to `ACCEPTED` and continues to delivery |
-
-The callback response includes `status`, `messageId`, `payplanSno`, and `message`. An accepted callback returns HTTP
-`200`, status `OK`, and message `Callback received`, including when Vision reports a failed Payment Plan status.
-An invalid callback returns HTTP `400` with a reason in `message`; an unknown `payplanSno` returns HTTP `404` and
-`Payment plan not found`. An FC assignment failure returns HTTP `400`, status `KO`, and an `FC not found` message.
-A later callback retries processing from `SEND_FAILED`, `PP_CREATED`, `CALLBACK_FAILED`, or `FC_NOT_FOUND`. A successful
-callback with a valid FC can therefore recover the workflow without admin intervention.
-
-## Funds Commitment Assignment
-
-Vision's `fc_numbers` identifies one or more `FundsCommitmentHeader` records. Automatic assignment works as follows:
-
-1. HOPE matches every number to a unique header.
-2. A header is eligible when at least one of its items belongs to the Payment Plan's Business Area.
-3. All requested headers are assigned to the Payment Plan atomically.
-4. A header can be assigned to multiple Payment Plans.
-5. Business Area and WBS remain item-level attributes, and all items under an assigned header are available for display.
-
-Historical item-level assignments are migrated to header-level Payment Plan associations.
-
-The standard non-Vision FC flow is header-based. A user can select one or more eligible headers.
-
-## Admin FC Recovery
-
-Django admin provides recovery when sending fails, a sent plan waits indefinitely, or automatic FC assignment fails.
-While both Vision flags remain enabled, an administrator can select one or more eligible FC headers on the recovery
-page. For `SEND_FAILED` or
-`WAITING_FOR_CALLBACK` without a successful-send marker, the page warns that HOPE cannot confirm that Vision
-received the Payment Plan. An active callback with a Vision plan identifier confirms receipt even if the original
-request did not record its successful response.
-
-The recovery action rejects an empty selection or a header without an item matching the Payment Plan's Business Area.
-
-The admin page warns that successful recovery releases the Payment Plan automatically and immediately starts Payment
-Gateway delivery for a Payment Gateway plan. Recovery uses the same `FC_ASSOCIATED` to `RELEASED` transition as an
-automatic callback.
-
-## Automatic Release
-
-Successful FC assignment replaces the normal finance-review count and moves the Payment Plan directly from
-`IN_REVIEW` to `ACCEPTED`.
-
-- The Payment Plan creator is recorded as the finance-release actor.
-- No release comment is added.
-- Standard release side effects, activity logging, exchange-rate processing, and release notification run normally.
-
-`PaymentPlan.created_by` is required and protected from deletion, so the creator remains available as the automatic
-release actor.
-
-## Abort and Rejection
-
-Aborting or rejecting a Payment Plan does not wait for Vision. If the plan was already sent, HOPE queues a status
-notification to Vision through the same `POST /ps/ezcash/PaymentPlan` endpoint:
-
-- abort sends `ABORTED`,
-- rejection sends `REJECTED`.
-
-A notification failure is logged but does not block or roll back the local status change. The local Vision attempt is
-reset, allowing a later authorization to start a new attempt. A callback received while the plan is outside
-`IN_REVIEW` is logged and ignored.
-
-## Payment Gateway and XLSX Delivery
-
-### Payment Gateway Plans
-
-Successful FC assignment and release start the standard Payment Gateway send flow automatically. The integration
-reuses Payment Gateway validation, background processing, error states, and Payment Plan activity logging. Automatic
-sending is recorded with the Payment Plan creator as the actor. An admin retry is recorded with the administrator as
-the actor.
-
-If Payment Gateway sending fails:
-
-- retry is available in Django admin,
-- the React send/retry action remains hidden for the Vision-managed plan, and
-- Vision does not introduce an additional automatic retry mechanism.
-
-Non-Vision Payment Plans retain both Django admin retry and the standard React send/retry action.
-
-### Non-Payment Gateway Plans
-
-After successful release, non-Payment Gateway plans use the standard XLSX export flow. Vision does not replace the FSP
-or introduce another export format. A plan without an assigned FC remains in `IN_REVIEW` and cannot be exported.
-
-No additional comment is added when sending a plan to Payment Gateway or exporting it for an FSP.
-
-## Vision State and UI
-
-Vision workflow data is stored under `payment_plan.internal_data["vision"]`. Supported states are:
-
-- `NOT_SENT`
-- `SEND_FAILED`
-- `WAITING_FOR_CALLBACK`
-- `PP_CREATED`
-- `CALLBACK_FAILED`
-- `FC_NOT_FOUND`
-- `FC_ASSOCIATED`
-- `RELEASED`
-
-Failure details use structured error codes where applicable.
-
-The Payment Plan detail API exposes Vision enablement, workflow status, Vision identifier, FC numbers, and user-safe
-failure details. The React Payment Plan page displays Vision progress and blocking reasons. For Vision-managed plans,
-it does not display actions for manual FC assignment, manual release, manual Vision sending, or manual Payment Gateway
-sending.
-
-## Notifications
-
-Successful FC assignment and automatic release use the standard release notification. The Payment Plan creator is the
-recorded action user. Vision send failures and FC assignment failures do not send a separate creator notification.
-
-Callback idempotency prevents duplicate callbacks from creating repeated notifications.
+Vision statuses are `NOT_SENT`, `SEND_FAILED`, `WAITING_FOR_CALLBACK`, `PP_CREATED`, `CALLBACK_FAILED`,
+`FC_NOT_FOUND`, `FC_ASSOCIATED`, and `RELEASED`.

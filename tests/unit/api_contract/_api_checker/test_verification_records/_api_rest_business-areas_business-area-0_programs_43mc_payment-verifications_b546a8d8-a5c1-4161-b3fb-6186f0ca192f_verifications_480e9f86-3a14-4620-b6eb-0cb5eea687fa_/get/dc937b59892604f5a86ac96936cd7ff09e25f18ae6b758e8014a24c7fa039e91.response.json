@@ -92,7 +92,8 @@
             "payment_plan_group": {
                 "id": "e179bede-27a4-470f-aaa4-1ad441deef02",
                 "unicef_id": "PPG-0001",
-                "name": "Default Group"
+                "name": "Default Group",
+                "vision_managed": false
             },
             "version": 1735688653315204,
             "background_action_status": null,
@@ -166,7 +167,6 @@
             "total_withdrawn_households_count": 0,
             "unsuccessful_payments_count": 0,
             "vision_integration_enabled": false,
-            "vision_managed": false,
             "vision": {
                 "status": "NOT_SENT",
                 "vision_id": null,

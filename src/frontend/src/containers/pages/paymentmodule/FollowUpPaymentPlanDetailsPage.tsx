@@ -5,8 +5,6 @@ import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/Foll
 import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/PaymentPlanAcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
-import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
-import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
@@ -74,10 +72,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
     status === PaymentPlanStatusEnum.CLOSED;
 
-  const shouldDisplayFundsCommitment =
-    status === PaymentPlanStatusEnum.IN_REVIEW ||
-    status === PaymentPlanStatusEnum.ACCEPTED ||
-    status === PaymentPlanStatusEnum.FINISHED;
   if (!paymentPlan) return null;
 
   return (
@@ -87,12 +81,8 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         baseUrl={baseUrl}
         permissions={permissions}
       />
-      <VisionStatusSection paymentPlan={paymentPlan} />
       <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <PaymentPlanAcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayFundsCommitment && (
-        <FundsCommitmentSection paymentPlan={paymentPlan} />
-      )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />

@@ -967,17 +967,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_individuals = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    vision_integration_enabled = serializers.BooleanField(read_only=True)
-    vision_managed = serializers.BooleanField(read_only=True)
-    vision = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
-    funds_commitments = serializers.SerializerMethodField()
-    available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
     closed_by = serializers.SerializerMethodField()
@@ -1012,9 +1007,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "excluded_individuals",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
-            "vision_integration_enabled",
-            "vision_managed",
-            "vision",
             "can_delete",
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
@@ -1034,8 +1026,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "unore_exchange_rate",
             "unore_exchange_rate_unavailable",
             "eligible_payments_count",
-            "funds_commitments",
-            "available_funds_commitments",
             "payment_verification_plans",
             "payment_verification_summary",
             "admin_url",
@@ -1209,39 +1199,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
-
-    @extend_schema_field(FundsCommitmentSerializer(many=True))
-    def get_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
-            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
-        )
-        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
-
-    @extend_schema_field(FundsCommitmentSerializer(many=True))
-    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        if obj.vision_managed:
-            return []
-
-        headers = (
-            FundsCommitmentHeader.objects.with_derived_fields()
-            .filter(funds_commitment_items__office_id=obj.business_area_id)
-            .distinct()
-            .prefetch_related(
-                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
-            )
-        )
-
-        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
-
-    @extend_schema_field(VisionStateSerializer)
-    def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
-        vision_data = obj.vision_data
-        return {
-            "status": obj.vision_status,
-            "vision_id": vision_data.get("vision_id"),
-            "fc_numbers": vision_data.get("fc_numbers", []),
-            "error_code": vision_data.get("error_code"),
-        }
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
@@ -2129,6 +2086,11 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
 
 
 class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
+    vision_managed = serializers.BooleanField(read_only=True)
+    vision = serializers.SerializerMethodField()
+    funds_commitments = serializers.SerializerMethodField()
+    available_funds_commitments = serializers.SerializerMethodField()
+    can_assign_funds_commitments = serializers.BooleanField(read_only=True)
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     closed_by = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
@@ -2151,6 +2113,11 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "vision_managed",
+            "vision",
+            "funds_commitments",
+            "available_funds_commitments",
+            "can_assign_funds_commitments",
             "admin_url",
             "background_action_status",
             "approval_process",
@@ -2176,6 +2143,37 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_create_top_up",
             "can_create_top_up_amendment",
         ]
+
+    @extend_schema_field(VisionStateSerializer)
+    def get_vision(self, obj: PaymentPlanGroup) -> dict[str, Any]:
+        data = obj.vision_data
+        return {
+            "status": obj.vision_status,
+            "vision_id": data.get("vision_id"),
+            "fc_numbers": data.get("fc_numbers", []),
+            "error_code": data.get("error_code"),
+        }
+
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_funds_commitments(self, obj: PaymentPlanGroup) -> list[dict[str, Any]]:
+        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
+            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
+        )
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
+
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_available_funds_commitments(self, obj: PaymentPlanGroup) -> list[dict[str, Any]]:
+        if not obj.can_assign_funds_commitments:
+            return []
+        headers = (
+            FundsCommitmentHeader.objects.with_derived_fields()
+            .filter(funds_commitment_items__office_id=obj.cycle.program.business_area_id)
+            .distinct()
+            .prefetch_related(
+                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
+            )
+        )
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
     @staticmethod
     def get_split_choices(obj: PaymentPlanGroup) -> list[dict[str, Any]]:
