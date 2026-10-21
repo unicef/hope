@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    HouseholdFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
@@ -27,6 +28,7 @@ from extras.test_utils.factories import (
     PaymentVerificationPlanFactory,
     RuleCommitFactory,
     RuleFactory,
+    TargetingCriteriaRuleFactory,
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
@@ -142,6 +144,49 @@ def financial_service_provider(delivery_mechanism_cash):
     return FinancialServiceProviderFactory(
         delivery_mechanisms=[delivery_mechanism_cash],
     )
+
+
+@pytest.fixture
+def aborted_regular_plan_payment(delivery_mechanism_cash, financial_service_provider):
+    payment_plan = PaymentPlanFactory(
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        currency=CurrencyFactory(code="AFN"),
+        delivery_mechanism=delivery_mechanism_cash,
+        financial_service_provider=financial_service_provider,
+    )
+    household = HouseholdFactory(business_area=payment_plan.business_area, program=payment_plan.program, size=1)
+    TargetingCriteriaRuleFactory(household_ids=household.unicef_id, payment_plan=payment_plan)
+    return PaymentFactory(
+        parent=payment_plan,
+        household=household,
+        collector=household.head_of_household,
+        currency=payment_plan.currency,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("100.00"),
+    )
+
+
+@pytest.fixture
+def aborted_child_plan_payment(plan_type):
+    payment_plan = PaymentPlanFactory(
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+    )
+    return PaymentFactory(parent=payment_plan, entitlement_quantity=Decimal("25.00"))
+
+
+@pytest.fixture
+def aborted_child_plan_conflicted_payment(plan_type):
+    payment_plan = PaymentPlanFactory(
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        total_households_count=0,
+    )
+    return PaymentFactory(parent=payment_plan, conflicted=True, status=Payment.STATUS_NOT_ELIGIBLE)
 
 
 @pytest.fixture
@@ -502,6 +547,72 @@ def test_payment_plan_full_rebuild_of_reactivated_open_plan(mock_full_rebuild: M
     assert payment_plan.status == PaymentPlan.Status.OPEN
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     mock_full_rebuild.assert_called_once()
+
+
+def test_reactivate_abort_rebuilds_regular_plan_payments_in_plan_currency(
+    aborted_regular_plan_payment: Payment,
+) -> None:
+    payment_plan = aborted_regular_plan_payment.parent
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+
+    payment_plan.refresh_from_db()
+    rebuilt_payment = Payment.all_objects.get(parent=payment_plan)
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert payment_plan.total_entitled_quantity == Decimal("0.00")
+    assert rebuilt_payment.pk != aborted_regular_plan_payment.pk
+    assert rebuilt_payment.household_id == aborted_regular_plan_payment.household_id
+    assert rebuilt_payment.entitlement_quantity is None
+    assert rebuilt_payment.currency.code == "AFN"
+
+
+@pytest.mark.parametrize(
+    "plan_type",
+    [
+        pytest.param(PaymentPlan.PlanType.FOLLOW_UP, id="follow-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP, id="top-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP_AMENDMENT, id="top-up-amendment"),
+    ],
+)
+def test_reactivate_abort_of_child_plan_keeps_its_payments(
+    aborted_child_plan_payment: Payment,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    payment_plan = aborted_child_plan_payment.parent
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).reactivate_abort()
+
+    payment_plan.refresh_from_db(fields=["status", "build_status"])
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert list(Payment.all_objects.filter(parent=payment_plan).values_list("pk", "entitlement_quantity")) == [
+        (aborted_child_plan_payment.pk, Decimal("25.00"))
+    ]
+
+
+@pytest.mark.parametrize(
+    "plan_type",
+    [
+        pytest.param(PaymentPlan.PlanType.FOLLOW_UP, id="follow-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP, id="top-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP_AMENDMENT, id="top-up-amendment"),
+    ],
+)
+def test_reactivate_abort_of_child_plan_clears_lock_conflicts(
+    aborted_child_plan_conflicted_payment: Payment,
+) -> None:
+    payment_plan = aborted_child_plan_conflicted_payment.parent
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+
+    payment_plan.refresh_from_db()
+    aborted_child_plan_conflicted_payment.refresh_from_db()
+    assert aborted_child_plan_conflicted_payment.conflicted is False
+    assert aborted_child_plan_conflicted_payment.status == Payment.STATUS_PENDING
+    assert payment_plan.total_households_count == 1
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
