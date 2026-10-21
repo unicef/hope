@@ -363,7 +363,8 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock(self) -> PaymentPlan:
+    def clear_lock_conflicts(self) -> None:
+        """Undo what lock() did to hard-conflicted payments."""
         restorable_payments = self.payment_plan.payment_items.filter(
             status=Payment.STATUS_NOT_ELIGIBLE,
             excluded=False,
@@ -379,6 +380,9 @@ class PaymentPlanService:
             user_id,
         )
         self.payment_plan.payment_items.filter(conflicted=True).update_and_log({"conflicted": False}, user_id)
+
+    def unlock(self) -> PaymentPlan:
+        self.clear_lock_conflicts()
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -668,6 +672,7 @@ class PaymentPlanService:
                     head_of_household_id=household["head_of_household"],
                     collector=collector,
                     collector_type=collector_type,
+                    currency=payment_plan.currency,
                     financial_service_provider=financial_service_provider,
                     delivery_type=delivery_mechanism,
                     has_valid_wallet=wallet_validity_by_collector_id[collector.id],
@@ -1539,19 +1544,10 @@ class PaymentPlanService:
 
     def full_rebuild(self) -> None:
         payment_plan: PaymentPlan = self.payment_plan
-        match payment_plan.plan_type:
-            case PaymentPlan.PlanType.FOLLOW_UP:
-                # Lock the source plan, as on creation, so two Follow-Ups of the same source
-                # can't copy the same beneficiary at once.
-                PaymentPlan.objects.select_for_update().get(id=payment_plan.source_payment_plan_id)
-                payment_plan.payment_items(manager="all_objects").all().delete()
-                self.create_follow_up_payments()
-            case PaymentPlan.PlanType.TOP_UP | PaymentPlan.PlanType.TOP_UP_AMENDMENT:
-                # The amounts were chosen when the plan was created and can't be rebuilt, so keep the payments.
-                pass
-            case _:
-                payment_plan.payment_items(manager="all_objects").all().delete()
-                self.create_payments(payment_plan)
+        # remove all payment and recreate
+        payment_plan.payment_items(manager="all_objects").all().delete()
+
+        self.create_payments(payment_plan)
 
         payment_plan.update_population_count_fields()
 
@@ -1735,7 +1731,14 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "build_status"))
         self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "build_status"])
 
-        transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan, True))
+        # Child plans copy their payments from the source plan, so rebuilding them from targeting would replace them.
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
+            transaction.on_commit(lambda: payment_plan_full_rebuild_async_task(self.payment_plan, True))
+        else:
+            # An aborted plan was locked, so its payments still carry the lock's conflict flags.
+            self.clear_lock_conflicts()
+            self.payment_plan.update_population_count_fields()
+            self.payment_plan.update_money_fields()
 
         return self.payment_plan
 

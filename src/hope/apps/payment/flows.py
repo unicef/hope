@@ -515,7 +515,8 @@ class PaymentPlanFlow:
     )
     def status_reactivate_abort(self) -> None:
         self.payment_plan.status_date = timezone.now()
-        self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
+        if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
+            self.payment_plan.build_status = self.payment_plan.BuildStatus.BUILD_STATUS_PENDING
 
 
 class FollowUpInstructionFlow:
