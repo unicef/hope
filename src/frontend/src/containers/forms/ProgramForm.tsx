@@ -78,7 +78,7 @@ const ProgramForm = ({
     queryFn: () => RestService.restBeneficiaryGroupsList({ active: true }),
   });
 
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, setValues } = useFormikContext();
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
 
@@ -239,12 +239,13 @@ const ProgramForm = ({
                   const payeeType = payeeTypeChoices.find(
                     (choice) => choice.id === e.target.value,
                   );
-                  setFieldValue('payeeType', e.target.value);
-                  setFieldValue(
-                    'dataCollectingTypeCode',
-                    payeeType?.defaultDataCollectingType ?? '',
-                  );
-                  setFieldValue('beneficiaryGroup', '');
+                  setValues({
+                    ...values,
+                    payeeType: e.target.value,
+                    dataCollectingTypeCode:
+                      payeeType?.defaultDataCollectingType ?? '',
+                    beneficiaryGroup: '',
+                  });
                 }}
                 choices={payeeTypeChoices.map((choice) => ({
                   name: choice.name,

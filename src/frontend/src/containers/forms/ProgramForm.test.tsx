@@ -11,6 +11,7 @@ import noop from 'lodash/noop';
 import { TestProviders } from 'src/testUtils/testProviders';
 import { RestService } from '@restgenerated/services/RestService';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import ProgramForm from './ProgramForm';
 
 const location = vi.hoisted(() => ({ pathname: '/afghanistan/create' }));
@@ -90,9 +91,14 @@ const payeeLabels = [
 const renderForm = (
   initialValues: Record<string, unknown>,
   program?: ProgramDetail,
+  validationSchema?: ReturnType<typeof programValidationSchema>,
 ) =>
   render(
-    <Formik initialValues={initialValues} onSubmit={noop}>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={noop}
+      validationSchema={validationSchema}
+    >
       {({ values }) => (
         <ProgramForm values={values} errors={{}} program={program} />
       )}
@@ -186,6 +192,19 @@ describe('ProgramForm payee type fields', () => {
       'Any DCT',
       'Partial only',
     ]);
+  });
+
+  it('validates payee type, DCT and label together after a payee type is picked', async () => {
+    renderForm(
+      emptyValues,
+      undefined,
+      programValidationSchema(((key: string) => key) as any),
+    );
+    await pickOption('payeeType', 'Household');
+
+    expect(await screen.findByText('Payee Label is required')).toBeTruthy();
+    expect(screen.queryByText('Payee Type is required')).toBeNull();
+    expect(screen.queryByText('Data Collecting Type is required')).toBeNull();
   });
 
   it('resets DCT and clears the label when the payee type changes', async () => {
