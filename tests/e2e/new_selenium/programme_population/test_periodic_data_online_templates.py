@@ -92,6 +92,38 @@ def online_edit_factory(
     return make
 
 
+@pytest.fixture
+def new_online_edit(online_edit_factory: OnlineEditFactory) -> PDUOnlineEdit:
+    return online_edit_factory()
+
+
+@pytest.fixture
+def ready_online_edit(online_edit_factory: OnlineEditFactory) -> PDUOnlineEdit:
+    return online_edit_factory(status=PDUOnlineEdit.Status.READY)
+
+
+@pytest.fixture
+def approved_online_edit(online_edit_factory: OnlineEditFactory) -> PDUOnlineEdit:
+    return online_edit_factory(status=PDUOnlineEdit.Status.APPROVED, value="Merged value")
+
+
+@pytest.fixture
+def ready_online_edits(online_edit_factory: OnlineEditFactory) -> list[PDUOnlineEdit]:
+    return [
+        online_edit_factory(status=PDUOnlineEdit.Status.READY),
+        online_edit_factory(status=PDUOnlineEdit.Status.READY),
+    ]
+
+
+@pytest.fixture
+def approved_online_edits(online_edit_factory: OnlineEditFactory) -> list[PDUOnlineEdit]:
+    # Merging the same individual's round twice fails, so only the first edit carries a value.
+    return [
+        online_edit_factory(status=PDUOnlineEdit.Status.APPROVED, value="Bulk value"),
+        online_edit_factory(status=PDUOnlineEdit.Status.APPROVED),
+    ]
+
+
 def test_create_online_template(
     login: HopeTestBrowser,
     program: Program,
@@ -182,12 +214,11 @@ def test_edit_authorized_users(
 
 def test_edit_value_in_row(
     login: HopeTestBrowser,
-    online_edit_factory: OnlineEditFactory,
+    new_online_edit: PDUOnlineEdit,
     string_attribute: FlexibleAttribute,
     individual: Individual,
 ) -> None:
-    online_edit = online_edit_factory()
-    open_details(login, online_edit)
+    open_details(login, new_online_edit)
 
     login.wait_for_element_clickable(edit_row(individual)).click()
     login.set_value(f'input[data-cy="input-pdu-{string_attribute.name}-{individual.unicef_id}"]', "Round one value")
@@ -195,18 +226,17 @@ def test_edit_value_in_row(
 
     # Saving leaves edit mode, so the Edit button comes back.
     login.wait_for_element_clickable(edit_row(individual))
-    field = round_value(online_edit, string_attribute.name)
+    field = round_value(new_online_edit, string_attribute.name)
     assert field["value"] == "Round one value"
     assert field["collection_date"] is not None
 
 
 def test_send_back_with_comment(
     login: HopeTestBrowser,
-    online_edit_factory: OnlineEditFactory,
+    ready_online_edit: PDUOnlineEdit,
     create_super_user: User,
 ) -> None:
-    online_edit = online_edit_factory(status=PDUOnlineEdit.Status.READY)
-    open_details(login, online_edit)
+    open_details(login, ready_online_edit)
 
     login.wait_for_element_clickable(SEND_BACK).click()
     login.set_value('textarea[data-cy="input-send-back-comment"]', "Fix round one")
@@ -214,57 +244,54 @@ def test_send_back_with_comment(
 
     login.wait_for_text("Fix round one", '[data-testid="sent-back-comment"]')
     login.wait_for_element_clickable(SEND_FOR_APPROVAL)
-    online_edit.refresh_from_db()
-    assert online_edit.status == PDUOnlineEdit.Status.NEW
-    comment = PDUOnlineEditSentBackComment.objects.get(pdu_online_edit=online_edit)
+    ready_online_edit.refresh_from_db()
+    assert ready_online_edit.status == PDUOnlineEdit.Status.NEW
+    comment = PDUOnlineEditSentBackComment.objects.get(pdu_online_edit=ready_online_edit)
     assert comment.comment == "Fix round one"
     assert comment.created_by.username == create_super_user.username
 
 
 def test_approve(
     login: HopeTestBrowser,
-    online_edit_factory: OnlineEditFactory,
+    ready_online_edit: PDUOnlineEdit,
     create_super_user: User,
 ) -> None:
-    online_edit = online_edit_factory(status=PDUOnlineEdit.Status.READY)
-    open_details(login, online_edit)
+    open_details(login, ready_online_edit)
 
     login.wait_for_element_clickable(APPROVE).click()
 
     login.wait_for_element_clickable(MERGE)
-    online_edit.refresh_from_db()
-    assert online_edit.status == PDUOnlineEdit.Status.APPROVED
-    assert online_edit.approved_by.username == create_super_user.username
-    assert online_edit.approved_at is not None
+    ready_online_edit.refresh_from_db()
+    assert ready_online_edit.status == PDUOnlineEdit.Status.APPROVED
+    assert ready_online_edit.approved_by.username == create_super_user.username
+    assert ready_online_edit.approved_at is not None
 
 
 def test_merge_writes_value_to_individual(
     login: HopeTestBrowser,
-    online_edit_factory: OnlineEditFactory,
+    approved_online_edit: PDUOnlineEdit,
     string_attribute: FlexibleAttribute,
     individual: Individual,
 ) -> None:
-    online_edit = online_edit_factory(status=PDUOnlineEdit.Status.APPROVED, value="Merged value")
-    open_details(login, online_edit)
+    open_details(login, approved_online_edit)
 
     login.wait_for_element_clickable(MERGE).click()
 
     login.wait_for_text("Merged", STATUS)
-    online_edit.refresh_from_db()
-    assert online_edit.status == PDUOnlineEdit.Status.MERGED
+    approved_online_edit.refresh_from_db()
+    assert approved_online_edit.status == PDUOnlineEdit.Status.MERGED
     individual.refresh_from_db()
     assert individual.flex_fields[string_attribute.name]["1"]["value"] == "Merged value"
 
 
 def test_full_flow_from_edit_to_individual_page(
     login: HopeTestBrowser,
-    online_edit_factory: OnlineEditFactory,
+    new_online_edit: PDUOnlineEdit,
     string_attribute: FlexibleAttribute,
     individual: Individual,
 ) -> None:
     """Edit a value, send it for approval, approve and merge it, then see it on the individual."""
-    online_edit = online_edit_factory()
-    open_details(login, online_edit)
+    open_details(login, new_online_edit)
 
     login.wait_for_element_clickable(edit_row(individual)).click()
     login.set_value(f'input[data-cy="input-pdu-{string_attribute.name}-{individual.unicef_id}"]', "Full flow value")
@@ -276,7 +303,7 @@ def test_full_flow_from_edit_to_individual_page(
     login.wait_for_element_clickable(MERGE).click()
     login.wait_for_text("Merged", STATUS)
 
-    login.open(f"{individuals_url(online_edit.program)}/{individual.id}")
+    login.open(f"{individuals_url(new_online_edit.program)}/{individual.id}")
     login.wait_for_text("Full flow value", 'table[aria-label="programme time series fields"]')
 
 
@@ -301,40 +328,31 @@ def statuses(edits: list[PDUOnlineEdit]) -> set[str]:
 def test_bulk_approve_from_pending_approval_list(
     login: HopeTestBrowser,
     program: Program,
-    online_edit_factory: OnlineEditFactory,
+    ready_online_edits: list[PDUOnlineEdit],
 ) -> None:
-    edits = [
-        online_edit_factory(status=PDUOnlineEdit.Status.READY),
-        online_edit_factory(status=PDUOnlineEdit.Status.READY),
-    ]
     login.open(online_edits_list_url(program))
 
-    check_rows(login, "pending-approval", edits)
+    check_rows(login, "pending-approval", ready_online_edits)
     login.click('button[data-cy="button-bulk-approve"]')
 
-    wait_for_rows(login, "pending-merge", edits)
-    assert statuses(edits) == {PDUOnlineEdit.Status.APPROVED}
+    wait_for_rows(login, "pending-merge", ready_online_edits)
+    assert statuses(ready_online_edits) == {PDUOnlineEdit.Status.APPROVED}
 
 
 def test_bulk_merge_from_pending_merge_list(
     login: HopeTestBrowser,
     program: Program,
-    online_edit_factory: OnlineEditFactory,
+    approved_online_edits: list[PDUOnlineEdit],
     string_attribute: FlexibleAttribute,
     individual: Individual,
 ) -> None:
-    # Merging the same individual's round twice fails, so only the first edit carries a value.
-    edits = [
-        online_edit_factory(status=PDUOnlineEdit.Status.APPROVED, value="Bulk value"),
-        online_edit_factory(status=PDUOnlineEdit.Status.APPROVED),
-    ]
     login.open(online_edits_list_url(program))
 
-    check_rows(login, "pending-merge", edits)
+    check_rows(login, "pending-merge", approved_online_edits)
     login.click('button[data-cy="button-bulk-merge"]')
 
-    wait_for_rows(login, "merged", edits)
-    assert statuses(edits) == {PDUOnlineEdit.Status.MERGED}
+    wait_for_rows(login, "merged", approved_online_edits)
+    assert statuses(approved_online_edits) == {PDUOnlineEdit.Status.MERGED}
     individual.refresh_from_db()
     assert individual.flex_fields[string_attribute.name]["1"]["value"] == "Bulk value"
 
@@ -424,10 +442,9 @@ def test_user_not_authorized_for_the_edit_cannot_edit_rows(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    online_edit_factory: OnlineEditFactory,
+    new_online_edit: PDUOnlineEdit,
 ) -> None:
-    online_edit = online_edit_factory()
     with grant_permission(user_with_no_permissions, business_area, *VIEW_PERMISSIONS, *ALL_ONLINE_PERMISSIONS):
         browser.login(username="noperm_user")
-        open_details(browser, online_edit)
+        open_details(browser, new_online_edit)
         assert not browser.wait_for_element_visible(EDIT_ROW).is_enabled()

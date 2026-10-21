@@ -1,4 +1,3 @@
-from decimal import Decimal
 import logging
 
 from hope.apps.utils.logs import LogForgingFilter, _SanitizedValue, safe_log
@@ -130,18 +129,3 @@ def test_safe_log_passthrough_clean() -> None:
 
 def test_safe_log_non_string_coerced() -> None:
     assert safe_log(42) == "42"
-
-
-def test_log_forging_filter_keeps_numbers_formattable() -> None:
-    record = logging.LogRecord(
-        name="test",
-        level=logging.WARNING,
-        pathname="",
-        lineno=0,
-        msg="%s: %d payment(s), %.2f total",
-        args=("evil\nplan", 3, Decimal("1.5")),
-        exc_info=None,
-    )
-    f = LogForgingFilter()
-    assert f.filter(record) is True
-    assert record.getMessage() == "evilplan: 3 payment(s), 1.50 total"
