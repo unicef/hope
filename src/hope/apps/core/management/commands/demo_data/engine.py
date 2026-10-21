@@ -7,7 +7,7 @@ def generate_rule_formulas() -> None:
     rule_1 = RuleFactory(
         name="Test Formula for Targeting 011",
         definition="result.value=211",
-        description="",
+        description="Gives every household a fixed vulnerability score of 211",
         language="python",
         type="TARGETING",
         flags={"individual_data_needed": False},
@@ -27,7 +27,7 @@ def generate_rule_formulas() -> None:
     rule_3 = RuleFactory(
         name="Test Formula for Payment Plan 033",
         definition="result.value=210",
-        description="",
+        description="Gives every household a fixed entitlement of 210",
         language="python",
         type="PAYMENT_PLAN",
         flags={"individual_data_needed": False},
