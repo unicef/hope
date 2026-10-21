@@ -61,9 +61,6 @@ export const LockTargetPopulationDialog = ({
       });
       showMessage(t('Payment Plan has been locked.'));
     },
-    onError: (error) => {
-      showApiErrorMessages(error, showMessage);
-    },
   });
 
   return (
@@ -109,7 +106,7 @@ export const LockTargetPopulationDialog = ({
                       `/${baseUrl}/target-population/${targetPopulationId}`,
                     );
                   })
-                  .catch((e) => showMessage(e.message));
+                  .catch((e) => showApiErrorMessages(e, showMessage));
               }}
               data-cy="button-target-population-modal-lock"
             >
