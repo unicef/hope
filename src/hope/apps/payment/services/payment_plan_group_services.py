@@ -64,9 +64,9 @@ class PaymentPlanGroupService:
         """Create a Follow-Up / Top-Up / Amendment of this group as a new linked group.
 
         The linked group holds one child plan per plan of this group that qualifies for it, takes this
-        group's FSP and currency, and starts OPEN. ``top_up_amount`` funds a Top-Up or Amendment:
-        a ``Decimal`` for every eligible beneficiary, or ``{payment unicef_id: amount}`` from the
-        group's amount file, split here per source plan.
+        group's FSP, currency and payment gateway flag, gets the given dispersion dates and starts OPEN.
+        ``top_up_amount`` funds a Top-Up or Amendment: a ``Decimal`` for every eligible beneficiary, or
+        ``{payment unicef_id: amount}`` from the group's amount file, split here per source plan.
         """
         source_group = self._locked_for_update()
         if source_group.plan_type not in PaymentPlanGroup.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]:
@@ -97,6 +97,9 @@ class PaymentPlanGroupService:
             source_group=source_group,
             financial_service_provider=source_group.financial_service_provider,
             currency=source_group.currency,
+            use_payment_gateway=source_group.use_payment_gateway,
+            dispersion_start_date=dispersion_start_date,
+            dispersion_end_date=dispersion_end_date,
             created_by=user,
             status_date=timezone.now(),
         )
@@ -104,8 +107,6 @@ class PaymentPlanGroupService:
             PaymentPlanService(source_plan).create_child_plan(
                 plan_type=plan_type,
                 user=user,
-                dispersion_start_date=dispersion_start_date,
-                dispersion_end_date=dispersion_end_date,
                 payment_plan_group=linked_group,
                 top_up_amount=amounts_by_plan.get(source_plan.id, top_up_amount),
             )
@@ -184,6 +185,39 @@ class PaymentPlanGroupService:
         if currency is not None:
             self._validate_currency_against_delivery_mechanisms(currency)
         self.payment_plan_group.currency = currency
+
+    def assign_dispersion_dates(
+        self, dispersion_start_date: datetime.date | None, dispersion_end_date: datetime.date | None
+    ) -> None:
+        """Set the group's dispersion dates; the caller saves the group. Its Payment Plans read them from the group."""
+        group = self.payment_plan_group
+        if (dispersion_start_date, dispersion_end_date) == (group.dispersion_start_date, group.dispersion_end_date):
+            return
+        if group.status != PaymentPlanGroup.Status.OPEN:
+            raise ValidationError("Dispersion Dates can be changed only while the Payment Plan Group is Open.")
+        self.validate_dispersion_dates(
+            dispersion_start_date,
+            dispersion_end_date,
+            end_date_changed=dispersion_end_date != group.dispersion_end_date,
+        )
+        group.dispersion_start_date = dispersion_start_date
+        group.dispersion_end_date = dispersion_end_date
+
+    @staticmethod
+    def validate_dispersion_dates(
+        dispersion_start_date: datetime.date | None,
+        dispersion_end_date: datetime.date | None,
+        *,
+        end_date_changed: bool = True,
+    ) -> None:
+        """Refuse an end date before the start date, and a new end date that is not in the future."""
+        if dispersion_start_date and dispersion_end_date and dispersion_end_date < dispersion_start_date:
+            raise ValidationError(
+                f"Dispersion End Date [{dispersion_end_date}] cannot be earlier than "
+                f"Dispersion Start Date [{dispersion_start_date}]"
+            )
+        if dispersion_end_date and end_date_changed and dispersion_end_date <= timezone.now().date():
+            raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
     def _validate_not_linked(self, field_label: str) -> None:
         if self.payment_plan_group.source_group_id is not None:

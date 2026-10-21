@@ -9,7 +9,7 @@ from zipfile import BadZipFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import DatabaseError, transaction
-from django.db.models import Count, Q, QuerySet, Sum
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
@@ -672,9 +672,8 @@ class PaymentVerificationRecordViewSet(
         )
 
     def get_queryset(self) -> QuerySet:
-        return with_payment_related_data(
-            self.payment_plan.eligible_payments.exclude(payment_verifications__payment_verification_plan__isnull=True)
-        )
+        has_verification = Exists(PaymentVerification.objects.filter(payment=OuterRef("pk")))
+        return with_payment_related_data(self.payment_plan.eligible_payments.filter(has_verification))
 
     @extend_schema(
         responses={
@@ -767,12 +766,10 @@ class PaymentPlanViewSet(
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
     BLOCKED_ACTIONS_FOR_INSTRUCTION_MANAGED = {
-        "partial_update",
         "destroy",
         "lock",
         "unlock",
@@ -783,17 +780,21 @@ class PaymentPlanViewSet(
         PaymentPlan.objects.select_related(
             "program_cycle__program", "payment_plan_group__currency", "follow_up_instruction__currency"
         )
-        .prefetch_related("child_plans")
+        .prefetch_related(
+            Prefetch(
+                "child_plans",
+                queryset=PaymentPlan.objects.select_related("payment_plan_group", "follow_up_instruction"),
+            )
+        )
         .order_by("-created_at")
     )
     filterset_class = PaymentPlanListFilter
-    http_method_names = ["get", "post", "patch", "delete"]
+    http_method_names = ["get", "post", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
         "retrieve": PaymentPlanDetailSerializer,
         "create": PaymentPlanCreateUpdateSerializer,
-        "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": ApplyEngineFormulaSerializer,
         "entitlement_flat_amount": ApplyFlatAmountEntitlementSerializer,
@@ -810,7 +811,6 @@ class PaymentPlanViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
         "create": [Permissions.PM_CREATE],
-        "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
         "apply_engine_formula": [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
@@ -853,7 +853,7 @@ class PaymentPlanViewSet(
         serializer.is_valid(raise_exception=True)
         old_payment_plan = copy_model_object(payment_plan)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).open(input_data=serializer.validated_data)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).open()
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1303,7 +1303,12 @@ class PaymentPlanGlobalViewSet(
     queryset = (
         PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         .select_related("payment_plan_group__currency", "follow_up_instruction__currency")
-        .prefetch_related("child_plans")
+        .prefetch_related(
+            Prefetch(
+                "child_plans",
+                queryset=PaymentPlan.objects.select_related("payment_plan_group", "follow_up_instruction"),
+            )
+        )
         .order_by("-created_at")
     )
     serializer_classes_by_action = {
@@ -2049,13 +2054,11 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         attachment = self.get_object()
         file = attachment.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentPlanSupportingDocumentViewSet(
@@ -2102,13 +2105,11 @@ class PaymentPlanSupportingDocumentViewSet(
         document = self.get_object()
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
-        response = FileResponse(
+        return FileResponse(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
         )
-        response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
-        return response
 
 
 class PaymentViewSet(
@@ -2822,8 +2823,8 @@ class PaymentPlanGroupViewSet(
     def send_to_payment_gateway(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Queue an async send-to-payment-gateway job for the group's sendable payment plans.
 
-        A payment plan is sendable when it is ACCEPTED, has an FSP that routes through the payment
-        gateway (either its use_payment_gateway flag is True or the FSP communication_channel is API),
+        A payment plan is sendable when it is ACCEPTED, its group routes through the payment gateway
+        (the group's use_payment_gateway flag is True or its FSP communication_channel is API),
         still has splits not yet sent to the gateway, and is not already being sent. The group object
         is locked for update to prevent double processing the same objects.
         """

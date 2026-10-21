@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
 )
 from hope.contrib.vision.choices import VisionStatus
-from hope.models import FileTemp, PaymentPlan, PaymentPlanGroup
+from hope.models import FileTemp, FinancialServiceProvider, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -227,6 +227,41 @@ def test_group_send_includes_follow_up_with_historical_vision_state(
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert vision_enabled_sendable_follow_up_with_historical_vision_state.pk in sendable_plan_ids
+
+
+@pytest.fixture
+def sendable_plan_with_xlsx_fsp(cycle, payment_plan_group):
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=payment_plan_group,
+        status=PaymentPlan.Status.ACCEPTED,
+        financial_service_provider=FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        ),
+    )
+    PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+    return payment_plan
+
+
+@pytest.fixture
+def payment_gateway_group_with_xlsx_fsp_plan(payment_plan_group, sendable_plan_with_xlsx_fsp):
+    payment_plan_group.use_payment_gateway = True
+    payment_plan_group.save(update_fields=["use_payment_gateway"])
+    return payment_plan_group
+
+
+def test_group_send_excludes_xlsx_fsp_plans_when_group_does_not_use_payment_gateway(
+    payment_plan_group, sendable_plan_with_xlsx_fsp
+) -> None:
+    assert list(payment_plan_group.sendable_to_payment_gateway_plans()) == []
+
+
+def test_group_send_includes_xlsx_fsp_plans_when_group_uses_payment_gateway(
+    payment_gateway_group_with_xlsx_fsp_plan, sendable_plan_with_xlsx_fsp
+) -> None:
+    assert list(payment_gateway_group_with_xlsx_fsp_plan.sendable_to_payment_gateway_plans()) == [
+        sendable_plan_with_xlsx_fsp
+    ]
 
 
 def test_default_group_created_on_cycle_creation(cycle):

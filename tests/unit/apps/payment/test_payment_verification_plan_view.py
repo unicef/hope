@@ -753,6 +753,40 @@ def test_verifications_list(
         assert "received_amount" in payment["verification"]
 
 
+@pytest.fixture
+def unverified_payment(verification_context: dict[str, Any]) -> Payment:
+    return PaymentFactory(parent=verification_context["payment_plan"], status=Payment.STATUS_SUCCESS)
+
+
+def test_verifications_list_omits_payment_without_verification(
+    verification_context: dict[str, Any],
+    unverified_payment: Payment,
+    create_user_role_with_permissions: Any,
+) -> None:
+    url = reverse(
+        "api:payments:verification-records-list",
+        kwargs={
+            "business_area_slug": verification_context["business_area"].slug,
+            "program_code": verification_context["program_active"].code,
+            "payment_verification_pk": str(verification_context["payment_plan"].pk),
+        },
+    )
+    create_user_role_with_permissions(
+        verification_context["user"],
+        [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+        verification_context["business_area"],
+        verification_context["program_active"],
+    )
+
+    response = verification_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert {payment["id"] for payment in response.json()["results"]} == {
+        str(verification_context["payment_1"].pk),
+        str(verification_context["payment_2"].pk),
+    }
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [

@@ -8,12 +8,12 @@ import pytest
 from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.factories.account import UserFactory
 from extras.test_utils.factories.core import BeneficiaryGroupFactory
-from extras.test_utils.factories.grievance import GrievanceTicketFactory
+from extras.test_utils.factories.grievance import GrievanceTicketFactory, MyTasksTrackingFactory
 from extras.test_utils.factories.program import ProgramFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.constants import PRESET_MINE, PRESET_NEEDS_ASSIGNMENT
-from hope.apps.grievance.models import GrievanceTicket
+from hope.apps.grievance.models import GrievanceTicket, MyTasksTracking
 from hope.apps.grievance.utils import my_tasks_url
 from hope.models import BusinessArea, Program, User
 
@@ -21,10 +21,14 @@ pytestmark = pytest.mark.django_db()
 
 # --- My Tasks ------------------------------------------------------------------------
 #
-# The My Tasks page has two tabs: Needs Assignment (unassigned, active) and Assigned To Me. The
-# daily digest emails deep-link into them with ?tab=, ?sensitive= and ?overdue=. Every fixture
-# below is one ticket placed on exactly one side of one of those axes, so each test can list a
-# handful and state which of them must show.
+# The My Tasks page has three tabs: Needs Assignment (unassigned, active), Assigned To Me and
+# Pending Approval (waiting for an approval the user may give). The My Tasks emails link into them
+# with ?tab=; the sensitivity and overdue filters travel in the URL as ?sensitive= and ?overdue=.
+# Every fixture below is one ticket placed on exactly one side of one of those axes, so each test
+# can list a handful and state which of them must show.
+#
+# A ticket is unread when somebody else created, assigned, edited or annotated it after the user
+# was last tracked (the ``tracking`` fixture) or last opened it. Unread rows and tabs carry a dot.
 
 
 def _ticket(
@@ -33,6 +37,7 @@ def _ticket(
     category: int,
     issue_type: int,
     assigned_to: User | None = None,
+    created_by: User | None = None,
     status: int = GrievanceTicket.STATUS_NEW,
     age: timedelta | None = None,
 ) -> GrievanceTicket:
@@ -46,6 +51,7 @@ def _ticket(
         category=category,
         issue_type=issue_type,
         assigned_to=assigned_to,
+        created_by=created_by,
         status=status,
     )
     ticket.programs.set([program])
@@ -189,9 +195,66 @@ def restricted_user_sensitive(my_tasks_program: Program, user_with_no_permission
     return _sensitive(my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_ASSIGNED)
 
 
+@pytest.fixture
+def for_approval_complaint(my_tasks_program: Program, other_user: User) -> GrievanceTicket:
+    """Waiting for approval; a complaint is approved by whoever may close tickets."""
+    return _complaint(my_tasks_program, assigned_to=other_user, status=GrievanceTicket.STATUS_FOR_APPROVAL)
+
+
+@pytest.fixture
+def restricted_user_for_approval(my_tasks_program: Program, user_with_no_permissions: User) -> GrievanceTicket:
+    return _complaint(
+        my_tasks_program, assigned_to=user_with_no_permissions, status=GrievanceTicket.STATUS_FOR_APPROVAL
+    )
+
+
+@pytest.fixture
+def tracking(me: User, business_area: BusinessArea) -> MyTasksTracking:
+    """Tracking that started yesterday, so a ticket created now by somebody else is unread.
+
+    Without it the first page visit starts the tracking, after every ticket of the test exists.
+    """
+    tracking = MyTasksTrackingFactory(user=me, business_area=business_area)
+    MyTasksTracking.objects.filter(pk=tracking.pk).update(created_at=timezone.now() - timedelta(days=1))
+    return tracking
+
+
+@pytest.fixture
+def unread_complaint(
+    my_tasks_program: Program, me: User, other_user: User, tracking: MyTasksTracking
+) -> GrievanceTicket:
+    """Created today by a colleague and assigned to me."""
+    return _complaint(my_tasks_program, assigned_to=me, created_by=other_user, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def unread_sensitive(
+    my_tasks_program: Program, me: User, other_user: User, tracking: MyTasksTracking
+) -> GrievanceTicket:
+    return _sensitive(my_tasks_program, assigned_to=me, created_by=other_user, status=GrievanceTicket.STATUS_ASSIGNED)
+
+
+@pytest.fixture
+def complaint_from_before_tracking(
+    my_tasks_program: Program, me: User, other_user: User, tracking: MyTasksTracking
+) -> GrievanceTicket:
+    """Created by a colleague two days ago, before the tracking started: nothing new to read."""
+    return _complaint(
+        my_tasks_program,
+        assigned_to=me,
+        created_by=other_user,
+        status=GrievanceTicket.STATUS_ASSIGNED,
+        age=timedelta(days=2),
+    )
+
+
 PAGE_TITLE = 'h5[data-cy="page-header-title"]'
 TAB_NEEDS_ASSIGNMENT = '[data-cy="tab-needs-assignment"]'
 TAB_MINE = '[data-cy="tab-mine"]'
+TAB_PENDING_APPROVAL = '[data-cy="tab-pending-approval"]'
+TAB_DOT_MINE = '[data-cy="tab-unread-dot-mine"]'
+FILTER_UNREAD = '[data-cy="filters-unread"]'
+BUTTON_MARK_READ = 'button[data-cy="button-mark-all-read"]'
 FILTER_SENSITIVE = 'div[data-cy="filters-sensitive"]'
 FILTER_CATEGORY = 'div[data-cy="filters-category"]'
 FILTER_ISSUE_TYPE = 'div[data-cy="filters-issue-type"]'
@@ -210,8 +273,8 @@ def _open(browser: HopeTestBrowser, business_area: BusinessArea, query: str = ""
     browser.wait_for_text("My Tasks", PAGE_TITLE, timeout=60)
 
 
-def _open_email_link(browser: HopeTestBrowser, url: str) -> None:
-    """Open the exact URL the digest email carries, minus the host the live server replaces."""
+def _open_url(browser: HopeTestBrowser, url: str) -> None:
+    """Open an absolute My Tasks URL (as the email carries it), minus the host the live server replaces."""
     parts = urlsplit(url)
     browser.open(f"{parts.path}?{parts.query}")
     browser.wait_for_text("My Tasks", PAGE_TITLE, timeout=60)
@@ -241,6 +304,10 @@ def _apply(browser: HopeTestBrowser) -> None:
 def _tick(browser: HopeTestBrowser, ticket: GrievanceTicket) -> None:
     """Select a row. MUI renders the native checkbox with opacity 0, hence js_click."""
     browser.js_click(f'[data-cy="ticket-row-{ticket.unicef_id}"] input[type="checkbox"]')
+
+
+def _unread_row(ticket: GrievanceTicket) -> str:
+    return f'[data-cy="ticket-row-{ticket.unicef_id}"][data-unread="true"]'
 
 
 # --- Navigation ----------------------------------------------------------------------
@@ -322,6 +389,23 @@ def test_assigned_to_me_all_tickets_includes_closed(
     _apply(login)
 
     _wait_for_rows(login, my_complaint, my_closed)
+
+
+# --- Pending Approval ----------------------------------------------------------------
+
+
+@pytest.mark.usefixtures("my_complaint", "unassigned_complaint")
+def test_pending_approval_lists_only_tickets_waiting_for_approval(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    for_approval_complaint: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=pending-approval")
+
+    login.assert_element(f'{TAB_PENDING_APPROVAL}[aria-selected="true"]')
+    _wait_for_rows(login, for_approval_complaint)
+    # Every ticket here waits for approval, so there is no status to choose.
+    login.assert_element_absent(FILTER_STATUS)
 
 
 # --- Sensitivity filter --------------------------------------------------------------
@@ -422,16 +506,16 @@ def test_program_scoped_page_lists_only_that_programs_tickets(
     login.assert_element_absent('th[data-cy="programs"]')
 
 
-# --- Email deep links ----------------------------------------------------------------
+# --- URL parameters ------------------------------------------------------------------
 
 
 @pytest.mark.usefixtures("my_sensitive", "my_overdue_complaint")
-def test_email_deep_link_lands_on_mine_overdue_sensitive(
+def test_url_with_overdue_and_sensitive_lands_on_the_filtered_mine_tab(
     login: HopeTestBrowser,
     business_area: BusinessArea,
     my_recent_sensitive_overdue: GrievanceTicket,
 ) -> None:
-    _open_email_link(login, my_tasks_url(business_area, PRESET_MINE, overdue=True, sensitive=True))
+    _open_url(login, f"{my_tasks_url(business_area, PRESET_MINE)}&overdue=true&sensitive=true")
 
     login.assert_element(f'{TAB_MINE}[aria-selected="true"]')
     login.assert_text("Overdue Only", FILTER_OVERDUE)
@@ -441,12 +525,12 @@ def test_email_deep_link_lands_on_mine_overdue_sensitive(
 
 
 @pytest.mark.usefixtures("unassigned_sensitive", "my_complaint")
-def test_needs_assignment_deep_link_selects_the_tab(
+def test_email_link_selects_the_needs_assignment_tab(
     login: HopeTestBrowser,
     business_area: BusinessArea,
     unassigned_complaint: GrievanceTicket,
 ) -> None:
-    _open_email_link(login, my_tasks_url(business_area, PRESET_NEEDS_ASSIGNMENT, sensitive=False))
+    _open_url(login, f"{my_tasks_url(business_area, PRESET_NEEDS_ASSIGNMENT)}&sensitive=false")
 
     login.assert_element(f'{TAB_NEEDS_ASSIGNMENT}[aria-selected="true"]')
     login.assert_text("Other", FILTER_SENSITIVE)
@@ -554,6 +638,81 @@ def test_selection_is_dropped_when_the_query_changes(
     login.wait_for_element_present(f"{BUTTON_BULK_ASSIGN}[disabled]")
 
 
+# --- Unread --------------------------------------------------------------------------
+
+
+def test_a_colleagues_ticket_is_unread_and_an_older_one_is_not(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    unread_complaint: GrievanceTicket,
+    complaint_from_before_tracking: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=mine")
+    _wait_for_rows(login, unread_complaint, complaint_from_before_tracking)
+
+    login.wait_for_element_present(_unread_row(unread_complaint))
+    login.assert_element_present(f'{_unread_row(unread_complaint)} [data-cy="ticket-unread-dot"]')
+    login.assert_element_absent(_unread_row(complaint_from_before_tracking))
+    login.assert_element_present(TAB_DOT_MINE)
+    login.assert_element_absent('[data-cy="tab-unread-dot-needs-assignment"]')
+
+
+def test_opening_the_ticket_clears_its_highlight(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    unread_complaint: GrievanceTicket,
+    complaint_from_before_tracking: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=mine")
+    login.wait_for_element_present(_unread_row(unread_complaint))
+
+    # The first cell is the checkbox, which swallows the click; the ID cell opens the ticket.
+    login.click(f'[data-cy="ticket-row-{unread_complaint.unicef_id}"] td:nth-child(2)')
+    login.wait_for_text(f"Ticket ID: {unread_complaint.unicef_id}", PAGE_TITLE)
+    login.go_back()
+
+    # Opening the ticket marked it seen, and the list is fetched again on the way back.
+    _wait_for_rows(login, unread_complaint, complaint_from_before_tracking)
+    login.wait_for_element_absent(_unread_row(unread_complaint))
+    login.assert_element_absent(TAB_DOT_MINE)
+
+
+@pytest.mark.usefixtures("complaint_from_before_tracking")
+def test_mark_all_as_read_clears_the_tab(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    unread_complaint: GrievanceTicket,
+    unread_sensitive: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=mine")
+    login.wait_for_element_present(_unread_row(unread_complaint))
+    login.wait_for_element_present(_unread_row(unread_sensitive))
+
+    login.click(BUTTON_MARK_READ)
+
+    login.wait_for_element_absent(_unread_row(unread_complaint))
+    login.assert_element_absent(_unread_row(unread_sensitive))
+    login.assert_element_absent(TAB_DOT_MINE)
+    # Nothing left to mark, so the button has nothing to do.
+    login.wait_for_element_present(f"{BUTTON_MARK_READ}[disabled]")
+
+
+def test_only_unread_filter_hides_the_read_rows(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    unread_complaint: GrievanceTicket,
+    complaint_from_before_tracking: GrievanceTicket,
+) -> None:
+    _open(login, business_area, "?tab=mine")
+    _wait_for_rows(login, unread_complaint, complaint_from_before_tracking)
+
+    login.check_checkbox(FILTER_UNREAD)
+    _apply(login)
+
+    _wait_for_rows(login, unread_complaint)
+    login.assert_true("unread=true" in login.get_current_url())
+
+
 # --- Permissions ---------------------------------------------------------------------
 
 
@@ -577,10 +736,33 @@ def test_user_without_assign_permission_only_gets_assigned_to_me(
 
         browser.wait_for_element_visible(TAB_MINE)
         browser.assert_element_absent(TAB_NEEDS_ASSIGNMENT)
+        browser.assert_element_absent(TAB_PENDING_APPROVAL)
         # Holding only the non-sensitive grant leaves nothing to choose, so the filter is gone
         # and the sensitive ticket with it.
         browser.assert_element_absent(FILTER_SENSITIVE)
         _wait_for_rows(browser, restricted_user_complaint)
+
+
+@pytest.mark.usefixtures("restricted_user_complaint")
+def test_user_who_may_close_tickets_gets_pending_approval(
+    browser: HopeTestBrowser,
+    business_area: BusinessArea,
+    user_with_no_permissions: User,
+    restricted_user_for_approval: GrievanceTicket,
+) -> None:
+    # A complaint has no approve permission of its own: whoever may close it approves it.
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+        Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+    ):
+        browser.login(username="noperm_user", wait_for_drawer=False)
+        _open(browser, business_area, "?tab=pending-approval")
+
+        browser.wait_for_element_visible(f'{TAB_PENDING_APPROVAL}[aria-selected="true"]')
+        _wait_for_rows(browser, restricted_user_for_approval)
 
 
 def test_user_with_no_my_tasks_permissions_is_denied(

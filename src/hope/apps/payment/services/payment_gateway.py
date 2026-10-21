@@ -439,7 +439,7 @@ class PaymentGatewayAPI(BaseAPI):
 
 
 class PaymentGatewayService:
-    ADD_RECORDS_CHUNK_SIZE = 500
+    ADD_RECORDS_CHUNK_SIZE = 200
     SYNC_RECORDS_CHUNK_SIZE = 500
     PENDING_UPDATE_PAYMENT_STATUSES = [
         Payment.STATUS_PENDING,
@@ -780,7 +780,7 @@ class PaymentGatewayService:
             )
             .filter(
                 Exists(PaymentPlanSplit.objects.filter(payment_plan=OuterRef("pk"), sent_to_payment_gateway=True)),
-                Q(use_payment_gateway=True)
+                Q(payment_plan_group__use_payment_gateway=True)
                 | Q(
                     payment_plan_group__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
                 ),

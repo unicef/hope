@@ -5,9 +5,15 @@ from extras.test_utils.factories import (
     PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
 )
-from extras.test_utils.factories.payment import PaymentPlanFactory
+from extras.test_utils.factories.payment import (
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+    PaymentPlanFactory,
+)
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
+from extras.test_utils.factories.steficon import RuleCommitFactory
 from extras.test_utils.factories.targeting import TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BusinessArea,
     Household,
@@ -16,6 +22,7 @@ from hope.models import (
     PaymentPlanPurpose,
     Program,
     ProgramCycle,
+    Rule,
 )
 
 PURPOSE_NAME = "Test Purpose"
@@ -24,6 +31,9 @@ GROUP_NAME = "Test Group"
 CYCLE_TITLE = "Test Cycle"
 SECOND_CYCLE_TITLE = "Second Cycle"
 SECOND_GROUP_NAME = "Second Group"
+BUILT_TP_NAME = "Built TP"
+RULE_NAME = "Household Size Score"
+RULE_DEFINITION = 'result.value = context["household"].size'
 
 
 @pytest.fixture
@@ -100,3 +110,64 @@ def later_tp(targeting_tp: PaymentPlan, targeting_group: PaymentPlanGroup) -> Pa
         status=PaymentPlan.Status.TP_OPEN,
         business_area=targeting_tp.business_area,
     )
+
+
+@pytest.fixture
+def sized_households(targeting_program: Program) -> list[Household]:
+    return [
+        HouseholdFactory(
+            unicef_id=f"HH-23-0000.000{size}",
+            size=size,
+            business_area=targeting_program.business_area,
+            program=targeting_program,
+        )
+        for size in (1, 3, 5)
+    ]
+
+
+@pytest.fixture
+def built_tp(
+    targeting_group: PaymentPlanGroup,
+    tp_purpose: PaymentPlanPurpose,
+    sized_households: list[Household],
+) -> PaymentPlan:
+    tp = PaymentPlanFactory(
+        name=BUILT_TP_NAME,
+        program_cycle=targeting_group.cycle,
+        payment_plan_group=targeting_group,
+        status=PaymentPlan.Status.TP_OPEN,
+        business_area=targeting_group.cycle.program.business_area,
+    )
+    tp.payment_plan_purposes.add(tp_purpose)
+    rule = TargetingCriteriaRuleFactory(payment_plan=tp)
+    TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
+    PaymentPlanService(tp).full_rebuild()
+    tp.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    tp.save(update_fields=["build_status"])
+    tp.refresh_from_db()
+    return tp
+
+
+@pytest.fixture
+def locked_tp(built_tp: PaymentPlan) -> PaymentPlan:
+    # Mark Ready needs an FSP and delivery mechanism on the target population.
+    built_tp.status = PaymentPlan.Status.TP_LOCKED
+    built_tp.financial_service_provider = FinancialServiceProviderFactory()
+    built_tp.delivery_mechanism = DeliveryMechanismFactory()
+    built_tp.save(update_fields=["status", "financial_service_provider", "delivery_mechanism"])
+    return built_tp
+
+
+@pytest.fixture
+def household_size_rule(business_area: BusinessArea) -> Rule:
+    commit = RuleCommitFactory(
+        rule__name=RULE_NAME,
+        rule__type=Rule.TYPE_TARGETING,
+        rule__enabled=True,
+        rule__definition=RULE_DEFINITION,
+        definition=RULE_DEFINITION,
+        enabled=True,
+        is_release=True,
+    )
+    commit.rule.allowed_business_areas.add(business_area)
+    return commit.rule

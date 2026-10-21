@@ -30,6 +30,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   permissions,
   paymentPlan,
 }: FollowUpPaymentPlanDetailsHeaderProps): ReactElement {
+  const { isInstructionManaged } = paymentPlan;
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -46,24 +47,22 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   const canRemove =
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
-  const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
-          canEdit={canEdit}
           canLock={canLock}
         />
       );
       break;
     case 'LOCKED':
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}

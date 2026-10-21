@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FundsCommitmentFactory,
     HouseholdFactory,
     IndividualFactory,
     PaymentFactory,
@@ -26,7 +27,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
-from hope.apps.household.const import ROLE_ALTERNATE
+from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
@@ -38,7 +39,6 @@ from hope.apps.payment.api.serializers import (
     PendingPaymentSerializer,
     VolumeByDeliveryMechanismSerializer,
 )
-from hope.contrib.vision.fixtures import FundsCommitmentFactory
 from hope.contrib.vision.models import FundsCommitmentItem
 from hope.models import Approval, FinancialServiceProvider, Payment, PaymentPlan
 
@@ -795,7 +795,7 @@ def test_payment_list_serializer_snapshot_collector_data_with_collector_type_bas
     )
     payment = Payment.objects.get(id=payment.id)
 
-    assert payment.collector_is_primary is True
+    assert payment.collector_type == ROLE_PRIMARY
     full_name = PaymentListSerializer.get_collector_field(payment, "full_name")
     assert full_name == "Test Primary Collector"
 

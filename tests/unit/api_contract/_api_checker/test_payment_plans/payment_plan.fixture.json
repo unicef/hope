@@ -26,8 +26,6 @@
                 "name": null,
                 "start_date": null,
                 "end_date": null,
-                "dispersion_start_date": "2025-01-01",
-                "dispersion_end_date": "2025-01-31",
                 "excluded_ids": null,
                 "exclusion_reason": null,
                 "vulnerability_score_min": null,
@@ -40,7 +38,6 @@
                 "built_at": null,
                 "exchange_rate": null,
                 "custom_exchange_rate": false,
-                "use_payment_gateway": false,
                 "custom_exchange_rate_set_by": null,
                 "female_children_count": 0,
                 "male_children_count": 0,
@@ -224,7 +221,9 @@
                     "unicef_id": "PPG-1",
                     "cycle": "75169d50-cb04-4b94-87a7-3f502f9e0568",
                     "name": "Default Group",
-                    "background_action_status": null
+                    "background_action_status": null,
+                    "dispersion_start_date": "2025-01-01",
+                    "dispersion_end_date": "2025-01-31"
                 }
             },
             {

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from django.contrib import admin
 from django.contrib.auth.models import Group, Permission
@@ -19,7 +19,9 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
+    PaymentPlanPurposeFactory,
     PaymentPlanSplitFactory,
+    ProgramFactory,
     UserFactory,
 )
 from hope.admin.payment_plan import (
@@ -412,8 +414,9 @@ def test_payment_get_sync_missing_records_with_payment_gateway(admin_client, pay
 )
 def test_can_sync_with_payment_gateway(payment_plan, pp_status, use_payment_gateway, expected) -> None:
     payment_plan.status = pp_status
-    payment_plan.use_payment_gateway = use_payment_gateway
-    payment_plan.save(update_fields=["status", "use_payment_gateway"])
+    payment_plan.save(update_fields=["status"])
+    payment_plan.payment_plan_group.use_payment_gateway = use_payment_gateway
+    payment_plan.payment_plan_group.save(update_fields=["use_payment_gateway"])
 
     assert can_sync_with_payment_gateway(payment_plan) is expected
 
@@ -868,6 +871,43 @@ def test_restart_import_reconciliation_requires_permission(
     response = staff_client.get(url)
 
     assert response.status_code == 403
+
+
+def test_payment_plan_admin_keeps_plan_type_as_readonly(admin_user, payment_plan) -> None:
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    model_admin = PaymentPlanAdmin(PaymentPlan, admin.site)
+
+    assert "plan_type" in model_admin.list_display
+    assert "plan_type" in model_admin.readonly_fields
+    assert "plan_type" in model_admin.get_readonly_fields(request, payment_plan)
+
+
+def test_payment_plan_admin_excludes_target_populations(admin_user) -> None:
+    target_population = PaymentPlanFactory(status=PaymentPlan.Status.TP_OPEN)
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+    request = RequestFactory().get("/")
+    request.user = admin_user
+    model_admin = PaymentPlanAdmin(PaymentPlan, admin.site)
+
+    assert set(model_admin.get_queryset(request).values_list("pk", flat=True)) == {payment_plan.pk}
+    assert target_population.pk not in set(model_admin.get_queryset(request).values_list("pk", flat=True))
+
+
+def test_payment_plan_admin_scopes_payment_plan_purposes_to_program(admin_user) -> None:
+    payment_plan = PaymentPlanFactory()
+    purpose = payment_plan.program_cycle.program.payment_plan_purposes.get()
+    other_program = ProgramFactory()
+    other_program.payment_plan_purposes.add(PaymentPlanPurposeFactory())
+    request = RequestFactory().get("/")
+    request.resolver_match = MagicMock()
+    request.resolver_match.kwargs = {"object_id": str(payment_plan.pk)}
+    request.user = admin_user
+    model_admin = PaymentPlanAdmin(PaymentPlan, admin.site)
+
+    form = model_admin.get_form(request, payment_plan, change=True)()
+
+    assert list(form.fields["payment_plan_purposes"].queryset) == [purpose]
 
 
 def test_payment_plan_admin_adds_payment_instruction_inline_for_payment_gateway_plan(

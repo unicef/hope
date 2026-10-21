@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TestProviders } from 'src/testUtils/testProviders';
 import PhotoModal from './PhotoModal';
 
@@ -25,5 +25,17 @@ describe('PhotoModal', () => {
 
     expect(screen.getByTestId('dialog-root')).toBeTruthy();
     expect(screen.getByText('Photo')).toBeTruthy();
+  });
+
+  it('calls onOpen when the dialog is opened', () => {
+    const onOpen = vi.fn();
+    render(<PhotoModal variant="button" onOpen={onOpen} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(onOpen).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('button-show-photo'));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('dialog-root')).toBeTruthy();
   });
 });

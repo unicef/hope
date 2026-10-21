@@ -59,6 +59,8 @@ export function EditGroup({ group }: EditGroupProps): ReactElement | null {
           name: values.name,
           financialServiceProvider: values.financialServiceProvider,
           currency: values.currency,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
         },
       }),
     onSuccess: async () => {
@@ -109,6 +111,8 @@ export function EditGroup({ group }: EditGroupProps): ReactElement | null {
             financialServiceProvider:
               group.financialServiceProvider?.id ?? null,
             currency: group.currency ?? null,
+            dispersionStartDate: group.dispersionStartDate ?? null,
+            dispersionEndDate: group.dispersionEndDate ?? null,
           }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {

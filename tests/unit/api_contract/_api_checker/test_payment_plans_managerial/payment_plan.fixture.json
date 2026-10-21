@@ -28,8 +28,6 @@
                 "name": null,
                 "start_date": null,
                 "end_date": null,
-                "dispersion_start_date": "2025-01-01",
-                "dispersion_end_date": "2025-01-31",
                 "excluded_ids": null,
                 "exclusion_reason": null,
                 "vulnerability_score_min": null,
@@ -42,7 +40,6 @@
                 "built_at": null,
                 "exchange_rate": null,
                 "custom_exchange_rate": false,
-                "use_payment_gateway": false,
                 "custom_exchange_rate_set_by": null,
                 "female_children_count": 0,
                 "male_children_count": 0,
@@ -240,7 +237,9 @@
                     "delivery_import_file": null,
                     "background_action_status": null,
                     "plan_type": "REGULAR",
-                    "source_group": null
+                    "source_group": null,
+                    "dispersion_start_date": "2025-01-01",
+                    "dispersion_end_date": "2025-01-31"
                 }
             },
             {

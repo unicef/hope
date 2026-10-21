@@ -14,7 +14,13 @@ from flags.state import flag_state
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
 from hope.models.payment_plan import PaymentPlan, last_approval_step
-from hope.models.utils import AdminUrlMixin, InternalDataFieldModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import (
+    AdminUrlMixin,
+    InternalDataFieldModel,
+    LongNameIndex,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -33,6 +39,9 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
             "plan_type",
             "source_group",
             "financial_service_provider",
+            "use_payment_gateway",
+            "dispersion_start_date",
+            "dispersion_end_date",
             "background_action_status",
             "export_file_delivery",
             "delivery_import_file",
@@ -94,7 +103,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
     status = models.CharField(
         max_length=50,
         default=Status.OPEN,
-        db_index=True,
         choices=Status.choices,
     )
     status_date = models.DateTimeField(blank=True, null=True)
@@ -111,6 +119,12 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         related_name="payment_plan_groups",
         null=True,
         blank=True,
+    )
+    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
+    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -155,7 +169,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
     background_action_status = models.CharField(
         max_length=50,
         default=None,
-        db_index=True,
         blank=True,
         null=True,
         choices=BackgroundActionStatus.choices,
@@ -165,7 +178,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         max_length=20,
         choices=PaymentPlan.PlanType.choices,
         default=PaymentPlan.PlanType.REGULAR,
-        db_index=True,
         help_text="Type of the Payment Plans the group runs; a Follow-Up / Top-Up / Amendment group is linked [sys]",
     )
     source_group = models.ForeignKey(
@@ -187,6 +199,36 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
                 condition=Q(plan_type=PaymentPlan.PlanType.REGULAR, source_group__isnull=True)
                 | (~Q(plan_type=PaymentPlan.PlanType.REGULAR) & Q(source_group__isnull=False)),
                 name="payment_plan_group_source_group_only_on_linked",
+            ),
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_paymentplangroup_created_at_14a802c0"),
+            LongNameIndex(fields=["updated_at"], name="payment_paymentplangroup_updated_at_b23558fe"),
+            LongNameIndex(fields=["unicef_id"], name="payment_paymentplangroup_unicef_id_3fb17c90"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_unicef_id_3fb17c90_like",
+            ),
+            LongNameIndex(
+                fields=["background_action_status"], name="payment_paymentplangroup_background_action_status_2aeaeb44"
+            ),
+            LongNameIndex(
+                fields=["background_action_status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_background_action_status_2aeaeb44_like",
+            ),
+            LongNameIndex(fields=["status"], name="payment_paymentplangroup_status_c68e4ae6"),
+            LongNameIndex(
+                fields=["status"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_status_c68e4ae6_like",
+            ),
+            LongNameIndex(fields=["plan_type"], name="payment_paymentplangroup_plan_type_1e21f341"),
+            LongNameIndex(
+                fields=["plan_type"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_paymentplangroup_plan_type_1e21f341_like",
             ),
         ]
 
@@ -355,13 +397,17 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         """Narrow the group's payment plans to the ones that can be sent to the payment gateway.
 
         A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
-        (use_payment_gateway is True or the FSP communication_channel is API), still has splits
+        (the group's use_payment_gateway is True or the FSP communication_channel is API), still has splits
         not yet sent to the gateway, and is not already being sent. With Vision active, plans
         in a group with Vision status other than NOT_SENT are excluded, except Follow-Up plans.
         """
         from hope.models import FinancialServiceProvider, PaymentPlanSplit
 
-        if self.financial_service_provider is None:
+        if self.financial_service_provider is None or not (
+            self.use_payment_gateway
+            or self.financial_service_provider.communication_channel
+            == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ):
             return self.payment_plans.none()
         payment_plans = self.payment_plans.annotate(
             has_unsent_splits=Exists(
@@ -372,8 +418,6 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
             & Q(has_unsent_splits=True)
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
-        if self.financial_service_provider.communication_channel != FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
-            payment_plans = payment_plans.filter(use_payment_gateway=True)
         # A group accepted while Vision was disabled still has NOT_SENT status and needs manual PG sending.
         # Groups sent to Vision use automatic PG dispatch; Follow-Up plans remain eligible here, and failed
         # automatic sends are retried in Django admin.

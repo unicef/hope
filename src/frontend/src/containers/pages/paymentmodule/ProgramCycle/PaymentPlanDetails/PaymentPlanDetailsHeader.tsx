@@ -7,10 +7,6 @@ import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { restQueryKey } from '@utils/queryKeys';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
@@ -29,27 +25,10 @@ export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
+  const { isInstructionManaged } = paymentPlan;
   const { t } = useTranslation();
-  const { businessArea, programId, baseUrl } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsCyclesRetrieve,
-      {
-        businessAreaSlug: businessArea,
-        id: programCycleId,
-        programCode: programId,
-      },
-    ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsCyclesRetrieve({
-        businessAreaSlug: businessArea,
-        id: programCycleId,
-        programCode: programId,
-      });
-    },
-    enabled: !!programCycleId,
-  });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
@@ -59,7 +38,7 @@ export const PaymentPlanDetailsHeader = ({
       to: '../../..',
     });
     breadCrumbsItems.push({
-      title: `${programCycleData?.title || ''}`,
+      title: paymentPlan.programCycle?.title || '',
       to: '../..',
     });
   } else {
@@ -78,23 +57,21 @@ export const PaymentPlanDetailsHeader = ({
 
   const canRemove =
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
-  const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case PaymentPlanStatusEnum.OPEN:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
-          canEdit={canEdit}
           canLock={canLock}
         />
       );
       break;
     case PaymentPlanStatusEnum.LOCKED:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}

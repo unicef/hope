@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.utils import nested_getattr
+from hope.models.utils import LongNameIndex
 
 if TYPE_CHECKING:
     from django.contrib.auth.base_user import AbstractBaseUser
@@ -40,15 +41,13 @@ class LogEntry(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name="log_entries",
-        db_index=True,
     )
-    object_id = models.UUIDField(null=True, blank=True, db_index=True)
+    object_id = models.UUIDField(null=True, blank=True)
     content_object = GenericForeignKey("content_type", "object_id")
     action = models.CharField(
         choices=get_log_entry_action_choices,
         max_length=100,
         verbose_name=_("action"),
-        db_index=True,
     )
     object_repr = models.TextField(blank=True)
     changes = JSONField(null=True, blank=True, verbose_name=_("change message"))
@@ -63,7 +62,7 @@ class LogEntry(models.Model):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True, blank=True)
     programs = models.ManyToManyField("program.Program", related_name="activity_logs", blank=True)
 
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"))
 
     class Meta:
         app_label = "activity_log"
@@ -73,6 +72,12 @@ class LogEntry(models.Model):
         verbose_name_plural = _("log entries")
         indexes = [
             models.Index(fields=["business_area", "-timestamp"], name="idx_le_ba_ts"),
+            LongNameIndex(fields=["object_id"], name="activity_log_logentry_object_id_d7af1d06"),
+            LongNameIndex(fields=["action"], name="activity_log_logentry_action_7b504b2d"),
+            LongNameIndex(
+                fields=["action"], opclasses=["varchar_pattern_ops"], name="activity_log_logentry_action_7b504b2d_like"
+            ),
+            LongNameIndex(fields=["timestamp"], name="activity_log_logentry_timestamp_62c98ec4"),
         ]
 
     def __str__(self) -> str:

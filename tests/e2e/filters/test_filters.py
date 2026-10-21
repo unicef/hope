@@ -51,8 +51,6 @@ def create_payment_plan(business_area: BusinessArea) -> None:
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency=Currency.objects.get(code="USD"),
-        dispersion_start_date=datetime.now(),
-        dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
         status=PaymentPlan.Status.ACCEPTED,
         created_by=User.objects.first(),
@@ -70,8 +68,6 @@ def create_payment_plan(business_area: BusinessArea) -> None:
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency=Currency.objects.get(code="USD"),
-        dispersion_start_date=datetime.now(),
-        dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
         status=PaymentPlan.Status.ACCEPTED,
         created_by=User.objects.first(),
@@ -478,7 +474,6 @@ class TestSmokeFilters:
         filters.get_button_filters_apply().click()
         assert filters.wait_for_number_of_rows(1)
 
-    @pytest.mark.night
     def test_grievance_tickets_filters_of_households_and_individuals(
         self,
         create_programs: None,

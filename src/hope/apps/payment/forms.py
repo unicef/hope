@@ -50,18 +50,3 @@ class GroupReexportForm(forms.Form):
         required=False,
         label="FSP XLSX Template (optional override)",
     )
-
-
-class TemplateSelectForm(forms.Form):
-    template = forms.ModelChoiceField(
-        queryset=FinancialServiceProviderXlsxTemplate.objects.none(),
-        label="Select FSP XLSX Template",
-        required=False,
-    )
-
-    def __init__(self, *args: Any, payment_plan: Any = None, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        if payment_plan:
-            self.fields["template"].queryset = FinancialServiceProviderXlsxTemplate.objects.filter(
-                financial_service_providers__allowed_business_areas__slug=payment_plan.business_area.slug
-            ).distinct()

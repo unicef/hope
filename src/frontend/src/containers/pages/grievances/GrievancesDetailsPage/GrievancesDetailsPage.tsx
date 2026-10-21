@@ -13,9 +13,10 @@ import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   GRIEVANCES_VIEW_DETAILS_PERMISSIONS,
@@ -63,6 +64,24 @@ const GrievancesDetailsPage = (): ReactElement => {
         id: id,
       }),
   });
+
+  // Only this page counts as opening the ticket for My Tasks: other screens fetch tickets through
+  // the detail endpoint without showing them, so "seen" is an explicit call rather than a side
+  // effect of the fetch above.
+  const { mutate: reportSeen } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsMyTasksSeenCreate({
+        businessAreaSlug,
+        id,
+      }),
+  });
+  // Once per ticket, not on every refetch: the stamp only needs to postdate the last change.
+  const loadedTicketId = grievanceTicket?.id;
+  useEffect(() => {
+    if (loadedTicketId) {
+      reportSeen();
+    }
+  }, [loadedTicketId, reportSeen]);
 
   const { baseUrl } = useBaseUrl();
 

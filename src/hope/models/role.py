@@ -5,7 +5,7 @@ from natural_keys import NaturalKeyModel
 from hope.apps.account.fields import ChoiceArrayField
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class Role(NaturalKeyModel, TimeStampedUUIDModel):
@@ -31,6 +31,10 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
     class Meta:
         app_label = "account"
         ordering = ("name",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="account_role_created_at_1453ec3c"),
+            LongNameIndex(fields=["updated_at"], name="account_role_updated_at_d4087b83"),
+        ]
 
     def __str__(self) -> str:
         return self.name

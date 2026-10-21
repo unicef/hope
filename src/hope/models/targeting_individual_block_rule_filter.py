@@ -7,7 +7,7 @@ from hope.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.targeting.choices import FlexFieldClassification
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaFilterBase
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
@@ -43,6 +43,10 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     class Meta:
         app_label = "targeting"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="targeting_targetingindivid_created_at_c6ea6f6a"),
+            LongNameIndex(fields=["updated_at"], name="targeting_targetingindivid_updated_at_c9793a5c"),
+        ]
 
     @property
     def is_social_worker_program(self) -> bool:

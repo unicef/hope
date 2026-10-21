@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 from django.db.models import Case, IntegerField, Q, QuerySet, Value, When
@@ -45,8 +46,8 @@ class PaymentPlanFilter(FilterSet):
     total_entitled_quantity_usd_to = django_filters.NumberFilter(
         field_name="total_entitled_quantity_usd", lookup_expr="lte"
     )
-    start_date = django_filters.DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
-    end_date = django_filters.DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    start_date = django_filters.DateFilter(method="filter_by_dispersion_date", lookup_expr="gte")
+    end_date = django_filters.DateFilter(method="filter_by_dispersion_date", lookup_expr="lte")
 
     class Meta:
         model = PaymentPlan
@@ -66,6 +67,12 @@ class PaymentPlanFilter(FilterSet):
         return qs.filter(
             Q(payment_plan_group__financial_service_provider__name=value)
             | Q(follow_up_instruction__financial_service_provider__name=value)
+        )
+
+    def filter_by_dispersion_date(self, qs: QuerySet, name: str, value: date) -> QuerySet:
+        lookup = {"start_date": "dispersion_start_date__gte", "end_date": "dispersion_end_date__lte"}[name]
+        return qs.filter(
+            Q(**{f"payment_plan_group__{lookup}": value}) | Q(**{f"follow_up_instruction__{lookup}": value})
         )
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":

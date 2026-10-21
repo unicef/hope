@@ -1,4 +1,3 @@
-from datetime import timedelta
 from decimal import Decimal
 import logging
 from typing import Any
@@ -86,10 +85,8 @@ def _create_and_run(
     The job is kicked off explicitly rather than through the on_commit hook so the amounts the
     endpoint resolved travel with it, mirroring what `create_top_up` queues in production.
     """
-    start = source_pp.dispersion_start_date + timedelta(days=1)
-    end = source_pp.dispersion_end_date + timedelta(days=1)
     top_up = PaymentPlanService(source_pp).create_top_up(
-        user, start, end, payment_plan_group=top_up_group, fixed_amount=fixed_amount, amounts=amounts
+        user, payment_plan_group=top_up_group, fixed_amount=fixed_amount, amounts=amounts
     )
     extra_config = (
         {"fixed_amount": str(fixed_amount)}
@@ -211,13 +208,9 @@ def test_create_top_up_arrange_source_outside_accepted_or_finished_act_create_as
 ) -> None:
     source_pp.status = status
     source_pp.save(update_fields=["status"])
-    start = source_pp.dispersion_start_date + timedelta(days=1)
-    end = source_pp.dispersion_end_date + timedelta(days=1)
 
     with pytest.raises(Exception, match="Accepted or Finished"):
-        PaymentPlanService(source_pp).create_top_up(
-            user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00")
-        )
+        PaymentPlanService(source_pp).create_top_up(user, payment_plan_group=top_up_group, fixed_amount=Decimal("5.00"))
 
 
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=1.0)
@@ -280,14 +273,12 @@ def test_create_top_up_arrange_fixed_amount_act_run_task_assert_query_count(
     django_assert_num_queries: Any,
     top_up_group: Any,
 ) -> None:
-    start = source_pp.dispersion_start_date + timedelta(days=1)
-    end = source_pp.dispersion_end_date + timedelta(days=1)
     # Django never clears this between tests, so without it the count depends on what ran before.
     ContentType.objects.clear_cache()
 
     with django_assert_num_queries(77), django_capture_on_commit_callbacks(execute=True):
         PaymentPlanService(source_pp).create_top_up(
-            user, start, end, payment_plan_group=top_up_group, fixed_amount=Decimal("25.00")
+            user, payment_plan_group=top_up_group, fixed_amount=Decimal("25.00")
         )
 
 
@@ -306,11 +297,7 @@ def test_create_top_up_arrange_beneficiary_claimed_between_validation_and_copy_a
     """A beneficiary claimed by a sibling Top-Up after validation is skipped, but never silently."""
     claimed, funded, _other = three_payments
     amounts = {claimed.unicef_id: Decimal("10.00"), funded.unicef_id: Decimal("30.00")}
-    start = source_pp.dispersion_start_date + timedelta(days=1)
-    end = source_pp.dispersion_end_date + timedelta(days=1)
-    top_up = PaymentPlanService(source_pp).create_top_up(
-        user, start, end, payment_plan_group=top_up_group, amounts=amounts
-    )
+    top_up = PaymentPlanService(source_pp).create_top_up(user, payment_plan_group=top_up_group, amounts=amounts)
     competing_pp = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,

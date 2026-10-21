@@ -220,12 +220,48 @@ def test_create_takes_fsp_and_currency_from_the_source_group(instruction_over_on
     assert instruction_over_one_group.currency == currency
 
 
+def test_create_stores_dispersion_dates_on_the_instruction(instruction_over_one_group, cycle):
+    child_plan = instruction_over_one_group.payment_plans.get()
+
+    assert instruction_over_one_group.dispersion_start_date == cycle.start_date + timedelta(days=1)
+    assert instruction_over_one_group.dispersion_end_date == cycle.start_date + timedelta(days=2)
+    assert child_plan.dispersion_start_date == instruction_over_one_group.dispersion_start_date
+    assert child_plan.dispersion_end_date == instruction_over_one_group.dispersion_end_date
+
+
 def test_create_leaves_child_payment_plans_outside_any_group(instruction_over_one_group, fsp, currency):
     child_plan = instruction_over_one_group.payment_plans.get()
 
     assert child_plan.payment_plan_group_id is None
     assert child_plan.financial_service_provider == fsp
     assert child_plan.currency == currency
+
+
+@pytest.fixture
+def instruction_over_one_payment_gateway_group(user, program, cycle, business_area, currency, delivery_mechanism, fsp):
+    group = PaymentPlanGroupFactory(cycle=cycle, use_payment_gateway=True)
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    return FollowUpInstructionService(program).create(
+        user=user,
+        payment_plan_group_ids=[str(group.id)],
+        dispersion_start_date=cycle.start_date + timedelta(days=1),
+        dispersion_end_date=cycle.start_date + timedelta(days=2),
+    )
+
+
+def test_create_takes_use_payment_gateway_from_the_source_group(instruction_over_one_payment_gateway_group):
+    child_plan = instruction_over_one_payment_gateway_group.payment_plans.get()
+
+    assert instruction_over_one_payment_gateway_group.use_payment_gateway is True
+    assert child_plan.use_payment_gateway is True
 
 
 @pytest.mark.enable_activity_log
@@ -490,6 +526,45 @@ def test_create_raises_validation_error_for_mixed_currency(
     )
 
     with pytest.raises(ValidationError, match="must share the same Currency"):
+        FollowUpInstructionService(program).create(
+            user=user,
+            payment_plan_group_ids=[str(group.id), str(other_group.id)],
+            dispersion_start_date=cycle.start_date + timedelta(days=1),
+            dispersion_end_date=cycle.start_date + timedelta(days=2),
+        )
+
+
+def test_create_raises_validation_error_for_mixed_use_payment_gateway(
+    user,
+    program,
+    cycle,
+    business_area,
+    currency,
+    delivery_mechanism,
+    fsp,
+):
+    group = PaymentPlanGroupFactory(cycle=cycle, use_payment_gateway=True)
+    other_group = PaymentPlanGroupFactory(cycle=cycle)
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+    _create_source_payment_plan(
+        cycle=cycle,
+        group=other_group,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        with_failed_payment=True,
+    )
+
+    with pytest.raises(ValidationError, match="must share the same Use Payment Gateway setting"):
         FollowUpInstructionService(program).create(
             user=user,
             payment_plan_group_ids=[str(group.id), str(other_group.id)],
