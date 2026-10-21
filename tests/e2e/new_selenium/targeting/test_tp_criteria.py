@@ -1,8 +1,10 @@
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
+from extras.test_utils.factories import TicketNeedsAdjudicationDetailsFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
+from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, Household, PaymentPlan, PaymentPlanGroup, User
 
 from .conftest import CYCLE_TITLE, GROUP_NAME, HOUSEHOLDS_COUNT, PURPOSE_NAME
@@ -55,6 +57,17 @@ def save_new_tp(browser: HopeTestBrowser, name: str) -> PaymentPlan:
 
 def targeted_household_ids(tp: PaymentPlan) -> set[str]:
     return set(tp.payment_items.values_list("household__unicef_id", flat=True))
+
+
+@pytest.fixture
+def smallest_household_in_adjudication(sized_households: list[Household]) -> Household:
+    smallest = sized_households[0]
+    TicketNeedsAdjudicationDetailsFactory(
+        ticket__business_area=smallest.business_area,
+        ticket__status=GrievanceTicket.STATUS_IN_PROGRESS,
+        golden_records_individual=smallest.head_of_household,
+    )
+    return smallest
 
 
 def test_household_size_rule_targets_only_matching_households(

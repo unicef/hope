@@ -1,6 +1,7 @@
 import datetime
 from decimal import Decimal
 
+from django.utils import timezone
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
@@ -8,7 +9,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Payment, PaymentPlan, User
 
-from .conftest import PM_VIEW_PERMISSIONS, payment_plan_url
+from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan, payment_plan_url
 
 pytestmark = pytest.mark.django_db()
 
@@ -35,6 +36,38 @@ def open_payment_as(browser: HopeTestBrowser, payment: Payment, status: str) -> 
 
 def first_payment(payment_plan: PaymentPlan) -> Payment:
     return payment_plan.payment_items.order_by("unicef_id").first()
+
+
+def _delivered_payment_plan(business_area: BusinessArea, status: str, force_failed_count: int = 0) -> PaymentPlan:
+    """Released plan with 3 fully delivered payments, the first `force_failed_count` of them marked failed."""
+    payment_plan = _lifecycle_payment_plan(business_area, status)
+    for index, payment in enumerate(payment_plan.payment_items.order_by("unicef_id")):
+        failed = index < force_failed_count
+        payment.status = Payment.STATUS_FORCE_FAILED if failed else Payment.STATUS_DISTRIBUTION_SUCCESS
+        payment.delivered_quantity = Decimal(0) if failed else payment.entitlement_quantity
+        payment.delivered_quantity_usd = Decimal(0) if failed else payment.entitlement_quantity_usd
+        payment.delivery_date = None if failed else timezone.now()
+        payment.save()
+        payment.household.total_cash_received = payment.delivered_quantity
+        payment.household.total_cash_received_usd = payment.delivered_quantity_usd
+        payment.household.save(update_fields=["total_cash_received", "total_cash_received_usd"])
+    payment_plan.update_money_fields()
+    return payment_plan
+
+
+@pytest.fixture
+def delivered_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _delivered_payment_plan(business_area, PaymentPlan.Status.ACCEPTED)
+
+
+@pytest.fixture
+def finished_delivered_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    return _delivered_payment_plan(business_area, PaymentPlan.Status.FINISHED)
+
+
+@pytest.fixture
+def payment_plan_with_force_failed_payment(business_area: BusinessArea) -> PaymentPlan:
+    return _delivered_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, force_failed_count=1)
 
 
 def test_mark_payment_as_failed(

@@ -1,6 +1,7 @@
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
+from extras.test_utils.factories import HouseholdFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Household, PaymentPlan, User
@@ -8,6 +9,11 @@ from hope.models import BusinessArea, Household, PaymentPlan, User
 from .conftest import BUILT_TP_NAME, CYCLE_TITLE, GROUP_NAME, HOUSEHOLDS_COUNT, PURPOSE_NAME, STATUS, tp_url
 
 pytestmark = pytest.mark.django_db()
+
+
+@pytest.fixture
+def household_added_after_build(built_tp: PaymentPlan) -> Household:
+    return HouseholdFactory(size=2, business_area=built_tp.business_area, program=built_tp.program_cycle.program)
 
 
 def test_lock_hides_edit_actions_and_unlock_restores_them(

@@ -6,6 +6,9 @@ from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.factories import PDUOnlineEditFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
+from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import (
+    PDUOnlineEditGenerateDataService,
+)
 from hope.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -54,6 +57,39 @@ def edit_row(individual: Individual) -> str:
 def round_value(online_edit: PDUOnlineEdit, field_name: str) -> dict:
     online_edit.refresh_from_db()
     return online_edit.edit_data[0]["pdu_fields"][field_name]
+
+
+@pytest.fixture
+def online_edit_factory(
+    program: Program,
+    string_attribute: FlexibleAttribute,
+    individual: Individual,
+    create_super_user: User,
+) -> OnlineEditFactory:
+    """Build an online edit for `individual` with the same edit_data the create wizard generates."""
+
+    def make(
+        status: str = PDUOnlineEdit.Status.NEW,
+        value: str | None = None,
+        authorized_users: list[User] | None = None,
+    ) -> PDUOnlineEdit:
+        rounds_data = [{"field": string_attribute.name, "round": 1, "round_name": "Round 1"}]
+        edit_data = PDUOnlineEditGenerateDataService(program, {}, rounds_data).generate_edit_data()
+        if value is not None:
+            field = edit_data[0]["pdu_fields"][string_attribute.name]
+            field["value"] = value
+            field["collection_date"] = "2026-01-15"
+        return PDUOnlineEditFactory(
+            program=program,
+            business_area=program.business_area,
+            created_by=create_super_user,
+            status=status,
+            edit_data=edit_data,
+            number_of_records=len(edit_data),
+            authorized_users=[create_super_user] if authorized_users is None else authorized_users,
+        )
+
+    return make
 
 
 def test_create_online_template(

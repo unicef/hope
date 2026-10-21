@@ -366,7 +366,8 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock(self) -> PaymentPlan:
+    def clear_lock_conflicts(self) -> None:
+        """Undo what lock() did to hard-conflicted payments."""
         restorable_payments = self.payment_plan.payment_items.filter(
             status=Payment.STATUS_NOT_ELIGIBLE,
             excluded=False,
@@ -382,6 +383,9 @@ class PaymentPlanService:
             user_id,
         )
         self.payment_plan.payment_items.filter(conflicted=True).update_and_log({"conflicted": False}, user_id)
+
+    def unlock(self) -> PaymentPlan:
+        self.clear_lock_conflicts()
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -1743,6 +1747,11 @@ class PaymentPlanService:
         # Child plans take their collectors and entitlements from the source plan, so only regular plans are refreshed.
         if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
             transaction.on_commit(lambda: payment_plan_refresh_payees_async_task(self.payment_plan))
+        else:
+            # An aborted plan was locked, so its payments still carry the lock's conflict flags.
+            self.clear_lock_conflicts()
+            self.payment_plan.update_population_count_fields()
+            self.payment_plan.update_money_fields()
 
         return self.payment_plan
 

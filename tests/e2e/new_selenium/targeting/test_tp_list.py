@@ -44,6 +44,12 @@ def filter_by_min_households(browser: HopeTestBrowser) -> None:
     browser.type('[data-cy="filters-total-households-count-min"] input', "5")
 
 
+@pytest.fixture
+def finished_programme_tp(built_tp: PaymentPlan) -> PaymentPlan:
+    Program.objects.filter(id=built_tp.program_cycle.program_id).update(status=Program.FINISHED)
+    return built_tp
+
+
 @pytest.mark.parametrize(
     ("apply_filter", "shown", "hidden"),
     [

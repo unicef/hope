@@ -224,6 +224,17 @@ def aborted_child_plan_payment(plan_type):
 
 
 @pytest.fixture
+def aborted_child_plan_conflicted_payment(plan_type):
+    payment_plan = PaymentPlanFactory(
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        total_households_count=0,
+    )
+    return PaymentFactory(parent=payment_plan, conflicted=True, status=Payment.STATUS_NOT_ELIGIBLE)
+
+
+@pytest.fixture
 def western_union_report(payment_plan):
     return WesternUnionPaymentPlanReportFactory(payment_plan=payment_plan)
 
@@ -675,6 +686,29 @@ def test_reactivate_abort_of_child_plan_keeps_its_payments(
     assert list(Payment.all_objects.filter(parent=payment_plan).values_list("pk", "entitlement_quantity")) == [
         (aborted_child_plan_payment.pk, Decimal("25.00"))
     ]
+
+
+@pytest.mark.parametrize(
+    "plan_type",
+    [
+        pytest.param(PaymentPlan.PlanType.FOLLOW_UP, id="follow-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP, id="top-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP_AMENDMENT, id="top-up-amendment"),
+    ],
+)
+def test_reactivate_abort_of_child_plan_clears_lock_conflicts(
+    plan_type: str,
+    aborted_child_plan_conflicted_payment: Payment,
+) -> None:
+    payment_plan = aborted_child_plan_conflicted_payment.parent
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+
+    payment_plan.refresh_from_db()
+    aborted_child_plan_conflicted_payment.refresh_from_db()
+    assert aborted_child_plan_conflicted_payment.conflicted is False
+    assert aborted_child_plan_conflicted_payment.status == Payment.STATUS_PENDING
+    assert payment_plan.total_households_count == 1
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")

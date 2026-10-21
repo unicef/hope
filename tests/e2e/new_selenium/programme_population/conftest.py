@@ -1,17 +1,11 @@
-from collections.abc import Callable
-
 import pytest
 
 from extras.test_utils.factories import (
     BeneficiaryGroupFactory,
     HouseholdFactory,
     IndividualFactory,
-    PDUOnlineEditFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
-)
-from hope.apps.periodic_data_update.service.periodic_data_update_online_edit_generate_data_service import (
-    PDUOnlineEditGenerateDataService,
 )
 from hope.apps.periodic_data_update.utils import (
     field_label_to_field_name,
@@ -21,11 +15,9 @@ from hope.models import (
     BusinessArea,
     FlexibleAttribute,
     Individual,
-    PDUOnlineEdit,
     PeriodicFieldData,
     Program,
     RegistrationDataImport,
-    User,
 )
 
 
@@ -80,36 +72,3 @@ def individual(program: Program, business_area: BusinessArea, string_attribute: 
     hoh.save()
     hoh.refresh_from_db()
     return hoh
-
-
-@pytest.fixture
-def online_edit_factory(
-    program: Program,
-    string_attribute: FlexibleAttribute,
-    individual: Individual,
-    create_super_user: User,
-) -> Callable[..., PDUOnlineEdit]:
-    """Build an online edit for `individual` with the same edit_data the create wizard generates."""
-
-    def make(
-        status: str = PDUOnlineEdit.Status.NEW,
-        value: str | None = None,
-        authorized_users: list[User] | None = None,
-    ) -> PDUOnlineEdit:
-        rounds_data = [{"field": string_attribute.name, "round": 1, "round_name": "Round 1"}]
-        edit_data = PDUOnlineEditGenerateDataService(program, {}, rounds_data).generate_edit_data()
-        if value is not None:
-            field = edit_data[0]["pdu_fields"][string_attribute.name]
-            field["value"] = value
-            field["collection_date"] = "2026-01-15"
-        return PDUOnlineEditFactory(
-            program=program,
-            business_area=program.business_area,
-            created_by=create_super_user,
-            status=status,
-            edit_data=edit_data,
-            number_of_records=len(edit_data),
-            authorized_users=[create_super_user] if authorized_users is None else authorized_users,
-        )
-
-    return make

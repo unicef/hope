@@ -4,11 +4,12 @@ from decimal import Decimal
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
+from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import Approval, BusinessArea, Currency, PaymentPlan, PaymentPlanSplit, User
 
-from .conftest import PM_VIEW_PERMISSIONS, payment_plan_url
+from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan, payment_plan_url
 
 pytestmark = pytest.mark.django_db()
 
@@ -40,6 +41,19 @@ def open_payment_plan_as(
     browser.login(username="noperm_user")
     browser.open(payment_plan_url(payment_plan))
     browser.wait_for_text(status, STATUS)
+
+
+@pytest.fixture
+def pln_currency() -> Currency:
+    return CurrencyFactory(code="PLN", name="Polish Zloty")
+
+
+@pytest.fixture
+def aborted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
+    payment_plan = _lifecycle_payment_plan(business_area, PaymentPlan.Status.ABORTED)
+    payment_plan.abort_comment = "Aborted before the e2e run"
+    payment_plan.save(update_fields=["abort_comment"])
+    return payment_plan
 
 
 @pytest.mark.parametrize(
