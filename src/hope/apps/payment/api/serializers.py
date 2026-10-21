@@ -950,6 +950,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
+    # A grouped plan's approvals are on its group; only a Follow-Up Instruction child has its own.
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     bank_reconciliation_success = serializers.SerializerMethodField()
     bank_reconciliation_error = serializers.SerializerMethodField()
     can_create_payment_verification_plan = serializers.BooleanField()
@@ -1011,6 +1013,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
+            "approval_process",
             "total_entitled_quantity_usd",
             "total_entitled_quantity_revised_usd",
             "total_delivered_quantity_usd",

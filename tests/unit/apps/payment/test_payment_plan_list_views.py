@@ -12,6 +12,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
     FollowUpInstructionFactory,
@@ -910,3 +912,62 @@ def test_list_filtered_by_fsp_returns_follow_up_instruction_child(
     results = response.json()["results"]
     assert [plan["id"] for plan in results] == [str(instruction_child_with_fsp.id)]
     assert results[0]["payment_plan_group"] is None
+
+
+@pytest.fixture
+def instruction_child_with_approval(payment_plan_detail_context: dict[str, Any]) -> PaymentPlan:
+    program = payment_plan_detail_context["program_active"]
+    plan = PaymentPlanFactory(
+        business_area=payment_plan_detail_context["business_area"],
+        program_cycle=program.cycles.first(),
+        follow_up_instruction=FollowUpInstructionFactory(program=program),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.IN_AUTHORIZATION,
+    )
+    ApprovalFactory(approval_process=ApprovalProcessFactory(payment_plan=plan), comment="approved for the instruction")
+    return plan
+
+
+def test_payment_plan_detail_returns_approval_process_of_instruction_child(
+    payment_plan_detail_context: dict[str, Any],
+    instruction_child_with_approval: PaymentPlan,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    url = reverse(
+        "api:payments:payment-plans-detail",
+        kwargs={
+            "business_area_slug": payment_plan_detail_context["business_area"].slug,
+            "program_code": payment_plan_detail_context["program_active"].code,
+            "pk": str(instruction_child_with_approval.id),
+        },
+    )
+
+    response = payment_plan_detail_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    approval_process = response.json()["approval_process"]
+    assert len(approval_process) == 1
+    assert approval_process[0]["actions"]["approval"][0]["comment"] == "approved for the instruction"
+
+
+def test_payment_plan_detail_of_grouped_plan_has_no_approval_process_of_its_own(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["approval_process"] == []

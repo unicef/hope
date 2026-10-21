@@ -8,7 +8,10 @@ interface PaymentPlanAcceptanceProcessProps {
   paymentPlan: PaymentPlanDetail;
 }
 
-/** Read-only view of the plan's group approvals; approving happens on the group page. */
+/**
+ * Read-only view of the plan's approvals: the group's for a grouped plan, the plan's own for a
+ * Follow-Up Instruction child. Approving happens on the group or instruction page.
+ */
 export function PaymentPlanAcceptanceProcess({
   paymentPlan,
 }: PaymentPlanAcceptanceProcessProps): ReactElement {
@@ -20,7 +23,11 @@ export function PaymentPlanAcceptanceProcess({
 
   return (
     <AcceptanceProcess
-      approvalProcess={group?.approvalProcess}
+      approvalProcess={
+        paymentPlan.isInstructionManaged
+          ? paymentPlan.approvalProcess
+          : group?.approvalProcess
+      }
       closure={closure}
     />
   );
