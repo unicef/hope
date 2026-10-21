@@ -99,9 +99,10 @@ class DataCollectingTypeForm(forms.ModelForm):
                 self.add_error("payee_type", "Payee Type is required for a Data Collecting Type that is not deprecated")
         elif (
             dct_type
+            and not self.cleaned_data.get("deprecated")
             and DataCollectingType.objects.filter(payee_type=payee_type)
             .exclude(pk=self.instance.pk)
-            .exclude(type=dct_type)
+            .exclude(Q(type=dct_type) | Q(type__isnull=True) | Q(deprecated=True))
             .exists()
         ):
             self.add_error("payee_type", MIXED_DCT_TYPES_IN_PAYEE_TYPE_ERROR)
@@ -158,7 +159,8 @@ class PayeeTypeForm(forms.ModelForm):
         if assigned_elsewhere.exists():
             labels = ", ".join(assigned_elsewhere.values_list("label", flat=True))
             self.add_error("data_collecting_types", f"{DCT_ASSIGNED_TO_OTHER_PAYEE_TYPE_ERROR}: {labels}")
-        if selected.order_by().values("type").distinct().count() > 1:
+        typed_in_use = selected.exclude(Q(type__isnull=True) | Q(deprecated=True))
+        if typed_in_use.order_by().values("type").distinct().count() > 1:
             self.add_error("data_collecting_types", MIXED_DCT_TYPES_IN_PAYEE_TYPE_ERROR)
         if self.instance.pk:
             removed = self.instance.data_collecting_types.exclude(pk__in=selected)

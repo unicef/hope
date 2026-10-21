@@ -103,6 +103,20 @@ def unassigned_standard_dct() -> DataCollectingType:
 
 
 @pytest.fixture
+def incentive_payee_dct_outside_type_check(
+    request: pytest.FixtureRequest, incentive_payee_type: PayeeType
+) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        code="delegate", label="Delegate for payment", payee_type=incentive_payee_type, **request.param
+    )
+
+
+@pytest.fixture
+def unassigned_dct_outside_type_check(request: pytest.FixtureRequest) -> DataCollectingType:
+    return DataCollectingTypeFactory(code="unknown", label="Unknown", payee_type=None, **request.param)
+
+
+@pytest.fixture
 def household_with_default_dct(household_payee_type: PayeeType, household_dct: DataCollectingType) -> PayeeType:
     household_payee_type.default_data_collecting_type = household_dct
     household_payee_type.save()
@@ -331,6 +345,47 @@ def test_dct_form_rejects_payee_type_with_data_collecting_types_of_other_type(
     assert form.errors["payee_type"] == ["All Data Collecting Types of a Payee Type must have the same type"]
 
 
+@pytest.mark.parametrize(
+    "incentive_payee_dct_outside_type_check",
+    [
+        pytest.param({"type": None}, id="without-type"),
+        pytest.param({"type": DataCollectingType.Type.STANDARD, "deprecated": True}, id="deprecated"),
+    ],
+    indirect=True,
+)
+def test_dct_form_ignores_dct_without_type_or_deprecated_in_same_type_check(
+    incentive_payee_dct_outside_type_check: DataCollectingType, incentive_payee_type: PayeeType
+) -> None:
+    form = DataCollectingTypeForm(
+        data={
+            "code": "frontline_worker_cp",
+            "label": "Frontline Worker CP",
+            "type": DataCollectingType.Type.SOCIAL,
+            "weight": 1,
+            "payee_type": incentive_payee_type.pk,
+        }
+    )
+
+    assert form.is_valid() is True
+
+
+def test_dct_form_allows_deprecated_dct_of_other_type_in_payee_type(
+    household_dct: DataCollectingType, household_payee_type: PayeeType
+) -> None:
+    form = DataCollectingTypeForm(
+        data={
+            "code": "unknown",
+            "label": "Unknown",
+            "type": DataCollectingType.Type.SOCIAL,
+            "deprecated": True,
+            "weight": 1,
+            "payee_type": household_payee_type.pk,
+        }
+    )
+
+    assert form.is_valid() is True
+
+
 def test_dct_form_rejects_unassigning_default_dct_of_payee_type(
     household_with_default_dct: PayeeType, household_dct: DataCollectingType
 ) -> None:
@@ -453,6 +508,30 @@ def test_payee_type_form_rejects_data_collecting_types_of_mixed_type(
 
     assert form.is_valid() is False
     assert form.errors["data_collecting_types"] == ["All Data Collecting Types of a Payee Type must have the same type"]
+
+
+@pytest.mark.parametrize(
+    "unassigned_dct_outside_type_check",
+    [
+        pytest.param({"type": None}, id="without-type"),
+        pytest.param({"type": DataCollectingType.Type.STANDARD, "deprecated": True}, id="deprecated"),
+    ],
+    indirect=True,
+)
+def test_payee_type_form_ignores_dct_without_type_or_deprecated_in_same_type_check(
+    unassigned_social_dct: DataCollectingType, unassigned_dct_outside_type_check: DataCollectingType
+) -> None:
+    form = PayeeTypeForm(
+        data={
+            "name": "Organization",
+            "gl_code": "7700430",
+            "weight": 10,
+            "data_collecting_types": [unassigned_social_dct.pk, unassigned_dct_outside_type_check.pk],
+            "default_data_collecting_type": unassigned_social_dct.pk,
+        }
+    )
+
+    assert form.is_valid() is True
 
 
 def test_payee_type_form_rejects_removing_dct_payee_labels_are_restricted_to(
