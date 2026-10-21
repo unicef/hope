@@ -208,7 +208,7 @@ def test_exclude_undoes_excluded_payments(payment_plan, payment_plan_data):
 
 def test_exclude_individuals_people_program(payment_plan, payment_plan_data, program):
     people_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
-    beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
+    beneficiary_group = BeneficiaryGroupFactory(name="People")
     program.data_collecting_type = people_dct
     program.beneficiary_group = beneficiary_group
     program.save(update_fields=["data_collecting_type", "beneficiary_group"])

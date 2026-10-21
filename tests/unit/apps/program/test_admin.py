@@ -27,11 +27,13 @@ from extras.test_utils.factories import (
     DataCollectingTypeFactory,
     IndividualFactory,
     PartnerFactory,
+    PayeeTypeFactory,
     ProgramFactory,
     RegistrationDataImportFactory,
     RoleAssignmentFactory,
     UserFactory,
 )
+from hope.admin.beneficiary_group import BeneficiaryGroupForm
 from hope.admin.program import (
     ProgramAdmin,
     bulk_upload_individuals_photos_action,
@@ -46,6 +48,7 @@ from hope.models import (
     DataCollectingType,
     FileTemp,
     Partner,
+    PayeeType,
     Program,
     RegistrationDataImport,
     RoleAssignment,
@@ -148,6 +151,28 @@ def django_app_no_csrf(django_app_factory: Any) -> Any:
 @pytest.fixture
 def area_limits_url(program: Program) -> str:
     return reverse("admin:program_program_area_limits", args=[program.pk])
+
+
+@pytest.fixture
+def incentive_payee_type(db: Any) -> PayeeType:
+    return PayeeTypeFactory(name="Incentive Payee", gl_code="7700430")
+
+
+@pytest.fixture
+def frontline_worker_dct(incentive_payee_type: PayeeType) -> DataCollectingType:
+    return DataCollectingTypeFactory(
+        code="frontline_worker_cp", type=DataCollectingType.Type.SOCIAL, payee_type=incentive_payee_type
+    )
+
+
+@pytest.fixture
+def incentive_payee_label(incentive_payee_type: PayeeType) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory(name="Child Protection workers", payee_type=incentive_payee_type)
+
+
+@pytest.fixture
+def program_on_household_beneficiary_group(household_beneficiary_group: BeneficiaryGroup) -> Program:
+    return ProgramFactory(beneficiary_group=household_beneficiary_group)
 
 
 def test_area_limits_get_request(
@@ -714,8 +739,8 @@ def standard_data_collecting_type(db: Any) -> DataCollectingType:
 
 
 @pytest.fixture
-def master_detail_beneficiary_group(db: Any) -> BeneficiaryGroup:
-    return BeneficiaryGroupFactory(master_detail=True)
+def household_beneficiary_group(db: Any) -> BeneficiaryGroup:
+    return BeneficiaryGroupFactory()
 
 
 @pytest.fixture
@@ -727,7 +752,7 @@ def test_add_view_rejects_biometric_flag_on_non_cw_business_area(
     django_app_no_csrf: Any,
     program_adder: User,
     standard_data_collecting_type: DataCollectingType,
-    master_detail_beneficiary_group: BeneficiaryGroup,
+    household_beneficiary_group: BeneficiaryGroup,
     all_except_cw_business_area: BusinessArea,
 ) -> None:
     response = django_app_no_csrf.post(
@@ -736,7 +761,7 @@ def test_add_view_rejects_biometric_flag_on_non_cw_business_area(
         params=_program_add_form_data(
             all_except_cw_business_area,
             standard_data_collecting_type,
-            master_detail_beneficiary_group,
+            household_beneficiary_group,
             biometric_deduplication_enabled=True,
         ),
         expect_errors=True,
@@ -751,7 +776,7 @@ def test_add_view_accepts_biometric_flag_on_cw_business_area(
     django_app_no_csrf: Any,
     program_adder: User,
     standard_data_collecting_type: DataCollectingType,
-    master_detail_beneficiary_group: BeneficiaryGroup,
+    household_beneficiary_group: BeneficiaryGroup,
     cw_business_area: BusinessArea,
 ) -> None:
     response = django_app_no_csrf.post(
@@ -760,7 +785,7 @@ def test_add_view_accepts_biometric_flag_on_cw_business_area(
         params=_program_add_form_data(
             cw_business_area,
             standard_data_collecting_type,
-            master_detail_beneficiary_group,
+            household_beneficiary_group,
             biometric_deduplication_enabled=True,
         ),
         expect_errors=True,
@@ -768,3 +793,83 @@ def test_add_view_accepts_biometric_flag_on_cw_business_area(
 
     assert response.status_code == status.HTTP_302_FOUND
     assert Program.objects.get(name="Program added in admin").biometric_deduplication_enabled is True
+
+
+def test_add_view_rejects_payee_label_of_other_payee_type(
+    django_app_no_csrf: Any,
+    program_adder: User,
+    standard_data_collecting_type: DataCollectingType,
+    incentive_payee_label: BeneficiaryGroup,
+    cw_business_area: BusinessArea,
+) -> None:
+    response = django_app_no_csrf.post(
+        reverse("admin:program_program_add"),
+        user=program_adder,
+        params=_program_add_form_data(cw_business_area, standard_data_collecting_type, incentive_payee_label),
+        expect_errors=True,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert "Payee Label does not belong to the selected Payee Type." in response.text
+    assert not Program.all_objects.filter(name="Program added in admin").exists()
+
+
+def test_beneficiary_group_form_accepts_data_collecting_types_of_its_payee_type(
+    incentive_payee_type: PayeeType, frontline_worker_dct: DataCollectingType
+) -> None:
+    form = BeneficiaryGroupForm(
+        data={
+            "name": "Child Protection workers",
+            "group_label": "Worker",
+            "group_label_plural": "Workers",
+            "member_label": "Worker",
+            "member_label_plural": "Workers",
+            "payee_type": incentive_payee_type.pk,
+            "data_collecting_types": [frontline_worker_dct.pk],
+            "active": True,
+        }
+    )
+
+    assert form.is_valid() is True
+
+
+def test_beneficiary_group_form_rejects_data_collecting_types_of_other_payee_type(
+    incentive_payee_type: PayeeType, standard_data_collecting_type: DataCollectingType
+) -> None:
+    form = BeneficiaryGroupForm(
+        data={
+            "name": "Child Protection workers",
+            "group_label": "Worker",
+            "group_label_plural": "Workers",
+            "member_label": "Worker",
+            "member_label_plural": "Workers",
+            "payee_type": incentive_payee_type.pk,
+            "data_collecting_types": [standard_data_collecting_type.pk],
+            "active": True,
+        }
+    )
+
+    assert form.is_valid() is False
+    assert form.errors["data_collecting_types"] == ["Data Collecting Types must belong to the selected Payee Type"]
+
+
+def test_beneficiary_group_form_rejects_changing_payee_type_of_label_used_by_programs(
+    program_on_household_beneficiary_group: Program,
+    household_beneficiary_group: BeneficiaryGroup,
+    incentive_payee_type: PayeeType,
+) -> None:
+    form = BeneficiaryGroupForm(
+        data={
+            "name": household_beneficiary_group.name,
+            "group_label": "Household",
+            "group_label_plural": "Households",
+            "member_label": "Individual",
+            "member_label_plural": "Individuals",
+            "payee_type": incentive_payee_type.pk,
+            "active": True,
+        },
+        instance=household_beneficiary_group,
+    )
+
+    assert form.is_valid() is False
+    assert form.errors["payee_type"] == ["Cannot change the Payee Type of a Payee Label used by programs"]

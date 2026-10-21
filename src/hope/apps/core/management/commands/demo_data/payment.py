@@ -251,9 +251,9 @@ def generate_payment_plan() -> None:  # noqa: PLR0915
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
     data_collecting_type = DataCollectingType.objects.get(code="full_collection")
     if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
-        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", payee_type=data_collecting_type.payee_type)
     else:
-        beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
+        beneficiary_group = BeneficiaryGroupFactory(name="Household", payee_type=data_collecting_type.payee_type)
     program = Program.objects.update_or_create(
         pk=program_pk,
         business_area=afghanistan,
@@ -682,9 +682,9 @@ def generate_payment_plan_large() -> None:
 
     data_collecting_type = DataCollectingType.objects.get(code="full_collection")
     if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
-        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", payee_type=data_collecting_type.payee_type)
     else:
-        beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
+        beneficiary_group = BeneficiaryGroupFactory(name="Household", payee_type=data_collecting_type.payee_type)
 
     program = Program.objects.update_or_create(
         pk=UUID("00000000-0000-0000-0000-311246000000"),

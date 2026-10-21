@@ -1,10 +1,18 @@
 from typing import Any, Callable
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from timezone_field.rest_framework import TimeZoneSerializerField
 
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldDataSerializer
-from hope.models import BusinessArea, Country, DataCollectingType, FlexibleAttribute, FlexibleAttributeChoice
+from hope.models import (
+    BusinessArea,
+    Country,
+    DataCollectingType,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+    PayeeType,
+)
 
 
 class CountrySmallSerializer(serializers.ModelSerializer):
@@ -61,7 +69,26 @@ class DataCollectingTypeChoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataCollectingType
-        fields = ("name", "value", "description", "type")
+        fields = ("name", "value", "description", "type", "payee_type")
+
+
+class PayeeTypeChoiceSerializer(serializers.ModelSerializer):
+    default_data_collecting_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PayeeType
+        fields = ("id", "name", "gl_code", "default_data_collecting_type")
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_default_data_collecting_type(self, obj: PayeeType) -> str | None:
+        """Return the default DCT code only when the business area can use it."""
+        dct = obj.default_data_collecting_type
+        if dct is None or not dct.active or dct.deprecated:
+            return None
+        limited_to = dct.limit_to.all()
+        if limited_to and self.context["business_area"].pk not in {business_area.pk for business_area in limited_to}:
+            return None
+        return dct.code
 
 
 class ChoiceSerializer(serializers.Serializer):

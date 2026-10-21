@@ -1,6 +1,6 @@
 from faker import Faker
 
-from extras.test_utils.factories import DataCollectingTypeFactory
+from extras.test_utils.factories import DataCollectingTypeFactory, PayeeTypeFactory
 from hope.models import BusinessArea, Country, CountryCodeMap, Currency, DataCollectingType
 
 faker = Faker()
@@ -380,6 +380,10 @@ def generate_business_areas() -> None:
 
 def generate_data_collecting_types() -> None:
     all_ba_id_list = BusinessArea.objects.all().values_list("id", flat=True)
+    payee_types = {
+        DataCollectingType.Type.STANDARD.value: PayeeTypeFactory(name="Household", gl_code="7700410", weight=30),
+        DataCollectingType.Type.SOCIAL.value: PayeeTypeFactory(name="Incentive Payee", gl_code="7700430", weight=20),
+    }
     data_collecting_types = [
         {
             "label": "Partial",
@@ -413,8 +417,16 @@ def generate_data_collecting_types() -> None:
             code=data_dict["code"],
             type=data_dict["type"],
             household_filters_available=bool(data_dict["type"] == DataCollectingType.Type.STANDARD.value),
+            payee_type=payee_types[data_dict["type"]],
         )
         dct.limit_to.add(*all_ba_id_list)
+
+    for payee_type, default_code in (
+        (payee_types[DataCollectingType.Type.STANDARD.value], "full_collection"),
+        (payee_types[DataCollectingType.Type.SOCIAL.value], "partial_individuals"),
+    ):
+        payee_type.default_data_collecting_type = DataCollectingType.objects.get(code=default_code)
+        payee_type.save(update_fields=["default_data_collecting_type"])
 
 
 def generate_currencies() -> None:
