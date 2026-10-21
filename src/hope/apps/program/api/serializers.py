@@ -852,7 +852,9 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"data_collecting_type": "Data Collecting Type must belong to the Payee Type of the original Program."}
             )
-        validate_payee_configuration(data_collecting_type, original_program.beneficiary_group)
+        validate_payee_configuration(
+            data_collecting_type, original_program.beneficiary_group, previous_program=original_program
+        )
 
         # validate start_date and end_date
         end_date = data.get("end_date")

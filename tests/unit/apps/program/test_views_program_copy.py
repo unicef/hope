@@ -128,6 +128,13 @@ def bg_original_restricted_to_original_dct(
 
 
 @pytest.fixture
+def bg_original_deactivated(program_to_copy: Program, bg_original: BeneficiaryGroup) -> BeneficiaryGroup:
+    bg_original.active = False
+    bg_original.save()
+    return bg_original
+
+
+@pytest.fixture
 def program_to_copy(
     afghanistan: BusinessArea, dct_original: DataCollectingType, bg_original: BeneficiaryGroup
 ) -> Program:
@@ -817,3 +824,41 @@ def test_copy_program_selected_access_without_partner(
 
     assert "partners" in response.json()
     assert "Please assign access to your partner before saving the Program." in response.json()["partners"][0]
+
+
+@pytest.mark.parametrize(
+    "dct_fixture",
+    [
+        pytest.param("dct_original", id="same_dct"),
+        pytest.param("dct_compatible", id="compatible_dct_of_same_payee_type"),
+    ],
+)
+def test_copy_program_with_deactivated_payee_label_returns_201(
+    authenticated_client: Any,
+    user: User,
+    afghanistan: BusinessArea,
+    copy_url: str,
+    base_copy_payload: dict,
+    bg_original_deactivated: BeneficiaryGroup,
+    dct_fixture: str,
+    request: pytest.FixtureRequest,
+    setup_partners_with_role_assignments: None,
+    create_user_role_with_permissions: Callable,
+) -> None:
+    create_user_role_with_permissions(
+        user,
+        [Permissions.PROGRAMME_DUPLICATE],
+        afghanistan,
+        whole_business_area_access=True,
+    )
+    payload = {
+        **base_copy_payload,
+        "data_collecting_type": request.getfixturevalue(dct_fixture).code,
+    }
+
+    response = authenticated_client.post(copy_url, payload)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    new_program = Program.objects.get(name="Copied Program Name", business_area=afghanistan)
+    assert new_program.beneficiary_group.name == "Original BG"
+    assert new_program.beneficiary_group.active is False

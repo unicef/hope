@@ -268,6 +268,9 @@ class Program(
 
     objects: ProgramManager = ProgramManager()
 
+    # Set on an unsaved copy so its payee configuration is validated like an edit of the original.
+    copied_from: "Program | None" = None
+
     def clean(self) -> None:
         super().clean()
         if (
@@ -286,7 +289,7 @@ class Program(
         if not self.data_collecting_type_id or not self.beneficiary_group_id:
             return
         previous_program = (
-            None
+            self.copied_from
             if self._state.adding or self.pk is None
             else Program.all_objects.select_related("data_collecting_type").filter(pk=self.pk).first()
         )
