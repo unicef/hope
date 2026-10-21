@@ -416,6 +416,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock_fsp(self) -> PaymentPlan | None:
+        if self.payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
+            raise ValidationError("Payment Plan FSP is not locked.")
         background_action_status = self.payment_plan.background_action_status
         if (
             background_action_status is not None
