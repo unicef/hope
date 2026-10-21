@@ -49,14 +49,12 @@ This command initializes demo data for the application by performing the followi
 """
 
 from argparse import ArgumentParser
-import importlib
 import logging
 import os
 import time
 from typing import Any
 
 from constance import config
-from django.apps import apps
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import Error, OperationalError, connections
@@ -71,6 +69,7 @@ from hope.apps.core.management.commands.demo_data.aurora import generate_aurora_
 from hope.apps.core.management.commands.demo_data.core import (
     generate_business_areas,
     generate_country_codes,
+    generate_currencies,
     generate_data_collecting_types,
 )
 from hope.apps.core.management.commands.demo_data.engine import generate_rule_formulas
@@ -82,6 +81,7 @@ from hope.apps.core.management.commands.demo_data.household import (
     generate_people_program,
     generate_rdi,
 )
+from hope.apps.core.management.commands.demo_data.my_tasks import generate_my_tasks_demo
 from hope.apps.core.management.commands.demo_data.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
@@ -132,8 +132,7 @@ class Command(BaseCommand):
     def _setup_base_fixtures(self) -> User:
         self.stdout.write("Loading fixtures...")
         self.stdout.write("Seeding currencies...")
-        migration = importlib.import_module("hope.apps.core.migrations.0020_migration")
-        migration.seed_currencies(apps, None)
+        generate_currencies()
         call_command("generateroles")
         generate_unicef_partners()
         call_command("loadcountries")
@@ -280,5 +279,12 @@ class Command(BaseCommand):
             else []
         )
         self._create_users_from_email_lists(email_list, tester_list, role_with_all_perms)
+
+        self.stdout.write("Generating My Tasks demo...")
+        generate_my_tasks_demo(
+            User.objects.filter(
+                role_assignments__role=role_with_all_perms, role_assignments__business_area=afghanistan
+            ).distinct()
+        )
 
         self.stdout.write(self.style.SUCCESS(f"Done in {timezone.now() - start_time}"))

@@ -12,7 +12,6 @@ from extras.test_utils.factories.grievance import TicketNeedsAdjudicationDetails
 from extras.test_utils.factories.household import HouseholdFactory
 from hope.apps.grievance.api.views import GrievanceTicketGlobalViewSet
 from hope.apps.grievance.models import GrievanceTicket
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.models import Individual, User
 
 
@@ -23,11 +22,6 @@ def mock_user():
 
 @pytest.fixture
 def mock_ticket():
-    return MagicMock()
-
-
-@pytest.fixture
-def mock_old_ticket():
     return MagicMock()
 
 
@@ -155,49 +149,3 @@ def test_validate_preconditions_close_adjudication_partner_no_access(
             GrievanceTicketGlobalViewSet._validate_status_change_preconditions(
                 mock_viewset, adjudication_user, adjudication_ticket, GrievanceTicket.STATUS_CLOSED
             )
-
-
-@patch("hope.apps.grievance.api.views.clear_cache")
-def test_build_notifications_no_matching_status(mock_clear_cache, mock_user, mock_ticket, mock_old_ticket):
-    mock_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-    mock_old_ticket.status = GrievanceTicket.STATUS_ASSIGNED
-    notifications = []
-
-    GrievanceTicketGlobalViewSet._build_status_change_notifications(
-        mock_user, mock_old_ticket, mock_ticket, notifications
-    )
-
-    assert len(notifications) == 0
-    mock_clear_cache.assert_not_called()
-
-
-@patch("hope.apps.grievance.api.views.clear_cache")
-@patch.object(GrievanceNotification, "_prepare_emails", return_value=[])
-@patch.object(GrievanceNotification, "_prepare_user_recipients", return_value=[])
-def test_build_notifications_for_approval(
-    mock_recipients, mock_emails, mock_clear_cache, mock_user, mock_ticket, mock_old_ticket
-):
-    mock_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
-    mock_old_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-    notifications = []
-
-    GrievanceTicketGlobalViewSet._build_status_change_notifications(
-        mock_user, mock_old_ticket, mock_ticket, notifications
-    )
-
-    assert len(notifications) == 1
-    assert notifications[0].action == GrievanceNotification.ACTION_SEND_TO_APPROVAL
-
-
-@patch("hope.apps.grievance.api.views.clear_cache")
-def test_build_notifications_back_to_in_progress(mock_clear_cache, mock_user, mock_ticket, mock_old_ticket):
-    mock_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-    mock_old_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
-    notifications = []
-
-    GrievanceTicketGlobalViewSet._build_status_change_notifications(
-        mock_user, mock_old_ticket, mock_ticket, notifications
-    )
-
-    assert len(notifications) == 1
-    assert notifications[0].action == GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS

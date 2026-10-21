@@ -82,6 +82,16 @@ def base_payment(payment_plan, base_household, program_active):
 
 
 @pytest.fixture
+def not_eligible_payment(payment_plan, program_active):
+    return PaymentFactory(
+        parent=payment_plan,
+        program=program_active,
+        status=Payment.STATUS_NOT_ELIGIBLE,
+        excluded=True,
+    )
+
+
+@pytest.fixture
 def global_urls(business_area):
     return {
         "list": reverse(
@@ -112,6 +122,7 @@ def test_global_list(
     api_client_user,
     global_urls,
     base_payment,
+    not_eligible_payment,
 ) -> None:
     create_user_role_with_permissions(user, permissions, business_area, program_active)
     response = api_client_user.get(global_urls["list"])
@@ -149,6 +160,7 @@ def test_count_endpoint(
     global_urls,
     payment_plan,
     base_payment,
+    not_eligible_payment,
 ) -> None:
     create_user_role_with_permissions(
         user,

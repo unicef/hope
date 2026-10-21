@@ -3,7 +3,9 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import type { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -14,8 +16,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import React, { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 
 interface PaymentPlansTableProps {
   programCycle?: ProgramCycleList;
@@ -35,9 +38,11 @@ export const PaymentPlansTable = ({
   tag,
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
+  const permissions = usePermissions();
+  const canViewList = hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions);
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const initialQueryVariables = React.useMemo(
+  const filterVariables = useMemo(
     () => ({
       programCode: programId,
       businessAreaSlug: businessArea,
@@ -69,17 +74,19 @@ export const PaymentPlansTable = ({
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
+  const table = useTableState({
+    defaultOrderBy: 'paymentPlanGroup__name,-createdAt',
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const paymentPlansParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
 
   const {
@@ -95,12 +102,12 @@ export const PaymentPlansTable = ({
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansList(paymentPlansParams),
     placeholderData: keepPreviousData,
-    enabled: !!businessArea && !!programId,
+    enabled: canViewList && !!businessArea && !!programId,
   });
 
   const paymentPlansCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
 
   const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
@@ -112,7 +119,7 @@ export const PaymentPlansTable = ({
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
         paymentPlansCountParams,
       ),
-    enabled: !!businessArea && !!programId && page === 0,
+    enabled: canViewList && !!businessArea && !!programId && page === 0,
   });
 
   const replacements = {
@@ -134,18 +141,14 @@ export const PaymentPlansTable = ({
 
   return (
     <UniversalRestTable
-      defaultOrderBy="paymentPlanGroup__name,-createdAt"
       title={title}
       headCells={adjustedHeadCells}
-      queryVariables={queryVariables}
+      tableState={table}
       data={dataPaymentPlans}
       error={errorPaymentPlans}
       isLoading={isLoadingPaymentPlans}
       isFetching={isFetchingPaymentPlans}
-      setQueryVariables={setQueryVariables}
       itemsCount={itemsCount}
-      page={page}
-      setPage={setPage}
       renderRow={(row: PaymentPlanList) => {
         const idx = results.indexOf(row);
         const prev = results[idx - 1];

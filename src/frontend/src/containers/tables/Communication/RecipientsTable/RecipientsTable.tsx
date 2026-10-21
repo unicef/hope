@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useTableState } from '@hooks/useTableState';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
@@ -10,7 +11,7 @@ import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import type { ReactElement } from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { Recipient } from '@restgenerated/models/Recipient';
 interface RecipientsTableProps {
@@ -27,21 +28,16 @@ function RecipientsTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessAreaSlug, programCode } = useBaseUrl();
 
-  const initialQueryVariables = useMemo(
+  const table = useTableState({ rowsPerPageOptions: [10, 15, 20] });
+  const queryVariables = useMemo(
     () => ({
       businessAreaSlug,
       programCode,
       messageId: id,
+      ...table.paginationParams,
     }),
-    [businessAreaSlug, programCode, id],
+    [businessAreaSlug, programCode, id, table.paginationParams],
   );
-
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const [page, setPage] = useState(0);
 
   const { data, isLoading, error } = useQuery({
     queryKey: restQueryKey(
@@ -74,12 +70,8 @@ function RecipientsTable({
         data={data}
         error={error}
         isLoading={isLoading}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
-        rowsPerPageOptions={[10, 15, 20]}
+        tableState={table}
         itemsCount={data?.results?.length || 0}
-        page={page}
-        setPage={setPage}
         renderRow={(row: Recipient) => (
           <RecipientsTableRow
             key={row.id}

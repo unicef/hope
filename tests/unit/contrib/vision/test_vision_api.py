@@ -34,11 +34,12 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
         *,
         unicef_id: str = "PP001",
         currency_code: str = "USD",
+        currency_vision_code: str | None = None,
         created_at: datetime = datetime(2025, 1, 1),
         exchange_rate: Decimal | None = Decimal("1.25000000"),
     ) -> PaymentPlan:
         business_area = BusinessAreaFactory(code="FI01")
-        currency = CurrencyFactory(code=currency_code)
+        currency = CurrencyFactory(code=currency_code, vision_code=currency_vision_code or currency_code)
         financial_service_provider = FinancialServiceProviderFactory(
             name="Head Vendor Name",
             vision_vendor_number="V100004",
@@ -155,6 +156,7 @@ def _make_mock_payment_plan(**overrides) -> MagicMock:
         setattr(pp, k, v)
     pp.business_area.code = fields.get("_business_area_code", "FI01")
     pp.currency.code = fields.get("_currency_code", "USD")
+    pp.currency.vision_code = fields.get("_currency_vision_code", pp.currency.code)
     pp.financial_service_provider.name = fields.get("_fsp_name", "Head Vendor Name")
     pp.financial_service_provider.vision_vendor_number = fields.get("_vision_vendor_number", "V100004")
     pp.internal_data = {}
@@ -226,6 +228,25 @@ def test_send_payment_plan_with_different_currency(
             "headVendor": "Head Vendor Name",
         },
     )
+
+
+@patch("hope.contrib.vision.api.VisionAPI._acquire_token")
+@patch("hope.contrib.vision.api.VisionAPI._post")
+def test_send_payment_plan_sends_vision_code_not_code(
+    mock_post, mock_acquire_token, vision_api_payment_plan_factory
+) -> None:
+    mock_post.return_value = ({"status": "ok"}, 200)
+    api = VisionAPI()
+    pp = vision_api_payment_plan_factory(
+        unicef_id="PP004",
+        currency_code="SYP",
+        currency_vision_code="SYP01",
+        created_at=datetime(2025, 3, 1),
+    )
+    result = api.send_payment_plan(pp)
+    assert result == {"status": "ok"}
+    sent_payload = mock_post.call_args[0][1]
+    assert sent_payload["currency"] == "SYP01"
 
 
 def test_vision_api_error_is_raised(vision_api_payment_plan_factory) -> None:
@@ -484,7 +505,7 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
             "payplanSno": "PP-0060-24-0000002a",
             "vision_payplanSno": "00000110",
             "status": "",
-            "fc_num": "",
+            "fc_numbers": [],
         },
         format="json",
     )
@@ -510,7 +531,7 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
         "payplanSno": "PP-0060-24-0000002a",
         "vision_payplanSno": "00000110",
         "status": "",
-        "fc_num": "",
+        "fc_numbers": [],
     }
     assert entry["response"] == response.data
     assert datetime.fromisoformat(entry["timestamp"])
@@ -519,7 +540,7 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
 
 @patch("hope.models.APILogEntry.objects.create")
 @patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
-def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
+def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
@@ -540,7 +561,7 @@ def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
             "business_area": "0060",
             "status": "SUCCESS",
             "error_message": "",
-            "fc_num": "FC123",
+            "fc_numbers": ["FC123", "FC456"],
             "timestamp": "20260525122706",
         },
         format="json",
@@ -563,7 +584,7 @@ def test_callback_view_success_with_fc_num(mock_get, mock_log_entry) -> None:
         mock_pp,
         vision_payment_plan_id="00000063",
         vision_result="SUCCESS",
-        fc_num="FC123",
+        fc_numbers=["FC123", "FC456"],
     )
     mock_pp.save.assert_called_once_with(update_fields=["internal_data"])
 
@@ -768,7 +789,7 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
     assert mock_pp.internal_data["vision"]["sent"] is True
     assert mock_pp.internal_data["vision"]["status"] == "CALLBACK_FAILED"
     assert mock_pp.internal_data["vision"]["error_code"] == "VISION_STATUS_FAILED"
-    assert "fc_num" not in mock_pp.internal_data["vision"]
+    assert "fc_numbers" not in mock_pp.internal_data["vision"]
 
 
 @patch("hope.models.APILogEntry.objects.create")
@@ -828,7 +849,7 @@ def test_callback_view_missing_payplan_sno(mock_get, mock_log_entry) -> None:
     ("vision_data", "expected_message"),
     [
         ({"status": VisionStatus.FC_NOT_FOUND.value}, "FC not found"),
-        ({"error_code": "FC_AMBIGUOUS"}, "Multiple FC groups found"),
+        ({"error_code": "FC_AMBIGUOUS"}, "Multiple FC headers found"),
         ({"error_code": "FC_CONFLICT"}, "FC assignment conflict"),
         ({}, "FC assignment failed"),
     ],

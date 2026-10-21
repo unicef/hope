@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.db import models
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class DocumentType(TimeStampedUUIDModel):
@@ -18,6 +18,10 @@ class DocumentType(TimeStampedUUIDModel):
         app_label = "household"
         ordering = [
             "label",
+        ]
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="household_documenttype_created_at_a5c65eca"),
+            LongNameIndex(fields=["updated_at"], name="household_documenttype_updated_at_46741c9a"),
         ]
 
     def __str__(self) -> str:

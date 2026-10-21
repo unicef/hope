@@ -5,6 +5,7 @@ from constance import config
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import CacheResponse
 from rest_framework_extensions.key_constructor import bits
@@ -25,6 +26,7 @@ class _ConstanceTTLCacheResponse(CacheResponse):
     ) -> None:
         super().__init__(timeout=0, key_func=key_func, cache=cache, cache_errors=cache_errors)
 
+    # Looks unused, but rest_framework_extensions calls it on every @cached_response request.
     def calculate_timeout(self, view_instance: Any, **_: Any) -> int:
         return config.REST_API_TTL
 
@@ -138,7 +140,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -155,7 +157,7 @@ class RendererKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -182,7 +184,7 @@ class BusinessAreaKeyBitMixin(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -202,7 +204,7 @@ class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:
@@ -219,7 +221,7 @@ class AreaLimitKeyBit(KeyBitBase):
         params: Any,
         view_instance: Any,
         view_method: Any,
-        request: Any,
+        request: Request,
         args: tuple,
         kwargs: dict,
     ) -> str:

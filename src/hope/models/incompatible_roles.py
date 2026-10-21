@@ -8,7 +8,7 @@ from natural_keys import NaturalKeyModel
 from hope.models.role import Role
 from hope.models.role_assignment import RoleAssignment
 from hope.models.user import User, logger
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 if TYPE_CHECKING:
     from hope.models.business_area import BusinessArea
@@ -56,6 +56,10 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         verbose_name_plural = "incompatible roles"
         unique_together = ("role_one", "role_two")
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="account_incompatibleroles_created_at_7a423961"),
+            LongNameIndex(fields=["updated_at"], name="account_incompatibleroles_updated_at_aae9f2fb"),
+        ]
 
     def clean(self) -> None:
         super().clean()

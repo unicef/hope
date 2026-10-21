@@ -218,7 +218,7 @@ def test_execute(
     }
     assert individuals_obj_data == expected_ind
 
-    pending_household = individual.pending_household
+    pending_household = PendingHousehold.objects.get(pk=individual.household_id)
     household_obj_data = {
         "residence_status": pending_household.residence_status,
         "country": pending_household.country.iso_code2,
@@ -673,6 +673,26 @@ def test_handle_household_dict_none_currency_sets_null(
     )
 
     assert households_to_create[0].currency is None
+
+
+@pytest.fixture
+def registration_data_import_without_currencies(business_area: object, program: object) -> object:
+    return RegistrationDataImportFactory(business_area=business_area, program=program)
+
+
+def test_cast_and_assign_currency_resolves_the_active_row(
+    business_area: object,
+    registration_data_import_without_currencies: object,
+    currency_syp: Currency,
+    django_assert_num_queries,
+) -> None:
+    task = RdiKoboCreateTask(registration_data_import_without_currencies.id, business_area.id)
+    household = PendingHousehold()
+
+    with django_assert_num_queries(1):
+        task._cast_and_assign("SYP", "currency_h_c", household)
+
+    assert household.currency == currency_syp
 
 
 def test_process_individual_try_except(business_area: object, registration_data_import: object) -> None:

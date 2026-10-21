@@ -16,6 +16,7 @@ from hope.apps.core.field_attributes.fields_types import (
 )
 from hope.apps.core.utils import get_attr_value
 from hope.apps.targeting.choices import FlexFieldClassification
+from hope.apps.utils.exceptions import log_and_raise
 from hope.models import FlexibleAttribute, Household, Individual
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class TargetingCriteriaQueryingBase:
     def get_individual_queryset(self) -> QuerySet:
         return Individual.objects.all()
 
-    def get_rules(self) -> Any:
+    def get_rules(self) -> QuerySet:
         return self.rules.all()
 
     def get_criteria_string(self) -> str:
@@ -287,25 +288,22 @@ class TargetingCriteriaFilterBase:
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
-            logger.warning(f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments")
-            raise ValidationError(
-                f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments"
+            log_and_raise(
+                f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments",
+                error_type=ValidationError,
             )
         args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
-                logger.warning(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
-                raise ValidationError(
-                    f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
+                log_and_raise(
+                    f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument",
+                    error_type=ValidationError,
                 )
         elif args_count != args_input_count:
-            logger.warning(
+            log_and_raise(
                 f"{self.field_name} {self.comparison_method} filter query expect {args_count} "
-                f"arguments gets {args_input_count}"
-            )
-            raise ValidationError(
-                f"{self.field_name} {self.comparison_method} filter query expect {args_count} "
-                f"arguments gets {args_input_count}"
+                f"arguments gets {args_input_count}",
+                error_type=ValidationError,
             )
         arguments = self.prepare_arguments(self.arguments, field_attr)
         argument = arguments if args_input_count > 1 else arguments[0]

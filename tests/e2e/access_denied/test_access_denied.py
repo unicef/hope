@@ -42,8 +42,10 @@ def login_as_restricted(browser: Chrome, restricted_user: User) -> Chrome:
     WebDriverWait(browser, 10).until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, login_button)))
     browser.find_element(By.ID, "id_username").send_keys("restricted")
     browser.find_element(By.ID, "id_password").send_keys("testtest2")
+    login_url = browser.current_url
     browser.find_element(By.CSS_SELECTOR, login_button).click()
-    WebDriverWait(browser, 10).until(expected_conditions.invisibility_of_element_located((By.ID, "login-form")))
+    # Checking the old form's visibility races the navigation and can hit a detached node.
+    WebDriverWait(browser, 10).until(expected_conditions.url_changes(login_url))
     cache.clear()
     return browser
 

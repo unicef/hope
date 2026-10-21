@@ -52,8 +52,13 @@ def get_submission_channel_choices() -> tuple:
     return SUBMISSION_CHANNEL_CHOICES
 
 
-# The two tabs on the My Tasks page. The daily emails link into them with ?tab=. Each email counts
-# sensitive and other tickets separately, so every count links with ?sensitive= to match.
+# The tabs on the My Tasks page. The emails link into them with ?tab=.
 MY_TASKS_PAGE = "my-tasks"
 PRESET_NEEDS_ASSIGNMENT = "needs-assignment"
 PRESET_MINE = "mine"
+PRESET_PENDING_APPROVAL = "pending-approval"
+MY_TASKS_TABS = (PRESET_NEEDS_ASSIGNMENT, PRESET_MINE, PRESET_PENDING_APPROVAL)
+
+
+def get_my_tasks_tab_choices() -> tuple:
+    return tuple((tab, tab) for tab in MY_TASKS_TABS)

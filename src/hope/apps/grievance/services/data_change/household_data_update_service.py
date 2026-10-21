@@ -8,6 +8,7 @@ from django_countries.fields import Country
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
+from hope.apps.core.currency_resolution import resolve_active_currency_or_none
 from hope.apps.core.utils import to_snake_case
 from hope.apps.grievance.models import GrievanceTicket, TicketHouseholdDataUpdateDetails
 from hope.apps.grievance.services.data_change.data_change_service import (
@@ -221,9 +222,9 @@ class HouseholdDataUpdateService(DataChangeService):
             ).first()
         currency = household_data.get("currency", {})
         if currency.get("value") is not None:
-            household_data["currency"]["value"] = Currency.objects.filter(  # type: ignore[index]
-                code=currency.get("value")
-            ).first()
+            household_data["currency"]["value"] = resolve_active_currency_or_none(  # type: ignore[index]
+                currency.get("value")
+            )
         facility = household_data.get("facility", {})
         facility_admin_area = household_data.pop("facility_admin_area", {})
         admin_area_p_code = facility_admin_area.get("value") if is_approved(facility_admin_area) else None

@@ -24,7 +24,7 @@ VISION_INVALID_CALLBACK_MESSAGE = "Invalid callback payload"
 VISION_PAYMENT_PLAN_NOT_FOUND_MESSAGE = "Payment plan not found"
 VISION_PAYPLAN_ID_MISSING_MESSAGE = "vision_payplanSno is required"
 VISION_FC_NOT_FOUND_MESSAGE = "FC not found"
-VISION_FC_AMBIGUOUS_MESSAGE = "Multiple FC groups found"
+VISION_FC_AMBIGUOUS_MESSAGE = "Multiple FC headers found"
 VISION_FC_CONFLICT_MESSAGE = "FC assignment conflict"
 VISION_FC_ASSIGNMENT_FAILED_MESSAGE = "FC assignment failed"
 
@@ -124,7 +124,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
             payment_plan,
             vision_payment_plan_id=serializer.validated_vision_payplan_sno,
             vision_result=serializer.validated_data.get("status", ""),
-            fc_num=serializer.validated_data.get("fc_num", ""),
+            fc_numbers=serializer.validated_data.get("fc_numbers", []),
         )
         response_status: int
         if fc_assignment_failed:

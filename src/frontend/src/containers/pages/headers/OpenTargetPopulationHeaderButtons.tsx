@@ -45,7 +45,7 @@ export function OpenTargetPopulationHeaderButtons({
   const { isActiveProgram } = useProgramContext();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: rebuild, isPending: loadingRebuild } = useMutation({
+  const { mutate: rebuild, isPending: loadingRebuild } = useMutation({
     mutationFn: ({
       businessAreaSlug,
       programCode,
@@ -65,6 +65,16 @@ export function OpenTargetPopulationHeaderButtons({
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsTargetPopulationsRetrieve,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsList,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsTargetPopulationsPendingPaymentsCountRetrieve,
         ),
       });
 
@@ -124,7 +134,7 @@ export function OpenTargetPopulationHeaderButtons({
           </Button>
         </Box>
       )}
-      {canEdit && (
+      {canLock && (
         <Box
           sx={{
             m: 2,
@@ -136,7 +146,7 @@ export function OpenTargetPopulationHeaderButtons({
             color="primary"
             disabled={loadingRebuild || !isActiveProgram}
             startIcon={<RefreshRounded />}
-            data-perm={PERMISSIONS.TARGETING_UPDATE}
+            data-perm={PERMISSIONS.TARGETING_LOCK}
             onClick={() =>
               rebuild({
                 businessAreaSlug: businessArea,

@@ -24,8 +24,8 @@ from hope.apps.household.documents import (
     get_individual_doc,
 )
 from hope.apps.registration_data.celery_tasks import deduplicate_documents_for_rdi
-from hope.apps.registration_data.services.biometric_deduplication import (
-    BiometricDeduplicationService,
+from hope.apps.registration_data.services.deduplication_engine import (
+    DeduplicationEngineService,
 )
 from hope.apps.registration_data.signals import rdi_merged
 from hope.apps.registration_data.tasks.deduplicate import DeduplicateTask
@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list]:
+    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list, list]:
         collision_detector = obj_hct.program.collision_detector
 
         household_ids_to_exclude = []
@@ -79,7 +79,7 @@ class RdiMergeTask:
         obj_hct.extra_hh_rdis.add(*collided_ids)
 
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
-        return households_to_merge_ids, household_ids_to_exclude
+        return households_to_merge_ids, household_ids_to_exclude, list(collided_ids)
 
     def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
         dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids).select_related(
@@ -116,10 +116,12 @@ class RdiMergeTask:
                 ):
                     cache.delete(key)
 
-    def _run_biometric_deduplication(self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list) -> None:
+    def _create_adjudication_tickets_from_deduplication_engine_findings(
+        self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list
+    ) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
-            dedupe_service = BiometricDeduplicationService()
-            dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
+            dedupe_service = DeduplicationEngineService()
+            dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
 
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
@@ -178,7 +180,9 @@ class RdiMergeTask:
 
             try:
                 with transaction.atomic():
-                    households_to_merge_ids, household_ids_to_exclude = self._process_collisions(obj_hct, household_ids)
+                    households_to_merge_ids, household_ids_to_exclude, collided_ids = self._process_collisions(
+                        obj_hct, household_ids
+                    )
                     individuals_to_merge_ids = list(
                         Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
                         .exclude(household__in=household_ids_to_exclude)
@@ -189,7 +193,7 @@ class RdiMergeTask:
 
                     transaction.on_commit(
                         lambda: recalculate_population_fields_async_task(
-                            [str(household_id) for household_id in households_to_merge_ids],
+                            [str(household_id) for household_id in households_to_merge_ids + collided_ids],
                             str(obj_hct.program_id),
                         )
                     )
@@ -235,7 +239,9 @@ class RdiMergeTask:
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     deduplicate_documents_for_rdi(str(obj_hct.id))
-                    self._run_biometric_deduplication(obj_hct, individuals_to_merge_ids)
+                    self._create_adjudication_tickets_from_deduplication_engine_findings(
+                        obj_hct, individuals_to_merge_ids
+                    )
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()

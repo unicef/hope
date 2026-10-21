@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Any
 
 from django.http import HttpRequest
-from django.urls import reverse_lazy
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from single_source import get_version
@@ -15,13 +14,11 @@ from hope.config.process_role import get_process_role
 DEBUG: bool = env("DEBUG")
 IS_TEST = False
 
-PROJECT_NAME = "hope"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-WWW_ROOT = f"http://{DOMAIN_NAME}/"
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 FRONTEND_HOST = env("DOMAIN")
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
@@ -45,19 +42,6 @@ ROOT_URLCONF = "hope.urls"
 
 DATA_VOLUME = env("DATA_VOLUME")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-ALLOWED_EXTENSIONS = (
-    "pdf",
-    "doc",
-    "docx",
-    "xls",
-    "xlsx",
-    "img",
-    "png",
-    "jpg",
-    "jpeg",
-    "csv",
-    "zip",
-)
 UPLOADS_DIR_NAME = "uploads"
 MEDIA_URL = f"/api/{UPLOADS_DIR_NAME}/"
 MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DIR_NAME)
@@ -87,9 +71,6 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 EMAIL_SUBJECT_PREFIX = ""
-
-# Get the ENV setting. Needs to be set in .bashrc or similar.
-ENV = env("ENV")
 
 PROCESS_ROLE = get_process_role()
 
@@ -130,9 +111,7 @@ MIDDLEWARE = [] + [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
-    "hope.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hope.middlewares.sentry.SentryScopeMiddleware",
     "hope.middlewares.version.VersionMiddleware",
 ]
@@ -257,18 +236,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
-
 AUTHENTICATION_BACKENDS = [
     "hope.apps.core.backends.PermissionsBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
 
-NOSE_ARGS = ["--with-timer", "--nocapture", "--nologcapture"]
-
-
-GIT_VERSION = env("GIT_VERSION")
 HIJACK_PERMISSION_CHECK = "hope.apps.utils.security.can_hijack"
 
 CACHE_ENABLED = env("CACHE_ENABLED")
@@ -280,27 +253,39 @@ if CACHE_ENABLED:
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": env("CACHE_LOCATION"),
             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-        }
+        },
+        "sessions": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": env("SESSION_CACHE_LOCATION"),
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient", "IGNORE_EXCEPTIONS": True},
+        },
     }
+    DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
 else:
     CACHES = {
         "default": {
             "BACKEND": "hope.apps.core.memcache.LocMemCache",
             "TIMEOUT": 1800,
-        }
+        },
+        "sessions": {
+            "BACKEND": "hope.apps.core.memcache.LocMemCache",
+            "LOCATION": "sessions",
+        },
     }
 
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE")
 SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY")
+SESSION_COOKIE_AGE = env.int("SESSION_COOKIE_AGE")
 SESSION_COOKIE_NAME = env("SESSION_COOKIE_NAME")
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_CACHE_ALIAS = "sessions"
 AUTH_USER_MODEL = "account.User"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 
 # Social Auth settings.
 
 
-LOGIN_URL = "/api/login/azuread-tenant-oauth2/"
+LOGIN_URL = "/login"
 
 GRAPH_MODELS = {
     "all_applications": True,
@@ -319,15 +304,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 # MICROSOFT GRAPH
 AZURE_GRAPH_API_BASE_URL = "https://graph.microsoft.com"
-AZURE_GRAPH_API_VERSION = "v1.0"
 AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"  # noqa
-
-TEST_OUTPUT_DIR = "./test-results"
-TEST_OUTPUT_FILE_NAME = "result.xml"
-
-DATAMART_USER = env("DATAMART_USER")
-DATAMART_PASSWORD = env("DATAMART_PASSWORD")
-DATAMART_URL = env("DATAMART_URL")
 
 DEDUPLICATION_ENGINE_API_URL = env("DEDUPLICATION_ENGINE_API_URL")
 DEDUPLICATION_ENGINE_API_KEY = env("DEDUPLICATION_ENGINE_API_KEY")
@@ -385,12 +362,6 @@ EXPLORER_DEFAULT_CONNECTION = "default"
 EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
 EXPLORER_PERMISSION_CHANGE = lambda r: r.user.has_perm("explorer.change_query")
 
-IMPERSONATE = {
-    "REDIRECT_URL": f"/api/{ADMIN_PANEL_URL}/",
-    "PAGINATE_COUNT": 50,
-    "DISABLE_LOGGING": False,
-}
-
 CONCURRENCY_ENABLED = False
 
 PROFILING = env("PROFILING") == "on"
@@ -400,23 +371,12 @@ if PROFILING:
     MIDDLEWARE.append("hope.middlewares.silk.DynamicSilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
 
-ADMIN_SYNC_USE_REVERSION = False
-
-SWAGGER_SETTINGS = {
-    "LOGOUT_URL": reverse_lazy("logout"),
-    "LOGIN_URL": "/",
-    "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
-}
-
 MAX_STORAGE_FILE_SIZE = 30
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
-    "DEVELOP_DEBUG_TOOLBAR": [],
     "SILK_MIDDLEWARE": [],
-    "FRONT_DOOR_BYPASS": [],
     "ALLOW_ACCOUNTABILITY_MODULE": [{"condition": "boolean", "value": False}],
-    "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
     "WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED": [{"condition": "boolean", "value": False}],
     "VISION_INTEGRATION_ACTIVE": [{"condition": "boolean", "value": False}],
     "IS_ROOT": [{"condition": "boolean", "value": False}],
@@ -451,13 +411,15 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
 
-SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
-SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
+SECURE_PROXY_SSL_HEADER = env.tuple("SECURE_PROXY_SSL_HEADER")
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT")
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS")
 SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD")
-
-FLOWER_ADDRESS = env("FLOWER_ADDRESS")
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool("SECURE_CONTENT_TYPE_NOSNIFF")
+SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY")
+# The obsolete X-XSS-Protection header is deliberately NOT set, see
+# https://owasp.org/www-project-secure-headers/#x-xss-protection
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 UNICEF_HQ_PARTNER = "UNICEF HQ"
@@ -482,8 +444,5 @@ from hope.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hope.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hope.config.fragments.storages import *  # noqa: F403, F401, E402
 from hope.config.fragments.vision import *  # noqa: F403, F401, E402
-
-GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
-GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")
 
 SALT_KEY = SECRET_KEY

@@ -1,4 +1,5 @@
-import { Checkbox } from '@mui/material';
+import { Box, Checkbox } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,6 +12,7 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import type { ApiErrorShape } from '@utils/utils';
 import { showApiErrorMessages } from '@utils/utils';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { theme } from 'src/theme';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 import type { ReactElement } from 'react';
@@ -64,7 +66,7 @@ export function GrievancesTableRow({
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
         {
@@ -85,9 +87,9 @@ export function GrievancesTableRow({
     },
   });
 
-  const onFilterChange = async (assignee, ids): Promise<void> => {
+  const onFilterChange = (assignee, ids): void => {
     if (assignee) {
-      await mutateAsync({
+      mutate({
         assignedTo: assignee.id,
         grievanceTicketIds: ids,
       });
@@ -126,6 +128,12 @@ export function GrievancesTableRow({
       role="checkbox"
       key={ticket.id}
       data-cy={`ticket-row-${ticket.unicefId}`}
+      data-unread={ticket.unread ? 'true' : undefined}
+      sx={
+        ticket.unread
+          ? { backgroundColor: alpha(theme.hctPalette.lightBlue, 0.05) }
+          : undefined
+      }
     >
       <TableCell align="left" padding="checkbox">
         <Checkbox
@@ -140,7 +148,28 @@ export function GrievancesTableRow({
         />
       </TableCell>
       {columns.map((id) => (
-        <TableCell key={id} align="left">
+        <TableCell
+          key={id}
+          align="left"
+          sx={id === 'unicef_id' ? { position: 'relative' } : undefined}
+        >
+          {ticket.unread && id === 'unicef_id' && (
+            // Sits in the gap between the checkbox and the ID, so IDs stay aligned either way.
+            <Box
+              component="span"
+              data-cy="ticket-unread-dot"
+              sx={{
+                position: 'absolute',
+                left: 4,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: theme.hctPalette.lightBlue,
+              }}
+            />
+          )}
           {GRIEVANCE_COLUMNS[id].render(cellContext)}
         </TableCell>
       ))}
