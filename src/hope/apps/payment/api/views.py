@@ -2842,7 +2842,10 @@ class PaymentPlanGroupViewSet(
         is locked for update to prevent double processing the same objects.
         """
         group = self.get_object()
-        self._validate_delivery_status(group, "Send to Payment Gateway")
+        if group.status != PaymentPlanGroup.Status.ACCEPTED:
+            raise ValidationError(
+                f"Send to Payment Gateway is possible only within Status ACCEPTED, got {group.status}"
+            )
 
         with transaction.atomic():
             PaymentPlanGroup.objects.select_for_update().get(pk=group.pk)

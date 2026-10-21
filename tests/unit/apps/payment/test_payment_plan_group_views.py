@@ -3935,4 +3935,24 @@ def test_send_group_to_payment_gateway_on_open_group_returns_400(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()[0] == "Send to Payment Gateway is possible only within Status ACCEPTED or FINISHED, got OPEN"
+    assert response.json()[0] == "Send to Payment Gateway is possible only within Status ACCEPTED, got OPEN"
+
+
+def test_send_group_to_payment_gateway_on_finished_group_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    finished_group_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_SEND_TO_PAYMENT_GATEWAY], business_area, program=program
+    )
+
+    response = client.post(
+        _send_group_to_payment_gateway_url(business_area.slug, program.code, finished_group_with_plan.id)
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()[0] == "Send to Payment Gateway is possible only within Status ACCEPTED, got FINISHED"
