@@ -9,9 +9,8 @@ so ``dedup_teardown`` can remove exactly what this command created.
 
     ./manage.py dedup_setup [--run-id <tag>]
 
-Field choices mirror ``init_e2e_scenario.create_household_with_individual`` and
-the ``_generate_rdi_dedup_demo`` seeder, re-expressed as raw ORM because test
-factories do not ship to deployed envs.
+Field choices mirror the ``_generate_rdi_dedup_demo`` seeder, re-expressed as
+raw ORM because test factories do not ship to deployed envs.
 """
 
 from __future__ import annotations

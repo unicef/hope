@@ -175,7 +175,7 @@ def wallet(individual: Individual, account_type: AccountType) -> Account:
         financial_institution=financial_institution,
         individual=individual,
         number="1234567890",
-        data={"number": "1234567890"},
+        data={"provider": "Example Provider"},
         rdi_merge_status=Account.MERGED,
     )
 
@@ -283,7 +283,7 @@ def two_mobile_wallets(
             financial_institution=financial_institution,
             individual=individual,
             number="111",
-            data={"number": "111"},
+            data={"provider": "First Provider"},
             rdi_merge_status=Account.MERGED,
         ),
         Account.objects.create(
@@ -291,7 +291,7 @@ def two_mobile_wallets(
             financial_institution=financial_institution,
             individual=individual,
             number="222",
-            data={"number": "222"},
+            data={"provider": "Second Provider"},
             rdi_merge_status=Account.MERGED,
         ),
     ]
@@ -333,7 +333,7 @@ def test_update_individual(
     returnee_old = individual.household.returnee
     muac_old = individual.flex_fields.get("muac")
     eggs_old = individual.household.flex_fields.get("eggs")
-    wallet_number_old = wallet.data.get("number")
+    wallet_number_old = wallet.number
     document_number_old = document_national_id.document_number
     universal_update = UniversalUpdate(program=program)
     universal_update.unicef_ids = individual.unicef_id
@@ -378,9 +378,8 @@ def test_update_individual(
     household.save()
     document_national_id.document_number = "111"
     document_national_id.save()
-    wallet.data["number"] = "0"
     wallet.number = "0"
-    wallet.save()
+    wallet.save(update_fields=["number"])
     service = UniversalIndividualUpdateService(universal_update)
     universal_update.clear_logs()
     service.execute()
@@ -409,8 +408,8 @@ Update successful
     assert individual.household.returnee == returnee_old
     assert individual.flex_fields.get("muac") == muac_old
     assert individual.household.flex_fields.get("eggs") == eggs_old
-    assert wallet.data.get("number") == wallet_number_old
     assert wallet.number == wallet_number_old
+    assert wallet.data == {"provider": "Example Provider"}
 
 
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
@@ -1097,11 +1096,17 @@ def test_handle_account_update_creates_new_account(
     financial_institution: FinancialInstitution,
 ) -> None:
     service = UniversalIndividualUpdateService(universal_update_with_accounts)
-    headers = ["unicef_id", "account__mobile__financial_institution_pk", "account__mobile__number"]
-    row = (individual.unicef_id, financial_institution.id, "555000111")
+    headers = [
+        "unicef_id",
+        "account__mobile__financial_institution_pk",
+        "account__mobile__number",
+        "account__mobile__provider",
+    ]
+    row = (individual.unicef_id, financial_institution.id, "555000111", "Example Provider")
     service.handle_account_update(row, headers, individual)
     account = Account.objects.get(individual=individual)
     assert account.number == "555000111"
+    assert account.data == {"provider": "Example Provider"}
     assert account.financial_institution == financial_institution
     assert account.account_type.key == "mobile"
 

@@ -40,10 +40,6 @@ class XlsxExportBaseService:
         # add export items and what you need
         return self.wb
 
-    def generate_file(self, filename: str) -> None:
-        self.generate_workbook()
-        self.wb.save(filename=filename)
-
     @staticmethod
     def _adjust_column_width_from_col(ws: "Worksheet") -> None:
         dim_holder = DimensionHolder(worksheet=ws)

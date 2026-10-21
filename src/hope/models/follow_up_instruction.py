@@ -7,7 +7,7 @@ from django.db.models import Count, Sum
 
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
-from hope.models.utils import AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
@@ -81,6 +81,16 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         ordering = ["created_at"]
         verbose_name = "Follow Up Instruction"
         verbose_name_plural = "Follow Up Instructions"
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="payment_followupinstruction_created_at_5807ab3f"),
+            LongNameIndex(fields=["updated_at"], name="payment_followupinstruction_updated_at_197e3019"),
+            LongNameIndex(fields=["unicef_id"], name="payment_followupinstruction_unicef_id_8793ca7b"),
+            LongNameIndex(
+                fields=["unicef_id"],
+                opclasses=["varchar_pattern_ops"],
+                name="payment_followupinstruction_unicef_id_8793ca7b_like",
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.unicef_id or str(self.id)
