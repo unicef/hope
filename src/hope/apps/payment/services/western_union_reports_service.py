@@ -660,13 +660,15 @@ class WesternUnionReportsService:
             f"{report_count_for_payment_plan + 1}.xlsx"
         )
 
-        funds_commitments_str = ", ".join(
-            f"{number}/{item}"
-            for number, item in payment_plan.funds_commitment_headers.values_list(
-                "funds_commitment_number",
-                "funds_commitment_items__funds_commitment_item",
+        funds_commitments_str = ""
+        if payment_plan.payment_plan_group_id:
+            funds_commitments_str = ", ".join(
+                f"{number}/{item}"
+                for number, item in payment_plan.payment_plan_group.funds_commitment_headers.values_list(
+                    "funds_commitment_number",
+                    "funds_commitment_items__funds_commitment_item",
+                )
             )
-        )
         payments_data: list[QCFReportPaymentRowData] = []
         for row in payment_rows:
             mtcn_match = str(row.mtcn) == str(row.payment.fsp_auth_code)

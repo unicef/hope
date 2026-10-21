@@ -32,9 +32,10 @@ from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     OVERRIDE_OPTION,
 )
 from hope.apps.utils.security import is_root
+from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
-from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
+from hope.contrib.vision.tasks import send_payment_plan_group_to_vision_async_task
 from hope.models import (
     AsyncJob,
     Payment,
@@ -51,7 +52,7 @@ if TYPE_CHECKING:
 
 
 class FundsCommitmentHeaderInline(admin.TabularInline):
-    model = FundsCommitmentHeader.payment_plans.through
+    model = FundsCommitmentHeader.payment_plan_groups.through
     extra = 0
     can_delete = False
     fields = readonly_fields = (
@@ -176,12 +177,12 @@ class PaymentInstructionInline(admin.TabularInline):
         return False
 
 
-def can_send_to_vision(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.can_send_to_vision
+def can_send_to_vision(group: PaymentPlanGroup) -> bool:
+    return group.can_send_to_vision
 
 
-def can_recover_vision_funds_commitment(payment_plan: PaymentPlan) -> bool:
-    return VisionService.can_recover_with_funds_commitment_headers(payment_plan)
+def can_recover_vision_funds_commitment_group(group: PaymentPlanGroup) -> bool:
+    return VisionService.can_recover_group_with_funds_commitment_headers(group)
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
@@ -224,6 +225,7 @@ class BasePaymentPlanAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
     filter_horizontal = ("payment_plan_purposes",)
+    inlines = [PaymentInstructionInline]
     raw_id_fields = (
         "imported_file",
         "export_file_entitlement",
@@ -335,7 +337,7 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
     )
     readonly_fields = BasePaymentPlanAdmin.readonly_fields + ("plan_type", "use_payment_gateway")
     list_select_related = ("business_area", "program_cycle", "payment_plan_group", "follow_up_instruction")
-    inlines = [FundsCommitmentHeaderInline, PaymentInstructionInline]
+    inlines = [PaymentInstructionInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
@@ -455,68 +457,6 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
         return HttpResponseRedirect(f"{url}?{filter_by_parent}")
 
     @button(
-        visible=lambda btn: can_send_to_vision(btn.original),
-        permission="payment.pm_manage_vision_workflow",
-    )
-    def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        if request.method == "POST":
-            payment_plan = PaymentPlan.objects.get(pk=pk)
-            send_payment_plan_to_vision_async_task(payment_plan, str(request.user.pk))
-            self.message_user(request, "Sending Payment Plan to Vision started", level="success")
-            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-        return confirm_action(
-            modeladmin=self,
-            request=request,
-            action=self.send_to_vision,
-            message="Do you confirm to send this payment plan to Vision?",
-        )
-
-    @button(
-        visible=lambda btn: can_recover_vision_funds_commitment(btn.original),
-        permission="payment.pm_manage_vision_workflow",
-        label="Assign Vision FC Headers",
-    )
-    def assign_vision_funds_commitment_headers(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        payment_plan = PaymentPlan.objects.select_related("business_area", "created_by").get(pk=pk)
-        form = VisionFundsCommitmentHeaderAssignmentForm(
-            data=request.POST or None,
-            payment_plan=payment_plan,
-        )
-        if request.method == "POST" and form.is_valid():
-            try:
-                with transaction.atomic():
-                    locked_payment_plan = (
-                        PaymentPlan.objects.select_for_update().select_related("business_area", "created_by").get(pk=pk)
-                    )
-                    VisionService.recover_with_funds_commitment_headers(
-                        locked_payment_plan,
-                        form.cleaned_data["funds_commitment_headers"],
-                    )
-            except FundsCommitmentAssignmentError:
-                form.add_error(
-                    "funds_commitment_headers",
-                    "Select one or more available Funds Commitment Headers.",
-                )
-            else:
-                self.message_user(
-                    request,
-                    "Funds Commitment Headers assigned and the Vision flow continued.",
-                    level=messages.SUCCESS,
-                )
-                return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-
-        context = {
-            **self.admin_site.each_context(request),
-            "opts": self.model._meta,
-            "original": payment_plan,
-            "payment_plan": payment_plan,
-            "vision_receipt_unconfirmed": not payment_plan.sent_to_vision,
-            "form": form,
-            "title": "Assign Vision Funds Commitment Headers",
-        }
-        return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
-
-    @button(
         visible=lambda btn: can_retry_payment_gateway_send(btn.original),
         permission="payment.pm_sync_payment_plan_with_pg",
     )
@@ -553,6 +493,7 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "name", "cycle")
     search_fields = ("name", "unicef_id")
     list_filter = (("cycle__program__business_area", AutoCompleteFilter),)
+    inlines = [FundsCommitmentHeaderInline]
 
     readonly_fields = (
         "id",
@@ -563,6 +504,7 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "name",
         "financial_service_provider",
         "currency",
+        "internal_data",
         "dispersion_start_date",
         "dispersion_end_date",
     )
@@ -575,6 +517,63 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_paymentplan_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
+
+    @button(
+        visible=lambda btn: can_send_to_vision(btn.original),
+        permission="payment.pm_manage_vision_workflow",
+    )
+    def send_to_vision(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            group = PaymentPlanGroup.objects.get(pk=pk)
+            send_payment_plan_group_to_vision_async_task(group, str(request.user.pk))
+            self.message_user(request, "Sending Payment Plan Group to Vision started", level="success")
+            return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.send_to_vision,
+            message="Do you confirm sending this Payment Plan Group to Vision?",
+        )
+
+    @button(
+        visible=lambda btn: can_recover_vision_funds_commitment_group(btn.original),
+        permission="payment.pm_manage_vision_workflow",
+        label="Assign Vision FC Headers",
+    )
+    def assign_vision_funds_commitment_headers(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        group = PaymentPlanGroup.objects.select_related("cycle__program__business_area").get(pk=pk)
+        form = VisionFundsCommitmentHeaderAssignmentForm(
+            data=request.POST or None,
+            payment_plan_group=group,
+        )
+        if request.method == "POST" and form.is_valid():
+            try:
+                VisionService.recover_group_with_funds_commitment_headers(
+                    group, form.cleaned_data["funds_commitment_headers"]
+                )
+            except FundsCommitmentAssignmentError as error:
+                if error.status == VisionStatus.FC_NOT_FOUND:
+                    form.add_error("funds_commitment_headers", "Select one or more available Funds Commitment Headers.")
+                else:
+                    form.add_error(None, "The group's Vision recovery is no longer available. Refresh and try again.")
+            else:
+                self.message_user(
+                    request,
+                    "Funds Commitment Headers assigned and the Payment Plan Group released.",
+                    level=messages.SUCCESS,
+                )
+                return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "original": group,
+            "payment_plan_group": group,
+            "vision_receipt_unconfirmed": not group.sent_to_vision,
+            "form": form,
+            "title": "Assign Vision Funds Commitment Headers",
+        }
+        return render(request, "admin/payment/assign_vision_funds_commitment_items.html", context)
 
     @button(permission="payment.view_paymentplan")
     def target_populations(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:

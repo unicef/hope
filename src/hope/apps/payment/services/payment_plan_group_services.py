@@ -18,6 +18,7 @@ from hope.apps.payment.services.payment_plan_services import (
     validate_approval_count,
 )
 from hope.apps.payment.utils import log_payment_plan_approval, log_payment_plan_group_change
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     Approval,
     ApprovalProcess,
@@ -29,6 +30,7 @@ from hope.models import (
     PaymentPlan,
     PaymentPlanGroup,
     PaymentPlanSplit,
+    log_create,
 )
 
 if TYPE_CHECKING:
@@ -300,10 +302,8 @@ class PaymentPlanGroupService:
         if approval_process is None:
             raise ValidationError(f"Approval Process object not found for Payment Plan Group {payment_plan_group.pk}")
         payment_plans = self._payment_plans(payment_plan_group)
-        if action == PaymentPlan.Action.REVIEW.value and any(
-            payment_plan.vision_managed for payment_plan in payment_plans
-        ):
-            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
+        if action == PaymentPlan.Action.REVIEW.value and payment_plan_group.vision_managed:
+            raise ValidationError("Vision-managed Payment Plan Groups are released automatically after FC assignment")
         required_number = required_number_for(approval_process, approval_type)
         validate_approval_count(approval_process, approval_type, required_number, payment_plan_group.status, user)
 
@@ -312,12 +312,80 @@ class PaymentPlanGroupService:
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
             record_stage_reached(approval_process, approval_type, user)
+            notify_vision = approval_type == Approval.REJECT and payment_plan_group.sent_to_vision
+            if approval_type in (Approval.REJECT, Approval.FINANCE_RELEASE) and (
+                payment_plan_group.sent_to_vision or payment_plan_group.vision_status != VisionStatus.NOT_SENT.value
+            ):
+                from hope.contrib.vision.services import VisionService
+
+                VisionService.invalidate_attempt(payment_plan_group)
+                payment_plan_group.save(update_fields=["internal_data"])
             self._transition_stage(payment_plan_group, approval_type)
             for payment_plan in payment_plans:
                 PaymentPlanService(payment_plan).apply_acceptance_stage(approval_type, user)
+            if approval_type == Approval.AUTHORIZATION and payment_plan_group.vision_managed:
+                from hope.contrib.vision.tasks import send_payment_plan_group_to_vision_async_task
+
+                transaction.on_commit(
+                    lambda: send_payment_plan_group_to_vision_async_task(payment_plan_group, str(user.pk))
+                )
+            if notify_vision:
+                from hope.contrib.vision.tasks import notify_payment_plan_group_status_to_vision_async_task
+
+                transaction.on_commit(
+                    lambda: notify_payment_plan_group_status_to_vision_async_task(
+                        payment_plan_group, str(user.pk), "REJECTED"
+                    ),
+                    robust=True,
+                )
             if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
                 send_payment_plan_group_notification_emails_async_task(
                     payment_plan_group, notification_action.value, str(user.pk), timezone.now().isoformat()
+                )
+        self.payment_plan_group = payment_plan_group
+        return payment_plan_group
+
+    @transaction.atomic
+    def release_from_vision(self) -> PaymentPlanGroup:
+        payment_plan_group = self._locked_for_update()
+        if payment_plan_group.status != PaymentPlanGroup.Status.IN_REVIEW:
+            return payment_plan_group
+        payment_plans = self._payment_plans(payment_plan_group)
+        if not payment_plans or any(plan.status != PaymentPlan.Status.IN_REVIEW for plan in payment_plans):
+            raise ValidationError("Every Payment Plan must be in review for Vision release")
+        approval_process = payment_plan_group.approval_process.first()
+        if approval_process is None:
+            raise ValidationError("Approval Process object not found for Payment Plan Group")
+        user = payment_plan_group.created_by or payment_plans[0].created_by
+        old_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
+        Approval.objects.create(approval_process=approval_process, created_by=user, type=Approval.FINANCE_RELEASE)
+        log_payment_plan_approval(payment_plan_group, user, Approval.FINANCE_RELEASE, None)
+        record_stage_reached(approval_process, Approval.FINANCE_RELEASE, user)
+        self._transition_stage(payment_plan_group, Approval.FINANCE_RELEASE)
+        for payment_plan in payment_plans:
+            PaymentPlanService(payment_plan).apply_acceptance_stage(Approval.FINANCE_RELEASE, user)
+        log_payment_plan_group_change(payment_plan_group, old_group, str(user.pk))
+        send_payment_plan_group_notification_emails_async_task(
+            payment_plan_group,
+            PaymentPlan.Action.REVIEW.value,
+            str(user.pk),
+            timezone.now().isoformat(),
+        )
+        for payment_plan in payment_plans:
+            if payment_plan.can_send_to_payment_gateway:
+                old_payment_plan = copy_model_object(payment_plan)
+                sent_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+                    input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
+                    user=user,
+                    as_manager=True,
+                )
+                log_create(
+                    mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                    business_area_field="business_area",
+                    user=user,
+                    programs=payment_plan.program.pk,
+                    old_object=old_payment_plan,
+                    new_object=sent_plan,
                 )
         self.payment_plan_group = payment_plan_group
         return payment_plan_group
@@ -418,12 +486,26 @@ class PaymentPlanGroupService:
             PaymentPlanGroup.Status.IN_REVIEW,
         ):
             raise ValidationError(f"Abort Payment Plan Group is not possible within Status {payment_plan_group.status}")
+        notify_vision = payment_plan_group.sent_to_vision
+        if notify_vision or payment_plan_group.vision_status != VisionStatus.NOT_SENT.value:
+            from hope.contrib.vision.services import VisionService
+
+            VisionService.invalidate_attempt(payment_plan_group)
         for payment_plan in self._payment_plans(payment_plan_group):
             PaymentPlanService(payment_plan).abort(abort_comment, user_id=str(user.pk))
         flow = PaymentPlanGroupFlow(payment_plan_group)
         flow.status_abort()
         payment_plan_group.abort_comment = abort_comment or ""
-        payment_plan_group.save(update_fields=("status", "status_date", "abort_comment", "updated_at"))
+        payment_plan_group.save(update_fields=("status", "status_date", "abort_comment", "updated_at", "internal_data"))
+        if notify_vision:
+            from hope.contrib.vision.tasks import notify_payment_plan_group_status_to_vision_async_task
+
+            transaction.on_commit(
+                lambda: notify_payment_plan_group_status_to_vision_async_task(
+                    payment_plan_group, str(user.pk), "ABORTED"
+                ),
+                robust=True,
+            )
         self.payment_plan_group = payment_plan_group
         return payment_plan_group
 

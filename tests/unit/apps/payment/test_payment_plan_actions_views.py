@@ -108,7 +108,10 @@ def payment_plan_actions_context(
             "api:payments:payment-plans-entitlement-flat-amount", kwargs=url_kwargs
         ),
         "url_custom_exchange_rate": reverse("api:payments:payment-plans-custom-exchange-rate", kwargs=url_kwargs),
-        "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
+        "url_funds_commitments": reverse(
+            "api:payments:payment-plan-groups-assign-funds-commitments",
+            kwargs={**url_kwargs_ba_program, "pk": pp.payment_plan_group_id},
+        ),
     }
 
 
@@ -1165,6 +1168,9 @@ def test_assign_funds_commitments(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
 
     first_header = FundsCommitmentHeaderFactory()
     second_header = FundsCommitmentHeaderFactory()
@@ -1193,10 +1199,56 @@ def test_assign_funds_commitments(
 
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.json()
-        assert set(payment_plan_actions_context["pp"].funds_commitment_headers.all()) == {
+        assert set(group.funds_commitment_headers.all()) == {
             first_header,
             second_header,
         }
+
+
+@pytest.fixture
+def group_with_existing_fc_assignment(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    context = payment_plan_actions_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        context["business_area"],
+        context["program_active"],
+    )
+    context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    context["pp"].save(update_fields=["status"])
+    group = context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
+    original_header = FundsCommitmentHeaderFactory()
+    replacement_header = FundsCommitmentHeaderFactory()
+    FundsCommitmentItemFactory(funds_commitment_header=original_header, office=context["business_area"])
+    FundsCommitmentItemFactory(funds_commitment_header=replacement_header, office=context["business_area"])
+    group.funds_commitment_headers.add(original_header)
+    return {**context, "group": group, "replacement_header": replacement_header}
+
+
+def test_assign_funds_commitments_replaces_group_selection(
+    group_with_existing_fc_assignment: dict[str, Any],
+    django_assert_num_queries,
+) -> None:
+    context = group_with_existing_fc_assignment
+    replacement_header = context["replacement_header"]
+
+    response = context["client"].post(
+        context["url_funds_commitments"],
+        {"funds_commitment_numbers": [replacement_header.funds_commitment_number]},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    with django_assert_num_queries(1):
+        assigned_numbers = list(
+            context["group"].funds_commitment_headers.values_list("funds_commitment_number", flat=True)
+        )
+    assert assigned_numbers == [replacement_header.funds_commitment_number]
 
 
 def test_assign_funds_commitments_validation_errors(
@@ -1216,10 +1268,13 @@ def test_assign_funds_commitments_validation_errors(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment plan must be in review" in response.json()
+    assert "Payment Plan Group must be in review" in response.json()
 
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
         {"funds_commitment_numbers": ["UNKNOWN"]},
@@ -1571,6 +1626,9 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
@@ -1578,4 +1636,4 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "assigned automatically" in str(response.data)
+    assert "managed by Vision" in str(response.data)

@@ -32,6 +32,7 @@ from hope.apps.payment.api.serializers import (
     ApprovalProcessSerializer,
     PaymentListSerializer,
     PaymentPlanDetailSerializer,
+    PaymentPlanGroupDetailSerializer,
     PaymentPlanListSerializer,
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanListSerializer,
@@ -208,6 +209,9 @@ def vision_payment_plan_detail_context(payment_plan_detail_context: dict[str, An
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
     payment_plan.status = PaymentPlan.Status.IN_REVIEW
     payment_plan.save(update_fields=["status"])
+    group = payment_plan.payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
     return payment_plan_detail_context
 
 
@@ -484,6 +488,10 @@ def test_payment_plan_detail_serializer_returns_pending_status_breakdown(
 @pytest.fixture
 def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[str, Any]) -> dict[str, Any]:
     payment_plan = payment_plan_detail_context["payment_plan"]
+    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    payment_plan.save(update_fields=["status"])
+    payment_plan.payment_plan_group.status = payment_plan.payment_plan_group.Status.IN_REVIEW
+    payment_plan.payment_plan_group.save(update_fields=["status"])
     funds_commitment = FundsCommitmentFactory(
         rec_serial_number=100,
         funds_commitment_number="FC123",
@@ -498,18 +506,18 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
         commitment_amount_usd=Decimal("100.50"),
     )
     item = FundsCommitmentItem.objects.get(pk=funds_commitment.pk)
-    item.funds_commitment_header.payment_plans.add(payment_plan)
+    item.funds_commitment_header.payment_plan_groups.add(payment_plan.payment_plan_group)
     return payment_plan_detail_context
 
 
-def test_payment_plan_detail_serializer_funds_commitments_exposes_header_fields(
+def test_payment_plan_group_detail_serializer_funds_commitments_exposes_header_fields(
     payment_plan_with_funds_commitment_header: dict[str, Any],
     django_assert_num_queries,
 ) -> None:
     payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
 
     with django_assert_num_queries(2):
-        data = PaymentPlanDetailSerializer().get_funds_commitments(payment_plan)
+        data = PaymentPlanGroupDetailSerializer().get_funds_commitments(payment_plan.payment_plan_group)
 
     assert data == [
         {
@@ -529,16 +537,19 @@ def test_payment_plan_detail_serializer_funds_commitments_exposes_header_fields(
     assert data[0]["funds_commitment_items"][0]["rec_serial_number"] == 100
 
 
-def test_payment_plan_detail_serializer_available_funds_commitments_exposes_header_fields(
+def test_payment_plan_group_detail_serializer_available_funds_commitments_exposes_header_fields(
     payment_plan_with_funds_commitment_header: dict[str, Any],
     django_assert_num_queries,
 ) -> None:
     payment_plan = payment_plan_with_funds_commitment_header["payment_plan"]
+    group = payment_plan.payment_plan_group
+    business_area_id = group.cycle.program.business_area_id
 
-    with django_assert_num_queries(3):
-        data = PaymentPlanDetailSerializer().get_available_funds_commitments(payment_plan)
+    with django_assert_num_queries(4):
+        data = PaymentPlanGroupDetailSerializer().get_available_funds_commitments(group)
 
     assert len(data) == 1
+    assert business_area_id == payment_plan.business_area_id
     assert data[0]["funds_commitment_number"] == "FC123"
     assert data[0]["vendor_id"] == "VENDOR-1"
     assert data[0]["posting_date"] == "2026-09-01"
@@ -576,7 +587,7 @@ def test_payment_plan_detail_serializer_vision_state(
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["vision_integration_enabled"] is True
-    assert data["vision_managed"] is True
+    assert data["payment_plan_group"]["vision_managed"] is True
     assert data["vision"] == {
         "status": "NOT_SENT",
         "vision_id": None,

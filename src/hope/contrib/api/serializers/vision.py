@@ -129,7 +129,7 @@ class PaymentPlanCallbackAckSerializer(serializers.Serializer):
         return {vision_callback_external_field_name(field_name): value for field_name, value in data.items()}
 
 
-class PaymentPlanPayloadSerializer(serializers.Serializer):
+class PaymentPlanGroupPayloadSerializer(serializers.Serializer):
     business_area = serializers.CharField(source="business_area.code")
     vendor_number = serializers.CharField(source="financial_service_provider.vision_vendor_number")
     payplan_sno = serializers.CharField(source="unicef_id")
@@ -137,8 +137,13 @@ class PaymentPlanPayloadSerializer(serializers.Serializer):
     currency = serializers.CharField(source="currency.vision_code")
     auth_amt = serializers.CharField(source="total_entitled_quantity")
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
-    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
+    exchange_rate = serializers.SerializerMethodField()
     head_vendor = serializers.CharField(source="financial_service_provider.name")
+
+    @staticmethod
+    def get_exchange_rate(obj: Any) -> None:
+        # TODO: Read the exchange rate from PaymentPlanGroup when it is moved there.
+        return None
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)

@@ -541,6 +541,54 @@ def test_mark_as_released_rejected_when_a_plan_is_vision_managed(group_in_review
     assert error.value.detail[0] == "Vision-managed Payment Plans are released automatically after FC assignment"
 
 
+@pytest.fixture
+def partially_released_group(group_in_review, locked_payment_plan):
+    locked_payment_plan.status = PaymentPlan.Status.ACCEPTED
+    locked_payment_plan.save(update_fields=["status"])
+    pending_plan = PaymentPlanFactory(
+        program_cycle=locked_payment_plan.program_cycle,
+        payment_plan_group=group_in_review,
+        status=PaymentPlan.Status.IN_REVIEW,
+    )
+    return group_in_review, pending_plan
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_vision_release_keeps_group_in_review_while_a_plan_is_pending(
+    mock_notify, partially_released_group, user, django_assert_num_queries
+):
+    group, _ = partially_released_group
+    with django_assert_num_queries(5):
+        result = PaymentPlanGroupService(group).advance_after_vision_release(user)
+
+    assert result.status == PaymentPlanGroup.Status.IN_REVIEW
+    mock_notify.assert_not_called()
+
+
+@pytest.fixture
+def group_with_released_vision_plans(partially_released_group):
+    group, pending_plan = partially_released_group
+    pending_plan.status = PaymentPlan.Status.ACCEPTED
+    pending_plan.save(update_fields=["status"])
+    return group
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_vision_release_accepts_group_after_all_plans_are_accepted(
+    mock_notify, group_with_released_vision_plans, user, django_assert_num_queries
+):
+    with django_assert_num_queries(6):
+        result = PaymentPlanGroupService(group_with_released_vision_plans).advance_after_vision_release(user)
+
+    with django_assert_num_queries(3):
+        repeated_result = PaymentPlanGroupService(group_with_released_vision_plans).advance_after_vision_release(user)
+
+    assert result.status == PaymentPlanGroup.Status.ACCEPTED
+    assert repeated_result.status == PaymentPlanGroup.Status.ACCEPTED
+    mock_notify.assert_called_once()
+    assert mock_notify.call_args.args[:3] == (result, PaymentPlan.Action.REVIEW.value, str(user.pk))
+
+
 @pytest.mark.enable_activity_log
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
 def test_approve_logs_event_on_group(mock_notify, group_in_approval, user):
