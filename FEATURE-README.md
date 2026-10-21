@@ -22,7 +22,7 @@ This is the documentation for aligning HOPE to new biographic deduplication flow
 
 HOPE stores biometric findings from HDE in `BiometricDedupeSimilarityPair`. HDE will now also return biographic findings, so they need their own model.
 
-## Changes
+### Changes
 
 - Abstract `DedupEngineSimilarityPair` with the shared logic `BiometricDedupeSimilarityPair` and new `BiographicDedupeSimilarityPair`.
 - FKs are declared per child to keep the existing biometric `related_name`s, see
@@ -30,12 +30,25 @@ https://github.com/unicef/hope/pull/6491/changes#r4292301640.
 - Biographic pair has `proximity_to_score`, which the current biographic dedup UI uses; kept so the UI behaves the same whether results come from HOPE or HDE.
 - Migration `0020`: creates the biographic table and renames the biometric check constraint to `biometric_individual1_lt_individual2` (drop + re-add).
 
-## Open (TODOs, resolved on the long-term branch)
+### Open (TODOs, resolved on the long-term branch)
 
 - Is the HDE score already scaled? https://github.com/unicef/hope/pull/6491/changes#r4292255943
 - `proximity_to_score` is `None` until a later PR fills it.
 - Biographic status codes are placeholders until the HDE contract is agreed.
 
-## For reviewers
+### For reviewers
 
 Look for over-engineering, inconsistencies, convention misalignments and architecture issues. Pardon for #TODOs in the code, some things needs to be further specified, but the overall image will not change and TODOs will be resolved on long term branch. You're doing great job B).
+
+## Branch `346504-ticket-helpers-refactor`
+
+### Summary
+
+This PR provides no behavioral changes in HOPE. It's purpose is to simplify next task related to handling biographic deduplication using hope dedupliation engine results.
+
+### Why?
+
+`create_grievance_ticket_with_details` can't be reused out of the box in a way it's designed today. It's EITHER:
+ - create grievance tickets with PAIRS using Hope Deduplication Engine findings
+ - create grievance tickets that GROUPS duplicates using HOPE deduplication findings.
+What I need here is: Use HDE deduplication results (SimilarityPairs) and create grievance ticket which GROUP together findings. Because of that I'll implement `create_grouped_grievance_tickets_from_hde_findings_with_details` that will be similar to `create_grievance_ticket_with_details`. In order to do that, I need to extract some steps to keep it DRY.
