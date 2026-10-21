@@ -11,11 +11,11 @@ The **Beneficiary Group** model (shown as **Payee Label** in the UI and admin) c
 | `group_label_plural`   | "Households"     | Plural group name — list page headers, tab labels, count labels.                                                                                                           |
 | `member_label`         | "Individual"     | Singular member name — detail page titles, lookup dialogs, filter labels.                                                                                                  |
 | `member_label_plural`  | "Individuals"    | Plural member name — list page headers, table headers, count labels.                                                                                                       |
-| `payee_type`           | "Household"      | The Payee Type the label belongs to. A program can only use a label of the Payee Type of its Data Collecting Type; the Payee Type also provides the GL code shown on the program. |
-| `data_collecting_types`| `full_collection`| Optional. When set, the label can only be used with these Data Collecting Types of its Payee Type. Leave empty to allow every Data Collecting Type of the Payee Type.          |
-| `active`               | `True` / `False` | Inactive labels cannot be chosen for new programs; programs already using them are not affected.                                                                           |
+| `payee_type`           | "Household"      | The Payee Type the Payee Label belongs to. A program can only use a Payee Label of the Payee Type of its Data Collecting Type; the Payee Type also provides the GL code shown on the program. |
+| `data_collecting_types`| `full_collection`| Optional. When set, the Payee Label can only be used with these Data Collecting Types of its Payee Type. Leave empty to allow every Data Collecting Type of the Payee Type.          |
+| `active`               | `True` / `False` | Inactive Payee Labels cannot be chosen for new programs; programs already using them are not affected.                                                                           |
 
-Whether the UI shows a group → member hierarchy (e.g. Household → Individuals) or only members (e.g. Social Workers) is driven by the `type` of the program's Data Collecting Type, not by the label.
+Whether the UI shows a group → member hierarchy (e.g. Household → Individuals) or only members (e.g. Social Workers) is driven by the `type` of the program's Data Collecting Type, not by the Payee Label.
 
 
 ## Admin Configuration
