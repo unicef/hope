@@ -249,6 +249,31 @@ describe('ProgramForm payee type fields', () => {
     ]);
   });
 
+  it('keeps the payee type and GL code of an edited program missing from the choices', async () => {
+    location.pathname = '/afghanistan/edit/1';
+    const program = {
+      payeeType: { id: 'payee-legacy', name: 'Legacy', glCode: '7700999' },
+      dataCollectingType: { code: 'legacy', label: 'Legacy DCT' },
+      beneficiaryGroup: { id: 'Any DCT', name: 'Any DCT' },
+    } as unknown as ProgramDetail;
+    renderForm(
+      {
+        payeeType: 'payee-legacy',
+        dataCollectingTypeCode: 'legacy',
+        beneficiaryGroup: 'Any DCT',
+      },
+      program,
+    );
+
+    expect(await openSelect('payeeType')).toEqual([
+      'Household',
+      'Incentive Payee',
+      'Legacy',
+    ]);
+    await choose('Legacy');
+    expect(glCodeInput().value).toBe('7700999');
+  });
+
   it('locks payee type, DCT and label on the copy page', async () => {
     location.pathname = '/afghanistan/duplicate/1';
     const program = {

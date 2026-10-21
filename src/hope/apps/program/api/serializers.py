@@ -686,7 +686,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     def validate_beneficiary_group(self, value: BeneficiaryGroup) -> BeneficiaryGroup:
         # validate if BG can be updated
         if self.instance.beneficiary_group != value and self.instance.registration_imports.exists():
-            raise serializers.ValidationError("Beneficiary Group cannot be updated if Program has population.")
+            raise serializers.ValidationError("Payee Label cannot be updated if Program has population.")
         return value
 
     def validate_version(self, value: int | None) -> int | None:

@@ -804,7 +804,7 @@ def test_update_beneficiary_group_invalid_with_population(
     response = authenticated_client.put(update_url, payload)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "beneficiary_group" in response.json()
-    assert response.json()["beneficiary_group"][0] == "Beneficiary Group cannot be updated if Program has population."
+    assert response.json()["beneficiary_group"][0] == "Payee Label cannot be updated if Program has population."
 
     program.refresh_from_db()
     assert program.beneficiary_group == bg_household

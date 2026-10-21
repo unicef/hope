@@ -182,24 +182,17 @@ def unknown_dct(db: Any) -> DataCollectingType:
 
 @pytest.fixture
 def inactive_payee_type_dct(inactive_payee_type: PayeeType) -> DataCollectingType:
-    return DataCollectingType.objects.create(
+    return DataCollectingTypeFactory(
         label="Head of Facility",
         code="head_of_facility",
         type=DataCollectingType.Type.SOCIAL,
-        active=True,
-        deprecated=False,
         payee_type=inactive_payee_type,
     )
 
 
 @pytest.fixture
 def dct_without_payee_type(db: Any) -> DataCollectingType:
-    return DataCollectingType.objects.create(
-        label="Delegate for payment",
-        code="delegate",
-        active=True,
-        deprecated=False,
-    )
+    return DataCollectingTypeFactory(label="Delegate for payment", code="delegate", type=None, payee_type=None)
 
 
 def _choices_url(business_area_slug: str) -> str:

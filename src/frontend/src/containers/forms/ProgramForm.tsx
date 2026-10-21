@@ -82,9 +82,28 @@ const ProgramForm = ({
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
 
-  const selectedPayeeType = payeeTypeChoices?.find(
-    (payeeType) => payeeType.id === values.payeeType,
-  );
+  const currentPayeeType = program?.payeeType;
+  const selectedPayeeType =
+    payeeTypeChoices?.find((payeeType) => payeeType.id === values.payeeType) ??
+    (currentPayeeType && values.payeeType === currentPayeeType.id
+      ? currentPayeeType
+      : undefined);
+
+  const payeeTypeOptions = useMemo(() => {
+    const choices = (payeeTypeChoices ?? []).map((choice) => ({
+      name: choice.name,
+      value: choice.id,
+    }));
+    // A program may keep a Payee Type that the choices no longer list.
+    if (
+      currentPayeeType &&
+      values.payeeType === currentPayeeType.id &&
+      !choices.some((choice) => choice.value === currentPayeeType.id)
+    ) {
+      choices.push({ name: currentPayeeType.name, value: currentPayeeType.id });
+    }
+    return choices;
+  }, [payeeTypeChoices, currentPayeeType, values.payeeType]);
 
   const filteredDataCollectionTypeChoicesData = useMemo(() => {
     const payeeTypeId = isCopyProgramPage
@@ -247,10 +266,7 @@ const ProgramForm = ({
                     beneficiaryGroup: '',
                   });
                 }}
-                choices={payeeTypeChoices.map((choice) => ({
-                  name: choice.name,
-                  value: choice.id,
-                }))}
+                choices={payeeTypeOptions}
                 component={FormikSelectField}
                 data-cy="input-payee-type"
               />
