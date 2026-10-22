@@ -15,10 +15,7 @@ from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_specific_households
 from hope.apps.payment.services.payment_gateway import PaymentPayloadSerializer
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
-    XlsxPaymentPlanDeliveryImportService,
-    _format_quantity_for_message,
-)
+from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
 from hope.models import Household, Payment, PaymentPlan
 
 
@@ -63,11 +60,10 @@ def test_money_model_field_has_precision_and_admin_labels(model, field_name):
     [
         ("123.45", Decimal("123.4500000000")),
         ("123.12345678905", Decimal("123.1234567891")),
-        ("-123.12345678905", Decimal("-123.1234567891")),
         ("99999999999999999999.99999999994", Decimal("99999999999999999999.9999999999")),
     ],
 )
-def test_currency_rounding_uses_half_away_from_zero(source, expected):
+def test_currency_rounding_uses_half_up(source, expected):
     assert normalize_currency_decimal(source) == expected
     assert HopeCurrencyField().formfield().clean(source) == expected
 
@@ -81,10 +77,11 @@ def test_currency_field_uses_unbounded_postgresql_numeric_type():
     [
         "99999999999999999999.99999999995",
         "100000000000000000000",
+        "-0.01",
         "NaN",
     ],
 )
-def test_currency_rounding_rejects_values_outside_thirty_digits(source):
+def test_currency_normalization_rejects_invalid_amounts(source):
     with pytest.raises(ValidationError, match="at most 20 digits before the decimal point"):
         normalize_currency_decimal(source)
 
@@ -101,7 +98,7 @@ def test_currency_api_representation_keeps_two_places_and_meaningful_precision(a
     assert HopeCurrencyDecimalField().to_representation(Decimal(amount)) == expected
 
 
-@pytest.mark.parametrize("source", ["NaN", "100000000000000000000"])
+@pytest.mark.parametrize("source", ["NaN", "100000000000000000000", "-0.01"])
 def test_currency_api_rejects_invalid_amount(source):
     with pytest.raises(DRFValidationError) as exc_info:
         HopeCurrencyDecimalField().to_internal_value(source)
@@ -118,10 +115,6 @@ def test_currency_api_representation_can_return_decimal():
 
 def test_payment_model_serializer_uses_currency_api_field():
     assert isinstance(PaymentListSerializer().fields["entitlement_quantity_usd"], HopeCurrencyDecimalField)
-
-
-def test_reconciliation_conflict_amount_keeps_meaningful_precision():
-    assert _format_quantity_for_message(Decimal("123.4500000001")) == "123.4500000001"
 
 
 def test_payment_save_load_preserves_ten_fractional_digits(payment, django_assert_num_queries):
@@ -216,3 +209,17 @@ def test_delivery_import_uses_fsp_provided_usd_amount(payment):
 
     assert payment.delivered_quantity == Decimal("100.00")
     assert payment.delivered_quantity_usd == Decimal("123.1234567891")
+
+
+def test_delivery_import_failed_sentinel_ignores_fsp_usd_amount(payment):
+    service = XlsxPaymentPlanDeliveryImportService(payment.parent, BytesIO())
+    service.xlsx_headers = ["delivered_quantity_usd"]
+    worksheet = openpyxl.Workbook().active
+    worksheet["A1"] = "delivered_quantity_usd"
+    worksheet["A2"] = "123.1234567891"
+
+    service._apply_reconciliation_values(payment, tuple(worksheet[2]), Decimal("-1.00"), None)
+
+    assert payment.status == Payment.STATUS_ERROR
+    assert payment.delivered_quantity is None
+    assert payment.delivered_quantity_usd is None

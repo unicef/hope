@@ -1,6 +1,6 @@
 from decimal import Decimal
 import io
-from typing import Any, cast
+from typing import Any
 
 import openpyxl
 from openpyxl.utils import get_column_letter
@@ -142,14 +142,6 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             if cell.value is None:
                 column += 1
                 continue
-            if (
-                column == self.RECEIVED_AMOUNT_COLUMN_INDEX
-                and cell.data_type == "s"
-                and (parsed_amount := to_decimal(cell.value)) is not None
-                and parsed_amount.is_finite()
-            ):
-                column += 1
-                continue
             if column in mandatory_columns and cell.data_type != self.COLUMN_DICT_TYPES[column]:
                 readable_cell_error = XlsxVerificationImportService.TYPES_READABLE_MAPPING[
                     self.COLUMN_DICT_TYPES[column]
@@ -193,21 +185,11 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         payment_record = self.payment_records_dict.get(payment_record_id)
         if payment_record is None:
             return
-        amount_cell = row[self.RECEIVED_AMOUNT_COLUMN_INDEX]
-        raw_amount = amount_cell.value
-        received_amount = to_decimal(raw_amount)
-        if raw_amount is not None and raw_amount != "" and (received_amount is None or not received_amount.is_finite()):
-            if amount_cell.data_type == "n":
-                self.errors.append(
-                    XlsxError("Payment Verifications", amount_cell.coordinate, "Invalid received amount")
-                )
-            return
-        raw_decimal = Decimal(str(raw_amount)) if received_amount is not None else None
-        if raw_decimal is not None:
-            exponent = cast("int", raw_decimal.as_tuple().exponent)
-            amount_display = format(raw_decimal, f".{max(2, -exponent)}f")
-        else:
-            amount_display = None
+        received_amount = row[self.RECEIVED_AMOUNT_COLUMN_INDEX].value
+        if received_amount is not None:
+            if not isinstance(received_amount, int | float):
+                return
+            received_amount = Decimal(format(round(received_amount, 2), ".2f"))
         received_cell = row[self.RECEIVED_COLUMN_INDEX]
         received = received_cell.value
         if received is None and received_amount is not None and received_amount == 0:
@@ -215,7 +197,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                 XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
-                    f"You can't set received_amount {amount_display} and not set received to NO",
+                    f"You can't set received_amount {received_amount} and not set received to NO",
                 )
             )
         elif received is None and received_amount is not None:
@@ -223,7 +205,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                 XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
-                    f"You can't set received_amount {amount_display} and not set received to YES",
+                    f"You can't set received_amount {received_amount} and not set received to YES",
                 )
             )
         elif received_amount == 0 and received != "NO":
@@ -239,7 +221,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                 XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
-                    f"If received_amount({amount_display}) is not 0, you should set received to YES",
+                    f"If received_amount({received_amount}) is not 0, you should set received to YES",
                 )
             )
 

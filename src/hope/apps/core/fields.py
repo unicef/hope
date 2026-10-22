@@ -1,7 +1,6 @@
 from decimal import ROUND_HALF_UP, Context, Decimal, InvalidOperation
 from typing import Any
 
-from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Abs, Round
@@ -26,7 +25,7 @@ def currency_precision_check(*fields: str, name: str) -> models.CheckConstraint:
 def normalize_currency_decimal(value: Any) -> Decimal:
     try:
         amount = Decimal(str(value))
-        if not amount.is_finite() or abs(amount) >= CURRENCY_MAX_ABSOLUTE_VALUE:
+        if not amount.is_finite() or amount < 0 or amount >= CURRENCY_MAX_ABSOLUTE_VALUE:
             raise InvalidOperation
         return amount.quantize(
             CURRENCY_QUANTUM,
@@ -34,12 +33,6 @@ def normalize_currency_decimal(value: Any) -> Decimal:
         )
     except (InvalidOperation, TypeError, ValueError) as exc:
         raise ValidationError("Enter a valid monetary amount with at most 20 digits before the decimal point.") from exc
-
-
-class HopeCurrencyFormField(forms.DecimalField):
-    def to_python(self, value: Any) -> Any:
-        parsed = super().to_python(value)
-        return normalize_currency_decimal(parsed) if parsed is not None else None
 
 
 class HopeCurrencyField(models.DecimalField):
@@ -58,7 +51,3 @@ class HopeCurrencyField(models.DecimalField):
 
     def from_db_value(self, value: Any, expression: Any, connection: Any) -> Decimal | None:
         return self.to_python(value)
-
-    def formfield(self, **kwargs: Any) -> forms.Field | None:
-        kwargs.setdefault("form_class", HopeCurrencyFormField)
-        return super().formfield(**kwargs)

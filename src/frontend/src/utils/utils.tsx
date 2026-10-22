@@ -666,7 +666,6 @@ export function formatCurrencyWithSymbol(
   currency = 'USD',
   visionCode?: string | null,
 ): string {
-  // TODO: ? Pass Currency.number_of_decimals to the frontend so displays honor configured currency precision.
   // If amount is null or undefined just show '-'
   if (amount === null || amount === undefined) {
     return '-';

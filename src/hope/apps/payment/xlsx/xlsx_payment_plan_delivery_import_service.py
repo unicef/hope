@@ -56,16 +56,9 @@ NULL_DELIVERY_POLICY_IGNORE = "ignore"
 NULL_DELIVERY_POLICIES = (NULL_DELIVERY_POLICY_RESET, NULL_DELIVERY_POLICY_IGNORE)
 
 
-def _format_quantity_for_message(quantity: Decimal) -> str:
-    whole, _, fractional = format(quantity, "f").partition(".")
-    return f"{whole}.{fractional.rstrip('0').ljust(2, '0')}"
-
-
 class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
-    KNOWN_COLUMNS: frozenset[str] = frozenset(
-        (*FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS, "delivered_quantity_usd")
-    )
+    KNOWN_COLUMNS: frozenset[str] = frozenset(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
 
     ACTION_APPLY = "apply"
     ACTION_CONFLICT = "conflict"
@@ -290,24 +283,23 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
             conflict_error = XlsxError(
                 self.sheetname,
                 cell.coordinate,
-                f"Payment {payment_id}: Delivered quantity {_format_quantity_for_message(delivered_quantity)} "
+                f"Payment {payment_id}: Delivered quantity {delivered_quantity} "
                 f"conflicts with the existing delivered quantity "
-                f"{_format_quantity_for_message(payment.delivered_quantity or Decimal(0))}.",
+                f"{payment.delivered_quantity or Decimal('0.00')}.",
             )
             self.errors.append(conflict_error)
             self.conflict_errors.append(conflict_error)
             return action, delivered_quantity
 
         if delivered_quantity is not None and delivered_quantity != Decimal("-1.00"):
-            entitlement_quantity = payment.entitlement_quantity or Decimal(0)
+            entitlement_quantity = payment.entitlement_quantity or Decimal("0.00")
             if delivered_quantity > entitlement_quantity:
                 self.errors.append(
                     XlsxError(
                         self.sheetname,
                         cell.coordinate,
                         f"Payment {payment_id}: Delivered quantity "
-                        f"{_format_quantity_for_message(delivered_quantity)} is bigger than "
-                        f"Entitlement quantity {_format_quantity_for_message(entitlement_quantity)}",
+                        f"{delivered_quantity} is bigger than Entitlement quantity {entitlement_quantity}",
                     )
                 )
         return action, delivered_quantity
@@ -581,10 +573,6 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 raise self.XlsxPaymentPlanDeliveryImportServiceError(
                     f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}"
                 ) from None
-            if delivered_quantity_usd < 0:
-                raise self.XlsxPaymentPlanDeliveryImportServiceError(
-                    f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}"
-                )
             payment.delivered_quantity_usd = delivered_quantity_usd
         else:
             payment.delivered_quantity_usd = get_quantity_in_usd(

@@ -970,6 +970,25 @@ def test_prepare_headers_raises_for_unknown_template_columns(payment_plan):
         export_service.prepare_headers(fsp_xlsx_template)
 
 
+def test_prepare_headers_custom_template_requires_explicit_usd_column(payment_plan):
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+    fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "delivered_quantity"])
+
+    headers = export_service.prepare_headers(fsp_xlsx_template)
+
+    assert "delivered_quantity" in headers
+    assert "delivered_quantity_usd" not in headers
+
+
+def test_prepare_headers_default_template_includes_delivered_quantity_usd(payment_plan):
+    export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
+    fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
+
+    headers = export_service.prepare_headers(fsp_xlsx_template)
+
+    assert headers.index("delivered_quantity_usd") == headers.index("delivered_quantity") + 1
+
+
 def test_get_flex_field_returns_empty_when_no_snapshot(payment_plan, payments, flex_decimal_attribute):
     export_service = XlsxPaymentPlanDeliveryExportService(payment_plan)
     payment = payments[0]
