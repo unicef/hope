@@ -222,6 +222,8 @@ def test_follow_up_instruction_full_flow(
 
     # --- Close ---
     login.click('[data-cy="button-close"]')
+    login.type('textarea[name="comment"]', "Paid out, no verification")
+    login.click('[data-cy="button-close-confirm"]')
     login.wait_for_text("Follow-up Instruction closed")
     login.wait_for_text("CLOSED")
     login.assert_element_absent('[data-cy="button-close"]')

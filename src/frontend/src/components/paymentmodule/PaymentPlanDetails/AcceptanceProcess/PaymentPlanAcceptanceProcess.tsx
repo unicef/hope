@@ -9,8 +9,8 @@ interface PaymentPlanAcceptanceProcessProps {
 }
 
 /**
- * Read-only view of the plan's approvals: the group's for a grouped plan, the plan's own for a
- * Follow-Up Instruction child. Approving happens on the group or instruction page.
+ * Read-only view of the plan's approvals: its group's for a grouped plan, its instruction's for a
+ * Follow-Up Instruction child (sent with the plan). Approving happens on the group or instruction page.
  */
 export function PaymentPlanAcceptanceProcess({
   paymentPlan,

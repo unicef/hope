@@ -9,12 +9,16 @@ from extras.test_utils.factories.payment import (
     ApprovalProcessFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
 from extras.test_utils.factories.program import ProgramFactory
-from hope.apps.payment.pdf.payment_plan_export_pdf_service import PaymentPlanGroupPDFExportService
-from hope.models import Approval, DataCollectingType, Payment, PaymentPlan, PaymentPlanGroup
+from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
+    FollowUpInstructionPDFExportService,
+    PaymentPlanGroupPDFExportService,
+)
+from hope.models import Approval, DataCollectingType, FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -197,4 +201,110 @@ def test_group_get_email_context(payment_plan_group: PaymentPlanGroup) -> None:
         "and below you will find the link to download the file.",
         "link": "",
         "title": "Payment Plan Group Summary file generated",
+    }
+
+
+@pytest.fixture
+def instruction(program_and_cycle: dict[str, Any], financial_service_provider: Any) -> FollowUpInstruction:
+    program = program_and_cycle["program"]
+    return FollowUpInstructionFactory(
+        program=program, business_area=program.business_area, financial_service_provider=financial_service_provider
+    )
+
+
+@pytest.fixture
+def instruction_child(
+    instruction: FollowUpInstruction, program_and_cycle: dict[str, Any], delivery_mechanism_cash: Any
+) -> PaymentPlan:
+    child = PaymentPlanFactory(
+        program_cycle=program_and_cycle["program_cycle"],
+        business_area=instruction.business_area,
+        follow_up_instruction=instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        delivery_mechanism=delivery_mechanism_cash,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    PaymentFactory(
+        parent=child,
+        entitlement_quantity=Decimal("10.00"),
+        entitlement_quantity_usd=Decimal("20.00"),
+        delivered_quantity=Decimal("10.00"),
+        delivered_quantity_usd=Decimal("20.00"),
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+    return child
+
+
+@pytest.fixture
+def instruction_approval_process(instruction: FollowUpInstruction) -> Any:
+    approval_process = ApprovalProcessFactory(follow_up_instruction=instruction)
+    ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL, comment="instruction approved")
+    return approval_process
+
+
+def test_instruction_generate_web_links(instruction: FollowUpInstruction, mocker: Any) -> None:
+    mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link",
+        side_effect=lambda path: f"http://www_link{path}",
+    )
+    pdf_export_service = FollowUpInstructionPDFExportService(instruction)
+
+    pdf_export_service.generate_web_links()
+
+    assert pdf_export_service.download_link == (
+        f"http://www_link/api/download-follow-up-instruction-summary-pdf/{instruction.id}"
+    )
+    assert pdf_export_service.instruction_link.endswith(f"/payment-module/follow-up-instructions/{instruction.id}")
+
+
+def test_instruction_generate_pdf_summary_returns_pdf_named_after_the_instruction(
+    instruction: FollowUpInstruction, instruction_child: PaymentPlan, instruction_approval_process: Any, mocker: Any
+) -> None:
+    mocker.patch("hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link", return_value="http://www_link")
+
+    pdf, filename = FollowUpInstructionPDFExportService(instruction).generate_pdf_summary()
+
+    assert isinstance(pdf, bytes)
+    assert filename == f"FollowUpInstructionSummary-{instruction.unicef_id}.pdf"
+
+
+def test_instruction_generate_pdf_summary_uses_the_instruction_approvals_and_payments(
+    instruction: FollowUpInstruction,
+    instruction_child: PaymentPlan,
+    instruction_approval_process: Any,
+    program_and_cycle: dict[str, Any],
+    mocker: Any,
+) -> None:
+    mocker.patch("hope.apps.payment.pdf.payment_plan_export_pdf_service.get_link", return_value="http://www_link")
+    generate_pdf_from_html_mock = mocker.patch(
+        "hope.apps.payment.pdf.payment_plan_export_pdf_service.generate_pdf_from_html", return_value=b"pdf"
+    )
+
+    FollowUpInstructionPDFExportService(instruction).generate_pdf_summary()
+
+    pdf_context_data = generate_pdf_from_html_mock.call_args.kwargs["data"]
+    assert pdf_context_data["payment_plans"] == [instruction_child]
+    assert pdf_context_data["status"] == "Accepted"
+    assert pdf_context_data["cycle_title"] == program_and_cycle["program_cycle"].title
+    assert pdf_context_data["approval"].comment == "instruction approved"
+    assert pdf_context_data["reconciliation"]["reconciled"] == 1
+    assert pdf_context_data["reconciliation"]["reconciled_usd"] == Decimal("20.00")
+
+
+def test_instruction_get_email_context(instruction: FollowUpInstruction) -> None:
+    user_mock = MagicMock()
+    user_mock.first_name = "First"
+    user_mock.last_name = "Last"
+    user_mock.email = "first.last@email.com"
+
+    context = FollowUpInstructionPDFExportService(instruction).get_email_context(user_mock)
+
+    assert context == {
+        "first_name": "First",
+        "last_name": "Last",
+        "email": "first.last@email.com",
+        "message": "Follow-Up Instruction Summary PDF file has been generated, "
+        "and below you will find the link to download the file.",
+        "link": "",
+        "title": "Follow-Up Instruction Summary file generated",
     }

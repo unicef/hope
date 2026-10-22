@@ -4,22 +4,51 @@ from typing import IO, TYPE_CHECKING, Any, cast
 
 from django.db import transaction
 from django.db.models import Exists, OuterRef
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task,
     import_follow_up_instruction_reconciliation_from_xlsx_async_task,
+    send_follow_up_instruction_notification_emails_async_task,
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.payment.utils import inactive_currency_reason
-from hope.models import FollowUpInstruction, Payment, PaymentPlan, PaymentPlanGroup, log_create
+from hope.apps.payment.services.payment_plan_services import (
+    ACTION_TO_APPROVAL_TYPE,
+    STAGE_REACHED_NOTIFICATION,
+    PaymentPlanService,
+    record_stage_reached,
+    required_number_for,
+    validate_approval_count,
+)
+from hope.apps.payment.utils import inactive_currency_reason, log_payment_plan_approval
+from hope.models import (
+    Approval,
+    ApprovalProcess,
+    FollowUpInstruction,
+    Payment,
+    PaymentPlan,
+    PaymentPlanGroup,
+    log_create,
+)
 
 if TYPE_CHECKING:
     import datetime
 
     from hope.models import Program, User
+
+
+ACTION_TO_STATUSES = {
+    PaymentPlan.Action.APPROVE.value: (FollowUpInstruction.Status.IN_APPROVAL,),
+    PaymentPlan.Action.AUTHORIZE.value: (FollowUpInstruction.Status.IN_AUTHORIZATION,),
+    PaymentPlan.Action.REVIEW.value: (FollowUpInstruction.Status.IN_REVIEW,),
+    PaymentPlan.Action.REJECT.value: (
+        FollowUpInstruction.Status.IN_APPROVAL,
+        FollowUpInstruction.Status.IN_AUTHORIZATION,
+        FollowUpInstruction.Status.IN_REVIEW,
+    ),
+}
 
 
 class FollowUpInstructionService:
@@ -138,6 +167,11 @@ class FollowUpInstructionService:
             raise ValueError("Instruction is required.")
         return self.instruction
 
+    def _locked_for_update(self) -> FollowUpInstruction:
+        instruction = FollowUpInstruction.objects.select_for_update().get(pk=self._require_instruction().pk)
+        self.instruction = instruction
+        return instruction
+
     def _validate_child_payment_plans_statuses(self, allowed_statuses: set[str], action_label: str) -> None:
         child_payment_plans = self._get_child_payment_plans()
         if not child_payment_plans:
@@ -220,8 +254,64 @@ class FollowUpInstructionService:
         return instruction
 
     @transaction.atomic
-    def close(self, user: "User") -> FollowUpInstruction:
-        instruction = self._require_instruction()
+    def send_for_approval(self, user: "User") -> FollowUpInstruction:
+        """Send every child plan for approval; one approval process, on the instruction, sized by its total."""
+        instruction = self._locked_for_update()
+        self._validate_child_payment_plans_statuses({PaymentPlan.Status.LOCKED_FSP}, "Send for Approval")
+        for payment_plan in self._get_child_payment_plans():
+            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+            PaymentPlanService(payment_plan).transition_send_for_approval()
+            self._log_payment_plan_change(payment_plan, user, old_payment_plan)
+        ApprovalProcess.objects.create(
+            follow_up_instruction=instruction,
+            sent_for_approval_by=user,
+            sent_for_approval_date=timezone.now(),
+            approval_number_required=instruction.approval_number_required,
+            authorization_number_required=instruction.authorization_number_required,
+            finance_release_number_required=instruction.finance_release_number_required,
+        )
+        send_follow_up_instruction_notification_emails_async_task(
+            instruction, PaymentPlan.Action.SEND_FOR_APPROVAL.value, str(user.pk), timezone.now().isoformat()
+        )
+        return instruction
+
+    @transaction.atomic
+    def acceptance_process(self, action: str, user: "User", comment: str | None = None) -> FollowUpInstruction:
+        """Record one approve / authorize / release / reject on the instruction.
+
+        When the required count is reached every child plan moves to the next stage together.
+        """
+        approval_type = ACTION_TO_APPROVAL_TYPE[action]
+        instruction = self._locked_for_update()
+        instruction_status = instruction.status
+        if instruction_status not in ACTION_TO_STATUSES[action]:
+            raise ValidationError(
+                f"Not possible to create {action} for Follow Up Instruction within status {instruction_status}"
+            )
+        approval_process = instruction.approval_process.first()
+        if approval_process is None:
+            raise ValidationError(f"Approval Process object not found for Follow Up Instruction {instruction.pk}")
+        required_number = required_number_for(approval_process, approval_type)
+        validate_approval_count(approval_process, approval_type, required_number, instruction_status, user)
+
+        Approval.objects.create(approval_process=approval_process, created_by=user, type=approval_type, comment=comment)
+        log_payment_plan_approval(instruction, user, approval_type, comment)
+
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:
+            record_stage_reached(approval_process, approval_type, user)
+            for payment_plan in self._get_child_payment_plans():
+                old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+                PaymentPlanService(payment_plan).apply_acceptance_stage(approval_type, user)
+                self._log_payment_plan_change(payment_plan, user, old_payment_plan)
+            if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
+                send_follow_up_instruction_notification_emails_async_task(
+                    instruction, notification_action.value, str(user.pk), timezone.now().isoformat()
+                )
+        return instruction
+
+    @transaction.atomic
+    def close(self, user: "User", closure_comment: str | None) -> FollowUpInstruction:
+        instruction = self._locked_for_update()
         self._validate_child_payment_plans_statuses(
             {PaymentPlan.Status.FINISHED},
             "Close instruction",
@@ -230,20 +320,22 @@ class FollowUpInstructionService:
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             service = PaymentPlanService(payment_plan)
             service.ready_for_closure()
-            updated_payment_plan = service.close(
-                closure_comment="Comment",
-                user_id=str(user.pk),
-            )
+            updated_payment_plan = service.close(closure_comment=closure_comment, user_id=str(user.pk))
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
+        instruction.closure_comment = closure_comment
+        instruction.closed_by = user
+        instruction.save(update_fields=["closure_comment", "closed_by", "updated_at"])
         return instruction
 
     @transaction.atomic
     def abort(self, user: "User", abort_comment: str | None) -> FollowUpInstruction:
-        instruction = self._require_instruction()
+        instruction = self._locked_for_update()
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             updated_payment_plan = PaymentPlanService(payment_plan).abort(abort_comment, user_id=str(user.pk))
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
+        instruction.abort_comment = abort_comment or ""
+        instruction.save(update_fields=["abort_comment", "updated_at"])
         return instruction
 
     @transaction.atomic

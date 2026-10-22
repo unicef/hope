@@ -925,9 +925,29 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
 
 class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
     payment_plans = FollowUpInstructionChildPaymentPlanSummarySerializer(many=True, read_only=True)
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    closed_by = serializers.SerializerMethodField()
+    export_pdf_file_summary = serializers.SerializerMethodField()
 
     class Meta(FollowUpInstructionListSerializer.Meta):
-        fields = FollowUpInstructionListSerializer.Meta.fields + ("payment_plans",)  # type: ignore[assignment]
+        fields = FollowUpInstructionListSerializer.Meta.fields + (  # type: ignore[assignment]
+            "payment_plans",
+            "approval_process",
+            "abort_comment",
+            "closure_comment",
+            "closed_by",
+            "export_pdf_file_summary",
+        )
+
+    @staticmethod
+    def get_closed_by(obj: FollowUpInstruction) -> str | None:
+        return f"{obj.closed_by.first_name} {obj.closed_by.last_name}" if obj.closed_by_id else None
+
+    @staticmethod
+    def get_export_pdf_file_summary(obj: FollowUpInstruction) -> str | None:
+        if obj.export_pdf_file_summary_id and obj.export_pdf_file_summary.file:
+            return obj.export_pdf_file_summary.file.url
+        return None
 
 
 class VisionStateSerializer(serializers.Serializer):
@@ -950,8 +970,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
-    # A grouped plan's approvals are on its group; only a Follow-Up Instruction child has its own.
-    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    approval_process = serializers.SerializerMethodField()
     bank_reconciliation_success = serializers.SerializerMethodField()
     bank_reconciliation_error = serializers.SerializerMethodField()
     can_create_payment_verification_plan = serializers.BooleanField()
@@ -1191,6 +1210,17 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
         return self._payments_summary(obj)["total_count"]
+
+    @extend_schema_field(ApprovalProcessSerializer(many=True))
+    def get_approval_process(self, obj: PaymentPlan) -> list[dict[str, Any]]:
+        # A grouped plan's approvals are read from its group; a Follow-Up Instruction child shows its instruction's.
+        if not obj.follow_up_instruction_id:
+            return []
+        return list(
+            ApprovalProcessSerializer(
+                obj.follow_up_instruction.approval_process.all(), many=True, context=self.context
+            ).data
+        )
 
     def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
         summary = self._payments_summary(obj)

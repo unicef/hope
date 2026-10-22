@@ -115,6 +115,7 @@ from hope.apps.payment.api.serializers import (
 )
 from hope.apps.payment.celery_tasks import (
     export_payment_plan_group_delivery_xlsx_async_task,
+    export_pdf_follow_up_instruction_summary_async_task,
     export_pdf_payment_plan_group_summary_async_task,
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
@@ -1381,6 +1382,7 @@ class FollowUpInstructionViewSet(
         "authorize": AcceptanceProcessSerializer,
         "mark_as_released": AcceptanceProcessSerializer,
         "abort": PaymentPlanAbortSerializer,
+        "close": PaymentPlanCloseSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PM_VIEW_LIST],
@@ -1399,6 +1401,7 @@ class FollowUpInstructionViewSet(
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
+        "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
     }
 
     def get_object(self) -> FollowUpInstruction:
@@ -1476,10 +1479,7 @@ class FollowUpInstructionViewSet(
     def send_for_approval(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
         user = self._request_user(request)
-        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
-            PaymentPlan.Action.SEND_FOR_APPROVAL,
-            user,
-        )
+        instruction = FollowUpInstructionService(instruction=instruction).send_for_approval(user)
         return self._detail_response(instruction)
 
     @action(detail=True, methods=["post"])
@@ -1489,10 +1489,10 @@ class FollowUpInstructionViewSet(
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
-            PaymentPlan.Action.REJECT,
+        instruction = FollowUpInstructionService(instruction=instruction).acceptance_process(
+            PaymentPlan.Action.REJECT.value,
             user,
-            extra_input_data={"comment": serializer.validated_data.get("comment")},
+            serializer.validated_data.get("comment"),
         )
         return self._detail_response(instruction)
 
@@ -1503,10 +1503,10 @@ class FollowUpInstructionViewSet(
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
-            PaymentPlan.Action.APPROVE,
+        instruction = FollowUpInstructionService(instruction=instruction).acceptance_process(
+            PaymentPlan.Action.APPROVE.value,
             user,
-            extra_input_data={"comment": serializer.validated_data.get("comment")},
+            serializer.validated_data.get("comment"),
         )
         return self._detail_response(instruction)
 
@@ -1517,10 +1517,10 @@ class FollowUpInstructionViewSet(
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
-            PaymentPlan.Action.AUTHORIZE,
+        instruction = FollowUpInstructionService(instruction=instruction).acceptance_process(
+            PaymentPlan.Action.AUTHORIZE.value,
             user,
-            extra_input_data={"comment": serializer.validated_data.get("comment")},
+            serializer.validated_data.get("comment"),
         )
         return self._detail_response(instruction)
 
@@ -1531,10 +1531,10 @@ class FollowUpInstructionViewSet(
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instruction = FollowUpInstructionService(instruction=instruction).execute_payment_plan_action(
-            PaymentPlan.Action.REVIEW,
+        instruction = FollowUpInstructionService(instruction=instruction).acceptance_process(
+            PaymentPlan.Action.REVIEW.value,
             user,
-            extra_input_data={"comment": serializer.validated_data.get("comment")},
+            serializer.validated_data.get("comment"),
         )
         return self._detail_response(instruction)
 
@@ -1585,11 +1585,15 @@ class FollowUpInstructionViewSet(
         )
         return self._detail_response(instruction)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["post"])
     @transaction.atomic
     def close(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
-        instruction = FollowUpInstructionService(instruction=instruction).close(self._request_user(request))
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instruction = FollowUpInstructionService(instruction=instruction).close(
+            self._request_user(request), serializer.validated_data.get("closure_comment")
+        )
         return self._detail_response(instruction)
 
     @action(detail=True, methods=["post"])
@@ -1609,6 +1613,17 @@ class FollowUpInstructionViewSet(
     def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
         instruction = FollowUpInstructionService(instruction=instruction).reactivate_abort(self._request_user(request))
+        return self._detail_response(instruction)
+
+    @extend_schema(request=None, responses={200: FollowUpInstructionDetailSerializer})
+    @action(detail=True, methods=["get"], url_path="export-pdf-payment-plan-summary")
+    def export_pdf_payment_plan_summary(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = self.get_object()
+        if instruction.status not in FollowUpInstruction.SUMMARY_PDF_STATUSES:
+            raise ValidationError(
+                f"Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, got {instruction.status}"
+            )
+        export_pdf_follow_up_instruction_summary_async_task(instruction, str(request.user.pk))
         return self._detail_response(instruction)
 
 

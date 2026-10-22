@@ -12,6 +12,7 @@ from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.utils.external_urls import frontend_url
 from hope.models import (
+    FollowUpInstruction,
     LogEntry,
     Payment,
     PaymentPlan,
@@ -104,11 +105,11 @@ def log_payment_plan_group_change(
 
 
 def _log_payment_plan_event(
-    payment_plan: PaymentPlan | PaymentPlanGroup,
+    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     changes: dict[str, Any],
 ) -> None:
-    """Attach a free-form activity-log entry to a plan or group (events the field-diff cannot express)."""
+    """Attach a free-form activity-log entry to a plan, group or instruction (events the field-diff cannot express)."""
     log = LogEntry.objects.create(
         action=LogEntry.UPDATE,
         content_object=payment_plan,
@@ -122,7 +123,7 @@ def _log_payment_plan_event(
 
 
 def log_payment_plan_approval(
-    payment_plan: PaymentPlan | PaymentPlanGroup,
+    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     approval_type: str,
     comment: str | None,

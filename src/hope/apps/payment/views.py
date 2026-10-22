@@ -8,7 +8,13 @@ from rest_framework.exceptions import ValidationError
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.utils.exceptions import log_and_raise
-from hope.models import PaymentPlan, PaymentPlanGroup, PaymentVerificationPlan, WesternUnionPaymentPlanReport
+from hope.models import (
+    FollowUpInstruction,
+    PaymentPlan,
+    PaymentPlanGroup,
+    PaymentVerificationPlan,
+    WesternUnionPaymentPlanReport,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from django.http import (
@@ -115,6 +121,22 @@ def download_payment_plan_group_summary_pdf(request: "HttpRequest", payment_plan
     if not (export_pdf_file_summary and export_pdf_file_summary.file):
         log_and_raise(
             f"PDF file not found. PaymentPlanGroup ID: {payment_plan_group.unicef_id}",
+            error_type=FileNotFoundError,
+        )
+    return redirect(export_pdf_file_summary.file.url)
+
+
+@login_required
+def download_follow_up_instruction_summary_pdf(request: "HttpRequest", instruction_id: str) -> "HttpResponse":
+    instruction = get_object_or_404(FollowUpInstruction, id=instruction_id)
+
+    if not request.user.has_perm(Permissions.PM_EXPORT_PDF_SUMMARY.value, instruction.business_area):
+        raise PermissionDenied({"required_permissions": [Permissions.PM_EXPORT_PDF_SUMMARY.value]})
+
+    export_pdf_file_summary = instruction.export_pdf_file_summary
+    if not (export_pdf_file_summary and export_pdf_file_summary.file):
+        log_and_raise(
+            f"PDF file not found. FollowUpInstruction ID: {instruction.unicef_id}",
             error_type=FileNotFoundError,
         )
     return redirect(export_pdf_file_summary.file.url)

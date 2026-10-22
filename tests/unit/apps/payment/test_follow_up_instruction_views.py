@@ -1,6 +1,7 @@
 from decimal import Decimal
 import io
 from typing import Any, Callable
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 import openpyxl
@@ -9,6 +10,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    ApprovalFactory,
     ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
@@ -224,7 +226,7 @@ def test_follow_up_instruction_reject(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-reject",
         kwargs={
@@ -567,7 +569,7 @@ def test_follow_up_instruction_approve(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-approve",
         kwargs={
@@ -598,7 +600,7 @@ def test_follow_up_instruction_authorize(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-authorize",
         kwargs={
@@ -629,7 +631,7 @@ def test_follow_up_instruction_mark_as_released(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-mark-as-released",
         kwargs={
@@ -829,8 +831,120 @@ def test_follow_up_instruction_close(
         },
     )
 
-    response = ctx["client"].get(url)
+    response = ctx["client"].post(url, {"closure_comment": "no verification needed"}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.CLOSED
+    assert response.json()["closure_comment"] == "no verification needed"
+    assert response.json()["closed_by"] == f"{ctx['user'].first_name} {ctx['user'].last_name}"
+
+
+@pytest.fixture
+def in_review_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.IN_REVIEW,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+@patch("hope.apps.payment.api.views.export_pdf_follow_up_instruction_summary_async_task")
+def test_follow_up_instruction_export_pdf_queues_the_summary(
+    mock_export: Any,
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    in_review_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_EXPORT_PDF_SUMMARY], ctx["business_area"], ctx["program"]
+    )
+
+    url = reverse(
+        "api:payments:follow-up-instructions-export-pdf-payment-plan-summary",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    mock_export.assert_called_once_with(ctx["instruction"], str(ctx["user"].pk))
+
+
+@pytest.fixture
+def locked_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+def test_follow_up_instruction_export_pdf_outside_review_returns_400(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    locked_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_EXPORT_PDF_SUMMARY], ctx["business_area"], ctx["program"]
+    )
+
+    url = reverse(
+        "api:payments:follow-up-instructions-export-pdf-payment-plan-summary",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, got LOCKED" in str(
+        response.json()
+    )
+
+
+@pytest.fixture
+def instruction_with_approval(follow_up_context: dict[str, Any], in_review_instruction_child: PaymentPlan) -> Any:
+    approval_process = ApprovalProcessFactory(follow_up_instruction=follow_up_context["instruction"])
+    ApprovalFactory(approval_process=approval_process, comment="approved once")
+    return follow_up_context["instruction"]
+
+
+def test_follow_up_instruction_detail_returns_its_approval_process(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    instruction_with_approval: Any,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_DETAILS], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-detail",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": instruction_with_approval.pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["approval_process"][0]["actions"]["approval"][0]["comment"] == "approved once"
+    assert data["closed_by"] is None
+    assert data["export_pdf_file_summary"] is None

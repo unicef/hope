@@ -22,7 +22,7 @@ vi.mock('./AcceptanceProcessRow', () => ({
 }));
 
 describe('PaymentPlanAcceptanceProcess', () => {
-  it('shows the own approvals of an instruction-managed plan', () => {
+  it('shows the instruction approvals of an instruction-managed plan', () => {
     renderWithProviders(
       <PaymentPlanAcceptanceProcess
         paymentPlan={
@@ -30,13 +30,13 @@ describe('PaymentPlanAcceptanceProcess', () => {
             status: PaymentPlanStatusEnum.IN_AUTHORIZATION,
             isInstructionManaged: true,
             paymentPlanGroup: null,
-            approvalProcess: [{ sentForApprovalDate: 'plan-approval' }],
+            approvalProcess: [{ sentForApprovalDate: 'instruction-approval' }],
           } as any
         }
       />,
     );
 
-    expect(screen.getByTestId('plan-approval')).toBeTruthy();
+    expect(screen.getByTestId('instruction-approval')).toBeTruthy();
   });
 
   it('shows the group approvals of a grouped plan', () => {

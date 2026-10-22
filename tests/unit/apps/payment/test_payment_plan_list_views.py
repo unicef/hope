@@ -917,14 +917,18 @@ def test_list_filtered_by_fsp_returns_follow_up_instruction_child(
 @pytest.fixture
 def instruction_child_with_approval(payment_plan_detail_context: dict[str, Any]) -> PaymentPlan:
     program = payment_plan_detail_context["program_active"]
+    instruction = FollowUpInstructionFactory(program=program)
     plan = PaymentPlanFactory(
         business_area=payment_plan_detail_context["business_area"],
         program_cycle=program.cycles.first(),
-        follow_up_instruction=FollowUpInstructionFactory(program=program),
+        follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.IN_AUTHORIZATION,
     )
-    ApprovalFactory(approval_process=ApprovalProcessFactory(payment_plan=plan), comment="approved for the instruction")
+    ApprovalFactory(
+        approval_process=ApprovalProcessFactory(follow_up_instruction=instruction),
+        comment="approved for the instruction",
+    )
     return plan
 
 
