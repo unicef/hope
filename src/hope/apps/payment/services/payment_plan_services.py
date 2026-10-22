@@ -155,8 +155,9 @@ class PaymentPlanService:
         try:
             return function_action()
         except NoTransition:
+            action_label = PaymentPlan.Action(cast("str", self.action)).label
             raise ValidationError(
-                f"{PaymentPlan.Action(self.action).label} is not allowed when the Payment Plan status is "
+                f"{action_label} is not allowed when the Payment Plan status is "
                 f"{self.payment_plan.get_status_display()}."
             )
 
