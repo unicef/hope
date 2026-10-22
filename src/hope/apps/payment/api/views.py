@@ -1485,8 +1485,9 @@ class PaymentPlanViewSet(
         reject_permission = _get_reject_permission(payment_plan.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan.program_cycle.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.REJECT
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = {"action": PaymentPlan.Action.REJECT, "comment": serializer.validated_data.get("comment")}
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1506,8 +1507,9 @@ class PaymentPlanViewSet(
     def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.APPROVE
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = {"action": PaymentPlan.Action.APPROVE, "comment": serializer.validated_data.get("comment")}
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1527,8 +1529,9 @@ class PaymentPlanViewSet(
     def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.AUTHORIZE
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = {"action": PaymentPlan.Action.AUTHORIZE, "comment": serializer.validated_data.get("comment")}
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -1550,8 +1553,9 @@ class PaymentPlanViewSet(
         if payment_plan.vision_managed:
             raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
         old_payment_plan = copy_model_object(payment_plan)
-        data = dict(request.data)
-        data["action"] = PaymentPlan.Action.REVIEW
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = {"action": PaymentPlan.Action.REVIEW, "comment": serializer.validated_data.get("comment")}
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

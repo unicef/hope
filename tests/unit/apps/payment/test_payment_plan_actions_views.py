@@ -1349,6 +1349,41 @@ def test_approval_process_approve(
 
 
 @pytest.mark.parametrize(
+    ("comment_length", "expected_status"),
+    [
+        (2000, status.HTTP_200_OK),
+        (2001, status.HTTP_400_BAD_REQUEST),
+    ],
+)
+def test_approval_process_approve_comment_length(
+    payment_plan_actions_context: dict[str, Any],
+    comment_length: int,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    approval_process = ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
+    payment_plan_actions_context["pp"].save()
+    comment = "line one\n" + "a" * (comment_length - len("line one\n"))
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_approval_process_approve"],
+        {"comment": comment},
+        format="json",
+    )
+    assert response.status_code == expected_status
+    if expected_status == status.HTTP_200_OK:
+        assert approval_process.approvals.get().comment == comment
+    else:
+        assert "comment" in response.json()
+
+
+@pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
         ([Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE], status.HTTP_200_OK),
@@ -2013,6 +2048,42 @@ def test_pp_abort(
 
     if expected_status == status.HTTP_400_BAD_REQUEST:
         assert response.json()[0] == f"Abort Payment Plan is not possible within Status {pp_status}"
+
+
+@pytest.mark.parametrize(
+    ("comment_length", "expected_status"),
+    [
+        (2000, status.HTTP_200_OK),
+        (2001, status.HTTP_400_BAD_REQUEST),
+    ],
+)
+def test_pp_abort_comment_length(
+    payment_plan_actions_context: dict[str, Any],
+    comment_length: int,
+    expected_status: int,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_ABORT],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    payment_plan_actions_context["pp"].save()
+    comment = "a" * comment_length
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_pp_abort"],
+        {"abort_comment": comment},
+        format="json",
+    )
+    assert response.status_code == expected_status
+    payment_plan_actions_context["pp"].refresh_from_db()
+    if expected_status == status.HTTP_200_OK:
+        assert payment_plan_actions_context["pp"].abort_comment == comment
+    else:
+        assert "abort_comment" in response.json()
+        assert payment_plan_actions_context["pp"].status == PaymentPlan.Status.IN_REVIEW
 
 
 @pytest.mark.parametrize(
