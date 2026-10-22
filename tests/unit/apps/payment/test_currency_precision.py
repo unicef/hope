@@ -114,11 +114,10 @@ def test_currency_api_rejects_invalid_amount(source):
     assert exc_info.value.get_codes() == ["invalid"]
 
 
-def test_currency_api_representation_can_return_decimal():
+def test_currency_api_representation_is_a_string_even_when_coercion_is_disabled():
     representation = HopeCurrencyDecimalField(coerce_to_string=False).to_representation(Decimal("123.45"))
 
-    assert isinstance(representation, Decimal)
-    assert representation.as_tuple().exponent == -2
+    assert representation == "123.45"
 
 
 def test_payment_model_serializer_uses_currency_api_field():

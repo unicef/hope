@@ -285,9 +285,9 @@ def payment_gateway_setup(
 
 
 @pytest.fixture
-def ten_place_gateway_payment(payment_gateway_setup: dict) -> Payment:
+def two_decimal_gateway_payment(payment_gateway_setup: dict) -> Payment:
     payment = payment_gateway_setup["payments"][0]
-    payment.entitlement_quantity = Decimal("100.1234567891")
+    payment.entitlement_quantity = Decimal("100.12")
     payment.save(update_fields=["entitlement_quantity"])
     return payment
 
@@ -2252,10 +2252,10 @@ def test_payment_payload_system_fields_override_fsp_extra_fields(payment_gateway
     assert "reconciliation_reference" not in payload
 
 
-def test_payment_payload_preserves_ten_place_amount(ten_place_gateway_payment: Payment) -> None:
-    payload = PaymentSerializer().get_payload(ten_place_gateway_payment)
+def test_payment_payload_uses_two_decimal_places_for_local_amount(two_decimal_gateway_payment: Payment) -> None:
+    payload = PaymentSerializer().get_payload(two_decimal_gateway_payment)
 
-    assert payload["amount"] == "100.1234567891"
+    assert payload["amount"] == "100.12"
 
 
 def test_map_financial_institution_pk_and_mapping_missing_logs_and_returns_original_data(

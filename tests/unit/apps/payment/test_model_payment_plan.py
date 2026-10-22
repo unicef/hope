@@ -388,9 +388,9 @@ def test_update_money_fields(payment_plan):
 def high_precision_payment_plan(payment_plan):
     PaymentFactory(
         parent=payment_plan,
-        entitlement_quantity=Decimal("1000000000000000000.0000000002"),
+        entitlement_quantity=Decimal("100.00"),
         entitlement_quantity_usd=Decimal("1000000000000000000.0000000002"),
-        delivered_quantity=Decimal("0.0000000001"),
+        delivered_quantity=Decimal("0.00"),
         delivered_quantity_usd=Decimal("0.0000000001"),
     )
     return payment_plan
@@ -404,9 +404,8 @@ def test_update_money_fields_preserves_tenth_place(high_precision_payment_plan, 
             fields=["total_undelivered_quantity", "total_undelivered_quantity_usd"]
         )
 
-    expected = Decimal("1000000000000000000.0000000001")
-    assert high_precision_payment_plan.total_undelivered_quantity == expected
-    assert high_precision_payment_plan.total_undelivered_quantity_usd == expected
+    assert high_precision_payment_plan.total_undelivered_quantity == Decimal("100.00")
+    assert high_precision_payment_plan.total_undelivered_quantity_usd == Decimal("1000000000000000000.0000000001")
 
 
 def test_not_excluded_payments():

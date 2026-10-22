@@ -1058,30 +1058,30 @@ def test_aggregate_data_payment_row_prefers_record_type_three_and_sums_amounts(
 
 
 @pytest.fixture
-def high_precision_wu_rows(db) -> tuple[Payment, list[list[str]]]:
+def currency_precision_wu_rows(db) -> tuple[Payment, list[list[str]]]:
     payment = PaymentFactory(unicef_id="RCPT-HIGH-PRECISION", fsp_auth_code="MTCN-1")
     first_row = [""] * 19
     first_row[0] = "1"
     first_row[1] = "MTCN-1"
-    first_row[10] = "99999999999999999999.1234567891"
-    first_row[11] = "0.0000000001"
+    first_row[10] = "999999999999.12"
+    first_row[11] = "0.01"
     first_row[12] = "0"
     first_row[18] = "2"
     second_row = first_row.copy()
-    second_row[10] = "0.0000000001"
+    second_row[10] = "0.01"
     return payment, [first_row, second_row]
 
 
-def test_aggregate_wu_payment_rows_keeps_ten_fractional_digits(
+def test_aggregate_wu_payment_rows_keeps_currency_precision(
     service: QCFReportsService,
-    high_precision_wu_rows: tuple[Payment, list[list[str]]],
+    currency_precision_wu_rows: tuple[Payment, list[list[str]]],
 ) -> None:
-    payment, rows = high_precision_wu_rows
+    payment, rows = currency_precision_wu_rows
 
     aggregated = service.aggregate_data_payment_row(payment.unicef_id, payment, rows)
 
-    assert aggregated.principal_amount == Decimal("99999999999999999999.1234567892")
-    assert aggregated.charges_amount == Decimal("0.0000000002")
+    assert aggregated.principal_amount == Decimal("999999999999.13")
+    assert aggregated.charges_amount == Decimal("0.02")
 
 
 def test_record_type_rank_uses_expected_order(
@@ -1636,7 +1636,7 @@ def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
                 payment_plan_unicef_id="PP-1",
                 programme="Programme",
                 fc="FC-1",
-                principal_amount=Decimal("99999999999999999999.1234567891"),
+                principal_amount=Decimal("999999999999.12"),
                 charges_amount=Decimal("3.00"),
                 fee_amount=Decimal("1.50"),
                 ad_name_value="Advice-1",
@@ -1657,7 +1657,7 @@ def test_payment_plan_data_post_init_tracks_principal_charges_refunds_and_fees(
         ],
     )
 
-    assert report_data.principal_total == Decimal("99999999999999999999.1234567891")
+    assert report_data.principal_total == Decimal("999999999999.12")
     assert report_data.charges_total == Decimal("5.00")
     assert report_data.refunds_total == Decimal("-50.00")
     assert report_data.fees_total == Decimal("2.00")

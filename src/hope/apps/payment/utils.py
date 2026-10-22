@@ -1,5 +1,5 @@
 import datetime
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 import hashlib
 import json
 from math import ceil
@@ -257,8 +257,9 @@ def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal |
     try:
         if isinstance(received_amount, str):
             received_amount = float(received_amount.strip())
-        return Decimal(f"{round(received_amount, 2):.2f}")
-    except ValueError:
+        amount = Decimal(f"{round(received_amount, 2):.2f}")
+        return amount if amount.is_finite() else None
+    except (InvalidOperation, OverflowError, ValueError):
         return None
 
 
