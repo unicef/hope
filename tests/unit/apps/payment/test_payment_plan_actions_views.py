@@ -995,7 +995,7 @@ def test_pp_fsp_unlock_returns_400_when_fsp_is_not_locked(
     response = locked_payment_plan_actions_context["client"].get(locked_payment_plan_actions_context["url_unlock_fsp"])
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == ["Payment Plan FSP is not locked."]
+    assert response.json() == ["Unlock FSP is not allowed when the Payment Plan status is Locked."]
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.LOCKED
 

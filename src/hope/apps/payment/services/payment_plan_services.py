@@ -26,6 +26,7 @@ from django.utils import timezone
 from requests import RequestException
 from rest_framework.exceptions import ValidationError
 from rest_framework.status import is_client_error
+from viewflow.fsm import NoTransition
 
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
@@ -151,7 +152,13 @@ class PaymentPlanService:
         self.validate_action()
 
         function_action = self.get_action_function()
-        return function_action()
+        try:
+            return function_action()
+        except NoTransition:
+            raise ValidationError(
+                f"{PaymentPlan.Action(self.action).label} is not allowed when the Payment Plan status is "
+                f"{self.payment_plan.get_status_display()}."
+            )
 
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())
@@ -416,8 +423,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock_fsp(self) -> PaymentPlan | None:
-        if self.payment_plan.status != PaymentPlan.Status.LOCKED_FSP:
-            raise ValidationError("Payment Plan FSP is not locked.")
         background_action_status = self.payment_plan.background_action_status
         if (
             background_action_status is not None
