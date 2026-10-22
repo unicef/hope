@@ -24,6 +24,7 @@ from hope.admin.account import AccountAdmin
 from hope.admin.document import DocumentAdmin
 from hope.admin.household import HouseholdAdmin
 from hope.admin.individual import IndividualAdmin, IndividualIdentityAdmin, IndividualRoleInHouseholdAdmin
+from hope.apps.household.const import ROLE_PRIMARY
 from hope.models import Account, Document, Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
 pytestmark = pytest.mark.django_db
@@ -398,3 +399,46 @@ def test_linked_admin_changelist_search_by_unicef_id_lists_rows_of_that_individu
     response = linked_staff_client.get(reverse(url_name), {"q": "IND-24-0000.0001"})
 
     assert [obj.individual.unicef_id for obj in response.context["cl"].result_list] == ["IND-24-0000.0001"]
+
+
+@pytest.mark.parametrize(
+    "url_name",
+    [
+        "admin:household_individualroleinhousehold_changelist",
+        "admin:household_individualidentity_changelist",
+        "admin:household_document_changelist",
+        "admin:payment_account_changelist",
+    ],
+    ids=["role", "identity", "document", "account"],
+)
+@pytest.mark.parametrize("params", [{}, {"q": "IND-24-0000.0001"}, {"q": "DOC-1"}], ids=["all", "unicef-id", "other"])
+def test_linked_admin_changelist_runs_no_count_query(linked_population, linked_staff_client, url_name, params):
+    with CaptureQueriesContext(connection) as captured:
+        linked_staff_client.get(reverse(url_name), params)
+
+    assert [query for query in captured.captured_queries if "COUNT(" in query["sql"]] == []
+
+
+# The cursor replaced the offset paginator; the first page must keep the order the model's Meta.ordering gave.
+@pytest.mark.parametrize(
+    ("url_name", "params", "model", "ordering"),
+    [
+        (
+            "admin:household_individualroleinhousehold_changelist",
+            {"role__exact": ROLE_PRIMARY},
+            IndividualRoleInHousehold,
+            ("-role", "id"),
+        ),
+        ("admin:household_individualidentity_changelist", {}, IndividualIdentity, ("id",)),
+        ("admin:household_document_changelist", {}, Document, ("-created_at",)),
+        ("admin:payment_account_changelist", {}, Account, ("-created_at",)),
+    ],
+    ids=["role", "identity", "document", "account"],
+)
+def test_linked_admin_changelist_keeps_model_ordering(
+    linked_population, linked_staff_client, url_name, params, model, ordering
+):
+    response = linked_staff_client.get(reverse(url_name), params)
+
+    expected = list(model.all_objects.order_by(*ordering).values_list("pk", flat=True))
+    assert [obj.pk for obj in response.context["cl"].result_list] == expected

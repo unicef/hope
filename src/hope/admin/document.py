@@ -1,6 +1,7 @@
 import logging
 from typing import Any, cast
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import RelatedFieldComboFilter
 from django.contrib import admin
@@ -24,7 +25,14 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(Document)
-class DocumentAdmin(UnicefIdSearchMixin, SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
+class DocumentAdmin(
+    UnicefIdSearchMixin,
+    SoftDeletableAdminMixin,
+    CursorPaginatorAdmin,
+    HOPEModelAdminBase,
+    RdiMergeStatusAdminMixin,
+):
+    cursor_ordering_field = "-created_at"
     search_fields = ("document_number", "country__name", "individual__unicef_id")
     unicef_id_search_map = {"IND": "individual__unicef_id"}
     list_display = (
@@ -48,6 +56,7 @@ class DocumentAdmin(UnicefIdSearchMixin, SoftDeletableAdminMixin, HOPEModelAdmin
     readonly_fields = ("program",)
     exclude = ("cleared_date", "cleared_by")
     show_full_result_count = False
+    show_query_result_count = False
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (

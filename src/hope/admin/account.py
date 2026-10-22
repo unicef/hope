@@ -1,5 +1,6 @@
 from typing import Any
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -39,7 +40,8 @@ class AccountAttachmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 
 @admin.register(Account)
-class AccountAdmin(UnicefIdSearchMixin, HOPEModelAdminBase):
+class AccountAdmin(UnicefIdSearchMixin, CursorPaginatorAdmin, HOPEModelAdminBase):
+    cursor_ordering_field = "-created_at"
     list_display = (
         "individual",
         "number",
@@ -78,6 +80,7 @@ class AccountAdmin(UnicefIdSearchMixin, HOPEModelAdminBase):
         "rdi_merge_status",
     )
     show_full_result_count = False
+    show_query_result_count = False
     inlines = (AccountAttachmentInline,)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
