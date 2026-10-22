@@ -12,6 +12,7 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 from flags.models import FlagState
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     CurrencyFactory,
@@ -158,6 +159,24 @@ def aborted_regular_plan(delivery_mechanism_cash, financial_service_provider):
         delivery_mechanism=delivery_mechanism_cash,
         financial_service_provider=financial_service_provider,
         total_entitled_quantity=Decimal("100.00"),
+    )
+
+
+@pytest.fixture
+def rebuilding_regular_plan():
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILDING,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+    )
+
+
+@pytest.fixture
+def rebuild_error_regular_plan():
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILD_ERROR,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
     )
 
 
@@ -580,27 +599,85 @@ def test_payment_plan_full_rebuild(
     mock_full_rebuild.assert_called_once()
 
 
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
-def test_reactivate_abort_queues_payees_refresh_for_regular_plan(
-    mock_refresh_payees: Mock,
+def test_reactivate_abort_marks_regular_plan_rebuilding(
+    aborted_regular_plan: PaymentPlan,
     django_capture_on_commit_callbacks: Any,
 ) -> None:
-    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ABORTED)
-    PaymentFactory(parent=payment_plan)
-
     with (
         patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
         django_capture_on_commit_callbacks(execute=True),
     ):
-        PaymentPlanService(payment_plan).reactivate_abort()
-    job = AsyncRetryJob.objects.latest("pk")
-    async_retry_job_task.run(job._meta.label_lower, job.pk, job.version)
+        PaymentPlanService(aborted_regular_plan).reactivate_abort()
 
-    payment_plan.refresh_from_db(fields=["status", "build_status"])
-    assert payment_plan.status == PaymentPlan.Status.OPEN
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    aborted_regular_plan.refresh_from_db()
+    job = AsyncRetryJob.objects.latest("pk")
+    assert aborted_regular_plan.status == PaymentPlan.Status.ABORTED
+    assert aborted_regular_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    assert aborted_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
     assert job.action == "hope.apps.payment.celery_tasks.payment_plan_refresh_payees_async_task_action"
+    assert job.config == {
+        "payment_plan_id": str(aborted_regular_plan.id),
+        "on_failure_action": "hope.apps.payment.celery_tasks.mark_payment_plan_rebuild_error",
+    }
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_refresh_payees_task_opens_rebuilt_plan(
+    mock_refresh_payees: Mock,
+    rebuilding_regular_plan: PaymentPlan,
+) -> None:
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, rebuilding_regular_plan)
+
+    rebuilding_regular_plan.refresh_from_db()
+    assert rebuilding_regular_plan.status == PaymentPlan.Status.OPEN
+    assert rebuilding_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert rebuilding_regular_plan.background_action_status is None
     mock_refresh_payees.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_refresh_payees_task_skips_plan_that_is_no_longer_aborted(
+    mock_refresh_payees: Mock,
+    rebuilding_regular_plan: PaymentPlan,
+) -> None:
+    rebuilding_regular_plan.status = PaymentPlan.Status.OPEN
+    rebuilding_regular_plan.background_action_status = None
+    rebuilding_regular_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    rebuilding_regular_plan.save()
+
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, rebuilding_regular_plan)
+
+    rebuilding_regular_plan.refresh_from_db()
+    assert rebuilding_regular_plan.status == PaymentPlan.Status.OPEN
+    assert rebuilding_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    mock_refresh_payees.assert_not_called()
+
+
+def test_reactivate_abort_rejected_while_rebuilding(rebuilding_regular_plan: PaymentPlan) -> None:
+    with pytest.raises(ValidationError, match="Another background action is already in progress."):
+        PaymentPlanService(rebuilding_regular_plan).reactivate_abort()
+
+    rebuilding_regular_plan.refresh_from_db()
+    assert rebuilding_regular_plan.status == PaymentPlan.Status.ABORTED
+    assert rebuilding_regular_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    assert not AsyncRetryJob.objects.exists()
+
+
+def test_reactivate_abort_from_rebuild_error_queues_rebuild_again(
+    rebuild_error_regular_plan: PaymentPlan,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    with (
+        patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
+        django_capture_on_commit_callbacks(execute=True),
+    ):
+        PaymentPlanService(rebuild_error_regular_plan).reactivate_abort()
+
+    rebuild_error_regular_plan.refresh_from_db()
+    assert rebuild_error_regular_plan.status == PaymentPlan.Status.ABORTED
+    assert rebuild_error_regular_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    assert rebuild_error_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+    assert AsyncRetryJob.objects.count() == 1
 
 
 def test_refresh_payees_keeps_payments_and_clears_entitlements(
@@ -619,6 +696,7 @@ def test_refresh_payees_keeps_payments_and_clears_entitlements(
     score_removed_payment.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.OPEN
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert payment_plan.background_action_status is None
     assert payment_plan.total_entitled_quantity == Decimal("0.00")
     assert set(Payment.all_objects.filter(parent=payment_plan).values_list("pk", flat=True)) == {
         entitled_payment.pk,
@@ -713,19 +791,39 @@ def test_reactivate_abort_of_child_plan_clears_lock_conflicts(
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_payment_plan_refresh_payees_marks_failed(mock_retry: Mock, mock_refresh_payees: Mock) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.OPEN,
-        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
-    )
-    PaymentFactory(parent=payment_plan)
+def test_payment_plan_refresh_payees_marks_failed(
+    mock_retry: Mock,
+    mock_refresh_payees: Mock,
+    rebuilding_regular_plan: PaymentPlan,
+) -> None:
     mock_refresh_payees.side_effect = Exception("test")
     mock_retry.side_effect = Retry("retry")
     with pytest.raises(Retry):
-        queue_and_run_retry_task(payment_plan_refresh_payees_async_task, payment_plan)
+        queue_and_run_retry_task(payment_plan_refresh_payees_async_task, rebuilding_regular_plan)
 
-    payment_plan.refresh_from_db(fields=["build_status"])
-    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+    rebuilding_regular_plan.refresh_from_db()
+    assert rebuilding_regular_plan.status == PaymentPlan.Status.ABORTED
+    assert rebuilding_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+    assert rebuilding_regular_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_payment_plan_refresh_payees_marks_rebuild_error_when_retries_exhausted(
+    mock_refresh_payees: Mock,
+    rebuilding_regular_plan: PaymentPlan,
+) -> None:
+    mock_refresh_payees.side_effect = Exception("test")
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        payment_plan_refresh_payees_async_task(rebuilding_regular_plan)
+    job = AsyncRetryJob.objects.latest("pk")
+
+    with pytest.raises(Exception, match="test"):
+        async_retry_job_task.apply((job._meta.label_lower, job.pk, job.version)).get()
+
+    rebuilding_regular_plan.refresh_from_db()
+    assert rebuilding_regular_plan.status == PaymentPlan.Status.ABORTED
+    assert rebuilding_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+    assert rebuilding_regular_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILD_ERROR
 
 
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")

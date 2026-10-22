@@ -1673,6 +1673,9 @@ def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
+        if payment_plan.status != PaymentPlan.Status.ABORTED:
+            logger.warning(f"Payment plan {payment_plan_id} is no longer aborted, skipping the payees refresh.")
+            return
         flow = PaymentPlanFlow(payment_plan)
         flow.build_status_building()
         payment_plan.save(update_fields=("build_status", "built_at"))
@@ -1681,7 +1684,18 @@ def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
                 PaymentPlanService(payment_plan).refresh_payees()
                 flow = PaymentPlanFlow(payment_plan)
                 flow.build_status_ok()
-                payment_plan.save(update_fields=("build_status", "built_at"))
+                flow.status_reactivate_abort()
+                flow.background_action_status_none()
+                payment_plan.save(
+                    update_fields=(
+                        "build_status",
+                        "built_at",
+                        "status",
+                        "status_date",
+                        "background_action_status",
+                        "updated_at",
+                    )
+                )
         except Exception:
             logger.exception("Payment plan payees refresh failed")
             flow = PaymentPlanFlow(payment_plan)
@@ -1690,13 +1704,25 @@ def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
             raise
 
 
+def mark_payment_plan_rebuild_error(job: AsyncRetryJob, _exception: Exception) -> None:
+    from hope.models import PaymentPlan
+
+    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+    flow = PaymentPlanFlow(payment_plan)
+    flow.background_action_status_rebuild_error()
+    payment_plan.save(update_fields=("background_action_status", "updated_at"))
+
+
 def payment_plan_refresh_payees_async_task(payment_plan: PaymentPlan) -> None:
     payment_plan_id = str(payment_plan.id)
     AsyncRetryJob.queue_task(
         instance=payment_plan,
         job_name=payment_plan_refresh_payees_async_task.__name__,
         action="hope.apps.payment.celery_tasks.payment_plan_refresh_payees_async_task_action",
-        config={"payment_plan_id": payment_plan_id},
+        config={
+            "payment_plan_id": payment_plan_id,
+            "on_failure_action": "hope.apps.payment.celery_tasks.mark_payment_plan_rebuild_error",
+        },
         group_key="payment",
         description=f"Refresh payees of reactivated payment plan {payment_plan_id}",
     )

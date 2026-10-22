@@ -1739,20 +1739,33 @@ class PaymentPlanService:
             raise ValidationError(
                 f"Reactivate Aborted Payment Plan is possible only within Status {PaymentPlan.Status.ABORTED}"
             )
-        flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_reactivate_abort()
-        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "build_status"))
-        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "build_status"])
-
         # Child plans take their collectors and entitlements from the source plan, so only regular plans are refreshed.
         if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
-            transaction.on_commit(lambda: payment_plan_refresh_payees_async_task(self.payment_plan))
-        else:
-            # An aborted plan was locked, so its payments still carry the lock's conflict flags.
-            self.clear_lock_conflicts()
-            self.payment_plan.update_population_count_fields()
-            self.payment_plan.update_money_fields()
+            return self._queue_reactivate_rebuild()
 
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.status_reactivate_abort()
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at"])
+        # An aborted plan was locked, so its payments still carry the lock's conflict flags.
+        self.clear_lock_conflicts()
+        self.payment_plan.update_population_count_fields()
+        self.payment_plan.update_money_fields()
+        return self.payment_plan
+
+    def _queue_reactivate_rebuild(self) -> PaymentPlan:
+        """Queue the payees refresh; the plan stays ABORTED until the task has rebuilt it."""
+        background_action_status = self.payment_plan.background_action_status
+        if (
+            background_action_status is not None
+            and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
+        ):
+            raise ValidationError("Another background action is already in progress.")
+        flow = PaymentPlanFlow(self.payment_plan)
+        flow.background_action_status_rebuilding()
+        flow.build_status_pending()
+        self.payment_plan.save(update_fields=("background_action_status", "build_status", "built_at", "updated_at"))
+        transaction.on_commit(lambda: payment_plan_refresh_payees_async_task(self.payment_plan))
         return self.payment_plan
 
     def refresh_payees(self) -> None:

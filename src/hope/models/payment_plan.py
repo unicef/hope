@@ -243,6 +243,8 @@ class PaymentPlan(
             "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "Send to Payment Gateway Error",
         )
+        REBUILDING = "REBUILDING", "Rebuilding"
+        REBUILD_ERROR = "REBUILD_ERROR", "Rebuild Error"
 
         @staticmethod
         def get_choices() -> list[tuple[str, str]]:
@@ -255,6 +257,7 @@ class PaymentPlan(
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
+        BackgroundActionStatus.REBUILD_ERROR,
     ]
 
     class Action(models.TextChoices):

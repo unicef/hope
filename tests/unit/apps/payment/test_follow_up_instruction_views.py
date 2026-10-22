@@ -418,6 +418,7 @@ def test_follow_up_instruction_reactivate_abort(
         follow_up_instruction=ctx["instruction"],
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
     )
     url = reverse(
         "api:payments:follow-up-instructions-reactivate-abort",

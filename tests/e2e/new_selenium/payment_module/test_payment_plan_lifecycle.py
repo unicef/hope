@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from unittest import mock
 
 import pytest
 
@@ -7,6 +8,7 @@ from e2e.new_selenium.conftest import grant_permission
 from extras.test_utils.factories import CurrencyFactory
 from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
+from hope.apps.payment.celery_tasks import payment_plan_refresh_payees_async_task
 from hope.models import Approval, BusinessArea, Currency, PaymentPlan, PaymentPlanSplit, User
 
 from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan, payment_plan_url
@@ -116,24 +118,42 @@ def test_abort_payment_plan(
     assert payment_plan.abort_comment == ABORT_COMMENT
 
 
-def test_reactivate_aborted_payment_plan(
+def test_abort_and_reactivate_payment_plan(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
-    aborted_payment_plan: PaymentPlan,
+    locked_fsp_payment_plan: PaymentPlan,
 ) -> None:
-    payment_plan = aborted_payment_plan
+    payment_plan = locked_fsp_payment_plan
     payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
     with grant_permission(
-        user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_REACTIVATE_ABORT
+        user_with_no_permissions,
+        business_area,
+        *PM_VIEW_PERMISSIONS,
+        Permissions.PM_ABORT,
+        Permissions.PM_REACTIVATE_ABORT,
     ):
-        open_payment_plan_as(browser, payment_plan, "ABORTED")
-        browser.wait_for_element_clickable(REACTIVATE).click()
-        browser.wait_for_text("Payment Plan has been reactivated.")
+        open_payment_plan_as(browser, payment_plan, "LOCKED FSP")
+        browser.wait_for_element_clickable(ABORT).click()
+        browser.set_value(COMMENT_INPUT, ABORT_COMMENT)
+        browser.wait_for_element_clickable(ABORT_SUBMIT).click()
+        browser.wait_for_text("Payment Plan has been aborted.")
+        browser.wait_for_text("ABORTED", STATUS)
+        # Celery runs eagerly here, so the rebuild is held back to keep the plan in the rebuilding state.
+        with mock.patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task"):
+            browser.wait_for_element_clickable(REACTIVATE).click()
+            browser.wait_for_text("Payment Plan has been reactivated.")
+            browser.wait_for_text("REBUILDING")
+            browser.wait_for_element_present(f"{REACTIVATE}:disabled")
+        payment_plan.refresh_from_db()
+        assert payment_plan.status == PaymentPlan.Status.ABORTED
+        assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+        payment_plan_refresh_payees_async_task(payment_plan)
         browser.wait_for_text("OPEN", STATUS)
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.background_action_status is None
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     assert payment_plan.total_entitled_quantity == Decimal("0.00")
     assert set(payment_plan.payment_items.values_list("id", flat=True)) == payment_ids
