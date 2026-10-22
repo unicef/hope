@@ -10,14 +10,9 @@ from django.db.models.lookups import LessThan
 import hope.apps.core.fields
 
 PAYMENT_PLAN_COLUMNS = (
-    "flat_amount_value",
-    "total_entitled_quantity",
     "total_entitled_quantity_usd",
-    "total_entitled_quantity_revised",
     "total_entitled_quantity_revised_usd",
-    "total_delivered_quantity",
     "total_delivered_quantity_usd",
-    "total_undelivered_quantity",
     "total_undelivered_quantity_usd",
 )
 
@@ -61,32 +56,6 @@ class Migration(migrations.Migration):
             state_operations=[
                 migrations.AlterField(
                     model_name="paymentplan",
-                    name="flat_amount_value",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Entitlement amount applied to every payment in this plan, with up to 10 decimal places.",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
-                        verbose_name="Flat entitlement amount",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_delivered_quantity",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Sum of delivered payments in the plan currency, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Total delivered quantity in base currency",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
                     name="total_delivered_quantity_usd",
                     field=hope.apps.core.fields.HopeCurrencyField(
                         blank=True,
@@ -96,32 +65,6 @@ class Migration(migrations.Migration):
                         null=True,
                         validators=[django.core.validators.MinValueValidator(Decimal(0))],
                         verbose_name="Total delivered quantity in USD",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_entitled_quantity",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Sum of payment entitlements in the plan currency, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Total entitled quantity in base currency",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_entitled_quantity_revised",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Revised entitlement total in the plan currency, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Revised total entitled quantity in base currency",
                     ),
                 ),
                 migrations.AlterField(
@@ -148,19 +91,6 @@ class Migration(migrations.Migration):
                         null=True,
                         validators=[django.core.validators.MinValueValidator(Decimal(0))],
                         verbose_name="Total entitled quantity in USD",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_undelivered_quantity",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Entitled amount remaining in the plan currency, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Total undelivered quantity in base currency",
                     ),
                 ),
                 migrations.AlterField(

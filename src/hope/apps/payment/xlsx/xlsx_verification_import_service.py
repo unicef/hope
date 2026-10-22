@@ -145,7 +145,8 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             if (
                 column == self.RECEIVED_AMOUNT_COLUMN_INDEX
                 and cell.data_type == "s"
-                and to_decimal(cell.value) is not None
+                and (parsed_amount := to_decimal(cell.value)) is not None
+                and parsed_amount.is_finite()
             ):
                 column += 1
                 continue
@@ -195,7 +196,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         amount_cell = row[self.RECEIVED_AMOUNT_COLUMN_INDEX]
         raw_amount = amount_cell.value
         received_amount = to_decimal(raw_amount)
-        if raw_amount is not None and raw_amount != "" and received_amount is None:
+        if raw_amount is not None and raw_amount != "" and (received_amount is None or not received_amount.is_finite()):
             if amount_cell.data_type == "n":
                 self.errors.append(
                     XlsxError("Payment Verifications", amount_cell.coordinate, "Invalid received amount")

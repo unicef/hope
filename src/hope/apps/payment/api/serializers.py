@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 import json
 import logging
 from typing import Any, cast
@@ -6,7 +6,7 @@ from typing import Any, cast
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import Case, Count, Exists, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
+from django.db.models import Case, Count, Exists, F, IntegerField, Max, OuterRef, Prefetch, Q, Sum, When
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -19,7 +19,6 @@ from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.fields import (
-    HopeCurrencyDecimalField,
     HopeCurrencyModelSerializer,
     ScopedRelatedField,
     UTCDateField,
@@ -126,6 +125,10 @@ class AccountAttachmentUploadSerializer(serializers.ModelSerializer):
         except DjangoValidationError as e:
             # clean() raises Django's ValidationError, which DRF would return as a 500.
             raise serializers.ValidationError(e.messages) from e
+
+
+def _usd_for_api(value: Decimal) -> Decimal:
+    return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
@@ -625,14 +628,6 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
         return FilteredActionsListSerializer(actions_data).data
 
 
-def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Decimal | None:
-    if not payment_plan.financial_service_provider:
-        return None
-    return payment_plan.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
-        "entitlement_sum"
-    ]
-
-
 class DeliveryMechanismSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryMechanism
@@ -643,27 +638,6 @@ class DeliveryMechanismSerializer(serializers.ModelSerializer):
             "is_active",
             "transfer_type",
             "account_type",
-        )
-
-
-class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
-    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
-    volume = serializers.SerializerMethodField()
-    volume_usd = serializers.SerializerMethodField()
-
-    def get_volume(self, obj: PaymentPlan) -> Decimal | None:  # non-usd
-        return _calculate_volume(obj, "entitlement_quantity")
-
-    def get_volume_usd(self, obj: PaymentPlan) -> Decimal | None:
-        return _calculate_volume(obj, "entitlement_quantity_usd")
-
-    class Meta:
-        model = PaymentPlan
-        fields = (
-            "id",
-            "delivery_mechanism",
-            "volume",
-            "volume_usd",
         )
 
 
@@ -678,7 +652,7 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
 
 
 class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
-    delivered_quantity = HopeCurrencyDecimalField()
+    delivered_quantity = serializers.FloatField()
     delivery_date = serializers.DateField()
 
 
@@ -737,7 +711,7 @@ class PaymentPlanCreateTopUpSerializer(PaymentPlanCreateFollowUpSerializer):
     required.
     """
 
-    fixed_amount = HopeCurrencyDecimalField(required=False, min_value=Decimal("0.01"))
+    fixed_amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, min_value=Decimal("0.01"))
     file = serializers.FileField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
@@ -829,6 +803,21 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
                     ),
                     Decimal(0),
                 ),
+                total_undelivered_quantity=Coalesce(
+                    Sum(
+                        Coalesce(F("entitlement_quantity"), Decimal(0)) - Coalesce(F("delivered_quantity"), Decimal(0)),
+                        filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
+                    ),
+                    Decimal(0),
+                ),
+                total_undelivered_quantity_usd=Coalesce(
+                    Sum(
+                        Coalesce(F("entitlement_quantity_usd"), Decimal(0))
+                        - Coalesce(F("delivered_quantity_usd"), Decimal(0)),
+                        filter=Q(conflicted=False, excluded=False, has_valid_wallet=True),
+                    ),
+                    Decimal(0),
+                ),
             )
         return obj._follow_up_instruction_payment_summary
 
@@ -839,23 +828,19 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
         return Decimal(self._summary(obj)["total_entitled_quantity"] or 0)
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlan) -> Decimal:
-        return Decimal(self._summary(obj)["total_entitled_quantity_usd"] or 0)
+        return _usd_for_api(Decimal(self._summary(obj)["total_entitled_quantity_usd"] or 0))
 
     def get_total_delivered_quantity(self, obj: PaymentPlan) -> Decimal:
         return Decimal(self._summary(obj)["total_delivered_quantity"] or 0)
 
     def get_total_delivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
-        return Decimal(self._summary(obj)["total_delivered_quantity_usd"] or 0)
+        return _usd_for_api(Decimal(self._summary(obj)["total_delivered_quantity_usd"] or 0))
 
     def get_total_undelivered_quantity(self, obj: PaymentPlan) -> Decimal:
-        summary = self._summary(obj)
-        return Decimal(summary["total_entitled_quantity"] or 0) - (Decimal(summary["total_delivered_quantity"] or 0))
+        return Decimal(self._summary(obj)["total_undelivered_quantity"] or 0)
 
     def get_total_undelivered_quantity_usd(self, obj: PaymentPlan) -> Decimal:
-        summary = self._summary(obj)
-        return Decimal(summary["total_entitled_quantity_usd"] or 0) - (
-            Decimal(summary["total_delivered_quantity_usd"] or 0)
-        )
+        return _usd_for_api(Decimal(self._summary(obj)["total_undelivered_quantity_usd"] or 0))
 
 
 class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
@@ -931,19 +916,19 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
         return self._payments_summary(obj)["total_entitled_quantity"]
 
     def get_total_entitled_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
-        return self._payments_summary(obj)["total_entitled_quantity_usd"]
+        return _usd_for_api(self._payments_summary(obj)["total_entitled_quantity_usd"])
 
     def get_total_delivered_quantity(self, obj: FollowUpInstruction) -> Decimal:
         return self._payments_summary(obj)["total_delivered_quantity"]
 
     def get_total_delivered_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
-        return self._payments_summary(obj)["total_delivered_quantity_usd"]
+        return _usd_for_api(self._payments_summary(obj)["total_delivered_quantity_usd"])
 
     def get_total_undelivered_quantity(self, obj: FollowUpInstruction) -> Decimal:
         return self._payments_summary(obj)["total_undelivered_quantity"]
 
     def get_total_undelivered_quantity_usd(self, obj: FollowUpInstruction) -> Decimal:
-        return self._payments_summary(obj)["total_undelivered_quantity_usd"]
+        return _usd_for_api(self._payments_summary(obj)["total_undelivered_quantity_usd"])
 
 
 class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
@@ -970,7 +955,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     has_payment_list_export_file = serializers.BooleanField(source="has_entitlement_file")
     imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
-    volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
     bank_reconciliation_success = serializers.SerializerMethodField()
@@ -1022,7 +1006,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "imported_file_date",
             "payments_conflicts_count",
             "delivery_mechanism",
-            "volume_by_delivery_mechanism",
             "split_choices",
             "exclusion_reason",
             "exclude_household_error",
@@ -1259,9 +1242,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_split_choices(self, obj: PaymentPlan) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
-
-    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> dict[str, Any]:
-        return VolumeByDeliveryMechanismSerializer([obj], many=True).data
 
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
@@ -1788,7 +1768,7 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
 
 
 class PaymentVerificationUpdateSerializer(serializers.Serializer):
-    received_amount = HopeCurrencyDecimalField(required=False)
+    received_amount = serializers.FloatField(required=False)
     received = serializers.BooleanField()
     version = serializers.IntegerField(required=False)
 
@@ -1944,7 +1924,7 @@ class ApplyEngineFormulaSerializer(serializers.Serializer):
 
 
 class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
-    flat_amount_value = HopeCurrencyDecimalField(required=True)
+    flat_amount_value = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     version = serializers.IntegerField(required=False)
 
 
@@ -2143,15 +2123,15 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
 
     def get_total_entitled_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_entitled_quantity_usd"))
-        return result["total"] or Decimal(0.0)
+        return _usd_for_api(result["total"] or Decimal(0.0))
 
     def get_total_delivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_delivered_quantity_usd"))
-        return result["total"] or Decimal(0.0)
+        return _usd_for_api(result["total"] or Decimal(0.0))
 
     def get_total_undelivered_quantity_usd(self, obj: PaymentPlanGroup) -> Decimal:
         result = obj.payment_plans.aggregate(total=Sum("total_undelivered_quantity_usd"))
-        return result["total"] or Decimal(0.0)
+        return _usd_for_api(result["total"] or Decimal(0.0))
 
     def get_payment_plans_count(self, obj: PaymentPlanGroup) -> int:
         return obj.payment_plans.count()

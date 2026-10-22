@@ -25,8 +25,6 @@ export function FormikTextField({
   precision,
   integer,
   maxLength,
-  maxNumber = 999999999,
-  step,
   ...otherProps
 }): ReactElement {
   const isInvalid = Boolean(
@@ -52,7 +50,7 @@ export function FormikTextField({
   };
 
   const handleChange = (e): void => {
-    if (type === 'number' && e.target.value > maxNumber) {
+    if (type === 'number' && e.target.value > 999999999) {
       return;
     }
     form.handleChange(e);
@@ -87,7 +85,6 @@ export function FormikTextField({
         htmlInput: {
           'data-cy': `input-${field.name}`,
           maxLength: maxLength || undefined,
-          step,
         },
       }}
     />

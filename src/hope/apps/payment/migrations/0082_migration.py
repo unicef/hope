@@ -10,9 +10,7 @@ from django.db.models.lookups import LessThan
 import hope.apps.core.fields
 
 PAYMENT_COLUMNS = (
-    "entitlement_quantity",
     "entitlement_quantity_usd",
-    "delivered_quantity",
     "delivered_quantity_usd",
 )
 
@@ -56,19 +54,6 @@ class Migration(migrations.Migration):
             state_operations=[
                 migrations.AlterField(
                     model_name="payment",
-                    name="delivered_quantity",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Amount delivered in the payment currency, with up to 10 decimal places.",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
-                        verbose_name="Delivered quantity in base currency",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="payment",
                     name="delivered_quantity_usd",
                     field=hope.apps.core.fields.HopeCurrencyField(
                         blank=True,
@@ -78,19 +63,6 @@ class Migration(migrations.Migration):
                         null=True,
                         validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
                         verbose_name="Delivered quantity in USD",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="payment",
-                    name="entitlement_quantity",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Amount entitled in the payment currency, with up to 10 decimal places.",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
-                        verbose_name="Entitlement quantity in base currency",
                     ),
                 ),
                 migrations.AlterField(

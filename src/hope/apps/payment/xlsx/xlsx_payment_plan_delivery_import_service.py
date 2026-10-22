@@ -63,7 +63,9 @@ def _format_quantity_for_message(quantity: Decimal) -> str:
 
 class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
     logger = logging.getLogger(__name__)
-    KNOWN_COLUMNS: frozenset[str] = frozenset(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
+    KNOWN_COLUMNS: frozenset[str] = frozenset(
+        (*FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS, "delivered_quantity_usd")
+    )
 
     ACTION_APPLY = "apply"
     ACTION_CONFLICT = "conflict"
@@ -231,8 +233,8 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         if not quantity.is_finite() or quantity < 0 and quantity != DELIVERY_ATTEMPTED_BUT_FAILED_VALUE:
             raise ValueError
         try:
-            return normalize_currency_decimal(quantity)
-        except ValidationError:
+            return quantity.quantize(Decimal("0.01"))
+        except InvalidOperation:
             raise ValueError from None
 
     def _get_row_action(self, payment: Payment, delivered_quantity: Decimal | None) -> str:
@@ -290,7 +292,7 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
                 cell.coordinate,
                 f"Payment {payment_id}: Delivered quantity {_format_quantity_for_message(delivered_quantity)} "
                 f"conflicts with the existing delivered quantity "
-                f"{_format_quantity_for_message(payment.delivered_quantity)}.",
+                f"{_format_quantity_for_message(payment.delivered_quantity or Decimal(0))}.",
             )
             self.errors.append(conflict_error)
             self.conflict_errors.append(conflict_error)
@@ -571,12 +573,26 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         )
         old_status = payment.status
         payment.delivered_quantity = stored_quantity
-        payment.delivered_quantity_usd = get_quantity_in_usd(
-            amount=stored_quantity,
-            currency=self.payment_plan.currency,
-            exchange_rate=Decimal(exchange_rate or 0),
-            currency_exchange_date=self.pp_currency_exchange_date,
-        )
+        provided_usd_amount = self._get_optional_cell_value(row, "delivered_quantity_usd")
+        if provided_usd_amount is not None and stored_quantity is not None:
+            try:
+                delivered_quantity_usd = normalize_currency_decimal(provided_usd_amount)
+            except ValidationError:
+                raise self.XlsxPaymentPlanDeliveryImportServiceError(
+                    f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}"
+                ) from None
+            if delivered_quantity_usd < 0:
+                raise self.XlsxPaymentPlanDeliveryImportServiceError(
+                    f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}"
+                )
+            payment.delivered_quantity_usd = delivered_quantity_usd
+        else:
+            payment.delivered_quantity_usd = get_quantity_in_usd(
+                amount=stored_quantity,
+                currency=self.payment_plan.currency,
+                exchange_rate=Decimal(exchange_rate or 0),
+                currency_exchange_date=self.pp_currency_exchange_date,
+            )
         payment.status = status
         if old_status != status:
             payment.status_date = timezone.now()

@@ -1,5 +1,6 @@
 from _decimal import Decimal
 import dataclasses
+from datetime import date
 from enum import Enum
 import logging
 from typing import Any, Self, cast
@@ -11,9 +12,7 @@ from django.utils.timezone import now
 from rest_framework import serializers
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.api.fields import HopeCurrencyDecimalField
 from hope.apps.core.api.mixins import BaseAPI
-from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.core.utils import chunks
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -23,6 +22,7 @@ from hope.apps.payment.utils import (
     get_quantity_in_usd,
     inactive_currency_reason,
     log_payment_plan_change,
+    to_decimal,
 )
 from hope.models import (
     AccountType,
@@ -111,7 +111,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
 
 
 class PaymentPayloadSerializer(serializers.Serializer):
-    amount = HopeCurrencyDecimalField(required=True)
+    amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=True)
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
@@ -701,6 +701,7 @@ class PaymentGatewayService:
         payment_plan: PaymentPlan,
         exchange_rate: Decimal | float | None,
         log_pairs: "list[tuple[Payment, Payment]]",
+        currency_exchange_date: date | None = None,
     ) -> tuple[str, ...] | None:
         matching_pg_payment = payment_records_by_remote_id.get(str(payment.id))
         if matching_pg_payment is None:
@@ -708,7 +709,7 @@ class PaymentGatewayService:
             return None
 
         old_payment = cast("Payment", copy_model_object(payment))
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity or Decimal("0.00"))
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -726,18 +727,18 @@ class PaymentGatewayService:
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Payment.STATUS_NOT_DISTRIBUTED,
         ]:
-            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:  # pragma no cover
+            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
                 delivered_quantity = 0
                 delivery_date = None
 
             update_fields.extend(["delivered_quantity", "delivered_quantity_usd", "delivery_date"])
             payment.delivery_date = to_utc_midnight(delivery_date) if delivery_date else None
-            payment.delivered_quantity = normalize_currency_decimal(delivered_quantity)
+            payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=payment.delivered_quantity,
                 currency=payment_plan.currency,
                 exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
-                currency_exchange_date=payment_plan.currency_exchange_date,
+                currency_exchange_date=currency_exchange_date or payment_plan.currency_exchange_date,
             )
 
         log_pairs.append((old_payment, payment))
@@ -788,6 +789,7 @@ class PaymentGatewayService:
             payment_log_pairs: list = []
 
             if (not has_eligible_payments or pending_payments) and payment_plan.is_payment_gateway:
+                currency_exchange_date = payment_plan.currency_exchange_date
                 payment_instructions = [split for split in payment_plan.splits.all() if split.sent_to_payment_gateway]
                 pending_payments_by_split: dict[Any, list[Payment]] = {}
                 payments_by_update_fields: dict[tuple[str, ...], list[Payment]] = {}
@@ -805,6 +807,7 @@ class PaymentGatewayService:
                                 payment_records_by_remote_id=payment_records_by_remote_id,
                                 container=instruction,
                                 payment_plan=payment_plan,
+                                currency_exchange_date=currency_exchange_date,
                                 exchange_rate=exchange_rate,
                                 log_pairs=payment_log_pairs,
                             )
@@ -838,6 +841,7 @@ class PaymentGatewayService:
                 payment_records_by_remote_id={pg_payment_record.remote_id: pg_payment_record},
                 container=payment.parent_split,  # type: ignore[arg-type]
                 payment_plan=payment_plan,
+                currency_exchange_date=payment_plan.currency_exchange_date,
                 exchange_rate=payment_plan.exchange_rate,
                 log_pairs=payment_log_pairs,
             )

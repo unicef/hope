@@ -1,12 +1,11 @@
 import datetime
-from decimal import ROUND_HALF_UP, Context, Decimal, localcontext
+from decimal import ROUND_HALF_UP, Decimal
 import hashlib
 import json
 from math import ceil
 from typing import TYPE_CHECKING, Any, no_type_check
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from hope.apps.activity_log.utils import create_diff
@@ -256,8 +255,10 @@ def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal |
         return None
 
     try:
-        return normalize_currency_decimal(received_amount)
-    except ValidationError:
+        if isinstance(received_amount, str):
+            received_amount = float(received_amount.strip())
+        return Decimal(f"{round(received_amount, 2):.2f}")
+    except ValueError:
         return None
 
 
@@ -313,8 +314,7 @@ def get_quantity_in_usd(
     if exchange_rate is None:
         return None
 
-    with localcontext(Context(prec=50, rounding=ROUND_HALF_UP)):
-        return normalize_currency_decimal(Decimal(amount) / Decimal(str(exchange_rate)))
+    return normalize_currency_decimal(Decimal(amount) / Decimal(str(exchange_rate)))
 
 
 def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:
@@ -348,10 +348,9 @@ def get_payment_delivered_quantity_status_and_value(
     * Not Delivered (0 = delivered quantity) [int, float, str]
     * Unsuccessful (failed at the delivery processing level) [-1.0]
     """
-    try:
-        delivered_quantity_decimal = normalize_currency_decimal(delivered_quantity)
-    except ValidationError as exc:
-        raise ValueError(f"Invalid delivered quantity {delivered_quantity}") from exc
+    delivered_quantity_decimal = to_decimal(delivered_quantity)
+    if delivered_quantity_decimal is None:
+        raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 
     if delivered_quantity_decimal < 0:
         return Payment.STATUS_ERROR, None

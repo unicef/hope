@@ -6,13 +6,11 @@ from io import BytesIO
 import logging
 from typing import IO, TYPE_CHECKING, Any, cast
 
-from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.utils import timezone
 import openpyxl
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.handle_total_cash_in_households import (
@@ -24,6 +22,7 @@ from hope.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
     log_payment_plan_change,
+    to_decimal,
 )
 from hope.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
@@ -49,6 +48,7 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
         self.old_payments: dict = {}
         self.payment_verifications_to_save: list[PaymentVerification] = []
         self.payment_plans_to_update: dict[str, PaymentPlan] = {}
+        self.currency_exchange_dates: dict[str, datetime.date] = {}
         self.payment_verification_plans_to_update: dict[str, Any] = {}
         self.is_updated = False
 
@@ -153,8 +153,10 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             )
             return
         try:
-            delivered_quantity_decimal = normalize_currency_decimal(delivered_quantity)
-        except ValidationError:
+            delivered_quantity_decimal = to_decimal(delivered_quantity)
+            if delivered_quantity_decimal is None:
+                raise ValueError
+        except (TypeError, ValueError):
             self.errors.append(
                 XlsxError(
                     self.sheetname,
@@ -244,11 +246,14 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
                 str(allocated_quantity), entitlement_quantity
             )
             delivery_date = self._normalize_delivery_date(payment, delivered_quantity_value)
+            parent_id = str(payment.parent_id)
+            if parent_id not in self.currency_exchange_dates:
+                self.currency_exchange_dates[parent_id] = payment.parent.currency_exchange_date
             delivered_quantity_usd = get_quantity_in_usd(
                 amount=delivered_quantity_value,
                 currency=payment.currency,
                 exchange_rate=Decimal(payment.parent.exchange_rate or 0),
-                currency_exchange_date=payment.parent.currency_exchange_date,
+                currency_exchange_date=self.currency_exchange_dates[parent_id],
             )
             if (
                 payment.delivered_quantity != delivered_quantity_value

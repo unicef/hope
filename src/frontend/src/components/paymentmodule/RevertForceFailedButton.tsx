@@ -75,7 +75,7 @@ export function RevertForceFailedButton({
   });
 
   const submit = (formValues: {
-    deliveredQuantity: string;
+    deliveredQuantity: number;
     deliveryDate: string;
   }): void => {
     revertMarkAsFailed({
@@ -110,7 +110,7 @@ export function RevertForceFailedButton({
       </Box>
       <Formik
         initialValues={{
-          deliveredQuantity: '0',
+          deliveredQuantity: 0,
           deliveryDate: '',
         }}
         validationSchema={validationSchema}
@@ -133,7 +133,6 @@ export function RevertForceFailedButton({
                   name="deliveredQuantity"
                   label={t('Delivered Quantity')}
                   type="number"
-                  step="any"
                   required
                   fullWidth
                   variant="outlined"

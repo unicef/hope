@@ -26,7 +26,7 @@ def currency_precision_check(*fields: str, name: str) -> models.CheckConstraint:
 def normalize_currency_decimal(value: Any) -> Decimal:
     try:
         amount = Decimal(str(value))
-        if not amount.is_finite():
+        if not amount.is_finite() or abs(amount) >= CURRENCY_MAX_ABSOLUTE_VALUE:
             raise InvalidOperation
         return amount.quantize(
             CURRENCY_QUANTUM,

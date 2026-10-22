@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -25,7 +26,7 @@ class HopeCurrencyDecimalField(serializers.DecimalField):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("max_digits", CURRENCY_MAX_DIGITS)
         kwargs.setdefault("decimal_places", CURRENCY_DECIMAL_PLACES)
-        kwargs.setdefault("coerce_to_string", True)
+        kwargs["coerce_to_string"] = True
         super().__init__(*args, **kwargs)
 
     def to_internal_value(self, data: Any) -> Any:
@@ -35,12 +36,9 @@ class HopeCurrencyDecimalField(serializers.DecimalField):
             self.fail("invalid")
         return super().to_internal_value(value)
 
-    def to_representation(self, value: Any) -> Any:
-        representation = super().to_representation(value)
-        if isinstance(representation, str):
-            whole, _, fractional = representation.partition(".")
-            return f"{whole}.{fractional.rstrip('0').ljust(2, '0')}"
-        return representation
+    def to_representation(self, value: Any) -> str:
+        amount = normalize_currency_decimal(value).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return format(amount, ".2f")
 
 
 class HopeCurrencyModelSerializer(serializers.ModelSerializer):

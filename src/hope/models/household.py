@@ -591,11 +591,12 @@ class Household(
         verbose_name="Total cash received in USD",
         help_text="Sum of delivered payments in USD, with up to 10 decimal places [sys].",
     )
-    total_cash_received = HopeCurrencyField(
+    total_cash_received = models.DecimalField(
         null=True,
+        decimal_places=2,
+        max_digits=64,
         blank=True,
-        verbose_name="Total cash received in base currency",
-        help_text="Sum of delivered payments in the household currency, with up to 10 decimal places [sys].",
+        help_text="Household cash received [sys]",
     )
 
     flex_fields = JSONField(default=dict, blank=True, help_text="Household flex fields [sys]")
@@ -732,7 +733,6 @@ class Household(
                 name="originating_id_hh_unique_constraint",
             ),
             currency_precision_check(
-                "total_cash_received",
                 "total_cash_received_usd",
                 name="household_cash_precision",
             ),

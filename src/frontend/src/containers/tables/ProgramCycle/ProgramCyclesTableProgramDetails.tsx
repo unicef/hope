@@ -12,7 +12,7 @@ import { useTableState } from '@hooks/useTableState';
 import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { programCycleStatusToColor, formatFigure } from '@utils/utils';
+import { programCycleStatusToColor } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -107,25 +107,19 @@ const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-entitled-quantity-usd"
         >
-          {row.totalEntitledQuantityUsd
-            ? formatFigure(row.totalEntitledQuantityUsd)
-            : '-'}
+          {row.totalEntitledQuantityUsd ?? '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-undelivered-quantity-usd"
         >
-          {row.totalUndeliveredQuantityUsd
-            ? formatFigure(row.totalUndeliveredQuantityUsd)
-            : '-'}
+          {row.totalUndeliveredQuantityUsd ?? '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-delivered-quantity-usd"
         >
-          {row.totalDeliveredQuantityUsd
-            ? formatFigure(row.totalDeliveredQuantityUsd)
-            : '-'}
+          {row.totalDeliveredQuantityUsd ?? '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">
           <UniversalMoment>{row.startDate}</UniversalMoment>

@@ -1081,6 +1081,41 @@ def test_get_hope_status(payment_gateway_setup: dict) -> None:
     assert record.get_hope_status(Decimal("1000000.00")) == Payment.STATUS_ERROR
 
 
+def test_update_payment_not_distributed_without_payout_amount(payment_gateway_setup: dict) -> None:
+    payment = payment_gateway_setup["payments"][0]
+    payment_plan = payment_gateway_setup["payment_plan"]
+    split = payment_gateway_setup["splits"][0]
+    record = PaymentRecordData(
+        id=1,
+        remote_id=str(payment.id),
+        created="2023-10-10",
+        modified="2023-10-11",
+        record_code="1",
+        parent=str(split.id),
+        status="REFUND",
+        auth_code="1",
+        payout_amount=None,
+        payout_date="2023-10-11",
+        fsp_code="1",
+    )
+    log_pairs = []
+
+    update_fields = PaymentGatewayService.update_payment(
+        payment=payment,
+        payment_records_by_remote_id={str(payment.id): record},
+        container=split,
+        payment_plan=payment_plan,
+        exchange_rate=None,
+        log_pairs=log_pairs,
+    )
+
+    assert update_fields is not None
+    assert payment.status == Payment.STATUS_NOT_DISTRIBUTED
+    assert payment.delivered_quantity == Decimal("0.00")
+    assert payment.delivered_quantity_usd == Decimal("0.00")
+    assert payment.delivery_date is None
+
+
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction")
 @mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
 def test_add_records_to_payment_instructions_for_split(

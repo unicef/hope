@@ -27,15 +27,6 @@ MIGRATION_CASES = (
         15,
     ),
     (
-        "payment",
-        "0084_migration",
-        "PaymentVerification",
-        "PAYMENT_VERIFICATION_COLUMNS",
-        "change_verification_amount_column",
-        "payment_verification_currency_precision",
-        15,
-    ),
-    (
         "household",
         "0053_migration",
         "Household",
@@ -47,7 +38,7 @@ MIGRATION_CASES = (
 )
 
 
-@pytest.fixture(params=MIGRATION_CASES, ids=("payment", "payment_plan", "payment_verification", "household"))
+@pytest.fixture(params=MIGRATION_CASES, ids=("payment", "payment_plan", "household"))
 def migration_case(request: pytest.FixtureRequest, db: None) -> SimpleNamespace:
     app_name, migration_name, model_name, columns_name, change_name, constraint_name, legacy_digits = request.param
     module = importlib.import_module(f"hope.apps.{app_name}.migrations.{migration_name}")
@@ -157,3 +148,21 @@ def test_currency_migration_rolls_back_both_statements_and_retries(
             [case.table_name, case.columns[0]],
         )
         assert cursor.fetchone() == ("numeric",)
+
+
+def test_household_currency_migration_rejects_values_outside_new_range(db):
+    module = importlib.import_module("hope.apps.household.migrations.0053_migration")
+    table_name = "test_household_usd_overrange"
+    table = connection.ops.quote_name(table_name)
+    column = connection.ops.quote_name("total_cash_received_usd")
+    with connection.cursor() as cursor:
+        cursor.execute(f"DROP TABLE IF EXISTS {table}")
+        cursor.execute(f"CREATE TEMP TABLE {table} ({column} numeric(64,2))")
+        cursor.execute(f"INSERT INTO {table} ({column}) VALUES (%s)", [Decimal("100000000000000000000.00")])
+
+    historical_model = SimpleNamespace(_meta=SimpleNamespace(db_table=table_name))
+    historical_apps = SimpleNamespace(get_model=lambda app_label, model_name: historical_model)
+
+    with pytest.raises(RuntimeError, match="more than 20 integer digits"):
+        with connection.schema_editor() as schema_editor:
+            module.change_household_cash_columns(historical_apps, schema_editor)

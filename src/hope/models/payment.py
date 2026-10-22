@@ -172,12 +172,8 @@ class Payment(
         related_name="payments",
         help_text="Currency",
     )
-    entitlement_quantity = HopeCurrencyField(
-        verbose_name="Entitlement quantity in base currency",
-        help_text="Amount entitled in the payment currency, with up to 10 decimal places.",
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+    entitlement_quantity = models.DecimalField(
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     entitlement_quantity_usd = HopeCurrencyField(
         verbose_name="Entitlement quantity in USD",
@@ -187,12 +183,8 @@ class Payment(
         blank=True,
     )
     entitlement_date = models.DateTimeField(null=True, blank=True)
-    delivered_quantity = HopeCurrencyField(
-        verbose_name="Delivered quantity in base currency",
-        help_text="Amount delivered in the payment currency, with up to 10 decimal places.",
-        validators=[MinValueValidator(Decimal("0.00"))],
-        null=True,
-        blank=True,
+    delivered_quantity = models.DecimalField(
+        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
     delivered_quantity_usd = HopeCurrencyField(
         verbose_name="Delivered quantity in USD",
@@ -285,9 +277,7 @@ class Payment(
                 name="token_number_unique_per_program",
             ),
             currency_precision_check(
-                "entitlement_quantity",
                 "entitlement_quantity_usd",
-                "delivered_quantity",
                 "delivered_quantity_usd",
                 name="payment_currency_precision",
             ),

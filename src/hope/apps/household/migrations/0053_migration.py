@@ -6,7 +6,7 @@ from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
-HOUSEHOLD_CASH_COLUMNS = ("total_cash_received", "total_cash_received_usd")
+HOUSEHOLD_CASH_COLUMNS = ("total_cash_received_usd",)
 
 
 def household_cash_precision_constraint() -> models.CheckConstraint:
@@ -30,6 +30,15 @@ def change_household_cash_columns(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute("SET LOCAL lock_timeout = '1s'")
         cursor.execute("SET LOCAL statement_timeout = '30s'")
+        cursor.execute(
+            f"SELECT 1 FROM {table} WHERE abs({columns[0]}) >= %s LIMIT 1",  # noqa: S608
+            [Decimal(100000000000000000000)],
+        )
+        if cursor.fetchone():
+            raise RuntimeError(
+                "Household USD totals contain a value with more than 20 integer digits; "
+                "reduce the legacy value before applying this migration."
+            )
         cursor.execute(f"ALTER TABLE {table} {alterations}")
         cursor.execute(
             f"ALTER TABLE {table} ADD CONSTRAINT {schema_editor.quote_name('household_cash_precision')} "
@@ -42,25 +51,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("household", "0052_migration"),
-        ("payment", "0084_migration"),
+        ("payment", "0083_migration"),
     ]
 
     operations = [
         migrations.SeparateDatabaseAndState(
             database_operations=[migrations.RunPython(change_household_cash_columns)],
             state_operations=[
-                migrations.AlterField(
-                    model_name="household",
-                    name="total_cash_received",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Sum of delivered payments in the household currency, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        verbose_name="Total cash received in base currency",
-                    ),
-                ),
                 migrations.AlterField(
                     model_name="household",
                     name="total_cash_received_usd",

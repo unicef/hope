@@ -7,7 +7,7 @@ import openpyxl
 from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hope.apps.core.fields import normalize_currency_decimal
+from hope.apps.payment.utils import to_decimal
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
 from hope.apps.payment.xlsx.xlsx_payment_plan_export_service import XlsxPaymentPlanExportService
 
@@ -57,9 +57,8 @@ def _row_amount(raw_amount: object, payment_id: str) -> Decimal | None:
     """Amount for one row, or ``None`` when the row funds nobody (blank or zero)."""
     if raw_amount is None or str(raw_amount).strip() == "":
         return None
-    try:
-        amount = normalize_currency_decimal(raw_amount)
-    except ValidationError:
+    amount = to_decimal(str(raw_amount))
+    if amount is None:
         raise ValidationError(f"Invalid amount '{raw_amount}' for payment {payment_id}.")
     if amount < 0:
         raise ValidationError(f"Negative amount '{raw_amount}' for payment {payment_id}.")

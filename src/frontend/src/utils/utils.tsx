@@ -666,6 +666,7 @@ export function formatCurrencyWithSymbol(
   currency = 'USD',
   visionCode?: string | null,
 ): string {
+  // TODO: ? Pass Currency.number_of_decimals to the frontend so displays honor configured currency precision.
   // If amount is null or undefined just show '-'
   if (amount === null || amount === undefined) {
     return '-';
@@ -741,9 +742,10 @@ export function formatFigure(
     return '-';
   }
 
-  const numValue = typeof value === 'string' ? value.trim() : value;
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
 
-  if (numValue === '' || !Number.isFinite(Number(numValue))) {
+  // If parsing failed or value is NaN, return '-'
+  if (isNaN(numValue)) {
     return '-';
   }
 
@@ -753,11 +755,10 @@ export function formatFigure(
   };
 
   // Use Intl.NumberFormat to format number with proper punctuation (thousands separator and decimal point)
-  const formatter = new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat(undefined, {
     minimumFractionDigits: opts.minimumFractionDigits,
     maximumFractionDigits: opts.maximumFractionDigits,
-  });
-  return formatter.format(numValue as number | Intl.StringNumericLiteral);
+  }).format(numValue);
 }
 
 export function paymentPlanStatusMapping(status): string {

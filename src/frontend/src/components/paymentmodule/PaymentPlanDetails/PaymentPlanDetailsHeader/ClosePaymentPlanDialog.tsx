@@ -19,7 +19,7 @@ import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail'
 import type { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { formatFigure, showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { Field, Form, Formik } from 'formik';
@@ -108,17 +108,17 @@ export function ClosePaymentPlanDialog({
     },
     {
       label: t('Total Entitlement'),
-      value: `${formatFigure(paymentPlan.totalEntitledQuantityUsd ?? 0, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} USD`,
+      value:
+        paymentPlan.totalEntitledQuantityUsd == null
+          ? '-'
+          : `${paymentPlan.totalEntitledQuantityUsd} USD`,
     },
     {
       label: t('Total amount redeemed'),
-      value: `${formatFigure(paymentPlan.totalDeliveredQuantityUsd ?? 0, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} USD`,
+      value:
+        paymentPlan.totalDeliveredQuantityUsd == null
+          ? '-'
+          : `${paymentPlan.totalDeliveredQuantityUsd} USD`,
     },
     { label: t('Number of payments'), value: numberOfPayments },
     { label: t('Payments Delivered fully'), value: deliveredFully },

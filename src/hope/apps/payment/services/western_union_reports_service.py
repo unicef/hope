@@ -4,7 +4,7 @@ from collections import defaultdict
 import csv
 import dataclasses
 from datetime import date, datetime, timedelta
-from decimal import Context, Decimal, InvalidOperation, localcontext
+from decimal import Decimal, InvalidOperation
 from enum import IntEnum
 import io
 import logging
@@ -92,15 +92,12 @@ class QCFReportPaymentPlanData:
     payments_data: list[QCFReportPaymentRowData]
 
     def __post_init__(self) -> None:
-        with localcontext(Context(prec=50)):
-            self.principal_total = sum(
-                (p.principal_amount for p in self.payments_data if p.principal_amount >= 0), Decimal(0)
-            )
-            self.charges_total = sum((p.charges_amount for p in self.payments_data), Decimal(0))
-            self.refunds_total = sum(
-                (p.principal_amount for p in self.payments_data if p.principal_amount < 0), Decimal(0)
-            )
-            self.fees_total = sum((p.fee_amount for p in self.payments_data), Decimal(0))
+        self.principal_total = sum(
+            (p.principal_amount for p in self.payments_data if p.principal_amount >= 0), Decimal(0)
+        )
+        self.charges_total = sum((p.charges_amount for p in self.payments_data), Decimal(0))
+        self.refunds_total = sum((p.principal_amount for p in self.payments_data if p.principal_amount < 0), Decimal(0))
+        self.fees_total = sum((p.fee_amount for p in self.payments_data), Decimal(0))
 
 
 class WesternUnionReportsService:
@@ -448,24 +445,23 @@ class WesternUnionReportsService:
             key=lambda row: self.record_type_rank(self.clean_field(row[self.DataFieldIndex.RECORD_TYPE])),
         )
 
-        with localcontext(Context(prec=50)):
-            return MatchedDataPaymentRow(
-                payment=payment,
-                mtcn=self.clean_field(representative_row[self.DataFieldIndex.MTCN]),
-                transaction_status=self.clean_field(representative_row[self.DataFieldIndex.TRANSACTION_STATUS]),
-                principal_amount=sum(
-                    (self.to_decimal(row[self.DataFieldIndex.PRINCIPAL_AMOUNT]) for row in payment_rows),
-                    start=Decimal(0),
-                ),
-                charges_amount=sum(
-                    (self.to_decimal(row[self.DataFieldIndex.CHARGES_AMOUNT]) for row in payment_rows),
-                    start=Decimal(0),
-                ),
-                fee_amount=sum(
-                    (self.to_decimal(row[self.DataFieldIndex.FEE_AMOUNT]) for row in payment_rows),
-                    start=Decimal(0),
-                ),
-            )
+        return MatchedDataPaymentRow(
+            payment=payment,
+            mtcn=self.clean_field(representative_row[self.DataFieldIndex.MTCN]),
+            transaction_status=self.clean_field(representative_row[self.DataFieldIndex.TRANSACTION_STATUS]),
+            principal_amount=sum(
+                (self.to_decimal(row[self.DataFieldIndex.PRINCIPAL_AMOUNT]) for row in payment_rows),
+                start=Decimal(0),
+            ),
+            charges_amount=sum(
+                (self.to_decimal(row[self.DataFieldIndex.CHARGES_AMOUNT]) for row in payment_rows),
+                start=Decimal(0),
+            ),
+            fee_amount=sum(
+                (self.to_decimal(row[self.DataFieldIndex.FEE_AMOUNT]) for row in payment_rows),
+                start=Decimal(0),
+            ),
+        )
 
     def record_type_rank(self, record_type: str) -> int:
         rank_map = {

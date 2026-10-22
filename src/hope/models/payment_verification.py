@@ -5,7 +5,6 @@ from django.db import models
 from django.utils import timezone
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.models.business_area import BusinessArea
 from hope.models.payment_verification_plan import PaymentVerificationPlan
 from hope.models.utils import AdminUrlMixin, ConcurrencyModel, LongNameIndex, TimeStampedUUIDModel
@@ -47,10 +46,10 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
 
     status = models.CharField(max_length=50, choices=get_status_choices, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True, blank=True)
-    received_amount = HopeCurrencyField(
-        verbose_name="Received amount in base currency",
-        help_text="Amount reported received in the payment currency, with up to 10 decimal places.",
-        validators=[MinValueValidator(Decimal("0.0000000001"))],
+    received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=15,
+        validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
         blank=True,
     )
@@ -59,7 +58,6 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
     class Meta:
         app_label = "payment"
         ordering = ("id",)
-        constraints = [currency_precision_check("received_amount", name="payment_verification_currency_precision")]
         indexes = [
             LongNameIndex(fields=["created_at"], name="payment_paymentverification_created_at_aeebbe97"),
             LongNameIndex(fields=["updated_at"], name="payment_paymentverification_updated_at_4f0cb4e9"),

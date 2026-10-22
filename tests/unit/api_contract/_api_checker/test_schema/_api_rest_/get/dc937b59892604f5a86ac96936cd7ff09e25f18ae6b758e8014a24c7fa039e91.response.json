@@ -40471,11 +40471,6 @@
                             ],
                             "readOnly": true
                         },
-                        "volume_by_delivery_mechanism": {
-                            "type": "object",
-                            "additionalProperties": {},
-                            "readOnly": true
-                        },
                         "split_choices": {
                             "type": "array",
                             "items": {
@@ -40764,8 +40759,7 @@
                         "unore_exchange_rate",
                         "unore_exchange_rate_unavailable",
                         "unsuccessful_payments_count",
-                        "updated_at",
-                        "volume_by_delivery_mechanism"
+                        "updated_at"
                     ]
                 },
                 "PaymentPlanExcludeBeneficiaries": {

@@ -3,7 +3,7 @@
     "target": "ES2022",
     "types": ["node"],
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "ES2023.Intl", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowJs": true,
     "module": "preserve",
     "moduleDetection": "force",

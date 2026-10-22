@@ -491,6 +491,7 @@ def payment_plan_apply_custom_exchange_rate_async_task_action(job: AsyncRetryJob
     try:
         bulk_size = 1000
         updates = []
+        currency_exchange_date = payment_plan.currency_exchange_date
         with transaction.atomic():
             for payment in payment_plan.eligible_payments.only(
                 "id",
@@ -501,13 +502,13 @@ def payment_plan_apply_custom_exchange_rate_async_task_action(job: AsyncRetryJob
                     amount=payment.entitlement_quantity,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency_exchange_date=currency_exchange_date,
                 )
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=payment.delivered_quantity,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency_exchange_date=currency_exchange_date,
                 )
                 updates.append(payment)
 

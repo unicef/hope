@@ -87,7 +87,7 @@ export function VerifyManual({
       await updateVerificationMutation.mutateAsync({
         received: values.status === 'RECEIVED',
         receivedAmount:
-          values.status === 'RECEIVED' ? String(values.receivedAmount) : '0',
+          values.status === 'RECEIVED' ? parseFloat(values.receivedAmount) : 0,
       });
       setVerifyManualDialogOpen(false);
       showMessage(t('Payment has been verified.'));
@@ -99,7 +99,7 @@ export function VerifyManual({
   const initialValues = {
     paymentVerificationId,
     status: 'RECEIVED',
-    receivedAmount: receivedAmount ?? '0',
+    receivedAmount: receivedAmount ?? 0,
   };
 
   return (
@@ -153,8 +153,6 @@ export function VerifyManual({
                       <Field
                         name="receivedAmount"
                         type="number"
-                        step="any"
-                        maxNumber={Number.POSITIVE_INFINITY}
                         label={t('Amount Received')}
                         color="primary"
                         component={FormikTextField}
