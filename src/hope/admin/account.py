@@ -7,7 +7,7 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
-from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase
+from hope.admin.utils import AutocompleteForeignKeyMixin, HOPEModelAdminBase, UnicefIdSearchMixin
 from hope.models import (
     Account,
     AccountAttachment,
@@ -39,7 +39,7 @@ class AccountAttachmentInline(AutocompleteForeignKeyMixin, admin.TabularInline):
 
 
 @admin.register(Account)
-class AccountAdmin(HOPEModelAdminBase):
+class AccountAdmin(UnicefIdSearchMixin, HOPEModelAdminBase):
     list_display = (
         "individual",
         "number",
@@ -67,6 +67,7 @@ class AccountAdmin(HOPEModelAdminBase):
         "number",
         "individual__unicef_id",
     )
+    unicef_id_search_map = {"IND": "individual__unicef_id"}
     list_filter = (
         ("individual__program__business_area", AutoCompleteFilter),
         ("individual__program", AutoCompleteFilter),

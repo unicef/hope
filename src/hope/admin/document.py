@@ -14,6 +14,7 @@ from hope.admin.utils import (
     HOPEModelAdminBase,
     RdiMergeStatusAdminMixin,
     SoftDeletableAdminMixin,
+    UnicefIdSearchMixin,
 )
 from hope.apps.core.utils import AutoCompleteFilterTemp
 from hope.apps.household.const import FOSTER_CHILD
@@ -23,8 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(Document)
-class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
+class DocumentAdmin(UnicefIdSearchMixin, SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin):
     search_fields = ("document_number", "country__name", "individual__unicef_id")
+    unicef_id_search_map = {"IND": "individual__unicef_id"}
     list_display = (
         "document_number",
         "type",

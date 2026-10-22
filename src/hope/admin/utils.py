@@ -502,8 +502,8 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
     uppercase by the `create_*_unicef_id` triggers, so upper-casing the term lets a plain `startswith`
     use the `unicef_id` index in collation "C" (the database collation gives `LIKE 'x%'` no index range).
     That index serves the cursor paginator's ORDER BY only in "C" too, so a search on the model's own
-    unicef_id adds the `unicef_id_c` annotation for `get_paginator` to order and page by. Meant to be
-    mixed in before `CursorPaginatorAdmin`.
+    unicef_id adds the `unicef_id_c` annotation for `get_paginator` to order and page by; any other
+    search keeps the admin's own paginator. A recognised id skips the other `search_fields`.
     """
 
     # unicef_id prefix a user may paste -> field to prefix-match on
