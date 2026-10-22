@@ -41,7 +41,7 @@ RUN apt-get update \
 
 # uv installer stage
 FROM base-build AS uv
-RUN pip install --upgrade pip && pip install uv
+RUN pip install --upgrade pip && pip install uv --no-dev
 COPY README.md LICENSE pyproject.toml uv.lock MANIFEST.in ./
 
 
