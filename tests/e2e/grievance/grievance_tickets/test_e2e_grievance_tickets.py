@@ -581,7 +581,7 @@ class TestSmokeGrievanceTickets:
         page_grievance_details_page.get_ticket_status()
         assert "Ticket ID" in page_grievance_details_page.get_title().text
         assert "EDIT" in page_grievance_details_page.get_button_edit().text
-        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "ASSIGN" in page_grievance_details_page.get_button_assign().text
         assert "New" in page_grievance_details_page.get_label_status().text
         assert "High" in page_grievance_details_page.get_label_priority().text
         assert "Very urgent" in page_grievance_details_page.get_label_urgency().text
@@ -806,7 +806,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_select_individualdata_relationship().click()
         page_grievance_new_ticket.select_listbox_element("Wife / Husband")
         page_grievance_new_ticket.get_button_next().click()
-        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "ASSIGN" in page_grievance_details_page.get_button_assign().text
         assert "New" in page_grievance_details_page.get_ticket_status().text
         assert "Not set" in page_grievance_details_page.get_ticket_priority().text
         assert "Not set" in page_grievance_details_page.get_ticket_urgency().text
@@ -1187,7 +1187,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.get_input_value().send_keys("5")
         page_grievance_new_ticket.get_button_next().click()
         page_grievance_details_page.get_checkbox_household_data()
-        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.assign_to_me()
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.get_button_send_for_approval().click()
         page_grievance_details_page.check_checkbox(page_grievance_details_page.checkbox_household_data)
@@ -1229,7 +1229,7 @@ class TestGrievanceTickets:
         page_grievance_tickets.get_nav_grievance().click()
         assert "Grievance Tickets" in page_grievance_tickets.get_grievance_title().text
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.assign_to_me()
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.driver.refresh()
         page_grievance_details_page.get_expand_collapse_button().click()
@@ -1442,7 +1442,7 @@ class TestGrievanceTickets:
 
         page_grievance_new_ticket.get_button_next().click()
         # Wait for details page to load and verify ticket was created successfully
-        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "ASSIGN" in page_grievance_details_page.get_button_assign().text
         assert "Individual Data Update with Photo - TEST" in page_grievance_details_page.get_label_description().text
 
     def test_grievance_tickets_add_individual_with_photo(
@@ -1486,7 +1486,7 @@ class TestGrievanceTickets:
         page_grievance_new_ticket.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
 
         page_grievance_new_ticket.get_button_next().click()
-        assert "ASSIGN TO ME" in page_grievance_details_page.get_button_assign_to_me().text
+        assert "ASSIGN" in page_grievance_details_page.get_button_assign().text
         assert "Add Individual with Photo - TEST" in page_grievance_details_page.get_label_description().text
         assert "Male" in page_grievance_details_page.get_label_gender().text
         assert "Test Photo Person" in page_grievance_details_page.get_label_full_name().text
