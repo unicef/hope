@@ -99,6 +99,7 @@ from hope.models import (
     AsyncRetryJob,
     FileTemp,
     IndividualRoleInHousehold,
+    LogEntry,
     Payment,
     PaymentPlan,
     PaymentPlanGroup,
@@ -601,13 +602,14 @@ def test_payment_plan_full_rebuild(
 
 def test_reactivate_abort_marks_regular_plan_rebuilding(
     aborted_regular_plan: PaymentPlan,
+    user: User,
     django_capture_on_commit_callbacks: Any,
 ) -> None:
     with (
         patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True),
         django_capture_on_commit_callbacks(execute=True),
     ):
-        PaymentPlanService(aborted_regular_plan).reactivate_abort()
+        PaymentPlanService(aborted_regular_plan).reactivate_abort(user_id=str(user.pk))
 
     aborted_regular_plan.refresh_from_db()
     job = AsyncRetryJob.objects.latest("pk")
@@ -617,6 +619,7 @@ def test_reactivate_abort_marks_regular_plan_rebuilding(
     assert job.action == "hope.apps.payment.celery_tasks.payment_plan_refresh_payees_async_task_action"
     assert job.config == {
         "payment_plan_id": str(aborted_regular_plan.id),
+        "user_id": str(user.pk),
         "on_failure_action": "hope.apps.payment.celery_tasks.mark_payment_plan_rebuild_error",
     }
 
@@ -633,6 +636,23 @@ def test_refresh_payees_task_opens_rebuilt_plan(
     assert rebuilding_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     assert rebuilding_regular_plan.background_action_status is None
     mock_refresh_payees.assert_called_once()
+
+
+@pytest.mark.enable_activity_log
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_refresh_payees_task_logs_reactivation(
+    mock_refresh_payees: Mock,
+    rebuilding_regular_plan: PaymentPlan,
+    user: User,
+) -> None:
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, rebuilding_regular_plan, str(user.pk))
+
+    log = LogEntry.objects.get(object_id=rebuilding_regular_plan.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes["status"] == {"from": "ABORTED", "to": "OPEN"}
+    assert log.changes["background_action_status"] == {"from": "REBUILDING", "to": None}
+    assert list(log.programs.values_list("pk", flat=True)) == [rebuilding_regular_plan.program.pk]
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
@@ -824,6 +844,27 @@ def test_payment_plan_refresh_payees_marks_rebuild_error_when_retries_exhausted(
     assert rebuilding_regular_plan.status == PaymentPlan.Status.ABORTED
     assert rebuilding_regular_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
     assert rebuilding_regular_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILD_ERROR
+
+
+@pytest.mark.enable_activity_log
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_payment_plan_refresh_payees_logs_rebuild_error(
+    mock_refresh_payees: Mock,
+    rebuilding_regular_plan: PaymentPlan,
+    user: User,
+) -> None:
+    mock_refresh_payees.side_effect = Exception("test")
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True):
+        payment_plan_refresh_payees_async_task(rebuilding_regular_plan, str(user.pk))
+    job = AsyncRetryJob.objects.latest("pk")
+
+    with pytest.raises(Exception, match="test"):
+        async_retry_job_task.apply((job._meta.label_lower, job.pk, job.version)).get()
+
+    log = LogEntry.objects.get(object_id=rebuilding_regular_plan.pk)
+    assert log.action == LogEntry.UPDATE
+    assert log.user == user
+    assert log.changes == {"background_action_status": {"from": "REBUILDING", "to": "REBUILD_ERROR"}}
 
 
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")

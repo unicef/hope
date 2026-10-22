@@ -4,6 +4,7 @@ import { useProgramContext } from '../../../../../programContext';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -46,7 +47,13 @@ export function AbortedPaymentPlanHeaderButtons({
       setLoading(false);
     },
     onSuccess: () => {
-      showMessage(t('Payment Plan has been reactivated.'));
+      showMessage(
+        paymentPlan.planType === PlanTypeEnum.REGULAR
+          ? t(
+              'Payment Plan rebuild has started. It will be reactivated when the rebuild finishes.',
+            )
+          : t('Payment Plan has been reactivated.'),
+      );
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansRetrieve,

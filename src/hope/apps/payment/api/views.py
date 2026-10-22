@@ -1759,7 +1759,7 @@ class PaymentPlanViewSet(
     def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).reactivate_abort()
+        payment_plan = PaymentPlanService(payment_plan).reactivate_abort(user_id=str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

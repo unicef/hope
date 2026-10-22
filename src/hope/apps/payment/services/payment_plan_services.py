@@ -1734,14 +1734,14 @@ class PaymentPlanService:
             )
         return self.payment_plan
 
-    def reactivate_abort(self) -> PaymentPlan:
+    def reactivate_abort(self, user_id: str | None = None) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.ABORTED:
             raise ValidationError(
                 f"Reactivate Aborted Payment Plan is possible only within Status {PaymentPlan.Status.ABORTED}"
             )
         # Child plans take their collectors and entitlements from the source plan, so only regular plans are refreshed.
         if self.payment_plan.plan_type == PaymentPlan.PlanType.REGULAR:
-            return self._queue_reactivate_rebuild()
+            return self._queue_reactivate_rebuild(user_id)
 
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_reactivate_abort()
@@ -1753,7 +1753,7 @@ class PaymentPlanService:
         self.payment_plan.update_money_fields()
         return self.payment_plan
 
-    def _queue_reactivate_rebuild(self) -> PaymentPlan:
+    def _queue_reactivate_rebuild(self, user_id: str | None) -> PaymentPlan:
         """Queue the payees refresh; the plan stays ABORTED until the task has rebuilt it."""
         background_action_status = self.payment_plan.background_action_status
         if (
@@ -1765,7 +1765,7 @@ class PaymentPlanService:
         flow.background_action_status_rebuilding()
         flow.build_status_pending()
         self.payment_plan.save(update_fields=("background_action_status", "build_status", "built_at", "updated_at"))
-        transaction.on_commit(lambda: payment_plan_refresh_payees_async_task(self.payment_plan))
+        transaction.on_commit(lambda: payment_plan_refresh_payees_async_task(self.payment_plan, user_id))
         return self.payment_plan
 
     def refresh_payees(self) -> None:

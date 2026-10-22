@@ -142,7 +142,7 @@ def test_abort_and_reactivate_payment_plan(
         # Celery runs eagerly here, so the rebuild is held back to keep the plan in the rebuilding state.
         with mock.patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task"):
             browser.wait_for_element_clickable(REACTIVATE).click()
-            browser.wait_for_text("Payment Plan has been reactivated.")
+            browser.wait_for_text("Payment Plan rebuild has started.")
             browser.wait_for_text("REBUILDING")
             browser.wait_for_element_present(f"{REACTIVATE}:disabled")
         payment_plan.refresh_from_db()
