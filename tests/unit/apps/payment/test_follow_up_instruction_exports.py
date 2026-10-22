@@ -275,7 +275,7 @@ def test_delivery_export_happy_path_aggregates_households(
     assert rows[shared_household_id]["entitlement_quantity"] == "140.00"
     assert rows[shared_household_id]["entitlement_quantity_usd"] == "140.00"
     assert rows[shared_household_id]["delivered_quantity"] == "0.00"
-    assert rows[shared_household_id]["delivered_quantity_usd"] == ""
+    assert rows[shared_household_id]["delivered_quantity_usd"] is None
 
 
 def test_delivery_export_includes_fsp_extra_field_from_later_child_plan(

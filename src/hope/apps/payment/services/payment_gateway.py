@@ -709,7 +709,7 @@ class PaymentGatewayService:
             return None
 
         old_payment = cast("Payment", copy_model_object(payment))
-        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity or Decimal("0.00"))
+        payment.status = matching_pg_payment.get_hope_status(cast("Decimal", payment.entitlement_quantity))
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
         payment.reason_for_unsuccessful_payment = matching_pg_payment.message
@@ -737,7 +737,7 @@ class PaymentGatewayService:
             payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=payment.delivered_quantity,
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
+                exchange_rate=exchange_rate,
                 currency_exchange_date=currency_exchange_date or payment_plan.currency_exchange_date,
             )
 

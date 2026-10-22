@@ -114,7 +114,7 @@ def test_verification_xlsx_round_trip_preserves_two_decimal_amount(two_decimal_v
     workbook = XlsxVerificationExportService(verification_plan).generate_workbook()
     amount_cell = workbook.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"]
     received_cell = workbook.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"]
-    assert amount_cell.value == 123.12
+    assert amount_cell.value == Decimal("123.12")
     assert amount_cell.data_type == "n"
     assert received_cell.value == "YES"
     file = io.BytesIO()

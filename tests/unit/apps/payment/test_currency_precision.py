@@ -65,7 +65,15 @@ def test_money_model_field_has_precision_and_admin_labels(model, field_name):
 )
 def test_currency_rounding_uses_half_up(source, expected):
     assert normalize_currency_decimal(source) == expected
-    assert HopeCurrencyField().formfield().clean(source) == expected
+
+
+def test_currency_form_accepts_ten_decimal_places():
+    assert HopeCurrencyField().formfield().clean("123.1234567890") == Decimal("123.1234567890")
+
+
+def test_currency_form_rejects_more_than_ten_decimal_places():
+    with pytest.raises(ValidationError, match="no more than 10 decimal places"):
+        HopeCurrencyField().formfield().clean("123.12345678901")
 
 
 def test_currency_field_uses_unbounded_postgresql_numeric_type():
