@@ -12,6 +12,7 @@ from django.db.models import (
     QuerySet,
     UniqueConstraint,
 )
+from django.db.models.functions import Collate
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -698,6 +699,7 @@ class Household(
             LongNameIndex(fields=["created_at"], name="household_household_created_at_c3191316"),
             LongNameIndex(fields=["updated_at"], name="household_household_updated_at_299c6681"),
             LongNameIndex(fields=["unicef_id"], name="household_household_unicef_id_6f025c4d"),
+            models.Index(Collate("unicef_id", "C"), name="hh_unicef_id_c_idx"),
             LongNameIndex(fields=["size"], name="household_household_size_72609b19"),
             LongNameIndex(fields=["unhcr_id"], name="household_household_unhcr_id_71c2d7ae"),
             LongNameIndex(

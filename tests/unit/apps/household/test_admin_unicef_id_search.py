@@ -1,9 +1,12 @@
 """Search by unicef_id in the Household/Individual admin must prefix-match, not scan."""
 
+from admin_cursor_paginator.cursor import Cursor, encode_cursor
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Permission
 from django.db import connection
 from django.test import RequestFactory
 from django.test.utils import CaptureQueriesContext
+from django.urls import reverse
 import pytest
 
 from extras.test_utils.factories import (
@@ -145,3 +148,132 @@ def test_admin_does_not_run_a_count_query_for_a_search(population, staff_request
         list(queryset)
 
     assert [query for query in captured.captured_queries if "COUNT(*)" in query["sql"]] == []
+
+
+# Three ids per model in the program and a fourth in another program of the same business area, so the program
+# filter (applied only together with business_area__exact) visibly drops it.
+@pytest.fixture
+def paged_population():
+    ba = BusinessAreaFactory(slug="unicef-id-paging-ba")
+    program = ProgramFactory(business_area=ba, status="ACTIVE")
+    other_program = ProgramFactory(business_area=ba, status="ACTIVE")
+    HouseholdFactory(
+        business_area=ba,
+        program=program,
+        create_role=False,
+        unicef_id="HH-24-0000.0001",
+        head_of_household__unicef_id="IND-24-0000.0001",
+    )
+    HouseholdFactory(
+        business_area=ba,
+        program=program,
+        create_role=False,
+        unicef_id="HH-24-0000.0002",
+        head_of_household__unicef_id="IND-24-0000.0002",
+    )
+    HouseholdFactory(
+        business_area=ba,
+        program=program,
+        create_role=False,
+        unicef_id="HH-24-0000.0003",
+        head_of_household__unicef_id="IND-24-0000.0003",
+    )
+    HouseholdFactory(
+        business_area=ba,
+        program=other_program,
+        create_role=False,
+        unicef_id="HH-24-0000.0004",
+        head_of_household__unicef_id="IND-24-0000.0004",
+    )
+    return {"business_area__exact": str(ba.id), "program__exact": str(program.id)}
+
+
+@pytest.fixture
+def staff_client(client):
+    user = UserFactory(is_staff=True)
+    user.user_permissions.set(
+        Permission.objects.filter(
+            content_type__app_label="household", codename__in=["view_individual", "view_household"]
+        )
+    )
+    client.force_login(user, backend="django.contrib.auth.backends.ModelBackend")
+    return client
+
+
+@pytest.mark.parametrize(
+    ("model", "model_admin_class", "term", "ordering_field"),
+    [
+        (Individual, IndividualAdmin, "IND-24", "unicef_id_c"),
+        (Household, HouseholdAdmin, "HH-24", "unicef_id_c"),
+        (Individual, IndividualAdmin, "HH-24", "unicef_id"),
+        (Individual, IndividualAdmin, "", "unicef_id"),
+        (Household, HouseholdAdmin, "", "unicef_id"),
+    ],
+    ids=[
+        "individual-own-id",
+        "household-own-id",
+        "individual-household-id",
+        "individual-no-search",
+        "household-no-search",
+    ],
+)
+def test_paginator_orders_by_c_collation_only_for_own_unicef_id_search(
+    population, staff_request, model, model_admin_class, term, ordering_field
+):
+    model_admin = model_admin_class(model, AdminSite())
+    queryset, _ = model_admin.get_search_results(staff_request, model_admin.get_queryset(staff_request), term)
+
+    paginator = model_admin.get_paginator(staff_request, queryset, 100)
+
+    assert paginator.ordering_field == ordering_field
+
+
+@pytest.mark.parametrize(
+    ("url_name", "params", "expected"),
+    [
+        (
+            "admin:household_individual_changelist",
+            {"q": "IND-24"},
+            ["IND-24-0000.0001", "IND-24-0000.0002", "IND-24-0000.0003"],
+        ),
+        (
+            "admin:household_individual_changelist",
+            {"q": "IND-24", "p": encode_cursor(Cursor(value="IND-24-0000.0001", is_reverse=0, number=2))},
+            ["IND-24-0000.0002", "IND-24-0000.0003"],
+        ),
+        (
+            "admin:household_individual_changelist",
+            {"q": "IND-24", "p": encode_cursor(Cursor(value="IND-24-0000.0003", is_reverse=1, number=2))},
+            ["IND-24-0000.0001", "IND-24-0000.0002"],
+        ),
+        (
+            "admin:household_household_changelist",
+            {"q": "HH-24"},
+            ["HH-24-0000.0001", "HH-24-0000.0002", "HH-24-0000.0003"],
+        ),
+        (
+            "admin:household_household_changelist",
+            {"q": "HH-24", "p": encode_cursor(Cursor(value="HH-24-0000.0001", is_reverse=0, number=2))},
+            ["HH-24-0000.0002", "HH-24-0000.0003"],
+        ),
+        (
+            "admin:household_household_changelist",
+            {"q": "HH-24", "p": encode_cursor(Cursor(value="HH-24-0000.0003", is_reverse=1, number=2))},
+            ["HH-24-0000.0001", "HH-24-0000.0002"],
+        ),
+    ],
+    ids=[
+        "individual-first",
+        "individual-next",
+        "individual-previous",
+        "household-first",
+        "household-next",
+        "household-previous",
+    ],
+)
+def test_changelist_search_by_own_unicef_id_pages_through_results(
+    paged_population, staff_client, url_name, params, expected
+):
+    response = staff_client.get(reverse(url_name), {**params, **paged_population})
+
+    assert [obj.unicef_id for obj in response.context["cl"].result_list] == expected
