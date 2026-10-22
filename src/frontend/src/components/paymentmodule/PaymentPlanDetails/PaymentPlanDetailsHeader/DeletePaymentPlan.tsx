@@ -65,6 +65,9 @@ export function DeletePaymentPlan({
       },
     });
   const { id } = paymentPlan;
+  const afterDeletePath = paymentPlan.paymentPlanGroup
+    ? `/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`
+    : `/${baseUrl}/payment-module/groups`;
   const { isActiveProgram } = useProgramContext();
 
   const handleDelete = async (): Promise<void> => {
@@ -74,18 +77,18 @@ export function DeletePaymentPlan({
         programCode: programId,
         id,
       });
-      showMessage(t('Payment Plan Deleted'));
-      navigate(`/${baseUrl}/payment-module/payment-plans`);
+      showMessage(t('Payment Plan Component Deleted'));
+      navigate(afterDeletePath);
     } catch (e) {
       // Ignore empty response error
       if (isEmptyJsonResponseError(e)) {
-        showMessage(t('Payment Plan Deleted'));
-        navigate(`/${baseUrl}/payment-module/payment-plans`);
+        showMessage(t('Payment Plan Component Deleted'));
+        navigate(afterDeletePath);
       } else {
         showApiErrorMessages(
           toApiError(e),
           showMessage,
-          t('Failed to delete the Payment Plan'),
+          t('Failed to delete the Payment Plan Component'),
         );
       }
     }
@@ -114,7 +117,7 @@ export function DeletePaymentPlan({
         maxWidth="md"
       >
         <DialogTitleWrapper>
-          <DialogTitle>{t('Delete Payment Plan')}</DialogTitle>
+          <DialogTitle>{t('Delete Payment Plan Component')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
@@ -123,7 +126,9 @@ export function DeletePaymentPlan({
                 p: 5,
               }}
             >
-              {t('Are you sure you want to remove this Payment Plan?')}
+              {t(
+                'Are you sure you want to remove this Payment Plan Component?',
+              )}
             </Box>
           </DialogContainer>
         </DialogContent>

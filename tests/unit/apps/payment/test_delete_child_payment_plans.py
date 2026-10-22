@@ -166,7 +166,6 @@ def test_delete_top_up_restores_top_up_eligibility(
     PaymentPlanService(payment_plan=top_up).delete()
 
     assert source_plan.eligible_payments_for_top_up().filter(pk=source_payment.pk).exists()
-    assert source_plan.can_create_top_up is True
 
 
 def test_delete_follow_up_soft_deletes_plan_and_payments(follow_up: PaymentPlan, follow_up_payment: Payment) -> None:

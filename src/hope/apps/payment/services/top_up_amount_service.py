@@ -16,23 +16,29 @@ if TYPE_CHECKING:
 
 
 class TopUpAmountTemplateService(XlsxPaymentPlanExportService):
-    """Blank amount template listing the payments eligible for this plan's child plan.
+    """Blank amount template listing the payments eligible for a group's Top-Up or Amendment.
 
-    Used for both a Top-Up and a Top-Up Amendment. Same sheet shape as the entitlement export
-    operators already know, with two differences: the row set is ``eligible_payments_for_child_plan()``
-    rather than every eligible payment, and the entitlement columns ship empty. Empty is deliberate —
-    prefilling the source amount invites the operator to submit it unchanged, which would silently
-    repeat the original payment instead of topping it up.
+    One sheet for every source plan of the group. Same sheet shape as the entitlement export
+    operators already know, with two differences: the rows are each plan's
+    ``eligible_payments_for_child_plan()`` rather than every eligible payment, and the entitlement
+    columns ship empty. Empty is deliberate — prefilling the source amount invites the operator to
+    submit it unchanged, which would silently repeat the original payment instead of topping it up.
+    The plans of one group share a programme, so the first one sets the columns.
     """
 
+    def __init__(self, source_payment_plans: list["PaymentPlan"]) -> None:
+        super().__init__(source_payment_plans[0])
+        self.source_payment_plans = source_payment_plans
+
     def _add_payment_list(self) -> None:
-        qs = (
-            self.payment_plan.eligible_payments_for_child_plan()
-            .select_related("household_snapshot", "currency", "delivery_type", "financial_service_provider")
-            .order_by("unicef_id")
-        )
-        for payment in qs.iterator(chunk_size=self.batch_size):
-            self._add_payment_row(payment)
+        for source_payment_plan in self.source_payment_plans:
+            qs = (
+                source_payment_plan.eligible_payments_for_child_plan()
+                .select_related("household_snapshot", "currency", "delivery_type", "financial_service_provider")
+                .order_by("unicef_id")
+            )
+            for payment in qs.iterator(chunk_size=self.batch_size):
+                self._add_payment_row(payment)
 
     def _payment_row(self, payment: "Payment") -> list:
         # Blank the amounts before the row reaches the sheet: reading them back out of openpyxl
@@ -65,12 +71,12 @@ def _row_amount(raw_amount: object, payment_id: str) -> Decimal | None:
     return amount or None
 
 
-def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]) -> dict[str, Decimal]:
+def parse_top_up_amount_file(source_payment_plans: list["PaymentPlan"], file: IO[bytes]) -> dict[str, Decimal]:
     """Read a filled-in Top-Up amount template into ``{payment unicef_id: amount}``.
 
     Only funded rows are returned: a row left empty or set to zero means the beneficiary is not
     part of the Top-Up at all, which is how the operator narrows it down. Raises when the file is
-    unreadable, references payments outside the source plan's eligible set, carries a negative or
+    unreadable, references payments outside the source plans' eligible sets, carries a negative or
     non-numeric amount, or funds nobody.
     """
     worksheet = _open_amount_sheet(file)
@@ -85,7 +91,11 @@ def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]
 
     payment_id_index = headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID)
     amount_index = headers.index(XlsxPaymentPlanBaseService.COLUMN_ENTITLEMENT_QUANTITY)
-    eligible_ids = set(source_payment_plan.eligible_payments_for_child_plan().values_list("unicef_id", flat=True))
+    eligible_ids = {
+        unicef_id
+        for source_payment_plan in source_payment_plans
+        for unicef_id in source_payment_plan.eligible_payments_for_child_plan().values_list("unicef_id", flat=True)
+    }
 
     amounts: dict[str, Decimal] = {}
     # Tracked separately from ``amounts``, which a blank or zero row never reaches: checking there
@@ -97,7 +107,7 @@ def parse_top_up_amount_file(source_payment_plan: "PaymentPlan", file: IO[bytes]
             continue
         payment_id = str(raw_payment_id).strip()
         if payment_id not in eligible_ids:
-            raise ValidationError(f"Payment {payment_id} is not eligible for a Top-Up of this Payment Plan.")
+            raise ValidationError(f"Payment {payment_id} is not eligible for a Top-Up of this Payment Plan Group.")
         if payment_id in seen_payment_ids:
             raise ValidationError(f"Payment {payment_id} appears more than once in the amount file.")
         seen_payment_ids.add(payment_id)

@@ -14,7 +14,7 @@ from extras.test_utils.factories import (
     ProgramCycleFactory,
 )
 from hope.contrib.vision.choices import VisionStatus
-from hope.models import PaymentPlan, PaymentPlanGroup
+from hope.models import FileTemp, FinancialServiceProvider, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -183,6 +183,41 @@ def test_group_send_includes_follow_up_with_historical_vision_state(
     assert vision_enabled_sendable_follow_up_with_historical_vision_state.pk in sendable_plan_ids
 
 
+@pytest.fixture
+def sendable_plan_with_xlsx_fsp(cycle, payment_plan_group):
+    payment_plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=payment_plan_group,
+        status=PaymentPlan.Status.ACCEPTED,
+        financial_service_provider=FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        ),
+    )
+    PaymentPlanSplitFactory(payment_plan=payment_plan, sent_to_payment_gateway=False)
+    return payment_plan
+
+
+@pytest.fixture
+def payment_gateway_group_with_xlsx_fsp_plan(payment_plan_group, sendable_plan_with_xlsx_fsp):
+    payment_plan_group.use_payment_gateway = True
+    payment_plan_group.save(update_fields=["use_payment_gateway"])
+    return payment_plan_group
+
+
+def test_group_send_excludes_xlsx_fsp_plans_when_group_does_not_use_payment_gateway(
+    payment_plan_group, sendable_plan_with_xlsx_fsp
+) -> None:
+    assert list(payment_plan_group.sendable_to_payment_gateway_plans()) == []
+
+
+def test_group_send_includes_xlsx_fsp_plans_when_group_uses_payment_gateway(
+    payment_gateway_group_with_xlsx_fsp_plan, sendable_plan_with_xlsx_fsp
+) -> None:
+    assert list(payment_gateway_group_with_xlsx_fsp_plan.sendable_to_payment_gateway_plans()) == [
+        sendable_plan_with_xlsx_fsp
+    ]
+
+
 def test_default_group_created_on_cycle_creation(cycle):
     assert PaymentPlanGroup.objects.filter(cycle=cycle, name="Default Group").exists()
 
@@ -230,28 +265,30 @@ def test_delete_locks_cycle_groups_for_update(cycle, payment_plan_group):
     assert any("for update" in query["sql"].lower() for query in captured.captured_queries)
 
 
-def test_get_batch_export_file_link_returns_url_when_file_present(cycle, payment_plan_group):
-    file_temp = FileTempFactory(file=SimpleUploadedFile("batch-1.xlsx", b"data"))
-    PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=payment_plan_group,
-        export_tag=1,
-        export_file_delivery=file_temp,
-    )
+def test_export_file_link_returns_url_when_file_present(payment_plan_group):
+    file_temp = FileTempFactory(file=SimpleUploadedFile("payment-list.xlsx", b"data"))
+    payment_plan_group.export_file_delivery = file_temp
+    payment_plan_group.save(update_fields=["export_file_delivery"])
 
-    assert payment_plan_group.get_batch_export_file_link(1) == file_temp.file.url
+    assert payment_plan_group.export_file_link == file_temp.file.url
 
 
-def test_get_batch_export_file_link_returns_none_for_unknown_tag(cycle, payment_plan_group):
-    assert payment_plan_group.get_batch_export_file_link(99) is None
+def test_export_file_link_returns_none_without_file(payment_plan_group):
+    assert payment_plan_group.export_file_link is None
 
 
-def test_get_batch_export_file_link_returns_none_when_plan_has_no_file(cycle, payment_plan_group):
-    PaymentPlanFactory(
-        program_cycle=cycle,
-        payment_plan_group=payment_plan_group,
-        export_tag=1,
-        export_file_delivery=None,
-    )
+def test_remove_export_file_delivery_deletes_file_temp_and_clears_fk(payment_plan_group):
+    file_temp = FileTempFactory(file=SimpleUploadedFile("payment-list.xlsx", b"data"))
+    payment_plan_group.export_file_delivery = file_temp
+    payment_plan_group.save(update_fields=["export_file_delivery"])
 
-    assert payment_plan_group.get_batch_export_file_link(1) is None
+    payment_plan_group.remove_export_file_delivery()
+
+    assert payment_plan_group.export_file_delivery is None
+    assert not FileTemp.objects.filter(pk=file_temp.pk).exists()
+
+
+def test_remove_export_file_delivery_without_file_is_a_noop(payment_plan_group):
+    payment_plan_group.remove_export_file_delivery()
+
+    assert payment_plan_group.export_file_delivery is None

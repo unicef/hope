@@ -12,20 +12,21 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
     FollowUpInstructionFactory,
     PartnerFactory,
-    PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
-    PaymentPlanSplitFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
+from extras.test_utils.factories.payment import FinancialServiceProviderFactory
 from hope.apps.account.permissions import Permissions
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import PaymentPlan, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -434,11 +435,8 @@ def test_payment_plan_detail(
     assert payment_plan["bank_reconciliation_error"] == 0
     assert payment_plan["can_create_payment_verification_plan"] is False
     assert payment_plan["available_payment_records_count"] == 0
-    assert payment_plan["can_create_follow_up"] is False
     assert payment_plan["total_withdrawn_households_count"] == 0
     assert payment_plan["unsuccessful_payments_count"] == 0
-    assert payment_plan["can_send_to_payment_gateway"] is False
-    assert payment_plan["can_split"] is False
     assert payment_plan["total_households_count_with_valid_phone_no"] == 0
     purpose = payment_plan_detail_context["purpose"]
     assert payment_plan["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
@@ -482,147 +480,6 @@ def test_follow_ups_and_top_ups_return_correct_children(
     follow_up_ids = [p["id"] for p in data["follow_ups"]]
     assert top_up_ids == [str(top_up.id)]
     assert follow_up_ids == [str(follow_up.id)]
-
-
-def test_can_create_follow_up(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    payment_plan_detail_context["pp"].plan_type = PaymentPlan.PlanType.FOLLOW_UP
-    payment_plan_detail_context["pp"].save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan = response.json()
-    assert payment_plan["can_create_follow_up"] is False
-
-
-def test_can_create_top_up_returns_true_when_has_delivered_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save(update_fields=["status"])
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-    PaymentFactory(parent=pp, status=Payment.STATUS_ERROR)
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is True
-
-
-def test_can_create_top_up_returns_false_when_no_delivered_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is False
-
-
-def test_can_create_top_up_returns_false_when_only_failed_payments(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    PaymentFactory(parent=payment_plan_detail_context["pp"], status=Payment.STATUS_ERROR)
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is False
-
-
-def test_can_create_top_up_returns_false_when_plan_is_top_up(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.plan_type = PaymentPlan.PlanType.TOP_UP
-    pp.save()
-    PaymentFactory(parent=pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_create_top_up"] is False
-
-
-def test_get_can_split(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    PaymentPlanSplitFactory(payment_plan=payment_plan_detail_context["pp"], sent_to_payment_gateway=True)
-    payment_plan_detail_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_detail_context["pp"].save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan = response.json()
-    assert payment_plan["can_split"] is False
-
-
-def test_get_can_split_returns_false_when_instruction_managed(
-    payment_plan_detail_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_detail_context["user"],
-        [Permissions.PM_VIEW_DETAILS],
-        payment_plan_detail_context["business_area"],
-        payment_plan_detail_context["program_active"],
-    )
-    instruction = FollowUpInstructionFactory(
-        program=payment_plan_detail_context["program_active"],
-        business_area=payment_plan_detail_context["business_area"],
-    )
-    pp = payment_plan_detail_context["pp"]
-    pp.follow_up_instruction = instruction
-    pp.status = PaymentPlan.Status.ACCEPTED
-    pp.save()
-
-    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["can_split"] is False
 
 
 def test_filter_by_status(payment_plan_filter_context: dict[str, Any]) -> None:
@@ -799,19 +656,25 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
         name="PP_abc",
         business_area=payment_plan_filter_context["business_area"],
         program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=payment_plan_filter_context["cycle"],
+            dispersion_start_date=date.fromisoformat("2022-02-24"),
+            dispersion_end_date=date.fromisoformat("2022-03-03"),
+        ),
         status=PaymentPlan.Status.LOCKED_FSP,
         created_by=payment_plan_filter_context["user"],
-        dispersion_start_date="2022-02-24",
-        dispersion_end_date="2022-03-03",
     )
     PaymentPlanFactory(
         name="PP_xyz",
         business_area=payment_plan_filter_context["business_area"],
         program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=PaymentPlanGroupFactory(
+            cycle=payment_plan_filter_context["cycle"],
+            dispersion_start_date=date.fromisoformat("2022-01-01"),
+            dispersion_end_date=date.fromisoformat("2022-01-17"),
+        ),
         status=PaymentPlan.Status.LOCKED_FSP,
         created_by=payment_plan_filter_context["user"],
-        dispersion_start_date="2022-01-01",
-        dispersion_end_date="2022-01-17",
     )
     response = payment_plan_filter_context["client"].get(
         payment_plan_filter_context["list_url"],
@@ -830,6 +693,31 @@ def test_filter_by_dispersion_date(payment_plan_filter_context: dict[str, Any]) 
     response_data = response.json()["results"]
     assert len(response_data) == 1
     assert response_data[0]["name"] == "PP_xyz"
+
+
+def test_filter_by_dispersion_date_reads_instruction_dates(payment_plan_filter_context: dict[str, Any]) -> None:
+    PaymentPlanFactory(
+        name="PP_instruction_child",
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        follow_up_instruction=FollowUpInstructionFactory(
+            program=payment_plan_filter_context["cycle"].program,
+            dispersion_start_date=date(2022, 2, 24),
+            dispersion_end_date=date(2022, 3, 3),
+        ),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"start_date": "2022-02-23", "end_date": "2022-03-04"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert [plan["name"] for plan in response.json()["results"]] == ["PP_instruction_child"]
+    assert response.json()["results"][0]["dispersion_start_date"] == "2022-02-24"
 
 
 def test_filter_by_plan_type_follow_up(payment_plan_filter_context: dict[str, Any]) -> None:
@@ -953,3 +841,137 @@ def test_filter_by_payment_plan_group(
     returned_ids = {r["id"] for r in results}
     assert str(payment_plan_filter_context["pp"].id) in returned_ids
     assert str(payment_plan_filter_context["pp_finished"].id) in returned_ids
+
+
+@pytest.fixture
+def target_population_in_group(payment_plan_filter_context: dict[str, Any]) -> PaymentPlan:
+    return PaymentPlanFactory(
+        business_area=payment_plan_filter_context["business_area"],
+        program_cycle=payment_plan_filter_context["cycle"],
+        payment_plan_group=payment_plan_filter_context["pp"].payment_plan_group,
+        status=PaymentPlan.Status.TP_OPEN,
+        created_by=payment_plan_filter_context["user"],
+    )
+
+
+def test_list_leaves_out_target_populations_without_group_filter(
+    payment_plan_filter_context: dict[str, Any], target_population_in_group: PaymentPlan
+) -> None:
+    response = payment_plan_filter_context["client"].get(payment_plan_filter_context["list_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert str(target_population_in_group.id) not in {r["id"] for r in response.json()["results"]}
+
+
+def test_list_filtered_by_group_includes_its_target_populations(
+    payment_plan_filter_context: dict[str, Any], target_population_in_group: PaymentPlan
+) -> None:
+    response = payment_plan_filter_context["client"].get(
+        payment_plan_filter_context["list_url"],
+        {"payment_plan_group": str(payment_plan_filter_context["pp"].payment_plan_group_id)},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert {r["id"] for r in response.json()["results"]} == {
+        str(payment_plan_filter_context["pp"].id),
+        str(payment_plan_filter_context["pp_finished"].id),
+        str(target_population_in_group.id),
+    }
+
+
+@pytest.fixture
+def instruction_child_with_fsp(payment_plan_list_context: dict[str, Any]) -> PaymentPlan:
+    program = payment_plan_list_context["program_active"]
+    return PaymentPlanFactory(
+        business_area=payment_plan_list_context["business_area"],
+        program_cycle=program.cycles.first(),
+        follow_up_instruction=FollowUpInstructionFactory(program=program),
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.OPEN,
+        financial_service_provider=FinancialServiceProviderFactory(name="Instruction FSP"),
+    )
+
+
+def test_list_filtered_by_fsp_returns_follow_up_instruction_child(
+    payment_plan_list_context: dict[str, Any],
+    instruction_child_with_fsp: PaymentPlan,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_list_context["user"],
+        [Permissions.PM_VIEW_LIST],
+        payment_plan_list_context["business_area"],
+        payment_plan_list_context["program_active"],
+    )
+
+    response = payment_plan_list_context["client"].get(
+        payment_plan_list_context["pp_list_url"], {"fsp": "Instruction FSP"}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()["results"]
+    assert [plan["id"] for plan in results] == [str(instruction_child_with_fsp.id)]
+    assert results[0]["payment_plan_group"] is None
+
+
+@pytest.fixture
+def instruction_child_with_approval(payment_plan_detail_context: dict[str, Any]) -> PaymentPlan:
+    program = payment_plan_detail_context["program_active"]
+    instruction = FollowUpInstructionFactory(program=program)
+    plan = PaymentPlanFactory(
+        business_area=payment_plan_detail_context["business_area"],
+        program_cycle=program.cycles.first(),
+        follow_up_instruction=instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.IN_AUTHORIZATION,
+    )
+    ApprovalFactory(
+        approval_process=ApprovalProcessFactory(follow_up_instruction=instruction),
+        comment="approved for the instruction",
+    )
+    return plan
+
+
+def test_payment_plan_detail_returns_approval_process_of_instruction_child(
+    payment_plan_detail_context: dict[str, Any],
+    instruction_child_with_approval: PaymentPlan,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+    url = reverse(
+        "api:payments:payment-plans-detail",
+        kwargs={
+            "business_area_slug": payment_plan_detail_context["business_area"].slug,
+            "program_code": payment_plan_detail_context["program_active"].code,
+            "pk": str(instruction_child_with_approval.id),
+        },
+    )
+
+    response = payment_plan_detail_context["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    approval_process = response.json()["approval_process"]
+    assert len(approval_process) == 1
+    assert approval_process[0]["actions"]["approval"][0]["comment"] == "approved for the instruction"
+
+
+def test_payment_plan_detail_of_grouped_plan_has_no_approval_process_of_its_own(
+    payment_plan_detail_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_detail_context["user"],
+        [Permissions.PM_VIEW_DETAILS],
+        payment_plan_detail_context["business_area"],
+        payment_plan_detail_context["program_active"],
+    )
+
+    response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["approval_process"] == []

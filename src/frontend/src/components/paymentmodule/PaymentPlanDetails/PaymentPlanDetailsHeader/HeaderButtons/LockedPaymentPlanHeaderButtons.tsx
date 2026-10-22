@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '@core/LoadingButton';
-import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -11,21 +10,16 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
-import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
-  permissions: string[];
-  canAbort: boolean;
 }
 
 export function LockedPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
-  permissions,
-  canAbort,
 }: LockedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -41,7 +35,7 @@ export function LockedPaymentPlanHeaderButtons({
         id: paymentPlan.id,
       }),
     onSuccess: async () => {
-      showMessage(t('Payment Plan has been unlocked.'));
+      showMessage(t('Payment Plan Component has been unlocked.'));
       await queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
@@ -83,16 +77,6 @@ export function LockedPaymentPlanHeaderButtons({
           >
             {t('Unlock')}
           </LoadingButton>
-        </Box>
-      )}
-      <LockFspPaymentPlan paymentPlan={paymentPlan} permissions={permissions} />
-      {canAbort && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
-          <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
     </Box>

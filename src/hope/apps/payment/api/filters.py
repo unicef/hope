@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 from django.db.models import Case, IntegerField, Q, QuerySet, Value, When
@@ -26,9 +27,8 @@ class PaymentPlanFilter(FilterSet):
     program = django_filters.CharFilter(method="filter_by_program", help_text="Filter by program code")
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
     payment_plan_group = django_filters.UUIDFilter(field_name="payment_plan_group__id")
-    export_tag = django_filters.NumberFilter(field_name="export_tag")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
-    fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
+    fsp = django_filters.CharFilter(method="filter_by_fsp")
     delivery_mechanism = django_filters.ModelMultipleChoiceFilter(
         field_name="delivery_mechanism__code",
         queryset=DeliveryMechanism.objects.all(),
@@ -46,8 +46,8 @@ class PaymentPlanFilter(FilterSet):
     total_entitled_quantity_usd_to = django_filters.NumberFilter(
         field_name="total_entitled_quantity_usd", lookup_expr="lte"
     )
-    start_date = django_filters.DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
-    end_date = django_filters.DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    start_date = django_filters.DateFilter(method="filter_by_dispersion_date", lookup_expr="gte")
+    end_date = django_filters.DateFilter(method="filter_by_dispersion_date", lookup_expr="lte")
 
     class Meta:
         model = PaymentPlan
@@ -63,6 +63,18 @@ class PaymentPlanFilter(FilterSet):
     def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_cycle_id=value)
 
+    def filter_by_fsp(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(
+            Q(payment_plan_group__financial_service_provider__name=value)
+            | Q(follow_up_instruction__financial_service_provider__name=value)
+        )
+
+    def filter_by_dispersion_date(self, qs: QuerySet, name: str, value: date) -> QuerySet:
+        lookup = {"start_date": "dispersion_start_date__gte", "end_date": "dispersion_end_date__lte"}[name]
+        return qs.filter(
+            Q(**{f"payment_plan_group__{lookup}": value}) | Q(**{f"follow_up_instruction__{lookup}": value})
+        )
+
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(
             Q(id__icontains=value)
@@ -70,6 +82,14 @@ class PaymentPlanFilter(FilterSet):
             | Q(name__icontains=value)
             | Q(program_cycle__title__icontains=value)
         )
+
+
+class PaymentPlanListFilter(PaymentPlanFilter):
+    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
+        # A group's page lists every plan in it; elsewhere target populations and drafts stay in Targeting.
+        if not self.form.cleaned_data.get("payment_plan_group"):
+            queryset = queryset.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return super().filter_queryset(queryset)
 
 
 class TargetPopulationFilter(PaymentPlanFilter):
@@ -224,18 +244,21 @@ class PaymentOfficeSearchFilter(OfficeSearchFilterMixin, FilterSet):
 class PaymentPlanGroupFilter(FilterSet):
     cycle = django_filters.UUIDFilter(field_name="cycle__id")
     search = django_filters.CharFilter(method="search_filter")
+    status = django_filters.MultipleChoiceFilter(choices=PaymentPlanGroup.Status.choices)
+    plan_type = django_filters.ChoiceFilter(choices=PaymentPlan.PlanType.choices)
     ordering = OrderingFilter(
         fields=(
             ("unicef_id", "unicef_id"),
             ("name", "name"),
             ("created_at", "created_at"),
             ("cycle__title", "cycle"),
+            ("status", "status"),
         )
     )
 
     class Meta:
         model = PaymentPlanGroup
-        fields = ["cycle"]
+        fields = ["cycle", "status", "plan_type"]
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(Q(unicef_id__icontains=value) | Q(name__istartswith=value))

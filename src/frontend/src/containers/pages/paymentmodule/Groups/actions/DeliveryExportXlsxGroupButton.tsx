@@ -3,10 +3,7 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import type { PaymentPlanGroupDetail } from '../types';
-import {
-  exportablePlanTypeOptions,
-  isGroupBackgroundActionBusy,
-} from '../utils';
+import { isGroupBackgroundActionBusy } from '../utils';
 import { GroupExportXlsxDialog } from './GroupExportXlsxDialog';
 
 interface DeliveryExportXlsxGroupButtonProps {
@@ -23,17 +20,15 @@ export function DeliveryExportXlsxGroupButton({
     !hasPermissions(PERMISSIONS.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX, permissions)
   )
     return null;
-  const planTypeOptions = exportablePlanTypeOptions(group, t);
-
-  if (group && planTypeOptions.length === 0) return null;
+  if (group && !group.canExport && !group.canRegenerateExport) return null;
+  const label = group?.canRegenerateExport ? t('Re-export') : t('Export');
 
   return (
     <GroupExportXlsxDialog
       groupId={group?.id ?? ''}
-      planTypeOptions={planTypeOptions}
       showTemplateChoice={false}
-      buttonLabel={t('Export')}
-      dialogTitle={t('Export')}
+      buttonLabel={label}
+      dialogTitle={label}
       buttonVariant="contained"
       disabled={!group || isGroupBackgroundActionBusy(group)}
       dataCySuffix="delivery-export-xlsx-group"

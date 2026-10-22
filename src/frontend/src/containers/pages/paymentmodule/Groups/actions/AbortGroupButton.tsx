@@ -1,0 +1,148 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
+import { showApiErrorMessages } from '@utils/utils';
+import { Field, Form, Formik } from 'formik';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
+import { PERMISSIONS } from 'src/config/permissions';
+import { useProgramContext } from '../../../../../programContext';
+import type { PaymentPlanGroupDetail } from '../types';
+
+interface AbortGroupButtonProps {
+  group: PaymentPlanGroupDetail;
+}
+
+export function AbortGroupButton({
+  group,
+}: AbortGroupButtonProps): ReactElement {
+  const { t } = useTranslation();
+  const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { mutate: abort, isPending } = useMutation({
+    mutationFn: (abortComment: string) =>
+      RestService.restBusinessAreasProgramsPaymentPlanGroupsAbortCreate({
+        businessAreaSlug: businessArea,
+        programCode: programId,
+        id: group.id,
+        requestBody: { abortComment },
+      }),
+    onSuccess: async () => {
+      showMessage(t('Payment Plan has been aborted.'));
+      setDialogOpen(false);
+      await Promise.all(
+        [
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
+          RestService.restBusinessAreasProgramsPaymentPlanGroupsList,
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ].map((fn) =>
+          queryClient.invalidateQueries({ queryKey: restQueryKey(fn) }),
+        ),
+      );
+    },
+    onError: (error) => showApiErrorMessages(error, showMessage),
+  });
+
+  const validationSchema = Yup.object().shape({
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(255, 'Too long')
+      .required('Abort Reason is required'),
+  });
+
+  return (
+    <Formik
+      initialValues={{ comment: '' }}
+      onSubmit={(values, { resetForm }) => {
+        abort(values.comment);
+        resetForm({});
+      }}
+      validationSchema={validationSchema}
+    >
+      {({ submitForm }) => (
+        <>
+          {dialogOpen && <AutoSubmitFormOnEnter />}
+          <Box sx={{ p: 2 }}>
+            <Button
+              color="secondary"
+              variant="outlined"
+              onClick={() => setDialogOpen(true)}
+              data-cy="button-abort"
+              disabled={!isActiveProgram}
+              data-perm={PERMISSIONS.PM_ABORT}
+            >
+              {t('Abort')}
+            </Button>
+          </Box>
+          <Dialog
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
+          >
+            <DialogTitleWrapper>
+              <DialogTitle>{t('Abort Payment Plan')}</DialogTitle>
+            </DialogTitleWrapper>
+            <DialogContent>
+              <DialogContainer>
+                <Box sx={{ p: 5 }}>
+                  {t('Are you sure you want to abort this Payment Plan?')}
+                </Box>
+                <Form>
+                  <Field
+                    name="comment"
+                    multiline
+                    fullWidth
+                    variant="filled"
+                    label={t('Abort Reason')}
+                    component={FormikTextField}
+                    required
+                  />
+                </Form>
+              </DialogContainer>
+            </DialogContent>
+            <DialogFooter>
+              <DialogActions>
+                <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+                <LoadingButton
+                  loading={isPending}
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  onClick={submitForm}
+                  data-cy="button-submit-abort"
+                  data-perm={PERMISSIONS.PM_ABORT}
+                >
+                  {t('Abort')}
+                </LoadingButton>
+              </DialogActions>
+            </DialogFooter>
+          </Dialog>
+        </>
+      )}
+    </Formik>
+  );
+}

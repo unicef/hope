@@ -28,6 +28,8 @@ class FollowUpInstructionAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "business_area",
         "program",
         "created_by",
+        "financial_service_provider",
+        "currency",
         "status",
     )
 

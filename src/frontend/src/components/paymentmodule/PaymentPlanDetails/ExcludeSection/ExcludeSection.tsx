@@ -120,7 +120,9 @@ function ExcludeSection({
         ? t(
             'Another background action on this Payment Plan failed and must be resolved first',
           )
-        : t('Another background action is currently running on this Payment Plan');
+        : t(
+            'Another background action is currently running on this Payment Plan',
+          );
     }
     return '';
   };
@@ -339,9 +341,7 @@ function ExcludeSection({
 
   const renderInputAndApply = (): ReactElement => {
     const applyDisabled =
-      !hasExcludePermission ||
-      !hasOpenOrLockedStatus ||
-      !canRunExclusion;
+      !hasExcludePermission || !hasOpenOrLockedStatus || !canRunExclusion;
 
     if (isEdit || numberOfExcluded === 0) {
       return (

@@ -27,7 +27,7 @@ def with_payment_related_data(queryset: QuerySet[Payment]) -> QuerySet[Payment]:
             "program__business_area",
             "parent__program_cycle__program__data_collecting_type",
             "parent__delivery_mechanism",
-            "parent__financial_service_provider",
+            "parent__payment_plan_group__financial_service_provider",
             "parent__payment_plan_group",
         )
         .prefetch_related(

@@ -171,6 +171,7 @@ class VisionService:
             payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
                 input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
                 user=automatic_actor,
+                as_manager=True,
             )
             log_create(
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

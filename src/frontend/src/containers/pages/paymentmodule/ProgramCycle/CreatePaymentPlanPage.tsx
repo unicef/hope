@@ -12,7 +12,6 @@ import type { PaginatedTargetPopulationListList } from '@restgenerated/models/Pa
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
-import { format, parseISO } from 'date-fns';
 import { Form, Formik } from 'formik';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,47 +85,15 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   const validationSchema = Yup.object().shape({
     paymentPlanId: Yup.string().required(t('Target Population is required')),
-    currency: Yup.string().nullable().required(t('Currency is required')),
-    dispersionStartDate: Yup.date().required(
-      t('Dispersion Start Date is required'),
-    ),
-    dispersionEndDate: Yup.date()
-      .required(t('Dispersion End Date is required'))
-      .min(new Date(), t('Dispersion End Date cannot be in the past'))
-      .when(
-        'dispersionStartDate',
-        (dispersionStartDate: any, schema: Yup.DateSchema) =>
-          dispersionStartDate && typeof dispersionStartDate === 'string'
-            ? schema.min(
-                parseISO(dispersionStartDate),
-                `${t('Dispersion End Date has to be greater than')} ${format(parseISO(dispersionStartDate), 'yyyy-MM-dd')}`,
-              )
-            : schema,
-      ),
   });
 
   const initialValues = {
     paymentPlanId: '',
-    currency: null,
-    dispersionStartDate: null,
-    dispersionEndDate: null,
   };
 
   const handleSubmit = async (values: typeof initialValues): Promise<void> => {
     try {
-      const dispersionStartDate = values.dispersionStartDate
-        ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
-        : null;
-      const dispersionEndDate = values.dispersionEndDate
-        ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
-        : null;
-
-      const requestBody = {
-        targetPopulationId: values.paymentPlanId,
-        dispersionStartDate,
-        dispersionEndDate,
-        currency: values.currency,
-      };
+      const requestBody = { targetPopulationId: values.paymentPlanId };
 
       const res = await createPaymentPlan({
         businessAreaSlug: businessArea,
@@ -134,7 +101,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         requestBody,
       });
 
-      showMessage(t('Payment Plan Created'));
+      showMessage(t('Payment Plan Component Created'));
       navigate(`../${res.id}`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
@@ -161,7 +128,13 @@ export const CreatePaymentPlanPage = (): ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters
+            paymentPlanGroupId={
+              allTargetPopulationsData.results.find(
+                (tp) => tp.id === values.paymentPlanId,
+              )?.paymentPlanGroup?.id
+            }
+          />
         </Form>
       )}
     </Formik>

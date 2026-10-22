@@ -61,8 +61,8 @@ def send_payment_plan_to_vision_async_task(payment_plan: PaymentPlan, user_id: s
 def notify_payment_plan_status_to_vision_async_task_action(job: AsyncJob) -> None:
     payment_plan = PaymentPlan.objects.select_related(
         "business_area",
-        "currency",
-        "financial_service_provider",
+        "payment_plan_group__currency",
+        "payment_plan_group__financial_service_provider",
     ).get(pk=job.config["payment_plan_id"])
     VisionAPI().notify_payment_plan_status(payment_plan, job.config["vision_status"])
 

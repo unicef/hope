@@ -9,7 +9,11 @@ import pytest
 
 from extras.test_utils.factories.account import PartnerFactory, UserFactory
 from extras.test_utils.factories.core import BusinessAreaFactory
-from extras.test_utils.factories.payment import PaymentPlanFactory, PaymentPlanGroupFactory
+from extras.test_utils.factories.payment import (
+    FollowUpInstructionFactory,
+    PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+)
 from extras.test_utils.factories.program import ProgramFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.core.timezones import format_human_datetime
@@ -1118,3 +1122,49 @@ def test_notification_without_permission_recipients_notifies_action_user(
     assert len(payment_notification.emails) == 1
     assert payment_notification.emails[0].recipients == [action_user.email]
     assert payment_notification.emails[0].ccs == []
+
+
+def test_group_notification_links_to_the_group_page(business_area: Any, program: Any) -> None:
+    creator = UserFactory()
+    payment_plan_group = PaymentPlanGroupFactory(cycle=program.cycles.first(), created_by=creator)
+
+    payment_notification = PaymentNotification(
+        payment_plan_group, PaymentNotification.ACTION_SEND_FOR_APPROVAL, UserFactory(), datetime.now(UTC)
+    )
+
+    body_variables = payment_notification._prepare_body_variables("Europe/Warsaw")
+    assert body_variables["payment_plan_url"].endswith(f"/payment-module/groups/{payment_plan_group.id}")
+    assert body_variables["payment_plan_id"] == payment_plan_group.unicef_id
+    assert body_variables["payment_plan_creator"] == creator.get_full_name()
+    assert body_variables["program_name"] == program.name
+
+
+@pytest.fixture
+def instruction_creator() -> Any:
+    return UserFactory()
+
+
+@pytest.fixture
+def notified_instruction(business_area: Any, program: Any, instruction_creator: Any) -> Any:
+    return FollowUpInstructionFactory(business_area=business_area, program=program, created_by=instruction_creator)
+
+
+@pytest.fixture
+def instruction_action_user() -> Any:
+    return UserFactory()
+
+
+def test_instruction_notification_links_to_the_instruction_page(
+    program: Any, notified_instruction: Any, instruction_creator: Any, instruction_action_user: Any
+) -> None:
+    payment_notification = PaymentNotification(
+        notified_instruction, PaymentNotification.ACTION_SEND_FOR_APPROVAL, instruction_action_user, datetime.now(UTC)
+    )
+
+    body_variables = payment_notification._prepare_body_variables("Europe/Warsaw")
+    assert body_variables["payment_plan_url"].endswith(
+        f"/payment-module/follow-up-instructions/{notified_instruction.id}"
+    )
+    assert body_variables["payment_plan_id"] == notified_instruction.unicef_id
+    assert body_variables["payment_plan_creator"] == instruction_creator.get_full_name()
+    assert body_variables["program_name"] == program.name

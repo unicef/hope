@@ -43,44 +43,42 @@ ENTITLEMENT_RULE_NAME = "Household Size Entitlement"
 ENTITLEMENT_RULE_DEFINITION = 'result.value = context["household"].size * 10'
 
 
-@pytest.fixture
-def finished_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    return PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.FINISHED,
+def _group_with_plan(
+    program_cycle: ProgramCycle, group_status: str, plan_status: str, **group_fields: Any
+) -> PaymentPlanGroup:
+    group = PaymentPlanGroupFactory(cycle=program_cycle, status=group_status, **group_fields)
+    PaymentPlanFactory(
+        business_area=program_cycle.program.business_area,
+        program_cycle=program_cycle,
+        payment_plan_group=group,
+        status=plan_status,
         financial_service_provider=FinancialServiceProviderFactory(),
         delivery_mechanism=DeliveryMechanismFactory(),
     )
+    return group
 
 
 @pytest.fixture
-def ready_for_closure_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    return PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.READY_FOR_CLOSURE,
-        financial_service_provider=FinancialServiceProviderFactory(),
-        delivery_mechanism=DeliveryMechanismFactory(),
-    )
+def finished_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
+    return _group_with_plan(program_cycle, PaymentPlanGroup.Status.FINISHED, PaymentPlan.Status.FINISHED)
 
 
 @pytest.fixture
-def closed_payment_plan(business_area: BusinessArea, create_super_user: Any) -> PaymentPlan:
-    program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
-    pp = PaymentPlanFactory(
-        business_area=business_area,
-        program_cycle=program.cycles.first(),
-        status=PaymentPlan.Status.CLOSED,
-        financial_service_provider=FinancialServiceProviderFactory(),
-        delivery_mechanism=DeliveryMechanismFactory(),
+def locked_group(program_cycle: ProgramCycle) -> PaymentPlanGroup:
+    return _group_with_plan(program_cycle, PaymentPlanGroup.Status.LOCKED, PaymentPlan.Status.LOCKED)
+
+
+@pytest.fixture
+def closed_group(program_cycle: ProgramCycle, create_super_user: Any) -> PaymentPlanGroup:
+    group = _group_with_plan(
+        program_cycle,
+        PaymentPlanGroup.Status.CLOSED,
+        PaymentPlan.Status.CLOSED,
+        closed_by=create_super_user,
+        status_date=timezone.now(),
     )
-    pp.closed_by = create_super_user
-    pp.save(update_fields=["closed_by"])
-    ApprovalProcessFactory(payment_plan=pp)
-    return pp
+    ApprovalProcessFactory(payment_plan_group=group)
+    return group
 
 
 @pytest.fixture
@@ -427,11 +425,12 @@ LIFECYCLE_PAYMENT_PLAN_NAME = "Lifecycle E2E Payment Plan"
 
 def _lifecycle_payment_plan(
     business_area: BusinessArea,
-    status: str,
+    group_status: str,
+    plan_status: str,
     payments_count: int = 3,
     collectors_count: int | None = None,
 ) -> PaymentPlan:
-    """Payment plan with an FSP, a delivery mechanism, USD and `payments_count` payments.
+    """Payment plan in a group with an FSP, a delivery mechanism, USD and `payments_count` payments.
 
     `collectors_count` makes payments share that many collectors, for split by collector.
     """
@@ -441,12 +440,16 @@ def _lifecycle_payment_plan(
     )
     fsp = FinancialServiceProviderFactory(name="Lifecycle E2E Provider")
     fsp.delivery_mechanisms.add(delivery_mechanism)
+    fsp.allowed_business_areas.add(business_area)
     currency = CurrencyFactory(code="USD", name="United States Dollar")
+    cycle = ProgramCycleFactory(program=program)
+    group = PaymentPlanGroupFactory(cycle=cycle, name="Lifecycle E2E Group", status=group_status)
     payment_plan = PaymentPlanFactory(
         name=LIFECYCLE_PAYMENT_PLAN_NAME,
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=cycle,
+        payment_plan_group=group,
         business_area=business_area,
-        status=status,
+        status=plan_status,
         plan_type=PaymentPlan.PlanType.REGULAR,
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
@@ -471,46 +474,70 @@ def _lifecycle_payment_plan(
             delivered_quantity_usd=None,
         )
         PaymentHouseholdSnapshotFactory(payment=payment, snapshot_data={})
-    if status in (PaymentPlan.Status.IN_APPROVAL, PaymentPlan.Status.IN_AUTHORIZATION):
-        ApprovalProcessFactory(payment_plan=payment_plan)
+    if group_status in (PaymentPlanGroup.Status.IN_APPROVAL, PaymentPlanGroup.Status.IN_AUTHORIZATION):
+        ApprovalProcessFactory(payment_plan_group=group)
     payment_plan.update_money_fields()
     return payment_plan
 
 
 @pytest.fixture
-def in_approval_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_APPROVAL)
+def in_approval_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    return _lifecycle_payment_plan(
+        business_area, PaymentPlanGroup.Status.IN_APPROVAL, PaymentPlan.Status.IN_APPROVAL
+    ).payment_plan_group
 
 
 @pytest.fixture
-def in_authorization_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.IN_AUTHORIZATION)
+def in_authorization_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    return _lifecycle_payment_plan(
+        business_area, PaymentPlanGroup.Status.IN_AUTHORIZATION, PaymentPlan.Status.IN_AUTHORIZATION
+    ).payment_plan_group
 
 
 @pytest.fixture
-def locked_fsp_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.LOCKED_FSP)
+def locked_lifecycle_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    return _lifecycle_payment_plan(
+        business_area, PaymentPlanGroup.Status.LOCKED, PaymentPlan.Status.LOCKED_FSP
+    ).payment_plan_group
 
 
 @pytest.fixture
-def accepted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=25)
+def accepted_lifecycle_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    return _lifecycle_payment_plan(
+        business_area, PaymentPlanGroup.Status.ACCEPTED, PaymentPlan.Status.ACCEPTED, payments_count=25
+    ).payment_plan_group
 
 
 @pytest.fixture
-def accepted_shared_collectors_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.ACCEPTED, payments_count=12, collectors_count=3)
+def accepted_shared_collectors_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    return _lifecycle_payment_plan(
+        business_area,
+        PaymentPlanGroup.Status.ACCEPTED,
+        PaymentPlan.Status.ACCEPTED,
+        payments_count=12,
+        collectors_count=3,
+    ).payment_plan_group
 
 
 @pytest.fixture
 def open_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    return _lifecycle_payment_plan(business_area, PaymentPlan.Status.OPEN)
+    return _lifecycle_payment_plan(business_area, PaymentPlanGroup.Status.OPEN, PaymentPlan.Status.OPEN)
 
 
 @pytest.fixture
-def aborted_targeted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
-    """ABORTED plan whose targeting matches the programme's 3 households, so Reactivate can rebuild it."""
-    payment_plan = _lifecycle_payment_plan(business_area, PaymentPlan.Status.TP_OPEN, payments_count=0)
+def open_lifecycle_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    """OPEN group whose plan is still in targeting, so its currency can still be changed."""
+    return _lifecycle_payment_plan(
+        business_area, PaymentPlanGroup.Status.OPEN, PaymentPlan.Status.TP_OPEN
+    ).payment_plan_group
+
+
+@pytest.fixture
+def aborted_targeted_group(business_area: BusinessArea) -> PaymentPlanGroup:
+    """ABORTED group whose plan's targeting matches the programme's 3 households, so Reactivate can rebuild it."""
+    payment_plan = _lifecycle_payment_plan(
+        business_area, PaymentPlanGroup.Status.OPEN, PaymentPlan.Status.TP_OPEN, payments_count=0
+    )
     rule = TargetingCriteriaRuleFactory(payment_plan=payment_plan)
     TargetingCriteriaRuleFilterFactory(targeting_criteria_rule=rule, comparison_method="RANGE", arguments=[1, 10])
     for size in (1, 3, 5):
@@ -520,4 +547,8 @@ def aborted_targeted_payment_plan(business_area: BusinessArea) -> PaymentPlan:
     payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
     payment_plan.abort_comment = "Aborted before the e2e run"
     payment_plan.save(update_fields=["status", "build_status", "abort_comment"])
-    return payment_plan
+    group = payment_plan.payment_plan_group
+    group.status = PaymentPlanGroup.Status.ABORTED
+    group.abort_comment = "Aborted before the e2e run"
+    group.save(update_fields=["status", "abort_comment"])
+    return group

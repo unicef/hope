@@ -1,4 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ExportInstructionSummaryPdfButton } from '@containers/pages/paymentmodule/FollowUpInstructions/actions/ExportInstructionSummaryPdfButton';
 import { ChildPaymentPlansTable } from '@containers/pages/paymentmodule/FollowUpInstructions/ChildPaymentPlansTable';
 import { FollowUpInstructionDetailsHeader } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionDetailsHeader';
 import { FollowUpInstructionSummary } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionSummary';
@@ -98,6 +100,20 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <FollowUpInstructionSummary instruction={instruction} />
+      <AcceptanceProcess
+        approvalProcess={instruction.approvalProcess}
+        closure={
+          instruction.status === 'CLOSED'
+            ? {
+                closedBy: instruction.closedBy,
+                closedDate: instruction.updatedAt,
+              }
+            : null
+        }
+        headerAction={
+          <ExportInstructionSummaryPdfButton instruction={instruction} />
+        }
+      />
       <ChildPaymentPlansTable paymentPlans={instruction.paymentPlans} />
     </Box>
   );

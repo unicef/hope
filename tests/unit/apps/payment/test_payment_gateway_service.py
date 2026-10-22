@@ -47,6 +47,7 @@ from hope.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanGroup,
     PaymentPlanSplit,
     PeriodicAsyncRetryJob,
 )
@@ -167,7 +168,7 @@ def uba_fsp():
 
 @pytest.fixture
 def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd):
-    return PaymentPlanFactory(
+    payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         created_by=user,
         financial_service_provider=pg_fsp,
@@ -176,6 +177,9 @@ def payment_plan(user, program_cycle, pg_fsp, delivery_mechanisms, currency_usd)
         exchange_rate=Decimal("2.0"),
         currency=currency_usd,
     )
+    payment_plan.payment_plan_group.status = PaymentPlanGroup.Status.ACCEPTED
+    payment_plan.payment_plan_group.save(update_fields=["status"])
+    return payment_plan
 
 
 @pytest.fixture
@@ -368,9 +372,9 @@ def payment_gateway_setup_with_unsent_pending_payment(payment_gateway_setup):
 
 @pytest.fixture
 def payment_gateway_setup_in_inactive_currency(payment_gateway_setup, currency_syp_deprecated):
-    """The plan and its payments priced in a currency deactivated after they were created."""
+    """The plan's group and its payments priced in a currency deactivated after they were created."""
     payment_plan = payment_gateway_setup["payment_plan"]
-    PaymentPlan.objects.filter(pk=payment_plan.pk).update(currency=currency_syp_deprecated)
+    PaymentPlanGroup.objects.filter(pk=payment_plan.payment_plan_group_id).update(currency=currency_syp_deprecated)
     Payment.objects.filter(parent=payment_plan).update(currency=currency_syp_deprecated)
     payment_plan.refresh_from_db()
     return payment_gateway_setup
@@ -654,6 +658,55 @@ def test_sync_records_ignores_unmatched_gateway_records(
     assert get_records_for_payment_instruction_mock.call_count == 2
     assert payment_1.status == Payment.STATUS_PENDING
     assert payment_2.status == Payment.STATUS_PENDING
+
+
+@pytest.fixture
+def sent_splits_with_xlsx_fsp(payment_gateway_setup: dict) -> dict:
+    fsp = payment_gateway_setup["fsp"]
+    fsp.communication_channel = FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+    fsp.save(update_fields=["communication_channel"])
+    PaymentPlanSplit.objects.filter(payment_plan=payment_gateway_setup["payment_plan"]).update(
+        sent_to_payment_gateway=True
+    )
+    return payment_gateway_setup
+
+
+@pytest.fixture
+def sent_splits_with_xlsx_fsp_in_payment_gateway_group(sent_splits_with_xlsx_fsp: dict) -> dict:
+    PaymentPlanGroup.objects.filter(pk=sent_splits_with_xlsx_fsp["payment_plan"].payment_plan_group_id).update(
+        use_payment_gateway=True
+    )
+    return sent_splits_with_xlsx_fsp
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction",
+    return_value=[],
+)
+def test_sync_records_syncs_xlsx_fsp_plan_of_group_using_payment_gateway(
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    sent_splits_with_xlsx_fsp_in_payment_gateway_group: dict,
+) -> None:
+    PaymentGatewayService().sync_records()
+
+    assert get_records_for_payment_instruction_mock.call_count == 2
+
+
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction",
+    return_value=[],
+)
+def test_sync_records_skips_xlsx_fsp_plan_of_group_not_using_payment_gateway(
+    get_records_for_payment_instruction_mock: Any,
+    get_exchange_rate_mock: Any,
+    sent_splits_with_xlsx_fsp: dict,
+) -> None:
+    PaymentGatewayService().sync_records()
+
+    assert get_records_for_payment_instruction_mock.call_count == 0
 
 
 def test_bulk_update_payments_uses_one_query_and_persists_signatures(
