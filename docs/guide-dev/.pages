@@ -10,6 +10,7 @@ nav:
   - child-payment-plans.md
   - account-attachments.md
   - population-recalculation.md
+  - collision-detection.md
   - contributing.md
 
 collapse: true
