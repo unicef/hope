@@ -7,7 +7,6 @@ from typing import IO, TYPE_CHECKING, Any, cast
 
 from dateutil.parser import parse
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -15,7 +14,6 @@ import openpyxl
 import pytz
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.core.timezones import to_utc_midnight
 from hope.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from hope.apps.payment.services.handle_total_cash_in_households import (
@@ -565,22 +563,12 @@ class XlsxPaymentPlanDeliveryImportService(XlsxImportBaseService):
         )
         old_status = payment.status
         payment.delivered_quantity = stored_quantity
-        provided_usd_amount = self._get_optional_cell_value(row, "delivered_quantity_usd")
-        if provided_usd_amount is not None and stored_quantity is not None:
-            try:
-                delivered_quantity_usd = normalize_currency_decimal(provided_usd_amount)
-            except ValidationError:
-                raise self.XlsxPaymentPlanDeliveryImportServiceError(
-                    f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}"
-                ) from None
-            payment.delivered_quantity_usd = delivered_quantity_usd
-        else:
-            payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=stored_quantity,
-                currency=self.payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate or 0),
-                currency_exchange_date=self.pp_currency_exchange_date,
-            )
+        payment.delivered_quantity_usd = get_quantity_in_usd(
+            amount=stored_quantity,
+            currency=self.payment_plan.currency,
+            exchange_rate=Decimal(exchange_rate or 0),
+            currency_exchange_date=self.pp_currency_exchange_date,
+        )
         payment.status = status
         if old_status != status:
             payment.status_date = timezone.now()

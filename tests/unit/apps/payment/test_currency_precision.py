@@ -15,7 +15,6 @@ from hope.apps.payment.api.serializers import PaymentListSerializer
 from hope.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_specific_households
 from hope.apps.payment.services.payment_gateway import PaymentPayloadSerializer
 from hope.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
-from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import XlsxPaymentPlanDeliveryImportService
 from hope.models import Household, Payment, PaymentPlan
 
 
@@ -207,44 +206,3 @@ def test_xlsx_unsupported_value_uses_string_fallback(nonmonetary_date):
 
     assert result == "2026-01-02"
     assert isinstance(result, str)
-
-
-def test_delivery_import_uses_fsp_provided_usd_amount(payment):
-    service = XlsxPaymentPlanDeliveryImportService(payment.parent, BytesIO())
-    service.xlsx_headers = ["delivered_quantity_usd"]
-    worksheet = openpyxl.Workbook().active
-    worksheet["A1"] = "delivered_quantity_usd"
-    worksheet["A2"] = "123.1234567891"
-
-    service._apply_reconciliation_values(payment, tuple(worksheet[2]), Decimal("100.00"), None)
-
-    assert payment.delivered_quantity == Decimal("100.00")
-    assert payment.delivered_quantity_usd == Decimal("123.1234567891")
-
-
-def test_delivery_import_rejects_invalid_fsp_usd_amount(payment):
-    service = XlsxPaymentPlanDeliveryImportService(payment.parent, BytesIO())
-    service.xlsx_headers = ["delivered_quantity_usd"]
-    worksheet = openpyxl.Workbook().active
-    worksheet["A1"] = "delivered_quantity_usd"
-    worksheet["A2"] = "-0.01"
-
-    with pytest.raises(
-        XlsxPaymentPlanDeliveryImportService.XlsxPaymentPlanDeliveryImportServiceError,
-        match=f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}",
-    ):
-        service._apply_reconciliation_values(payment, tuple(worksheet[2]), Decimal("100.00"), None)
-
-
-def test_delivery_import_failed_sentinel_ignores_fsp_usd_amount(payment):
-    service = XlsxPaymentPlanDeliveryImportService(payment.parent, BytesIO())
-    service.xlsx_headers = ["delivered_quantity_usd"]
-    worksheet = openpyxl.Workbook().active
-    worksheet["A1"] = "delivered_quantity_usd"
-    worksheet["A2"] = "123.1234567891"
-
-    service._apply_reconciliation_values(payment, tuple(worksheet[2]), Decimal("-1.00"), None)
-
-    assert payment.status == Payment.STATUS_ERROR
-    assert payment.delivered_quantity is None
-    assert payment.delivered_quantity_usd is None

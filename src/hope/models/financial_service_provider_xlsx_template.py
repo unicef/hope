@@ -83,7 +83,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity", _("Entitlement Quantity")),
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
-        ("delivered_quantity_usd", _("Delivered Quantity USD")),
         ("delivery_date", _("Delivery Date")),
         ("reference_id", _("Reference id")),
         ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
@@ -294,7 +293,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity": (payment, "entitlement_quantity"),
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
-            "delivered_quantity_usd": (payment, "delivered_quantity_usd"),
             "delivery_date": (payment, "delivery_date"),
             "reference_id": (payment, "transaction_reference_id"),
             "reason_for_unsuccessful_payment": (

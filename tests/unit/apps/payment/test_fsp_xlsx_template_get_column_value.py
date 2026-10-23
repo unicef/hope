@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from decimal import Decimal
 
 import pytest
 
@@ -216,20 +215,6 @@ def test_get_column_value_from_payment(
     )
 
     assert value == expected_value(payment, registration_token_document)
-
-
-def test_get_delivered_quantity_usd_from_payment(
-    payment_with_snapshot_and_document,
-    admin_areas_dict,
-):
-    payment = payment_with_snapshot_and_document
-    payment.delivered_quantity_usd = Decimal("12.1234567891")
-
-    value = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-        payment, "delivered_quantity_usd", admin_areas_dict, []
-    )
-
-    assert value == Decimal("12.1234567891")
 
 
 @pytest.mark.parametrize("column_name", DECLARED_EXPORT_COLUMNS)
