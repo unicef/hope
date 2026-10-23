@@ -23,7 +23,6 @@ class XlsxFollowUpInstructionBaseExportService(XlsxExportBaseService, ABC):
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",
-        "delivered_quantity_usd",
     }
 
     def __init__(self, instruction: FollowUpInstruction):

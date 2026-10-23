@@ -184,7 +184,6 @@ def delivery_template(fsp, delivery_mechanism):
             "entitlement_quantity",
             "entitlement_quantity_usd",
             "delivered_quantity",
-            "delivered_quantity_usd",
         ],
         core_fields=[],
         flex_fields=[],
@@ -269,13 +268,11 @@ def test_delivery_export_happy_path_aggregates_households(
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "delivered_quantity",
-        "delivered_quantity_usd",
     ]
     shared_household_id = instruction_payments[0].household.unicef_id
     assert rows[shared_household_id]["entitlement_quantity"] == "140.00"
     assert rows[shared_household_id]["entitlement_quantity_usd"] == "140.00"
     assert rows[shared_household_id]["delivered_quantity"] == "0.00"
-    assert rows[shared_household_id]["delivered_quantity_usd"] is None
 
 
 def test_delivery_export_includes_fsp_extra_field_from_later_child_plan(
@@ -382,28 +379,22 @@ def high_precision_follow_up_rows() -> tuple[dict[str, Any], dict[str, Any]]:
         {
             "household_id": "HH-01",
             "entitlement_quantity_usd": Decimal("1000000000000000000.0000000001"),
-            "delivered_quantity_usd": Decimal("1000000000000000000.0000000001"),
         },
         {
             "household_id": "HH-01",
             "entitlement_quantity_usd": Decimal("0.0000000001"),
-            "delivered_quantity_usd": Decimal("0.0000000001"),
         },
     )
 
 
 def test_merge_rows_preserves_full_precision_in_export(high_precision_follow_up_rows) -> None:
     service = object.__new__(_MinimalExportService)
-    service.headers = ["household_id", "entitlement_quantity_usd", "delivered_quantity_usd"]
+    service.headers = ["household_id", "entitlement_quantity_usd"]
 
     merged = service._merge_rows(*high_precision_follow_up_rows)
 
     assert (
         service.right_format_for_xlsx(merged["entitlement_quantity_usd"], "entitlement_quantity_usd")
-        == "1000000000000000000.0000000002"
-    )
-    assert (
-        service.right_format_for_xlsx(merged["delivered_quantity_usd"], "delivered_quantity_usd")
         == "1000000000000000000.0000000002"
     )
 
