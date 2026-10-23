@@ -8,10 +8,12 @@ if TYPE_CHECKING:
 
     from admin_extra_buttons.buttons import StandardButton
     from django.contrib.admin.options import ActionLocation
+    from django.core.paginator import Paginator
     from django.db.models.fields import Field
     from django.forms.fields import Field as FormField
     from django.http import HttpRequest, HttpResponse
 
+from admin_cursor_paginator.paginator import AdminCursorPaginator
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
@@ -22,6 +24,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, OneToOneRel, QuerySet
+from django.db.models.functions import Collate
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -496,8 +499,11 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
 
     Django turns `search_fields` into `UPPER(col) LIKE UPPER('%term%')` OR-ed together, which no
     index can serve; on `household_individual` that means walking 20M rows. unicef_ids are generated
-    uppercase by the `create_*_unicef_id` triggers, so upper-casing the term lets a plain
-    `startswith` hit the existing `..._like` (varchar_pattern_ops) index.
+    uppercase by the `create_*_unicef_id` triggers, so upper-casing the term lets a plain `startswith`
+    use the `unicef_id` index in collation "C" (the database collation gives `LIKE 'x%'` no index range).
+    That index serves the cursor paginator's ORDER BY only in "C" too, so a search on the model's own
+    unicef_id adds the `unicef_id_c` annotation for `get_paginator` to order and page by; any other
+    search keeps the admin's own paginator. A recognised id skips the other `search_fields`.
     """
 
     # unicef_id prefix a user may paste -> field to prefix-match on
@@ -511,5 +517,21 @@ class UnicefIdSearchMixin(admin.ModelAdmin):
         match = self.unicef_id_re.fullmatch(term)
         field = self.unicef_id_search_map.get(match[1]) if match else None
         if field:
-            return queryset.filter(**{f"{field}__startswith": term}), False
+            queryset = queryset.filter(**{f"{field}__startswith": term})
+            if field == "unicef_id":
+                # get_paginator orders and pages the cursor by this field
+                queryset = queryset.annotate(unicef_id_c=Collate("unicef_id", "C"))
+            return queryset, False
         return super().get_search_results(request, queryset, search_term)
+
+    def get_paginator(
+        self,
+        request: HttpRequest,
+        queryset: QuerySet,
+        per_page: int,
+        orphans: int = 0,
+        allow_empty_first_page: bool = True,
+    ) -> AdminCursorPaginator | Paginator:
+        if "unicef_id_c" in queryset.query.annotations:
+            return AdminCursorPaginator(request, queryset, per_page, "unicef_id_c")
+        return super().get_paginator(request, queryset, per_page, orphans, allow_empty_first_page)

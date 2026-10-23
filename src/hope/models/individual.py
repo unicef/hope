@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import IntegrityError, models
 from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
+from django.db.models.functions import Collate
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -628,6 +629,7 @@ class Individual(
             LongNameIndex(fields=["created_at"], name="household_individual_created_at_c3242865"),
             LongNameIndex(fields=["updated_at"], name="household_individual_updated_at_45b7c40d"),
             LongNameIndex(fields=["unicef_id"], name="household_individual_unicef_id_421e2ff2"),
+            models.Index(Collate("unicef_id", "C"), name="hi_unicef_id_c_idx"),
             LongNameIndex(fields=["full_name"], name="household_individual_full_name_8fa0162b"),
             LongNameIndex(fields=["given_name"], name="household_individual_given_name_1ebbded2"),
             LongNameIndex(fields=["middle_name"], name="household_individual_middle_name_1dfbf837"),
