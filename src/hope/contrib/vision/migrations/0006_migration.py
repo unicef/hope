@@ -10,6 +10,7 @@ def migrate_group_assignments(apps, schema_editor):
     group_assignments = (
         old_through.objects.using(database_alias)
         .filter(paymentplan__payment_plan_group__isnull=False)
+        .exclude(paymentplan__payment_plan_group__plan_type="FOLLOW_UP")
         .values_list("fundscommitmentheader_id", "paymentplan__payment_plan_group_id")
         .distinct()
     )

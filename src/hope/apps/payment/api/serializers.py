@@ -2130,7 +2130,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
 
     @extend_schema_field(FundsCommitmentSerializer(many=True))
     def get_funds_commitments(self, obj: PaymentPlanGroup) -> list[dict[str, Any]]:
-        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
+        headers = obj.funds_commitment_source_group.funds_commitment_headers.with_derived_fields().prefetch_related(
             Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
         )
         return [dict(FundsCommitmentSerializer(header).data) for header in headers]

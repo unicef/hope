@@ -1,6 +1,6 @@
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -288,9 +288,15 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
 
     @property
     def can_assign_funds_commitments(self) -> bool:
-        if self.status != self.Status.IN_REVIEW:
+        if self.status != self.Status.IN_REVIEW or self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
             return False
         return not self.vision_managed and self.payment_plans.exists()
+
+    @property
+    def funds_commitment_source_group(self) -> "PaymentPlanGroup":
+        if self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return cast("PaymentPlanGroup", self.source_group)
+        return self
 
     def plans_qualifying_for_linked_group(self, plan_type: "PaymentPlan.PlanType") -> list[PaymentPlan]:
         """Plans of this group that a linked Follow-Up / Top-Up / Amendment group would get a child plan for."""

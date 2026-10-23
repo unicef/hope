@@ -2387,7 +2387,7 @@ class PaymentPlanGroupViewSet(
         requested_numbers = set(serializer.validated_data["funds_commitment_numbers"])
         group = PaymentPlanGroup.objects.select_for_update().get(pk=self.get_object().pk)
         if not group.can_assign_funds_commitments:
-            raise ValidationError("Payment Plan Group must be in review and not managed by Vision")
+            raise ValidationError("Payment Plan Group must be in review, not managed by Vision, and not a Follow-Up")
         headers = list(FundsCommitmentHeader.objects.filter(funds_commitment_number__in=requested_numbers))
         if len(headers) != len(requested_numbers):
             raise ValidationError("One or more Funds Commitment Headers were not found")

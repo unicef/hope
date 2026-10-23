@@ -203,9 +203,14 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
       />
       {group && <VisionStatusSection group={group} />}
-      {group && (
-        <FundsCommitmentSection group={group} programCode={programId} />
-      )}
+      {group &&
+        [
+          PaymentPlanGroupStatusEnum.IN_REVIEW,
+          PaymentPlanGroupStatusEnum.ACCEPTED,
+          PaymentPlanGroupStatusEnum.FINISHED,
+        ].includes(group.status) && (
+          <FundsCommitmentSection group={group} programCode={programId} />
+        )}
       {group?.linkedGroups && (
         <LinkedGroupsTable linkedGroups={group.linkedGroups} />
       )}

@@ -661,10 +661,14 @@ class WesternUnionReportsService:
         )
 
         funds_commitments_str = ""
-        if payment_plan.payment_plan_group_id:
+        funds_commitment_group = payment_plan.payment_plan_group
+        if payment_plan.plan_type == PaymentPlan.PlanType.FOLLOW_UP and payment_plan.source_payment_plan_id:
+            funds_commitment_group = payment_plan.source_payment_plan.payment_plan_group
+        if funds_commitment_group:
+            funds_commitment_group = funds_commitment_group.funds_commitment_source_group
             funds_commitments_str = ", ".join(
                 f"{number}/{item}"
-                for number, item in payment_plan.payment_plan_group.funds_commitment_headers.values_list(
+                for number, item in funds_commitment_group.funds_commitment_headers.values_list(
                     "funds_commitment_number",
                     "funds_commitment_items__funds_commitment_item",
                 )
