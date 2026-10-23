@@ -3,6 +3,7 @@ import { CreateChildPaymentPlan } from '../../../CreateChildPaymentPlan';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
@@ -16,12 +17,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   isInstructionManaged = false,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       <>
         {paymentPlan.canCreateFollowUp && (
           <Box
@@ -69,6 +65,6 @@ export function AcceptedPaymentPlanHeaderButtons({
           </Box>
         )}
       </>
-    </Box>
+    </HeaderActions>
   );
 }

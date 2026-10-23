@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material';
+import { Button } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -8,6 +8,7 @@ import { removeItemById } from '../utils/helpers';
 import type { ReactElement } from 'react';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import type { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface NewAccountFieldArrayProps {
   values;
@@ -24,7 +25,7 @@ export function NewAccountFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <Grid container spacing={3}>
+    <ResponsiveGridContainer spacing={3}>
       <FieldArray
         name="individualDataUpdateFieldsAccounts"
         render={(arrayHelpers) => (
@@ -51,8 +52,8 @@ export function NewAccountFieldArray({
                 />
               );
             })}
-            <Grid size={8} />
-            <Grid size={12}>
+            <ResponsiveGrid size="twoThirds" />
+            <ResponsiveGrid size="full">
               <Button
                 color="primary"
                 onClick={() => {
@@ -65,10 +66,10 @@ export function NewAccountFieldArray({
               >
                 {t('Add Account')}
               </Button>
-            </Grid>
+            </ResponsiveGrid>
           </>
         )}
       />
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }

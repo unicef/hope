@@ -1,6 +1,7 @@
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import type { ReactElement } from 'react';
@@ -74,7 +75,7 @@ export const NaTicketsList = ({
         sx={{
           flex: 1,
           minHeight: 0,
-          maxHeight: { xs: '60vh', md: 'none' },
+          maxHeight: responsiveValue('60vh', 'none'),
           overflow: 'auto',
         }}
       >

@@ -9,6 +9,7 @@ import { AccountField } from '@components/grievances/AccountField';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import type { Account } from '@restgenerated/models/Account';
 import type { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 export interface EditAccountRowProps {
   values;
@@ -72,32 +73,36 @@ export function EditAccountRow({
     </>
   ) : (
     <Fragment key={account.id}>
-      <Grid size={4} key="type">
+      <ResponsiveGrid size="third" key="type">
         <LabelizedField label="type" value={String(account.name)} />
-      </Grid>
+      </ResponsiveGrid>
 
-      <Grid size={4}>
+      <ResponsiveGrid size="third">
         <LabelizedField label="Number" value={account.number} />
-      </Grid>
-      <Grid size={4}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third">
         <LabelizedField
           label="Financial Institution"
           value={financialInstitutionName}
         />
-      </Grid>
+      </ResponsiveGrid>
       {dataFields.map(({ key, value }) => {
         const displayValue = String(value);
         return (
-          <Grid size={4} key={key}>
+          <ResponsiveGrid size="third" key={key}>
             <LabelizedField label={key} value={displayValue} />
-          </Grid>
+          </ResponsiveGrid>
         );
       })}
-      <Grid size={11}></Grid>
-      <Grid size={1}>
+      <Grid size={responsiveValue(12, 11)}></Grid>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         <Box
           sx={{
             display: 'flex',
+            justifyContent: responsiveValue('flex-end', 'flex-start'),
             alignItems: 'center',
           }}
         >

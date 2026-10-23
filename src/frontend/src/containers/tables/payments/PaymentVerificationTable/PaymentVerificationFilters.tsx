@@ -4,7 +4,7 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import type { Choice } from '@restgenerated/models/Choice';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface PaymentVerificationFiltersProps {
   filter;
@@ -70,14 +71,13 @@ const PaymentVerificationFilters = ({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-start',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.search}
             data-cy="filter-search"
@@ -85,8 +85,8 @@ const PaymentVerificationFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
             fullWidth
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange(
@@ -106,8 +106,8 @@ const PaymentVerificationFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.serviceProvider}
             data-cy="filter-fsp"
@@ -117,8 +117,8 @@ const PaymentVerificationFilters = ({
               handleFilterChange('serviceProvider', e.target.value)
             }
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('deliveryTypes', e.target.value)
@@ -136,8 +136,8 @@ const PaymentVerificationFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             label="Start Date"
             fullWidth
@@ -145,8 +145,8 @@ const PaymentVerificationFilters = ({
             onChange={(date) => handleFilterChange('startDate', date)}
             value={filter.startDate}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             label="End Date"
             fullWidth
@@ -154,8 +154,8 @@ const PaymentVerificationFilters = ({
             onChange={(date) => handleFilterChange('endDate', date)}
             value={filter.endDate}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

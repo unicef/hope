@@ -7,6 +7,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -91,6 +92,7 @@ export function ReconciliationSummary({
               <Grid
                 container
                 spacing={0}
+                rowSpacing={responsiveValue(3, 0)}
                 sx={{
                   justifyContent: 'flex-start',
                 }}
@@ -102,7 +104,7 @@ export function ReconciliationSummary({
                     </FieldBorder>
                   );
                   return (
-                    <Grid size={2} key={label}>
+                    <ResponsiveGrid size="sixth" mobileSize="half" key={label}>
                       {label === t('Pending') ? (
                         <Tooltip
                           arrow
@@ -119,10 +121,10 @@ export function ReconciliationSummary({
                       ) : (
                         field
                       )}
-                    </Grid>
+                    </ResponsiveGrid>
                   );
                 })}
-                <Grid size={2}>
+                <ResponsiveGrid size="sixth">
                   <ChartContainer data-cy="chart-container">
                     <Pie
                       width={100}
@@ -147,7 +149,7 @@ export function ReconciliationSummary({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </ResponsiveGrid>
               </Grid>
             </Grid>
             <ReconciliationWrapUp>
@@ -155,26 +157,27 @@ export function ReconciliationSummary({
                 <Grid
                   container
                   spacing={0}
+                  rowSpacing={responsiveValue(3, 0)}
                   sx={{
                     justifyContent: 'flex-start',
                   }}
                 >
-                  <Grid size={2}>
+                  <ResponsiveGrid size="sixth" mobileSize="half">
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Number of payments')}
                         value={numberOfPayments}
                       />
                     </FieldBorder>
-                  </Grid>
-                  <Grid size={2}>
+                  </ResponsiveGrid>
+                  <ResponsiveGrid size="sixth" mobileSize="half">
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Reconciled')}
                         value={`${reconciled} (${reconciledInPercent}%)`}
                       />
                     </FieldBorder>
-                  </Grid>
+                  </ResponsiveGrid>
                 </Grid>
               </Grid>
             </ReconciliationWrapUp>

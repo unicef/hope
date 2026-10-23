@@ -1,5 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { responsiveGridSize } from 'src/responsive';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
@@ -110,7 +111,9 @@ export const TargetPopulationCore = ({
             }}
           >
             <Grid container>
-              <Grid size={6}>{targetPopulation?.excludedIds}</Grid>
+              <Grid size={responsiveGridSize('half')}>
+                {targetPopulation?.excludedIds}
+              </Grid>
             </Grid>
           </Box>
           <Box
@@ -119,7 +122,9 @@ export const TargetPopulationCore = ({
             }}
           >
             <Grid container>
-              <Grid size={6}>{targetPopulation?.exclusionReason}</Grid>
+              <Grid size={responsiveGridSize('half')}>
+                {targetPopulation?.exclusionReason}
+              </Grid>
             </Grid>
           </Box>
         </PaperContainer>

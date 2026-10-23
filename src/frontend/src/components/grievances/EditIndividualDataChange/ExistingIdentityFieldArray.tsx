@@ -1,9 +1,10 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
 import type { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EditIdentityRow } from './EditIdentityRow';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface ExistingIdentityFieldArrayProps {
   setFieldValue;
@@ -22,13 +23,13 @@ export function ExistingIdentityFieldArray({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
 
   return individual?.identities?.length > 0 ? (
-    <Grid container spacing={3}>
+    <ResponsiveGridContainer spacing={3}>
       <FieldArray
         name="individualDataUpdateIdentitiesToEdit"
         render={(arrayHelpers) => (
           <>
             {individual.identities.map((item) => (
-              <Grid size={12} key={item.id}>
+              <ResponsiveGrid size="full" key={item.id}>
                 <EditIdentityRow
                   setFieldValue={setFieldValue}
                   values={values}
@@ -37,12 +38,12 @@ export function ExistingIdentityFieldArray({
                   arrayHelpers={arrayHelpers}
                   addIndividualFieldsData={addIndividualFieldsData}
                 />
-              </Grid>
+              </ResponsiveGrid>
             ))}
           </>
         )}
       />
-    </Grid>
+    </ResponsiveGridContainer>
   ) : (
     isEditTicket && (
       <Box

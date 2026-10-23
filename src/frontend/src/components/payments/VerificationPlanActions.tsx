@@ -22,6 +22,8 @@ import { useEffect, useRef } from 'react';
 import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { showApiErrorMessages } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
+import { HeaderActions } from '@core/HeaderActions';
+import { responsiveValue } from 'src/responsive';
 
 const StyledLink = styled.a`
   text-decoration: none;
@@ -150,13 +152,7 @@ export function VerificationPlanActions({
 
   return (
     <Title>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-        }}
-      >
+      <HeaderActions spacing="none">
         {isPending && (
           <>
             <Box
@@ -193,17 +189,13 @@ export function VerificationPlanActions({
           </>
         )}
         {isActive && (
-          <Box
-            sx={{
-              display: 'flex',
-            }}
-          >
+          <>
             {verificationChannelXLSX && (
               <>
                 {canExport && (
                   <Box
                     sx={{
-                      p: 2,
+                      p: responsiveValue(0, 2),
                     }}
                   >
                     <LoadingButton
@@ -239,7 +231,7 @@ export function VerificationPlanActions({
                 {canDownload && (
                   <Box
                     sx={{
-                      p: 2,
+                      p: responsiveValue(0, 2),
                     }}
                   >
                     <StyledLink
@@ -272,7 +264,7 @@ export function VerificationPlanActions({
                   <Box
                     data-cy="import-xlsx"
                     sx={{
-                      p: 2,
+                      p: responsiveValue(0, 2),
                     }}
                   >
                     <ImportXlsx
@@ -299,7 +291,7 @@ export function VerificationPlanActions({
                 {canMarkInvalid && (
                   <Box
                     sx={{
-                      p: 2,
+                      p: responsiveValue(0, 2),
                     }}
                   >
                     <LoadingButton
@@ -341,9 +333,9 @@ export function VerificationPlanActions({
                 )}
               </>
             )}
-          </Box>
+          </>
         )}
-      </Box>
+      </HeaderActions>
     </Title>
   );
 }
