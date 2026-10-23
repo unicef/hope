@@ -51,7 +51,6 @@ def population_finding() -> dict:
         "first": {"reference_pk": "rdi:3"},
         "second": {"reference_pk": "population:3"},
         "score": 12.0,
-        "status_code": 200,
     }
 
 
@@ -61,7 +60,6 @@ def batch_finding() -> dict:
         "first": {"reference_pk": "rdi:4"},
         "second": {"reference_pk": "rdi:5"},
         "score": 12.0,
-        "status_code": 200,
     }
 
 

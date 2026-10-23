@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.db.models import Q, QuerySet
 
@@ -9,18 +10,18 @@ from hope.apps.household.const import (
     UNIQUE_IN_BATCH,
 )
 from hope.apps.registration_data.api.deduplication_engine import (
+    BiographicHDEFinding,
+    BiometricHDEFinding,
     DeduplicationEngineAPI,
-    SimilarityPair,
 )
 from hope.models import (
+    BiographicDedupeSimilarityPair,
     BiometricDedupeSimilarityPair,
-    Individual,
     PendingIndividual,
     Program,
     RegistrationDataImport,
 )
 from hope.models.deduplication_engine_similarity_pair import IndividualIdField
-from hope.models.utils import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -34,42 +35,45 @@ PERSISTED_BIOMETRIC_FINDINGS_STATUS_CODES = (
 )
 
 
-class DeduplicationEngineService:
+def _hde_finding_kwargs(finding: dict) -> dict[str, Any] | None:
+    # Fields shared by biometric and biographic findings; None when the finding has no individual to store.
+    first = finding["first"].get("reference_pk") or None
+    second = finding["second"].get("reference_pk") or None
+    if not (first or second):
+        logger.warning("Dedup Engine Findings, finding with both reference_pks empty")
+        return None
+    return {
+        "score": finding["score"],
+        "first": str(first) if first else None,
+        "second": str(second) if second else None,
+    }
+
+
+class BiometricDeduplicationEngineService:
     class DeduplicationEngineServiceError(Exception):
         pass
 
     def __init__(self) -> None:
         self.api = DeduplicationEngineAPI()
 
-    def parse_findings(self, findings: list[dict]) -> list[SimilarityPair]:
-        similarity_pairs: list[SimilarityPair] = []
+    def parse_findings(self, findings: list[dict]) -> list[BiometricHDEFinding]:
+        hde_findings = []
         for finding in findings:
             status_code = str(finding["status_code"])
             if status_code not in PERSISTED_BIOMETRIC_FINDINGS_STATUS_CODES:
                 logger.debug(f"Dedup Engine Findings, skipping non-persisted status_code={status_code}")
                 continue
-            first = finding["first"].get("reference_pk") or None
-            second = finding["second"].get("reference_pk") or None
-            if not (first or second):
-                logger.warning("Dedup Engine Findings, finding with both reference_pks empty")
-                continue
-            similarity_pairs.append(
-                SimilarityPair(
-                    score=finding["score"],
-                    status_code=status_code,
-                    first=str(first) if first else None,
-                    second=str(second) if second else None,
-                )
-            )
-        return similarity_pairs
+            if (kwargs := _hde_finding_kwargs(finding)) is not None:
+                hde_findings.append(BiometricHDEFinding(**kwargs, status_code=status_code))
+        return hde_findings
 
     def store_biometric_similarity_pairs(
         self,
         program: Program,
-        similarity_pairs: list[SimilarityPair],
+        hde_findings: list[BiometricHDEFinding],
         id_field_name: IndividualIdField = "id",
     ) -> None:
-        BiometricDedupeSimilarityPair.bulk_add_pairs(program, similarity_pairs, id_field_name=id_field_name)
+        BiometricDedupeSimilarityPair.bulk_add_pairs(program, hde_findings, id_field_name=id_field_name)
 
     def store_rdi_deduplication_statistics(self, rdi: RegistrationDataImport) -> None:
         rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
@@ -130,44 +134,15 @@ class DeduplicationEngineService:
     def get_duplicates_for_rdi_against_batch(
         self, rdi: RegistrationDataImport
     ) -> QuerySet[BiometricDedupeSimilarityPair, BiometricDedupeSimilarityPair]:
-        rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
-        return BiometricDedupeSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
-            program=rdi.program,
-            similarity_score__gt=0,
-        ).distinct()
+        return BiometricDedupeSimilarityPair.objects.for_rdi_against_batch(rdi).filter(similarity_score__gt=0)
 
     def get_duplicates_for_rdi_against_population(
         self, rdi: RegistrationDataImport, rdi_merged: bool = False, exclude_not_valid: bool = True
     ) -> QuerySet[BiometricDedupeSimilarityPair, BiometricDedupeSimilarityPair]:
-        if rdi_merged:
-            rdi_individuals = Individual.objects.filter(registration_data_import=rdi).only("id")
-            other_pending_rdis_individuals = PendingIndividual.objects.filter(program=rdi.program)
-        else:
-            rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
-            other_pending_rdis_individuals = PendingIndividual.objects.filter(program=rdi.program).exclude(
-                id__in=rdi_individuals
-            )
-
-        qs = BiometricDedupeSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-            (Q(individual1__duplicate=False) | Q(individual1__isnull=True))
-            & (Q(individual2__duplicate=False) | Q(individual2__isnull=True)),
-            (Q(individual1__withdrawn=False) | Q(individual1__isnull=True))
-            & (Q(individual2__withdrawn=False) | Q(individual2__isnull=True)),
-            (
-                Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-                | Q(individual1__isnull=True)
-                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED)
-                | Q(individual2__isnull=True)
-            ),
-            program=rdi.program,
-        ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
-
+        pairs = BiometricDedupeSimilarityPair.objects.for_rdi_against_population(rdi, rdi_merged)
         if exclude_not_valid:
-            qs = qs.exclude(similarity_score=0)
-
-        return qs.distinct()
+            pairs = pairs.exclude(similarity_score=0)
+        return pairs
 
     def create_grievance_tickets_for_biometric_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
@@ -190,3 +165,25 @@ class DeduplicationEngineService:
 
     def get_rdi_biometric_findings(self, rdi_country_workspace_id: str) -> list[dict]:
         return self.api.get_rdi_biometric_findings(rdi_country_workspace_id)
+
+
+class BiographicDeduplicationEngineService:
+    def __init__(self) -> None:
+        self.api = DeduplicationEngineAPI()
+
+    def parse_findings(self, findings: list[dict]) -> list[BiographicHDEFinding]:
+        return [
+            BiographicHDEFinding(**kwargs, proximity_to_score=finding["proximity_to_score"])
+            for finding in findings
+            if (kwargs := _hde_finding_kwargs(finding)) is not None
+        ]
+
+    def store_biographic_similarity_pairs(
+        self,
+        program: Program,
+        hde_findings: list[BiographicHDEFinding],
+    ) -> None:
+        BiographicDedupeSimilarityPair.bulk_add_pairs(program, hde_findings, id_field_name="country_workspace_id")
+
+    def get_rdi_biographic_findings(self, rdi_country_workspace_id: str) -> list[dict]:
+        return self.api.get_rdi_biographic_findings(rdi_country_workspace_id)

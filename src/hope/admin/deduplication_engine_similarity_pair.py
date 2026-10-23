@@ -2,6 +2,7 @@ import logging
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
+from django.http import HttpRequest
 
 from hope.admin.utils import HOPEModelAdminBase
 from hope.models import BiographicDedupeSimilarityPair, BiometricDedupeSimilarityPair
@@ -25,3 +26,6 @@ class BiographicDeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
     list_filter = (("program", AutoCompleteFilter),)
     readonly_fields = ("program", "individual1", "individual2", "similarity_score", "proximity_to_score")
     search_fields = ("program__name", "individual1__unicef_id", "individual2__unicef_id")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
