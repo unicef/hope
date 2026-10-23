@@ -592,7 +592,7 @@ function Entitlement({
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${formatCurrencyCode(paymentPlan.currency, paymentPlan.currencyVisionCode)} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
+                {`${formatFigure(paymentPlan.totalEntitledQuantity)} ${formatCurrencyCode(paymentPlan.currency, paymentPlan.currencyVisionCode)} (${formatFigure(paymentPlan.totalEntitledQuantityUsd)} USD)`}
               </BigValue>
             </LabelizedField>
           </>

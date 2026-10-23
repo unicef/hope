@@ -26,6 +26,7 @@ import type { Filter } from '@utils/utils';
 import {
   programCycleStatusToColor,
   showApiErrorMessages,
+  formatFigure,
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
@@ -200,7 +201,7 @@ export const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {row.totalEntitledQuantityUsd ?? '-'}
+        {formatFigure(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
         <UniversalMoment>{row.startDate}</UniversalMoment>

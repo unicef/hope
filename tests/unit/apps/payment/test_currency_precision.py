@@ -114,6 +114,10 @@ def test_currency_api_rejects_invalid_amount(source):
     assert exc_info.value.get_codes() == ["invalid"]
 
 
+def test_currency_api_accepts_ten_decimal_places():
+    assert HopeCurrencyDecimalField().to_internal_value("123.1234567891") == Decimal("123.1234567891")
+
+
 def test_currency_api_representation_is_a_string_even_when_coercion_is_disabled():
     representation = HopeCurrencyDecimalField(coerce_to_string=False).to_representation(Decimal("123.45"))
 
@@ -216,6 +220,20 @@ def test_delivery_import_uses_fsp_provided_usd_amount(payment):
 
     assert payment.delivered_quantity == Decimal("100.00")
     assert payment.delivered_quantity_usd == Decimal("123.1234567891")
+
+
+def test_delivery_import_rejects_invalid_fsp_usd_amount(payment):
+    service = XlsxPaymentPlanDeliveryImportService(payment.parent, BytesIO())
+    service.xlsx_headers = ["delivered_quantity_usd"]
+    worksheet = openpyxl.Workbook().active
+    worksheet["A1"] = "delivered_quantity_usd"
+    worksheet["A2"] = "-0.01"
+
+    with pytest.raises(
+        XlsxPaymentPlanDeliveryImportService.XlsxPaymentPlanDeliveryImportServiceError,
+        match=f"Invalid delivered_quantity_usd provided for payment_id {payment.unicef_id}",
+    ):
+        service._apply_reconciliation_values(payment, tuple(worksheet[2]), Decimal("100.00"), None)
 
 
 def test_delivery_import_failed_sentinel_ignores_fsp_usd_amount(payment):
