@@ -182,7 +182,7 @@ class XlsxErrorSerializer(serializers.Serializer):
 
 
 class AcceptanceProcessSerializer(serializers.Serializer):
-    comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False)
+    comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):

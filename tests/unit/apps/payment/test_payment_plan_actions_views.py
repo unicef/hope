@@ -1413,6 +1413,28 @@ def test_approval_process_approve_comment_length(
         assert "comment" in response.json()
 
 
+def test_approval_process_approve_empty_comment(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
+    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
+    payment_plan_actions_context["pp"].save()
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_approval_process_approve"],
+        {"comment": ""},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == "IN_AUTHORIZATION"
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
