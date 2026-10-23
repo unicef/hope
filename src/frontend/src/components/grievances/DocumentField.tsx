@@ -8,6 +8,11 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
 import { getIndexForId } from './utils/helpers';
 import type { ReactElement } from 'react';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 export interface DocumentFieldProps {
   id: string;
@@ -48,14 +53,13 @@ export function DocumentField({
         mt: 2,
       }}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'center',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <Field
             name={`${docFieldName}.key`}
             fullWidth
@@ -66,8 +70,8 @@ export function DocumentField({
             required={!isEditTicket}
             disabled={isEditTicket}
           />
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <Field
             name={`${docFieldName}.country`}
             fullWidth
@@ -78,8 +82,8 @@ export function DocumentField({
             required={!isEditTicket}
             disabled={isEditTicket}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <Field
             name={`${docFieldName}.number`}
             fullWidth
@@ -89,22 +93,25 @@ export function DocumentField({
             required={!isEditTicket}
             disabled={isEditTicket}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <GrievanceDocumentPhotoModalEditable
             photoSrc={photoSrc}
             setFieldValue={setFieldValue}
             fieldName={`${docFieldName}.photo`}
           />
-        </Grid>
+        </ResponsiveGrid>
         {!isEdited ? (
-          <Grid size={1}>
+          <Grid
+            sx={{ textAlign: responsiveValue('right', 'left') }}
+            size={responsiveValue(12, 1)}
+          >
             <IconButton disabled={isEditTicket} onClick={onDelete}>
               <Delete />
             </IconButton>
           </Grid>
         ) : null}
-      </Grid>
+      </ResponsiveGridContainer>
     </Box>
   );
 }

@@ -1,3 +1,4 @@
+import { HeaderActions } from '@components/core/HeaderActions';
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
 import { Box } from '@mui/material';
 import type { ReactElement } from 'react';
@@ -21,48 +22,27 @@ export function DraftProgramDetailsPageHeaderButtons({
   canDuplicate,
 }: DraftProgramDetailsPageHeaderPropTypes): ReactElement {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions>
       {canRemove && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <DeleteProgram program={program} />
         </Box>
       )}
       {canEdit && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <EditProgramMenu program={program} />
         </Box>
       )}
       {canActivate && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <ActivateProgram program={program} />
         </Box>
       )}
       {canDuplicate && (
-        <Box
-          sx={{
-            m: 2,
-          }}
-        >
+        <Box>
           <DuplicateProgramButtonLink program={program} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

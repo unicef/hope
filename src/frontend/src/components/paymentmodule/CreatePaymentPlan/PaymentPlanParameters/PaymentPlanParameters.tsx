@@ -1,5 +1,5 @@
 import { Title } from '@core/Title';
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { CalendarTodayRounded } from '@mui/icons-material';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -9,6 +9,7 @@ import { Field } from 'formik';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface PaymentPlanParametersProps {
   values;
@@ -27,9 +28,9 @@ export const PaymentPlanParameters = ({
       <Title>
         <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
-      <Grid spacing={3} container>
+      <ResponsiveGridContainer spacing={3}>
         {cycles && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <Field
               name="programCycle"
               label={t('Cycle')}
@@ -44,9 +45,9 @@ export const PaymentPlanParameters = ({
               disableClearable
               data-cy="input-program-cycle"
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <Field
             name="dispersionStartDate"
             label={t('Dispersion Start Date')}
@@ -57,8 +58,8 @@ export const PaymentPlanParameters = ({
             dataCy="input-dispersion-start-date"
             tooltip={t('The first day from which payments could be delivered.')}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <Field
             name="dispersionEndDate"
             label={t('Dispersion End Date')}
@@ -72,16 +73,16 @@ export const PaymentPlanParameters = ({
             dataCy="input-dispersion-end-date"
             tooltip={t('The last day on which payments could be delivered.')}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <Field
             name="currency"
             component={FormikCurrencyAutocomplete}
             required
             disabled={paymentPlan?.planType === 'FOLLOW_UP'}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </PaperContainer>
   );
 };

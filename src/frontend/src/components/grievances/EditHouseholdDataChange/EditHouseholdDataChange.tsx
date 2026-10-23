@@ -19,6 +19,11 @@ import { restQueryKey } from '@utils/queryKeys';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { useQuery } from '@tanstack/react-query';
 import { roleDisplayMap } from '@components/grievances/utils/createGrievanceUtils';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -174,7 +179,7 @@ function EditHouseholdDataChange({
         <Title>
           <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Data`}</Typography>
         </Title>
-        <Grid container spacing={3}>
+        <ResponsiveGridContainer spacing={3}>
           <FieldArray
             name="householdDataUpdateFields"
             render={(arrayHelpers) => (
@@ -192,7 +197,7 @@ function EditHouseholdDataChange({
                   />
                 ))}
 
-                <Grid size={4}>
+                <ResponsiveGrid size="third">
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutlined />}
@@ -203,32 +208,34 @@ function EditHouseholdDataChange({
                   >
                     {t('Add new field')}
                   </Button>
-                </Grid>
+                </ResponsiveGrid>
               </>
             )}
           />
-        </Grid>
+        </ResponsiveGridContainer>
         {/* Roles in Household Section */}
         <Title>
           <Typography variant="h6">{t('Roles in Household')}</Typography>
         </Title>
-        <Grid
-          container
+        <ResponsiveGridContainer
           spacing={2}
           sx={{
             alignItems: 'center',
           }}
         >
-          <Grid size={4}>
+          <ResponsiveGrid size="third">
             <strong>{t('Full Name')}</strong>
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <strong>{t('Current Role')}</strong>
-          </Grid>
-          <Grid size={3}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter">
             <strong>{t('New Role')}</strong>
-          </Grid>
-          <Grid size={1}></Grid>
+          </ResponsiveGrid>
+          <Grid
+            sx={{ display: responsiveValue('none', 'block') }}
+            size={responsiveValue(12, 1)}
+          />
           {/* Render all roles, including added ones */}
           {(values.roles || []).map((roleItem, index) => {
             // Find individual details from householdMembers
@@ -247,7 +254,7 @@ function EditHouseholdDataChange({
             const isNewRole = !currentRoleObj;
             return (
               <React.Fragment key={roleItem.individual + '-' + index}>
-                <Grid size={4}>
+                <ResponsiveGrid size="third">
                   <Field
                     name={`roles.${index}.individual`}
                     component={FormikSelectField}
@@ -255,13 +262,14 @@ function EditHouseholdDataChange({
                     choices={availableChoices}
                     fullWidth
                   />
-                </Grid>
-                <Grid size={4}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="third">
                   {currentRoleObj
-                    ? roleDisplayMap[currentRoleObj.role ?? ''] || currentRoleObj.role
+                    ? roleDisplayMap[currentRoleObj.role ?? ''] ||
+                      currentRoleObj.role
                     : 'No role'}
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter">
                   <Field
                     name={`roles.${index}.newRole`}
                     component={FormikSelectField}
@@ -269,8 +277,11 @@ function EditHouseholdDataChange({
                     choices={roleChoices}
                     fullWidth
                   />
-                </Grid>
-                <Grid size={1}>
+                </ResponsiveGrid>
+                <Grid
+                  sx={{ textAlign: responsiveValue('right', 'left') }}
+                  size={responsiveValue(12, 1)}
+                >
                   {isNewRole && (
                     <Button
                       color="secondary"
@@ -291,7 +302,7 @@ function EditHouseholdDataChange({
             );
           })}
           {/* Add a New Role button */}
-          <Grid size={12} sx={{ marginTop: 12 }}>
+          <ResponsiveGrid size="full" sx={{ marginTop: 12 }}>
             {(() => {
               const usedIds = (values.roles || []).map((r) => r.individual);
               const availableIndividuals = householdMembers.results.filter(
@@ -330,8 +341,8 @@ function EditHouseholdDataChange({
                 </Tooltip>
               );
             })()}
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </>
     )
   );

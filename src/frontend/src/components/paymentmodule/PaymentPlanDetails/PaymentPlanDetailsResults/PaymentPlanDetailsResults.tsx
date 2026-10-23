@@ -15,6 +15,7 @@ import { ResultsForHouseholds } from '@components/paymentmodule/PaymentPlanDetai
 import { ResultsForPeople } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForPeople';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 
 interface PaymentPlanDetailsResultsProps {
   paymentPlan: PaymentPlanDetail;
@@ -42,8 +43,8 @@ export const PaymentPlanDetailsResults = ({
         <Typography variant="h6">{t('Results')}</Typography>
       </Title>
       <ContentWrapper>
-        <Grid container>
-          <Grid size={{ xs: 4 }}>
+        <Grid container rowSpacing={responsiveValue(3, 0)}>
+          <Grid size={responsiveGridSize('third')}>
             <Grid
               container
               spacing={3}
@@ -85,7 +86,7 @@ export const PaymentPlanDetailsResults = ({
               </Grid>
             </Grid>
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={responsiveGridSize('third')}>
             <Grid
               container
               spacing={0}

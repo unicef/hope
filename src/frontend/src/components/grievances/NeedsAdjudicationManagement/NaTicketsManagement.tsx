@@ -4,6 +4,7 @@ import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Tooltip, Typography } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
@@ -398,18 +399,18 @@ export const NaTicketsManagement = ({
           <Box
             sx={{
               display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
+              flexDirection: responsiveValue('column', 'row'),
               alignItems: 'stretch',
-              height: { md: 'calc(100vh - 320px)' },
-              minHeight: { md: 420 },
-              p: 5,
-              gap: 5,
+              height: responsiveValue('auto', 'calc(100vh - 320px)'),
+              minHeight: responsiveValue(0, 420),
+              p: responsiveValue(2, 5),
+              gap: responsiveValue(2, 5),
             }}
           >
             <Box
               sx={{
-                width: { xs: '100%', md: '40%' },
-                minWidth: { md: 320 },
+                width: responsiveValue('100%', '40%'),
+                minWidth: responsiveValue(0, 320),
                 display: 'flex',
               }}
             >

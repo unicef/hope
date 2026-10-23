@@ -3,6 +3,8 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GreyText } from './GreyText';
+import { responsiveValue } from 'src/responsive';
+import type { ResponsiveValue } from 'src/responsive';
 
 const PaperContainer = styled(Box)`
   display: flex;
@@ -23,7 +25,7 @@ interface BaseSectionProps {
   buttons?: ReactElement;
   title?: string | ReactElement;
   description?: string;
-  p?: number;
+  p?: number | ResponsiveValue<number>;
   containerPadding?: string | number | object;
   noPaper?: boolean;
   tabs?: ReactElement;
@@ -35,7 +37,7 @@ export const BaseSection = ({
   buttons,
   title = '',
   description,
-  p = 3,
+  p = responsiveValue(2, 3),
   containerPadding,
   noPaper = false,
   tabs = null,
@@ -44,10 +46,8 @@ export const BaseSection = ({
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 
-  // Default to theme spacing if containerPadding is not provided
-  // theme.spacing(3) vertical, theme.spacing(4) horizontal
-  // We'll use MUI's sx prop for padding
-  const defaultPadding = { py: 3, px: 4 };
+  // The inner boxes already pad, so phones drop the outer horizontal padding.
+  const defaultPadding = { py: 3, px: responsiveValue(0, 4) };
   let containerSx;
   if (containerPadding !== undefined) {
     if (typeof containerPadding === 'object') {
@@ -81,6 +81,8 @@ export const BaseSection = ({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            gap: responsiveValue(2, 0),
           }}
         >
           <Box>

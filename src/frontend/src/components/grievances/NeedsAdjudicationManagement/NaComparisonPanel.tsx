@@ -14,6 +14,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -327,6 +328,7 @@ export const NaComparisonPanel = ({
           sx={{
             mb: 4,
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
             alignItems: 'center',
             gap: 3,
             px: 3,

@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface ProgrammesFilterProps {
   filter;
@@ -57,22 +58,21 @@ function ProgrammesFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={2}>
+        <ResponsiveGrid size="sixth">
           <SearchTextField
             label="Search"
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label="Status"
@@ -85,8 +85,8 @@ function ProgrammesFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <DatePickerFilter
             label="Start Date"
             dataCy="filters-start-date"
@@ -98,8 +98,8 @@ function ProgrammesFilters({
             }
             value={filter.startDate}
           />
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <DatePickerFilter
             label="End Date"
             dataCy="filters-end-date"
@@ -111,8 +111,8 @@ function ProgrammesFilters({
             }
             value={filter.endDate}
           />
-        </Grid>
-        <Grid size={4}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label="Sector"
@@ -126,8 +126,8 @@ function ProgrammesFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <NumberTextField
             data-cy="filters-number-of-households-min"
             topLabel="Programme Size"
@@ -138,8 +138,8 @@ function ProgrammesFilters({
             }
             icon={<GroupIcon />}
           />
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <NumberTextField
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
@@ -149,8 +149,8 @@ function ProgrammesFilters({
             }
             icon={<GroupIcon />}
           />
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <NumberTextField
             data-cy="filters-budget-min"
             topLabel="Budget (USD)"
@@ -158,16 +158,16 @@ function ProgrammesFilters({
             placeholder="From"
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
           />
-        </Grid>
-        <Grid size={2}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <NumberTextField
             data-cy="filters-budget-max"
             value={filter.budgetMax}
             placeholder="To"
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('dataCollectingType', e.target.value)
@@ -182,8 +182,8 @@ function ProgrammesFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }
