@@ -48,6 +48,3 @@ class HopeCurrencyField(models.DecimalField):
         if value is None:
             return None
         return normalize_currency_decimal(value)
-
-    def from_db_value(self, value: Any, expression: Any, connection: Any) -> Decimal | None:
-        return self.to_python(value)
