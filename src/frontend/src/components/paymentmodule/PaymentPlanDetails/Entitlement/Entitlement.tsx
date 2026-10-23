@@ -3,6 +3,7 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
+import { RuleNameWithDescription } from '@core/RuleNameWithDescription';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -18,7 +19,6 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import type { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
@@ -313,34 +313,37 @@ function Entitlement({
                   value={steficonRuleValue}
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
-                >
-                  {steficonData?.results?.map((each, index) => {
-                    const hasDescription = Boolean(each?.description);
-                    return (
-                      <MenuItem
-                        data-cy={`select-option-${index}`}
-                        key={each.id}
-                        value={each.id}
-                      >
-                        {hasDescription ? (
-                          <Tooltip
-                            title={each.description}
-                            placement="right"
-                            arrow
-                          >
-                            <Box
-                              component="span"
-                              sx={{ display: 'block', width: '100%' }}
-                            >
-                              {each.name}
-                            </Box>
-                          </Tooltip>
-                        ) : (
-                          each.name
-                        )}
-                      </MenuItem>
+                  renderValue={(value) => {
+                    const appliedRule = paymentPlan.steficonRule?.rule;
+                    const rule =
+                      steficonData?.results?.find(
+                        (each) => String(each.id) === String(value),
+                      ) ??
+                      (String(appliedRule?.id) === String(value)
+                        ? appliedRule
+                        : undefined);
+                    return rule ? (
+                      <RuleNameWithDescription
+                        name={rule.name}
+                        description={rule.description}
+                      />
+                    ) : (
+                      ''
                     );
-                  })}
+                  }}
+                >
+                  {steficonData?.results?.map((each, index) => (
+                    <MenuItem
+                      data-cy={`select-option-${index}`}
+                      key={each.id}
+                      value={each.id}
+                    >
+                      <RuleNameWithDescription
+                        name={each.name}
+                        description={each.description}
+                      />
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
