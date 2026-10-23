@@ -11,7 +11,8 @@ import type { RevertMarkPaymentAsFailed } from '@restgenerated/models/RevertMark
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import type { ReactElement } from 'react';
@@ -34,6 +35,7 @@ export function RevertForceFailedButton({
   const { businessArea, programId } = useBaseUrl();
   const { paymentPlanId } = useParams();
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
   const {
     mutate: revertMarkAsFailed,
     isPending: loadingRevertMarkAsFailed,
@@ -62,6 +64,12 @@ export function RevertForceFailedButton({
       ),
     onSuccess: () => {
       showMessage(t('Force failed has been reverted.'));
+      setOpenModal(false);
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve,
+        ),
+      });
     },
     onError: (error: any) => {
       showApiErrorMessages(error, showMessage);
@@ -163,7 +171,7 @@ export function RevertForceFailedButton({
                   color="primary"
                   variant="contained"
                   onClick={submitForm}
-                  data-cy="button-submit"
+                  data-cy="button-revert-mark-as-failed-submit"
                   loading={loadingRevertMarkAsFailed}
                 >
                   {t('Revert mark as failed')}

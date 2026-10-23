@@ -475,6 +475,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
             minRows={3}
             value={sendBackComment}
             onChange={(e) => setSendBackComment(e.target.value)}
+            slotProps={{ htmlInput: { 'data-cy': 'input-send-back-comment' } }}
             disabled={sendBackLoading}
           />
         }

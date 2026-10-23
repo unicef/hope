@@ -4,12 +4,14 @@ import { useProgramContext } from '../../../../../programContext';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { RestService } from '@restgenerated/services/RestService';
 import { PERMISSIONS } from 'src/config/permissions';
+import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 
 export interface AbortedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -26,6 +28,11 @@ export function AbortedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const isBackgroundActionInProgress =
+    !!paymentPlan.backgroundActionStatus &&
+    !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
+      paymentPlan.backgroundActionStatus,
+    );
 
   const { mutate: reactivate } = useMutation({
     mutationFn: async () => {
@@ -40,7 +47,13 @@ export function AbortedPaymentPlanHeaderButtons({
       setLoading(false);
     },
     onSuccess: () => {
-      showMessage(t('Payment Plan has been reactivated.'));
+      showMessage(
+        paymentPlan.planType === PlanTypeEnum.REGULAR
+          ? t(
+              'Payment Plan rebuild has started. It will be reactivated when the rebuild finishes.',
+            )
+          : t('Payment Plan has been reactivated.'),
+      );
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
@@ -79,7 +92,12 @@ export function AbortedPaymentPlanHeaderButtons({
             color="primary"
             data-cy="button-reactivate-payment-plan"
             onClick={handleReactivate}
-            disabled={!isActiveProgram || loading || !canReactivate}
+            disabled={
+              !isActiveProgram ||
+              loading ||
+              !canReactivate ||
+              isBackgroundActionInProgress
+            }
             data-perm={PERMISSIONS.PM_REACTIVATE_ABORT}
           >
             {loading ? t('Reactivating...') : t('Reactivate')}

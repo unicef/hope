@@ -207,6 +207,12 @@ logger = logging.getLogger(__name__)
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
+REJECT_PERMISSION_BY_STATUS: dict[str | None, Permissions] = {
+    PaymentPlan.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+    PaymentPlan.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+    PaymentPlan.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+}
+
 
 class ScopedPaymentPlanMixin:
     payment_plan_url_kwarg = "payment_plan_pk"
@@ -1474,15 +1480,7 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
 
-        def _get_reject_permission(status: str) -> Permissions | None:
-            status_to_perm_map = {
-                PaymentPlan.Status.IN_APPROVAL.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-                PaymentPlan.Status.IN_AUTHORIZATION.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-                PaymentPlan.Status.IN_REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            }
-            return status_to_perm_map.get(status)
-
-        reject_permission = _get_reject_permission(payment_plan.status)
+        reject_permission = REJECT_PERMISSION_BY_STATUS.get(payment_plan.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan.program_cycle.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         data = dict(request.data)
@@ -1761,7 +1759,7 @@ class PaymentPlanViewSet(
     def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).reactivate_abort()
+        payment_plan = PaymentPlanService(payment_plan).reactivate_abort(user_id=str(request.user.pk))
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -1926,6 +1924,9 @@ class FollowUpInstructionViewSet(
     @transaction.atomic
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
+        reject_permission = REJECT_PERMISSION_BY_STATUS.get(instruction.status)
+        if reject_permission and not request.user.has_perm(reject_permission.value, instruction.program):
+            raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
