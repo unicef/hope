@@ -517,7 +517,7 @@ class TestSmokePaymentVerification:
         page_grievance_tickets.get_tab_system_generated().click()
         assert len(page_grievance_tickets.get_ticket_list_row()) == 1
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.assign_to_me()
         page_grievance_details_page.get_button_set_in_progress().click()
 
         page_grievance_details_page.get_grievance_verify().click()

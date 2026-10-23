@@ -23,6 +23,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgramContext } from '../../programContext';
 import type { MiśTheme } from '../../theme';
+import { AssignGrievanceDialog } from './GrievancesDetails/AssignGrievanceDialog';
 import {
   getGrievanceDetailsPath,
   getGrievanceEditPath,
@@ -49,6 +50,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack,
   canClose,
   canAssign,
+  currentUserId,
 }: {
   ticket: GrievanceTicketDetail;
   canEdit: boolean;
@@ -58,6 +60,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
+  currentUserId: string;
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -453,16 +456,12 @@ export const GrievanceDetailsToolbar = ({
         )}
         {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
-          <LoadingButton
-            loading={loading}
-            color="primary"
-            variant="contained"
-            onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
-            data-cy="button-assign-to-me"
+          <AssignGrievanceDialog
+            ticketId={ticket.id}
+            currentUserId={currentUserId}
+            programCode={ticket.programs?.[0]?.code}
             disabled={!isActiveProgram}
-          >
-            {t('ASSIGN TO ME')}
-          </LoadingButton>
+          />
         )}
         {isAssigned && canSetInProgress && (
           <Box
