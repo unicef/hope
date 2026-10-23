@@ -158,7 +158,16 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             return
         entitlement_amount = self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).value
         if entitlement_amount is not None and entitlement_amount != "":
-            converted_entitlement_amount = to_decimal(str(entitlement_amount)) or Decimal(0.0)
+            converted_entitlement_amount = to_decimal(str(entitlement_amount))
+            if converted_entitlement_amount is None:
+                self.errors.append(
+                    XlsxError(
+                        self.TITLE,
+                        self._get_cell(row, self.COLUMN_ENTITLEMENT_QUANTITY).coordinate,
+                        "Invalid amount",
+                    )
+                )
+                return
             if converted_entitlement_amount != payment.entitlement_quantity:
                 self.is_updated = True
 

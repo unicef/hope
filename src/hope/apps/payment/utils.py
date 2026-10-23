@@ -1,5 +1,5 @@
 import datetime
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 import hashlib
 import json
 from math import ceil
@@ -10,6 +10,7 @@ from django.db.models import Q
 
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.exchange_rates import ExchangeRates
+from hope.apps.core.fields import normalize_currency_decimal
 from hope.apps.utils.external_urls import frontend_url
 from hope.models import (
     LogEntry,
@@ -232,14 +233,18 @@ def get_number_of_samples(
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(received: bool, received_amount: Decimal | float, delivered_amount: Decimal | float) -> str:
+def from_received_to_status(
+    received: bool | None,
+    received_amount: Decimal | float | int | str | None,
+    delivered_amount: Decimal | float | int | str | None,
+) -> str:
     received_amount_dec = to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
     if received:
-        if received_amount_dec is None:
+        if received_amount is None or str(received_amount).strip() == "":
             return PaymentVerification.STATUS_RECEIVED
-        if received_amount_dec == delivered_amount:
+        if received_amount_dec is not None and received_amount_dec == to_decimal(delivered_amount):
             return PaymentVerification.STATUS_RECEIVED
         return PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     return PaymentVerification.STATUS_NOT_RECEIVED
@@ -252,13 +257,16 @@ def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal |
     try:
         if isinstance(received_amount, str):
             received_amount = float(received_amount.strip())
-        return Decimal(f"{round(received_amount, 2):.2f}")
-    except ValueError:
+        amount = Decimal(f"{round(received_amount, 2):.2f}")
+        return amount if amount.is_finite() else None
+    except (InvalidOperation, OverflowError, ValueError):
         return None
 
 
 @no_type_check
-def from_received_yes_no_to_status(received: bool, received_amount: float, delivered_amount: float) -> str:
+def from_received_yes_no_to_status(
+    received: str | None, received_amount: Decimal | float | int | str | None, delivered_amount: Decimal | None
+) -> str:
     received_bool = None
     if received == "YES":
         received_bool = True
@@ -295,7 +303,7 @@ def get_quantity_in_usd(
         return None
 
     if amount == 0:
-        return Decimal(0)
+        return normalize_currency_decimal(0)
 
     currency_code = currency.vision_code if currency else None
 
@@ -307,7 +315,7 @@ def get_quantity_in_usd(
     if exchange_rate is None:
         return None
 
-    return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+    return normalize_currency_decimal(Decimal(amount) / Decimal(str(exchange_rate)))
 
 
 def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:
@@ -332,7 +340,7 @@ def normalize_score(value: float | str | Decimal | None) -> Decimal | None:
 
 
 def get_payment_delivered_quantity_status_and_value(
-    delivered_quantity: int | float | str | None, entitlement_quantity: Decimal
+    delivered_quantity: Decimal | int | float | str | None, entitlement_quantity: Decimal
 ) -> tuple[str, Decimal | None]:
     """Return status and delivered quantity.
 
@@ -341,8 +349,7 @@ def get_payment_delivered_quantity_status_and_value(
     * Not Delivered (0 = delivered quantity) [int, float, str]
     * Unsuccessful (failed at the delivery processing level) [-1.0]
     """
-    delivered_quantity_decimal: Decimal = to_decimal(delivered_quantity)  # type: ignore
-
+    delivered_quantity_decimal = to_decimal(delivered_quantity)
     if delivered_quantity_decimal is None:
         raise ValueError(f"Invalid delivered quantity {delivered_quantity}")
 

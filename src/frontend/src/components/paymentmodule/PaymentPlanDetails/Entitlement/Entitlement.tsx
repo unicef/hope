@@ -583,7 +583,7 @@ function Entitlement({
             </Box>
           </Box>
         </Row>
-        {paymentPlan.totalEntitledQuantityUsd ? (
+        {paymentPlan.totalEntitledQuantityUsd != null ? (
           <>
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>

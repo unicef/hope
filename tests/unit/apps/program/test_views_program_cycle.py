@@ -723,7 +723,7 @@ def test_filter_total_delivered_quantity_usd(
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 1
-    assert str(response.data["results"][0]["total_delivered_quantity_usd"]) == "1500.00"
+    assert response.data["results"][0]["total_delivered_quantity_usd"] == "1500.00"
 
 
 def test_filter_total_entitled_quantity_usd(
@@ -756,7 +756,7 @@ def test_filter_total_entitled_quantity_usd(
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data["results"]) == 1
-    assert str(response.data["results"][0]["total_entitled_quantity_usd"]) == "2000.00"
+    assert response.data["results"][0]["total_entitled_quantity_usd"] == "2000.00"
 
 
 def test_reactivate_program_cycle_with_permission(

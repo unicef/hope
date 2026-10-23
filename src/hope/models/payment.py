@@ -15,6 +15,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY, get_role_choices
 from hope.apps.payment.managers import PaymentManager
 from hope.apps.payment.validators import payment_token_and_order_number_validator
@@ -174,15 +175,23 @@ class Payment(
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
-    entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+    entitlement_quantity_usd = HopeCurrencyField(
+        verbose_name="Entitlement quantity in USD",
+        help_text="Entitlement amount converted to USD, with up to 10 decimal places.",
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
     )
     entitlement_date = models.DateTimeField(null=True, blank=True)
     delivered_quantity = models.DecimalField(
         decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
-    delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=15, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+    delivered_quantity_usd = HopeCurrencyField(
+        verbose_name="Delivered quantity in USD",
+        help_text="Delivered amount converted to USD, with up to 10 decimal places.",
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
@@ -266,6 +275,11 @@ class Payment(
                 fields=["program_id", "token_number"],
                 condition=Q(is_removed=False),
                 name="token_number_unique_per_program",
+            ),
+            currency_precision_check(
+                "entitlement_quantity_usd",
+                "delivered_quantity_usd",
+                name="payment_currency_precision",
             ),
         ]
         ordering = ("-created_at",)

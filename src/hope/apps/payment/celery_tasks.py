@@ -34,6 +34,7 @@ from hope.apps.payment.utils import (
     log_payment_plan_change,
     log_payment_plan_group_change,
     normalize_score,
+    to_decimal,
 )
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_export_service import XlsxPaymentPlanDeliveryExportService
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
@@ -490,6 +491,7 @@ def payment_plan_apply_custom_exchange_rate_async_task_action(job: AsyncRetryJob
     try:
         bulk_size = 1000
         updates = []
+        currency_exchange_date = payment_plan.currency_exchange_date
         with transaction.atomic():
             for payment in payment_plan.eligible_payments.only(
                 "id",
@@ -500,13 +502,13 @@ def payment_plan_apply_custom_exchange_rate_async_task_action(job: AsyncRetryJob
                     amount=payment.entitlement_quantity,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency_exchange_date=currency_exchange_date,
                 )
                 payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=payment.delivered_quantity,
                     currency=payment_plan.currency,
                     exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
+                    currency_exchange_date=currency_exchange_date,
                 )
                 updates.append(payment)
 
@@ -1718,7 +1720,7 @@ class CheckRapidProVerificationTask:
             return None
         delivered_amount = payment_record_verification.payment.delivered_quantity
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
-        payment_record_verification.received_amount = received_amount
+        payment_record_verification.received_amount = to_decimal(received_amount)
         return payment_record_verification
 
 

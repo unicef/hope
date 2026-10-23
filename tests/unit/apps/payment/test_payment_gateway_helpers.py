@@ -50,6 +50,7 @@ def test_add_records_success_updates_container(mock_chunks, gateway_service, moc
 
     gateway_service._add_records_to_container(payments, mock_container)
 
+    mock_chunks.assert_called_once_with(payments, 200)
     gateway_service._handle_pg_success.assert_called_once_with(response, chunk)
     gateway_service._handle_pg_errors.assert_not_called()
     assert mock_container.sent_to_payment_gateway is True

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import ROUND_HALF_UP
 import re
 from typing import TYPE_CHECKING, Any
 
@@ -124,6 +125,15 @@ class ProgramCycleListSerializer(serializers.ModelSerializer):
     program_end_date = serializers.DateField(format="%Y-%m-%d")
     admin_url = serializers.SerializerMethodField()
     can_remove_cycle = serializers.SerializerMethodField()
+    total_entitled_quantity_usd = serializers.DecimalField(
+        max_digits=64, decimal_places=2, rounding=ROUND_HALF_UP, read_only=True
+    )
+    total_undelivered_quantity_usd = serializers.DecimalField(
+        max_digits=64, decimal_places=2, rounding=ROUND_HALF_UP, read_only=True
+    )
+    total_delivered_quantity_usd = serializers.DecimalField(
+        max_digits=64, decimal_places=2, rounding=ROUND_HALF_UP, read_only=True
+    )
 
     class Meta:
         model = ProgramCycle
