@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse
-from social_core.exceptions import InvalidEmail
+from social_core.exceptions import AuthResponseError
 from social_core.pipeline import social_auth, user as social_core_user
 
 from hope.apps.account.microsoft_graph import MicrosoftGraphAPI
@@ -52,6 +52,7 @@ def user_details(
 def require_email(
     strategy: Any,
     details: dict,
+    backend: Any = None,
     user: User | None = None,
     is_new: bool = False,
     *args: Any,
@@ -61,7 +62,12 @@ def require_email(
         return
     if is_new and not details.get("email"):
         logger.warning("Email couldn't be validated")
-        raise InvalidEmail(strategy)
+        raise AuthResponseError(
+            backend,
+            "Email couldn't be validated",
+            code="profile_email_missing",
+            stage="pipeline",
+        )
 
 
 def create_user(
