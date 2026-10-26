@@ -85,7 +85,11 @@ def conflicting_legacy_currency_table(legacy_currency_table: SimpleNamespace) ->
     return legacy_currency_table
 
 
-def test_currency_migration_expands_all_columns_and_enforces_precision(legacy_currency_table: SimpleNamespace) -> None:
+@pytest.mark.parametrize("invalid_amount", [Decimal("-0.01"), Decimal(100000000000000000000)])
+def test_currency_migration_expands_all_columns_and_enforces_value_range(
+    legacy_currency_table: SimpleNamespace,
+    invalid_amount: Decimal,
+) -> None:
     case = legacy_currency_table
 
     with connection.schema_editor() as schema_editor:
@@ -109,13 +113,14 @@ def test_currency_migration_expands_all_columns_and_enforces_precision(legacy_cu
         cursor.execute(f"SELECT {case.first_column} FROM {case.table}")
         legacy_value = cursor.fetchone()[0]
         assert legacy_value == Decimal("123.45")
-        cursor.execute(f"UPDATE {case.table} SET {case.first_column} = %s", [Decimal("123.1234567891")])
+        high_precision_value = Decimal("123.12345678912")
+        cursor.execute(f"UPDATE {case.table} SET {case.first_column} = %s", [high_precision_value])
         cursor.execute(f"SELECT {case.first_column} FROM {case.table}")
-        assert cursor.fetchone() == (Decimal("123.1234567891"),)
+        assert cursor.fetchone() == (high_precision_value,)
 
     with connection.cursor() as cursor:
         with pytest.raises(IntegrityError), transaction.atomic():
-            cursor.execute(f"UPDATE {case.table} SET {case.first_column} = %s", [Decimal("123.12345678912")])
+            cursor.execute(f"UPDATE {case.table} SET {case.first_column} = %s", [invalid_amount])
 
 
 def test_currency_migration_rolls_back_both_statements_and_retries(

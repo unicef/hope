@@ -70,9 +70,8 @@ def test_currency_form_accepts_ten_decimal_places():
     assert HopeCurrencyField().formfield().clean("123.1234567890") == Decimal("123.1234567890")
 
 
-def test_currency_form_rejects_more_than_ten_decimal_places():
-    with pytest.raises(ValidationError, match="no more than 10 decimal places"):
-        HopeCurrencyField().formfield().clean("123.12345678901")
+def test_currency_field_rounds_more_than_ten_decimal_places():
+    assert HopeCurrencyField().to_python("123.12345678915") == Decimal("123.1234567892")
 
 
 def test_currency_field_uses_unbounded_postgresql_numeric_type():
@@ -117,6 +116,10 @@ def test_currency_api_accepts_ten_decimal_places():
     assert HopeCurrencyDecimalField().to_internal_value("123.1234567891") == Decimal("123.1234567891")
 
 
+def test_currency_api_rounds_more_than_ten_decimal_places():
+    assert HopeCurrencyDecimalField().to_internal_value("123.12345678915") == Decimal("123.1234567892")
+
+
 def test_currency_api_representation_is_a_string_even_when_coercion_is_disabled():
     representation = HopeCurrencyDecimalField(coerce_to_string=False).to_representation(Decimal("123.45"))
 
@@ -136,6 +139,14 @@ def test_payment_save_load_preserves_ten_fractional_digits(payment, django_asser
 
     assert payment.entitlement_quantity_usd == Decimal("123.1234567891")
     assert payment.entitlement_quantity_usd.as_tuple().exponent == -10
+
+
+def test_payment_save_rounds_amounts_above_ten_fractional_digits(payment):
+    payment.entitlement_quantity_usd = Decimal("123.12345678915")
+    payment.save(update_fields=["entitlement_quantity_usd"])
+    payment.refresh_from_db(fields=["entitlement_quantity_usd"])
+
+    assert payment.entitlement_quantity_usd == Decimal("123.1234567892")
 
 
 def test_payment_plan_save_load_pads_legacy_two_decimal_values(payment, django_assert_num_queries):
