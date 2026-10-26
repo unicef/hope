@@ -945,7 +945,7 @@ def test_close_transitions_child_payment_plans_to_closed_without_notification(
         currency=currency,
         delivery_mechanism=delivery_mechanism,
         fsp=fsp,
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
     )
 
     result = FollowUpInstructionService(instruction=instruction).close(user=user, closure_comment="all paid")
@@ -1249,8 +1249,97 @@ def finished_children(approval_instruction, cycle, business_area, currency) -> l
     ]
 
 
-def test_close_stores_the_comment_and_user_on_the_instruction_and_its_children(
+@patch(
+    "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
+)
+def test_ready_for_closure_moves_every_child_to_ready_for_closure(
+    mock_notify: Any, user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+) -> None:
+    FollowUpInstructionService(instruction=approval_instruction).ready_for_closure(user)
+
+    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {
+        PaymentPlan.Status.READY_FOR_CLOSURE
+    }
+    assert approval_instruction.status == FollowUpInstruction.Status.READY_FOR_CLOSURE
+    assert mock_notify.call_args.args[:3] == (
+        approval_instruction,
+        PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value,
+        str(user.pk),
+    )
+
+
+@pytest.fixture
+def accepted_child(approval_instruction, cycle, business_area, currency) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        follow_up_instruction=approval_instruction,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+
+
+def test_ready_for_closure_rejects_children_that_are_not_finished(
+    user: Any,
+    approval_instruction: FollowUpInstruction,
+    finished_children: list[PaymentPlan],
+    accepted_child: PaymentPlan,
+) -> None:
+    with pytest.raises(ValidationError, match="Mark as Ready for Closure is not available"):
+        FollowUpInstructionService(instruction=approval_instruction).ready_for_closure(user)
+
+
+@pytest.fixture
+def ready_for_closure_children(approval_instruction, cycle, business_area, currency) -> list[PaymentPlan]:
+    return [
+        PaymentPlanFactory(
+            program_cycle=cycle,
+            business_area=business_area,
+            currency=currency,
+            follow_up_instruction=approval_instruction,
+            plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+            status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        )
+        for _ in range(2)
+    ]
+
+
+@patch(
+    "hope.apps.payment.services.follow_up_instruction_service.send_follow_up_instruction_notification_emails_async_task"
+)
+def test_send_back_moves_every_child_to_finished(
+    mock_notify: Any,
+    user: Any,
+    approval_instruction: FollowUpInstruction,
+    ready_for_closure_children: list[PaymentPlan],
+) -> None:
+    FollowUpInstructionService(instruction=approval_instruction).send_back_to_finished(user)
+
+    assert set(approval_instruction.payment_plans.values_list("status", flat=True)) == {PaymentPlan.Status.FINISHED}
+    assert mock_notify.call_args.args[:3] == (
+        approval_instruction,
+        PaymentPlan.Action.SEND_BACK_TO_FINISHED.value,
+        str(user.pk),
+    )
+
+
+def test_send_back_rejects_children_that_are_not_ready_for_closure(
     user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+) -> None:
+    with pytest.raises(ValidationError, match="Send Back is not available"):
+        FollowUpInstructionService(instruction=approval_instruction).send_back_to_finished(user)
+
+
+def test_close_rejects_children_that_are_not_ready_for_closure(
+    user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+) -> None:
+    with pytest.raises(ValidationError, match="Close instruction is not available"):
+        FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment="paid out")
+
+
+def test_close_stores_the_comment_and_user_on_the_instruction_and_its_children(
+    user: Any, approval_instruction: FollowUpInstruction, ready_for_closure_children: list[PaymentPlan]
 ) -> None:
     FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment="paid out")
 
@@ -1261,7 +1350,7 @@ def test_close_stores_the_comment_and_user_on_the_instruction_and_its_children(
 
 
 def test_close_without_a_comment_raises_when_nothing_was_verified(
-    user: Any, approval_instruction: FollowUpInstruction, finished_children: list[PaymentPlan]
+    user: Any, approval_instruction: FollowUpInstruction, ready_for_closure_children: list[PaymentPlan]
 ) -> None:
     with pytest.raises(ValidationError, match="Closure comment is required"):
         FollowUpInstructionService(instruction=approval_instruction).close(user=user, closure_comment=None)

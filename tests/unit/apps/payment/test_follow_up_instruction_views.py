@@ -814,7 +814,7 @@ def test_follow_up_instruction_close(
         ctx["user"], [Permissions.PM_CLOSE_FINISHED], ctx["business_area"], ctx["program"]
     )
     pp = PaymentPlanFactory(
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
         follow_up_instruction=ctx["instruction"],
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
@@ -838,6 +838,102 @@ def test_follow_up_instruction_close(
     assert pp.status == PaymentPlan.Status.CLOSED
     assert response.json()["closure_comment"] == "no verification needed"
     assert response.json()["closed_by"] == f"{ctx['user'].first_name} {ctx['user'].last_name}"
+
+
+@pytest.fixture
+def finished_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.FINISHED,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+def test_follow_up_instruction_ready_for_closure(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    finished_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_MARK_READY_FOR_CLOSURE], ctx["business_area"], ctx["program"]
+    )
+    url = reverse(
+        "api:payments:follow-up-instructions-ready-for-closure",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == FollowUpInstruction.Status.READY_FOR_CLOSURE
+    finished_instruction_child.refresh_from_db()
+    assert finished_instruction_child.status == PaymentPlan.Status.READY_FOR_CLOSURE
+
+
+def test_follow_up_instruction_ready_for_closure_requires_permission(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    finished_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_LIST], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-ready-for-closure",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.fixture
+def ready_for_closure_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+def test_follow_up_instruction_send_back_to_finished(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    ready_for_closure_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_MARK_READY_FOR_CLOSURE], ctx["business_area"], ctx["program"]
+    )
+    url = reverse(
+        "api:payments:follow-up-instructions-send-back-to-finished",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    ready_for_closure_instruction_child.refresh_from_db()
+    assert ready_for_closure_instruction_child.status == PaymentPlan.Status.FINISHED
 
 
 @pytest.fixture

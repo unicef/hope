@@ -1398,6 +1398,8 @@ class FollowUpInstructionViewSet(
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
         "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        "ready_for_closure": [Permissions.PM_MARK_READY_FOR_CLOSURE],
+        "send_back_to_finished": [Permissions.PM_MARK_READY_FOR_CLOSURE],
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
@@ -1582,6 +1584,22 @@ class FollowUpInstructionViewSet(
         file.seek(0)
         instruction = FollowUpInstructionService(instruction=instruction).import_delivery_xlsx(
             self._request_user(request), file
+        )
+        return self._detail_response(instruction)
+
+    @extend_schema(request=None, responses={200: FollowUpInstructionDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="ready-for-closure")
+    def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = FollowUpInstructionService(instruction=self.get_object()).ready_for_closure(
+            self._request_user(request)
+        )
+        return self._detail_response(instruction)
+
+    @extend_schema(request=None, responses={200: FollowUpInstructionDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="send-back-to-finished")
+    def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = FollowUpInstructionService(instruction=self.get_object()).send_back_to_finished(
+            self._request_user(request)
         )
         return self._detail_response(instruction)
 

@@ -26,6 +26,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         IN_REVIEW = "IN_REVIEW"
         ACCEPTED = "ACCEPTED"
         FINISHED = "FINISHED"
+        READY_FOR_CLOSURE = "READY_FOR_CLOSURE"
         CLOSED = "CLOSED"
         ABORTED = "ABORTED"
 
@@ -44,6 +45,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
         Status.CLOSED,
         Status.ABORTED,
     )

@@ -217,8 +217,21 @@ def test_follow_up_instruction_full_flow(
     login.wait_for_text("0.00", '[data-cy="summary-total-undelivered"]')
     login.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
     login.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
-    login.wait_for_element_visible('[data-cy="button-close"]')
+    login.wait_for_element_visible('[data-cy="button-set-ready-for-closure"]')
+    login.assert_element_absent('[data-cy="button-close"]')
     login.assert_element_absent('[data-cy="button-mark-as-released"]')
+
+    # --- Ready for closure, send back, ready again ---
+    login.click('[data-cy="button-set-ready-for-closure"]')
+    login.wait_for_text("Follow-up Instruction set ready for closure")
+    login.wait_for_text("READY FOR CLOSURE", '[data-cy="plan-status-0"]')
+    login.wait_for_element_visible('[data-cy="button-close"]')
+    login.click('[data-cy="button-send-back"]')
+    login.wait_for_text("Follow-up Instruction sent back")
+    login.wait_for_text("FINISHED", '[data-cy="plan-status-0"]')
+    login.assert_element_absent('[data-cy="button-close"]')
+    login.click('[data-cy="button-set-ready-for-closure"]')
+    login.wait_for_text("READY FOR CLOSURE", '[data-cy="plan-status-1"]')
 
     # --- Close ---
     login.click('[data-cy="button-close"]')

@@ -310,6 +310,33 @@ export function FollowUpInstructionActions({
         </>
       )}
       {status === 'FINISHED' && (
+        <SimpleWorkflowButton
+          label="Set Ready for Closure"
+          instruction={instruction}
+          mutationFn={() =>
+            RestService.restBusinessAreasProgramsFollowUpInstructionsReadyForClosureCreate(
+              commonArgs,
+            )
+          }
+          successMessage="Follow-up Instruction set ready for closure"
+          dataCy="button-set-ready-for-closure"
+        />
+      )}
+      {status === 'READY_FOR_CLOSURE' && (
+        <SimpleWorkflowButton
+          label="Send Back"
+          instruction={instruction}
+          mutationFn={() =>
+            RestService.restBusinessAreasProgramsFollowUpInstructionsSendBackToFinishedCreate(
+              commonArgs,
+            )
+          }
+          successMessage="Follow-up Instruction sent back"
+          variant="outlined"
+          dataCy="button-send-back"
+        />
+      )}
+      {status === 'READY_FOR_CLOSURE' && (
         <ConfirmWorkflowButton
           label="Close"
           instruction={instruction}
