@@ -3,6 +3,7 @@ import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useFrontendVersion } from '@hooks/useFrontendVersion';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import CloseIcon from '@mui/icons-material/Close';
 import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import MUIDrawer from '@mui/material/Drawer';
@@ -178,8 +179,11 @@ export const Drawer = ({
           transparent={matchColorToWindowOrigin() !== '#00ADEF'}
           displayLogoWithoutSubtitle
         />
-        <CollapseIconButton onClick={handleDrawerClose}>
-          <ChevronLeftIcon />
+        <CollapseIconButton
+          onClick={handleDrawerClose}
+          aria-label="close drawer"
+        >
+          {isMobile ? <CloseIcon /> : <ChevronLeftIcon />}
         </CollapseIconButton>
       </ToolbarHeader>
       {isMobile && (
