@@ -4,7 +4,6 @@ from decimal import Decimal
 
 import django.core.validators
 from django.db import migrations, models
-from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
@@ -20,7 +19,7 @@ def payment_plan_currency_precision_constraint() -> models.CheckConstraint:
     condition = models.Q()
     for column in PAYMENT_PLAN_COLUMNS:
         condition &= models.Q(**{f"{column}__isnull": True}) | (
-            models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(LessThan(column, Decimal(100000000000000000000)))
+            models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(**{f"{column}__lt": Decimal(100000000000000000000)})
         )
     return models.CheckConstraint(condition=condition, name="payment_plan_currency_precision")
 
