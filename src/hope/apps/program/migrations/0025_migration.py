@@ -69,9 +69,11 @@ def create_payee_types_and_backfill(apps, schema_editor):
         name="Organization", defaults={"gl_code": "7700430", "weight": 10}
     )
 
-    DataCollectingType.objects.get_or_create(
+    head_of_facility, _ = DataCollectingType.objects.get_or_create(
         code=ORGANIZATION_DCT_CODE, defaults={**ORGANIZATION_DCT_DEFAULTS, "payee_type": organization}
     )
+    # The post_save receiver that makes a DCT compatible with itself does not run here.
+    head_of_facility.compatible_types.add(head_of_facility)
     DataCollectingType.objects.filter(payee_type__isnull=True, type=STANDARD).update(payee_type=household)
     DataCollectingType.objects.filter(payee_type__isnull=True, type=SOCIAL).update(payee_type=incentive_payee)
     DataCollectingType.objects.filter(payee_type__isnull=True, code__in=HOUSEHOLD_DCT_CODES_WITHOUT_TYPE).update(
