@@ -13,25 +13,25 @@
     </tr>
     <tr>
       <td>Payment Plan</td>
-      <td>{{ payment_plan_group.unicef_id }}</td>
+      <td>{{ unicef_id }}</td>
       <td>Programme Name</td>
-      <td>{{ payment_plan_group.program.name }}</td>
+      <td>{{ program_name }}</td>
     </tr>
     <tr>
       <td>Name</td>
-      <td>{{ payment_plan_group.name }}</td>
+      <td>{{ name }}</td>
       <td>Programme Cycle</td>
-      <td>{{ payment_plan_group.cycle.title }}</td>
+      <td>{{ cycle_title }}</td>
     </tr>
     <tr>
       <td>Status</td>
-      <td>{{ payment_plan_group.get_status_display }}</td>
+      <td>{{ status }}</td>
       <td>FSP</td>
       <td>{{ fsp.name }}</td>
     </tr>
     <tr>
       <td>Currency</td>
-      <td>{{ payment_plan_group.currency }}</td>
+      <td>{{ currency }}</td>
       <td>Vision Vendor number</td>
       <td>{{ fsp.vision_vendor_number }}</td>
     </tr>
@@ -74,14 +74,14 @@
       <td>Delivery mechanism</td>
       <td>Dispersion dates</td>
       <td>{% if is_social_worker_program %}People{% else %}Households{% endif %}</td>
-      <td>Entitlement ({{ payment_plan_group.currency }})</td>
+      <td>Entitlement ({{ currency }})</td>
     </tr>
     {% for payment_plan in payment_plans %}
     <tr>
       <td>{{ payment_plan.unicef_id }}</td>
       <td>{{ payment_plan.name }}</td>
       <td>{{ payment_plan.delivery_mechanism|default_if_none:"-" }}</td>
-      <td>{{ payment_plan_group.dispersion_start_date|date:"j N Y" }} - {{ payment_plan_group.dispersion_end_date|date:"j N Y" }}</td>
+      <td>{{ dispersion_start_date|date:"j N Y" }} - {{ dispersion_end_date|date:"j N Y" }}</td>
       <td>{% if is_social_worker_program %}{{ payment_plan.total_individuals_count }}{% else %}{{ payment_plan.total_households_count }}{% endif %}</td>
       <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
     </tr>
@@ -101,7 +101,7 @@
         <td>Total Households redeemed</td>
       {% endif %}
       <td>{{ reconciliation.reconciled|default_if_none:"0" }}</td>
-      <td>Total amount redeemed ({{ payment_plan_group.currency }})</td>
+      <td>Total amount redeemed ({{ currency }})</td>
       <td>{{ reconciliation.reconciled_local|default_if_none:"0" }}</td>
       <td>Total amount redeemed (USD)</td>
       <td>{{ reconciliation.reconciled_usd|default_if_none:"0" }}</td>
@@ -113,7 +113,7 @@
         <td>Total pending Households</td>
       {% endif %}
       <td>{{ reconciliation.pending|default_if_none:"0" }}</td>
-      <td>Total amount unredeemed ({{ payment_plan_group.currency }})</td>
+      <td>Total amount unredeemed ({{ currency }})</td>
       <td>{{ reconciliation.failed_local|default_if_none:"0" }}</td>
       <td>Total amount unredeemed (USD)</td>
       <td>{{ reconciliation.failed_usd|default_if_none:"0" }}</td>
@@ -198,7 +198,7 @@
 <div style="clear: both;"></div>
 
 <p></p>
-<p>Link to Payment Plan: <a href="{{ payment_plan_group_link }}">{{ payment_plan_group_link }}</a></p>
+<p>Link to Payment Plan: <a href="{{ link }}">{{ link }}</a></p>
 <p></p>
 <p>Generated on {% now "N j, Y" %}</p>
 

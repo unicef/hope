@@ -899,9 +899,11 @@ class PaymentPlan(
 
     @property
     def last_approval_process(self) -> "ApprovalProcess | None":
-        """The approval process of the plan's group, or the plan's own when a Follow-Up Instruction runs it."""
+        """The approval process of the plan's group or Follow-Up Instruction, which approves all its plans together."""
         if self.payment_plan_group_id:
             return self.payment_plan_group.approval_process.first()
+        if self.follow_up_instruction_id:
+            return self.follow_up_instruction.approval_process.first()
         return self.approval_process.first()
 
     def _get_last_approval_process_data(self) -> ModifiedData:

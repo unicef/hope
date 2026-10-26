@@ -1028,17 +1028,6 @@ def test_follow_up_instruction_child_reads_use_payment_gateway_from_instruction(
     assert payment_gateway_instruction_child_payment_plan.is_payment_gateway is True
 
 
-@pytest.fixture
-def instruction_child_approval_process(instruction_child_payment_plan):
-    return ApprovalProcessFactory(payment_plan=instruction_child_payment_plan)
-
-
-def test_follow_up_instruction_child_last_approval_process_is_its_own(
-    instruction_child_payment_plan, instruction_child_approval_process
-):
-    assert instruction_child_payment_plan.last_approval_process == instruction_child_approval_process
-
-
 def test_payment_plan_in_group_and_instruction_violates_constraint(payment_plan, follow_up_instruction):
     payment_plan.follow_up_instruction = follow_up_instruction
 
@@ -1049,3 +1038,14 @@ def test_payment_plan_in_group_and_instruction_violates_constraint(payment_plan,
 def test_removed_payment_plan_without_group_is_allowed(removed_payment_plan_without_group):
     assert removed_payment_plan_without_group.payment_plan_group_id is None
     assert removed_payment_plan_without_group.is_removed is True
+
+
+@pytest.fixture
+def instruction_approval_process(follow_up_instruction):
+    return ApprovalProcessFactory(follow_up_instruction=follow_up_instruction)
+
+
+def test_follow_up_instruction_child_reads_its_approval_process_from_the_instruction(
+    instruction_child_payment_plan, instruction_approval_process
+):
+    assert instruction_child_payment_plan.last_approval_process == instruction_approval_process

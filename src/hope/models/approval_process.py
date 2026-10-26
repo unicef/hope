@@ -24,6 +24,13 @@ class ApprovalProcess(TimeStampedUUIDModel):
     payment_plan_group = models.ForeignKey(
         "payment.PaymentPlanGroup", on_delete=models.CASCADE, related_name="approval_process", null=True, blank=True
     )
+    follow_up_instruction = models.ForeignKey(
+        "payment.FollowUpInstruction",
+        on_delete=models.CASCADE,
+        related_name="approval_process",
+        null=True,
+        blank=True,
+    )
 
     approval_number_required = models.PositiveIntegerField(default=1)
     authorization_number_required = models.PositiveIntegerField(default=1)
@@ -35,9 +42,12 @@ class ApprovalProcess(TimeStampedUUIDModel):
         verbose_name_plural = "Approval Processes"
         constraints = [
             models.CheckConstraint(
-                condition=Q(payment_plan__isnull=False, payment_plan_group__isnull=True)
-                | Q(payment_plan__isnull=True, payment_plan_group__isnull=False),
-                name="approval_process_owned_by_plan_or_group",
+                condition=Q(
+                    payment_plan__isnull=False, payment_plan_group__isnull=True, follow_up_instruction__isnull=True
+                )
+                | Q(payment_plan__isnull=True, payment_plan_group__isnull=False, follow_up_instruction__isnull=True)
+                | Q(payment_plan__isnull=True, payment_plan_group__isnull=True, follow_up_instruction__isnull=False),
+                name="approval_process_has_one_owner",
             )
         ]
         indexes = [

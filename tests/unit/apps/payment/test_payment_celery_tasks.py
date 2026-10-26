@@ -19,6 +19,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
@@ -38,6 +39,8 @@ from hope.apps.payment.celery_tasks import (
     create_payment_verification_plan_xlsx_async_task_action,
     export_payment_plan_group_delivery_xlsx_async_task,
     export_payment_plan_group_delivery_xlsx_async_task_action,
+    export_pdf_follow_up_instruction_summary_async_task,
+    export_pdf_follow_up_instruction_summary_async_task_action,
     export_pdf_payment_plan_group_summary_async_task,
     export_pdf_payment_plan_group_summary_async_task_action,
     get_sync_run_rapid_pro_async_task,
@@ -75,6 +78,8 @@ from hope.apps.payment.celery_tasks import (
     remove_old_cash_plan_payment_verification_xlsx_async_task_action,
     remove_old_payment_plan_payment_list_xlsx_async_task,
     remove_old_payment_plan_payment_list_xlsx_async_task_action,
+    send_follow_up_instruction_notification_emails_async_task,
+    send_follow_up_instruction_notification_emails_async_task_action,
     send_payment_notification_emails_async_task,
     send_payment_notification_emails_async_task_action,
     send_payment_plan_group_delivery_xlsx_password_async_task_action,
@@ -2259,4 +2264,102 @@ def test_export_pdf_payment_plan_group_summary_queues_retry_job(django_capture_o
     assert job.content_object == payment_plan_group
     assert job.config == {"payment_plan_group_id": str(payment_plan_group.pk), "user_id": str(user.pk)}
     assert job.description == f"Export payment plan group summary pdf for {payment_plan_group.pk}"
+    mock_queue.assert_called_once()
+
+
+@pytest.fixture
+def follow_up_instruction() -> Any:
+    return FollowUpInstructionFactory()
+
+
+def test_send_follow_up_instruction_notification_emails_action_sends_email(
+    follow_up_instruction: Any, user: Any
+) -> None:
+    job = Mock(
+        config={
+            "follow_up_instruction_id": str(follow_up_instruction.id),
+            "action_user_id": str(user.id),
+            "action": "SEND_FOR_APPROVAL",
+            "action_date": "2026-04-03T12:30:00+00:00",
+        }
+    )
+
+    with patch("hope.apps.payment.notifications.PaymentNotification") as mock_notification:
+        send_follow_up_instruction_notification_emails_async_task_action(job)
+
+    assert mock_notification.call_args.args[0] == follow_up_instruction
+    mock_notification.return_value.send_email_notification.assert_called_once()
+
+
+def test_send_follow_up_instruction_notification_emails_queues_job(
+    follow_up_instruction: Any, user: Any, django_capture_on_commit_callbacks: Any
+) -> None:
+    with patch("hope.apps.payment.celery_tasks.AsyncJob.queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            send_follow_up_instruction_notification_emails_async_task(
+                follow_up_instruction, "APPROVE", str(user.pk), "2026-04-03T12:30:00+00:00"
+            )
+
+    job = AsyncJob.objects.latest("pk")
+    assert job.content_object == follow_up_instruction
+    assert job.config == {
+        "follow_up_instruction_id": str(follow_up_instruction.pk),
+        "action": "APPROVE",
+        "action_user_id": str(user.pk),
+        "action_date": "2026-04-03T12:30:00+00:00",
+    }
+    mock_queue.assert_called_once()
+
+
+@pytest.fixture
+def instruction_with_old_summary_pdf(follow_up_instruction: Any, user: Any) -> Any:
+    follow_up_instruction.export_pdf_file_summary = FileTempFactory(
+        object_id=follow_up_instruction.pk,
+        content_type=get_content_type_for_model(follow_up_instruction),
+        created_by=user,
+    )
+    follow_up_instruction.save(update_fields=["export_pdf_file_summary"])
+    follow_up_instruction.business_area.enable_email_notification = True
+    follow_up_instruction.business_area.save(update_fields=["enable_email_notification"])
+    return follow_up_instruction
+
+
+@pytest.fixture
+def instruction_summary_pdf_job(instruction_with_old_summary_pdf: Any, user: Any) -> AsyncRetryJob:
+    return AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_pdf_follow_up_instruction_summary_async_task_action",
+        config={"follow_up_instruction_id": str(instruction_with_old_summary_pdf.pk), "user_id": str(user.pk)},
+    )
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.celery_tasks.FollowUpInstructionPDFExportService.generate_pdf_summary")
+def test_export_pdf_follow_up_instruction_summary_action_replaces_existing_file_and_sends_email(
+    mock_generate_pdf_summary: Mock,
+    mock_send_email: Mock,
+    instruction_with_old_summary_pdf: Any,
+    instruction_summary_pdf_job: AsyncRetryJob,
+) -> None:
+    old_file_id = instruction_with_old_summary_pdf.export_pdf_file_summary_id
+    mock_generate_pdf_summary.return_value = (b"%PDF-1.4 test", "summary.pdf")
+
+    export_pdf_follow_up_instruction_summary_async_task_action(instruction_summary_pdf_job)
+
+    instruction_with_old_summary_pdf.refresh_from_db(fields=["export_pdf_file_summary"])
+    assert instruction_with_old_summary_pdf.export_pdf_file_summary_id not in (None, old_file_id)
+    assert FileTemp.objects.filter(pk=old_file_id).exists() is False
+    mock_send_email.assert_called_once()
+
+
+def test_export_pdf_follow_up_instruction_summary_queues_retry_job(
+    follow_up_instruction: Any, user: Any, django_capture_on_commit_callbacks: Any
+) -> None:
+    with patch("hope.apps.payment.celery_tasks.AsyncRetryJob.queue", autospec=True) as mock_queue:
+        with django_capture_on_commit_callbacks(execute=True):
+            export_pdf_follow_up_instruction_summary_async_task(follow_up_instruction, str(user.pk))
+
+    job = AsyncRetryJob.objects.latest("pk")
+    assert job.content_object == follow_up_instruction
+    assert job.config == {"follow_up_instruction_id": str(follow_up_instruction.pk), "user_id": str(user.pk)}
     mock_queue.assert_called_once()

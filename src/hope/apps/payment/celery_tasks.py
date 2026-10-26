@@ -22,7 +22,10 @@ from hope.apps.core.utils import (
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
-from hope.apps.payment.pdf.payment_plan_export_pdf_service import PaymentPlanGroupPDFExportService
+from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
+    FollowUpInstructionPDFExportService,
+    PaymentPlanGroupPDFExportService,
+)
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     calculate_counts,
@@ -1298,6 +1301,49 @@ def export_pdf_payment_plan_group_summary_async_task(payment_plan_group: Payment
     )
 
 
+def export_pdf_follow_up_instruction_summary_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.models import FileTemp, FollowUpInstruction, User
+
+    instruction = FollowUpInstruction.objects.get(id=job.config["follow_up_instruction_id"])
+    set_sentry_business_area_tag(instruction.business_area.name)
+    user = User.objects.get(pk=job.config["user_id"])
+
+    with transaction.atomic():
+        if instruction.export_pdf_file_summary:
+            instruction.export_pdf_file_summary.file.delete()
+            instruction.export_pdf_file_summary.delete()
+            instruction.export_pdf_file_summary = None
+
+        service = FollowUpInstructionPDFExportService(instruction)
+        pdf, filename = service.generate_pdf_summary()
+
+        file_pdf_obj = FileTemp(
+            object_id=instruction.pk,
+            content_type=get_content_type_for_model(instruction),
+            created_by=user,
+        )
+        file_pdf_obj.file.save(filename, ContentFile(pdf))
+
+        instruction.export_pdf_file_summary = file_pdf_obj
+        instruction.save(update_fields=["export_pdf_file_summary", "updated_at"])
+
+        if instruction.business_area.enable_email_notification:
+            send_email_notification_on_commit(service, user)
+
+
+def export_pdf_follow_up_instruction_summary_async_task(instruction: FollowUpInstruction, user_id: str) -> None:
+    instruction_id = str(instruction.id)
+    AsyncRetryJob.queue_task(
+        instance=instruction,
+        owner_id=user_id,
+        job_name=export_pdf_follow_up_instruction_summary_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_pdf_follow_up_instruction_summary_async_task_action",
+        config={"follow_up_instruction_id": instruction_id, "user_id": user_id},
+        group_key="payment",
+        description=f"Export follow-up instruction summary pdf for {instruction_id}",
+    )
+
+
 def periodic_sync_payment_gateway_fsp_async_task_action(job: AsyncRetryJob | None = None) -> None:
     from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI, PaymentGatewayService
 
@@ -1452,6 +1498,44 @@ def send_payment_plan_group_notification_emails_async_task(
         },
         group_key="payment",
         description=f"Send payment notification emails for group {payment_plan_group_id}",
+    )
+
+
+def send_follow_up_instruction_notification_emails_async_task_action(job: AsyncJob) -> None:
+    from hope.apps.payment.notifications import PaymentNotification
+    from hope.models import FollowUpInstruction, User
+
+    instruction = FollowUpInstruction.objects.get(id=job.config["follow_up_instruction_id"])
+    action_user = User.objects.get(id=job.config["action_user_id"])
+    set_sentry_business_area_tag(instruction.business_area.name)
+    PaymentNotification(
+        instruction,
+        job.config["action"],
+        action_user,
+        datetime.datetime.fromisoformat(job.config["action_date"]),
+    ).send_email_notification()
+
+
+def send_follow_up_instruction_notification_emails_async_task(
+    instruction: FollowUpInstruction,
+    action: str,
+    action_user_id: str,
+    action_date: str,
+) -> None:
+    instruction_id = str(instruction.id)
+    AsyncJob.queue_task(
+        instance=instruction,
+        owner_id=action_user_id,
+        job_name=send_follow_up_instruction_notification_emails_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.send_follow_up_instruction_notification_emails_async_task_action",
+        config={
+            "follow_up_instruction_id": instruction_id,
+            "action": action,
+            "action_user_id": action_user_id,
+            "action_date": action_date,
+        },
+        group_key="payment",
+        description=f"Send payment notification emails for follow-up instruction {instruction_id}",
     )
 
 

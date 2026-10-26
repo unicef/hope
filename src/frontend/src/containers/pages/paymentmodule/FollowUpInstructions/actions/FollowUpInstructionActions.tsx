@@ -310,15 +310,19 @@ export function FollowUpInstructionActions({
         </>
       )}
       {status === 'FINISHED' && (
-        <SimpleWorkflowButton
+        <ConfirmWorkflowButton
           label="Close"
           instruction={instruction}
-          mutationFn={() =>
-            RestService.restBusinessAreasProgramsFollowUpInstructionsCloseRetrieve(
-              commonArgs,
+          mutationFn={(comment) =>
+            RestService.restBusinessAreasProgramsFollowUpInstructionsCloseCreate(
+              {
+                ...commonArgs,
+                requestBody: { closureComment: comment ?? null },
+              },
             )
           }
           successMessage="Follow-up Instruction closed"
+          withComment
           variant="outlined"
           dataCy="button-close"
         />
