@@ -153,7 +153,7 @@ export function XlsxImportDialog<
                 setFileToImport(file);
               }}
             />
-            {options}
+            {options ? <Box sx={{ px: 3 }}>{options}</Box> : null}
             {fileToImport && xlsxError ? (
               <XlsxErrorsDisplay errors={xlsxError} />
             ) : null}
