@@ -18,6 +18,7 @@ from extras.test_utils.factories import (
 )
 from hope.admin.funds_commitment_header import FundsCommitmentHeaderAdmin, FundsCommitmentItemInline
 from hope.admin.payment_plan import FundsCommitmentHeaderInline as PaymentPlanFundsCommitmentHeaderInline
+from hope.apps.account.actor_snapshot import ActorSnapshot
 from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import PaymentPlan
@@ -120,6 +121,32 @@ def payment_plan_created_payment_plan(vision_admin_context) -> PaymentPlan:
     }
     payment_plan.save(update_fields=["internal_data"])
     return payment_plan
+
+
+@pytest.fixture
+def fc_not_found_recovery_context(vision_admin_context) -> dict[str, Any]:
+    creator = vision_admin_context["user"]
+    creator.first_name = "Anna"
+    creator.last_name = "Nowak"
+    creator.save(update_fields=["first_name", "last_name"])
+    payment_plan = _create_payment_plan(
+        vision_admin_context["business_area"],
+        creator,
+        vision_admin_context["program_cycle"],
+    )
+    payment_plan.internal_data = {"vision": {"sent": True, "status": VisionStatus.FC_NOT_FOUND.value}}
+    payment_plan.save(update_fields=["internal_data"])
+    ApprovalProcessFactory(payment_plan=payment_plan)
+    funds_commitment_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
+    FundsCommitmentItemFactory(
+        funds_commitment_header=funds_commitment_header,
+        office=vision_admin_context["business_area"],
+    )
+    return {
+        "client": vision_admin_context["client"],
+        "payment_plan": payment_plan,
+        "funds_commitment_header": funds_commitment_header,
+    }
 
 
 def test_send_to_vision_button_visible_when_in_review(afghanistan, admin_user, program_cycle, admin_client) -> None:
@@ -433,3 +460,25 @@ def test_funds_commitment_item_inline_remains_unchanged() -> None:
         "total_open_amount_local",
         "total_open_amount_usd",
     )
+
+
+@patch("hope.admin.payment_plan.VisionService.recover_with_funds_commitment_headers")
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_manual_fc_header_recovery_arrange_ad_title_act_post_assert_creator_snapshot_passed_to_recovery(
+    mock_graph,
+    mock_recover,
+    fc_not_found_recovery_context,
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Finance Officer"}
+    payment_plan = fc_not_found_recovery_context["payment_plan"]
+
+    response = fc_not_found_recovery_context["client"].post(
+        reverse("admin:payment_paymentplan_assign_vision_funds_commitment_headers", args=[payment_plan.pk]),
+        {"funds_commitment_headers": [fc_not_found_recovery_context["funds_commitment_header"].pk]},
+    )
+
+    assert response.status_code == 302
+    locked_payment_plan, funds_commitment_headers, actor_snapshot = mock_recover.call_args.args
+    assert locked_payment_plan.pk == payment_plan.pk
+    assert list(funds_commitment_headers) == [fc_not_found_recovery_context["funds_commitment_header"]]
+    assert actor_snapshot == ActorSnapshot(name="Anna Nowak", job_title="Finance Officer", job_title_source="AD")

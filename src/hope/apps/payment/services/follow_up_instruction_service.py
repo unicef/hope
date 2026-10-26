@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef
 from rest_framework.exceptions import ValidationError
 
+from hope.apps.account.actor_snapshot import build_actor_snapshot
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task,
@@ -202,6 +203,8 @@ class FollowUpInstructionService:
         extra_input_data: dict[str, Any] | None = None,
     ) -> FollowUpInstruction:
         instruction = self._require_instruction()
+        # One AD lookup for the whole instruction; the child plans share the same actor.
+        actor_snapshot = build_actor_snapshot(user)
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
             input_data = {"action": action, **(extra_input_data or {})}
@@ -209,6 +212,7 @@ class FollowUpInstructionService:
                 input_data=input_data,
                 user=user,
                 allow_instruction_managed=True,
+                actor_snapshot=actor_snapshot,
             )
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
         return instruction

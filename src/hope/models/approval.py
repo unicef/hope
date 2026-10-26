@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from hope.apps.account.actor_snapshot import JobTitleSource, actor_display
 from hope.models.approval_process import ApprovalProcess
 from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
@@ -30,6 +31,12 @@ class Approval(TimeStampedUUIDModel):
     )
     comment = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    # Who signed off, as recorded at the moment
+    created_by_name = models.CharField(max_length=301, blank=True, default="")
+    created_by_job_title = models.CharField(max_length=255, blank=True, default="")
+    created_by_job_title_source = models.CharField(
+        max_length=16, blank=True, default="", choices=JobTitleSource.choices
+    )
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
 
     class Meta:
@@ -52,9 +59,6 @@ class Approval(TimeStampedUUIDModel):
             self.REJECT: "Rejected",
         }
 
-        return (
-            f"{types_map.get(self.type)} by "
-            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
-            if (user := self.created_by)
-            else types_map.get(self.type, "")
-        )
+        label = types_map.get(self.type, "")
+        actor = actor_display(self, "created_by")
+        return f"{label} by {actor}" if actor else label

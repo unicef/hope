@@ -27,6 +27,7 @@ from requests import RequestException
 from rest_framework.exceptions import ValidationError
 from rest_framework.status import is_client_error
 
+from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.exchange_rates import ExchangeRates
@@ -92,6 +93,7 @@ class PaymentPlanService:
         self.action: str | None = None
         self.user: User | None = None
         self.input_data: dict | None = None
+        self.actor_snapshot: ActorSnapshot | None = None
 
     @property
     def actions_map(self) -> dict:
@@ -141,6 +143,7 @@ class PaymentPlanService:
         input_data: dict,
         user: "AbstractBaseUser | AnonymousUser",
         allow_instruction_managed: bool = False,
+        actor_snapshot: ActorSnapshot | None = None,
     ) -> PaymentPlan:
         """Get function from get_action_function and execute it return PaymentPlan object."""
         if self.payment_plan.is_instruction_managed and not allow_instruction_managed:
@@ -148,6 +151,7 @@ class PaymentPlanService:
         self.action = input_data.get("action")
         self.input_data = input_data
         self.user = cast("User", user)
+        self.actor_snapshot = actor_snapshot
         self.validate_action()
 
         function_action = self.get_action_function()
@@ -168,6 +172,7 @@ class PaymentPlanService:
             and background_action_status not in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES
         ):
             raise ValidationError("Another background action is already in progress.")
+        actor_snapshot = self.actor_snapshot or build_actor_snapshot(self.user)
         flow = PaymentPlanFlow(self.payment_plan)
         if background_action_status in PaymentPlan.BACKGROUND_ACTION_ERROR_STATES:
             flow.background_action_status_none()
@@ -181,6 +186,7 @@ class PaymentPlanService:
             approval_number_required=self.payment_plan.approval_number_required,
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
+            **actor_snapshot.as_model_fields("sent_for_approval_by"),
         )
         send_payment_notification_emails_async_task(
             self.payment_plan,
@@ -208,7 +214,7 @@ class PaymentPlanService:
         self.payment_plan = payment_plan
         return self.payment_plan
 
-    def release_from_vision(self) -> PaymentPlan:
+    def release_from_vision(self, actor_snapshot: ActorSnapshot | None = None) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             raise ValidationError("Only an in-review Payment Plan can be released by Vision")
 
@@ -219,11 +225,14 @@ class PaymentPlanService:
 
         # Automatic Vision release uses the required, protected Payment Plan creator as its finance-release actor.
         release_actor = self.payment_plan.created_by
+        if actor_snapshot is None:
+            actor_snapshot = build_actor_snapshot(release_actor)
         Approval.objects.create(
             approval_process=approval_process,
             created_by=release_actor,
             type=Approval.FINANCE_RELEASE,
             comment=None,
+            **actor_snapshot.as_model_fields("created_by"),
         )
         log_payment_plan_approval(self.payment_plan, release_actor, Approval.FINANCE_RELEASE, None)
 
@@ -434,6 +443,9 @@ class PaymentPlanService:
         if self.action == PaymentPlan.Action.REVIEW.value and self.payment_plan.vision_managed:
             raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
 
+        # The AD call happens before the row lock below is taken, so a slow lookup never blocks other actions.
+        actor_snapshot = self.actor_snapshot or build_actor_snapshot(self.user)
+        self.actor_snapshot = actor_snapshot
         with transaction.atomic():
             self.payment_plan = (
                 PaymentPlan.objects.select_for_update(of=("self",))
@@ -459,6 +471,7 @@ class PaymentPlanService:
                 "created_by": self.user,
                 "type": approval_type,
                 "comment": approval_comment,
+                **actor_snapshot.as_model_fields("created_by"),
             }
             Approval.objects.create(**approval_data)
             log_payment_plan_approval(self.payment_plan, self.user, approval_type, approval_comment)
@@ -513,6 +526,10 @@ class PaymentPlanService:
             elif approvals_by_user.filter(type=approval_type).exists():
                 raise ValidationError(f"Can't create new {approval_type}. User have already created {approval_type}")
 
+    def _record_actor(self, approval_process: ApprovalProcess, field: str) -> None:
+        setattr(approval_process, field, self.user)
+        (self.actor_snapshot or build_actor_snapshot(self.user)).apply_to(approval_process, field)
+
     def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
@@ -523,7 +540,7 @@ class PaymentPlanService:
             if approval_type == Approval.APPROVAL:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_approve()
-                approval_process.sent_for_authorization_by = self.user
+                self._record_actor(approval_process, "sent_for_authorization_by")
                 approval_process.sent_for_authorization_date = timezone.now()
                 approval_process.save()
                 notification_action = PaymentPlan.Action.APPROVE
@@ -532,7 +549,7 @@ class PaymentPlanService:
             if approval_type == Approval.AUTHORIZATION:
                 flow = PaymentPlanFlow(self.payment_plan)
                 flow.status_authorize()
-                approval_process.sent_for_finance_release_by = self.user
+                self._record_actor(approval_process, "sent_for_finance_release_by")
                 approval_process.sent_for_finance_release_date = timezone.now()
                 approval_process.save()
                 notification_action = PaymentPlan.Action.AUTHORIZE

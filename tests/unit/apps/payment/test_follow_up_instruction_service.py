@@ -9,6 +9,7 @@ import pytest
 from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
+    ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
@@ -22,7 +23,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.payment.services.follow_up_instruction_service import FollowUpInstructionService
-from hope.models import FollowUpInstruction, LogEntry, Payment, PaymentPlan
+from hope.models import Approval, FollowUpInstruction, LogEntry, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -82,6 +83,41 @@ def fsp(delivery_mechanism):
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.add(delivery_mechanism)
     return fsp
+
+
+@pytest.fixture
+def approver():
+    return UserFactory(
+        first_name="Jan", last_name="Kowalski", email="jan.kowalski@example.com", job_title="Stored Title"
+    )
+
+
+@pytest.fixture
+def in_approval_instruction(
+    approver, program, cycle, business_area, currency, delivery_mechanism, fsp
+) -> dict[str, Any]:
+    instruction = FollowUpInstructionFactory(business_area=business_area, program=program, created_by=approver)
+    first_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.IN_APPROVAL,
+    )
+    second_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.IN_APPROVAL,
+    )
+    ApprovalProcessFactory(payment_plan=first_plan)
+    ApprovalProcessFactory(payment_plan=second_plan)
+    return {"instruction": instruction, "first_plan": first_plan, "second_plan": second_plan}
 
 
 def _create_source_payment_plan(
@@ -870,3 +906,29 @@ def test_remove_export_file_does_nothing_when_no_export_file(user, program, busi
     instruction.remove_export_file()
 
     assert instruction.export_file is None
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_execute_payment_plan_action_arrange_two_child_plans_act_approve_assert_one_ad_lookup_shared(
+    mock_graph, in_approval_instruction: dict[str, Any], approver: Any
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+
+    FollowUpInstructionService(instruction=in_approval_instruction["instruction"]).execute_payment_plan_action(
+        PaymentPlan.Action.APPROVE, approver, extra_input_data={"comment": ""}
+    )
+
+    first_approval = (
+        in_approval_instruction["first_plan"].approval_process.first().approvals.get(type=Approval.APPROVAL)
+    )
+    second_approval = (
+        in_approval_instruction["second_plan"].approval_process.first().approvals.get(type=Approval.APPROVAL)
+    )
+    assert mock_graph.call_count == 1
+    assert mock_graph.return_value.get_user_data.call_count == 1
+    assert first_approval.created_by_name == "Jan Kowalski"
+    assert first_approval.created_by_job_title == "Programme Officer"
+    assert first_approval.created_by_job_title_source == "AD"
+    assert second_approval.created_by_name == "Jan Kowalski"
+    assert second_approval.created_by_job_title == "Programme Officer"
+    assert second_approval.created_by_job_title_source == "AD"

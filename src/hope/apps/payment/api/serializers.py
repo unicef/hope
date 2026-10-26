@@ -16,6 +16,7 @@ from rest_framework import serializers
 from rest_framework.settings import api_settings
 
 from hope.api.utils import CurrencySlugRelatedField, OnUnchangedCode
+from hope.apps.account.actor_snapshot import actor_display
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.api.fields import ScopedRelatedField, UTCDateField
@@ -579,25 +580,13 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
         )
 
     def get_sent_for_approval_by(self, obj: ApprovalProcess) -> str:
-        return (
-            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
-            if (user := obj.sent_for_approval_by)
-            else ""
-        )
+        return actor_display(obj, "sent_for_approval_by")
 
     def get_sent_for_authorization_by(self, obj: ApprovalProcess) -> str:
-        return (
-            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
-            if (user := obj.sent_for_authorization_by)
-            else ""
-        )
+        return actor_display(obj, "sent_for_authorization_by")
 
     def get_sent_for_finance_release_by(self, obj: ApprovalProcess) -> str:
-        return (
-            f"{user.first_name} {user.last_name}" + (f" ({user.job_title})" if user.job_title else "")
-            if (user := obj.sent_for_finance_release_by)
-            else ""
-        )
+        return actor_display(obj, "sent_for_finance_release_by")
 
     def get_rejected_on(self, obj: ApprovalProcess) -> str | None:
         if obj.approvals.filter(type=Approval.REJECT).exists():
