@@ -14,10 +14,12 @@ describe('RuleNameWithDescription', () => {
     expect(await screen.findByText('Gives 10 USD per member')).toBeTruthy();
   });
 
-  it('renders only the name when there is no description', () => {
+  it('renders only the name when there is no description', async () => {
     render(<RuleNameWithDescription name="Formula B" description="" />);
-    fireEvent.mouseOver(screen.getByText('Formula B'));
-    expect(screen.getByText('Formula B')).toBeTruthy();
+    const name = screen.getByText('Formula B');
+    expect(name.getAttribute('aria-label')).toBeNull();
+    fireEvent.mouseOver(name);
+    await new Promise((resolve) => setTimeout(resolve, 200));
     expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
