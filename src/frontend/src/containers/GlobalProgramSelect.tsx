@@ -379,7 +379,9 @@ export const GlobalProgramSelect = () => {
         anchorEl={anchorEl}
         placement="bottom-start"
       >
-        <ClickAwayListener onClickAway={handleClose}>
+        {/* The options list renders outside the Autocomplete root, so a touchend
+            click-away would close it before the tap's click selects an option. */}
+        <ClickAwayListener onClickAway={handleClose} touchEvent={false}>
           <Autocomplete
             open
             onClose={(

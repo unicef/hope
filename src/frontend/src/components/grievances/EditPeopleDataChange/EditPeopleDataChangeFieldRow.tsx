@@ -9,6 +9,11 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { EditPeopleDataChangeField } from './EditPeopleDataChangeField';
 import { CurrentValue } from './CurrentValue';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 export interface EditPeopleDataChangeFieldRowProps {
   fields: any[];
@@ -39,15 +44,14 @@ export const EditPeopleDataChangeFieldRow = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
   return (
-    <Grid
-      container
+    <ResponsiveGridContainer
       spacing={2}
       sx={{
         alignItems: 'center',
         mb: 2,
       }}
     >
-      <Grid size={4}>
+      <ResponsiveGrid size="third">
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -67,8 +71,8 @@ export const EditPeopleDataChangeFieldRow = ({
               name: item.labelEn,
             }))}
         />
-      </Grid>
-      <Grid size={4}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third">
         <CurrentValue
           field={field}
           value={
@@ -78,20 +82,23 @@ export const EditPeopleDataChangeFieldRow = ({
           }
           values={values}
         />
-      </Grid>
+      </ResponsiveGrid>
       {itemValue.fieldName ? (
         <EditPeopleDataChangeField
           name={`individualDataUpdateFields[${index}].fieldValue`}
           field={field}
         />
       ) : null}
-      <Grid size={1}>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         {itemValue.fieldName && (
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
         )}
       </Grid>
-    </Grid>
+    </ResponsiveGridContainer>
   );
 };

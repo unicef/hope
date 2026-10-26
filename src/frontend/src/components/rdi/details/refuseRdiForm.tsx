@@ -13,6 +13,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useSnackbar } from '@hooks/useSnackBar';
 import type { ReactElement } from 'react';
 import { showApiErrorMessages } from '@utils/utils';
+import { responsiveValue } from 'src/responsive';
 
 const RefuseRdiForm = ({
   registration,
@@ -52,7 +53,11 @@ const RefuseRdiForm = ({
     >
       {({ submitForm }) => (
         <Form>
-          <Dialog open={open} onClose={onClose} style={{ minWidth: '750px' }}>
+          <Dialog
+            open={open}
+            onClose={onClose}
+            sx={{ minWidth: responsiveValue(0, 750) }}
+          >
             <DialogTitle>Refuse RDI</DialogTitle>
             <DialogContent>
               <DialogContentText>

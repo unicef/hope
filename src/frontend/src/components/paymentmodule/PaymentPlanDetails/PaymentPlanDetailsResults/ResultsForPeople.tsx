@@ -6,6 +6,7 @@ import {
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { responsiveGridSize } from 'src/responsive';
 
 interface ResultsForPeopleProps {
   paymentPlan: PaymentPlanDetail;
@@ -16,7 +17,7 @@ export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
   const { totalIndividualsCount } = paymentPlan;
 
   return (
-    <Grid size={{ xs: 4 }}>
+    <Grid size={responsiveGridSize('third')}>
       <Grid
         container
         spacing={0}

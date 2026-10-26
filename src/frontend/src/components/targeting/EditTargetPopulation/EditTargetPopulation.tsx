@@ -27,6 +27,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
+import { responsiveGridSize } from 'src/responsive';
 import * as Yup from 'yup';
 import Exclusions from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
@@ -60,6 +61,11 @@ const EditTargetPopulation = ({
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const permissions = usePermissions();
+  // Without the list permission the cycle stays fixed to the target population's own.
+  const canListCycles = hasPermissions(
+    PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+    permissions,
+  );
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [modalCycle, setModalCycle] = useState<{ value: string; name: string }>(
     {
@@ -286,7 +292,7 @@ const EditTargetPopulation = ({
                 mb: 5,
               }}
             >
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
@@ -307,9 +313,11 @@ const EditTargetPopulation = ({
                   // @ts-ignore
                   error={errors.programCycleId?.value}
                   data-cy="program-cycle-autocomplete"
+                  enabled={canListCycles}
+                  disabled={!canListCycles}
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Box
                   sx={{
                     display: 'flex',
@@ -360,7 +368,7 @@ const EditTargetPopulation = ({
               }}
             />
             <Grid container spacing={3}>
-              <Grid size={6}>
+              <Grid size={responsiveGridSize('half')}>
                 <Field
                   name="name"
                   label={t('Target Population Name')}
@@ -373,7 +381,7 @@ const EditTargetPopulation = ({
                 />
               </Grid>
               {paymentPlan.isPurposesEditable && (
-                <Grid size={6}>
+                <Grid size={responsiveGridSize('half')}>
                   <Field
                     name="paymentPlanPurposes"
                     label={t('Payment Plan Purposes')}

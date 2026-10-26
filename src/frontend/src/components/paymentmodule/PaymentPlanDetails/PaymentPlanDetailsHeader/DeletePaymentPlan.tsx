@@ -25,6 +25,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../../programContext';
+import { HeaderIconAction } from '@core/HeaderIconAction';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -93,19 +94,27 @@ export function DeletePaymentPlan({
 
   return (
     <>
-      <Box
-        sx={{
-          p: 2,
-        }}
+      <HeaderIconAction
+        icon={<Delete />}
+        label={t('Delete')}
+        onClick={() => setDeleteDialogOpen(true)}
+        disabled={!isActiveProgram}
+        dataCy="button-delete-pp"
       >
-        <IconButton
-          onClick={() => setDeleteDialogOpen(true)}
-          disabled={!isActiveProgram}
-          data-cy="button-delete-pp"
+        <Box
+          sx={{
+            p: 2,
+          }}
         >
-          <Delete />
-        </IconButton>
-      </Box>
+          <IconButton
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={!isActiveProgram}
+            data-cy="button-delete-pp"
+          >
+            <Delete />
+          </IconButton>
+        </Box>
+      </HeaderIconAction>
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}

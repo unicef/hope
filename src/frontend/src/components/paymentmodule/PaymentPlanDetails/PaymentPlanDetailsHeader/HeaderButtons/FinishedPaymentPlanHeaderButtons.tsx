@@ -12,6 +12,7 @@ import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface FinishedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -33,33 +34,33 @@ export function FinishedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
-  const {
-    mutate: markReadyForClosure,
-    isPending: loadingReadyForClosure,
-  } = useMutation({
-    mutationFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansReadyForClosureRetrieve({
-        businessAreaSlug: businessArea,
-        programCode: programId,
-        id: paymentPlan.id,
-      }),
-    onSuccess: () => {
-      showMessage(t('Payment Plan marked as ready for closure.'));
-      queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+  const { mutate: markReadyForClosure, isPending: loadingReadyForClosure } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansReadyForClosureRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            programCode: programId,
+            id: paymentPlan.id,
+          },
         ),
-      });
-      queryClient.invalidateQueries({
-        queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlansList,
-        ),
-      });
-    },
-    onError: (error: any) => {
-      showApiErrorMessages(error, showMessage);
-    },
-  });
+      onSuccess: () => {
+        showMessage(t('Payment Plan marked as ready for closure.'));
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ),
+        });
+        queryClient.invalidateQueries({
+          queryKey: restQueryKey(
+            RestService.restBusinessAreasProgramsPaymentPlansList,
+          ),
+        });
+      },
+      onError: (error: any) => {
+        showApiErrorMessages(error, showMessage);
+      },
+    });
 
   const {
     mutate: sendToPaymentGateway,
@@ -92,12 +93,7 @@ export function FinishedPaymentPlanHeaderButtons({
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       <>
         {paymentPlan.canCreateFollowUp && (
           <Box
@@ -183,6 +179,6 @@ export function FinishedPaymentPlanHeaderButtons({
           </Box>
         )}
       </>
-    </Box>
+    </HeaderActions>
   );
 }
