@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
@@ -20,6 +20,7 @@ import { useProgramContext } from '../../programContext';
 import { IndividualDetails } from '@components/payments/IndividualDetails';
 import type { ReactElement } from 'react';
 import type { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface VerificationPaymentDetailsProps {
   payment: PaymentDetail;
@@ -39,8 +40,8 @@ export function VerificationPaymentDetails({
         <Title>
           <Typography variant="h6">{t('Payment Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.status}
@@ -48,35 +49,35 @@ export function VerificationPaymentDetails({
                 statusNameMapping={paymentStatusDisplayMap}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('TARGET POPULATION')}
               value={payment.parent.name}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
               value={payment.parent?.deliveryMechanism?.name}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </ContainerColumnWithBorder>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Verification Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.verification.status}
                 statusToColor={verificationRecordsStatusToColor}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('AMOUNT RECEIVED')}
               value={formatCurrencyWithSymbol(
@@ -85,8 +86,8 @@ export function VerificationPaymentDetails({
                 payment.currencyVisionCode,
               )}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </ContainerColumnWithBorder>
       {isSocialDctType ? (
         <IndividualDetails individual={payment.household.headOfHousehold} />
@@ -97,20 +98,20 @@ export function VerificationPaymentDetails({
         <Title>
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
               value={formatFigure(payment.entitlementQuantity)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
               value={formatFigure(payment.deliveredQuantity)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('CURRENCY')}
               value={formatCurrencyCode(
@@ -118,23 +119,23 @@ export function VerificationPaymentDetails({
                 payment.currencyVisionCode,
               )}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DELIVERY TYPE')}
               value={payment.deliveryMechanism?.name}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('DELIVERY DATE')}
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('FSP')} value={payment.fspName} />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </Overview>
       {canViewActivityLog && (
         <UniversalActivityLogTable

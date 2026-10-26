@@ -1,5 +1,6 @@
 import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
@@ -63,16 +64,16 @@ export function ActivityLogPageFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'center' }}>
-        <Grid size={{ xs: 3 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'center' }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('module', e.target.value)}
             label={t('Module')}
@@ -93,8 +94,8 @@ export function ActivityLogPageFilters({
                 </MenuItem>
               ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AssigneeAutocompleteRestFilter
             label={t('User')}
             filter={filter}
@@ -105,8 +106,8 @@ export function ActivityLogPageFilters({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

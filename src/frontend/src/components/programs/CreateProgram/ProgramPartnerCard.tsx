@@ -7,6 +7,7 @@ import { Field } from 'formik';
 import type { FC, ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 import styled from 'styled-components';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -186,7 +187,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
             ) && (
               <Grid container>
                 {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
-                  <Grid key={level} size={4}>
+                  <ResponsiveGrid key={level} size="third" mobileSize="half">
                     <LabelizedField
                       dataCy={`Admin-Areas-${level}-field`}
                       label={`Admin Areas ${level}`}
@@ -194,7 +195,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
                     >
                       {allAreasTreeDataGroupedByLevel[level]}
                     </LabelizedField>
-                  </Grid>
+                  </ResponsiveGrid>
                 ))}
               </Grid>
             )}
@@ -208,7 +209,13 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
         </IconButton>
       </Box>
       <Collapse in={isAdminAreaExpanded}>
-        <Box style={{ maxHeight: '30vh', overflow: 'auto', width: '50%' }}>
+        <Box
+          sx={{
+            maxHeight: '30vh',
+            overflow: 'auto',
+            width: responsiveValue('100%', '50%'),
+          }}
+        >
           <SimpleTreeView
             multiSelect
             slots={{
@@ -249,7 +256,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
           justifyContent: 'space-between',
         }}
       >
-        <Grid size={6}>
+        <ResponsiveGrid size="half">
           <Field
             name={`partners[${index}].id`}
             label={t('Partner')}
@@ -258,7 +265,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
             component={FormikSelectField}
             required
           />
-        </Grid>
+        </ResponsiveGrid>
         <DeleteProgramPartner
           // TODO: add permission
           canDeleteProgramPartner={canDeleteProgramPartner}
@@ -279,7 +286,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
       >
         <BiggestText>{t('Area Access')}</BiggestText>
       </Box>
-      <Grid size={6}>
+      <ResponsiveGrid size="half">
         <Field
           name={`partners[${index}].areaAccess`}
           required={values.partners[index]?.id !== ''}
@@ -305,7 +312,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
             }
           }}
         />
-      </Grid>
+      </ResponsiveGrid>
       {index + 1 < values.partners.length && <DividerLine />}
     </Grid>
   );

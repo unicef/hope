@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { useIsMobile } from 'src/responsive';
 
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
@@ -23,6 +24,7 @@ export function AcceptanceProcessStepper({
     financeReleaseNumberRequired,
   } = acceptanceProcess;
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const isClosed = paymentPlan.status === PaymentPlanStatusEnum.CLOSED;
   const steps = [
     {
@@ -67,7 +69,7 @@ export function AcceptanceProcessStepper({
   };
 
   return (
-    <Stepper activeStep={getActiveStep()}>
+    <Stepper activeStep={getActiveStep()} alternativeLabel={isMobile}>
       {steps.map((step) => (
         <Step completed={step.isCompleted} key={step.name}>
           <StepLabel error={step.hasError}>{step.name}</StepLabel>

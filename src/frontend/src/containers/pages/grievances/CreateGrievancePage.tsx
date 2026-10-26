@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { Formik, useFormikContext } from 'formik';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
@@ -36,6 +36,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 import type { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import type { IndividualRoleInHouseholdForHousehold } from '@restgenerated/models/IndividualRoleInHouseholdForHousehold';
@@ -68,15 +69,21 @@ import {
   PERMISSIONS,
 } from '../../../config/permissions';
 
-const InnerBoxPadding = styled.div`
-  .MuiPaper-root {
-    padding: 32px 20px;
-  }
-`;
+function InnerBoxPadding({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <Box
+      sx={{
+        '& .MuiPaper-root': { padding: responsiveValue('16px', '32px 20px') },
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
 
-const NewTicket = styled.div`
-  padding: 20px;
-`;
+function NewTicket({ children }: { children: ReactNode }): ReactElement {
+  return <Box sx={{ padding: responsiveValue('8px', '20px') }}>{children}</Box>;
+}
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -739,9 +746,9 @@ const CreateGrievancePage = (): ReactElement => {
                   <NewTicket>
                     <Grid container spacing={3}>
                       <TicketsAlreadyExist values={values} />
-                      <Grid size={{ xs: 6 }}>
+                      <ResponsiveGrid size="half">
                         <OtherRelatedTicketsCreate values={values} />
-                      </Grid>
+                      </ResponsiveGrid>
                     </Grid>
                   </NewTicket>
                 </Grid>

@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react';
 import { useState, useRef } from 'react';
 import { useScrollToRefOnChange } from '@hooks/useScrollToRefOnChange';
-import { Box, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { HeaderActions } from '@components/core/HeaderActions';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
@@ -155,7 +156,7 @@ export const GrievancesTablePage = (): ReactElement => {
   return (
     <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <HeaderActions spacing="gap">
           {availableMyTasksTabs(permissions).length > 0 && (
             <Button
               variant="outlined"
@@ -196,7 +197,7 @@ export const GrievancesTablePage = (): ReactElement => {
               {t('NEW TICKET')}
             </ButtonTooltip>
           )}
-        </Box>
+        </HeaderActions>
       </PageHeader>
       <GrievancesFilters
         choicesData={choicesData}

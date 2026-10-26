@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { ClearApplyButtons } from './ClearApplyButtons';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { t } from 'i18next';
+import { responsiveValue, useIsMobile } from 'src/responsive';
 
 interface FiltersSectionProps {
   children: ReactElement | ReactElement[];
@@ -20,7 +21,6 @@ interface FiltersSectionProps {
 const FiltersPaper = styled(Paper)`
   width: 100%;
   background-color: #fff;
-  padding: 8px 44px;
 `;
 
 export const FiltersSection: FC<FiltersSectionProps> = ({
@@ -32,7 +32,11 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
   withHideShowButton = false,
   initialExpanded = true,
 }): ReactElement => {
-  const [expanded, setExpanded] = useState(initialExpanded);
+  const isMobile = useIsMobile();
+  // On phones and tablets the filters take a whole screen, so they start
+  // collapsed behind the show/hide toggle.
+  const hasHideShowButton = withHideShowButton || isMobile;
+  const [expanded, setExpanded] = useState(initialExpanded && !isMobile);
 
   const filtersComponent = (
     <>
@@ -46,7 +50,7 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
           }}
         >
           {children}
-          {!withHideShowButton && (
+          {!hasHideShowButton && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
               {withApplyClearButtons && (
                 <ClearApplyButtons
@@ -58,7 +62,7 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
           )}
         </Box>
       </Collapse>
-      {withHideShowButton && (
+      {hasHideShowButton && (
         <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
           <Box
             sx={{
@@ -91,7 +95,9 @@ export const FiltersSection: FC<FiltersSectionProps> = ({
     </>
   );
   return isOnPaper ? (
-    <FiltersPaper>{filtersComponent}</FiltersPaper>
+    <FiltersPaper sx={{ padding: responsiveValue('8px 16px', '8px 44px') }}>
+      {filtersComponent}
+    </FiltersPaper>
   ) : (
     filtersComponent
   );

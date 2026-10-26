@@ -21,6 +21,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useProgramContext } from '../../programContext';
 import type { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { responsiveValue } from 'src/responsive';
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
@@ -83,7 +84,9 @@ export function FinishVerificationPlan({
       const receivedWithProblemsTicketsCount =
         verificationPlan?.receivedWithProblemsCount;
 
-      return (notReceivedTicketsCount ?? 0) + (receivedWithProblemsTicketsCount ?? 0);
+      return (
+        (notReceivedTicketsCount ?? 0) + (receivedWithProblemsTicketsCount ?? 0)
+      );
     }
     return null;
   };
@@ -102,7 +105,7 @@ export function FinishVerificationPlan({
     <>
       <Box
         sx={{
-          p: 2,
+          p: responsiveValue(0, 2),
         }}
       >
         <Button
