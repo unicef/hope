@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { AbortPaymentPlan } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/AbortPaymentPlan';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -87,12 +88,7 @@ export function LockedFspPaymentPlanHeaderButtons({
     });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canUnlock && (
         <Box
           sx={{
@@ -138,6 +134,6 @@ export function LockedFspPaymentPlanHeaderButtons({
           <AbortPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

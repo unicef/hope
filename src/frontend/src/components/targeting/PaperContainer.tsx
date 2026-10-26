@@ -1,10 +1,18 @@
-import styled from 'styled-components';
 import { Paper } from '@mui/material';
+import type { PaperProps } from '@mui/material';
+import type { ReactElement } from 'react';
+import { responsiveValue } from 'src/responsive';
 
-export const PaperContainer = styled(Paper)`
-  display: flex;
-  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
-  margin: ${({ theme }) => theme.spacing(5)};
-  flex-direction: column;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
+export const PaperContainer = (props: PaperProps): ReactElement => (
+  <Paper
+    sx={{
+      display: 'flex',
+      py: 3,
+      px: 4,
+      m: responsiveValue(2, 5),
+      flexDirection: 'column',
+      borderBottom: '1px solid rgba(224, 224, 224, 1)',
+    }}
+    {...props}
+  />
+);

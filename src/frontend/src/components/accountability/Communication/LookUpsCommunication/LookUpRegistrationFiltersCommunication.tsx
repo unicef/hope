@@ -1,5 +1,4 @@
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
@@ -9,6 +8,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import type { ReactElement } from 'react';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface LookUpRegistrationFiltersCommunicationProps {
   filter: Record<string, any>;
@@ -54,16 +54,16 @@ export function LookUpRegistrationFiltersCommunication({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container spacing={3} sx={{ alignItems: 'flex-end' }}>
-        <Grid size={{ xs: 4 }}>
+      <ResponsiveGridContainer spacing={3} sx={{ alignItems: 'flex-end' }}>
+        <ResponsiveGrid size="third">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filter-search"
           />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="third">
           <AssigneeAutocompleteRestFilter
             name="importedBy"
             label={t('Imported By')}
@@ -75,8 +75,8 @@ export function LookUpRegistrationFiltersCommunication({
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
@@ -90,8 +90,8 @@ export function LookUpRegistrationFiltersCommunication({
             }
             data-cy="filter-size-min"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder="To"
@@ -104,8 +104,8 @@ export function LookUpRegistrationFiltersCommunication({
             }
             data-cy="filter-size-max"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Import Date')}
             placeholder={t('From')}
@@ -113,16 +113,16 @@ export function LookUpRegistrationFiltersCommunication({
             value={filter.importDateRangeMin}
             dataCy="filter-import-date-range-min"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}
             value={filter.importDateRangeMax}
             dataCy="filter-import-date-range-max"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

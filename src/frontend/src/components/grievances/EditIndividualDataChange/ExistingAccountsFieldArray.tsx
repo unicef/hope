@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { EditAccountRow } from './EditAccountRow';
@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import type { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import type { FinancialInstitutionChoice } from '@restgenerated/models/FinancialInstitutionChoice';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface ExistingAccountsFieldArrayProps {
   setFieldValue;
@@ -24,16 +25,15 @@ export function ExistingAccountsFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <Grid container spacing={3} sx={{ flexDirection: 'column' }}>
+    <ResponsiveGridContainer spacing={3} sx={{ flexDirection: 'column' }}>
       <FieldArray
         name="individualDataUpdateAccountsToEdit"
         render={(arrayHelpers) =>
           individual?.accounts?.length > 0 ? (
             <>
               {individual.accounts.map((item) => (
-                <Grid size={12} key={item.id}>
-                  <Grid
-                    container
+                <ResponsiveGrid size="full" key={item.id}>
+                  <ResponsiveGridContainer
                     direction="row"
                     spacing={3}
                     sx={{
@@ -50,8 +50,8 @@ export function ExistingAccountsFieldArray({
                         accountFinancialInstitutionChoices
                       }
                     />
-                  </Grid>
-                </Grid>
+                  </ResponsiveGridContainer>
+                </ResponsiveGrid>
               ))}
             </>
           ) : (
@@ -67,6 +67,6 @@ export function ExistingAccountsFieldArray({
           )
         }
       />
-    </Grid>
+    </ResponsiveGridContainer>
   );
 }

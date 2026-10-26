@@ -10,6 +10,7 @@ import type { ReactElement } from 'react';
 import { Fragment } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import type { Account } from '@restgenerated/models/Account';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 export interface AccountProps {
   id: string;
@@ -45,9 +46,9 @@ export function AccountField({
       return null;
     }
     return (
-      <Grid size={{ xs: 3 }}>
+      <ResponsiveGrid size="quarter">
         <LabelizedField label={t('Current Value')} value={getValue(account)} />
-      </Grid>
+      </ResponsiveGrid>
     );
   };
   const newValueFieldWidth = account ? 5 : 8;
@@ -57,18 +58,21 @@ export function AccountField({
     )?.name || account?.financialInstitution;
   return (
     <>
-      <Grid size={{ xs: 11 }} />
-      <Grid size={{ xs: 1 }}>
+      <Grid size={responsiveValue(12, 11)} />
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         <IconButton disabled={isEditTicket} onClick={onDelete}>
           <Delete />
         </IconButton>
       </Grid>
 
       <Fragment key="type">
-        <Grid size={{ xs: 4 }}>
+        <ResponsiveGrid size="third">
           <LabelizedField label={t('Account Item')} value="Account Type" />
-        </Grid>
-        <Grid size={{ xs: 8 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="twoThirds">
           <Field
             name={`${accountFieldName}.accountType`}
             variant="outlined"
@@ -78,13 +82,13 @@ export function AccountField({
             disabled={Boolean(account)}
             required
           />
-        </Grid>
+        </ResponsiveGrid>
       </Fragment>
 
       <Fragment key="number">
-        <Grid size={{ xs: 4 }}>
+        <ResponsiveGrid size="third">
           <LabelizedField label={t('Account Item')} value="Number" />
-        </Grid>
+        </ResponsiveGrid>
         {renderCurrentValue(account, (acc) => acc.number)}
         <Grid size={{ xs: newValueFieldWidth }}>
           <Field
@@ -98,12 +102,12 @@ export function AccountField({
         </Grid>
       </Fragment>
       <Fragment key="financialInstitution">
-        <Grid size={{ xs: 4 }}>
+        <ResponsiveGrid size="third">
           <LabelizedField
             label={t('Account Item')}
             value="Financial Institution"
           />
-        </Grid>
+        </ResponsiveGrid>
 
         {renderCurrentValue(account, () => financialInstitutionName)}
         <Grid size={{ xs: newValueFieldWidth }}>
@@ -127,7 +131,7 @@ export function AccountField({
               getIndexForId(values[baseName], id)
             ]?.dataFields?.map((field, idx) => (
               <Fragment key={idx}>
-                <Grid size={{ xs: 4 }}>
+                <ResponsiveGrid size="third">
                   <Field
                     name={`${dynamicFieldsName}.${idx}.key`}
                     component={FormikTextField}
@@ -137,7 +141,7 @@ export function AccountField({
                     disabled={Boolean(account) && !field.isNew}
                     required
                   />
-                </Grid>
+                </ResponsiveGrid>
                 {renderCurrentValue(
                   account,
                   (acc) =>
@@ -153,7 +157,10 @@ export function AccountField({
                     required
                   />
                 </Grid>
-                <Grid size={{ xs: 1 }}>
+                <Grid
+                  sx={{ textAlign: responsiveValue('right', 'left') }}
+                  size={responsiveValue(12, 1)}
+                >
                   {field.isNew && (
                     <IconButton onClick={() => remove(idx)}>
                       <Delete />
@@ -162,7 +169,7 @@ export function AccountField({
                 </Grid>
               </Fragment>
             ))}
-            <Grid size={{ xs: 12 }}>
+            <ResponsiveGrid size="full">
               <Button
                 variant="outlined"
                 startIcon={<Add />}
@@ -170,7 +177,7 @@ export function AccountField({
               >
                 {t('Add Field')}
               </Button>
-            </Grid>
+            </ResponsiveGrid>
           </>
         )}
       </FieldArray>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import { SurveyTabsValues } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import LookUpSelectionTablesSurveys from './LookUpSelectionTablesSurveys';
@@ -62,17 +63,18 @@ export function LookUpSelectionSurveys({
     <Box>
       <BoxWithBorderBottom
         sx={{
-          p: 4,
-          m: 4,
+          p: responsiveValue(2, 4),
+          m: responsiveValue(2, 4),
           display: 'flex',
           alignItems: 'center',
+          flexWrap: 'wrap',
           bgcolor: '#F5F5F5',
         }}
       >
         <Box
           sx={{
-            pl: 5,
-            pr: 5,
+            pl: responsiveValue(0, 5),
+            pr: responsiveValue(2, 5),
             fontWeight: '500',
             fontSize: 'medium',
           }}
@@ -100,8 +102,8 @@ export function LookUpSelectionSurveys({
       </BoxWithBorderBottom>
       <Box
         sx={{
-          p: 4,
-          mt: 4,
+          p: responsiveValue(2, 4),
+          mt: responsiveValue(2, 4),
         }}
       >
         <Box>

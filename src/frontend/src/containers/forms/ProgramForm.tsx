@@ -1,7 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Grid, TextField, Tooltip } from '@mui/material';
+import { TextField, Tooltip } from '@mui/material';
 import type { PaginatedPayeeLabelList } from '@restgenerated/models/PaginatedPayeeLabelList';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
@@ -19,6 +19,11 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 interface ProgramFormPropTypes {
   values;
@@ -171,8 +176,8 @@ const ProgramForm = ({
 
   return (
     <Form>
-      <Grid container spacing={3}>
-        <Grid size={6}>
+      <ResponsiveGridContainer spacing={3}>
+        <ResponsiveGrid size="half">
           <Field
             name="name"
             label={t('Programme Name')}
@@ -183,8 +188,8 @@ const ProgramForm = ({
             component={FormikTextField}
             data-cy="input-programme-name"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="code"
             label={t('Programme Code')}
@@ -196,8 +201,8 @@ const ProgramForm = ({
             disabled={isEditProgram}
             data-cy="input-programme-code"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="startDate"
             label={t('Start Date')}
@@ -207,8 +212,8 @@ const ProgramForm = ({
             decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             data-cy="input-start-date"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="endDate"
             label={t('End Date')}
@@ -220,8 +225,8 @@ const ProgramForm = ({
             minDate={values.startDate}
             data-cy="input-end-date"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="sector"
             label={t('Sector')}
@@ -232,8 +237,8 @@ const ProgramForm = ({
             component={FormikSelectField}
             data-cy="input-sector"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Tooltip
             title={
               values.isActive
@@ -272,8 +277,8 @@ const ProgramForm = ({
               />
             </span>
           </Tooltip>
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <TextField
             label={t('GL Code')}
             value={selectedPayeeType?.glCode ?? ''}
@@ -284,8 +289,8 @@ const ProgramForm = ({
             slotProps={{ htmlInput: { readOnly: true } }}
             data-cy="input-gl-code"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Tooltip
             title={
               values.isActive
@@ -326,8 +331,8 @@ const ProgramForm = ({
               />
             </span>
           </Tooltip>
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Tooltip
             title={
               isCopyProgramPage
@@ -365,8 +370,8 @@ const ProgramForm = ({
               />
             </span>
           </Tooltip>
-        </Grid>
-        <Grid size={12}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="full">
           <Field
             name="description"
             label={t('Description')}
@@ -377,8 +382,8 @@ const ProgramForm = ({
             component={FormikTextField}
             data-cy="input-description"
           />
-        </Grid>
-        <Grid size={12}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="full">
           <Field
             name="paymentPlanPurposes"
             required
@@ -386,8 +391,8 @@ const ProgramForm = ({
             lockedValues={lockedPurposeIds ?? []}
             disabled={(values.paymentPlanPurposes?.length ?? 0) >= 10}
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="budget"
             label={t('Budget (USD)')}
@@ -398,8 +403,8 @@ const ProgramForm = ({
             component={FormikTextField}
             data-cy="input-budget"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
@@ -409,8 +414,8 @@ const ProgramForm = ({
             component={FormikTextField}
             data-cy="input-admin-area"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="populationGoal"
             label={t('Population Goal (# of Individuals)')}
@@ -420,9 +425,12 @@ const ProgramForm = ({
             component={FormikTextField}
             data-cy="input-population-goal"
           />
-        </Grid>
-        <Grid size={6} />
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid
+          size="half"
+          sx={{ display: responsiveValue('none', 'block') }}
+        />
+        <ResponsiveGrid size="half">
           <Field
             name="cashPlus"
             label={t('Cash+')}
@@ -430,9 +438,12 @@ const ProgramForm = ({
             component={FormikCheckboxField}
             data-cy="input-cash-plus"
           />
-        </Grid>
-        <Grid size={6} />
-        <Grid size={12}>
+        </ResponsiveGrid>
+        <ResponsiveGrid
+          size="half"
+          sx={{ display: responsiveValue('none', 'block') }}
+        />
+        <ResponsiveGrid size="full">
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}
@@ -441,8 +452,8 @@ const ProgramForm = ({
             data-cy="input-frequency-of-payment"
             alignItems="center"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="reconciliationWindowInDays"
             label={t('Reconciliation window (in days)')}
@@ -453,8 +464,8 @@ const ProgramForm = ({
             component={FormikTextField}
             data-cy="input-reconciliation-window"
           />
-        </Grid>
-        <Grid size={6}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="half">
           <Field
             name="sendReconciliationWindowExpiryNotifications"
             label={t('Send reconciliation window expiry notifications')}
@@ -462,8 +473,8 @@ const ProgramForm = ({
             component={FormikCheckboxField}
             data-cy="input-reconciliation-window-notifications"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </Form>
   );
 };

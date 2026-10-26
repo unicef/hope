@@ -3,17 +3,19 @@ import { Title } from '@core/Title';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import type { Theme } from '@mui/material';
 import { Typography } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  SECTION_PADDING,
+} from 'src/responsive';
 import styled from 'styled-components';
 import { ImportedIndividualFlexFieldPhotoModal } from '../ImportedIndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
   margin-top: ${({ theme }) => theme.spacing(6)};
   margin-bottom: ${({ theme }) => theme.spacing(6)};
 `;
@@ -41,11 +43,11 @@ export const RegistrationIndividualAdditionalRegistrationInformation = ({
     ([key, value]: [string, string | string[]]) => {
       if (key in flexAttributesDict === false) {
         return (
-          <Grid size={{ xs: 4 }} key={key}>
+          <ResponsiveGrid size="third" key={key}>
             <LabelizedField label={key} value={value}>
               {value}
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
         );
       }
       const { type, choices } = flexAttributesDict[key];
@@ -70,24 +72,22 @@ export const RegistrationIndividualAdditionalRegistrationInformation = ({
         newValue = value;
       }
       return (
-        <Grid size={{ xs: 4 }} key={key}>
+        <ResponsiveGrid size="third" key={key}>
           <LabelizedField label={label} value={newValue}>
             {children}
           </LabelizedField>
-        </Grid>
+        </ResponsiveGrid>
       );
     },
   );
   return (
-    <Overview>
+    <Overview sx={{ padding: SECTION_PADDING }}>
       <Title>
         <Typography variant="h6">
           {t('Additional Registration information')}
         </Typography>
       </Title>
-      <Grid container spacing={6}>
-        {fields}
-      </Grid>
+      <ResponsiveGridContainer spacing={6}>{fields}</ResponsiveGridContainer>
     </Overview>
   );
 };

@@ -10,6 +10,7 @@ import {
   DialogActions,
   Dialog,
   Table,
+  TableContainer,
   TextField,
 } from '@mui/material';
 import styled from 'styled-components';
@@ -120,9 +121,11 @@ export const ManagerialConsoleBaseModal = ({
               />
             </Box>
           </Box>
-          <StyledTable>
-            <TableBody>{children}</TableBody>
-          </StyledTable>
+          <TableContainer>
+            <StyledTable>
+              <TableBody>{children}</TableBody>
+            </StyledTable>
+          </TableContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>

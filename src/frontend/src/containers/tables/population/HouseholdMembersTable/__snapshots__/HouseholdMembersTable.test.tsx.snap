@@ -13,10 +13,10 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
         class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
       >
         <div
-          class="styled-normalized MuiBox-root css-0"
+          class="styled-normalized MuiBox-root css-1b626uw"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-k5d18q-MuiToolbar-root"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
@@ -26,7 +26,7 @@ exports[`HouseholdMembersTable > should handle empty household members list 1`] 
             </h6>
           </div>
           <div
-            class="styled-normalized MuiBox-root css-1ruxp1v"
+            class="styled-normalized MuiBox-root css-7yim04"
           />
         </div>
         <table
@@ -200,10 +200,10 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
         class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
       >
         <div
-          class="styled-normalized MuiBox-root css-0"
+          class="styled-normalized MuiBox-root css-1b626uw"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-k5d18q-MuiToolbar-root"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
@@ -213,7 +213,7 @@ exports[`HouseholdMembersTable > should render HouseholdMembersTable correctly 1
             </h6>
           </div>
           <div
-            class="styled-normalized MuiBox-root css-1ruxp1v"
+            class="styled-normalized MuiBox-root css-7yim04"
           />
         </div>
         <table
@@ -387,10 +387,10 @@ exports[`HouseholdMembersTable > should render multiple household members with d
         class="MuiTableContainer-root styled-normalized css-MuiTableContainer-root"
       >
         <div
-          class="styled-normalized MuiBox-root css-0"
+          class="styled-normalized MuiBox-root css-1b626uw"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-k5d18q-MuiToolbar-root"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
@@ -400,7 +400,7 @@ exports[`HouseholdMembersTable > should render multiple household members with d
             </h6>
           </div>
           <div
-            class="styled-normalized MuiBox-root css-1ruxp1v"
+            class="styled-normalized MuiBox-root css-7yim04"
           />
         </div>
         <table

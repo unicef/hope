@@ -17,6 +17,7 @@ import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
 import { showApiErrorMessages } from '@utils/utils';
 import { restQueryKey } from '@utils/queryKeys';
+import { responsiveValue } from 'src/responsive';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -67,7 +68,7 @@ export function DiscardVerificationPlan({
     <>
       <Box
         sx={{
-          p: 2,
+          p: responsiveValue(0, 2),
         }}
       >
         <ErrorButton

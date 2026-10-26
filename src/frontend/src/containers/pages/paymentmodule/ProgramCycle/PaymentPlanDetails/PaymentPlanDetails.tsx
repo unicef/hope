@@ -19,6 +19,7 @@ import {
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 interface PaymentPlanDetailsProps {
   baseUrl: string;
   paymentPlan: PaymentPlanDetail;
@@ -52,20 +53,24 @@ export const PaymentPlanDetails = ({
         </Title>
         <OverviewContainer>
           <Grid container>
-            <Grid container size={{ xs: 9 }} spacing={6}>
-              <Grid size={{ xs: 3 }}>
+            <Grid
+              container
+              size={responsiveValue(12, 9)}
+              spacing={responsiveValue(3, 6)}
+            >
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Created By')}>
                   {createdBy}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Programme')}>
                   <BlackLink to={`/${baseUrl}/details/${program.code}`}>
                     {program.name}
                   </BlackLink>
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Target Population')}>
                   <BlackLink
                     to={`/${baseUrl}/target-population/${paymentPlan.id}`}
@@ -73,13 +78,13 @@ export const PaymentPlanDetails = ({
                     {paymentPlan.name}
                   </BlackLink>
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Currency')}>
                   {currency}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Group')}>
                   {paymentPlanGroup ? (
                     <BlackLink
@@ -91,8 +96,8 @@ export const PaymentPlanDetails = ({
                     '-'
                   )}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Export Batch')}>
                   {exportTag && paymentPlanGroup?.id ? (
                     <BlackLink
@@ -104,28 +109,28 @@ export const PaymentPlanDetails = ({
                     '-'
                   )}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Start Date')}>
                   <UniversalMoment>{startDate}</UniversalMoment>
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('End Date')}>
                   <UniversalMoment>{endDate}</UniversalMoment>
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Dispersion Start Date')}>
                   <UniversalMoment>{dispersionStartDate}</UniversalMoment>
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Dispersion End Date')}>
                   <UniversalMoment>{dispersionEndDate}</UniversalMoment>
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <Box
                   sx={{
                     mr: 1,
@@ -148,8 +153,8 @@ export const PaymentPlanDetails = ({
                     <Info />
                   </IconButton>
                 </Tooltip>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <Box
                   sx={{
                     mr: 1,
@@ -159,8 +164,8 @@ export const PaymentPlanDetails = ({
                     {paymentPlan.financialServiceProvider?.name}
                   </LabelizedField>
                 </Box>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <Box
                   sx={{
                     mr: 1,
@@ -170,9 +175,9 @@ export const PaymentPlanDetails = ({
                     {paymentPlan.deliveryMechanism?.name}
                   </LabelizedField>
                 </Box>
-              </Grid>
+              </ResponsiveGrid>
               {paymentPlan.sourcePaymentPlan && (
-                <Grid size={{ xs: 3 }}>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Main Payment Plan')}>
                     <BlackLink
                       to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.sourcePaymentPlan.id}`}
@@ -180,7 +185,7 @@ export const PaymentPlanDetails = ({
                       {paymentPlan.sourcePaymentPlan.unicefId}
                     </BlackLink>
                   </LabelizedField>
-                </Grid>
+                </ResponsiveGrid>
               )}
               {paymentPlan.paymentPlanPurposes?.length > 0 && (
                 <Grid size={{ xs: 12 }}>
@@ -203,9 +208,9 @@ export const PaymentPlanDetails = ({
             </Grid>
             <Grid
               container
-              sx={{ flexDirection: 'column' }}
-              size={{ xs: 3 }}
-              spacing={6}
+              sx={{ flexDirection: 'column', mt: responsiveValue(6, 0) }}
+              size={responsiveValue(12, 3)}
+              spacing={responsiveValue(3, 6)}
             >
               <Grid size={{ xs: 12 }}>
                 <FieldBorder color="#84A1CA">

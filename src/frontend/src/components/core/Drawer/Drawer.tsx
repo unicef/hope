@@ -1,3 +1,5 @@
+import { BusinessAreaSelect } from '@containers/BusinessAreaSelect';
+import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useFrontendVersion } from '@hooks/useFrontendVersion';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -10,6 +12,7 @@ import { ProgramStatusEnum } from '@restgenerated/models/ProgramStatusEnum';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { useIsMobile } from 'src/responsive';
 import styled from 'styled-components';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
@@ -54,13 +57,14 @@ const ToolbarHeader = styled('div')`
 
 interface DrawerComponentProps {
   open: boolean;
+  $overlay: boolean;
 }
 
 const DrawerComponent = styled(MUIDrawer)<DrawerComponentProps>`
   .MuiDrawer-paper {
     background-color: white;
     height: 100vh;
-    position: relative;
+    position: ${(props) => (props.$overlay ? 'fixed' : 'relative')};
     white-space: nowrap;
     width: ${(props) => (props.open ? '270px' : '55px')};
     transition:
@@ -141,7 +145,8 @@ export const Drawer = ({
 }: DrawerProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const { isAllPrograms } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
+  const isMobile = useIsMobile();
 
   const frontendVersion = useFrontendVersion();
 
@@ -159,8 +164,12 @@ export const Drawer = ({
 
   return (
     <DrawerComponent
-      variant="permanent"
+      variant={isMobile ? 'temporary' : 'permanent'}
       open={open}
+      onClose={handleDrawerClose}
+      // GlobalProgramSelect syncs the selected programme from the URL, so it must stay mounted while closed.
+      ModalProps={{ keepMounted: true }}
+      $overlay={isMobile}
       style={{ height: '100vh' }}
       data-cy={dataCy}
     >
@@ -173,6 +182,22 @@ export const Drawer = ({
           <ChevronLeftIcon />
         </CollapseIconButton>
       </ToolbarHeader>
+      {isMobile && (
+        // The app bar has no room for these on mobile.
+        <Box
+          data-cy="drawer-context-selects"
+          sx={{
+            bgcolor: 'secondary.main',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            p: 4,
+          }}
+        >
+          <BusinessAreaSelect />
+          {businessArea !== 'global' && <GlobalProgramSelect />}
+        </Box>
+      )}
       {notActiveBar}
       <Divider />
       <ToolbarScrollBox>
