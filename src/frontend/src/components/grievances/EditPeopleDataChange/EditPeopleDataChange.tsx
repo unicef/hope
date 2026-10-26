@@ -3,7 +3,7 @@ import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
 import { AddCircleOutlined } from '@mui/icons-material';
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import type { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import type { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -21,6 +21,7 @@ import { NewDocumentFieldArray } from '@components/grievances/EditIndividualData
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingAccountsFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingAccountsFieldArray';
 import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
+import { ResponsiveGrid } from 'src/responsive';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid #d8d8d8;
@@ -171,7 +172,10 @@ function EditPeopleDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualDataUpdateFields.map((item, index) => (
-                  <Grid size={12} key={`${index}-${item?.fieldName}`}>
+                  <ResponsiveGrid
+                    size="full"
+                    key={`${index}-${item?.fieldName}`}
+                  >
                     <EditPeopleDataChangeFieldRow
                       key={`${index}-${item?.fieldName}`}
                       itemValue={item}
@@ -182,9 +186,9 @@ function EditPeopleDataChange({
                       onDelete={() => arrayHelpers.remove(index)}
                       values={values}
                     />
-                  </Grid>
+                  </ResponsiveGrid>
                 ))}
-                <Grid size={4}>
+                <ResponsiveGrid size="third">
                   <Button
                     color="primary"
                     onClick={() => {
@@ -196,7 +200,7 @@ function EditPeopleDataChange({
                   >
                     {t('Add new field')}
                   </Button>
-                </Grid>
+                </ResponsiveGrid>
               </>
             )}
           />

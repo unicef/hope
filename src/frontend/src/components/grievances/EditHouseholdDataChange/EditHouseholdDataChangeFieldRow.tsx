@@ -10,6 +10,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 import type { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { ResponsiveGrid, responsiveValue } from 'src/responsive';
 
 export interface EditHouseholdDataChangeFieldRowProps {
   fields;
@@ -54,7 +55,7 @@ export const EditHouseholdDataChangeFieldRow = ({
         alignItems: 'center',
       }}
     >
-      <Grid size={4}>
+      <ResponsiveGrid size="third">
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
@@ -74,8 +75,8 @@ export const EditHouseholdDataChangeFieldRow = ({
             }))}
           disabled={isEditTicket}
         />
-      </Grid>
-      <Grid size={4}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third">
         <CurrentValue
           field={field}
           value={
@@ -83,16 +84,19 @@ export const EditHouseholdDataChangeFieldRow = ({
           }
           values={values}
         />
-      </Grid>
-      <Grid size={3}>
+      </ResponsiveGrid>
+      <ResponsiveGrid size="quarter">
         {itemValue.fieldName ? (
           <EditHouseholdDataChangeField
             name={`householdDataUpdateFields[${index}].fieldValue`}
             field={field}
           />
         ) : null}
-      </Grid>
-      <Grid size={1}>
+      </ResponsiveGrid>
+      <Grid
+        sx={{ textAlign: responsiveValue('right', 'left') }}
+        size={responsiveValue(12, 1)}
+      >
         {itemValue.fieldName && (
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />

@@ -17,6 +17,7 @@ import { Box } from '@mui/system';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BaseSection } from '@components/core/BaseSection';
+import { responsiveValue } from 'src/responsive';
 import { BlackLink } from '@components/core/BlackLink';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { t } from 'i18next';
@@ -478,7 +479,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
         title={
           <Box
             sx={{
-              p: 6,
+              p: responsiveValue(2, 6),
             }}
           >
             <Typography data-cy="title" variant="h6">

@@ -301,6 +301,8 @@ const NewOnlineTemplatePage = (): ReactElement => {
               <Box
                 sx={{
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  rowGap: 2,
                   mt: 4,
                   justifyContent: 'flex-start',
                   width: '100%',

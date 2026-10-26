@@ -2,26 +2,25 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { responsiveValue } from 'src/responsive';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
 import HopeLogo from './something_went_wrong_hope_logo.png';
 import type { FC } from 'react';
 
-const Container = styled.div`
+const Container = styled(Box)`
   background-color: #ffffff;
   text-align: center;
-  padding-top: 30px;
   font-family: 'Roboto', sans-serif;
   height: 100vh;
   width: 100%;
 `;
 
-const LogoContainer = styled.div`
-  position: absolute;
+const LogoContainer = styled(Box)`
   top: 20px;
   left: 20px;
 `;
 
-const SquareLogo = styled.div`
+const SquareLogo = styled(Box)`
   display: inline-block;
   background-color: white;
   padding: 20px;
@@ -84,11 +83,25 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
   const errorMessage = location.state?.errorMessage || propsErrorMessage;
 
   return (
-    <Container>
-      <LogoContainer>
+    <Container
+      sx={{
+        pt: responsiveValue('16px', '30px'),
+        px: responsiveValue('16px', '0'),
+      }}
+    >
+      <LogoContainer sx={{ position: responsiveValue('static', 'absolute') }}>
         <img src={HopeLogo} alt="Hope Logo" width="130" height="71" />{' '}
       </LogoContainer>
-      <SquareLogo>
+      <SquareLogo
+        sx={{
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          '& img': {
+            maxWidth: '100%',
+            height: responsiveValue('auto', '205px'),
+          },
+        }}
+      >
         <img
           src={SomethingWentWrongGraphic}
           alt="Sad face"
@@ -117,7 +130,11 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
                 Error: {errorMessage}
               </Paragraph>
             )}
-            {component && <Paragraph>Component: {component}</Paragraph>}
+            {component && (
+              <Paragraph style={{ wordWrap: 'break-word' }}>
+                Component: {component}
+              </Paragraph>
+            )}
           </Box>
         ) : (
           <Paragraph>

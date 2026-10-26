@@ -1,5 +1,6 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
+import { HeaderActions } from '@components/core/HeaderActions';
 import type { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -18,7 +19,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   Table,
   TableBody,
   TableCell,
@@ -41,6 +41,11 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import {
+  responsiveValue,
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+} from 'src/responsive';
 import { ConfirmationDialog } from '../../components/core/ConfirmationDialog/ConfirmationDialog';
 import PeriodicDataUpdateEditableTable from './PeriodicDataUpdateEditableTable';
 import SentBackComment from './SentBackComment';
@@ -370,6 +375,10 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   ];
 
+  const showSendForApproval = status === 'NEW' && canSave && isAuthorized;
+  const showApproval = status === 'READY' && canApprove && isAuthorized;
+  const showMerge = status === 'APPROVED' && canMerge && isAuthorized;
+
   return (
     <>
       <PageHeader
@@ -383,75 +392,55 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         }
       >
         <>
-          {status === 'NEW' && canSave && isAuthorized && (
-            <Box
-              sx={{
-                px: 6,
-                pt: 2,
-                pb: 2,
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSendForApproval}
-                disabled={sendForApprovalLoading}
-                data-cy="send-for-approval"
-                data-perm={PERMISSIONS.PDU_ONLINE_SAVE_DATA}
-              >
-                {t('Send for Approval')}
-              </Button>
-            </Box>
-          )}
-          {status === 'READY' && canApprove && isAuthorized && (
-            <Box
-              sx={{
-                px: 6,
-                pt: 2,
-                pb: 2,
-                display: 'flex',
-                gap: 2,
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setSendBackDialogOpen(true)}
-                data-cy="send-back"
-                data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
-              >
-                {t('Send Back')}
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleApprove}
-                data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
-                data-cy="approve"
-              >
-                {t('Approve')}
-              </Button>
-            </Box>
-          )}
-          {status === 'APPROVED' && canMerge && isAuthorized && (
-            <Box
-              sx={{
-                px: 6,
-                pt: 2,
-                pb: 2,
-                display: 'flex',
-                gap: 2,
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleMerge}
-                data-cy="merge"
-                data-perm={PERMISSIONS.PDU_ONLINE_MERGE}
-              >
-                {t('Merge')}
-              </Button>
+          {(showSendForApproval || showApproval || showMerge) && (
+            <Box sx={{ px: responsiveValue(0, 6) }}>
+              <HeaderActions spacing="between">
+                {showSendForApproval && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSendForApproval}
+                    disabled={sendForApprovalLoading}
+                    data-cy="send-for-approval"
+                    data-perm={PERMISSIONS.PDU_ONLINE_SAVE_DATA}
+                  >
+                    {t('Send for Approval')}
+                  </Button>
+                )}
+                {showApproval && (
+                  <>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setSendBackDialogOpen(true)}
+                      data-cy="send-back"
+                      data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
+                    >
+                      {t('Send Back')}
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleApprove}
+                      data-perm={PERMISSIONS.PDU_ONLINE_APPROVE}
+                      data-cy="approve"
+                    >
+                      {t('Approve')}
+                    </Button>
+                  </>
+                )}
+                {showMerge && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleMerge}
+                    data-cy="merge"
+                    data-perm={PERMISSIONS.PDU_ONLINE_MERGE}
+                  >
+                    {t('Merge')}
+                  </Button>
+                )}
+              </HeaderActions>
             </Box>
           )}
         </>
@@ -482,8 +471,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
         type="primary"
       />
       <BaseSection title="Details">
-        <Grid container spacing={6}>
-          <Grid size={{ xs: 3 }}>
+        <ResponsiveGridContainer spacing={6}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Status')}>
               <StatusBox
                 status={status}
@@ -491,25 +480,25 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 statusDisplay={statusDisplay}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Template Name')} value={name} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Creation Date')}>
               <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Number of Records')}
               value={formatFigure(numberOfRecords)}
             />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Created By')} value={createdBy} />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Authorized Users')}>
               <BlackLink
                 button
@@ -519,7 +508,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 {`${authorizedUsers && authorizedUsers.length ? authorizedUsers.length : 0} ${t(authorizedUsers && authorizedUsers.length === 1 ? 'Authorized User' : 'Authorized Users')}`}
               </BlackLink>
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
           {/* Authorized Users Modal */}
           <Dialog
             open={authorizedUsersModalOpen}
@@ -589,7 +578,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
               </Button>
             </DialogActions>
           </Dialog>
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField label={t('Approval Date')}>
               {approvedAt ? (
                 <UniversalMoment>{approvedAt}</UniversalMoment>
@@ -597,19 +586,19 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
                 t('-')
               )}
             </LabelizedField>
-          </Grid>
-          <Grid size={{ xs: 3 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="quarter" mobileSize="half">
             <LabelizedField
               label={t('Approved By')}
               value={approvedBy || t('-')}
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </BaseSection>
       <Box
         sx={{
-          pl: 12,
-          pt: 6,
+          pl: responsiveValue(2, 12),
+          pt: responsiveValue(2, 6),
         }}
       >
         {sentBackComment &&
@@ -626,7 +615,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
       {/* Periodic Data Update Table */}
       <Box
         sx={{
-          p: 3,
+          p: responsiveValue(1, 3),
         }}
       >
         <PeriodicDataUpdateEditableTable

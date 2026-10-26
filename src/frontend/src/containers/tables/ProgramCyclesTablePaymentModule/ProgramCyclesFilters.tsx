@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createHandleApplyFilterChange, formatFigure } from '@utils/utils';
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { NumberTextField } from '@core/NumberTextField';
@@ -55,22 +56,21 @@ export const ProgramCyclesFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             fullWidth
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -84,8 +84,8 @@ export const ProgramCyclesFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
@@ -95,8 +95,8 @@ export const ProgramCyclesFilters = ({
               handleFilterChange('totalEntitledQuantityUsdFrom', e.target.value)
             }
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
             value={formatFigure(filter.totalEntitledQuantityUsdTo)}
@@ -111,8 +111,8 @@ export const ProgramCyclesFilters = ({
                 filter.totalEntitledQuantityUsdTo
             }
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel="Date"
             onChange={(date) =>
@@ -123,8 +123,8 @@ export const ProgramCyclesFilters = ({
             }
             value={filter.startDate}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(
@@ -134,8 +134,8 @@ export const ProgramCyclesFilters = ({
             }
             value={filter.endDate}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

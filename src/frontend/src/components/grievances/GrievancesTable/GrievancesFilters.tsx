@@ -11,8 +11,12 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AccountBalance } from '@mui/icons-material';
-import Grid from '@mui/material/Grid';
 import { MenuItem } from '@mui/material';
+import {
+  ResponsiveGridContainer,
+  ResponsiveGrid,
+  responsiveValue,
+} from 'src/responsive';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
@@ -148,21 +152,20 @@ export const GrievancesFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             value={filter.search}
             label="Search"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
+        </ResponsiveGrid>
         <DocumentSearchField
           onChange={handleFilterChange}
           type={filter.documentType}
@@ -170,7 +173,7 @@ export const GrievancesFilters = ({
           choices={documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <ProgramAutocompleteRestFilter
               filter={filter}
               name="program"
@@ -181,9 +184,9 @@ export const GrievancesFilters = ({
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -197,8 +200,8 @@ export const GrievancesFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <SearchTextField
             value={filter.fsp}
             label="FSP"
@@ -207,8 +210,8 @@ export const GrievancesFilters = ({
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
             data-cy="filters-fsp"
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder="From"
@@ -217,8 +220,8 @@ export const GrievancesFilters = ({
             fullWidth
             dataCy="filters-creation-date-from"
           />
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth" mobileSize="half">
           <DatePickerFilter
             placeholder="To"
             onChange={(date) => handleFilterChange('createdAtAfter', date)}
@@ -226,8 +229,8 @@ export const GrievancesFilters = ({
             fullWidth
             dataCy="filters-creation-date-to"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('category', e.target.value)}
             label={t('Category')}
@@ -241,9 +244,9 @@ export const GrievancesFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
+        </ResponsiveGrid>
         {showIssueType && (
-          <Grid size={{ xs: 2 }}>
+          <ResponsiveGrid size="sixth">
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label="Issue Type"
@@ -256,9 +259,9 @@ export const GrievancesFilters = ({
                 </MenuItem>
               ))}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <AssigneeAutocompleteRestFilter
             filter={filter}
             label={t('Assigned To')}
@@ -270,9 +273,9 @@ export const GrievancesFilters = ({
             setAppliedFilter={setAppliedFilter}
             dataCy="filters-assignee"
           />
-        </Grid>
+        </ResponsiveGrid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <CreatedByAutocompleteRestFilter
               filter={filter}
               name="createdBy"
@@ -283,17 +286,17 @@ export const GrievancesFilters = ({
               setAppliedFilter={setAppliedFilter}
               additionalVariables={{ isTicketCreator: true }}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          <Grid
-            container
+          <ResponsiveGridContainer
             spacing={3}
             sx={{
               alignItems: 'flex-end',
+              width: responsiveValue('100%', 'auto'),
             }}
           >
-            <Grid size={{ xs: 6 }}>
+            <ResponsiveGrid size="half" mobileSize="half">
               <NumberTextField
                 topLabel={t('Similarity Score')}
                 value={filter.scoreMin}
@@ -302,8 +305,8 @@ export const GrievancesFilters = ({
                 data-cy="filters-similarity-score-from"
                 fullWidth
               />
-            </Grid>
-            <Grid size={{ xs: 6 }}>
+            </ResponsiveGrid>
+            <ResponsiveGrid size="half" mobileSize="half">
               <NumberTextField
                 value={filter.scoreMax}
                 placeholder="To"
@@ -311,11 +314,11 @@ export const GrievancesFilters = ({
                 data-cy="filters-similarity-score-to"
                 fullWidth
               />
-            </Grid>
-          </Grid>
+            </ResponsiveGrid>
+          </ResponsiveGridContainer>
         )}
         {!isAllPrograms && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <RdiAutocompleteRestFilter
               filter={filter}
               name="registrationDataImport"
@@ -325,9 +328,9 @@ export const GrievancesFilters = ({
               setAppliedFilter={setAppliedFilter}
               setFilter={setFilter}
             />
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <LanguageAutocompleteRestFilter
             filter={filter}
             name="preferredLanguage"
@@ -338,8 +341,8 @@ export const GrievancesFilters = ({
             setFilter={setFilter}
             dataCy="filters-preferred-language"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('priority', e.target.value)}
             label={t('Priority')}
@@ -353,8 +356,8 @@ export const GrievancesFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 2 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) => handleFilterChange('urgency', e.target.value)}
             label={t('Urgency')}
@@ -368,9 +371,9 @@ export const GrievancesFilters = ({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
+        </ResponsiveGrid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
-          <Grid size={{ xs: 3 }}>
+          <ResponsiveGrid size="quarter">
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('submissionChannel', e.target.value)
@@ -388,9 +391,9 @@ export const GrievancesFilters = ({
                 ),
               )}
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 2 }}>
+        <ResponsiveGrid size="sixth">
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('grievanceStatus', e.target.value)
@@ -408,9 +411,9 @@ export const GrievancesFilters = ({
               {t('All Tickets')}
             </MenuItem>
           </SelectFilter>
-        </Grid>
+        </ResponsiveGrid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
-          <Grid size={{ xs: 2 }}>
+          <ResponsiveGrid size="sixth">
             <SelectFilter
               onChange={(e) => handleFilterChange('areaScope', e.target.value)}
               label={t('Ticket Type')}
@@ -422,9 +425,9 @@ export const GrievancesFilters = ({
               <MenuItem value="cross-area">{t('Cross-Area Tickets')}</MenuItem>
               <MenuItem value="all">{t('All Tickets')}</MenuItem>
             </SelectFilter>
-          </Grid>
+          </ResponsiveGrid>
         )}
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             level={1}
             filter={filter}
@@ -437,8 +440,8 @@ export const GrievancesFilters = ({
             setAppliedFilter={setAppliedFilter}
             dataCy="filters-admin-level-1"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             level={2}
             filter={filter}
@@ -451,8 +454,8 @@ export const GrievancesFilters = ({
             setAppliedFilter={setAppliedFilter}
             dataCy="filters-admin-level-2"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

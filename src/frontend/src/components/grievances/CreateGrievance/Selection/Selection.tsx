@@ -16,6 +16,7 @@ import {
 import type { ChangeEvent, ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface SelectionProps {
   handleChange: (e: ChangeEvent) => void;
@@ -121,7 +122,7 @@ function Selection({
 
   return (
     <Grid container columnSpacing={3}>
-      <Grid size={{ xs: 6 }}>
+      <ResponsiveGrid size="half">
         <Field
           name="category"
           label="Category"
@@ -135,9 +136,9 @@ function Selection({
           disabled={redirectedFromRelatedTicket}
           required
         />
-      </Grid>
+      </ResponsiveGrid>
       {showIssueType(values) && (
-        <Grid size={{ xs: 6 }}>
+        <ResponsiveGrid size="half">
           <Field
             name="issueType"
             label="Issue Type"
@@ -146,22 +147,22 @@ function Selection({
             component={FormikSelectField}
             required
           />
-        </Grid>
+        </ResponsiveGrid>
       )}
       {values.category && (
         <>
           <DividerLine />
-          <Grid size={{ xs: 6 }}>
+          <ResponsiveGrid size="half">
             <LabelizedField label={t('Category Description')}>
               {categoryDescription}
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
           {issueTypeDescription && (
-            <Grid size={{ xs: 6 }}>
+            <ResponsiveGrid size="half">
               <LabelizedField label={t('Issue Type Description')}>
                 {issueTypeDescription}
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           )}
         </>
       )}
