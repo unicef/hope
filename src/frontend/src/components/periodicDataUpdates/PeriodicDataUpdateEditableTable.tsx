@@ -326,6 +326,11 @@ const PeriodicDataUpdateEditableTable: React.FC<
                                 field.subtype === 'DECIMAL' ? 'number' : 'text'
                               }
                               value={field.value ?? ''}
+                              slotProps={{
+                                htmlInput: {
+                                  'data-cy': `input-pdu-${fieldKey}-${individual.unicefId}`,
+                                },
+                              }}
                               onChange={(e) => {
                                 let newValue;
                                 if (field.subtype === 'DECIMAL') {
@@ -430,6 +435,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                               });
                               handleSaveRow(idx);
                             }}
+                            data-cy={`button-save-row-${individual.unicefId}`}
                           >
                             {t('Save')}
                           </Button>
@@ -441,6 +447,7 @@ const PeriodicDataUpdateEditableTable: React.FC<
                         color="primary"
                         size="small"
                         disabled={!isAuthorized}
+                        data-cy={`button-edit-row-${individual.unicefId}`}
                         onClick={() =>
                           setEditingRows((prev) => {
                             const updated = new Set(prev);
