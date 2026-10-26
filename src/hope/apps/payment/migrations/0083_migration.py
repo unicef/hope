@@ -4,6 +4,8 @@ from decimal import Decimal
 
 import django.core.validators
 from django.db import migrations, models
+from django.db.models.functions import Abs
+from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
@@ -19,7 +21,8 @@ def payment_plan_currency_precision_constraint() -> models.CheckConstraint:
     condition = models.Q()
     for column in PAYMENT_PLAN_COLUMNS:
         condition &= models.Q(**{f"{column}__isnull": True}) | (
-            models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(**{f"{column}__lt": Decimal(100000000000000000000)})
+            models.Q(**{f"{column}__gte": Decimal(0)})
+            & models.Q(LessThan(Abs(column), Decimal(100000000000000000000)))
         )
     return models.CheckConstraint(condition=condition, name="payment_plan_currency_precision")
 
@@ -30,7 +33,7 @@ def change_payment_plan_columns(apps, schema_editor):
     columns = [schema_editor.quote_name(name) for name in PAYMENT_PLAN_COLUMNS]
     alterations = ", ".join(f"ALTER COLUMN {column} TYPE numeric" for column in columns)
     precision_checks = " AND ".join(
-        f"({column} IS NULL OR ({column} >= 0 AND {column} < 100000000000000000000))" for column in columns
+        f"({column} IS NULL OR ({column} >= 0 AND abs({column}) < 100000000000000000000))" for column in columns
     )
     with connection.cursor() as cursor:
         cursor.execute("SET LOCAL lock_timeout = '1s'")

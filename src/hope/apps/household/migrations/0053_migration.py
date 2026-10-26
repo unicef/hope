@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from django.db import migrations, models
+from django.db.models.functions import Abs
+from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
@@ -11,7 +13,8 @@ def household_cash_precision_constraint() -> models.CheckConstraint:
     condition = models.Q()
     for column in HOUSEHOLD_CASH_COLUMNS:
         condition &= models.Q(**{f"{column}__isnull": True}) | (
-            models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(**{f"{column}__lt": Decimal(100000000000000000000)})
+            models.Q(**{f"{column}__gte": Decimal(0)})
+            & models.Q(LessThan(Abs(column), Decimal(100000000000000000000)))
         )
     return models.CheckConstraint(condition=condition, name="household_cash_precision")
 
@@ -22,7 +25,7 @@ def change_household_cash_columns(apps, schema_editor):
     columns = [schema_editor.quote_name(name) for name in HOUSEHOLD_CASH_COLUMNS]
     alterations = ", ".join(f"ALTER COLUMN {column} TYPE numeric" for column in columns)
     precision_checks = " AND ".join(
-        f"({column} IS NULL OR ({column} >= 0 AND {column} < 100000000000000000000))" for column in columns
+        f"({column} IS NULL OR ({column} >= 0 AND abs({column}) < 100000000000000000000))" for column in columns
     )
     with connection.cursor() as cursor:
         cursor.execute("SET LOCAL lock_timeout = '1s'")

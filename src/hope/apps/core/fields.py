@@ -3,6 +3,8 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Abs
+from django.db.models.lookups import LessThan
 
 CURRENCY_DECIMAL_PLACES = 10
 CURRENCY_MAX_DIGITS = 30
@@ -14,7 +16,8 @@ def currency_precision_check(*fields: str, name: str) -> models.CheckConstraint:
     condition = models.Q()
     for field in fields:
         condition &= models.Q(**{f"{field}__isnull": True}) | (
-            models.Q(**{f"{field}__gte": 0}) & models.Q(**{f"{field}__lt": CURRENCY_MAX_ABSOLUTE_VALUE})
+            models.Q(**{f"{field}__gte": 0})
+            & models.Q(LessThan(Abs(field), CURRENCY_MAX_ABSOLUTE_VALUE))
         )
     return models.CheckConstraint(condition=condition, name=name)
 
