@@ -13,8 +13,7 @@ def household_cash_precision_constraint() -> models.CheckConstraint:
     condition = models.Q()
     for column in HOUSEHOLD_CASH_COLUMNS:
         condition &= models.Q(**{f"{column}__isnull": True}) | (
-            models.Q(**{f"{column}__gte": Decimal(0)})
-            & models.Q(LessThan(Abs(column), Decimal(100000000000000000000)))
+            models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(LessThan(Abs(column), Decimal(100000000000000000000)))
         )
     return models.CheckConstraint(condition=condition, name="household_cash_precision")
 

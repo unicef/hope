@@ -16,8 +16,7 @@ def currency_precision_check(*fields: str, name: str) -> models.CheckConstraint:
     condition = models.Q()
     for field in fields:
         condition &= models.Q(**{f"{field}__isnull": True}) | (
-            models.Q(**{f"{field}__gte": 0})
-            & models.Q(LessThan(Abs(field), CURRENCY_MAX_ABSOLUTE_VALUE))
+            models.Q(**{f"{field}__gte": 0}) & models.Q(LessThan(Abs(field), CURRENCY_MAX_ABSOLUTE_VALUE))
         )
     return models.CheckConstraint(condition=condition, name=name)
 
