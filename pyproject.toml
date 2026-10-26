@@ -196,6 +196,7 @@ packages.find.where = [ "src" ]
 package-dir = { "" = "src" }
 
 [tool.uv]
+exclude-newer = "7 days"
 package = true
 
 [tool.django-stubs]
