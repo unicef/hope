@@ -120,6 +120,30 @@ def in_approval_instruction(
     return {"instruction": instruction, "first_plan": first_plan, "second_plan": second_plan}
 
 
+@pytest.fixture
+def locked_instruction(approver, program, cycle, business_area, currency, delivery_mechanism, fsp) -> dict[str, Any]:
+    instruction = FollowUpInstructionFactory(business_area=business_area, program=program, created_by=approver)
+    first_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    second_plan = _create_instruction_child_payment_plan(
+        instruction=instruction,
+        cycle=cycle,
+        business_area=business_area,
+        currency=currency,
+        delivery_mechanism=delivery_mechanism,
+        fsp=fsp,
+        status=PaymentPlan.Status.LOCKED,
+    )
+    return {"instruction": instruction, "first_plan": first_plan, "second_plan": second_plan}
+
+
 def _create_source_payment_plan(
     *,
     cycle: Any,
@@ -932,3 +956,18 @@ def test_execute_payment_plan_action_arrange_two_child_plans_act_approve_assert_
     assert second_approval.created_by_name == "Jan Kowalski"
     assert second_approval.created_by_job_title == "Programme Officer"
     assert second_approval.created_by_job_title_source == "AD"
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_execute_payment_plan_action_arrange_two_locked_child_plans_act_unlock_assert_no_ad_lookup(
+    mock_graph, locked_instruction: dict[str, Any], approver: Any
+) -> None:
+    FollowUpInstructionService(instruction=locked_instruction["instruction"]).execute_payment_plan_action(
+        PaymentPlan.Action.UNLOCK, approver
+    )
+
+    locked_instruction["first_plan"].refresh_from_db()
+    locked_instruction["second_plan"].refresh_from_db()
+    assert locked_instruction["first_plan"].status == PaymentPlan.Status.OPEN
+    assert locked_instruction["second_plan"].status == PaymentPlan.Status.OPEN
+    mock_graph.assert_not_called()

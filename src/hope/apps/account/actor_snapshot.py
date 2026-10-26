@@ -57,6 +57,9 @@ def build_actor_snapshot(user: "User | None") -> ActorSnapshot:
     name = full_name(user)
     try:
         job_title = fetch_ad_job_title(MicrosoftGraphAPI(), user)
+    except Http404:
+        logger.info("User %s not found in AD, using the stored job title", user.pk)
+        return ActorSnapshot(name=name, job_title=user.job_title, job_title_source=JobTitleSource.USER_RECORD)
     except Exception:  # noqa: BLE001 - MicrosoftGraphAPI raises bare Exception when the token request fails
         logger.warning("AD job title lookup failed for user %s, using the stored job title", user.pk, exc_info=True)
         return ActorSnapshot(name=name, job_title=user.job_title, job_title_source=JobTitleSource.USER_RECORD)

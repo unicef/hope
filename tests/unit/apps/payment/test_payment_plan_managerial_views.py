@@ -110,6 +110,18 @@ def vision_managerial_context(managerial_context: dict[str, Any]) -> dict[str, A
     return managerial_context
 
 
+@pytest.fixture
+def snapshot_managerial_context(managerial_context: dict[str, Any]) -> dict[str, Any]:
+    ApprovalProcessFactory(
+        payment_plan=managerial_context["payment_plan1"],
+        sent_for_approval_by=managerial_context["user"],
+        sent_for_approval_by_name="Jan Kowalski",
+        sent_for_approval_by_job_title="Programme Officer",
+        sent_for_approval_by_job_title_source="AD",
+    )
+    return managerial_context
+
+
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
@@ -204,10 +216,31 @@ def test_list_payment_plans_approval_process_data(
         payment_plan=managerial_context["payment_plan1"],
         sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc),
         sent_for_approval_by=managerial_context["user"],
+        sent_for_approval_by_name="Jan Kowalski",
+        sent_for_approval_by_job_title="Programme Officer",
+        sent_for_approval_by_job_title_source="AD",
     )
-    approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)
-    approval_authorization = ApprovalFactory(approval_process=approval_process, type=Approval.AUTHORIZATION)
-    approval_release = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
+    approval_approval = ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.APPROVAL,
+        created_by_name="Anna Nowak",
+        created_by_job_title="Approver",
+        created_by_job_title_source="AD",
+    )
+    approval_authorization = ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.AUTHORIZATION,
+        created_by_name="Piotr Zielinski",
+        created_by_job_title="",
+        created_by_job_title_source="USER_RECORD",
+    )
+    approval_release = ApprovalFactory(
+        approval_process=approval_process,
+        type=Approval.FINANCE_RELEASE,
+        created_by_name="Maria Wisniewska",
+        created_by_job_title="Finance Officer",
+        created_by_job_title_source="AD",
+    )
     create_user_role_with_permissions(
         managerial_context["user"],
         [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
@@ -221,7 +254,7 @@ def test_list_payment_plans_approval_process_data(
     assert response_json[0]["last_approval_process_date"] == approval_process.sent_for_approval_date.strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
-    assert response_json[0]["last_approval_process_by"] == str(approval_process.sent_for_approval_by)
+    assert response_json[0]["last_approval_process_by"] == "Jan Kowalski (Programme Officer)"
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_AUTHORIZATION
@@ -232,7 +265,7 @@ def test_list_payment_plans_approval_process_data(
     assert len(response_json) == 1
 
     assert response_json[0]["last_approval_process_date"] == approval_approval.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert response_json[0]["last_approval_process_by"] == str(approval_approval.created_by)
+    assert response_json[0]["last_approval_process_by"] == "Anna Nowak (Approver)"
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         managerial_context["payment_plan1"].status = PaymentPlan.Status.IN_REVIEW
@@ -244,7 +277,7 @@ def test_list_payment_plans_approval_process_data(
     assert response_json[0]["last_approval_process_date"] == approval_authorization.created_at.strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
-    assert response_json[0]["last_approval_process_by"] == str(approval_authorization.created_by)
+    assert response_json[0]["last_approval_process_by"] == "Piotr Zielinski"
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         managerial_context["payment_plan1"].status = PaymentPlan.Status.ACCEPTED
@@ -254,7 +287,29 @@ def test_list_payment_plans_approval_process_data(
     response_json = response.json()["results"]
     assert len(response_json) == 1
     assert response_json[0]["last_approval_process_date"] == approval_release.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-    assert response_json[0]["last_approval_process_by"] == str(approval_release.created_by)
+    assert response_json[0]["last_approval_process_by"] == "Maria Wisniewska (Finance Officer)"
+
+
+def test_list_payment_plans_arrange_sender_renamed_after_snapshot_act_get_assert_last_approval_process_by_unchanged(
+    snapshot_managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        snapshot_managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        snapshot_managerial_context["business_area"],
+        snapshot_managerial_context["program1"],
+    )
+    user = snapshot_managerial_context["user"]
+    user.first_name = "Renamed"
+    user.last_name = "Person"
+    user.job_title = "New Title"
+    user.save(update_fields=["first_name", "last_name", "job_title"])
+
+    response = snapshot_managerial_context["client"].get(snapshot_managerial_context["url"])
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["results"][0]["last_approval_process_by"] == "Jan Kowalski (Programme Officer)"
 
 
 def test_bulk_action(

@@ -24,6 +24,7 @@ from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
 
+from hope.apps.account.actor_snapshot import actor_display
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
@@ -53,13 +54,12 @@ if TYPE_CHECKING:
     from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
     from hope.models.payment_verification_plan import PaymentVerificationPlan
     from hope.models.program import Program
-    from hope.models.user import User
 
 
 @dataclass
 class ModifiedData:
     modified_date: datetime
-    modified_by: Optional["User"] = None
+    modified_by: str | None = None
 
 
 class PaymentPlan(
@@ -972,22 +972,22 @@ class PaymentPlan(
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return ModifiedData(
                     approval_process.sent_for_approval_date,  # type: ignore[arg-type]
-                    approval_process.sent_for_approval_by,
+                    actor_display(approval_process, "sent_for_approval_by"),
                 )
             if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
                 approval = approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last()
                 if approval:
-                    return ModifiedData(approval.created_at, approval.created_by)
+                    return ModifiedData(approval.created_at, actor_display(approval, "created_by"))
             if self.status == PaymentPlan.Status.IN_REVIEW:
                 approval = approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
                 if approval:
-                    return ModifiedData(approval.created_at, approval.created_by)
+                    return ModifiedData(approval.created_at, actor_display(approval, "created_by"))
             if self.status == PaymentPlan.Status.ACCEPTED and (
                 approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
                 .order_by("created_at")
                 .last()
             ):
-                return ModifiedData(approval.created_at, approval.created_by)
+                return ModifiedData(approval.created_at, actor_display(approval, "created_by"))
         return ModifiedData(self.updated_at)
 
     # from generic pp
