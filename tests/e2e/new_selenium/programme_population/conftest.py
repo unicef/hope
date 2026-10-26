@@ -60,6 +60,7 @@ def string_attribute(program: Program) -> FlexibleAttribute:
 def individual(program: Program, business_area: BusinessArea, string_attribute: FlexibleAttribute) -> Individual:
     rdi = RegistrationDataImportFactory(status=RegistrationDataImport.MERGED, program=program)
     hoh = IndividualFactory(
+        unicef_id="IND-00-0000.0001",
         household=None,
         business_area=business_area,
         program=program,
@@ -68,4 +69,5 @@ def individual(program: Program, business_area: BusinessArea, string_attribute: 
     HouseholdFactory(business_area=business_area, program_id=program.pk, registration_data_import=rdi)
     populate_pdu_with_null_values(program, hoh.flex_fields)
     hoh.save()
+    hoh.refresh_from_db()
     return hoh

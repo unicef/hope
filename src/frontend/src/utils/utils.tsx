@@ -405,6 +405,9 @@ export function paymentPlanBackgroundActionStatusToColor(
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatusEnum.REBUILDING]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatusEnum.REBUILD_ERROR]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];

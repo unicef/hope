@@ -191,6 +191,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
             onChange={() => handleSelectOne(row.id)}
             onClick={(e) => e.stopPropagation()}
             slotProps={{ input: { 'aria-label': `select row ${row.id}` } }}
+            data-cy={`checkbox-row-${row.id}`}
           />
         ) : (
           <Tooltip title="You are not within authorized users for this Edit">
@@ -279,6 +280,7 @@ const PeriodicDataUpdatePendingForApproval = () => {
           ? [
               <Button
                 key="approve-selected"
+                data-cy="button-bulk-approve"
                 variant="outlined"
                 color="primary"
                 onClick={handleApprove}
