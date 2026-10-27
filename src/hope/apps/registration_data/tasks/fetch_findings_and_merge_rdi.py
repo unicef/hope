@@ -131,6 +131,8 @@ class FetchFindingsAndMergeRdi:
         hde_findings = dedupe_service.parse_findings(findings)
         dedupe_service.store_biographic_similarity_pairs(rdi.program, hde_findings)
         logger.info(f"RDI:{rdi.id} parsed {len(hde_findings)} biographic findings")
+        dedupe_service.store_biographic_deduplication_statistics(rdi)
+        logger.info(f"RDI:{rdi.id} stored biographic deduplication statistics")
 
     def _reset_rdi_state_for_cw_retry(self, rdi: RegistrationDataImport) -> None:
         rdi.error_message = ""

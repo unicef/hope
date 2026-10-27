@@ -183,6 +183,12 @@ def index_with_max_terms_count_1(program, household_with_individuals, national_i
     get_individual_doc(str(program.id))._index.put_settings(settings={"index.max_terms_count": 1})
 
 
+@pytest.fixture
+def deduplication_engine_settings(settings) -> None:
+    settings.DEDUPLICATION_ENGINE_API_KEY = "dedup_api_key"
+    settings.DEDUPLICATION_ENGINE_API_URL = "http://dedup-fake-url.com"
+
+
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
 def test_execute(program, sanction_list, household_with_individuals, national_id_document):
@@ -288,6 +294,7 @@ def test_create_system_flag_tickets(program, household_with_individuals, sanctio
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 @override_config(IS_ELASTICSEARCH_ENABLED=True)
+@pytest.mark.usefixtures("deduplication_engine_settings")
 def test_create_system_flag_tickets_during_cw_auto_merge(
     business_area, program, sanction_list, django_capture_on_commit_callbacks
 ):
