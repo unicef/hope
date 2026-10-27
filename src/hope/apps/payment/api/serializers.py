@@ -1213,14 +1213,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @extend_schema_field(ApprovalProcessSerializer(many=True))
     def get_approval_process(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        # A grouped plan's approvals are read from its group; a Follow-Up Instruction child shows its instruction's.
-        if not obj.follow_up_instruction_id:
+        # A plan is approved together with its group, or with its Follow-Up Instruction; it shows their approvals.
+        owner = obj.follow_up_instruction if obj.follow_up_instruction_id else obj.payment_plan_group
+        if owner is None:
             return []
-        return list(
-            ApprovalProcessSerializer(
-                obj.follow_up_instruction.approval_process.all(), many=True, context=self.context
-            ).data
-        )
+        return list(ApprovalProcessSerializer(owner.approval_process.all(), many=True, context=self.context).data)
 
     def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
         summary = self._payments_summary(obj)

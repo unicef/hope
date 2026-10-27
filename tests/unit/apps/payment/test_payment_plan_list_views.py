@@ -960,8 +960,17 @@ def test_payment_plan_detail_returns_approval_process_of_instruction_child(
     assert approval_process[0]["actions"]["approval"][0]["comment"] == "approved for the instruction"
 
 
-def test_payment_plan_detail_of_grouped_plan_has_no_approval_process_of_its_own(
+@pytest.fixture
+def group_approval(payment_plan_detail_context: dict[str, Any]) -> Any:
+    return ApprovalFactory(
+        approval_process=ApprovalProcessFactory(payment_plan_group=payment_plan_detail_context["group"]),
+        comment="approved for the group",
+    )
+
+
+def test_payment_plan_detail_returns_approval_process_of_its_group(
     payment_plan_detail_context: dict[str, Any],
+    group_approval: Any,
     create_user_role_with_permissions: Any,
 ) -> None:
     create_user_role_with_permissions(
@@ -974,4 +983,6 @@ def test_payment_plan_detail_of_grouped_plan_has_no_approval_process_of_its_own(
     response = payment_plan_detail_context["client"].get(payment_plan_detail_context["pp_detail_url"])
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["approval_process"] == []
+    approval_process = response.json()["approval_process"]
+    assert len(approval_process) == 1
+    assert approval_process[0]["actions"]["approval"][0]["comment"] == "approved for the group"
