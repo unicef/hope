@@ -1,9 +1,9 @@
 import logging
 from typing import Any
 
+from django.contrib.auth.backends import BaseBackend
 from django.http import HttpRequest, HttpResponse
-from social_core.backends.base import BaseBackend
-from social_core.exceptions import InvalidEmail
+from social_core.exceptions import AuthResponseError
 from social_core.pipeline import social_auth, user as social_core_user
 from social_core.strategy import BaseStrategy
 
@@ -66,7 +66,12 @@ def require_email(
         return
     if is_new and not details.get("email"):
         logger.warning("Email couldn't be validated")
-        raise InvalidEmail(strategy)
+        raise AuthResponseError(
+            backend,
+            "Email couldn't be validated",
+            code="profile_email_missing",
+            stage="pipeline",
+        )
 
 
 def create_user(
