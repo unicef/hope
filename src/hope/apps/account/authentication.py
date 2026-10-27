@@ -1,8 +1,8 @@
 import logging
 from typing import Any
 
-from django.contrib.auth.backends import BaseBackend
 from django.http import HttpRequest, HttpResponse
+from social_core.backends.base import BaseAuth
 from social_core.exceptions import AuthResponseError
 from social_core.pipeline import social_auth, user as social_core_user
 from social_core.strategy import BaseStrategy
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def social_details(
-    backend: BaseBackend, details: dict[str, Any], response: HttpRequest, *args: Any, **kwargs: Any
+    backend: BaseAuth, details: dict[str, Any], response: HttpRequest, *args: Any, **kwargs: Any
 ) -> HttpResponse:
     logger.debug("social_details response:\n%s", response)
     logger.debug("user_data:\n%s", backend.user_data(None, response=response))
@@ -31,7 +31,7 @@ def social_details(
 def user_details(
     strategy: BaseStrategy,
     details: dict[str, Any],
-    backend: BaseBackend,
+    backend: BaseAuth | None = None,
     user: User | None = None,
     *args: Any,
     **kwargs: Any,
@@ -58,7 +58,7 @@ def require_email(
     details: dict[str, Any],
     user: User | None = None,
     is_new: bool = False,
-    backend: BaseBackend | None = None,
+    backend: BaseAuth | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> None:
@@ -77,7 +77,7 @@ def require_email(
 def create_user(
     strategy: BaseStrategy,
     details: dict[str, Any],
-    backend: BaseBackend,
+    backend: BaseAuth,
     user: bool | User,
     *args: Any,
     **kwargs: Any,
