@@ -1,7 +1,7 @@
 from decimal import Decimal
 import secrets
 import string
-from typing import Any, Collection
+from typing import Any, Collection, Self
 
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -273,8 +273,8 @@ class Program(
     _saved_payee_configuration: tuple[Any, Any] | None = None
 
     @classmethod
-    def from_db(cls, db: str | None, field_names: Collection[str], values: Collection[Any]) -> "Program":
-        instance = super().from_db(db, field_names, values)
+    def from_db(cls, db: str | None, field_names: Collection[str], values: Collection[Any], **kwargs: Any) -> Self:
+        instance = super().from_db(db, field_names, values, **kwargs)
         instance._saved_payee_configuration = (
             instance.__dict__.get("data_collecting_type_id"),
             instance.__dict__.get("beneficiary_group_id"),
