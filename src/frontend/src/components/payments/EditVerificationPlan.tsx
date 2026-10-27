@@ -46,6 +46,7 @@ import { restQueryKey } from '@utils/queryKeys';
 import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import type { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
+import { responsiveGridSize, responsiveValue } from 'src/responsive';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -487,6 +488,7 @@ export const EditVerificationPlan = ({
                             label={t('Verification Channel')}
                             style={{
                               flexDirection: 'row',
+                              flexWrap: 'wrap',
                               alignItems: 'center',
                             }}
                             choices={channelChoices}
@@ -549,6 +551,7 @@ export const EditVerificationPlan = ({
                         <Box
                           sx={{
                             display: 'flex',
+                            flexWrap: responsiveValue('wrap', 'nowrap'),
                           }}
                         >
                           <Field
@@ -588,7 +591,9 @@ export const EditVerificationPlan = ({
                                 }}
                               >
                                 <Grid container>
-                                  <Grid size={{ xs: 4 }}>
+                                  <Grid
+                                    size={responsiveGridSize('third', 'half')}
+                                  >
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -597,7 +602,9 @@ export const EditVerificationPlan = ({
                                       component={FormikTextField}
                                     />
                                   </Grid>
-                                  <Grid size={{ xs: 4 }}>
+                                  <Grid
+                                    size={responsiveGridSize('third', 'half')}
+                                  >
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -611,7 +618,7 @@ export const EditVerificationPlan = ({
                             </Grid>
                           )}
                           {values.sexCheckbox && (
-                            <Grid size={{ xs: 5 }}>
+                            <Grid size={responsiveValue(12, 5)}>
                               <Box
                                 sx={{
                                   mt: 6,
@@ -660,6 +667,7 @@ export const EditVerificationPlan = ({
                           label="Verification Channel"
                           style={{
                             flexDirection: 'row',
+                            flexWrap: 'wrap',
                           }}
                           alignItems="center"
                           choices={channelChoices}

@@ -484,7 +484,7 @@ class TestFeedback:
         assert "Linked Ticket Referral" in page_grievance_details_page.get_ticket_description().text
         grievance_ticket = page_grievance_details_page.get_title().text.split(" ")[-1]
         page_feedback.get_nav_feedback().click()
-        assert grievance_ticket in page_feedback.wait_for_rows()[0].text
+        page_feedback.wait_for_row_with_text(0, grievance_ticket)
         page_feedback.wait_for_rows()[0].click()
         assert grievance_ticket in page_grievance_details_page.get_grievance_lined_ticket().text
         page_feedback.get_nav_feedback().click()

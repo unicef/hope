@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { AddCircleOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -23,6 +23,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDocumentTypeChoices } from '@hooks/useDocumentTypeChoices';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 export interface AddIndividualDataChangeFieldProps {
   field: any;
@@ -95,7 +96,7 @@ export function AddIndividualDataChangeField({
   }
   return (
     <>
-      <Grid size={8}>
+      <ResponsiveGrid size="twoThirds">
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -107,8 +108,8 @@ export function AddIndividualDataChangeField({
           disabled={isEditTicket}
           {...fieldProps}
         />
-      </Grid>
-      <Grid size={4} />
+      </ResponsiveGrid>
+      <ResponsiveGrid size="third" />
     </>
   );
 }
@@ -184,13 +185,15 @@ function AddIndividualDataChange({
             {t(`${beneficiaryGroup?.memberLabel} Data`)}
           </Typography>
         </Title>
-        <Grid container spacing={3}>
-          <Grid size={12}>{t('Core Fields')}</Grid>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="full">{t('Core Fields')}</ResponsiveGrid>
 
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
-          {flexFields.length > 0 && <Grid size={12}>{t('Flex Fields')}</Grid>}
+          {flexFields.length > 0 && (
+            <ResponsiveGrid size="full">{t('Flex Fields')}</ResponsiveGrid>
+          )}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField
               key={item.name}
@@ -198,8 +201,8 @@ function AddIndividualDataChange({
               flexField
             />
           ))}
-        </Grid>
-        <Grid container spacing={3}>
+        </ResponsiveGridContainer>
+        <ResponsiveGridContainer spacing={3}>
           <FieldArray
             name="individualData.documents"
             render={(arrayHelpers) => (
@@ -225,8 +228,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid size={8} />
-                <Grid size={12}>
+                <ResponsiveGrid size="twoThirds" />
+                <ResponsiveGrid size="full">
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutlined />}
@@ -242,12 +245,12 @@ function AddIndividualDataChange({
                   >
                     {t('Add Document')}
                   </Button>
-                </Grid>
+                </ResponsiveGrid>
               </>
             )}
           />
-        </Grid>
-        <Grid container spacing={3}>
+        </ResponsiveGridContainer>
+        <ResponsiveGridContainer spacing={3}>
           <FieldArray
             name="individualData.identities"
             render={(arrayHelpers) => (
@@ -272,8 +275,8 @@ function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid size={8} />
-                <Grid size={12}>
+                <ResponsiveGrid size="twoThirds" />
+                <ResponsiveGrid size="full">
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutlined />}
@@ -288,11 +291,11 @@ function AddIndividualDataChange({
                   >
                     {t('Add Identity')}
                   </Button>
-                </Grid>
+                </ResponsiveGrid>
               </>
             )}
           />
-        </Grid>
+        </ResponsiveGridContainer>
       </>
     )
   );

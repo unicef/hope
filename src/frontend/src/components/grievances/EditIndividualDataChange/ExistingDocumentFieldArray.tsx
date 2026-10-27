@@ -4,6 +4,7 @@ import { FieldArray } from 'formik';
 import type { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EditDocumentRow } from './EditDocumentRow';
+import { ResponsiveGrid } from 'src/responsive';
 
 export interface ExistingDocumentFieldArrayProps {
   setFieldValue;
@@ -27,7 +28,7 @@ export function ExistingDocumentFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.documents.map((item) => (
-              <Grid size={12} key={item.id}>
+              <ResponsiveGrid size="full" key={item.id}>
                 <EditDocumentRow
                   setFieldValue={setFieldValue}
                   values={values}
@@ -36,7 +37,7 @@ export function ExistingDocumentFieldArray({
                   arrayHelpers={arrayHelpers}
                   addIndividualFieldsData={addIndividualFieldsData}
                 />
-              </Grid>
+              </ResponsiveGrid>
             ))}
           </>
         )}

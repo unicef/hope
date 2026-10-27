@@ -4,10 +4,12 @@ import { ButtonDialog } from '@core/ButtonDialog';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
+import { HeaderActions } from '@core/HeaderActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Box, Button, Tooltip } from '@mui/material';
+import { responsiveValue } from 'src/responsive';
 import type { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
@@ -33,7 +35,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
 import { countTicketChanges, getTicketData } from './utils/ticketData';
 
-const Separator = styled.div`
+const Separator = styled(Box)`
   width: 1px;
   height: 28px;
   border: 1px solid
@@ -410,12 +412,7 @@ export const GrievanceDetailsToolbar = ({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={ticket.adminUrl} />}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <HeaderActions spacing="none">
         {isEditable && canEdit && (
           <Box
             sx={{
@@ -454,7 +451,9 @@ export const GrievanceDetailsToolbar = ({
             </Button>
           </Box>
         )}
-        {isNew && canEdit && canAssign && <Separator />}
+        {isNew && canEdit && canAssign && (
+          <Separator sx={{ display: responsiveValue('none', 'block') }} />
+        )}
         {isNew && canEdit && canAssign && (
           <AssignGrievanceDialog
             ticketId={ticket.id}
@@ -675,7 +674,7 @@ export const GrievanceDetailsToolbar = ({
             {canClose && wrapWithTooltip(closeButton)}
           </>
         )}
-      </Box>
+      </HeaderActions>
     </PageHeader>
   );
 };

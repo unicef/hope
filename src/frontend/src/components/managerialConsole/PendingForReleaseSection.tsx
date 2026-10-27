@@ -9,6 +9,7 @@ import type {
 } from './types';
 import {
   Table,
+  TableContainer,
   TableBody,
   TableCell,
   TableHead,
@@ -28,6 +29,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
+import { responsiveValue } from 'src/responsive';
 
 interface PendingForReleaseSectionProps {
   selectedInReview: string[];
@@ -163,67 +165,73 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
 
   return (
     <BaseSection title={title} buttons={buttons}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell padding="checkbox" style={{ width: '10%' }}>
-              <Box sx={{ flex: 1 }}>
-                <Checkbox
-                  checked={allSelected && selectedInReview.length > 0}
-                  onClick={handleSelectAllReviewed}
-                  data-cy="select-all-release"
-                />
-              </Box>
-            </TableCell>
-            {columns.map((column) => (
-              <TableCell key={column.field}>
-                {column.field === 'program' ? (
-                  <ProgramSelect
-                    selectedProgram={selectedProgram}
-                    setSelectedProgram={setSelectedProgram}
-                    programs={programs}
-                    dataCy="program-select-release"
+      <TableContainer>
+        <Table sx={{ minWidth: responsiveValue<number | string>(700, 'auto') }}>
+          <TableHead>
+            <TableRow>
+              <TableCell padding="checkbox" style={{ width: '10%' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Checkbox
+                    checked={allSelected && selectedInReview.length > 0}
+                    onClick={handleSelectAllReviewed}
+                    data-cy="select-all-release"
                   />
-                ) : (
-                  <TableSortLabel
-                    active={sortField === column.field}
-                    direction={sortDirection}
-                    onClick={() => handleSort(column.field)}
-                  >
-                    {column.headerName}
-                  </TableSortLabel>
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedRows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedInReview.includes(row.id)}
-                  onChange={() =>
-                    handleSelect(selectedInReview, setSelectedInReview, row.id)
-                  }
-                  data-cy="select-release"
-                />
+                </Box>
               </TableCell>
               {columns.map((column) => (
-                <TableCell
-                  key={column.field}
-                  align="left"
-                  data-cy="column-field-release"
-                >
-                  {column.renderCell
-                    ? column.renderCell({ value: row[column.field], row })
-                    : row[column.field]}
+                <TableCell key={column.field}>
+                  {column.field === 'program' ? (
+                    <ProgramSelect
+                      selectedProgram={selectedProgram}
+                      setSelectedProgram={setSelectedProgram}
+                      programs={programs}
+                      dataCy="program-select-release"
+                    />
+                  ) : (
+                    <TableSortLabel
+                      active={sortField === column.field}
+                      direction={sortDirection}
+                      onClick={() => handleSort(column.field)}
+                    >
+                      {column.headerName}
+                    </TableSortLabel>
+                  )}
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {sortedRows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedInReview.includes(row.id)}
+                    onChange={() =>
+                      handleSelect(
+                        selectedInReview,
+                        setSelectedInReview,
+                        row.id,
+                      )
+                    }
+                    data-cy="select-release"
+                  />
+                </TableCell>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.field}
+                    align="left"
+                    data-cy="column-field-release"
+                  >
+                    {column.renderCell
+                      ? column.renderCell({ value: row[column.field], row })
+                      : row[column.field]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </BaseSection>
   );
 };

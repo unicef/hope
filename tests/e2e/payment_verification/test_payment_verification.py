@@ -530,6 +530,8 @@ class TestSmokePaymentVerification:
 
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_details_page.get_button_confirm().click()
+        # Closing the ticket is what sets the verification to RECEIVED; leaving earlier races that request.
+        page_grievance_details_page.wait_for_text("Closed", page_grievance_details_page.ticket_status)
 
         page_payment_verification.get_nav_payment_verification().click()
         page_payment_verification.get_cash_plan_table_row().click()
