@@ -279,27 +279,29 @@ def test_require_email_returns_none_when_new_user_with_email_in_details(mock_str
     assert result is None
 
 
-def test_require_email_raises_response_error_when_new_user_without_email(
-    mock_strategy: MagicMock, mock_backend: MagicMock
+@pytest.mark.parametrize(
+    "details",
+    [
+        {},
+        {"email": ""},
+    ],
+)
+def test_require_email_raises_response_error_when_new_user_has_no_email(
+    mock_strategy: MagicMock,
+    mock_backend: MagicMock,
+    details: dict[str, str],
 ) -> None:
     with pytest.raises(AuthResponseError) as exc_info:
-        require_email(mock_strategy, {}, backend=mock_backend, user=None, is_new=True)
+        require_email(
+            mock_strategy,
+            details,
+            backend=mock_backend,
+            user=None,
+            is_new=True,
+        )
 
     assert exc_info.value.code == "profile_email_missing"
     assert exc_info.value.stage == "pipeline"
-
-
-def test_require_email_raises_response_error_when_new_user_with_empty_email_string(
-    mock_strategy: MagicMock, mock_backend: MagicMock
-) -> None:
-    with pytest.raises(AuthResponseError) as exc_info:
-        require_email(mock_strategy, {"email": ""}, backend=mock_backend, user=None, is_new=True)
-
-    assert exc_info.value.code == "profile_email_missing"
-    assert exc_info.value.stage == "pipeline"
-
-
-# --- create_user tests ---
 
 
 def test_create_user_returns_is_new_false_when_user_exists(
