@@ -17,7 +17,6 @@ from django.test import override_settings
 from flags.models import FlagState
 import pytest
 from pytest_html import extras
-import responses
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -366,36 +365,6 @@ def browser(driver: Chrome, live_server_with_static) -> Chrome:
         yield driver
     finally:
         reset_browser(driver)
-
-
-@pytest.fixture
-def dedup_engine_stub(monkeypatch: pytest.MonkeyPatch) -> Any:
-    # Minimal happy-path stub for the external deduplication engine.
-    # Opt-in: tests that talk to the engine declare `dedup_engine_stub` in
-    # their signature. Selenium/live_server calls are unaffected (they don't
-    # go through the `requests` library). Tests that need a non-default
-    # response for a specific endpoint can call `.add(...)` on the yielded
-    # RequestsMock to override.
-    stub_url = "http://dedup-engine-stub.test/"
-    monkeypatch.setenv("DEDUPLICATION_ENGINE_API_URL", stub_url)
-    monkeypatch.setenv("DEDUPLICATION_ENGINE_API_KEY", "test")
-
-    base = re.escape(stub_url)
-    sets = rf"{base}deduplication_sets/[^/]+"
-    set_groups = rf"{base}deduplication_sets/[^/]+"
-
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
-        rsps.add(responses.POST, re.compile(rf"{base}deduplication_sets/$"), json={}, status=200)
-        rsps.add(responses.GET, re.compile(rf"{sets}/$"), json={"state": "Ready", "error": ""}, status=200)
-        rsps.add(responses.DELETE, re.compile(rf"{sets}/$"), json={}, status=200)
-        rsps.add(responses.POST, re.compile(rf"{sets}/process/$"), json={}, status=200)
-        rsps.add(responses.POST, re.compile(rf"{sets}/images_bulk/$"), json=[], status=200)
-        rsps.add(responses.DELETE, re.compile(rf"{sets}/images_bulk/clear/$"), json={}, status=200)
-        rsps.add(responses.GET, re.compile(rf"{sets}/duplicates/$"), json={"results": [], "next": None}, status=200)
-        rsps.add(responses.POST, re.compile(rf"{sets}/ignored/filenames/$"), json={}, status=200)
-        # Ticket 306312: new set_groups resource family.
-        rsps.add(responses.GET, re.compile(rf"{set_groups}/findings/$"), json={"findings": []}, status=200)
-        yield rsps
 
 
 @pytest.fixture

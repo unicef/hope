@@ -23,7 +23,6 @@ Example for a population XLSX with Maria Gonzalez in row 3 and an RDI XLSX with 
           "first": {"reference_pk": "rdi:3"},
           "second": {"reference_pk": "population:3"},
           "score": 12.0,
-          "status_code": 200
         }
       ],
       "tickets": [
@@ -122,7 +121,6 @@ class Command(BaseCommand):
                 "first": {"reference_pk": first},
                 "second": {"reference_pk": second},
                 "score": score,
-                "status_code": 200,
             }
             for (first, second), score in sorted(scores.items())
         ]
