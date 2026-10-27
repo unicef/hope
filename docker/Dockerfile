@@ -41,7 +41,7 @@ RUN apt-get update \
 
 # uv installer stage
 FROM base-build AS uv
-RUN pip install --upgrade pip && pip install uv --no-dev
+RUN pip install --upgrade pip && pip install uv
 COPY README.md LICENSE pyproject.toml uv.lock MANIFEST.in ./
 
 
@@ -90,7 +90,7 @@ COPY ./src/ ./src/
 COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hope/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-editable --frozen
+        --no-editable --frozen --no-dev
 
 
 # Dist — final production image. FROM base-runtime, not base-build, so no toolchain leaks in.
