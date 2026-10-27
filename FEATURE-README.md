@@ -67,3 +67,13 @@ In HOPE we put logic into services. Since biographic deduplication for country w
 3. `src/hope/apps/registration_data/tasks/fetch_findings_and_merge_rdi.py` adjusted to unconditionally fetch biographic findings
 4. Since DedupEngineSimilarityPair base class is used by two children now I decided to implement query set to make things more flexible and not hardcode the query logic within the models / services.
 5. `status_code` is used only for BiometricFinding. `proximity_to_score` is an attribute only for BiographicFinding.
+
+## Branch `pre-merge-stats`
+
+1. `src/hope/apps/grievance/services/needs_adjudication_ticket_services.py` - logic related to adjudication tickets creation. It required some tweaks from me mostly because existing logic for ticket creation is EITHER
+   1. for creating adjudication tickets that contain only PAIRS of individuals (biometric flow)
+   2. for creating adjudication tickets that contain GROUPED individual (for biographic)
+   I could use none of them, because we had PAIRS from HDE and have to create GROUPED tickets.
+2. `src/hope/apps/registration_data/services/deduplication_engine.py` - storing deduplication statistics in both RDI and Individual attributes.
+3. `src/hope/apps/registration_data/tasks/rdi_merge.py` - wire logic in merge.
+4.

@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import date
 from decimal import Decimal
 import functools
 import uuid
@@ -7,8 +8,10 @@ from django.db import IntegrityError
 import pytest
 
 from extras.test_utils.factories import (
+    AreaFactory,
     BiographicDeduplicationEngineSimilarityPairFactory,
     BiometricDeduplicationEngineSimilarityPairFactory,
+    HouseholdFactory,
     IndividualFactory,
     PendingIndividualFactory,
     ProgramFactory,
@@ -423,3 +426,105 @@ def test_biographic_for_rdi_against_population_keeps_zero_score_pair(
     result = BiographicDedupeSimilarityPair.objects.for_rdi_against_population(rdi)
 
     assert list(result) == [biographic_zero_score_population_pair]
+
+
+@pytest.fixture
+def duplicate_in_kabul(program: Program) -> Individual:
+    household = HouseholdFactory(program=program, business_area=program.business_area, admin2=AreaFactory(name="Kabul"))
+    return IndividualFactory(
+        program=program,
+        business_area=program.business_area,
+        household=household,
+        full_name="Jan Kowalski",
+        birth_date=date(1985, 3, 7),
+    )
+
+
+@pytest.fixture
+def main_individual(program: Program) -> Individual:
+    return IndividualFactory(program=program, business_area=program.business_area)
+
+
+@pytest.fixture
+def biographic_pair_with_duplicate_in_kabul(
+    program: Program, main_individual: Individual, duplicate_in_kabul: Individual
+) -> BiographicDedupeSimilarityPair:
+    return BiographicDeduplicationEngineSimilarityPairFactory(
+        program=program,
+        individual1=main_individual,
+        individual2=duplicate_in_kabul,
+        similarity_score=Decimal("12.50"),
+        proximity_to_score=Decimal("-2.25"),
+    )
+
+
+@pytest.fixture
+def biographic_pair_without_second_individual(
+    program: Program, main_individual: Individual
+) -> BiographicDedupeSimilarityPair:
+    return BiographicDeduplicationEngineSimilarityPairFactory(
+        program=program, individual1=main_individual, individual2=None
+    )
+
+
+def test_biographic_serialize_for_individual_returns_legacy_golden_record_shape(
+    main_individual: Individual,
+    duplicate_in_kabul: Individual,
+    biographic_pair_with_duplicate_in_kabul: BiographicDedupeSimilarityPair,
+) -> None:
+    result = BiographicDedupeSimilarityPair.serialize_for_individual(
+        main_individual, [biographic_pair_with_duplicate_in_kabul]
+    )
+
+    assert result == {
+        "duplicates": [
+            {
+                "hit_id": str(duplicate_in_kabul.id),
+                "full_name": "Jan Kowalski",
+                "score": 12.5,
+                "location": "Kabul",
+                "dob": "1985-03-07",
+                "proximity_to_score": -2.25,
+            }
+        ],
+        "possible_duplicates": [],
+    }
+
+
+@pytest.mark.parametrize(("main_index", "duplicate_index"), [(0, 1), (1, 0)])
+def test_biographic_serialize_for_individual_reports_other_individual_whichever_side_main_is_on(
+    main_index: int,
+    duplicate_index: int,
+    individuals: list[Individual],
+    biographic_pair: BiographicDedupeSimilarityPair,
+) -> None:
+    result = BiographicDedupeSimilarityPair.serialize_for_individual(individuals[main_index], [biographic_pair])
+
+    assert result["duplicates"][0]["hit_id"] == str(individuals[duplicate_index].id)
+
+
+def test_biographic_serialize_for_individual_without_household_has_no_location(
+    individuals: list[Individual], biographic_pair: BiographicDedupeSimilarityPair
+) -> None:
+    result = BiographicDedupeSimilarityPair.serialize_for_individual(individuals[0], [biographic_pair])
+
+    assert result["duplicates"][0]["location"] is None
+
+
+def test_biographic_serialize_for_individual_skips_pair_without_other_individual(
+    main_individual: Individual,
+    biographic_pair_without_second_individual: BiographicDedupeSimilarityPair,
+) -> None:
+    result = BiographicDedupeSimilarityPair.serialize_for_individual(
+        main_individual, [biographic_pair_without_second_individual]
+    )
+
+    assert result == {"duplicates": [], "possible_duplicates": []}
+
+
+def test_biographic_serialize_for_individual_without_pairs_returns_empty_buckets(
+    main_individual: Individual,
+) -> None:
+    result = BiographicDedupeSimilarityPair.serialize_for_individual(main_individual, [])
+
+    assert result == {"duplicates": [], "possible_duplicates": []}

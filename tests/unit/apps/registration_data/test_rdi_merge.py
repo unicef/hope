@@ -10,6 +10,8 @@ import pytest
 from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
+    BiographicDeduplicationEngineSimilarityPairFactory,
+    BiometricDeduplicationEngineSimilarityPairFactory,
     BusinessAreaFactory,
     CountryFactory,
     HouseholdCollectionFactory,
@@ -23,9 +25,12 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     SanctionListFactory,
 )
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import BROTHER_SISTER, COUSIN, HEAD, NON_BENEFICIARY, ROLE_ALTERNATE
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
 from hope.models import (
+    BiographicDedupeSimilarityPair,
+    BiometricDedupeSimilarityPair,
     BusinessArea,
     Household,
     Individual,
@@ -635,23 +640,6 @@ def test_run_deduplication_raises_when_business_area_is_none(rdi_merge_task):
         rdi_merge_task._run_deduplication(rdi, mock.MagicMock(), "test-rdi-id")
 
 
-def test_create_adjudication_tickets_from_deduplication_engine_findings_skips_when_program_is_none(rdi_merge_task):
-    rdi = mock.MagicMock()
-    rdi.program = None
-
-    rdi_merge_task._create_adjudication_tickets_from_deduplication_engine_findings(rdi, [])
-
-
-def test_create_adjudication_tickets_from_deduplication_engine_findings_skips_when_biometric_deduplication_disabled(
-    rdi_merge_task,
-):
-    rdi = mock.MagicMock()
-    rdi.program = mock.MagicMock()
-    rdi.program.biometric_deduplication_enabled = False
-
-    rdi_merge_task._create_adjudication_tickets_from_deduplication_engine_findings(rdi, [])
-
-
 @mock.patch("hope.apps.registration_data.tasks.rdi_merge.get_individual_doc")
 def test_populate_index_individuals_when_es_enabled(
     mock_get_individual_doc: mock.Mock,
@@ -678,3 +666,162 @@ def test_populate_index_households_when_es_enabled(
 
     mock_get_household_doc.assert_called_once_with(str(rdi.program.id))
     mock_get_household_doc.return_value.return_value.update.assert_called_once()
+
+
+@pytest.fixture
+def deduplication_not_postponed(business_area: object) -> None:
+    business_area.postpone_deduplication = False
+    business_area.save(update_fields=["postpone_deduplication"])
+
+
+@pytest.fixture
+def deduplication_engine_settings(settings) -> None:
+    settings.DEDUPLICATION_ENGINE_API_KEY = "dedup_api_key"
+    settings.DEDUPLICATION_ENGINE_API_URL = "http://dedup-fake-url.com"
+
+
+@pytest.fixture
+def cw_rdi(business_area: object, program: object) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(
+        business_area=business_area, program=program, country_workspace_id="cw-rdi-correlation-id"
+    )
+
+
+@pytest.fixture
+def legacy_rdi(business_area: object, program: object) -> RegistrationDataImport:
+    return RegistrationDataImportFactory(business_area=business_area, program=program, country_workspace_id=None)
+
+
+@pytest.fixture
+def cw_rdi_pending_individual(cw_rdi: RegistrationDataImport) -> PendingIndividual:
+    return PendingIndividualFactory(
+        registration_data_import=cw_rdi, program=cw_rdi.program, business_area=cw_rdi.business_area
+    )
+
+
+@pytest.fixture
+def legacy_rdi_pending_individual(legacy_rdi: RegistrationDataImport) -> PendingIndividual:
+    return PendingIndividualFactory(
+        registration_data_import=legacy_rdi, program=legacy_rdi.program, business_area=legacy_rdi.business_area
+    )
+
+
+@pytest.fixture
+def population_individual(program: object) -> Individual:
+    return IndividualFactory(program=program, business_area=program.business_area)
+
+
+@pytest.fixture
+def cw_rdi_biographic_population_pair(
+    cw_rdi_pending_individual: PendingIndividual, population_individual: Individual
+) -> BiographicDedupeSimilarityPair:
+    return BiographicDeduplicationEngineSimilarityPairFactory(
+        program=cw_rdi_pending_individual.program,
+        individual1=cw_rdi_pending_individual,
+        individual2=population_individual,
+    )
+
+
+@pytest.fixture
+def legacy_rdi_biographic_population_pair(
+    legacy_rdi_pending_individual: PendingIndividual, population_individual: Individual
+) -> BiographicDedupeSimilarityPair:
+    return BiographicDeduplicationEngineSimilarityPairFactory(
+        program=legacy_rdi_pending_individual.program,
+        individual1=legacy_rdi_pending_individual,
+        individual2=population_individual,
+    )
+
+
+@pytest.mark.usefixtures("deduplication_engine_settings", "deduplication_not_postponed", "cw_rdi_pending_individual")
+@mock.patch("hope.apps.registration_data.tasks.rdi_merge.DeduplicateTask")
+def test_merge_cw_rdi_skips_legacy_biographic_deduplication(
+    deduplicate_task_mock: mock.Mock,
+    cw_rdi: RegistrationDataImport,
+    django_capture_on_commit_callbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(cw_rdi.pk)
+
+    deduplicate_task_mock.assert_not_called()
+
+
+@pytest.mark.usefixtures("deduplication_not_postponed", "legacy_rdi_pending_individual")
+@mock.patch("hope.apps.registration_data.tasks.rdi_merge.DeduplicateTask")
+def test_merge_legacy_rdi_runs_legacy_biographic_deduplication(
+    deduplicate_task_mock: mock.Mock,
+    legacy_rdi: RegistrationDataImport,
+    django_capture_on_commit_callbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(legacy_rdi.pk)
+
+    deduplicate_task_mock.assert_called_once_with(legacy_rdi.business_area.slug, legacy_rdi.program.id)
+
+
+@pytest.mark.usefixtures("deduplication_engine_settings")
+def test_merge_cw_rdi_creates_biographic_ticket_from_hde_pairs(
+    cw_rdi: RegistrationDataImport,
+    cw_rdi_pending_individual: PendingIndividual,
+    population_individual: Individual,
+    cw_rdi_biographic_population_pair: BiographicDedupeSimilarityPair,
+    django_capture_on_commit_callbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(cw_rdi.pk)
+
+    ticket = GrievanceTicket.objects.get(issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY)
+    assert ticket.ticket_details.golden_records_individual_id == cw_rdi_pending_individual.id
+    assert list(ticket.ticket_details.possible_duplicates.all()) == [population_individual]
+
+
+@pytest.fixture
+def cw_rdi_biometric_population_pair(
+    cw_rdi_pending_individual: PendingIndividual, population_individual: Individual
+) -> BiometricDedupeSimilarityPair:
+    return BiometricDeduplicationEngineSimilarityPairFactory(
+        program=cw_rdi_pending_individual.program,
+        individual1=cw_rdi_pending_individual,
+        individual2=population_individual,
+    )
+
+
+@pytest.fixture
+def biometric_deduplication_enabled(program: object) -> None:
+    program.biometric_deduplication_enabled = True
+    program.save(update_fields=["biometric_deduplication_enabled"])
+
+
+@pytest.mark.usefixtures("deduplication_engine_settings", "cw_rdi_biometric_population_pair")
+def test_merge_cw_rdi_skips_biometric_tickets_when_biometric_deduplication_disabled(
+    cw_rdi: RegistrationDataImport,
+    django_capture_on_commit_callbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(cw_rdi.pk)
+
+    assert not GrievanceTicket.objects.filter(issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY).exists()
+
+
+@pytest.mark.usefixtures(
+    "deduplication_engine_settings", "biometric_deduplication_enabled", "cw_rdi_biometric_population_pair"
+)
+def test_merge_cw_rdi_creates_biometric_ticket_when_biometric_deduplication_enabled(
+    cw_rdi: RegistrationDataImport,
+    django_capture_on_commit_callbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(cw_rdi.pk)
+
+    assert GrievanceTicket.objects.filter(issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY).count() == 1
+
+
+@pytest.mark.usefixtures("legacy_rdi_biographic_population_pair")
+def test_merge_legacy_rdi_does_not_create_tickets_from_hde_pairs(
+    legacy_rdi: RegistrationDataImport,
+    django_capture_on_commit_callbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(legacy_rdi.pk)
+
+    assert not GrievanceTicket.objects.exists()
