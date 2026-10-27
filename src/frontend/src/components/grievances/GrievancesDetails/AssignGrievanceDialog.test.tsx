@@ -52,11 +52,14 @@ const assignMock = vi.mocked(
 const byCy = (cy: string): HTMLElement =>
   document.querySelector(`[data-cy="${cy}"]`) as HTMLElement;
 
-const renderDialog = () => {
+const onAssignToMe = vi.fn(() => Promise.resolve(true));
+
+const renderDialog = (canAssignToOther = true) => {
   render(
     <AssignGrievanceDialog
       ticketId="ticket-1"
-      currentUserId="me-1"
+      onAssignToMe={onAssignToMe}
+      canAssignToOther={canAssignToOther}
       programCode="PRG"
     />,
     {
@@ -69,6 +72,7 @@ const renderDialog = () => {
 describe('AssignGrievanceDialog', () => {
   beforeEach(() => {
     assignMock.mockClear();
+    onAssignToMe.mockClear();
   });
 
   it('assigns the ticket to the current user by default', async () => {
@@ -77,12 +81,17 @@ describe('AssignGrievanceDialog', () => {
     expect(byCy('pick-officer')).toBeNull();
     fireEvent.click(byCy('button-confirm-assign'));
 
-    await waitFor(() =>
-      expect(assignMock).toHaveBeenCalledWith({
-        businessAreaSlug: 'afghanistan',
-        formData: { assignedTo: 'me-1', grievanceTicketIds: ['ticket-1'] },
-      }),
-    );
+    await waitFor(() => expect(onAssignToMe).toHaveBeenCalled());
+    expect(assignMock).not.toHaveBeenCalled();
+  });
+
+  it('disables assigning another officer without GRIEVANCES_UPDATE', () => {
+    renderDialog(false);
+
+    expect(
+      (byCy('radio-assign-to-other').querySelector('input') as HTMLInputElement)
+        .disabled,
+    ).toBe(true);
   });
 
   it('assigns the ticket to the picked officer', async () => {

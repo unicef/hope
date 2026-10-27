@@ -138,7 +138,10 @@ const GrievancesDetailsPage = (): ReactElement => {
         canSendBack={canSendBack}
         canClose={canClose}
         canAssign={canAssign}
-        currentUserId={currentUserId}
+        canAssignToOther={hasPermissions(
+          PERMISSIONS.GRIEVANCES_UPDATE,
+          permissions,
+        )}
       />
       <Grid container>
         <GrievancesDetails

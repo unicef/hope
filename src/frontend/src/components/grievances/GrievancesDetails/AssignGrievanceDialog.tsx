@@ -30,7 +30,10 @@ type AssignMode = 'me' | 'other';
 
 interface AssignGrievanceDialogProps {
   ticketId: string;
-  currentUserId: string;
+  // status-change accepts the _AS_CREATOR/_AS_OWNER perms, the bulk endpoint only GRIEVANCES_UPDATE.
+  onAssignToMe: () => Promise<boolean>;
+  canAssignToOther: boolean;
+  loading?: boolean;
   // The ticket's programme, not the URL's: the URL says `all` in the All Programmes view.
   programCode?: string;
   disabled?: boolean;
@@ -38,7 +41,9 @@ interface AssignGrievanceDialogProps {
 
 export function AssignGrievanceDialog({
   ticketId,
-  currentUserId,
+  onAssignToMe,
+  canAssignToOther,
+  loading,
   programCode,
   disabled,
 }: AssignGrievanceDialogProps): ReactElement {
@@ -89,12 +94,17 @@ export function AssignGrievanceDialog({
     setAssignee(null);
   };
 
-  const assignedTo = mode === 'me' ? currentUserId : assignee?.id;
-
   const onConfirm = async (): Promise<void> => {
-    if (!assignedTo) return;
+    if (mode === 'me') {
+      if (await onAssignToMe()) handleClose();
+      return;
+    }
+    if (!assignee) return;
     try {
-      await mutateAsync({ assignedTo, grievanceTicketIds: [ticketId] });
+      await mutateAsync({
+        assignedTo: assignee.id,
+        grievanceTicketIds: [ticketId],
+      });
       handleClose();
     } catch {
       // handled in onError
@@ -139,6 +149,7 @@ export function AssignGrievanceDialog({
                 value="other"
                 control={<Radio data-cy="radio-assign-to-other" />}
                 label={t('Assign to another officer')}
+                disabled={!canAssignToOther}
               />
             </RadioGroup>
             {mode === 'other' && (
@@ -161,12 +172,12 @@ export function AssignGrievanceDialog({
               {t('CANCEL')}
             </Button>
             <LoadingButton
-              loading={isPending}
+              loading={isPending || loading}
               data-cy="button-confirm-assign"
               variant="contained"
               color="primary"
               onClick={onConfirm}
-              disabled={!assignedTo}
+              disabled={mode === 'other' && !assignee}
             >
               {t('ASSIGN')}
             </LoadingButton>

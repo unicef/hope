@@ -50,7 +50,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack,
   canClose,
   canAssign,
-  currentUserId,
+  canAssignToOther,
 }: {
   ticket: GrievanceTicketDetail;
   canEdit: boolean;
@@ -60,7 +60,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
-  currentUserId: string;
+  canAssignToOther: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -458,7 +458,9 @@ export const GrievanceDetailsToolbar = ({
         {isNew && canEdit && canAssign && (
           <AssignGrievanceDialog
             ticketId={ticket.id}
-            currentUserId={currentUserId}
+            onAssignToMe={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
+            canAssignToOther={canAssignToOther}
+            loading={loading}
             programCode={ticket.programs?.[0]?.code}
             disabled={!isActiveProgram}
           />
