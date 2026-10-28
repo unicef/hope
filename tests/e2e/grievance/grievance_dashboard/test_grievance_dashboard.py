@@ -202,7 +202,7 @@ class TestSmokeGrievanceDashboard:
 
         page_grievance_tickets.get_nav_grievance().click()
         page_grievance_tickets.get_ticket_list_row()[0].click()
-        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.assign_to_me()
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_tickets.get_button_confirm().click()
