@@ -1,7 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
-import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { PaymentPlanDetails } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
@@ -132,7 +131,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           <FspExtraFields paymentPlan={paymentPlan} permissions={permissions} />
         )}
       <ExcludeSection paymentPlan={paymentPlan} />
-      <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable

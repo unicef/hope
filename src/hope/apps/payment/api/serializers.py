@@ -146,11 +146,12 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan = self.context["payment_plan"]
-        data["payment_plan"] = payment_plan
+        # The view passes the owner: {"payment_plan_group": group} or {"follow_up_instruction": instruction}.
+        owner = self.context["owner"]
+        data.update(owner)
         data["created_by"] = self.context["request"].user
 
-        if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
+        if PaymentPlanSupportingDocument.objects.filter(**owner).count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
             raise serializers.ValidationError(
                 f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
                 f"supporting documents."
@@ -926,6 +927,7 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
 class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
     payment_plans = FollowUpInstructionChildPaymentPlanSummarySerializer(many=True, read_only=True)
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     closed_by = serializers.SerializerMethodField()
     export_pdf_file_summary = serializers.SerializerMethodField()
 
@@ -933,6 +935,7 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
         fields = FollowUpInstructionListSerializer.Meta.fields + (  # type: ignore[assignment]
             "payment_plans",
             "approval_process",
+            "supporting_documents",
             "abort_comment",
             "closure_comment",
             "closed_by",
@@ -984,7 +987,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     vision_managed = serializers.BooleanField(read_only=True)
     vision = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
-    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
@@ -1029,7 +1031,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "vision_managed",
             "vision",
             "can_delete",
-            "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
             "approval_process",
@@ -2131,6 +2132,7 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
 
 class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     closed_by = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
@@ -2155,6 +2157,7 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "admin_url",
             "background_action_status",
             "approval_process",
+            "supporting_documents",
             "abort_comment",
             "closure_comment",
             "closed_by",

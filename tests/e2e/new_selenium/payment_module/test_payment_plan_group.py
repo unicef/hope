@@ -967,3 +967,35 @@ def test_group_details_overview_shows_totals_and_links_to_cycle(
         browser.wait_for_element_clickable('div[data-cy="label-Cycle"] a').click()
         browser.wait_for_text(cycle.title, 'h5[data-cy="page-header-title"]')
         browser.wait_for_element_visible('div[data-cy="label-Frequency of Payment"]')
+
+
+def test_upload_supporting_document_to_group(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    group_with_totals: PaymentPlanGroup,
+) -> None:
+    program = group_with_totals.cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT,
+    ):
+        browser.login(username="noperm_user")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group_with_totals.id}")
+        browser.wait_for_text("No documents uploaded", '[data-cy="supporting-documents-empty"]')
+
+        browser.wait_for_element_clickable('button[data-cy="upload-file-button"]').click()
+        browser.choose_file('[data-cy="file-input"]', f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+        browser.type('div[data-cy="title-input"] input', "Signed contract")
+        browser.click('button[data-cy="button-import-submit"]')
+        browser.wait_for_text("File uploaded successfully")
+        browser.click('button[data-cy="expand-button"]')
+
+        browser.wait_for_text("Signed contract", '[data-cy="document-item"]')
+
+    assert list(group_with_totals.documents.values_list("title", flat=True)) == ["Signed contract"]

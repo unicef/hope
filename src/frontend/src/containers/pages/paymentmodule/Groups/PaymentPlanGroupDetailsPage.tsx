@@ -1,5 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -186,6 +187,13 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         }
         headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
       />
+      {group && (
+        <SupportingDocumentsSection
+          key={group.id}
+          ownerPath={`payment-plan-groups/${group.id}`}
+          supportingDocuments={group.supportingDocuments}
+        />
+      )}
       {group?.linkedGroups && (
         <LinkedGroupsTable linkedGroups={group.linkedGroups} />
       )}

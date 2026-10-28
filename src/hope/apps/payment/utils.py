@@ -140,13 +140,13 @@ def log_payment_plan_approval(
 
 
 def log_payment_plan_supporting_document(
-    payment_plan: PaymentPlan,
+    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     title: str,
     *,
     created: bool,
 ) -> None:
-    """Record upload/removal of a PaymentPlan supporting (compliance) document."""
+    """Record upload/removal of a supporting (compliance) document on a plan, group or instruction."""
     changes = {"supporting_document": {"from": None, "to": title} if created else {"from": title, "to": None}}
     _log_payment_plan_event(payment_plan, user, changes)
 

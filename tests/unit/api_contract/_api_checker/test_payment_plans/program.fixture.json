@@ -2,18 +2,18 @@
     "program": {
         "master": {
             "model": "program.program",
-            "pk": "242ca25d-29c0-4b50-8e5a-1880fd1dc044",
+            "pk": "fa8df7b1-cfc3-44ae-9042-0fb87d0d8e7e",
             "fields": {
                 "is_removed": false,
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "last_sync_at": null,
                 "version": 1735688653315201,
-                "data_collecting_type": 1,
-                "beneficiary_group": "5cad70a0-120f-46e4-b21e-b97ade350f05",
-                "business_area": "574206fa-72c4-45b9-b147-ef9204718147",
+                "data_collecting_type": 2,
+                "beneficiary_group": "8e46d913-abf3-4848-9da4-1d8b45d7c746",
+                "business_area": "187959f7-e677-40a3-8172-8f04792c2ee7",
                 "name": "Program 0",
-                "code": "p3a9",
+                "code": "pf-i",
                 "status": "ACTIVE",
                 "description": "",
                 "start_date": "2025-01-01",
@@ -37,14 +37,14 @@
                 "admin_areas": [],
                 "sanction_lists": [],
                 "payment_plan_purposes": [
-                    "d4097b90-cadb-4891-bd05-ce480f5c3d45"
+                    "0714079e-7e64-4ed2-8449-3f605a596240"
                 ]
             }
         },
         "deps": [
             {
                 "model": "core.datacollectingtype",
-                "pk": 1,
+                "pk": 2,
                 "fields": {
                     "created": "2025-01-01T00:00:00Z",
                     "modified": "2025-01-01T00:00:00Z",
@@ -57,16 +57,17 @@
                     "individual_filters_available": false,
                     "household_filters_available": true,
                     "recalculate_composition": false,
+                    "collects_individual_data": false,
                     "weight": 0,
                     "compatible_types": [
-                        1
+                        2
                     ],
                     "limit_to": []
                 }
             },
             {
                 "model": "program.beneficiarygroup",
-                "pk": "5cad70a0-120f-46e4-b21e-b97ade350f05",
+                "pk": "8e46d913-abf3-4848-9da4-1d8b45d7c746",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -80,7 +81,7 @@
             },
             {
                 "model": "core.businessarea",
-                "pk": "574206fa-72c4-45b9-b147-ef9204718147",
+                "pk": "187959f7-e677-40a3-8172-8f04792c2ee7",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
@@ -99,12 +100,13 @@
                     "rdi_import_xlsx_disabled": false,
                     "active": true,
                     "enable_email_notification": true,
-
+                    "vision_integration_active": false,
                     "rapid_pro_host": null,
                     "rapid_pro_payment_verification_token": null,
                     "rapid_pro_messages_token": null,
                     "rapid_pro_survey_token": null,
                     "postpone_deduplication": false,
+                    "ingest_source": "ALL_EXCEPT_COUNTRY_WORKSPACE",
                     "deduplication_duplicate_score": 6.0,
                     "deduplication_possible_duplicate_score": 6.0,
                     "deduplication_batch_duplicates_percentage": 50,
@@ -120,11 +122,11 @@
             },
             {
                 "model": "payment.paymentplanpurpose",
-                "pk": "d4097b90-cadb-4891-bd05-ce480f5c3d45",
+                "pk": "0714079e-7e64-4ed2-8449-3f605a596240",
                 "fields": {
                     "created_at": "2025-01-01T00:00:00Z",
                     "updated_at": "2025-01-01T00:00:00Z",
-                    "unicef_id": "PPP-1",
+                    "unicef_id": "PPP-2",
                     "name": "Purpose 0",
                     "description": "",
                     "limit_to": []

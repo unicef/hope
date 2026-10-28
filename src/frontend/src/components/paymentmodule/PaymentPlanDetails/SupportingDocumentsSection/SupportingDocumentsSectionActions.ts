@@ -6,20 +6,20 @@ export const useDownloadSupportingDocument = () => {
     mutationFn: ({
       businessAreaSlug: mutationBusinessAreaSlug,
       programId: mutationProgramId,
-      paymentPlanId: mutationPaymentPlanId,
+      ownerPath: mutationOwnerPath,
       fileId: mutationFileId,
       fileName: mutationFileName,
     }: {
       businessAreaSlug: string;
       programId: string;
-      paymentPlanId: string;
+      ownerPath: string;
       fileId: string;
       fileName: string;
     }) => {
       return fetchSupportingDocument(
         mutationBusinessAreaSlug,
         mutationProgramId,
-        mutationPaymentPlanId,
+        mutationOwnerPath,
         mutationFileId,
         mutationFileName,
       );

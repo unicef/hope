@@ -893,12 +893,13 @@ class PaymentAdmin(ViewOnUiMixin, CursorPaginatorAdmin, AdminAdvancedFiltersMixi
 @admin.register(PaymentPlanSupportingDocument)
 class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
     search_fields = ("title",)
-    list_display = ("title", "payment_plan", "created_by", "uploaded_at")
+    list_display = ("title", "payment_plan_group", "follow_up_instruction", "created_by", "uploaded_at")
     list_filter = (("created_by", AutoCompleteFilter),)
     readonly_fields = (
         "uploaded_at",
         "created_by",
-        "payment_plan",
+        "payment_plan_group",
+        "follow_up_instruction",
     )
 
     def has_add_permission(self, request: HttpRequest) -> bool:

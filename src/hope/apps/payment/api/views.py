@@ -2132,11 +2132,12 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         )
 
 
-class PaymentPlanSupportingDocumentViewSet(
-    ProgramMixin, ScopedPaymentPlanMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
-):
+class SupportingDocumentViewSet(ProgramMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+    """Upload, delete and download the supporting documents of a group or a Follow-Up Instruction."""
+
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
+    owner_field: str
 
     permissions_by_action = {
         "create": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
@@ -2145,33 +2146,35 @@ class PaymentPlanSupportingDocumentViewSet(
         "download": [Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT],
     }
 
+    @cached_property
+    def owner(self) -> PaymentPlanGroup | FollowUpInstruction:
+        raise NotImplementedError
+
     def get_queryset(self) -> QuerySet:
-        return PaymentPlanSupportingDocument.objects.filter(payment_plan=self.payment_plan)
+        return PaymentPlanSupportingDocument.objects.filter(**{self.owner_field: self.owner})
 
     def get_object(self) -> PaymentPlanSupportingDocument:
         return get_object_or_404(self.get_queryset(), id=self.kwargs.get("file_id"))
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()
-        context["payment_plan"] = self.payment_plan
+        context["owner"] = {self.owner_field: self.owner}
         return context
 
     @transaction.atomic
     def perform_create(self, serializer: Any) -> None:
         document = serializer.save()
-        log_payment_plan_supporting_document(document.payment_plan, self.request.user, document.title, created=True)
+        log_payment_plan_supporting_document(self.owner, self.request.user, document.title, created=True)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         document = self.get_object()
-        payment_plan = document.payment_plan
         title = document.title
         document.delete()
-        log_payment_plan_supporting_document(payment_plan, request.user, title, created=False)
+        log_payment_plan_supporting_document(self.owner, request.user, title, created=False)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
-    @transaction.atomic
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         document = self.get_object()
         file = document.file
@@ -2180,6 +2183,26 @@ class PaymentPlanSupportingDocumentViewSet(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
+        )
+
+
+class PaymentPlanGroupSupportingDocumentViewSet(SupportingDocumentViewSet):
+    owner_field = "payment_plan_group"
+
+    @cached_property
+    def owner(self) -> PaymentPlanGroup:
+        return get_object_or_404(
+            PaymentPlanGroup, pk=self.kwargs.get("payment_plan_group_pk"), cycle__program=self.program
+        )
+
+
+class FollowUpInstructionSupportingDocumentViewSet(SupportingDocumentViewSet):
+    owner_field = "follow_up_instruction"
+
+    @cached_property
+    def owner(self) -> FollowUpInstruction:
+        return get_object_or_404(
+            FollowUpInstruction, pk=self.kwargs.get("follow_up_instruction_pk"), program=self.program
         )
 
 

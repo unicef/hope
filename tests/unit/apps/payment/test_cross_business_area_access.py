@@ -83,7 +83,7 @@ def attacker_purpose(attacker_payment_plan: PaymentPlan) -> PaymentPlanPurpose:
 
 @pytest.fixture
 def victim_document(victim_payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(payment_plan=victim_payment_plan)
+    return PaymentPlanSupportingDocumentFactory(payment_plan_group=victim_payment_plan.payment_plan_group)
 
 
 @pytest.fixture
@@ -166,10 +166,10 @@ def test_download_supporting_document_without_permission_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-download",
+        "api:payments:payment-plan-group-supporting-documents-download",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_document.payment_plan.id),
+            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -185,10 +185,10 @@ def test_download_supporting_document_from_other_business_area_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-download",
+        "api:payments:payment-plan-group-supporting-documents-download",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_document.payment_plan.id),
+            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -204,10 +204,10 @@ def test_delete_supporting_document_from_other_business_area_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-detail",
+        "api:payments:payment-plan-group-supporting-documents-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_document.payment_plan.id),
+            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -225,14 +225,14 @@ def test_upload_supporting_document_to_other_business_area_is_denied(
     upload_file: SimpleUploadedFile,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-list",
-        kwargs={**cross_ba_kwargs, "payment_plan_pk": str(victim_payment_plan.id)},
+        "api:payments:payment-plan-group-supporting-documents-list",
+        kwargs={**cross_ba_kwargs, "payment_plan_group_pk": str(victim_payment_plan.payment_plan_group.id)},
     )
 
     response = api_client.post(url, {"title": "cross ba", "file": upload_file}, format="multipart")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
-    assert not victim_payment_plan.documents.exists()
+    assert not victim_payment_plan.payment_plan_group.documents.exists()
 
 
 def test_retrieve_payment_plan_from_other_business_area_is_denied(

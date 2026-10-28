@@ -3,21 +3,22 @@
     "headers": {
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
-        "Allow": "GET, PATCH, DELETE",
-        "X-Hope-Backend-Version": "None",
+        "Allow": "GET, DELETE",
+        "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "3383"
+        "Content-Length": "3023"
     },
     "data": {
-        "id": "cb13e8a9-6d3b-415f-8964-24001fcbc65e",
+        "id": "deb01862-9373-40ba-99a3-b4c4d79cf717",
         "unicef_id": "PP-BA0000-25-00000001",
         "name": null,
         "status": "OPEN",
         "total_households_count": 0,
         "total_individuals_count": 0,
         "currency": null,
+        "currency_vision_code": null,
         "excluded_ids": null,
         "total_entitled_quantity": null,
         "total_delivered_quantity": null,
@@ -31,66 +32,39 @@
         "created_at": "2025-01-01T00:00:00Z",
         "updated_at": "2025-01-01T00:00:00Z",
         "program": {
-            "id": "dab4d3f7-d80b-4f8a-9d96-0178ba307064",
-            "code": "4zlq",
+            "id": "fa8df7b1-cfc3-44ae-9042-0fb87d0d8e7e",
+            "code": "pf-i",
             "name": "Program 0",
             "status": "ACTIVE",
             "screen_beneficiary": false
         },
         "payment_plan_group": {
-            "id": "4de68a9d-e8c7-4024-92d2-4d7de8007ea1",
-            "unicef_id": "PPG-4",
+            "id": "24fa35bc-b9cf-43a3-aa4d-336fd64d31d0",
+            "unicef_id": "PPG-1",
             "name": "Default Group"
         },
-        "version": 1735688653315202,
+        "version": 1735688653315201,
         "background_action_status": null,
         "background_action_status_display": null,
         "start_date": null,
         "end_date": null,
         "program_cycle": {
-            "id": "4fe2d0d8-6c55-4b95-907a-f92e68634225",
+            "id": "ed6a9c67-3b48-4f5b-bb99-b36d2d4ec34a",
             "title": "Programme Cycle 0"
         },
         "is_payment_gateway": false,
         "is_instruction_managed": false,
         "has_payment_list_export_file": false,
-        "has_fsp_delivery_mechanism_xlsx_template": false,
         "imported_file_name": "",
         "imported_file_date": null,
         "payments_conflicts_count": 0,
         "delivery_mechanism": null,
         "volume_by_delivery_mechanism": [
             {
-                "id": "cb13e8a9-6d3b-415f-8964-24001fcbc65e",
+                "id": "deb01862-9373-40ba-99a3-b4c4d79cf717",
                 "delivery_mechanism": null,
                 "volume": null,
                 "volume_usd": null
-            }
-        ],
-        "split_choices": [
-            {
-                "name": "By Admin Area 1",
-                "value": "BY_ADMIN_AREA1"
-            },
-            {
-                "name": "By Admin Area 2",
-                "value": "BY_ADMIN_AREA2"
-            },
-            {
-                "name": "By Admin Area 3",
-                "value": "BY_ADMIN_AREA3"
-            },
-            {
-                "name": "By Collector",
-                "value": "BY_COLLECTOR"
-            },
-            {
-                "name": "By Records",
-                "value": "BY_RECORDS"
-            },
-            {
-                "name": "No Split",
-                "value": "NO_SPLIT"
             }
         ],
         "exclusion_reason": null,
@@ -105,23 +79,30 @@
             "not_delivered": 0,
             "unsuccessful": 0,
             "pending": 0,
+            "pending_breakdown": {
+                "pending": 0,
+                "sent_to_payment_gateway": 0,
+                "sent_to_fsp": 0
+            },
             "reconciled": 0,
             "number_of_payments": 0
         },
         "excluded_households": [],
         "excluded_individuals": [],
-        "can_create_follow_up": false,
-        "can_create_top_up": false,
-        "can_create_top_up_amendment": false,
         "total_withdrawn_households_count": 0,
         "unsuccessful_payments_count": 0,
-        "can_split": false,
-        "supporting_documents": [],
+        "vision_integration_enabled": false,
+        "vision_managed": false,
+        "vision": {
+            "status": "NOT_SENT",
+            "vision_id": null,
+            "fc_numbers": [],
+            "error_code": null
+        },
+        "can_delete": true,
         "total_households_count_with_valid_phone_no": 0,
         "financial_service_provider": null,
-        "can_export_xlsx": false,
-        "can_download_xlsx": false,
-        "can_send_xlsx_password": false,
+        "approval_process": [],
         "total_entitled_quantity_usd": null,
         "total_entitled_quantity_revised_usd": null,
         "total_delivered_quantity_usd": null,
@@ -141,7 +122,7 @@
         "available_funds_commitments": [],
         "payment_verification_plans": [],
         "payment_verification_summary": null,
-        "admin_url": "/api/unicorn/payment/paymentplan/cb13e8a9-6d3b-415f-8964-24001fcbc65e/change/",
+        "admin_url": "/api/unicorn/payment/paymentplan/deb01862-9373-40ba-99a3-b4c4d79cf717/change/",
         "abort_comment": "",
         "closure_comment": null,
         "closed_by": null,
@@ -149,7 +130,7 @@
         "flat_amount_value": null,
         "payment_plan_purposes": [
             {
-                "id": "488c34bc-ffaa-40f0-89a2-9e066338f32e",
+                "id": "0714079e-7e64-4ed2-8449-3f605a596240",
                 "name": "Purpose 0"
             }
         ]
