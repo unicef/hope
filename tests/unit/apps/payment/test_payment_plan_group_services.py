@@ -703,20 +703,21 @@ def test_abort_rejects_open_group(open_group, locked_payment_plan, user):
     assert error.value.detail[0] == "Abort Payment Plan Group is not possible within Status OPEN"
 
 
-@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
-def test_reactivate_abort_reopens_group_and_plans(
-    mock_rebuild, group_in_approval, locked_payment_plan, user, django_capture_on_commit_callbacks
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task")
+def test_reactivate_abort_reopens_group_and_queues_its_plans_payees_refresh(
+    mock_refresh, group_in_approval, locked_payment_plan, user, django_capture_on_commit_callbacks
 ):
     PaymentPlanGroupService(group_in_approval).abort(None, user)
 
     with django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanGroupService(group_in_approval).reactivate_abort()
+        PaymentPlanGroupService(group_in_approval).reactivate_abort(str(user.pk))
 
     group_in_approval.refresh_from_db()
     locked_payment_plan.refresh_from_db()
     assert group_in_approval.status == PaymentPlanGroup.Status.OPEN
-    assert locked_payment_plan.status == PaymentPlan.Status.OPEN
-    mock_rebuild.assert_called_once_with(locked_payment_plan, True)
+    assert locked_payment_plan.status == PaymentPlan.Status.ABORTED
+    assert locked_payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    mock_refresh.assert_called_once_with(locked_payment_plan, str(user.pk))
 
 
 @pytest.fixture

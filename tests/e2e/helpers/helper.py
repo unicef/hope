@@ -386,6 +386,24 @@ class Common:
                 raise AssertionError(f"Element: {name} is not in the list: {labels}")
             sleep(0.1)
 
+    def _wait_until_still(self, element: WebElement, timeout: int = DEFAULT_TIMEOUT) -> None:
+        """Wait until ``element`` stays in the same place for two reads in a row.
+
+        A click goes to screen coordinates, so clicking an option while its menu is
+        still opening or scrolling hits whichever row has moved under that point.
+        """
+        script = "const r = arguments[0].getBoundingClientRect(); return [r.top, r.left, r.width, r.height];"
+        deadline = time.monotonic() + timeout
+        previous = self.driver.execute_script(script, element)
+        while True:
+            sleep(0.1)
+            current = self.driver.execute_script(script, element)
+            if current == previous:
+                return
+            if time.monotonic() >= deadline:
+                raise TimeoutException(f"Element kept moving: {previous} -> {current}")
+            previous = current
+
     def select_listbox_element(
         self,
         name: str,
@@ -400,6 +418,7 @@ class Common:
             # Long menus scroll on their own; without this an item below the fold gets
             # clicked through to the menu backdrop.
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'nearest'});", item)
+            self._wait_until_still(item)
             self._wait().until(expected_conditions.element_to_be_clickable(item))
             item.click()
             try:

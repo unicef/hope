@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { PaymentPlanGroupDetail } from '../types';
 import { showApiErrorMessages } from '@utils/utils';
+import { HeaderIconAction } from '@core/HeaderIconAction';
 
 interface DeletePaymentPlanGroupProps {
   group: PaymentPlanGroupDetail | null;
@@ -64,19 +65,26 @@ export function DeletePaymentPlanGroup({
 
   return (
     <>
-      <Box
-        sx={{
-          p: 2,
-        }}
+      <HeaderIconAction
+        icon={<Delete />}
+        label={t('Delete group')}
+        onClick={() => setDeleteDialogOpen(true)}
+        dataCy="button-delete-group"
       >
-        <IconButton
-          onClick={() => setDeleteDialogOpen(true)}
-          aria-label={t('Delete group')}
-          data-cy="button-delete-group"
+        <Box
+          sx={{
+            p: 2,
+          }}
         >
-          <Delete />
-        </IconButton>
-      </Box>
+          <IconButton
+            onClick={() => setDeleteDialogOpen(true)}
+            aria-label={t('Delete group')}
+            data-cy="button-delete-group"
+          >
+            <Delete />
+          </IconButton>
+        </Box>
+      </HeaderIconAction>
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}

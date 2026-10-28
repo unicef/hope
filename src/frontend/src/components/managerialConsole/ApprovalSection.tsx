@@ -9,6 +9,7 @@ import type {
 } from './types';
 import {
   Table,
+  TableContainer,
   TableCell,
   TableHead,
   TableRow,
@@ -28,6 +29,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
+import { responsiveValue } from 'src/responsive';
 
 interface ApprovalSectionProps {
   selectedApproved: string[];
@@ -164,67 +166,73 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
 
   return (
     <BaseSection title={title} buttons={buttons}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell padding="checkbox" style={{ width: '10%' }}>
-              <Box sx={{ flex: 1 }}>
-                <Checkbox
-                  data-cy="select-all-approval"
-                  checked={allSelected && selectedApproved.length > 0}
-                  onClick={handleSelectAllApproved}
-                />
-              </Box>
-            </TableCell>
-            {columns.map((column) => (
-              <TableCell key={column.field}>
-                {column.field === 'program' ? (
-                  <ProgramSelect
-                    dataCy="program-select-approval"
-                    selectedProgram={selectedProgram}
-                    setSelectedProgram={setSelectedProgram}
-                    programs={programs}
+      <TableContainer>
+        <Table sx={{ minWidth: responsiveValue<number | string>(700, 'auto') }}>
+          <TableHead>
+            <TableRow>
+              <TableCell padding="checkbox" style={{ width: '10%' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Checkbox
+                    data-cy="select-all-approval"
+                    checked={allSelected && selectedApproved.length > 0}
+                    onClick={handleSelectAllApproved}
                   />
-                ) : (
-                  <TableSortLabel
-                    active={sortField === column.field}
-                    direction={sortDirection}
-                    onClick={() => handleSort(column.field)}
-                  >
-                    {column.headerName}
-                  </TableSortLabel>
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedRows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  data-cy="select-approval"
-                  checked={selectedApproved.includes(row.id)}
-                  onChange={() =>
-                    handleSelect(selectedApproved, setSelectedApproved, row.id)
-                  }
-                />
+                </Box>
               </TableCell>
               {columns.map((column) => (
-                <TableCell
-                  data-cy="column-field"
-                  key={column.field}
-                  align="left"
-                >
-                  {column.renderCell
-                    ? column.renderCell({ value: row[column.field], row })
-                    : row[column.field]}
+                <TableCell key={column.field}>
+                  {column.field === 'program' ? (
+                    <ProgramSelect
+                      dataCy="program-select-approval"
+                      selectedProgram={selectedProgram}
+                      setSelectedProgram={setSelectedProgram}
+                      programs={programs}
+                    />
+                  ) : (
+                    <TableSortLabel
+                      active={sortField === column.field}
+                      direction={sortDirection}
+                      onClick={() => handleSort(column.field)}
+                    >
+                      {column.headerName}
+                    </TableSortLabel>
+                  )}
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {sortedRows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    data-cy="select-approval"
+                    checked={selectedApproved.includes(row.id)}
+                    onChange={() =>
+                      handleSelect(
+                        selectedApproved,
+                        setSelectedApproved,
+                        row.id,
+                      )
+                    }
+                  />
+                </TableCell>
+                {columns.map((column) => (
+                  <TableCell
+                    data-cy="column-field"
+                    key={column.field}
+                    align="left"
+                  >
+                    {column.renderCell
+                      ? column.renderCell({ value: row[column.field], row })
+                      : row[column.field]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </BaseSection>
   );
 };

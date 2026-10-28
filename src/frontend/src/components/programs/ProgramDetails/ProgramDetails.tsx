@@ -5,7 +5,7 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { Box, Chip, Grid, Typography } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
 import type { PaymentPlanPurpose } from '@restgenerated/models/PaymentPlanPurpose';
 import type { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramDetail } from '@restgenerated/models/ProgramDetail';
@@ -16,16 +16,15 @@ import {
 } from '@utils/utils';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 import type { MiśTheme } from 'src/theme';
 import styled from 'styled-components';
 import { PartnerAccess } from '../constants';
 
-const NumberOfHouseHolds = styled.div`
-  padding: ${({ theme }) => theme.spacing(8)};
-  border-color: #b1b1b5;
-  border-left-width: 1px;
-  border-left-style: solid;
-`;
 const NumberOfHouseHoldsValue = styled.div`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
     theme.hctTypography.fontFamily};
@@ -69,18 +68,18 @@ export const ProgramDetails = ({
     });
 
     return (
-      <Grid container spacing={6}>
+      <ResponsiveGridContainer spacing={6}>
         {Object.keys(counts).map((level) => (
-          <Grid size={3} key={level}>
+          <ResponsiveGrid size="quarter" mobileSize="half" key={level}>
             <LabelizedField
               dataCy={`admin-area-${level}-total-count`}
               label={t(`Admin Area ${level}`)}
             >
               {counts[level]}
             </LabelizedField>
-          </Grid>
+          </ResponsiveGrid>
         ))}
-      </Grid>
+      </ResponsiveGridContainer>
     );
   };
 
@@ -95,49 +94,49 @@ export const ProgramDetails = ({
         <Typography variant="h6">{t('Programme Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid size={4}>
+        <ResponsiveGridContainer spacing={6}>
+          <ResponsiveGrid size="third">
             <LabelizedField label={t('status')}>
               <StatusBox
                 status={program.status}
                 statusToColor={programStatusToColor}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('START DATE')}
               value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('END DATE')}
               value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField label={t('Programme Code')} value={program.code} />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Data Collecting Type')}
               value={program?.dataCollectingType?.label}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Beneficiary Group')}
               value={program?.beneficiaryGroup?.name}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Frequency of Payment')}
               value={
@@ -146,38 +145,38 @@ export const ProgramDetails = ({
                 ]
               }
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Administrative Areas of implementation')}
               value={program.administrativeAreasOfImplementation}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Description')}
               value={program.description}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('CASH+')}
               value={program.cashPlus ? t('Yes') : t('No')}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Partner Access')}
               value={PartnerAccess[program.partnerAccess ?? '']}
             />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Reconciliation Window (in days)')}
               value={program.reconciliationWindowInDays}
             />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third">
             <LabelizedField
               label={t('Send reconciliation window expiry notifications')}
               value={
@@ -186,9 +185,9 @@ export const ProgramDetails = ({
                   : t('No')
               }
             />
-          </Grid>
+          </ResponsiveGrid>
           {program.paymentPlanPurposes?.length > 0 && (
-            <Grid size={12}>
+            <ResponsiveGrid size="full">
               <LabelizedField label={t('Payment Plan Purposes')}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {program.paymentPlanPurposes.map(
@@ -202,16 +201,26 @@ export const ProgramDetails = ({
                   )}
                 </Box>
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           )}
-        </Grid>
-        <NumberOfHouseHolds>
+        </ResponsiveGridContainer>
+        <Box
+          sx={{
+            borderColor: '#b1b1b5',
+            borderStyle: 'solid',
+            borderWidth: responsiveValue('1px 0 0 0', '0 0 0 1px'),
+            mt: responsiveValue(6, 0),
+            pt: responsiveValue(4, 8),
+            px: responsiveValue(0, 8),
+            pb: responsiveValue(0, 8),
+          }}
+        >
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
               {program.householdCount}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
-        </NumberOfHouseHolds>
+        </Box>
       </OverviewContainer>
       {showPartners && (
         <>
@@ -220,9 +229,9 @@ export const ProgramDetails = ({
             <Typography variant="h6">{t('Programme Partners')}</Typography>
           </Title>
           <OverviewContainer>
-            <Grid container spacing={6}>
+            <ResponsiveGridContainer spacing={6}>
               {partners.map((partner) => (
-                <Grid key={partner.id} size={12}>
+                <ResponsiveGrid key={partner.id} size="full">
                   <StyledBox
                     sx={{
                       p: 6,
@@ -243,9 +252,9 @@ export const ProgramDetails = ({
                       renderAdminAreasCount(partner)
                     )}
                   </StyledBox>
-                </Grid>
+                </ResponsiveGrid>
               ))}
-            </Grid>
+            </ResponsiveGridContainer>
           </OverviewContainer>
         </>
       )}

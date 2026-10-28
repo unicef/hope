@@ -1,4 +1,5 @@
-import { Box, Chip, Grid, Typography } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { useTranslation } from 'react-i18next';
 import {
   paymentPlanStatusToColor,
@@ -30,8 +31,8 @@ function TargetPopulationDetails({
         <Typography variant="h6">{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid data-cy="details-grid" container spacing={6}>
-          <Grid size={4}>
+        <ResponsiveGridContainer data-cy="details-grid" spacing={6}>
+          <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField label={t('Status')}>
               <StatusBox
                 dataCy="target-population-status"
@@ -40,37 +41,37 @@ function TargetPopulationDetails({
                 statusNameMapping={targetPopulationStatusDisplayMap}
               />
             </LabelizedField>
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField
               dataCy="created-by"
               label={t('created by')}
               value={createdBy}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField
               dataCy="program-name"
               label={t('Programme')}
               value={programName}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField
               dataCy="programme-cycle-title"
               label={t('Programme Cycle')}
               value={programCycle?.title ?? '-'}
             />
-          </Grid>
-          <Grid size={4}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField
               dataCy="payment-plan-group-name"
               label={t('Payment Plan')}
               value={targetPopulation.paymentPlanGroup?.name ?? '-'}
             />
-          </Grid>
+          </ResponsiveGrid>
           {targetPopulation.paymentPlanPurposes?.length > 0 && (
-            <Grid size={4}>
+            <ResponsiveGrid size="third" mobileSize="half">
               <LabelizedField label={t('Purposes')}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {targetPopulation.paymentPlanPurposes.map((p) => (
@@ -78,9 +79,9 @@ function TargetPopulationDetails({
                   ))}
                 </Box>
               </LabelizedField>
-            </Grid>
+            </ResponsiveGrid>
           )}
-        </Grid>
+        </ResponsiveGridContainer>
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );

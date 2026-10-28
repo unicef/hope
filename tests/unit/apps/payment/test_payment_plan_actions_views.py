@@ -165,6 +165,23 @@ def locked_fsp_extra_fields_actions_context(
 
 
 @pytest.fixture
+def locked_payment_plan_actions_context(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    context = payment_plan_actions_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_LOCK_AND_UNLOCK_FSP],
+        context["business_area"],
+        context["program_active"],
+    )
+    context["pp"].status = PaymentPlan.Status.LOCKED
+    context["pp"].save(update_fields=["status"])
+    return context
+
+
+@pytest.fixture
 def retryable_fsp_extra_fields_actions_context(
     fsp_extra_fields_actions_context: dict[str, Any],
 ) -> dict[str, Any]:

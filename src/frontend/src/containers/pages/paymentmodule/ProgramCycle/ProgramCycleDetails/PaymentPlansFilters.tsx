@@ -5,7 +5,8 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { Title } from '@core/Title';
-import { Grid, MenuItem, Typography } from '@mui/material';
+import { MenuItem, Typography } from '@mui/material';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 import { Box } from '@mui/system';
 import type { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
@@ -79,22 +80,21 @@ export const PaymentPlansFilters = ({
           {t('Payment Plan Components Filters')}
         </Typography>
       </Title>
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={3}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             fullWidth
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -111,8 +111,8 @@ export const PaymentPlansFilters = ({
               );
             })}
           </SelectFilter>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <Box
             sx={{
               display: 'flex',
@@ -129,8 +129,8 @@ export const PaymentPlansFilters = ({
               }
             />
           </Box>
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <NumberTextField
             id="totalEntitledQuantityToFilter"
             value={formatFigure(filter.totalEntitledQuantityTo)}
@@ -144,8 +144,8 @@ export const PaymentPlansFilters = ({
               filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo
             }
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
@@ -168,8 +168,8 @@ export const PaymentPlansFilters = ({
             }}
             value={filter.dispersionStartDate}
           />
-        </Grid>
-        <Grid size={3}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter" mobileSize="half">
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -182,8 +182,8 @@ export const PaymentPlansFilters = ({
             minDate={filter.dispersionStartDate}
             minDateMessage={<span />}
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 };

@@ -3,6 +3,7 @@ import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
 import type { ReactElement } from 'react';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -16,12 +17,7 @@ export function OpenPaymentPlanHeaderButtons({
   canLock,
 }: OpenPaymentPlanHeaderButtonsProps): ReactElement {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canRemove && <DeletePaymentPlan paymentPlan={paymentPlan} />}
       {canLock && (
         <Box
@@ -32,6 +28,6 @@ export function OpenPaymentPlanHeaderButtons({
           <LockPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

@@ -31,6 +31,8 @@ import { SendForApprovalGroupButton } from './actions/SendForApprovalGroupButton
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import { SplitGroupButton } from './actions/SplitGroupButton';
 import type { PaymentPlanGroupDetail } from './types';
+import { responsiveValue } from 'src/responsive';
+import { HeaderActions } from '@core/HeaderActions';
 
 // For each approval stage: the action that moves the group forward and the
 // permission it needs; Reject in that stage needs the same permission.
@@ -171,6 +173,7 @@ export function PaymentPlanGroupDetailsHeader({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
             alignItems: 'baseline',
             gap: 1,
           }}
@@ -209,12 +212,7 @@ export function PaymentPlanGroupDetailsHeader({
       breadCrumbs={breadCrumbsItems}
       flags={<AdminButton adminUrl={group?.adminUrl} />}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <HeaderActions spacing="none">
         <EditGroup group={group} />
         <LockUnlockGroupButton group={group} />
         <ApprovalButtons group={group} />
@@ -228,7 +226,7 @@ export function PaymentPlanGroupDetailsHeader({
         <SendToPaymentGatewayGroupButton group={group} />
         <LinkedGroupButtons group={group} />
         <DeletePaymentPlanGroup group={group} />
-      </Box>
+      </HeaderActions>
     </PageHeader>
   );
 }

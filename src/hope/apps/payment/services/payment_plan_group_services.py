@@ -428,7 +428,7 @@ class PaymentPlanGroupService:
         return payment_plan_group
 
     @transaction.atomic
-    def reactivate_abort(self) -> PaymentPlanGroup:
+    def reactivate_abort(self, user_id: str | None = None) -> PaymentPlanGroup:
         payment_plan_group = self._locked_for_update()
         if payment_plan_group.status != PaymentPlanGroup.Status.ABORTED:
             raise ValidationError(
@@ -436,7 +436,7 @@ class PaymentPlanGroupService:
                 f"{PaymentPlanGroup.Status.ABORTED}"
             )
         for payment_plan in self._payment_plans(payment_plan_group):
-            PaymentPlanService(payment_plan).reactivate_abort()
+            PaymentPlanService(payment_plan).reactivate_abort(user_id)
         flow = PaymentPlanGroupFlow(payment_plan_group)
         flow.status_reactivate_abort()
         payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))

@@ -8,6 +8,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import type { ReactElement } from 'react';
 import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
 import type { AcceptanceProcessClosure } from './AcceptanceProcess';
+import { responsiveValue, ResponsiveGrid } from 'src/responsive';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -61,7 +62,7 @@ export function AcceptanceProcessRow({
   return (
     <StyledBox
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
     >
       <AcceptanceProcessStepper
@@ -69,7 +70,7 @@ export function AcceptanceProcessRow({
         isClosed={!!closure}
       />
       <Grid container>
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${sentForApprovalBy}`}
@@ -78,8 +79,8 @@ export function AcceptanceProcessRow({
               author={sentForApprovalBy}
             />
           )}
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${sentForAuthorizationBy}`}
@@ -88,8 +89,8 @@ export function AcceptanceProcessRow({
               author={sentForAuthorizationBy}
             />
           )}
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           {actions.financeRelease.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${sentForFinanceReleaseBy}`}
@@ -98,8 +99,8 @@ export function AcceptanceProcessRow({
               author={sentForFinanceReleaseBy}
             />
           )}
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           {closure && (
             <Box
               sx={{
@@ -112,8 +113,7 @@ export function AcceptanceProcessRow({
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  ml: 3,
-                  mr: 3,
+                  mx: responsiveValue(0, 3),
                   p: 3,
                 }}
               >
@@ -131,7 +131,7 @@ export function AcceptanceProcessRow({
               </GreyBox>
             </Box>
           )}
-        </Grid>
+        </ResponsiveGrid>
         {actions.reject.length > 0 && (
           <Grid container>
             <Grid size={{ xs: 12 }}>

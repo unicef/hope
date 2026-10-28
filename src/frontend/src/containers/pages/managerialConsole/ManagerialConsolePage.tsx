@@ -19,6 +19,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { restQueryKey } from '@utils/queryKeys';
 import type { PaginatedPaymentPlanGroupManagerialList } from '@restgenerated/models/PaginatedPaymentPlanGroupManagerialList';
+import { responsiveValue } from 'src/responsive';
 
 type ManagerialStatus =
   'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'ACCEPTED';
@@ -175,13 +176,13 @@ export const ManagerialConsolePage: FC = () => {
       {canApprove && (
         <Box
           sx={{
-            mb: 6,
+            mb: responsiveValue(3, 6),
           }}
         >
           {canApprove && (
             <Box
               sx={{
-                mb: 6,
+                mb: responsiveValue(3, 6),
               }}
             >
               <ApprovalSection
@@ -199,7 +200,7 @@ export const ManagerialConsolePage: FC = () => {
       {canAuthorize && (
         <Box
           sx={{
-            mb: 6,
+            mb: responsiveValue(3, 6),
           }}
         >
           <AuthorizationSection
@@ -215,7 +216,7 @@ export const ManagerialConsolePage: FC = () => {
       {canReview && (
         <Box
           sx={{
-            mb: 6,
+            mb: responsiveValue(3, 6),
           }}
         >
           <PendingForReleaseSection

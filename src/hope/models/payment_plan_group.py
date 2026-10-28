@@ -14,6 +14,7 @@ from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
+from hope.models.approval import COMMENT_MAX_LENGTH
 from hope.models.payment_plan import PaymentPlan, last_approval_step
 from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
@@ -128,7 +129,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         null=True,
         blank=True,
     )
-    abort_comment = models.CharField(max_length=255, blank=True)
+    abort_comment = models.CharField(max_length=COMMENT_MAX_LENGTH, blank=True)
     closure_comment = models.TextField(null=True, blank=True)
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

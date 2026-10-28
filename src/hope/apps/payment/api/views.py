@@ -209,6 +209,12 @@ logger = logging.getLogger(__name__)
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
+REJECT_PERMISSION_BY_STATUS: dict[str | None, Permissions] = {
+    PaymentPlan.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+    PaymentPlan.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+    PaymentPlan.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+}
+
 
 class ScopedPaymentPlanMixin:
     payment_plan_url_kwarg = "payment_plan_pk"
@@ -1488,6 +1494,9 @@ class FollowUpInstructionViewSet(
     @transaction.atomic
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
+        reject_permission = REJECT_PERMISSION_BY_STATUS.get(instruction.status)
+        if reject_permission and not request.user.has_perm(reject_permission.value, instruction.program):
+            raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -2818,11 +2827,7 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"])
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        reject_permission = {
-            PaymentPlanGroup.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-            PaymentPlanGroup.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            PaymentPlanGroup.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-        }.get(payment_plan_group.status)
+        reject_permission = REJECT_PERMISSION_BY_STATUS.get(payment_plan_group.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan_group.cycle.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         return self._run_acceptance_action(request, PaymentPlan.Action.REJECT)
@@ -2861,7 +2866,7 @@ class PaymentPlanGroupViewSet(
     @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
     @action(detail=True, methods=["post"], url_path="reactivate-abort")
     def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._run_status_action(request, lambda service: service.reactivate_abort())
+        return self._run_status_action(request, lambda service: service.reactivate_abort(str(request.user.pk)))
 
     def _run_acceptance_action(self, request: Request, plan_action: "PaymentPlan.Action") -> Response:
         serializer = self.get_serializer(data=request.data)

@@ -8,6 +8,7 @@ from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Count, Sum
 from django.db.models.functions import Coalesce
 
+from hope.models.approval import COMMENT_MAX_LENGTH
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
 from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
@@ -112,7 +113,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         on_delete=models.SET_NULL,
         help_text="Generated summary PDF",
     )
-    abort_comment = models.CharField(max_length=255, blank=True, default="")
+    abort_comment = models.CharField(max_length=COMMENT_MAX_LENGTH, blank=True, default="")
     closure_comment = models.TextField(null=True, blank=True)
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

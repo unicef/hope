@@ -78,6 +78,7 @@ from hope.models import (
     ProgramCycle,
     log_create,
 )
+from hope.models.approval import COMMENT_MAX_LENGTH
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 logger = logging.getLogger(__name__)
@@ -182,7 +183,7 @@ class XlsxErrorSerializer(serializers.Serializer):
 
 
 class AcceptanceProcessSerializer(serializers.Serializer):
-    comment = serializers.CharField(required=False)
+    comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
@@ -1276,7 +1277,7 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
             (PaymentPlan.Action.REVIEW.value, PaymentPlan.Action.REVIEW.label),
         ]
     )
-    comment = serializers.CharField(required=False, allow_blank=True)
+    comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
@@ -1968,7 +1969,7 @@ class AssignFundsCommitmentsSerializer(serializers.Serializer):
 
 
 class PaymentPlanAbortSerializer(serializers.Serializer):
-    abort_comment = serializers.CharField(max_length=255, required=False)
+    abort_comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False)
 
 
 class PaymentPlanCloseSerializer(serializers.Serializer):

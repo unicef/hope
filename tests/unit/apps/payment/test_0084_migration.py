@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 import pytest
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0083_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
 
 
 PlanRow = Callable[..., dict[str, Any]]
@@ -14,7 +14,7 @@ PlanRow = Callable[..., dict[str, Any]]
 def plan_row() -> PlanRow:
     """Build a payment plan as the dict the migration reads with .values(), not as a model object.
 
-    The plan's FSP, currency and use_payment_gateway columns no longer exist on today's PaymentPlan (0084 and 0093
+    The plan's FSP, currency and use_payment_gateway columns no longer exist on today's PaymentPlan (0085 and 0094
     move them to the group), so factories cannot create these plans and the test database has no such columns.
     """
 

@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { showApiErrorMessages } from '@utils/utils';
 import { PERMISSIONS } from 'src/config/permissions';
+import { HeaderActions } from '@core/HeaderActions';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -54,12 +55,7 @@ export function LockedPaymentPlanHeaderButtons({
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
+    <HeaderActions spacing="none">
       {canUnlock && (
         <Box
           sx={{
@@ -79,6 +75,6 @@ export function LockedPaymentPlanHeaderButtons({
           </LoadingButton>
         </Box>
       )}
-    </Box>
+    </HeaderActions>
   );
 }

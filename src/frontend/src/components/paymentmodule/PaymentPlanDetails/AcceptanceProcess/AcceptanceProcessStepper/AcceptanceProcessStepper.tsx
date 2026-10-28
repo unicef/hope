@@ -4,6 +4,7 @@ import Stepper from '@mui/material/Stepper';
 import { useTranslation } from 'react-i18next';
 import type { ReactElement } from 'react';
 import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
+import { useIsMobile } from 'src/responsive';
 
 interface AcceptanceProcessStepperProps {
   acceptanceProcess: ApprovalProcess;
@@ -22,6 +23,7 @@ export function AcceptanceProcessStepper({
     financeReleaseNumberRequired,
   } = acceptanceProcess;
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const steps = [
     {
       name: `${t('Approval')} (${
@@ -65,7 +67,7 @@ export function AcceptanceProcessStepper({
   };
 
   return (
-    <Stepper activeStep={getActiveStep()}>
+    <Stepper activeStep={getActiveStep()} alternativeLabel={isMobile}>
       {steps.map((step) => (
         <Step completed={step.isCompleted} key={step.name}>
           <StepLabel error={step.hasError}>{step.name}</StepLabel>
