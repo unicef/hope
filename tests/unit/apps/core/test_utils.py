@@ -984,7 +984,7 @@ def test_get_fields_attr_generators_for_social_worker_program_uses_xlsx_people_s
 
     program = ProgramFactory(
         data_collecting_type=DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL),
-        beneficiary_group=BeneficiaryGroupFactory(master_detail=False),
+        beneficiary_group=BeneficiaryGroupFactory(),
     )
 
     result = list(get_fields_attr_generators(flex_field=False, program_id=str(program.id)))

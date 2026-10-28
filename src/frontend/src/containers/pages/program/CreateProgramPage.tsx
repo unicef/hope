@@ -122,7 +122,7 @@ export const CreateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode', 'isActive']);
+    const requestValues = omit(values, ['editMode', 'isActive', 'payeeType']);
 
     const initialPduFieldState = {
       label: '',
@@ -240,6 +240,7 @@ export const CreateProgramPage = (): ReactElement => {
     startDate: '',
     endDate: undefined,
     sector: '',
+    payeeType: '',
     dataCollectingTypeCode: '',
     beneficiaryGroup: '',
     description: '',
@@ -263,6 +264,7 @@ export const CreateProgramPage = (): ReactElement => {
       'startDate',
       'endDate',
       'sector',
+      'payeeType',
       'dataCollectingTypeCode',
       'description',
       'budget',

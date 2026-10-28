@@ -224,6 +224,7 @@ const EditProgramPage = (): ReactElement => {
         'partnerAccess',
         'pduFields',
         'isActive',
+        'payeeType',
       ]);
 
       // Build the base programData object
@@ -301,6 +302,7 @@ const EditProgramPage = (): ReactElement => {
     startDate: startDate,
     endDate: endDate,
     sector,
+    payeeType: program.payeeType?.id,
     dataCollectingTypeCode: dataCollectingType.code,
     beneficiaryGroup: beneficiaryGroup.id,
     description,
@@ -344,6 +346,7 @@ const EditProgramPage = (): ReactElement => {
       'startDate',
       'endDate',
       'sector',
+      'payeeType',
       'dataCollectingTypeCode',
       'beneficiaryGroup',
       'description',
@@ -452,6 +455,7 @@ const EditProgramPage = (): ReactElement => {
                             programId={id}
                             errors={errors}
                             programHasRdi={programHasRdi}
+                            program={program}
                             lockedPurposeIds={(
                               program.paymentPlanPurposes ?? []
                             )

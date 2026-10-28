@@ -229,7 +229,7 @@ class MassEnrollForm(forms.Form):
             if self.households.exclude(program__beneficiary_group=program_for_enroll.beneficiary_group).exists():
                 self.add_error(
                     None,
-                    "Some households belong to a different beneficiary group than the selected program.",
+                    "Some households belong to a different payee label than the selected program.",
                 )
 
             if warning_message:

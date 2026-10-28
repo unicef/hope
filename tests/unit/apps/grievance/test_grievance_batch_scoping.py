@@ -64,7 +64,7 @@ def social_dct() -> DataCollectingType:
 
 @pytest.fixture
 def social_beneficiary_group() -> Any:
-    return BeneficiaryGroupFactory(master_detail=False)
+    return BeneficiaryGroupFactory()
 
 
 @pytest.fixture

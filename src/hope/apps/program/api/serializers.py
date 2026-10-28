@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 from django.db.models import Exists, OuterRef, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 
 from hope.apps.account.api.serializers import PartnerForProgramSerializer
@@ -14,6 +14,7 @@ from hope.apps.core.api.mixins import AdminUrlSerializerMixin
 from hope.apps.core.api.serializers import DataCollectingTypeSerializer
 from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choice_object
 from hope.apps.periodic_data_update.api.serializers import PeriodicFieldSerializer
+from hope.apps.program.validators import get_payee_configuration_errors
 from hope.models import (
     AdminAreaLimitedTo,
     BeneficiaryGroup,
@@ -21,6 +22,7 @@ from hope.models import (
     FlexibleAttribute,
     Household,
     Partner,
+    PayeeType,
     PaymentPlan,
     PaymentPlanPurpose,
     PeriodicFieldData,
@@ -85,15 +87,15 @@ def validate_data_collecting_type(data_collecting_type: DataCollectingType, busi
         raise serializers.ValidationError("Deprecated Data Collecting Type cannot be used in Program.")
 
 
-def validate_data_collecting_type_and_beneficiary_group_combination(
-    data_collecting_type: DataCollectingType, beneficiary_group: BeneficiaryGroup
+def validate_payee_configuration(
+    data_collecting_type: DataCollectingType,
+    beneficiary_group: BeneficiaryGroup,
+    previous_program: Program | None = None,
 ) -> None:
-    if (data_collecting_type.type == DataCollectingType.Type.SOCIAL and beneficiary_group.master_detail) or (
-        data_collecting_type.type == DataCollectingType.Type.STANDARD and not beneficiary_group.master_detail
+    if errors := get_payee_configuration_errors(
+        data_collecting_type, beneficiary_group, previous_program=previous_program
     ):
-        raise serializers.ValidationError(
-            {"beneficiary_group": "Selected combination of data collecting type and beneficiary group is invalid."}
-        )
+        raise serializers.ValidationError(errors)
 
 
 def validate_partners_data(partners: list[dict[str, Any]], partner_access: str, user_partner: Partner) -> None:
@@ -326,8 +328,25 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
             "group_label_plural",
             "member_label",
             "member_label_plural",
-            "master_detail",
         )
+
+
+@extend_schema_serializer(component_name="PayeeLabel")
+class BeneficiaryGroupListSerializer(BeneficiaryGroupSerializer):
+    data_collecting_types = serializers.SlugRelatedField(slug_field="code", many=True, read_only=True)
+
+    class Meta(BeneficiaryGroupSerializer.Meta):
+        fields = BeneficiaryGroupSerializer.Meta.fields + (  # type: ignore
+            "payee_type",
+            "data_collecting_types",
+            "active",
+        )
+
+
+class PayeeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayeeType
+        fields = ("id", "name", "gl_code")
 
 
 class PaymentPlanPurposeSerializer(serializers.ModelSerializer):
@@ -347,6 +366,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
+    payee_type = PayeeTypeSerializer(source="data_collecting_type.payee_type", read_only=True)
 
     class Meta:
         model = Program
@@ -363,6 +383,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
             "population_goal",
             "data_collecting_type",
             "beneficiary_group",
+            "payee_type",
             "status",
             "pdu_fields",
             "household_count",
@@ -557,10 +578,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         partner = self.context["request"].user.partner
         validate_partners_data(partners, partner_access, partner)
 
-        # validate DCT and BG combination
-        data_collecting_type = data["data_collecting_type"]
-        beneficiary_group = data["beneficiary_group"]
-        validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
+        validate_payee_configuration(data["data_collecting_type"], data["beneficiary_group"])
 
         return data
 
@@ -668,7 +686,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     def validate_beneficiary_group(self, value: BeneficiaryGroup) -> BeneficiaryGroup:
         # validate if BG can be updated
         if self.instance.beneficiary_group != value and self.instance.registration_imports.exists():
-            raise serializers.ValidationError("Beneficiary Group cannot be updated if Program has population.")
+            raise serializers.ValidationError("Payee Label cannot be updated if Program has population.")
         return value
 
     def validate_version(self, value: int | None) -> int | None:
@@ -712,10 +730,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
                 {"start_date": "Start date must be the same as or before the earliest cycle."}
             )
 
-        # validate DCT and BG combination
-        data_collecting_type = data["data_collecting_type"]
-        beneficiary_group = data["beneficiary_group"]
-        validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
+        validate_payee_configuration(
+            data["data_collecting_type"], data["beneficiary_group"], previous_program=self.instance
+        )
 
         return data
 
@@ -823,7 +840,6 @@ class ProgramCopySerializer(serializers.ModelSerializer):
 
         # validate DCT against original program
         data_collecting_type = data["data_collecting_type"]
-        beneficiary_group = original_program.beneficiary_group
         if not original_program.data_collecting_type:
             raise serializers.ValidationError(
                 {"data_collecting_type": "The original Program must have a Data Collecting Type."}
@@ -832,14 +848,18 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"data_collecting_type": "Data Collecting Type must be compatible with the original Program."}
             )
+        if data_collecting_type.payee_type_id != original_program.data_collecting_type.payee_type_id:
+            raise serializers.ValidationError(
+                {"data_collecting_type": "Data Collecting Type must belong to the Payee Type of the original Program."}
+            )
+        validate_payee_configuration(
+            data_collecting_type, original_program.beneficiary_group, previous_program=original_program
+        )
 
         # validate start_date and end_date
         end_date = data.get("end_date")
         if end_date:
             validate_end_date_after_start_date(data["start_date"], end_date)
-
-        # validate DCT and BG combination
-        validate_data_collecting_type_and_beneficiary_group_combination(data_collecting_type, beneficiary_group)
 
         # validate partners and partner_access
         partners = data.get("partners", [])

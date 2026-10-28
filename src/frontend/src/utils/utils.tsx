@@ -1225,6 +1225,7 @@ export function showApiErrorMessages(
   function formatFieldLabel(field: string): string {
     let cleaned = field.replace(/\[\d+\]/g, '');
     cleaned = cleaned.split('.').pop();
+    if (_.snakeCase(cleaned) === 'beneficiary_group') return 'Payee Label';
     let label = cleaned.replace(/_/g, ' ');
     label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
     label = label
@@ -1335,6 +1336,7 @@ export function getApiErrorMessages(
   function formatFieldLabel(field: string): string {
     let cleaned = field.replace(/\[\d+\]/g, '');
     cleaned = cleaned.split('.').pop();
+    if (_.snakeCase(cleaned) === 'beneficiary_group') return 'Payee Label';
     let label = cleaned.replace(/_/g, ' ');
     label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
     label = label

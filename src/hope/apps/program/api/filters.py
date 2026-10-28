@@ -8,7 +8,7 @@ from django_filters import rest_framework as filters
 
 from hope.apps.core.api.filters import UpdatedAtFilter
 from hope.apps.core.utils import CustomOrderingFilter
-from hope.models import Program, ProgramCycle
+from hope.models import BeneficiaryGroup, Program, ProgramCycle
 
 
 class ProgramCycleFilter(UpdatedAtFilter):
@@ -147,3 +147,9 @@ class ProgramFilter(UpdatedAtFilter):
         business_area_slug = self.request.parser_context.get("kwargs", {}).get("business_area_slug")
         current_program = Program.objects.get(code=value, business_area__slug=business_area_slug)
         return qs.filter(beneficiary_group=current_program.beneficiary_group).exclude(id=current_program.id)
+
+
+class BeneficiaryGroupFilter(UpdatedAtFilter):
+    class Meta:
+        model = BeneficiaryGroup
+        fields = ("active",)

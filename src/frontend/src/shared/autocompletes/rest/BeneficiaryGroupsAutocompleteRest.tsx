@@ -37,7 +37,7 @@ export const BeneficiaryGroupAutocompleteRest = ({
     <BaseAutocompleteRest
       programId={programId}
       value={value}
-      label={t('Beneficiary Group')}
+      label={t('Payee Label')}
       dataCy="filters-beneficiary-group-autocomplete"
       fetchFunction={() => RestService.restBeneficiaryGroupsList({})}
       queryKeyMethod={RestService.restBeneficiaryGroupsList}

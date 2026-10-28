@@ -108,7 +108,7 @@ class TestMassEnrollForm:
         )
 
         assert not form.is_valid()
-        assert any("beneficiary group" in str(e) for e in form.non_field_errors())
+        assert any("payee label" in str(e) for e in form.non_field_errors())
 
     def test_skips_validation_without_apply(self, business_area, program, household) -> None:
         form = MassEnrollForm(
