@@ -677,4 +677,3 @@ class TestPaymentPlans:
         page_new_payment_plan.get_button_save_payment_plan().click()
 
         assert "Target Population is required" in page_new_payment_plan.get_input_target_population().text
-
