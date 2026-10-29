@@ -683,7 +683,11 @@ def test_vision_release_accepts_group_and_all_review_plans(mock_notify, group_wi
     assert result.status == PaymentPlanGroup.Status.ACCEPTED
     assert repeated_result.status == PaymentPlanGroup.Status.ACCEPTED
     mock_notify.assert_called_once()
-    assert mock_notify.call_args.args[:3] == (result, PaymentPlan.Action.REVIEW.value, str(user.pk))
+    assert mock_notify.call_args.args[:3] == (
+        result,
+        PaymentPlan.Action.REVIEW.value,
+        str(group_with_review_vision_plans.created_by_id),
+    )
 
 
 @pytest.mark.enable_activity_log

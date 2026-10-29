@@ -41,8 +41,7 @@
         "payment_plan_group": {
             "id": "251cfde4-439d-470e-905c-b25958ce0d5e",
             "unicef_id": "PPG-2",
-            "name": "Default Group",
-            "vision_managed": false
+            "name": "Default Group"
         },
         "background_action_status": null,
         "start_date": null,

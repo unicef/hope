@@ -92,8 +92,7 @@
             "payment_plan_group": {
                 "id": "59c1d336-d67c-40e4-9f63-2f43e43a1d5f",
                 "unicef_id": "PPG-6",
-                "name": "Default Group",
-                "vision_managed": false
+                "name": "Default Group"
             },
             "version": 1735688653315204,
             "background_action_status": null,
@@ -187,8 +186,6 @@
             "unore_exchange_rate": null,
             "unore_exchange_rate_unavailable": false,
             "eligible_payments_count": 1,
-            "funds_commitments": [],
-            "available_funds_commitments": [],
             "payment_verification_plans": [
                 {
                     "id": "f5d604d1-b2e6-4c9b-9539-c1d1fb8b00eb",

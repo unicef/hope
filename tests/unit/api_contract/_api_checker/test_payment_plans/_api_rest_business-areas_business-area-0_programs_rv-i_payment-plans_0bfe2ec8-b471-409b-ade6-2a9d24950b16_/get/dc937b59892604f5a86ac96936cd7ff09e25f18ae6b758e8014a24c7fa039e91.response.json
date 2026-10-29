@@ -41,8 +41,7 @@
         "payment_plan_group": {
             "id": "ac0dc03c-677a-4269-9268-604d8b5823c8",
             "unicef_id": "PPG-2",
-            "name": "Default Group",
-            "vision_managed": false
+            "name": "Default Group"
         },
         "version": 1735688653315202,
         "background_action_status": null,
@@ -135,8 +134,6 @@
         "unore_exchange_rate": null,
         "unore_exchange_rate_unavailable": false,
         "eligible_payments_count": 0,
-        "funds_commitments": [],
-        "available_funds_commitments": [],
         "payment_verification_plans": [],
         "admin_url": "/api/unicorn/payment/paymentplan/0bfe2ec8-b471-409b-ade6-2a9d24950b16/change/",
         "abort_comment": "",

@@ -589,7 +589,7 @@ def test_payment_verification_serializer_uses_program_cycle_end_date(
     assert field.to_representation(value) == "2030-01-02"
 
 
-def test_payment_plan_detail_serializer_vision_state(
+def test_payment_plan_detail_serializer_excludes_group_vision_state(
     vision_payment_plan_detail_context: dict[str, Any],
 ) -> None:
     payment_plan = vision_payment_plan_detail_context["payment_plan"]
@@ -597,14 +597,9 @@ def test_payment_plan_detail_serializer_vision_state(
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
-    assert data["vision_integration_enabled"] is True
-    assert data["payment_plan_group"]["vision_managed"] is True
-    assert data["vision"] == {
-        "status": "NOT_SENT",
-        "vision_id": None,
-        "fc_numbers": [],
-        "error_code": None,
-    }
+    assert data["payment_plan_group"]["id"] == str(payment_plan.payment_plan_group_id)
+    assert "vision_integration_enabled" not in data
+    assert "vision" not in data
 
 
 def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
@@ -639,7 +634,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_none_when_api_unavai
     payment_plan.payment_plan_group.save(update_fields=["currency"])
     payment_plan.get_unore_exchange_rate = Mock(side_effect=ConnectionError("exchange rate API unavailable"))
 
-    with django_assert_num_queries(20):
+    with django_assert_num_queries(15):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["id"] == str(payment_plan.id)
@@ -656,7 +651,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_not_unavailable_with
     payment_plan.payment_plan_group.currency = None
     payment_plan.payment_plan_group.save(update_fields=["currency"])
 
-    with django_assert_num_queries(20):
+    with django_assert_num_queries(15):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     assert data["currency"] is None
@@ -678,7 +673,7 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     payment_plan.payment_plan_group.custom_exchange_rate = False
     payment_plan.payment_plan_group.save(update_fields=["custom_exchange_rate"])
 
-    with django_assert_num_queries(20):
+    with django_assert_num_queries(15):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
 
     expected_rate = payment_plan.get_unore_exchange_rate()

@@ -255,7 +255,7 @@ def test_manual_fc_header_recovery_is_available_after_vision_send_failed(
     assert action_response.status_code == 200
     content = action_response.content.decode()
     assert "this Payment Plan Group" in content
-    assert "A request may have" in content
+    assert "The request may have" in content
     assert "processing may have stopped before confirmation was recorded" in content
 
 
@@ -281,7 +281,7 @@ def test_manual_fc_header_recovery_is_available_while_waiting_without_send_confi
     assert action_response.status_code == 200
     content = action_response.content.decode()
     assert "this Payment Plan Group" in content
-    assert "A request may have" in content
+    assert "The request may have" in content
     assert "processing may have stopped before confirmation was recorded" in content
 
 

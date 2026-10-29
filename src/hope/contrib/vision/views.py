@@ -68,7 +68,7 @@ class PaymentPlanCallbackView(HOPEAPIView, APIView):
     @staticmethod
     def _get_payment_plan_group(payplan_sno: str) -> PaymentPlanGroup:
         return (
-            PaymentPlanGroup.objects.select_for_update()
+            PaymentPlanGroup.objects.select_for_update(of=("self",))
             .select_related("cycle__program__business_area", "created_by")
             .get(unicef_id=payplan_sno)
         )

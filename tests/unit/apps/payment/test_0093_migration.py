@@ -1,9 +1,10 @@
-import datetime
+import datetime as dt
 import importlib
 from typing import Any
 
 from django.apps.registry import Apps
 from django.db import connection
+from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.migrations.loader import MigrationLoader
 import pytest
 
@@ -14,6 +15,11 @@ from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup
 pytestmark = pytest.mark.django_db
 
 migration_module = importlib.import_module("hope.apps.payment.migrations.0093_migration")
+
+
+@pytest.fixture
+def schema_editor() -> BaseDatabaseSchemaEditor:
+    return connection.schema_editor()
 
 
 @pytest.fixture
@@ -52,7 +58,7 @@ def january_plan(historical_apps: Apps, cycle: Any, group: PaymentPlanGroup) -> 
     with connection.cursor() as cursor:
         cursor.execute(
             'UPDATE "payment_paymentplan" SET "dispersion_start_date" = %s, "dispersion_end_date" = %s WHERE "id" = %s',
-            [datetime.date(2026, 1, 1), datetime.date(2026, 1, 31), payment_plan.pk],
+            [dt.date(2026, 1, 1), dt.date(2026, 1, 31), payment_plan.pk],
         )
     return payment_plan
 
@@ -63,7 +69,7 @@ def march_plan(historical_apps: Apps, cycle: Any, group: PaymentPlanGroup) -> Pa
     with connection.cursor() as cursor:
         cursor.execute(
             'UPDATE "payment_paymentplan" SET "dispersion_start_date" = %s, "dispersion_end_date" = %s WHERE "id" = %s',
-            [datetime.date(2026, 3, 1), datetime.date(2026, 3, 31), payment_plan.pk],
+            [dt.date(2026, 3, 1), dt.date(2026, 3, 31), payment_plan.pk],
         )
     return payment_plan
 
@@ -76,45 +82,58 @@ def instruction_child(historical_apps: Apps, cycle: Any, instruction: FollowUpIn
     with connection.cursor() as cursor:
         cursor.execute(
             'UPDATE "payment_paymentplan" SET "dispersion_start_date" = %s, "dispersion_end_date" = %s WHERE "id" = %s',
-            [datetime.date(2026, 5, 1), datetime.date(2026, 5, 31), payment_plan.pk],
+            [dt.date(2026, 5, 1), dt.date(2026, 5, 31), payment_plan.pk],
         )
     return payment_plan
 
 
 def test_group_takes_the_widest_dispersion_window_of_its_plans(
-    historical_apps: Apps, group: PaymentPlanGroup, january_plan: PaymentPlan, march_plan: PaymentPlan
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlanGroup,
+    january_plan: PaymentPlan,
+    march_plan: PaymentPlan,
 ) -> None:
-    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor=None)
+    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor)
 
     group.refresh_from_db()
-    assert group.dispersion_start_date == datetime.date(2026, 1, 1)
-    assert group.dispersion_end_date == datetime.date(2026, 3, 31)
+    assert group.dispersion_start_date == dt.date(2026, 1, 1)
+    assert group.dispersion_end_date == dt.date(2026, 3, 31)
 
 
 def test_instruction_takes_the_dispersion_dates_of_its_plans(
-    historical_apps: Apps, instruction: FollowUpInstruction, instruction_child: PaymentPlan
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    instruction: FollowUpInstruction,
+    instruction_child: PaymentPlan,
 ) -> None:
-    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor=None)
+    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor)
 
     instruction.refresh_from_db()
-    assert instruction.dispersion_start_date == datetime.date(2026, 5, 1)
-    assert instruction.dispersion_end_date == datetime.date(2026, 5, 31)
+    assert instruction.dispersion_start_date == dt.date(2026, 5, 1)
+    assert instruction.dispersion_end_date == dt.date(2026, 5, 31)
 
 
 def test_removed_plan_does_not_count_towards_the_group_dispersion_window(
-    historical_apps: Apps, group: PaymentPlanGroup, january_plan: PaymentPlan, march_plan: PaymentPlan
+    historical_apps: Apps,
+    schema_editor: BaseDatabaseSchemaEditor,
+    group: PaymentPlanGroup,
+    january_plan: PaymentPlan,
+    march_plan: PaymentPlan,
 ) -> None:
     PaymentPlan.all_objects.filter(pk=march_plan.pk).update(is_removed=True)
 
-    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor=None)
+    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor)
 
     group.refresh_from_db()
-    assert group.dispersion_start_date == datetime.date(2026, 1, 1)
-    assert group.dispersion_end_date == datetime.date(2026, 1, 31)
+    assert group.dispersion_start_date == dt.date(2026, 1, 1)
+    assert group.dispersion_end_date == dt.date(2026, 1, 31)
 
 
-def test_group_without_plans_keeps_no_dispersion_dates(historical_apps: Apps, group: PaymentPlanGroup) -> None:
-    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor=None)
+def test_group_without_plans_keeps_no_dispersion_dates(
+    historical_apps: Apps, schema_editor: BaseDatabaseSchemaEditor, group: PaymentPlanGroup
+) -> None:
+    migration_module.copy_dates_from_payment_plans(historical_apps, schema_editor)
 
     group.refresh_from_db()
     assert group.dispersion_start_date is None

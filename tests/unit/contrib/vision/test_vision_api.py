@@ -302,7 +302,7 @@ def test_send_payment_plan_persists_missing_credentials_failure(
     api = VisionAPI()
     payment_plan = vision_api_group_factory()
 
-    with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
+    with django_assert_num_queries(6), pytest.raises(VisionAPIMissingCredentialsError):
         api.send_payment_plan_group(payment_plan)
 
     payment_plan.refresh_from_db(fields=["internal_data"])
@@ -355,7 +355,7 @@ def test_notify_payment_plan_status_uses_payment_plan_endpoint_without_changing_
     }
     payment_plan.save(update_fields=["internal_data"])
 
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(6):
         response = VisionAPI().notify_payment_plan_group_status(payment_plan, "REJECTED")
 
     payment_plan.refresh_from_db(fields=["internal_data"])
@@ -376,7 +376,7 @@ def test_notify_payment_plan_status_logs_missing_credentials_without_changing_wo
     settings.VISION_CLIENT_ID = ""
     payment_plan = vision_api_group_factory()
 
-    with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
+    with django_assert_num_queries(6), pytest.raises(VisionAPIMissingCredentialsError):
         VisionAPI().notify_payment_plan_group_status(payment_plan, "ABORTED")
 
     payment_plan.refresh_from_db(fields=["internal_data"])
@@ -397,7 +397,7 @@ def test_notify_payment_plan_status_logs_api_error(
     mock_post.side_effect = BaseAPI.APIError("status update failed")
     payment_plan = vision_api_group_factory()
 
-    with django_assert_num_queries(4), pytest.raises(VisionAPIError, match="status update failed"):
+    with django_assert_num_queries(6), pytest.raises(VisionAPIError, match="status update failed"):
         VisionAPI().notify_payment_plan_group_status(payment_plan, "REJECTED")
 
     payment_plan.refresh_from_db(fields=["internal_data"])
