@@ -429,8 +429,9 @@ def test_callback_view_gets_payment_plan_with_related_data(
 
     payment_plan = vision_api_group_factory(unicef_id="PP-LOOKUP")
 
+    payment_plan.refresh_from_db(fields=["unicef_id"])
     with django_assert_num_queries(1):
-        selected_payment_plan = PaymentPlanCallbackView._get_payment_plan_group("PP-LOOKUP")
+        selected_payment_plan = PaymentPlanCallbackView._get_payment_plan_group(payment_plan.unicef_id)
 
     assert selected_payment_plan.pk == payment_plan.pk
     assert selected_payment_plan.business_area == payment_plan.business_area

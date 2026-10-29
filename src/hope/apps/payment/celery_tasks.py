@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from functools import partial
 import logging
@@ -132,7 +132,7 @@ def remove_old_cash_plan_payment_verification_xlsx_async_task_action(job: AsyncR
     from hope.models import FileTemp
 
     past_days = int(job.config.get("past_days", 30))
-    days = datetime.datetime.now() - datetime.timedelta(days=past_days)
+    days = dt.datetime.now() - dt.timedelta(days=past_days)
     ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
     files_qs = FileTemp.objects.filter(content_type=ct, created__lte=days)
     removed_count = files_qs.count()
@@ -832,7 +832,7 @@ def _run_owner_exchange_rate_recalculation(
     from hope.models import Payment
 
     with transaction.atomic():
-        owner = owner_model.objects.select_for_update().select_related("currency").get(pk=job.object_id)
+        owner = owner_model.objects.select_for_update(of=("self",)).select_related("currency").get(pk=job.object_id)
         if owner.background_action_status != owner.BackgroundActionStatus.RECALCULATING:
             raise NonRetriableTaskError("The owner recalculation was superseded by another background action")
         plans = list(
@@ -945,7 +945,7 @@ def remove_old_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJ
     from hope.models import FileTemp, PaymentPlan
 
     past_days = int(job.config.get("past_days", 30))
-    days = datetime.datetime.now() - datetime.timedelta(days=past_days)
+    days = dt.datetime.now() - dt.timedelta(days=past_days)
     file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
     removed_count = file_qs.count()
     if not removed_count:
@@ -1455,7 +1455,7 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         payment_plan,
         job.config["action"],
         action_user,
-        datetime.datetime.fromisoformat(job.config["action_date"]),
+        dt.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -1470,7 +1470,7 @@ def send_payment_plan_group_notification_emails_async_task_action(job: AsyncJob)
         payment_plan_group,
         job.config["action"],
         action_user,
-        datetime.datetime.fromisoformat(job.config["action_date"]),
+        dt.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 
@@ -1508,7 +1508,7 @@ def send_follow_up_instruction_notification_emails_async_task_action(job: AsyncJ
         instruction,
         job.config["action"],
         action_user,
-        datetime.datetime.fromisoformat(job.config["action_date"]),
+        dt.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
 
 

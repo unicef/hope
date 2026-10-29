@@ -101,8 +101,6 @@ def vision_enabled_follow_up_review_context(follow_up_context: dict[str, Any]) -
     business_area.vision_integration_active = True
     business_area.save(update_fields=["vision_integration_active"])
     instruction = follow_up_context["instruction"]
-    instruction.status = FollowUpInstruction.Status.IN_REVIEW
-    instruction.save(update_fields=["status"])
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.IN_REVIEW,
         follow_up_instruction=instruction,

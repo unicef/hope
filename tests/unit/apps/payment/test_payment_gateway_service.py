@@ -1005,6 +1005,7 @@ def instruction_managed_payment_gateway_setup(payment_gateway_setup: dict) -> di
         business_area=payment_plan.business_area,
         financial_service_provider=payment_gateway_setup["fsp"],
         currency=payment_plan.currency,
+        exchange_rate=Decimal("2.00"),
     )
     payment_plan.payment_plan_group = None
     payment_plan.save(update_fields=["follow_up_instruction", "payment_plan_group"])

@@ -675,7 +675,9 @@ def group_with_review_vision_plans(partially_released_group):
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
-def test_vision_release_accepts_group_and_all_review_plans(mock_notify, group_with_review_vision_plans, user):
+def test_vision_release_accepts_group_and_all_review_plans(
+    mock_notify, group_with_review_vision_plans, locked_payment_plan
+):
     result = PaymentPlanGroupService(group_with_review_vision_plans).release_from_vision()
 
     repeated_result = PaymentPlanGroupService(group_with_review_vision_plans).release_from_vision()
@@ -686,7 +688,7 @@ def test_vision_release_accepts_group_and_all_review_plans(mock_notify, group_wi
     assert mock_notify.call_args.args[:3] == (
         result,
         PaymentPlan.Action.REVIEW.value,
-        str(group_with_review_vision_plans.created_by_id),
+        str(locked_payment_plan.created_by_id),
     )
 
 

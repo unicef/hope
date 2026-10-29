@@ -10,7 +10,7 @@ from hope.models import AsyncJob, PaymentPlanGroup
 def send_payment_plan_group_to_vision_async_task_action(job: AsyncJob) -> None:
     with transaction.atomic():
         group = (
-            PaymentPlanGroup.objects.select_for_update()
+            PaymentPlanGroup.objects.select_for_update(of=("self",))
             .select_related("cycle__program__business_area", "financial_service_provider", "currency")
             .get(pk=job.config["payment_plan_group_id"])
         )

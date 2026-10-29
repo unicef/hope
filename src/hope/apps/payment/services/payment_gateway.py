@@ -743,9 +743,9 @@ class PaymentGatewayService:
             payment.delivery_date = to_utc_midnight(delivery_date) if delivery_date else None
             payment.delivered_quantity = to_decimal(delivered_quantity)
             payment.delivered_quantity_usd = get_quantity_in_usd(
-                amount=Decimal(delivered_quantity),  # type: ignore[arg-type]
+                amount=payment.delivered_quantity,
                 currency=payment_plan.currency,
-                exchange_rate=Decimal(exchange_rate),  # type: ignore[arg-type]
+                exchange_rate=exchange_rate,
                 currency_exchange_date=payment_plan.currency_exchange_date,
             )
 

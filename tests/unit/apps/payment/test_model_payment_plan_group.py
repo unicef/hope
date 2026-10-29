@@ -192,7 +192,7 @@ def test_group_send_excludes_failed_gateway_send_for_vision_managed_group(
 def test_group_send_includes_plan_with_not_sent_vision_status(
     payment_plan_group, not_sent_to_vision_sendable_payment_plan, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(1):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert not_sent_to_vision_sendable_payment_plan.pk in sendable_plan_ids
@@ -201,7 +201,7 @@ def test_group_send_includes_plan_with_not_sent_vision_status(
 def test_group_send_ignores_historical_plan_vision_status(
     payment_plan_group, sendable_plan_with_historical_vision_state, django_assert_num_queries
 ) -> None:
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(1):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert sendable_plan_with_historical_vision_state.pk in sendable_plan_ids
@@ -212,7 +212,7 @@ def test_group_send_includes_plan_without_vision_state(
     vision_enabled_sendable_payment_plan_without_vision_state,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(1):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert vision_enabled_sendable_payment_plan_without_vision_state.pk in sendable_plan_ids
@@ -223,7 +223,7 @@ def test_group_send_includes_follow_up_with_historical_vision_state(
     vision_enabled_sendable_follow_up_with_historical_vision_state,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(1):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert vision_enabled_sendable_follow_up_with_historical_vision_state.pk in sendable_plan_ids
