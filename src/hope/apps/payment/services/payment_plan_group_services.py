@@ -7,7 +7,10 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from hope.apps.activity_log.utils import copy_model_object
-from hope.apps.payment.celery_tasks import send_payment_plan_group_notification_emails_async_task
+from hope.apps.payment.celery_tasks import (
+    recalculate_owner_exchange_rate_async_task,
+    send_payment_plan_group_notification_emails_async_task,
+)
 from hope.apps.payment.flows import PaymentPlanFlow, PaymentPlanGroupFlow
 from hope.apps.payment.services.payment_plan_services import (
     ACTION_TO_APPROVAL_TYPE,
@@ -184,7 +187,12 @@ class PaymentPlanGroupService:
             raise ValidationError("Currency can be changed only before any Payment Plan in the group is opened.")
         if currency is not None:
             self._validate_currency_against_delivery_mechanisms(currency)
+        elif self.payment_plan_group.payment_plans.exists():
+            raise ValidationError("Currency cannot be removed while the group has Payment Plans")
         self.payment_plan_group.currency = currency
+        self.payment_plan_group.exchange_rate = None
+        self.payment_plan_group.custom_exchange_rate = False
+        self.payment_plan_group.custom_exchange_rate_set_by = None
 
     def assign_dispersion_dates(
         self, dispersion_start_date: datetime.date | None, dispersion_end_date: datetime.date | None
@@ -202,6 +210,8 @@ class PaymentPlanGroupService:
         )
         group.dispersion_start_date = dispersion_start_date
         group.dispersion_end_date = dispersion_end_date
+        if not group.custom_exchange_rate:
+            group.exchange_rate = None
 
     @staticmethod
     def validate_dispersion_dates(
@@ -323,6 +333,10 @@ class PaymentPlanGroupService:
             self._transition_stage(payment_plan_group, approval_type)
             for payment_plan in payment_plans:
                 PaymentPlanService(payment_plan).apply_acceptance_stage(approval_type, user)
+            if approval_type == Approval.FINANCE_RELEASE:
+                transaction.on_commit(
+                    lambda: recalculate_owner_exchange_rate_async_task(payment_plan_group, str(user.pk))
+                )
             if approval_type == Approval.AUTHORIZATION and payment_plan_group.vision_managed:
                 from hope.contrib.vision.tasks import send_payment_plan_group_to_vision_async_task
 
@@ -364,6 +378,7 @@ class PaymentPlanGroupService:
         self._transition_stage(payment_plan_group, Approval.FINANCE_RELEASE)
         for payment_plan in payment_plans:
             PaymentPlanService(payment_plan).apply_acceptance_stage(Approval.FINANCE_RELEASE, user)
+        transaction.on_commit(lambda: recalculate_owner_exchange_rate_async_task(payment_plan_group, str(user.pk)))
         log_payment_plan_group_change(payment_plan_group, old_group, str(user.pk))
         send_payment_plan_group_notification_emails_async_task(
             payment_plan_group,

@@ -120,12 +120,12 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_group_delivery_from_xlsx_async_task,
     import_payment_plan_payment_list_from_xlsx_async_task,
-    payment_plan_apply_custom_exchange_rate_async_task,
     payment_plan_apply_engine_rule_async_task,
     payment_plan_apply_steficon_hh_selection_async_task,
     payment_plan_exclude_beneficiaries_async_task,
     payment_plan_full_rebuild_async_task,
     payment_plan_set_entitlement_flat_amount_async_task,
+    recalculate_owner_exchange_rate_async_task,
     send_payment_plan_group_delivery_xlsx_password_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
@@ -150,6 +150,8 @@ from hope.apps.payment.services.verifiers import PaymentVerificationArgumentVeri
 from hope.apps.payment.utils import (
     calculate_counts,
     from_received_to_status,
+    log_follow_up_instruction_change,
+    log_payment_plan_group_change,
     log_payment_plan_supporting_document,
 )
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_reconciliation_import_service import (
@@ -802,7 +804,6 @@ class PaymentPlanViewSet(
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_extra_fields_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
-        "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -826,9 +827,6 @@ class PaymentPlanViewSet(
             Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
         ],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
-        "custom_exchange_rate": [
-            Permissions.PM_CUSTOM_EXCHANGE_RATE,
-        ],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -1218,62 +1216,6 @@ class PaymentPlanViewSet(
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(
-        request=ApplyCustomExchangeRateSerializer,
-        responses={200: PaymentPlanDetailSerializer},
-    )
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="custom-exchange-rate",
-    )
-    @transaction.atomic
-    def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.IN_REVIEW]:
-            raise ValidationError("User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan")
-        serializer.is_valid(raise_exception=True)
-
-        exchange_rate = serializer.validated_data.get("custom_exchange_rate")
-        unore_exchange_rate = serializer.validated_data.get("unore_exchange_rate")
-        if version := serializer.validated_data.get("version"):
-            check_concurrency_version_in_mutation(version, payment_plan)
-
-        flow = PaymentPlanFlow(payment_plan)
-        flow.background_action_status_applying_custom_exchange_rate()
-
-        if exchange_rate is not None:
-            payment_plan.exchange_rate = exchange_rate
-            payment_plan.custom_exchange_rate = True
-            payment_plan.custom_exchange_rate_set_by = cast("User", request.user)
-        else:
-            payment_plan.exchange_rate = unore_exchange_rate
-            payment_plan.custom_exchange_rate = False
-            payment_plan.custom_exchange_rate_set_by = None
-        payment_plan.save(
-            update_fields=[
-                "background_action_status",
-                "custom_exchange_rate",
-                "exchange_rate",
-                "custom_exchange_rate_set_by",
-            ]
-        )
-        payment_plan.refresh_from_db(
-            fields=[
-                "background_action_status",
-                "custom_exchange_rate",
-                "exchange_rate",
-                "custom_exchange_rate_set_by",
-            ]
-        )
-        transaction.on_commit(lambda: payment_plan_apply_custom_exchange_rate_async_task(payment_plan))
-        response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
-        return Response(
-            data=response_serializer.data,
-            status=status.HTTP_200_OK,
-        )
-
     @extend_schema(responses={200: FSPXlsxTemplateSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="fsp-xlsx-template-list")
     @transaction.atomic
@@ -1347,6 +1289,7 @@ class FollowUpInstructionViewSet(
         "mark_as_released": AcceptanceProcessSerializer,
         "abort": PaymentPlanAbortSerializer,
         "close": PaymentPlanCloseSerializer,
+        "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PM_VIEW_LIST],
@@ -1366,6 +1309,7 @@ class FollowUpInstructionViewSet(
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
+        "custom_exchange_rate": [Permissions.PM_CUSTOM_EXCHANGE_RATE],
     }
 
     def get_object(self) -> FollowUpInstruction:
@@ -1380,6 +1324,37 @@ class FollowUpInstructionViewSet(
     @staticmethod
     def _request_user(request: Request) -> "User":
         return cast("User", request.user)
+
+    @extend_schema(request=ApplyCustomExchangeRateSerializer, responses={200: FollowUpInstructionDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="custom-exchange-rate")
+    @transaction.atomic
+    def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        instruction = FollowUpInstruction.objects.select_for_update().get(pk=self.get_object().pk)
+        if instruction.status not in (FollowUpInstruction.Status.OPEN, FollowUpInstruction.Status.IN_REVIEW):
+            raise ValidationError("Exchange rate can be changed only while the instruction is OPEN or IN_REVIEW")
+        if instruction.updated_at != data["updated_at"]:
+            raise ValidationError("The instruction has changed. Refresh the page and try again.")
+        if instruction.background_action_status not in (None, *FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES):
+            raise ValidationError("Wait for the current instruction action to finish before changing the rate")
+
+        user = self._request_user(request)
+        old_instruction = cast("FollowUpInstruction", copy_model_object(instruction))
+        custom_rate = data.get("custom_exchange_rate")
+        instruction.exchange_rate = custom_rate if custom_rate is not None else data["unore_exchange_rate"]
+        instruction.custom_exchange_rate = custom_rate is not None
+        instruction.custom_exchange_rate_set_by = user if custom_rate is not None else None
+        instruction.save(
+            update_fields=["exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by", "updated_at"]
+        )
+        log_follow_up_instruction_change(instruction, old_instruction, str(user.pk))
+        instruction = cast(
+            "FollowUpInstruction",
+            recalculate_owner_exchange_rate_async_task(instruction, str(user.pk), fetch_unore_rate=False),
+        )
+        return self._detail_response(instruction)
 
     @transaction.atomic
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -2351,6 +2326,7 @@ class PaymentPlanGroupViewSet(
         "create_top_up_amendment": PaymentPlanCreateTopUpSerializer,
         "split": SplitPaymentPlanSerializer,
         "assign_funds_commitments": AssignFundsCommitmentsSerializer,
+        "custom_exchange_rate": ApplyCustomExchangeRateSerializer,
     }
 
     permissions_by_action = {
@@ -2386,12 +2362,41 @@ class PaymentPlanGroupViewSet(
         "split": [Permissions.PM_SPLIT],
         "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
+        "custom_exchange_rate": [Permissions.PM_CUSTOM_EXCHANGE_RATE],
     }
 
     @etag_decorator(PaymentPlanGroupListKeyConstructor)
     @cached_response(key_func=PaymentPlanGroupListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(request=ApplyCustomExchangeRateSerializer, responses={200: PaymentPlanGroupDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="custom-exchange-rate")
+    @transaction.atomic
+    def custom_exchange_rate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        group = PaymentPlanGroup.objects.select_for_update().get(pk=self.get_object().pk)
+        if group.status not in (PaymentPlanGroup.Status.OPEN, PaymentPlanGroup.Status.IN_REVIEW):
+            raise ValidationError("Exchange rate can be changed only while the group is OPEN or IN_REVIEW")
+        if group.updated_at != data["updated_at"]:
+            raise ValidationError("The group has changed. Refresh the page and try again.")
+        if group.background_action_status not in (None, *PaymentPlanGroup.BACKGROUND_ACTION_ERROR_STATES):
+            raise ValidationError("Wait for the current group action to finish before changing the rate")
+
+        user = cast("User", request.user)
+        old_group = cast("PaymentPlanGroup", copy_model_object(group))
+        custom_rate = data.get("custom_exchange_rate")
+        group.exchange_rate = custom_rate if custom_rate is not None else data["unore_exchange_rate"]
+        group.custom_exchange_rate = custom_rate is not None
+        group.custom_exchange_rate_set_by = user if custom_rate is not None else None
+        group.save(update_fields=["exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by", "updated_at"])
+        log_payment_plan_group_change(group, old_group, str(user.pk))
+        group = cast(
+            "PaymentPlanGroup", recalculate_owner_exchange_rate_async_task(group, str(user.pk), fetch_unore_rate=False)
+        )
+        return Response(PaymentPlanGroupDetailSerializer(group, context={"request": request}).data)
 
     @extend_schema(request=AssignFundsCommitmentsSerializer, responses={200: PaymentPlanGroupDetailSerializer})
     @action(detail=True, methods=["post"], url_path="assign-funds-commitments")

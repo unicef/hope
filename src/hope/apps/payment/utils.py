@@ -104,6 +104,20 @@ def log_payment_plan_group_change(
     )
 
 
+def log_follow_up_instruction_change(
+    instruction: FollowUpInstruction,
+    old_instruction: FollowUpInstruction,
+    user_id: str | None,
+) -> None:
+    _log_update(
+        instruction,
+        create_diff(old_instruction, instruction, FollowUpInstruction.ACTIVITY_LOG_MAPPING),
+        business_area=instruction.business_area,
+        program_pk=instruction.program_id,
+        user_id=user_id,
+    )
+
+
 def _log_payment_plan_event(
     payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
@@ -311,6 +325,17 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def get_owner_unore_exchange_rate(
+    owner: PaymentPlanGroup | FollowUpInstruction, exchange_date: datetime.date | None = None
+) -> float | None:
+    if owner.currency is None:
+        return None
+    if owner.currency.code == "USDC":
+        return 1.0
+    date = exchange_date or owner.currency_exchange_date
+    return ExchangeRates().get_exchange_rate_for_currency_code(owner.currency.vision_code, date)
 
 
 def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:

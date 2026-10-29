@@ -830,7 +830,6 @@ def test_manual_fc_recovery_is_available_after_payment_plan_created_acknowledgem
 
 
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.log_create")
 @patch("hope.apps.payment.services.payment_plan_services.log_payment_plan_approval")
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
@@ -838,7 +837,6 @@ def test_release_from_vision_uses_payment_plan_creator(
     mock_group_notification,
     mock_approval_log,
     mock_activity_log,
-    mock_exchange_rate,
     mock_notification,
     vision_payment_plan: PaymentPlan,
 ) -> None:

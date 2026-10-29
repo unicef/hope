@@ -3,7 +3,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
 import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/PaymentPlanAcceptanceProcess';
-import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
@@ -85,7 +84,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       <PaymentPlanAcceptanceProcess paymentPlan={paymentPlan} />
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
-      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

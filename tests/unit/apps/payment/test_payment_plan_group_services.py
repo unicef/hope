@@ -270,6 +270,44 @@ def test_assign_currency_rejected_when_a_payment_plan_is_opened(cycle, currency)
     assert error.value.detail[0] == "Currency can be changed only before any Payment Plan in the group is opened."
 
 
+@pytest.fixture
+def group_with_custom_rate_before_open(open_group, cycle):
+    open_group.exchange_rate = Decimal("1.25000000")
+    open_group.custom_exchange_rate = True
+    open_group.save(update_fields=["exchange_rate", "custom_exchange_rate"])
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=open_group, status=PaymentPlan.Status.TP_OPEN)
+    return open_group
+
+
+@pytest.fixture
+def replacement_currency():
+    return CurrencyFactory(code="PLN", name="Polish Zloty")
+
+
+def test_changing_group_currency_clears_its_previous_rate(group_with_custom_rate_before_open, replacement_currency):
+    PaymentPlanGroupService(group_with_custom_rate_before_open).assign_currency(replacement_currency)
+
+    assert group_with_custom_rate_before_open.currency == replacement_currency
+    assert group_with_custom_rate_before_open.exchange_rate is None
+    assert group_with_custom_rate_before_open.custom_exchange_rate is False
+
+
+@pytest.fixture
+def group_with_unore_rate_and_open_plan(open_group, cycle):
+    open_group.exchange_rate = Decimal("1.25000000")
+    open_group.save(update_fields=["exchange_rate"])
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=open_group, status=PaymentPlan.Status.OPEN)
+    return open_group
+
+
+def test_changing_group_dates_clears_the_previous_unore_rate(group_with_unore_rate_and_open_plan):
+    PaymentPlanGroupService(group_with_unore_rate_and_open_plan).assign_dispersion_dates(
+        date(2099, 2, 1), date(2099, 2, 28)
+    )
+
+    assert group_with_unore_rate_and_open_plan.exchange_rate is None
+
+
 def test_assign_currency_usdc_rejected_with_non_digital_delivery_mechanism(cycle, delivery_mechanism):
     group = PaymentPlanGroupFactory(cycle=cycle)
     PaymentPlanFactory(

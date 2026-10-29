@@ -372,7 +372,7 @@ def test_manual_fc_header_recovery_waits_for_every_pending_plan(
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
+@patch("hope.apps.payment.services.payment_plan_group_services.recalculate_owner_exchange_rate_async_task")
 def test_manual_fc_header_recovery_assigns_multiple_headers_and_releases_group(
     mock_exchange_rate_task,
     mock_notification_task,
@@ -408,7 +408,8 @@ def test_manual_fc_header_recovery_assigns_multiple_headers_and_releases_group(
         funds_commitment_header,
         second_header,
     }
-    assert mock_exchange_rate_task.call_count == 2
+    mock_exchange_rate_task.assert_called_once()
+    assert mock_exchange_rate_task.call_args.args[0].pk == payment_plan.payment_plan_group_id
     assert mock_notification_task.call_count == 2
     mock_group_notification_task.assert_called_once()
 

@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 from functools import cached_property
 from typing import TYPE_CHECKING, cast
@@ -8,11 +9,13 @@ from django.db import models, transaction
 from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Exists, OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
+from hope.models.approval import Approval
 from hope.models.payment_plan import PaymentPlan, last_approval_step
 from hope.models.utils import (
     AdminUrlMixin,
@@ -40,6 +43,9 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
             "source_group",
             "financial_service_provider",
             "use_payment_gateway",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "custom_exchange_rate_set_by",
             "dispersion_start_date",
             "dispersion_end_date",
             "background_action_status",
@@ -66,6 +72,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         CLOSED = "CLOSED", "Closed"
 
     class BackgroundActionStatus(models.TextChoices):
+        RECALCULATING = "RECALCULATING", "Recalculating Payment Plan data"
+        RECALCULATING_ERROR = "RECALCULATING_ERROR", "Payment Plan recalculation error"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
         XLSX_IMPORTING_RECONCILIATION = (
@@ -75,6 +83,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
+        BackgroundActionStatus.RECALCULATING_ERROR,
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
     ]
@@ -126,6 +135,18 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         default=False,
         help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
     )
+    exchange_rate = models.DecimalField(
+        decimal_places=8, blank=True, null=True, max_digits=15, help_text="Exchange Rate [sys]"
+    )
+    custom_exchange_rate = models.BooleanField(default=False, help_text="Custom Exchange Rate flag [sys]")
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="User who set the custom exchange rate [sys]",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -172,7 +193,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         blank=True,
         null=True,
         choices=BackgroundActionStatus.choices,
-        help_text="Background Action Status for celery export/import task [sys]",
+        help_text="Background Action Status for asynchronous group tasks [sys]",
     )
     plan_type = models.CharField(
         max_length=20,
@@ -310,6 +331,20 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
         return [plan for plan in payment_plans if plan.eligible_payments_for_child_plan().exists()]
 
     @property
+    def currency_exchange_date(self) -> date:
+        if self.status in (
+            self.Status.ACCEPTED,
+            self.Status.FINISHED,
+            self.Status.READY_FOR_CLOSURE,
+            self.Status.CLOSED,
+        ):
+            process = self.approval_process.first()
+            if process and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first()):
+                return approval.created_at.date()
+        today = timezone.now().date()
+        return min(today, self.dispersion_end_date) if self.dispersion_end_date else today
+
+    @property
     def last_approval_process_date(self) -> "datetime | None":
         return last_approval_step(self.approval_process.first(), self.status, self.updated_at).modified_date
 
@@ -368,7 +403,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
 
     @property
     def can_start_background_action(self) -> bool:
-        """Whether a new export/import can start: the group is idle or in an error state."""
+        """Whether a new background action can start: the group is idle or in an error state."""
         return (
             self.background_action_status is None
             or self.background_action_status in PaymentPlanGroup.BACKGROUND_ACTION_ERROR_STATES

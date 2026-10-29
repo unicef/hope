@@ -6,7 +6,7 @@ import {
   waitFor,
 } from 'src/testUtils/testUtils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { PERMISSIONS } from 'src/config/permissions';
 import ConversionToUsd from './ConversionToUsd';
@@ -31,10 +31,14 @@ vi.mock('@hooks/useSnackBar', () => ({
 
 vi.mock('@restgenerated/services/RestService', () => ({
   RestService: {
-    restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate: vi.fn(() =>
-      Promise.resolve({}),
+    restBusinessAreasProgramsPaymentPlanGroupsCustomExchangeRateCreate: vi.fn(
+      () => Promise.resolve({}),
     ),
-    restBusinessAreasProgramsPaymentPlansRetrieve: vi.fn(),
+    restBusinessAreasProgramsFollowUpInstructionsCustomExchangeRateCreate:
+      vi.fn(() => Promise.resolve({})),
+    restBusinessAreasProgramsPaymentPlanGroupsRetrieve: vi.fn(),
+    restBusinessAreasProgramsFollowUpInstructionsRetrieve: vi.fn(),
+    restBusinessAreasProgramsPaymentPlansList: vi.fn(),
   },
 }));
 
@@ -49,21 +53,20 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-const basePaymentPlan = {
-  id: 'payment-plan-1',
-  status: PaymentPlanStatusEnum.OPEN,
+const baseOwner = {
+  id: 'group-1',
+  status: PaymentPlanGroupStatusEnum.OPEN,
   currency: 'PLN',
   exchangeRate: '1.25000000',
   customExchangeRate: true,
   unoreExchangeRate: '2.00000000',
-  version: 3,
-  backgroundActionStatus: null,
-  backgroundActionStatusDisplay: '',
+  updatedAt: '2026-10-26T12:00:00Z',
 } as const;
 
 function renderComponent(
   overrides = {},
   permissions = [PERMISSIONS.PM_CUSTOM_EXCHANGE_RATE],
+  ownerType: 'group' | 'instruction' = 'group',
 ) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -76,7 +79,8 @@ function renderComponent(
   return renderWithProviders(
     <QueryClientProvider client={queryClient}>
       <ConversionToUsd
-        paymentPlan={{ ...basePaymentPlan, ...overrides }}
+        owner={{ ...baseOwner, ...overrides }}
+        ownerType={ownerType}
         permissions={permissions}
       />
     </QueryClientProvider>,
@@ -100,7 +104,7 @@ describe('ConversionToUsd', () => {
   });
 
   it('disables conversion controls for unsupported statuses', () => {
-    renderComponent({ status: PaymentPlanStatusEnum.LOCKED });
+    renderComponent({ status: PaymentPlanGroupStatusEnum.LOCKED });
 
     const input = screen.getByRole('spinbutton') as HTMLInputElement;
     const applyButton = screen.getByRole('button', {
@@ -127,6 +131,23 @@ describe('ConversionToUsd', () => {
     expect(input.readOnly).toBe(true);
   });
 
+  it('disables Apply while the owner rate is recalculating', () => {
+    renderComponent({ backgroundActionStatus: 'RECALCULATING' });
+
+    expect(
+      (screen.getByRole('button', { name: 'Apply' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+  });
+
+  it('shows a recalculation error on the owner', () => {
+    renderComponent({ backgroundActionStatus: 'RECALCULATING_ERROR' });
+
+    expect(
+      screen.getByText('Exchange rate recalculation failed. Please try again.'),
+    ).toBeTruthy();
+  });
+
   it('sends only the custom exchange rate when custom option is selected', async () => {
     renderComponent();
 
@@ -134,14 +155,14 @@ describe('ConversionToUsd', () => {
 
     await waitFor(() => {
       expect(
-        RestService.restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate,
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsCustomExchangeRateCreate,
       ).toHaveBeenCalledWith({
         businessAreaSlug: 'afghanistan',
-        id: 'payment-plan-1',
+        id: 'group-1',
         programCode: 'test-program',
         requestBody: {
           customExchangeRate: '1.25000000',
-          version: 3,
+          updatedAt: '2026-10-26T12:00:00Z',
         },
       });
     });
@@ -157,14 +178,34 @@ describe('ConversionToUsd', () => {
 
     await waitFor(() => {
       expect(
-        RestService.restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate,
+        RestService.restBusinessAreasProgramsPaymentPlanGroupsCustomExchangeRateCreate,
       ).toHaveBeenCalledWith({
         businessAreaSlug: 'afghanistan',
-        id: 'payment-plan-1',
+        id: 'group-1',
         programCode: 'test-program',
         requestBody: {
           unoreExchangeRate: '2.00000000',
-          version: 3,
+          updatedAt: '2026-10-26T12:00:00Z',
+        },
+      });
+    });
+  });
+
+  it('sends instruction rates to the instruction endpoint', async () => {
+    renderComponent({}, [PERMISSIONS.PM_CUSTOM_EXCHANGE_RATE], 'instruction');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    await waitFor(() => {
+      expect(
+        RestService.restBusinessAreasProgramsFollowUpInstructionsCustomExchangeRateCreate,
+      ).toHaveBeenCalledWith({
+        businessAreaSlug: 'afghanistan',
+        id: 'group-1',
+        programCode: 'test-program',
+        requestBody: {
+          customExchangeRate: '1.25000000',
+          updatedAt: '2026-10-26T12:00:00Z',
         },
       });
     });

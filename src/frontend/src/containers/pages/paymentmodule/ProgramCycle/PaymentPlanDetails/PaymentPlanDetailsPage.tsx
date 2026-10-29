@@ -25,7 +25,6 @@ import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail'
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/PaymentPlanAcceptanceProcess';
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
-import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
@@ -115,7 +114,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         )}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
-      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

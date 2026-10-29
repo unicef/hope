@@ -137,13 +137,8 @@ class PaymentPlanGroupPayloadSerializer(serializers.Serializer):
     currency = serializers.CharField(source="currency.vision_code")
     auth_amt = serializers.CharField(source="total_entitled_quantity")
     auth_amt_usd = serializers.CharField(source="total_entitled_quantity_usd")
-    exchange_rate = serializers.SerializerMethodField()
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True)
     head_vendor = serializers.CharField(source="financial_service_provider.name")
-
-    @staticmethod
-    def get_exchange_rate(obj: Any) -> None:
-        # TODO: Read the exchange rate from PaymentPlanGroup when it is moved there.
-        return None
 
     def to_representation(self, instance: Any) -> dict[str, Any]:
         data = super().to_representation(instance)

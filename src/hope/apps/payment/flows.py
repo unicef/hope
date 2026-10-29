@@ -119,41 +119,6 @@ class PaymentPlanFlow:
 
     @background_action_status.transition(
         source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
-        conditions=[
-            lambda obj: (
-                obj.payment_plan.status
-                in [
-                    obj.payment_plan.Status.OPEN,
-                    obj.payment_plan.Status.IN_REVIEW,
-                ]
-            )
-        ],
-    )
-    def background_action_status_applying_custom_exchange_rate(self) -> None:
-        pass
-
-    @background_action_status.transition(
-        source=[
-            PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
-            PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-        ],
-        target=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-        conditions=[
-            lambda obj: (
-                obj.payment_plan.status
-                in [
-                    obj.payment_plan.Status.OPEN,
-                    obj.payment_plan.Status.IN_REVIEW,
-                ]
-            )
-        ],
-    )
-    def background_action_status_applying_custom_exchange_rate_error(self) -> None:
-        pass
-
-    @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
         target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
             lambda obj: (
@@ -654,39 +619,39 @@ class FollowUpInstructionFlow:
         return self.instruction.background_action_status
 
     @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+        source=[None] + list(FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES),
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
     )
     def background_action_status_xlsx_exporting(self) -> None:
         pass
 
     @background_action_status.transition(
         source=[
-            PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-            PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR,
         ],
-        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR,
     )
     def background_action_status_xlsx_export_error(self) -> None:
         pass
 
     @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        source=[None] + list(FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES),
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
     )
     def background_action_status_xlsx_importing_reconciliation(self) -> None:
         pass
 
     @background_action_status.transition(
         source=[
-            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-            PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],
-        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORT_ERROR,
     )
     def background_action_status_xlsx_import_error(self) -> None:
         pass
 
-    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus))
+    @background_action_status.transition(source=[None] + list(FollowUpInstruction.BackgroundActionStatus))
     def background_action_status_none(self) -> None:
         self.instruction.background_action_status = None

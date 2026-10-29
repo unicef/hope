@@ -1,5 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -202,6 +203,13 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         }
         headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
       />
+      {group && (
+        <ConversionToUsd
+          owner={group}
+          ownerType="group"
+          permissions={permissions}
+        />
+      )}
       {group && <VisionStatusSection group={group} />}
       {group &&
         [

@@ -38,10 +38,10 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_rebuild_stats_async_task,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
+    recalculate_owner_exchange_rate_async_task,
     send_payment_notification_emails_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_to_payment_gateway_async_task,
-    update_exchange_rate_on_release_payments_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
@@ -315,16 +315,20 @@ class PaymentPlanService:
             raise ValidationError("Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened.")
         if dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-        try:
-            self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
-        except RequestException as e:
-            if e.response is not None and is_client_error(e.response.status_code):
-                logger.error("UNORE rejected exchange rate request for PaymentPlan %s: %s", self.payment_plan.pk, e)
-            else:
-                logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", self.payment_plan.pk, e)
-            self.payment_plan.exchange_rate = None
+        if payment_plan_group.exchange_rate is None:
+            try:
+                payment_plan_group.exchange_rate = self.payment_plan.get_exchange_rate()
+            except RequestException as e:
+                if e.response is not None and is_client_error(e.response.status_code):
+                    logger.error("UNORE rejected exchange rate request for PaymentPlan %s: %s", self.payment_plan.pk, e)
+                else:
+                    logger.warning(
+                        "Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", self.payment_plan.pk, e
+                    )
+                payment_plan_group.exchange_rate = None
+            payment_plan_group.save(update_fields=("exchange_rate", "updated_at"))
 
-        self.payment_plan.save(update_fields=("status_date", "status", "exchange_rate", "updated_at"))
+        self.payment_plan.save(update_fields=("status_date", "status", "updated_at"))
         self.payment_plan.program_cycle.set_active()
 
         Payment.objects.filter(parent=self.payment_plan).update(currency=payment_plan_group.currency)
@@ -496,6 +500,11 @@ class PaymentPlanService:
         user = cast("User", self.user)
         record_stage_reached(approval_process, approval_type, user)
         self.apply_acceptance_stage(approval_type, user)
+        if approval_type == Approval.FINANCE_RELEASE:
+            owner = self.payment_plan.exchange_rate_owner
+            if owner is None:
+                raise ValidationError("A payment plan needs a group or Follow-Up Instruction for its exchange rate")
+            transaction.on_commit(lambda: recalculate_owner_exchange_rate_async_task(owner, str(user.pk)))
         if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
             send_payment_notification_emails_async_task(
                 self.payment_plan, notification_action.value, str(user.id), timezone.now().isoformat()
@@ -513,11 +522,6 @@ class PaymentPlanService:
             flow.status_authorize()
         if approval_type == Approval.FINANCE_RELEASE:
             flow.status_mark_as_reviewed()
-            # AB#272790
-            release_user_id = str(user.pk)
-            transaction.on_commit(
-                lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
-            )
         if approval_type == Approval.REJECT:
             flow.status_reject()
 
@@ -1073,8 +1077,12 @@ class PaymentPlanService:
             # instead of hitting the payment_plan_and_household unique constraint.
             return
 
-        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
-        self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
+        exchange_rate_owner = self.payment_plan.exchange_rate_owner
+        if exchange_rate_owner is None:
+            raise ValidationError("A payment plan needs a group or Follow-Up Instruction for its exchange rate.")
+        if exchange_rate_owner.exchange_rate is None:
+            exchange_rate_owner.exchange_rate = self.payment_plan.get_exchange_rate()
+            exchange_rate_owner.save(update_fields=["exchange_rate", "updated_at"])
 
         if not (split := self.payment_plan.splits.first()):
             split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)

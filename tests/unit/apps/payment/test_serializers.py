@@ -604,9 +604,10 @@ def test_payment_plan_detail_serializer_returns_unore_exchange_rate_separately(
     payment_plan.status = PaymentPlan.Status.ACCEPTED
     payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
     payment_plan.payment_plan_group.save(update_fields=["currency"])
-    payment_plan.exchange_rate = 1.25
-    payment_plan.custom_exchange_rate = True
-    payment_plan.save(update_fields=["status", "exchange_rate", "custom_exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = 1.25
+    payment_plan.payment_plan_group.custom_exchange_rate = True
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate", "custom_exchange_rate"])
+    payment_plan.save(update_fields=["status"])
     payment_plan.get_unore_exchange_rate = Mock(return_value=2.0)
 
     data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data
@@ -663,8 +664,8 @@ def test_payment_plan_detail_serializer_unore_exchange_rate_from_exchange_rate_c
     user = payment_plan_detail_context["user"]
     payment_plan.payment_plan_group.currency = CurrencyFactory(code="BHD", name="Bahraini Dinar")
     payment_plan.payment_plan_group.save(update_fields=["currency"])
-    payment_plan.custom_exchange_rate = False
-    payment_plan.save(update_fields=["custom_exchange_rate"])
+    payment_plan.payment_plan_group.custom_exchange_rate = False
+    payment_plan.payment_plan_group.save(update_fields=["custom_exchange_rate"])
 
     with django_assert_num_queries(20):
         data = PaymentPlanDetailSerializer(instance=payment_plan, context={"request": Mock(user=user)}).data

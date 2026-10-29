@@ -10,6 +10,7 @@ export function isGroupBackgroundActionBusy(
 ): boolean {
   const status = group?.backgroundActionStatus;
   return (
+    status === 'RECALCULATING' ||
     status ===
       PaymentPlanGroupDetailBackgroundActionStatusEnum.XLSX_EXPORTING ||
     status ===
@@ -34,4 +35,3 @@ export function planTypeDisplayLabel(
       return '';
   }
 }
-

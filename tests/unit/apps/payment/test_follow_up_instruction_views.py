@@ -75,7 +75,9 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
     client = api_client(user)
     cycle = ProgramCycleFactory(program=program)
     currency = CurrencyFactory(code="USD")
-    instruction = FollowUpInstructionFactory(program=program, business_area=business_area, created_by=user)
+    instruction = FollowUpInstructionFactory(
+        program=program, business_area=business_area, created_by=user, exchange_rate=Decimal("1.00")
+    )
     return {
         "business_area": business_area,
         "user": user,
@@ -807,7 +809,6 @@ def test_follow_up_instruction_delivery_import_xlsx(
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        exchange_rate=Decimal("1.00"),
     )
     payment = PaymentFactory(
         parent=pp,

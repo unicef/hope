@@ -282,8 +282,8 @@ def test_import_invalid_file_without_required_columns(payment_plan):
 
 
 def test_import_valid_file(payment_plan, xlsx_valid_file, payments):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     not_excluded_payments = list(payment_plan.eligible_payments.order_by("id")[:2])
     payment_id_1 = str(not_excluded_payments[0].unicef_id)
     payment_id_2 = str(not_excluded_payments[1].unicef_id)
@@ -308,8 +308,8 @@ def test_import_valid_file(payment_plan, xlsx_valid_file, payments):
 
 
 def test_import_valid_file_with_reordered_required_columns(payment_plan, payments):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     not_excluded_payments = list(payment_plan.eligible_payments.order_by("id")[:2])
     payment_1 = not_excluded_payments[0]
     payment_2 = not_excluded_payments[1]
@@ -359,8 +359,8 @@ def test_entitlement_import_updates_only_modified_rows_for_household_program(
     payments,
     django_assert_num_queries,
 ):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     PaymentHouseholdSnapshot.objects.all().delete()
     create_payment_plan_snapshot_data(payment_plan)
 
@@ -423,8 +423,8 @@ def test_entitlement_import_updates_only_modified_rows_for_social_worker_program
     program.save()
     assert payment_plan.is_social_worker_program is True
 
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     PaymentHouseholdSnapshot.objects.all().delete()
     create_payment_plan_snapshot_data(payment_plan)
 
@@ -551,8 +551,8 @@ def test_validate_entitlement_marks_update_for_changed_value(payment_plan, xlsx_
 
 
 def test_import_payment_list_uses_payment_plan_exchange_rate(payment_plan, xlsx_valid_file, payments):
-    payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("2.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     payment = payment_plan.eligible_payments.order_by("id").first()
     assert payment is not None
 
@@ -571,8 +571,8 @@ def test_import_payment_list_uses_payment_plan_exchange_rate(payment_plan, xlsx_
 
 
 def test_import_row_returns_none_for_unknown_payment_id(payment_plan, xlsx_valid_file, payments):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
     service.open_workbook()
     row = next(service.ws_payments.iter_rows(min_row=2))
@@ -585,8 +585,8 @@ def test_import_row_returns_none_for_unknown_payment_id(payment_plan, xlsx_valid
 
 
 def test_import_row_returns_none_for_empty_entitlement(payment_plan, xlsx_valid_file, payments):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     payment = payment_plan.eligible_payments.order_by("id").first()
     assert payment is not None
     service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
@@ -601,8 +601,8 @@ def test_import_row_returns_none_for_empty_entitlement(payment_plan, xlsx_valid_
 
 
 def test_import_row_returns_none_for_unchanged_entitlement(payment_plan, xlsx_valid_file, payments):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     payment = payment_plan.eligible_payments.order_by("id").first()
     assert payment is not None
     service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
@@ -617,8 +617,8 @@ def test_import_row_returns_none_for_unchanged_entitlement(payment_plan, xlsx_va
 
 
 def test_import_payment_list_skips_blank_rows_and_flushes_by_batch_size(payment_plan, xlsx_valid_file, payments):
-    payment_plan.exchange_rate = Decimal("1.00")
-    payment_plan.save(update_fields=["exchange_rate"])
+    payment_plan.payment_plan_group.exchange_rate = Decimal("1.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     service = XlsxPaymentPlanImportService(payment_plan, xlsx_valid_file)
     service.open_workbook()
     service.BATCH_SIZE = 1

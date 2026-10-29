@@ -11,7 +11,6 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin, messages
 from django.contrib.admin import FieldListFilter
 from django.contrib.admin.options import get_content_type_for_model
-from django.db import transaction
 from django.db.models import Model, Prefetch, QuerySet
 from django.db.models.fields.related import ManyToManyField
 from django.forms import ModelForm, ModelMultipleChoiceField
@@ -22,10 +21,10 @@ from django.utils.html import format_html
 
 from hope.admin.utils import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin, ViewOnUiMixin
 from hope.apps.activity_log.utils import copy_model_object, create_diff
+from hope.apps.payment.celery_tasks import recalculate_owner_exchange_rate_async_task
 from hope.apps.payment.forms import GroupReexportForm, VisionFundsCommitmentHeaderAssignmentForm
 from hope.apps.payment.services.payment_gateway import PaymentGatewayAPI
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.apps.payment.utils import get_quantity_in_usd
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     NULL_DELIVERY_POLICY_OPTION,
     NULL_DELIVERY_POLICY_RESET,
@@ -358,45 +357,6 @@ class PaymentPlanAdmin(BasePaymentPlanAdmin, PaymentPlanCeleryTasksMixin):
         return f"{base}/payment-module/payment-plans/{obj.id}"
 
     @button(
-        visible=lambda btn: btn.original.status == PaymentPlan.Status.ACCEPTED,
-        permission="payment.recalculate_exchange_rate",
-    )
-    def recalculate_exchange_rate(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        if request.method == "POST":
-            with transaction.atomic():
-                payment_plan = PaymentPlan.objects.get(pk=pk)
-                if payment_plan.currency is None:
-                    raise ValueError("PaymentPlan.currency must not be None")
-                updates = []
-                currency_exchange_date = payment_plan.currency_exchange_date
-                for payment in payment_plan.eligible_payments:
-                    payment.entitlement_quantity_usd = get_quantity_in_usd(
-                        amount=payment.entitlement_quantity,
-                        currency=payment_plan.currency,
-                        exchange_rate=payment_plan.exchange_rate,
-                        currency_exchange_date=currency_exchange_date,
-                    )
-                    payment.delivered_quantity_usd = get_quantity_in_usd(
-                        amount=payment.delivered_quantity,
-                        currency=payment_plan.currency,
-                        exchange_rate=payment_plan.exchange_rate,
-                        currency_exchange_date=currency_exchange_date,
-                    )
-                    updates.append(payment)
-                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd", "delivered_quantity_usd"])
-                payment_plan.update_money_fields()
-
-                # invalidate cache for program cycle list
-                payment_plan.program_cycle.save()
-            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
-        return confirm_action(
-            modeladmin=self,
-            request=request,
-            action=self.recalculate_exchange_rate,
-            message="Do you confirm to recalculate USD values based on provided exchange rate?",
-        )
-
-    @button(
         visible=lambda btn: can_sync_with_payment_gateway(btn.original),
         permission="payment.pm_sync_payment_plan_with_pg",
     )
@@ -507,6 +467,9 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
         "internal_data",
         "dispersion_start_date",
         "dispersion_end_date",
+        "exchange_rate",
+        "custom_exchange_rate",
+        "custom_exchange_rate_set_by",
     )
 
     def frontend_url(self, obj: PaymentPlanGroup) -> str | None:
@@ -517,6 +480,29 @@ class PaymentPlanGroupAdmin(ViewOnUiMixin, HOPEModelAdminBase):
     def payment_plans(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:payment_paymentplan_changelist")
         return HttpResponseRedirect(f"{url}?payment_plan_group__id__exact={pk}")
+
+    @button(
+        label="Retry USD recalculation",
+        visible=lambda btn: (
+            btn.original.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+        ),
+        permission="payment.recalculate_exchange_rate",
+    )
+    def retry_usd_recalculation(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            group = PaymentPlanGroup.objects.get(pk=pk)
+            if group.background_action_status != PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR:
+                self.message_user(request, "A failed group USD recalculation is required", level=messages.ERROR)
+            else:
+                recalculate_owner_exchange_rate_async_task(group, str(request.user.pk), fetch_unore_rate=True)
+                self.message_user(request, "Group USD recalculation retry queued", level=messages.SUCCESS)
+            return redirect(reverse("admin:payment_paymentplangroup_change", args=[pk]))
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.retry_usd_recalculation,
+            message="Retry USD recalculation for every Payment Plan in this group?",
+        )
 
     @button(
         visible=lambda btn: can_send_to_vision(btn.original),

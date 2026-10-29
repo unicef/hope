@@ -292,16 +292,18 @@ def _entitlement_payment_plan(
     fsp = FinancialServiceProviderFactory(name="Entitlement E2E Provider")
     fsp.delivery_mechanisms.add(delivery_mechanism)
     currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    cycle = ProgramCycleFactory(program=program)
+    group = PaymentPlanGroupFactory(cycle=cycle, exchange_rate=Decimal("2.0"))
     payment_plan = PaymentPlanFactory(
         name="Entitlement E2E Payment Plan",
-        program_cycle=ProgramCycleFactory(program=program),
+        program_cycle=cycle,
+        payment_plan_group=group,
         business_area=business_area,
         status=status,
         plan_type=PaymentPlan.PlanType.REGULAR,
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
         currency=currency,
-        exchange_rate=Decimal("2.0"),
     )
     for index, (size, entitlement) in enumerate(zip((1, 3), entitlements, strict=True), start=1):
         household = HouseholdFactory(size=size, business_area=business_area, program=program)

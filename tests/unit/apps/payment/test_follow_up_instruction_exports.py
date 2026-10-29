@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     HouseholdFactory,
     PaymentFactory,
@@ -78,11 +79,14 @@ def fsp(delivery_mechanism):
 
 @pytest.fixture
 def instruction(user, program, business_area):
-    return FollowUpInstruction.objects.create(
+    return FollowUpInstructionFactory(
         business_area=business_area,
         program=program,
         created_by=user,
         background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
+        exchange_rate=Decimal("1.00"),
+        dispersion_start_date=None,
+        dispersion_end_date=None,
     )
 
 
@@ -97,7 +101,6 @@ def child_payment_plans(instruction, cycle, business_area, currency, delivery_me
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
     )
     plan_two = PaymentPlanFactory(
         program_cycle=cycle,
@@ -108,7 +111,6 @@ def child_payment_plans(instruction, cycle, business_area, currency, delivery_me
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
     )
     return plan_one, plan_two
 
