@@ -12,7 +12,9 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models.fields import Field
 from django.forms import inlineformset_factory
+from django.forms.fields import Field as FormField
 from django.http import HttpRequest, HttpResponseBase, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
@@ -21,6 +23,7 @@ from django.urls import reverse
 from jsoneditor.forms import JSONEditor
 import requests
 
+from hope.admin.user_role import get_autocomplete_partner, is_autocomplete_for, limit_business_areas_for_partner
 from hope.admin.utils import HOPEModelAdminBase, LastSyncDateResetMixin
 from hope.apps.administration.widgets import JsonWidget
 from hope.apps.core.services.rapid_pro.api import RapidProAPI
@@ -203,6 +206,13 @@ class BusinessAreaAdmin(
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
     filter_horizontal = ("countries", "payment_countries")
 
+    def get_search_results(
+        self, request: HttpRequest, queryset: "QuerySet", search_term: str
+    ) -> tuple["QuerySet", bool]:
+        if is_autocomplete_for(request, "roleassignment", "business_area"):
+            queryset = limit_business_areas_for_partner(queryset, get_autocomplete_partner(request))
+        return super().get_search_results(request, queryset, search_term)
+
     def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> Any:
         """Make the biographic deduplication thresholds read only for Country Workspace only business areas.
 
@@ -232,7 +242,7 @@ class BusinessAreaAdmin(
     def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
-    def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+    def formfield_for_dbfield(self, db_field: Field, request: HttpRequest, **kwargs: Any) -> FormField | None:
         if db_field.name == "custom_fields":
             if is_root(request):
                 kwargs = {"widget": JSONEditor}

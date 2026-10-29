@@ -214,7 +214,6 @@ class TestPeoplePDUXlsxUpload:
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert page_individuals.get_update_status(periodic_data_update_upload.pk).text == "Successful"
 
-    @pytest.mark.night
     def test_people_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
@@ -257,7 +256,6 @@ class TestPeoplePDUXlsxUpload:
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert page_individuals.get_pdu_form_errors().text == error_text
 
-    @pytest.mark.night
     def test_people_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,

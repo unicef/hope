@@ -135,10 +135,10 @@ class TestSmokeGrievanceDashboard:
         add_grievances: None,
         page_grievance_dashboard: GrievanceDashboard,
     ) -> None:
-        page_grievance_dashboard.get_nav_grievance().click()
+        page_grievance_dashboard.open_nav_section("Grievance")
         page_grievance_dashboard.get_nav_grievance_dashboard().click()
 
-        assert "Grievance Dashboard" in page_grievance_dashboard.get_page_header_title().text
+        page_grievance_dashboard.assert_page_header_title("Grievance Dashboard")
         assert "100" in page_grievance_dashboard.get_total_number_of_tickets_top_number().text
         assert (
             "25"
@@ -174,9 +174,9 @@ class TestSmokeGrievanceDashboard:
         page_grievance_details_page: GrievanceDetailsPage,
         download_path: str,
     ) -> None:
-        page_grievance_tickets.get_nav_grievance().click()
+        page_grievance_tickets.open_nav_section("Grievance")
         page_grievance_dashboard.get_nav_grievance_dashboard().click()
-        assert "Grievance Dashboard" in page_grievance_dashboard.get_page_header_title().text
+        page_grievance_dashboard.assert_page_header_title("Grievance Dashboard")
         assert "3" in page_grievance_dashboard.get_total_number_of_tickets_top_number().text
         assert (
             "1"
@@ -207,7 +207,7 @@ class TestSmokeGrievanceDashboard:
         page_grievance_details_page.get_button_close_ticket().click()
         page_grievance_tickets.get_button_confirm().click()
         page_grievance_tickets.wait_for_text("Closed", page_grievance_tickets.status_container)
-        page_grievance_tickets.get_nav_grievance().click()
+        page_grievance_tickets.open_nav_section("Grievance")
         page_grievance_dashboard.get_nav_grievance_dashboard().click()
 
         from selenium.webdriver.support.ui import WebDriverWait

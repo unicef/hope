@@ -25,7 +25,7 @@ export function SendToPaymentGatewayGroupButton({
   const queryClient = useQueryClient();
   const permissions = usePermissions();
 
-  const { mutateAsync: sendToPaymentGateway, isPending: loadingSend } =
+  const { mutate: sendToPaymentGateway, isPending: loadingSend } =
     useMutation({
       mutationFn: () =>
         RestService.restBusinessAreasProgramsPaymentPlanGroupsSendToPaymentGatewayCreate(

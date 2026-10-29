@@ -84,7 +84,7 @@ export function EditIdentityRow({
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
-              country: identity.country.isoCode3,
+              country: identity.country?.isoCode3 ?? null,
               partner: identity.partner,
               number: identity.number,
             });
@@ -111,7 +111,10 @@ export function EditIdentityRow({
       </Grid>
       <Grid size={4}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={identity.country.name} />
+          <LabelizedField
+            label={t('Country')}
+            value={identity.country?.name ?? '-'}
+          />
         </DisabledDiv>
       </Grid>
       <Grid size={3}>
@@ -142,7 +145,7 @@ export function EditIdentityRow({
                 onClick={() => {
                   arrayHelpers.push({
                     id: identity.id,
-                    country: identity.country.isoCode3,
+                    country: identity.country?.isoCode3 ?? null,
                     partner: identity.partner,
                     number: identity.number,
                   });

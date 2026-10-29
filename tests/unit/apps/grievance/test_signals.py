@@ -4,7 +4,12 @@ from uuid import uuid4
 from django.core.cache import cache
 import pytest
 
-from extras.test_utils.factories import BusinessAreaFactory, GrievanceTicketFactory, ProgramFactory
+from extras.test_utils.factories import (
+    BusinessAreaFactory,
+    GrievanceTicketFactory,
+    ProgramFactory,
+    TicketNoteFactory,
+)
 from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.signals import (
     increment_grievance_ticket_version_cache,
@@ -210,3 +215,12 @@ def test_increment_grievance_ticket_version_cache_on_program_change_unsupported_
         )
 
     mocked_increment.assert_not_called()
+
+
+def test_a_new_note_bumps_the_ticket_list_version(ticket: GrievanceTicket, program: Program) -> None:
+    ticket.programs.add(program)
+
+    with patch("hope.apps.grievance.signals.increment_grievance_ticket_version_cache") as mocked_increment:
+        TicketNoteFactory(ticket=ticket)
+
+    mocked_increment.assert_called_once_with(ticket.business_area.slug, {program.code})

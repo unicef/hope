@@ -22,8 +22,9 @@ from hope.apps.core.field_attributes.core_fields_attributes import (
 from hope.apps.core.field_attributes.fields_types import Scope
 from hope.apps.household.celery_tasks import recalculate_population_fields_async_task
 from hope.apps.household.services.household_recalculate_data import RECALCULATION_INDIVIDUAL_FIELDS
+from hope.apps.program.signals import adjust_program_size
 from hope.apps.utils.phone import calculate_phone_numbers_validity
-from hope.models import Individual, log_create
+from hope.models import Individual, Program, log_create
 
 
 class InvalidColumnsError(Exception):
@@ -94,6 +95,9 @@ class IndividualXlsxUpdate:
         household_ids = sorted({str(individual.household_id) for individual in individuals if individual.household_id})
         if household_ids and RECALCULATION_INDIVIDUAL_FIELDS.intersection(columns):
             recalculate_population_fields_async_task(household_ids=household_ids)
+        if "relationship" in columns:
+            for program in Program.objects.filter(id__in={individual.program_id for individual in individuals}):
+                adjust_program_size(program)
 
     @staticmethod
     def _column_name_by_attr(attr: dict) -> str | None:

@@ -67,6 +67,9 @@ export function ProgramAutocompleteRestFilter({
       queryVariables,
     ),
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
+    // Fetch only when the dropdown opens, or when a preselected value from
+    // the URL needs its label resolved.
+    enabled: open || !!value,
   });
 
   // Update query variables when search text changes
@@ -148,7 +151,6 @@ export function ProgramAutocompleteRestFilter({
       }}
       handleOptionSelected={handleOptionSelected}
       handleOptionLabel={handleOptionLabel}
-      data={dataPrograms}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

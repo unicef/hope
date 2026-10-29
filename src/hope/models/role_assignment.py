@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Q
 from natural_keys import NaturalKeyModel
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
@@ -99,6 +99,8 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
             models.Index(fields=["partner", "business_area", "expiry_date"], name="idx_ra_partner_ba_exp"),
             # Optimize business_area queries with expiry_date filtering
             models.Index(fields=["business_area", "expiry_date"], name="idx_ra_ba_exp"),
+            LongNameIndex(fields=["created_at"], name="account_roleassignment_created_at_78cf0c2d"),
+            LongNameIndex(fields=["updated_at"], name="account_roleassignment_updated_at_4738f268"),
         ]
 
     def clean(self) -> None:

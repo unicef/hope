@@ -18,6 +18,7 @@ export interface FinishedPaymentPlanHeaderButtonsProps {
   canSplit: boolean;
   paymentPlan: PaymentPlanDetail;
   canMarkReadyForClosure: boolean;
+  isInstructionManaged?: boolean;
 }
 
 export function FinishedPaymentPlanHeaderButtons({
@@ -25,6 +26,7 @@ export function FinishedPaymentPlanHeaderButtons({
   canSplit,
   paymentPlan,
   canMarkReadyForClosure,
+  isInstructionManaged = false,
 }: FinishedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -32,7 +34,7 @@ export function FinishedPaymentPlanHeaderButtons({
   const { businessArea, programId } = useBaseUrl();
 
   const {
-    mutateAsync: markReadyForClosure,
+    mutate: markReadyForClosure,
     isPending: loadingReadyForClosure,
   } = useMutation({
     mutationFn: () =>
@@ -60,7 +62,7 @@ export function FinishedPaymentPlanHeaderButtons({
   });
 
   const {
-    mutateAsync: sendToPaymentGateway,
+    mutate: sendToPaymentGateway,
     isPending: LoadingSendToPaymentGateway,
   } = useMutation({
     mutationFn: () =>
@@ -130,16 +132,18 @@ export function FinishedPaymentPlanHeaderButtons({
             />
           </Box>
         )}
-        <Box
-          sx={{
-            p: 2,
-          }}
-        >
-          <SplitIntoPaymentLists
-            paymentPlan={paymentPlan}
-            canSplit={canSplit}
-          />
-        </Box>
+        {!isInstructionManaged && (
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <SplitIntoPaymentLists
+              paymentPlan={paymentPlan}
+              canSplit={canSplit}
+            />
+          </Box>
+        )}
         {canSendToPaymentGateway && (
           <Box
             sx={{

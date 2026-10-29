@@ -16,11 +16,6 @@ class WesternUnionFTPClient(FTPClient):
     INVOICE_PREFIX_PATTERN = re.compile(r"^AD-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
     DATA_PREFIX_PATTERN = re.compile(r"^(?:QCF|RCF)-[A-Z0-9]+-[A-Z]+-\d{8}.*\.zip$", re.IGNORECASE)
 
-    def print_files(self) -> None:
-        files = self.list_files_w_attrs()
-        for _attr in files:
-            pass
-
     def get_files_since(self, date_from: datetime, filename_pattern: re.Pattern[str]) -> list[tuple[str, io.BytesIO]]:
         files = [f for f in self.list_files_w_attrs() if datetime.fromtimestamp(f.st_mtime) >= date_from]
         return_files = []

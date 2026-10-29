@@ -61,12 +61,17 @@ export function VerificationRecordsTableRow({
         </TableCell>
       )}
       <TableCell align="right">
-        {formatCurrencyWithSymbol(payment.deliveredQuantity, payment.currency)}
+        {formatCurrencyWithSymbol(
+          payment.deliveredQuantity,
+          payment.currency,
+          payment.currencyVisionCode,
+        )}
       </TableCell>
       <TableCell align="right">
         {formatCurrencyWithSymbol(
           payment.verification.receivedAmount,
           payment.currency,
+          payment.currencyVisionCode,
         )}
       </TableCell>
       <TableCell align="left">{payment.hohPhoneNo}</TableCell>

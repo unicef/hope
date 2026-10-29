@@ -33,6 +33,13 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0)],
         },
     ),
+    "days_at_least_one": (
+        "django.forms.fields.IntegerField",
+        {
+            "min_value": 1,
+            "widget": "django.forms.widgets.NumberInput",
+        },
+    ),
     "positive_floats": (
         "django.forms.fields.FloatField",
         {
@@ -89,28 +96,16 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
-    "DEDUPLICATION_IMAGE_UPLOAD_BATCH_SIZE": (
-        5000,
-        "Batch size for image upload",
-        "positive_integers",
-    ),
     "WU_FTP_SYNC_LOOKBACK_DAYS": (
         31,
         "Number of days back to scan Western Union FTP for AD/QCF files during periodic sync",
         "positive_integers",
-    ),
-    "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
-    "KOBO_ADMIN_CREDENTIALS": (
-        "",
-        "Kobo superuser credentials in format user:password",
-        str,
     ),
     "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED": (
         5,
         "If amount of duplicates for single individual exceeds this limit deduplication is aborted",
         "positive_integers",
     ),
-    "KOBO_APP_API_TOKEN": ("", "Kobo KPI token", str),
     # GOLDEN RECORDS SETTINGS
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE": (
         50,
@@ -136,11 +131,6 @@ CONSTANCE_CONFIG = {
     ),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
-    # CASH ASSIST
-    "CASH_ASSIST_URL_PREFIX": (
-        "",
-        "Cash Assist base url used to generate url to cash assist",
-    ),
     "SEND_GRIEVANCES_NOTIFICATION": (
         False,
         "Should send grievances notification",
@@ -158,8 +148,23 @@ CONSTANCE_CONFIG = {
     ),
     "GRIEVANCE_NOTIFICATION_HOUR": (
         6,
-        "Local grievance digest and reminder hour in 24-hour format (0-23; 6 means 06:00)",
+        "Local hour of the My Tasks email check in 24-hour format (0-23; 6 means 06:00)",
         "hour_of_day",
+    ),
+    "MY_TASKS_MONITOR_WINDOW": (
+        1,
+        "Days between My Tasks email checks (1 means every day)",
+        "days_at_least_one",
+    ),
+    "MY_TASKS_ALARM_WINDOW": (
+        7,
+        "Days after the first My Tasks email before the reminders start, while something stays unread",
+        "days_at_least_one",
+    ),
+    "MY_TASKS_REPEAT_EACH": (
+        2,
+        "Days between My Tasks reminders while something stays unread",
+        "days_at_least_one",
     ),
     "SEND_PAYMENT_PLANS_NOTIFICATION": (
         False,
@@ -191,11 +196,6 @@ CONSTANCE_CONFIG = {
         "Mailjet template id for PDU Online Edit notification",
         int,
     ),
-    "IGNORED_USER_LINKED_OBJECTS": (
-        "created_advanced_filters,advancedfilter,logentry,social_auth,query,querylog,logs",
-        "list of relation to hide in 'linked objects' user page",
-        str,
-    ),
     "QUICK_LINKS": (
         """Kobo,https://kobo-hope-trn.unitst.org/
 Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
@@ -207,11 +207,6 @@ Clear Cache,clear-cache/
 """,
         "",
         str,
-    ),
-    "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (
-        False,
-        "Automatically merge the population after server-triggered RDI import",
-        bool,
     ),
     "RECALCULATE_POPULATION_FIELDS_CHUNK": (
         50000,
@@ -225,11 +220,6 @@ Clear Cache,clear-cache/
             "Intended to be used only for testing purposes"
         ),
         bool,
-    ),
-    "REMOVE_RDI_LINKS_TIMEDELTA": (
-        90,
-        "The schedule (in days) which is applied to task remove_old_rdi_links_task",
-        "positive_integers",
     ),
     "ADMIN_SYNC_REMOTE_SERVER": (
         "http://localhost:8000",
@@ -285,6 +275,9 @@ Clear Cache,clear-cache/
         "Image shown on the surprise/easter-egg page (leave blank for default).",
         "image_field",
     ),
+    "ES_USE_EXACT_ID_AND_ADDRESS_SEARCH": (
+        False,
+        "Individual search uses exact HOPE ID, household address and fuzzy name (needs a fleet reindex)",
+        bool,
+    ),
 }
-
-CONSTANCE_DBS = ("default",)

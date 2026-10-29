@@ -41,6 +41,10 @@
                 "value": "Pending"
             },
             {
+                "name": "Not Eligible",
+                "value": "Not Eligible"
+            },
+            {
                 "name": "Sent to Payment Gateway",
                 "value": "Sent to Payment Gateway"
             },

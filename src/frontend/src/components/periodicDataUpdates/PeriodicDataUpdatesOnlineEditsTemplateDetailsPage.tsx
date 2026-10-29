@@ -99,7 +99,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
   const [sendBackLoading, setSendBackLoading] = useState(false);
   const [sendForApprovalLoading, setSendForApprovalLoading] = useState(false);
 
-  const { mutateAsync: bulkApprove } = useMutation({
+  const { mutate: bulkApprove } = useMutation({
     mutationFn: (ids: number[]) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkApproveCreate(
         {
@@ -122,8 +122,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   });
 
-  const handleApprove = async () => {
-    await bulkApprove([numericId]);
+  const handleApprove = () => {
+    bulkApprove([numericId]);
   };
 
   const handleSendBackConfirm = async () => {
@@ -179,7 +179,7 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     }
   };
 
-  const { mutateAsync: bulkMerge } = useMutation({
+  const { mutate: bulkMerge } = useMutation({
     mutationFn: (ids: number[]) => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateOnlineEditsBulkMergeCreate(
         {
@@ -202,8 +202,8 @@ const PeriodicDataUpdatesOnlineEditsTemplateDetailsPage = (): ReactElement => {
     },
   });
 
-  const handleMerge = async () => {
-    await bulkMerge([numericId]);
+  const handleMerge = () => {
+    bulkMerge([numericId]);
   };
 
   // Modal state for Authorized Users

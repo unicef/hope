@@ -35,7 +35,7 @@ def test_household_data_update_admin_area_resolves_pcode_to_label(
     browser.click('button[data-cy="button-submit"]')
 
     browser.wait_for_ready_state_complete()
-    browser.click('[data-cy="input-consent"]')
+    browser.check_checkbox('[data-cy="input-consent"]')
     browser.click('button[data-cy="button-submit"]')
 
     browser.type('textarea[name="description"]', "Admin area update regression #6006")

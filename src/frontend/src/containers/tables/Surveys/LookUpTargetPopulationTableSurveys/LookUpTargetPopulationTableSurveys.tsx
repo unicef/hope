@@ -7,8 +7,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePersistedCount } from '@hooks/usePersistedCount';
+import { useTableState } from '@hooks/useTableState';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
@@ -45,9 +46,7 @@ export function LookUpTargetPopulationTableSurveys({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const [page, setPage] = useState(0);
-
-  const initialQueryVariables = useMemo(
+  const filterVariables = useMemo(
     () => ({
       totalHouseholdsCountWithValidPhoneNoMin:
         filter.totalHouseholdsCountMin || 0,
@@ -63,7 +62,6 @@ export function LookUpTargetPopulationTableSurveys({
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programCode: programId,
-      page,
     }),
     [
       filter.totalHouseholdsCountMin,
@@ -73,19 +71,24 @@ export function LookUpTargetPopulationTableSurveys({
       filter.createdAtRangeMin,
       filter.createdAtRangeMax,
       programId,
-      page,
     ],
   );
 
-  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  const table = useTableState({
+    rowsPerPageOptions: [10, 15, 20],
+    defaultOrderBy: 'createdAt',
+    defaultOrderDirection: 'desc',
+    resetPageOn: filterVariables,
+  });
+  const { page } = table;
+  const listVariables = useMemo(
+    () => ({ ...filterVariables, ...table.paginationParams }),
+    [filterVariables, table.paginationParams],
+  );
 
   const targetPopulationsListParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
-    { withPagination: true },
+    listVariables,
   );
   const {
     data: paymentPlansData,
@@ -108,7 +111,7 @@ export function LookUpTargetPopulationTableSurveys({
   // Count query, enabled only on page 0
   const targetPopulationsCountParams = createApiParams(
     { businessAreaSlug: businessArea, programCode: programId },
-    queryVariables,
+    filterVariables,
   );
   const { data: countData } = useQuery({
     queryKey: restQueryKey(
@@ -133,18 +136,12 @@ export function LookUpTargetPopulationTableSurveys({
       <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
-        rowsPerPageOptions={[10, 15, 20]}
-        defaultOrderBy="createdAt"
-        defaultOrderDirection="desc"
         data={paymentPlansData}
         isLoading={isLoading}
         isFetching={isFetching}
         error={error}
-        queryVariables={queryVariables}
-        setQueryVariables={setQueryVariables}
+        tableState={table}
         itemsCount={itemsCount}
-        page={page}
-        setPage={setPage}
         renderRow={(row: TargetPopulationList) => (
           <LookUpTargetPopulationTableRowSurveys
             radioChangeHandler={enableRadioButton && handleRadioChange}

@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -78,5 +76,5 @@ class WesternUnionInvoiceAdmin(AutocompleteForeignKeyMixin, admin.ModelAdmin):
             return redirect(f"{request.path}?{query_params.urlencode()}")
         return super().changelist_view(request, extra_context)
 
-    def has_add_permission(self: Any, request: Any) -> bool:
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False

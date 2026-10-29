@@ -11,7 +11,7 @@ class AdminPanel(BaseComponents):
     login_button = '//*[@id="login-form"]/div[3]/input'
     logged_name = '//*[@class="changelink"]/a'
     button_logout = '//*[@id="logout-form"]/button'
-    logged_out = '//*[@id="content"]'
+    logged_out = "#content"
     error_note = '//*[@class="errornote"]'
     unicef_id = '//*[@id="content"]/h2'
 
@@ -22,7 +22,7 @@ class AdminPanel(BaseComponents):
         return self.wait_for(self.error_note, By.XPATH)
 
     def get_logged_out(self) -> WebElement:
-        return self.wait_for(self.logged_out, By.XPATH)
+        return self.wait_for(self.logged_out)
 
     def get_button_logout(self) -> WebElement:
         return self.wait_for(self.button_logout, By.XPATH)

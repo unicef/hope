@@ -89,6 +89,9 @@ Each batch gets its own **Batch Detail page** (linked from the group) showing th
 
 **Send to Payment Gateway** — sends each qualifying plan in the group to the payment gateway.
 
+**Upload Reconciliation** — imports delivered quantities and distribution information from the group's XLSX. See
+[Payment Reconciliation](payment-reconciliation.md) for normal uploads, corrections, and resets.
+
 **Delete** — only allowed when the group has no Payment Plans attached. A Cycle must always have at least one group, so the last remaining group cannot be deleted.
 
 
@@ -146,12 +149,33 @@ On submit, the system automatically creates a Follow-Up Payment Plan for every e
 
 Withdrawn households are excluded from each generated plan.
 
+### Processing Follow-Up Instructions
+
+Follow-Up Payment Plans are processed through the **Follow-Up Instructions page**. These actions are not available from the individual Payment Plan page.
+However, if a Payment Plan contains records with the Forced Failed status, the Create Follow-Up Payment Plan button is activated immediately. Once the Follow-Up Payment Plan is created, it includes only the records with the Forced Failed status.
+
+To process Follow-Up Payment Plans, select the Follow-Up Instruction created as described above, and then choose the required action. Depending on the eligibility and current status of the plans, as well as the user’s permissions, available actions may include:
+
+-	Lock
+-	Send for Approval
+-	Reject
+-	Abort
+-	Authorize
+-	Release
+-	Reconcile
+-	Set as Ready for Closure
+-	Send Back
+-	Close
+
+The selected action is applied to all eligible Follow-Up Payment Plans within the selected Payment Plan Groups. If multiple Payment Plan Groups are selected, the action is applied to all eligible Follow-Up Payment Plans across those groups.
+
+
 ### Exporting and reconciling Follow-Up Instructions
 
 Follow-Up Instructions support the same export / import reconciliation cycle as standard Payment Plans, but at the batch level:
 
-1. **Export XLSX** — generates a single file covering all child plans' failed payments.
-2. **Upload Reconciliation** — import the filled-in reconciliation XLSX; the instruction routes each row to the correct child plan.
+1. **Export XLSX** — generates a single file covering failed payments from all child plans within the instruction.
+2. **Upload Reconciliation** — import the filled-in reconciliation XLSX; the instruction routes each row to the corresponding Follow-Up Payment Plan.
 
 ---
 

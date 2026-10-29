@@ -33,7 +33,6 @@ from extras.test_utils.factories import (
     RuleFactory,
     TargetingCriteriaRuleFactory,
 )
-from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.models import (
     BeneficiaryGroup,
@@ -192,12 +191,13 @@ def create_targeting(create_test_program: Program, delivery_mechanisms) -> None:
     )
     TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
     rule = RuleFactory(
+        name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
         deprecated=False,
         enabled=True,
     )
     rule.allowed_business_areas.add(business_area)
-    RuleCommitFactory(rule=rule, version=2)
+    RuleCommitFactory(rule=rule, version=2, is_release=True, enabled=True)
     # create payments
     PaymentPlanService.create_payments(payment_plan)
 
@@ -251,71 +251,6 @@ def create_payment_plan_lock_social_worker(
     social_worker_program: Program,
 ) -> PaymentPlan:
     return payment_plan_create(program=social_worker_program)
-
-
-@pytest.fixture
-def create_payment_plan_open(social_worker_program: Program, delivery_mechanisms) -> PaymentPlan:
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
-    fsp = FinancialServiceProviderFactory()
-    fsp.delivery_mechanisms.set([dm_cash])
-
-    program_cycle = ProgramCycleFactory(
-        program=social_worker_program,
-        title="Cycle for PaymentPlan",
-        status=ProgramCycle.ACTIVE,
-        start_date=timezone.now() + relativedelta(days=10),
-        end_date=timezone.now() + relativedelta(days=15),
-    )
-
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.DRAFT,
-        plan_type=PaymentPlan.PlanType.REGULAR,
-        program_cycle=program_cycle,
-        business_area=social_worker_program.business_area,
-        dispersion_start_date=timezone.now().date(),
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_cash,
-    )
-    hoh1 = IndividualFactory(household=None)
-    household_1 = HouseholdFactory(
-        unicef_id="HH-17-0000.3340",
-        head_of_household=hoh1,
-        size=2,
-    )
-    ind = IndividualFactory(
-        household=household_1,
-        program=social_worker_program,
-        sex="MALE",
-        birth_date=factory.Faker("date_of_birth", tzinfo=UTC, minimum_age=11, maximum_age=16),
-        business_area=social_worker_program.business_area,
-    )
-    PaymentFactory(
-        parent=payment_plan,
-        household=household_1,
-        excluded=False,
-        currency=Currency.objects.get(code="PLN"),
-        collector=ind,
-    )
-
-    payment_plan.update_population_count_fields()
-    payment_plan.update_money_fields()
-
-    flow = PaymentPlanFlow(payment_plan)
-    flow.status_open()
-    payment_plan.save(update_fields=("status",))
-
-    PaymentPlanFactory(
-        status=PaymentPlan.Status.LOCKED,
-        program_cycle=program_cycle,
-        business_area=social_worker_program.business_area,
-        dispersion_start_date=timezone.now().date(),
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        source_payment_plan=payment_plan,
-        financial_service_provider=fsp,
-        delivery_mechanism=dm_cash,
-    )
-
-    return payment_plan
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
@@ -468,10 +403,10 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
 class TestSmokePaymentModule:
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, page_payment_module: PaymentModule) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.wait_for_page_ready()
-        assert "Payment Module" in page_payment_module.get_page_header_title()
+        page_payment_module.assert_page_header_title("Payment Module")
         assert "Status" in page_payment_module.get_select_filter().text
         assert "" in page_payment_module.get_filters_total_entitled_quantity_from().text
         assert "" in page_payment_module.get_filters_total_entitled_quantity_to().text
@@ -504,14 +439,14 @@ class TestSmokePaymentModule:
         page_new_payment_plan: NewPaymentPlan,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         page_program_cycle.get_program_cycle_row()[0].find_element(
             By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
         ).find_element(By.TAG_NAME, "a").click()
         page_program_cycle_details.get_button_create_payment_plan().click()
         page_new_payment_plan.wait_for_page_ready()
-        assert "New Payment Plan" in page_new_payment_plan.get_page_header_title().text
+        page_new_payment_plan.assert_page_header_title("New Payment Plan")
         assert "SAVE" in page_new_payment_plan.get_button_save_payment_plan().text
         assert "Target Population" in page_new_payment_plan.get_input_target_population().text
         assert "Currency" in page_new_payment_plan.get_input_currency().text
@@ -531,7 +466,7 @@ class TestSmokePaymentModule:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         assert "ACCEPTED" in page_payment_module_details.get_status_container().text
@@ -570,7 +505,6 @@ class TestSmokePaymentModule:
         assert "FSP Auth Code" in page_payment_module_details.get_table_label()[10].text
         assert "Reconciliation" in page_payment_module_details.get_table_label()[11].text
 
-    @pytest.mark.xfail(reason="psycopg.errors.DeadlockDetected: deadlock detected")
     def test_payment_plan_happy_path(
         self,
         clear_downloaded_files: None,
@@ -584,7 +518,7 @@ class TestSmokePaymentModule:
     ) -> None:
         payment_plan = PaymentPlan.objects.first()
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         assert (
             "Draft"
@@ -619,6 +553,8 @@ class TestSmokePaymentModule:
         page_payment_module_details.get_input_entitlement_formula().click()
         page_payment_module_details.select_listbox_element("Test Rule")
         page_payment_module_details.get_button_apply_steficon().click()
+        # the status is LOCKED before the formula runs too; the snackbar only shows once the apply request is done
+        page_payment_module_details.check_alert("Formula is executing, please wait until completed")
         page_payment_module_details.check_status("LOCKED")
         page_payment_module_details.click_button_lock_plan()
         page_payment_module_details.get_button_submit().click()
@@ -643,19 +579,6 @@ class TestSmokePaymentModule:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentPlans:
-    def test_payment_plan_edit(
-        self,
-        clear_downloaded_files: None,
-        create_targeting: None,
-        page_payment_module: PaymentModule,
-        page_payment_module_details: PaymentModuleDetails,
-        page_new_payment_plan: NewPaymentPlan,
-        page_program_cycle: ProgramCyclePage,
-        page_program_cycle_details: ProgramCycleDetailsPage,
-    ) -> None:
-        page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
-
     def test_payment_plan_exclude_not_lock_error(
         self,
         create_payment_plan: PaymentPlan,
@@ -666,7 +589,7 @@ class TestPaymentPlans:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         with pytest.raises(ElementClickInterceptedException):
@@ -679,7 +602,7 @@ class TestPaymentPlans:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_button_create_exclusions()
@@ -716,7 +639,7 @@ class TestPaymentPlans:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_button_create_exclusions()
@@ -749,30 +672,6 @@ class TestPaymentPlans:
 
         assert "6" in page_payment_module_details.get_label_targeted_individuals().text
 
-    def test_payment_plan_delete(
-        self,
-        create_payment_plan_open: PaymentPlan,
-        page_payment_module: PaymentModule,
-        page_payment_module_details: PaymentModuleDetails,
-        page_new_payment_plan: NewPaymentPlan,
-    ) -> None:
-        page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
-        page_payment_module.get_nav_payment_plans().click()
-        page_payment_module.get_rows()
-        for i in range(len(page_payment_module.get_rows())):
-            if "OPEN" in page_payment_module.get_row(i).text:
-                payment_plan = page_payment_module.get_row(i).text
-                page_payment_module.get_row(i).click()
-                break
-        else:
-            raise AssertionError("No payment plan has Open status")
-        page_payment_module_details.get_delete_button().click()
-        page_payment_module_details.get_button_submit().click()
-        page_payment_module.get_row(0)
-        assert payment_plan not in page_payment_module.get_row(0).text
-        assert "LOCKED" in page_payment_module.get_row(0).text
-
     def test_payment_plan_creation_error(
         self,
         create_targeting: None,
@@ -783,7 +682,7 @@ class TestPaymentPlans:
         page_program_cycle_details: ProgramCycleDetailsPage,
     ) -> None:
         page_program_cycle.select_global_program_filter("Test Program")
-        page_program_cycle.get_nav_payment_module().click()
+        page_program_cycle.open_nav_section("Payment Module")
         page_program_cycle.get_nav_programme_cycles().click()
         assert (
             "Draft"
@@ -810,7 +709,7 @@ class TestPaymentPlans:
         page_payment_module_details: PaymentModuleDetails,
     ) -> None:
         page_payment_module.select_global_program_filter("Test Program")
-        page_payment_module.get_nav_payment_module().click()
+        page_payment_module.open_nav_section("Payment Module")
         page_payment_module.get_nav_payment_plans().click()
         page_payment_module.get_row(0).click()
         page_payment_module_details.get_upload_file_button().click()

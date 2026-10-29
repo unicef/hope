@@ -1,6 +1,6 @@
 from django.db import models
 
-from hope.models.utils import TimeStampedUUIDModel
+from hope.models.utils import LongNameIndex, TimeStampedUUIDModel
 
 
 class SanctionListIndividualDocument(TimeStampedUUIDModel):
@@ -20,3 +20,7 @@ class SanctionListIndividualDocument(TimeStampedUUIDModel):
         verbose_name = "Document"
         verbose_name_plural = "Documents"
         ordering = ("id",)
+        indexes = [
+            LongNameIndex(fields=["created_at"], name="sanction_list_sanctionlist_created_at_412c7655"),
+            LongNameIndex(fields=["updated_at"], name="sanction_list_sanctionlist_updated_at_2cb780b5"),
+        ]

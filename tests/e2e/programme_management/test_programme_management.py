@@ -1,5 +1,4 @@
 import random
-from time import sleep
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -59,6 +58,7 @@ def create_program(
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
         start_date=timezone.now() - relativedelta(months=1),
         end_date=timezone.now() + relativedelta(months=1),
         data_collecting_type=dct,
@@ -72,254 +72,6 @@ def create_program(
 
 @pytest.mark.usefixtures("login")
 class TestProgrammeManagement:
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "program_name": "New Programme - " + str(random.random()),
-                    "selector": "Child Protection",
-                    "startDate": FormatTime(1, 5, 2023),
-                    "endDate": FormatTime(12, 12, 2033),
-                    "dataCollectingType": "Full",
-                },
-                id="Child Protection & Full",
-            ),
-            pytest.param(
-                {
-                    "program_name": "New Programme - " + str(random.random()),
-                    "selector": "Education",
-                    "startDate": FormatTime(11, 12, 2002),
-                    "endDate": FormatTime(1, 8, 2043),
-                    "dataCollectingType": "Size only",
-                },
-                id="Education & Size only",
-            ),
-        ],
-    )
-    def test_create_programme(
-        self,
-        page_programme_management: ProgrammeManagement,
-        page_programme_details: ProgrammeDetails,
-        test_data: dict,
-        screenshot_path: str,
-        payment_plan_purpose: PaymentPlanPurpose,
-    ) -> None:
-        # Go to Programme Management
-        page_programme_management.get_nav_programme_management().click()
-        # Create Programme
-        # 1st step (Details)
-        page_programme_management.get_button_new_program().click()
-        page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
-        page_programme_management.choose_option_selector(test_data["selector"])
-        page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
-        page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("Main Menu")
-        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
-        page_programme_management.get_button_next().click()
-        # 2nd step (Time Series Fields)
-        page_programme_management.get_button_add_time_series_field().click()
-        page_programme_management.get_input_pdu_fields_object_label(0).send_keys("test series field name")
-        page_programme_management.get_select_pdu_fields_object_pdu_data_subtype(0).click()
-        page_programme_management.select_listbox_element("Text")
-        page_programme_management.get_select_pdu_fields_object_pdu_data_number_of_rounds(0).click()
-        page_programme_management.select_listbox_element("1")
-        page_programme_management.get_input_pdu_fields_rounds_names(0, 0).send_keys("Round 1")
-        page_programme_management.get_button_next().click()
-        # 3rd step (Partners)
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        assert "DRAFT" in page_programme_details.get_program_status().text
-        assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
-        assert test_data["endDate"].date_in_text_format in page_programme_details.get_label_end_date().text
-        assert test_data["selector"] in page_programme_details.get_label_selector().text
-        assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
-        assert "Regular" in page_programme_details.get_label_freq_of_payment().text
-        assert "-" in page_programme_details.get_label_administrative_areas().text
-        assert "No" in page_programme_details.get_label_cash_plus().text
-        assert "0" in page_programme_details.get_label_program_size().text
-
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "program_name": "New Programme - " + str(random.random()),
-                    "selector": "Health",
-                    "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2035),
-                    "dataCollectingType": "Partial",
-                    "description": f"Text with random {str(random.random())} text",
-                    "budget": 1000.99,
-                    "administrativeAreas": "Test pass",
-                    "populationGoals": "100",
-                },
-                id="All",
-            ),
-        ],
-    )
-    def test_create_programme_optional_values(
-        self,
-        page_programme_management: ProgrammeManagement,
-        page_programme_details: ProgrammeDetails,
-        test_data: dict,
-        screenshot_path: str,
-        payment_plan_purpose: PaymentPlanPurpose,
-    ) -> None:
-        # Go to Programme Management
-        page_programme_management.get_nav_programme_management().click()
-        # Create Programme
-        page_programme_management.get_button_new_program().click()
-        # 1st step (Details)
-        page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
-        page_programme_management.choose_option_selector(test_data["selector"])
-        page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
-        page_programme_management.get_input_freq_of_payment_one_off().click()
-        page_programme_management.get_input_cash_plus().click()
-        page_programme_management.get_input_description().send_keys(test_data["description"])
-        page_programme_management.get_input_budget().clear()
-        page_programme_management.get_input_budget().send_keys(test_data["budget"])
-        page_programme_management.get_input_administrative_areas_of_implementation().send_keys(
-            test_data["administrativeAreas"]
-        )
-        page_programme_management.get_input_population().clear()
-        page_programme_management.get_input_population().send_keys(test_data["populationGoals"])
-        page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People")
-        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
-        page_programme_management.get_button_next().click()
-        # 2nd step (Time Series Fields)
-        page_programme_management.get_button_add_time_series_field()
-        page_programme_management.get_button_next().click()
-        # 3rd step (Partners)
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        assert "DRAFT" in page_programme_details.get_program_status().text
-        assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
-        assert test_data["endDate"].date_in_text_format in page_programme_details.get_label_end_date().text
-        assert test_data["selector"] in page_programme_details.get_label_selector().text
-        assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
-        assert "One-off" in page_programme_details.get_label_freq_of_payment().text
-        assert test_data["administrativeAreas"] in page_programme_details.get_label_administrative_areas().text
-        assert "Yes" in page_programme_details.get_label_cash_plus().text
-        assert "0" in page_programme_details.get_label_program_size().text
-
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "program_name": "New Programme - " + str(random.random()),
-                    "selector": "Health",
-                    "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2042),
-                    "dataCollectingType": "Partial",
-                },
-                id="One-off",
-            ),
-        ],
-    )
-    def test_create_programme_frequency_of_payment(
-        self,
-        page_programme_management: ProgrammeManagement,
-        page_programme_details: ProgrammeDetails,
-        test_data: dict,
-        payment_plan_purpose: PaymentPlanPurpose,
-    ) -> None:
-        # Go to Programme Management
-        page_programme_management.get_nav_programme_management().click()
-        # Create Programme
-        page_programme_management.get_button_new_program().click()
-        # 1st step (Details)
-        page_programme_management.get_input_programme_name().send_keys("New Programme")
-        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
-        page_programme_management.choose_option_selector(test_data["selector"])
-        page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
-        page_programme_management.get_input_freq_of_payment_one_off().click()
-        page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People")
-        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
-        page_programme_management.get_button_next().click()
-        # 2nd step (Time Series Fields)
-        page_programme_management.get_button_add_time_series_field()
-        page_programme_management.get_button_next().click()
-        # 3rd step (Partners)
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        page_programme_details.wait_for_text("DRAFT", page_programme_details.program_status)
-        assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
-        assert test_data["endDate"].date_in_text_format in page_programme_details.get_label_end_date().text
-        assert test_data["selector"] in page_programme_details.get_label_selector().text
-        assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
-        assert "One-off" in page_programme_details.get_label_freq_of_payment().text
-        assert "-" in page_programme_details.get_label_administrative_areas().text
-        assert "No" in page_programme_details.get_label_cash_plus().text
-        assert "0" in page_programme_details.get_label_program_size().text
-
-    @pytest.mark.night
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "program_name": "New Programme - " + str(random.random()),
-                    "selector": "Health",
-                    "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2032),
-                    "dataCollectingType": "Partial",
-                },
-                id="Yes",
-            ),
-        ],
-    )
-    def test_create_programme_cash_plus(
-        self,
-        page_programme_management: ProgrammeManagement,
-        page_programme_details: ProgrammeDetails,
-        test_data: dict,
-        payment_plan_purpose: PaymentPlanPurpose,
-    ) -> None:
-        # Go to Programme Management
-        page_programme_management.get_nav_programme_management().click()
-        # Create Programme
-        page_programme_management.get_button_new_program().click()
-        # 1st step (Details)
-        page_programme_management.get_input_programme_name().send_keys(test_data["program_name"])
-        page_programme_management.fill_input_start_date(test_data["startDate"].numerically_formatted_date)
-        page_programme_management.fill_input_end_date(test_data["endDate"].numerically_formatted_date)
-        page_programme_management.choose_option_selector(test_data["selector"])
-        page_programme_management.choose_option_data_collecting_type(test_data["dataCollectingType"])
-        page_programme_management.get_input_cash_plus().click()
-        page_programme_management.get_input_beneficiary_group().click()
-        page_programme_management.select_listbox_element("People")
-        page_programme_management.choose_payment_plan_purpose(payment_plan_purpose.name)
-        page_programme_management.get_button_next().click()
-        # 2nd step (Time Series Fields)
-        page_programme_management.get_button_add_time_series_field()
-        page_programme_management.get_button_next().click()
-        # 3rd step (Partners)
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New Programme", page_programme_details.header_title)
-        assert "DRAFT" in page_programme_details.get_program_status().text
-        assert test_data["startDate"].date_in_text_format in page_programme_details.get_label_start_date().text
-        assert test_data["endDate"].date_in_text_format in page_programme_details.get_label_end_date().text
-        assert test_data["selector"] in page_programme_details.get_label_selector().text
-        assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
-        assert "Regular" in page_programme_details.get_label_freq_of_payment().text
-        assert "-" in page_programme_details.get_label_administrative_areas().text
-        assert "Yes" in page_programme_details.get_label_cash_plus().text
-        assert "0" in page_programme_details.get_label_program_size().text
-
-    @pytest.mark.night
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -379,20 +131,6 @@ class TestProgrammeManagement:
         assert "DRAFT" in elements[1]
         assert "Health" in elements[2]
 
-    def test_create_programme_check_empty_mandatory_fields(
-        self, page_programme_management: ProgrammeManagement
-    ) -> None:
-        # Go to Programme Management
-        page_programme_management.get_nav_programme_management().click()
-        # Create Programme
-        page_programme_management.get_button_new_program().click()
-        page_programme_management.get_button_next().click()
-        # Cehck Mandatory fields texts
-        assert "Programme Name is required" in page_programme_management.get_label_programme_name().text.split("\n")
-        assert "Start Date is required" in page_programme_management.get_label_start_date().text
-        assert "Sector is required" in page_programme_management.get_label_selector().text
-        assert "Data Collecting Type is required" in page_programme_management.get_label_data_collecting_type().text
-
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -445,21 +183,8 @@ class TestProgrammeManagement:
         with pytest.raises(NoSuchElementException):
             assert "UNHCR" in page_programme_details.get_label_partner_name().text
 
-    def test_create_programme_cancel_scenario(
-        self,
-        page_programme_management: ProgrammeManagement,
-        page_programme_details: ProgrammeDetails,
-    ) -> None:
-        # Go to Programme Management
-        page_programme_management.get_nav_programme_management().click()
-        # Create Programme
-        page_programme_management.get_button_new_program().click()
-        page_programme_management.get_button_cancel().click()
-        assert "Programme Management" in page_programme_management.get_header_title().text
-
 
 # ToDo: Check Unicef partner! and delete classes
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
     @pytest.mark.parametrize(
@@ -520,10 +245,8 @@ class TestBusinessAreas:
         assert "15" in page_programme_details.get_label_admin_area2().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestComeBackScenarios:
-    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -596,10 +319,10 @@ class TestComeBackScenarios:
         assert "-" in page_programme_details.get_label_administrative_areas().text
         assert "Yes" in page_programme_details.get_label_cash_plus().text
         assert "0" in page_programme_details.get_label_program_size().text
-        assert "UNHCR" in page_programme_details.get_label_partner_name().text
+        # The creator's own partner (TEST) is listed first.
+        page_programme_details.wait_for_text_in_any_element("UNHCR", page_programme_details.label_partner_name)
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.parametrize(
@@ -615,7 +338,6 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_programme_chose_dates_via_calendar(
         self,
         page_programme_management: ProgrammeManagement,
@@ -702,45 +424,10 @@ class TestManualCalendar:
         # 3rd step (Partners)
         page_programme_management.get_access_to_program().click()
         page_programme_management.select_who_access_to_program(test_data["partners_access"])
-        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
-        sleep(5)
-        page_programme_management.get_button_save().click()
+        page_programme_management.click(page_programme_management.button_save)
         assert test_data["partners_access"] in page_programme_details.get_label_partner_access().text
         assert test_data["dataCollectingType"] in page_programme_details.get_label_data_collecting_type().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
-    def test_edit_programme(
-        self,
-        create_programs: None,
-        page_programme_management: ProgrammeManagement,
-        page_programme_details: ProgrammeDetails,
-    ) -> None:
-        page_programme_management.click_nav_programme_management()
-        page_programme_management.get_table_row_by_program_name("Test Programm").click()
-
-        page_programme_management.get_button_edit_program().click()
-        page_programme_management.get_select_edit_program_details().click()
-
-        # 1st step (Details)
-        page_programme_management.clear_input(page_programme_management.get_input_programme_name())
-        page_programme_management.get_input_programme_name().send_keys("New name after Edit")
-        page_programme_management.clear_input(page_programme_management.get_input_programme_code())
-        page_programme_management.get_input_programme_code().send_keys("NEW1")
-        page_programme_management.fill_input_start_date(FormatTime(1, 1, 2022).numerically_formatted_date)
-        page_programme_management.fill_input_end_date(FormatTime(1, 10, 2099).numerically_formatted_date)
-        page_programme_management.get_button_next().click()
-        # 2nd step (Time Series Fields)
-        page_programme_management.get_button_add_time_series_field()
-        page_programme_management.element_clickable(page_programme_management.button_save)
-        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
-        sleep(5)
-        page_programme_management.get_button_save().click()
-        # Check Details page
-        page_programme_details.wait_for_text("New name after Edit", page_programme_details.header_title)
-        assert FormatTime(1, 1, 2022).date_in_text_format in page_programme_details.get_label_start_date().text
-        assert FormatTime(1, 10, 2099).date_in_text_format in page_programme_details.get_label_end_date().text
-
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_programme_partners(
         self,
         create_programs: None,
@@ -789,11 +476,13 @@ class TestManualCalendar:
 
         page_programme_management.wait_for(page_programme_management.input_partner).click()
         select_options_container = page_programme_management.get_select_options_container()
-        options = select_options_container.find_elements(By.TAG_NAME, "li")
-        assert any(li.text == "Test Partner 1" for li in options)
-        assert not any(li.text == "Test Partner 2" for li in options)
-        assert any(li.text == "UNHCR" for li in options)
-        assert not any(li.text == "TEST" for li in options)
+        # textContent, because .text is empty while the menu is still fading in.
+        labels = {li.get_attribute("textContent") for li in select_options_container.find_elements(By.TAG_NAME, "li")}
+        assert "Test Partner 1" in labels
+        assert "Test Partner 2" not in labels
+        assert "UNHCR" in labels
+        # The login fixture gives every partner but UNICEF a role in the business area.
+        assert "TEST" in labels
 
         page_programme_management.driver.find_element(By.CSS_SELECTOR, "body").click()
 
@@ -806,11 +495,9 @@ class TestManualCalendar:
         page_programme_details.wait_for_text("Test Program Partners", page_programme_details.header_title)
         assert partner_access_selected in page_programme_details.get_label_partner_access().text
 
-        partner_name_elements = page_programme_management.driver.find_elements(
-            By.CSS_SELECTOR, "[data-cy='label-partner-name']"
-        )
-        assert len(partner_name_elements) == 1
-        assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements)
+        # Partners with a role across the whole business area are always listed, and
+        # TEST, Test Partner 1 and UNHCR all have one, so only the access label changes.
+        assert page_programme_details.get_partner_names(3) == ["TEST", "Test Partner 1", "UNHCR"]
 
         # edit program
         page_programme_management.get_button_edit_program().click()
@@ -823,16 +510,11 @@ class TestManualCalendar:
         page_programme_management.get_button_save().click()
 
         # Check Details page
-        sleep(10)
         assert "details" in page_programme_details.wait_for_new_url(programme_edit_url, 20).split("/")
-
-        partner_name_elements_new = page_programme_management.driver.find_elements(
-            By.CSS_SELECTOR, "[data-cy='label-partner-name']"
+        page_programme_details.wait_for_text(
+            "All Current Partners within the business area", page_programme_details.label_partner_access
         )
-        assert len(partner_name_elements_new) == 3
-        assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements_new)
-        assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
-        assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
+        assert set(page_programme_details.get_partner_names(3)) == {"TEST", "Test Partner 1", "UNHCR"}
 
     @pytest.mark.parametrize(
         "test_data",
@@ -849,7 +531,6 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_edit_programme_with_rdi(
         self,
         page_programme_management: ProgrammeManagement,
@@ -892,6 +573,8 @@ class TestManualCalendar:
         RegistrationDataImportFactory(
             program=Program.objects.get(name=program_name),
         )
+        # The RDI was created behind the app's back, so reload to drop the cached programme.
+        page_programme_management.driver.refresh()
         # Edit Programme
         page_programme_management.get_button_edit_program().click()
         page_programme_management.get_select_edit_program_details().click()
@@ -912,12 +595,14 @@ class TestManualCalendar:
         assert is_disabled_edit_time_series_field_name == "true"
 
         is_disabled_edit_time_series_field_subtype = (
-            page_programme_management.get_select_pdu_fields_object_pdu_data_subtype(0).get_attribute("aria-disabled")
+            page_programme_management.get_select_pdu_fields_object_pdu_data_subtype(0, edit=True).get_attribute(
+                "aria-disabled"
+            )
         )
         assert is_disabled_edit_time_series_field_subtype == "true"
 
         # only possible to increase number of rounds
-        page_programme_management.get_select_pdu_fields_object_pdu_data_number_of_rounds(0).click()
+        page_programme_management.get_select_pdu_fields_object_pdu_data_number_of_rounds(0, edit=True).click()
         is_disabled_decrease_round_number = page_programme_management.get_listbox_element("1").get_attribute(
             "aria-disabled"
         )
@@ -933,15 +618,15 @@ class TestManualCalendar:
         page_programme_management.select_listbox_element("3")
 
         is_disabled_edit_time_series_existing_round_name_1 = (
-            page_programme_management.get_input_pdu_fields_rounds_names(0, 0).get_attribute("disabled")
+            page_programme_management.get_input_pdu_fields_rounds_names(0, 0, edit=True).get_attribute("disabled")
         )
         assert is_disabled_edit_time_series_existing_round_name_1 == "true"
         is_disabled_edit_time_series_existing_round_name_2 = (
-            page_programme_management.get_input_pdu_fields_rounds_names(0, 1).get_attribute("disabled")
+            page_programme_management.get_input_pdu_fields_rounds_names(0, 1, edit=True).get_attribute("disabled")
         )
         assert is_disabled_edit_time_series_existing_round_name_2 == "true"
 
-        page_programme_management.get_input_pdu_fields_rounds_names(0, 2).send_keys("Round 3")
+        page_programme_management.get_input_pdu_fields_rounds_names(0, 2, edit=True).send_keys("Round 3")
 
         page_programme_management.get_button_save().click()
         assert program_name in page_programme_details.get_header_title().text

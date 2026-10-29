@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from hope.apps.payment.utils import inactive_currency_reason
 from hope.apps.payment.xlsx.xlsx_follow_up_instruction_base_export_service import (
     XlsxFollowUpInstructionBaseExportService,
 )
@@ -24,6 +25,9 @@ class XlsxFollowUpInstructionDeliveryExportService(XlsxFollowUpInstructionBaseEx
         return "follow_up_instruction_delivery_payment_list"
 
     def get_source_headers(self) -> list[str]:
+        # Child plans share one currency (FollowUpInstructionService._validate_shared_configuration).
+        if reason := inactive_currency_reason(self.payment_plan):
+            raise ValueError(reason)
         fsp_extra_fields_headers = XlsxPaymentPlanDeliveryExportService.get_fsp_extra_fields_headers(
             Payment.objects.filter(parent__follow_up_instruction=self.instruction).eligible().only("extras")
         )

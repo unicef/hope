@@ -20,6 +20,7 @@ from extras.test_utils.factories import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    HouseholdFactory,
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
@@ -27,6 +28,7 @@ from extras.test_utils.factories import (
     PaymentVerificationPlanFactory,
     RuleCommitFactory,
     RuleFactory,
+    TargetingCriteriaRuleFactory,
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
@@ -79,14 +81,14 @@ from hope.apps.payment.celery_tasks import (
     send_payment_notification_emails_async_task_action,
     send_payment_plan_group_delivery_xlsx_password_async_task_action,
     send_payment_plan_reconciliation_overdue_email_async_task,
-    send_qcf_report_email_notifications_async_task,
-    send_qcf_report_email_notifications_async_task_action,
     send_to_payment_gateway_async_task,
     send_to_payment_gateway_async_task_action,
+    send_western_union_report_email_notifications_async_task,
     update_exchange_rate_on_release_payments_async_task,
     update_exchange_rate_on_release_payments_async_task_action,
 )
 from hope.apps.payment.services import western_union_reports_service
+from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.utils import generate_cache_key
 from hope.models import (
     AsyncJob,
@@ -145,7 +147,50 @@ def financial_service_provider(delivery_mechanism_cash):
 
 
 @pytest.fixture
-def qcf_report(payment_plan):
+def aborted_regular_plan_payment(delivery_mechanism_cash, financial_service_provider):
+    payment_plan = PaymentPlanFactory(
+        plan_type=PaymentPlan.PlanType.REGULAR,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        currency=CurrencyFactory(code="AFN"),
+        delivery_mechanism=delivery_mechanism_cash,
+        financial_service_provider=financial_service_provider,
+    )
+    household = HouseholdFactory(business_area=payment_plan.business_area, program=payment_plan.program, size=1)
+    TargetingCriteriaRuleFactory(household_ids=household.unicef_id, payment_plan=payment_plan)
+    return PaymentFactory(
+        parent=payment_plan,
+        household=household,
+        collector=household.head_of_household,
+        currency=payment_plan.currency,
+        entitlement_quantity=Decimal("100.00"),
+        entitlement_quantity_usd=Decimal("100.00"),
+    )
+
+
+@pytest.fixture
+def aborted_child_plan_payment(plan_type):
+    payment_plan = PaymentPlanFactory(
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+    )
+    return PaymentFactory(parent=payment_plan, entitlement_quantity=Decimal("25.00"))
+
+
+@pytest.fixture
+def aborted_child_plan_conflicted_payment(plan_type):
+    payment_plan = PaymentPlanFactory(
+        plan_type=plan_type,
+        status=PaymentPlan.Status.ABORTED,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        total_households_count=0,
+    )
+    return PaymentFactory(parent=payment_plan, conflicted=True, status=Payment.STATUS_NOT_ELIGIBLE)
+
+
+@pytest.fixture
+def western_union_report(payment_plan):
     return WesternUnionPaymentPlanReportFactory(payment_plan=payment_plan)
 
 
@@ -488,6 +533,103 @@ def test_payment_plan_full_rebuild(
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
     assert payment_plan.built_at is not None
     mock_full_rebuild.assert_called_once()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+def test_payment_plan_full_rebuild_of_reactivated_open_plan(mock_full_rebuild: Mock) -> None:
+    payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ABORTED)
+    PaymentFactory(parent=payment_plan)
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+
+    payment_plan.refresh_from_db(fields=["status", "build_status"])
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    mock_full_rebuild.assert_called_once()
+
+
+def test_reactivate_abort_rebuilds_regular_plan_payments_in_plan_currency(
+    aborted_regular_plan_payment: Payment,
+) -> None:
+    payment_plan = aborted_regular_plan_payment.parent
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+    queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan, True)
+
+    payment_plan.refresh_from_db()
+    rebuilt_payment = Payment.all_objects.get(parent=payment_plan)
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert payment_plan.total_entitled_quantity == Decimal("0.00")
+    assert rebuilt_payment.pk != aborted_regular_plan_payment.pk
+    assert rebuilt_payment.household_id == aborted_regular_plan_payment.household_id
+    assert rebuilt_payment.entitlement_quantity is None
+    assert rebuilt_payment.currency.code == "AFN"
+
+
+@pytest.mark.parametrize(
+    "plan_type",
+    [
+        pytest.param(PaymentPlan.PlanType.FOLLOW_UP, id="follow-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP, id="top-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP_AMENDMENT, id="top-up-amendment"),
+    ],
+)
+def test_reactivate_abort_of_child_plan_keeps_its_payments(
+    aborted_child_plan_payment: Payment,
+    django_capture_on_commit_callbacks: Any,
+) -> None:
+    payment_plan = aborted_child_plan_payment.parent
+
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanService(payment_plan).reactivate_abort()
+
+    payment_plan.refresh_from_db(fields=["status", "build_status"])
+    assert payment_plan.status == PaymentPlan.Status.OPEN
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+    assert list(Payment.all_objects.filter(parent=payment_plan).values_list("pk", "entitlement_quantity")) == [
+        (aborted_child_plan_payment.pk, Decimal("25.00"))
+    ]
+
+
+@pytest.mark.parametrize(
+    "plan_type",
+    [
+        pytest.param(PaymentPlan.PlanType.FOLLOW_UP, id="follow-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP, id="top-up"),
+        pytest.param(PaymentPlan.PlanType.TOP_UP_AMENDMENT, id="top-up-amendment"),
+    ],
+)
+def test_reactivate_abort_of_child_plan_clears_lock_conflicts(
+    aborted_child_plan_conflicted_payment: Payment,
+) -> None:
+    payment_plan = aborted_child_plan_conflicted_payment.parent
+
+    PaymentPlanService(payment_plan).reactivate_abort()
+
+    payment_plan.refresh_from_db()
+    aborted_child_plan_conflicted_payment.refresh_from_db()
+    assert aborted_child_plan_conflicted_payment.conflicted is False
+    assert aborted_child_plan_conflicted_payment.status == Payment.STATUS_PENDING
+    assert payment_plan.total_households_count == 1
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.full_rebuild")
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_payment_plan_full_rebuild_of_open_plan_marks_failed(mock_retry: Mock, mock_full_rebuild: Mock) -> None:
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.OPEN,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+    )
+    PaymentFactory(parent=payment_plan)
+    mock_full_rebuild.side_effect = Exception("test")
+    mock_retry.side_effect = Retry("retry")
+    with pytest.raises(Retry):
+        queue_and_run_retry_task(payment_plan_full_rebuild_async_task, payment_plan)
+
+    payment_plan.refresh_from_db(fields=["build_status"])
+    assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
 
 
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
@@ -1247,9 +1389,9 @@ def test_periodic_sync_payment_plan_invoices_western_union_ftp_retries_on_except
     [True, False],
 )
 @patch("hope.apps.payment.services.western_union_reports_service.WesternUnionReportsService")
-def test_send_qcf_report_email_notifications(
+def test_send_western_union_report_email_notifications(
     mock_service_cls: Mock,
-    qcf_report,
+    western_union_report,
     should_send: bool,
 ) -> None:
     FlagState.objects.get_or_create(
@@ -1260,29 +1402,20 @@ def test_send_qcf_report_email_notifications(
     )
 
     mock_service = mock_service_cls.return_value
-    queue_and_run_retry_task(send_qcf_report_email_notifications_async_task, qcf_report_id=str(qcf_report.id))
+    queue_and_run_retry_task(
+        send_western_union_report_email_notifications_async_task, report_id=str(western_union_report.id)
+    )
     assert bool(mock_service.send_notification_emails.call_count) == should_send
-    qcf_report.refresh_from_db()
-    assert qcf_report.sent is should_send
-
-
-@patch("hope.apps.payment.celery_tasks.send_western_union_report_email_notifications_async_task_action")
-def test_send_qcf_report_email_notifications_action_delegates_to_western_union_action(
-    mock_action: Mock,
-) -> None:
-    job = Mock(spec=AsyncRetryJob)
-
-    send_qcf_report_email_notifications_async_task_action(job)
-
-    mock_action.assert_called_once_with(job)
+    western_union_report.refresh_from_db()
+    assert western_union_report.sent is should_send
 
 
 @patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
 @patch("hope.apps.payment.services.western_union_reports_service.WesternUnionReportsService")
-def test_send_qcf_report_email_notifications_retries_on_exception(
+def test_send_western_union_report_email_notifications_retries_on_exception(
     mock_service_cls: Mock,
     mock_retry: Mock,
-    qcf_report,
+    western_union_report,
 ) -> None:
     FlagState.objects.get_or_create(
         name="WU_PAYMENT_PLAN_INVOICES_NOTIFICATIONS_ENABLED",
@@ -1295,7 +1428,9 @@ def test_send_qcf_report_email_notifications_retries_on_exception(
 
     mock_retry.side_effect = Retry("retry")
     with pytest.raises(Retry):
-        queue_and_run_retry_task(send_qcf_report_email_notifications_async_task, qcf_report_id=str(qcf_report.id))
+        queue_and_run_retry_task(
+            send_western_union_report_email_notifications_async_task, report_id=str(western_union_report.id)
+        )
     mock_retry.assert_called_once()
 
 

@@ -6,7 +6,6 @@ from e2e.page_object.base_components import BaseComponents
 class PaymentVerificationDetails(BaseComponents):
     # Locators
     page_header_container = 'div[data-cy="page-header-container"]'
-    page_header_title = 'h5[data-cy="page-header-title"]'
     button_new_plan = 'button[data-cy="button-new-plan"]'
     button_edit_plan = 'button[data-cy="button-edit-plan"]'
     div_payment_plan_details = 'div[data-cy="div-payment-plan-details"]'
@@ -64,9 +63,6 @@ class PaymentVerificationDetails(BaseComponents):
 
     def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.page_header_container)
-
-    def get_page_header_title(self) -> WebElement:
-        return self.wait_for(self.page_header_title)
 
     def get_button_new_plan(self) -> WebElement:
         return self.wait_for(self.button_new_plan)

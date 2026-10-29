@@ -11,13 +11,8 @@ import { AdminButton } from '@core/AdminButton';
 import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import type { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { restQueryKey } from '@utils/queryKeys';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
@@ -38,27 +33,9 @@ export const PaymentPlanDetailsHeader = ({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const visionManaged = paymentPlan.visionManaged;
+  const { isInstructionManaged } = paymentPlan;
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery<ProgramCycleList>({
-    queryKey: restQueryKey(
-      RestService.restBusinessAreasProgramsCyclesRetrieve,
-      {
-        businessAreaSlug: businessArea,
-        id: programCycleId,
-        programCode: programId,
-      },
-    ),
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsCyclesRetrieve({
-        businessAreaSlug: businessArea,
-        id: programCycleId,
-        programCode: programId,
-      });
-    },
-    enabled: !!programCycleId,
-  });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
@@ -68,7 +45,7 @@ export const PaymentPlanDetailsHeader = ({
       to: '../../..',
     });
     breadCrumbsItems.push({
-      title: `${programCycleData?.title || ''}`,
+      title: paymentPlan.programCycle?.title || '',
       to: '../..',
     });
   } else {
@@ -121,7 +98,7 @@ export const PaymentPlanDetailsHeader = ({
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case PaymentPlanStatusEnum.OPEN:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
@@ -131,7 +108,7 @@ export const PaymentPlanDetailsHeader = ({
       );
       break;
     case PaymentPlanStatusEnum.LOCKED:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}
@@ -141,7 +118,7 @@ export const PaymentPlanDetailsHeader = ({
       );
       break;
     case PaymentPlanStatusEnum.LOCKED_FSP:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canUnlock}
@@ -151,7 +128,7 @@ export const PaymentPlanDetailsHeader = ({
       );
       break;
     case PaymentPlanStatusEnum.IN_APPROVAL:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -164,7 +141,7 @@ export const PaymentPlanDetailsHeader = ({
       );
       break;
     case PaymentPlanStatusEnum.IN_AUTHORIZATION:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -177,7 +154,7 @@ export const PaymentPlanDetailsHeader = ({
       );
       break;
     case PaymentPlanStatusEnum.IN_REVIEW:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
@@ -192,6 +169,7 @@ export const PaymentPlanDetailsHeader = ({
     case PaymentPlanStatusEnum.ACCEPTED:
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
+          isInstructionManaged={isInstructionManaged}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
         />
@@ -200,6 +178,7 @@ export const PaymentPlanDetailsHeader = ({
     case PaymentPlanStatusEnum.FINISHED:
       buttons = (
         <FinishedPaymentPlanHeaderButtons
+          isInstructionManaged={isInstructionManaged}
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
@@ -210,6 +189,7 @@ export const PaymentPlanDetailsHeader = ({
     case PaymentPlanStatusEnum.READY_FOR_CLOSURE:
       buttons = (
         <ReadyForClosurePaymentPlanHeaderButtons
+          isInstructionManaged={isInstructionManaged}
           paymentPlan={paymentPlan}
           canSendBack={canMarkReadyForClosure}
           canClose={canClose}
@@ -220,7 +200,7 @@ export const PaymentPlanDetailsHeader = ({
       buttons = null;
       break;
     case PaymentPlanStatusEnum.ABORTED:
-      buttons = (
+      buttons = isInstructionManaged ? null : (
         <AbortedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReactivate={canReactivate}

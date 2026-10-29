@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.db import transaction
 from django.db.models import (
@@ -81,6 +81,9 @@ from hope.apps.grievance.api.serializers.grievance_ticket import (
     GrievanceTicketListSerializer,
     GrievanceTicketRelatedSerializer,
     GrievanceUpdateApproveStatusSerializer,
+    MyTasksTabSerializer,
+    MyTasksUnreadTabsSerializer,
+    MyTasksVisitSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
@@ -90,10 +93,10 @@ from hope.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNote,
 )
-from hope.apps.grievance.notifications import GrievanceNotification
 from hope.apps.grievance.services.bulk_action_service import BulkActionService
 from hope.apps.grievance.services.dashboard_datasets import build_dashboard_data
 from hope.apps.grievance.services.data_change_services import update_data_change_extras
+from hope.apps.grievance.services.my_tasks_service import mark_seen, mark_tab_seen, start_tracking, unread_tabs
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     mark_unique_and_close,
 )
@@ -116,7 +119,7 @@ from hope.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hope.apps.grievance.validators import DataChangeValidator
-from hope.apps.household.const import HEAD
+from hope.apps.household.const import HEAD, NON_BENEFICIARY
 from hope.apps.utils.exceptions import log_and_raise
 from hope.models import (
     DataCollectingType,
@@ -132,6 +135,8 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.contrib.auth.models import AbstractUser
+
+    from hope.models import User
 
 
 class GrievanceTicketViewSet(
@@ -160,7 +165,7 @@ class GrievanceTicketViewSet(
     program_model_field_is_many = True
 
     def get_count_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(self.grievance_permissions_query)
+        return self.with_unread(super().get_queryset().filter(self.grievance_permissions_query))
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -172,7 +177,7 @@ class GrievanceTicketViewSet(
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household__admin2")
-        return (
+        return self.with_unread(
             super()
             .get_queryset()
             .filter(self.grievance_permissions_query)
@@ -209,7 +214,7 @@ class GrievanceTicketViewSet(
 
     @etag_decorator(GrievanceTicketListKeyConstructor)
     @cached_response(key_func=GrievanceTicketListKeyConstructor())
-    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
     @extend_schema(responses={200: GrievanceDashboardSerializer})
@@ -278,6 +283,30 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
         ],
         "related_tickets": [
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
+        "my_tasks_visit": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        "my_tasks_mark_read": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        "my_tasks_seen": [
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
             Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
@@ -389,7 +418,7 @@ class GrievanceTicketGlobalViewSet(
     def get_count_queryset(self) -> QuerySet:
         # no distinct(): visibility and the program filters are Exists subqueries, the ticket detail
         # relations are OneToOne, and the office_search filters that do join m2m add their own distinct()
-        return super().get_queryset().filter(self.grievance_permissions_query)
+        return self.with_unread(super().get_queryset().filter(self.grievance_permissions_query))
 
     def get_queryset(self) -> QuerySet:
         to_prefetch: list[str | Prefetch] = []
@@ -408,7 +437,8 @@ class GrievanceTicketGlobalViewSet(
             households = Household.objects.annotate(
                 active_individuals_count_annotated=Count(
                     "individuals",
-                    filter=Q(individuals__withdrawn=False, individuals__duplicate=False),
+                    filter=Q(individuals__withdrawn=False, individuals__duplicate=False)
+                    & ~Q(individuals__relationship=NON_BENEFICIARY),
                 )
             )
             annotated_paths = [
@@ -432,7 +462,7 @@ class GrievanceTicketGlobalViewSet(
                 )
             )
 
-        return (
+        return self.with_unread(
             super()
             .get_queryset()
             .filter(self.grievance_permissions_query)
@@ -465,6 +495,53 @@ class GrievanceTicketGlobalViewSet(
             .annotate(total_days=F("total__day"))
             .order_by("-created_at")
         )
+
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=True, methods=["post"], url_path="my-tasks/seen")
+    def my_tasks_seen(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Record that the user opened the ticket on its details page."""
+        mark_seen(cast("User", request.user), self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=MyTasksVisitSerializer, responses={200: MyTasksUnreadTabsSerializer})
+    @action(detail=False, methods=["post"], url_path="my-tasks/visit")
+    def my_tasks_visit(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Start unread tracking for the user if needed and say which My Tasks tabs hold unread tickets."""
+        serializer = MyTasksVisitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = cast("User", request.user)
+        tabs = unread_tabs(
+            user,
+            self.business_area,
+            start_tracking(user, self.business_area).created_at,
+            self._my_tasks_program(serializer.validated_data),
+        )
+        return self._unread_tabs_response(tabs)
+
+    @extend_schema(request=MyTasksTabSerializer, responses={200: MyTasksUnreadTabsSerializer})
+    @action(detail=False, methods=["post"], url_path="my-tasks/mark-read")
+    def my_tasks_mark_read(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Mark every unread ticket of one My Tasks tab as seen and say which tabs still hold unread tickets."""
+        serializer = MyTasksTabSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tabs = mark_tab_seen(
+            cast("User", request.user),
+            self.business_area,
+            serializer.validated_data["tab"],
+            self._my_tasks_program(serializer.validated_data),
+        )
+        return self._unread_tabs_response(tabs)
+
+    def _my_tasks_program(self, data: dict[str, Any]) -> Program | None:
+        """Resolve the programme My Tasks is opened in; None in the all-programmes scope."""
+        if "program" not in data:
+            return None
+        return get_object_or_404(Program, business_area=self.business_area, code=data["program"])
+
+    @staticmethod
+    def _unread_tabs_response(tabs: dict[str, bool]) -> Response:
+        data = {"unread_tabs": [preset for preset, unread in tabs.items() if unread]}
+        return Response(MyTasksUnreadTabsSerializer(data).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={200: GrievanceTicketRelatedSerializer(many=True)},
@@ -632,29 +709,6 @@ class GrievanceTicketGlobalViewSet(
         if not grievance_ticket.can_change_status(new_status):
             log_and_raise("New status is incorrect")
 
-    @staticmethod
-    def _build_status_change_notifications(
-        user: Any, old_ticket: GrievanceTicket, ticket: GrievanceTicket, notifications: list
-    ) -> None:
-        if ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            notifications.append(
-                GrievanceNotification(ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL, editor=user)
-            )
-        if ticket.status == GrievanceTicket.STATUS_CLOSED:
-            clear_cache(ticket.ticket_details, ticket.business_area.slug)
-        if (
-            old_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
-            and ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
-        ):
-            notifications.append(
-                GrievanceNotification(
-                    ticket,
-                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                    approver=user,
-                    editor=user,
-                )
-            )
-
     @transaction.atomic
     @extend_schema(
         request=GrievanceStatusChangeSerializer,
@@ -669,7 +723,6 @@ class GrievanceTicketGlobalViewSet(
 
         user = request.user
         new_status = input_data["status"]
-        notifications = []
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket.pk)
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
         if grievance_ticket.category in (
@@ -689,8 +742,8 @@ class GrievanceTicketGlobalViewSet(
         status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
         status_changer.change_status(new_status)
         grievance_ticket.refresh_from_db()
-
-        self._build_status_change_notifications(user, old_grievance_ticket, grievance_ticket, notifications)
+        if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
@@ -701,7 +754,6 @@ class GrievanceTicketGlobalViewSet(
             new_object=grievance_ticket,
         )
 
-        transaction.on_commit(lambda: GrievanceNotification.send_all_notifications(notifications))
         return Response(
             GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
             status=status.HTTP_202_ACCEPTED,
@@ -798,14 +850,6 @@ class GrievanceTicketGlobalViewSet(
 
         description = input_data["description"]
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=user)
-        notification = GrievanceNotification(
-            grievance_ticket,
-            GrievanceNotification.ACTION_NOTES_ADDED,
-            created_by=user,
-            editor=user,
-            ticket_note=ticket_note,
-        )
-        transaction.on_commit(notification.send_email_notification)
 
         return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
 
@@ -1263,6 +1307,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["priority"],
             self.business_area_slug,  # type: ignore
+            cast("User", request.user),
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
@@ -1282,6 +1327,7 @@ class GrievanceTicketGlobalViewSet(
             serializer.validated_data["grievance_ticket_ids"],
             serializer.validated_data["urgency"],
             self.business_area_slug,  # type: ignore
+            cast("User", request.user),
         )
         return Response(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
