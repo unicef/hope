@@ -26,6 +26,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hope.api.caches import cached_response, etag_decorator
+from hope.apps.account.actor_snapshot import ActorSnapshot, build_actor_snapshot
 from hope.apps.account.permissions import Permissions
 from hope.apps.activity_log.utils import copy_model_object, create_diff
 from hope.apps.core.api.mixins import (
@@ -2407,6 +2408,8 @@ class PaymentPlanManagerialViewSet(
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
+        # One AD lookup for the whole batch; the rows locked by earlier plans stay locked until the loop ends.
+        actor_snapshot = build_actor_snapshot(cast("User", request.user))
         payment_plans: QuerySet[PaymentPlan] = PaymentPlan.objects.filter(
             id__in=serializer.validated_data["ids"]
         ).select_related(
@@ -2423,6 +2426,7 @@ class PaymentPlanManagerialViewSet(
                     input_data,
                     self.business_area,
                     request,
+                    actor_snapshot,
                 )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -2434,6 +2438,7 @@ class PaymentPlanManagerialViewSet(
         input_data: dict,
         business_area: BusinessArea,
         request: Request,
+        actor_snapshot: ActorSnapshot,
     ) -> None:
         if input_data["action"] == PaymentPlan.Action.REVIEW.value and payment_plan.vision_managed:
             return
@@ -2455,7 +2460,7 @@ class PaymentPlanManagerialViewSet(
             old_payment_plan.export_file_delivery = copy_model_object(payment_plan.export_file_delivery)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user
+            input_data=input_data, user=request.user, actor_snapshot=actor_snapshot
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

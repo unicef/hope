@@ -140,20 +140,17 @@ def test_build_actor_snapshot_arrange_token_request_fails_act_build_assert_store
     assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Stored Title", job_title_source="USER_RECORD")
 
 
-def test_build_actor_snapshot_arrange_user_query_fails_act_build_assert_stored_title(
-    user: User, ad: responses.RequestsMock
+@pytest.mark.parametrize(
+    ("status", "body"),
+    [
+        pytest.param(500, {"error": "fail"}, id="user-query-fails"),
+        pytest.param(200, {"value": []}, id="user-unknown-to-ad"),
+    ],
+)
+def test_build_actor_snapshot_arrange_ad_lookup_fails_act_build_assert_stored_title(
+    user: User, ad: responses.RequestsMock, status: int, body: dict[str, Any]
 ) -> None:
-    ad.add(responses.GET, USERS_URL, body="fail", status=500)
-
-    snapshot = build_actor_snapshot(user)
-
-    assert snapshot == ActorSnapshot(name="Jan Kowalski", job_title="Stored Title", job_title_source="USER_RECORD")
-
-
-def test_build_actor_snapshot_arrange_user_unknown_to_ad_act_build_assert_stored_title(
-    user: User, ad: responses.RequestsMock
-) -> None:
-    ad.add(responses.GET, USERS_URL, json={"value": []})
+    ad.add(responses.GET, USERS_URL, json=body, status=status)
 
     snapshot = build_actor_snapshot(user)
 

@@ -1,6 +1,7 @@
 from datetime import timezone as dt_timezone
 import json
 from typing import Any, Callable
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.db import connection
@@ -119,6 +120,17 @@ def snapshot_managerial_context(managerial_context: dict[str, Any]) -> dict[str,
         sent_for_approval_by_job_title="Programme Officer",
         sent_for_approval_by_job_title_source="AD",
     )
+    return managerial_context
+
+
+@pytest.fixture
+def bulk_approval_context(managerial_context: dict[str, Any]) -> dict[str, Any]:
+    user = managerial_context["user"]
+    user.first_name = "Jan"
+    user.last_name = "Kowalski"
+    user.save(update_fields=["first_name", "last_name"])
+    ApprovalProcessFactory(payment_plan=managerial_context["payment_plan1"])
+    ApprovalProcessFactory(payment_plan=managerial_context["payment_plan2"])
     return managerial_context
 
 
@@ -355,6 +367,52 @@ def test_bulk_action(
     managerial_context["payment_plan2"].refresh_from_db()
     assert managerial_context["payment_plan1"].status == PaymentPlan.Status.IN_AUTHORIZATION
     assert managerial_context["payment_plan2"].status == PaymentPlan.Status.IN_AUTHORIZATION
+
+
+@patch("hope.apps.account.actor_snapshot.MicrosoftGraphAPI")
+def test_bulk_action_arrange_two_plans_act_approve_assert_one_ad_lookup_shared(
+    mock_graph: Any,
+    bulk_approval_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    mock_graph.return_value.get_user_data.return_value = {"jobTitle": "Programme Officer"}
+    create_user_role_with_permissions(
+        bulk_approval_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        bulk_approval_context["business_area"],
+        bulk_approval_context["program1"],
+    )
+    create_user_role_with_permissions(
+        bulk_approval_context["user"],
+        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        bulk_approval_context["business_area"],
+        bulk_approval_context["program2"],
+    )
+
+    response = bulk_approval_context["client"].post(
+        bulk_approval_context["bulk_url"],
+        data={
+            "ids": [bulk_approval_context["payment_plan1"].id, bulk_approval_context["payment_plan2"].id],
+            "action": PaymentPlan.Action.APPROVE.value,
+            "comment": "",
+        },
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    first_approval = (
+        bulk_approval_context["payment_plan1"].approval_process.first().approvals.get(type=Approval.APPROVAL)
+    )
+    second_approval = (
+        bulk_approval_context["payment_plan2"].approval_process.first().approvals.get(type=Approval.APPROVAL)
+    )
+    assert mock_graph.call_count == 1
+    assert mock_graph.return_value.get_user_data.call_count == 1
+    assert first_approval.created_by_name == "Jan Kowalski"
+    assert first_approval.created_by_job_title == "Programme Officer"
+    assert first_approval.created_by_job_title_source == "AD"
+    assert second_approval.created_by_name == "Jan Kowalski"
+    assert second_approval.created_by_job_title == "Programme Officer"
+    assert second_approval.created_by_job_title_source == "AD"
 
 
 def test_bulk_finance_release_skips_vision_managed_plan(
