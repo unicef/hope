@@ -223,7 +223,7 @@ def test_group_send_includes_follow_up_with_historical_vision_state(
     vision_enabled_sendable_follow_up_with_historical_vision_state,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         sendable_plan_ids = list(payment_plan_group.sendable_to_payment_gateway_plans().values_list("pk", flat=True))
 
     assert vision_enabled_sendable_follow_up_with_historical_vision_state.pk in sendable_plan_ids

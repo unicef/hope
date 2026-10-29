@@ -1109,10 +1109,13 @@ def test_missing_unore_rate_marks_owner_error(mock_unore_rate: Mock, owner_with_
 
 
 @patch("hope.models.async_job.AsyncRetryJob.queue")
-def test_owner_rate_recalculation_marks_owner_busy_before_queue(mock_queue: Mock, owner_with_two_payment_plans) -> None:
+def test_owner_rate_recalculation_marks_owner_busy_before_queue(
+    mock_queue: Mock, owner_with_two_payment_plans, django_capture_on_commit_callbacks
+) -> None:
     group, _, _ = owner_with_two_payment_plans
 
-    recalculate_owner_exchange_rate_async_task(group)
+    with django_capture_on_commit_callbacks(execute=True):
+        recalculate_owner_exchange_rate_async_task(group)
 
     group.refresh_from_db()
     job = AsyncRetryJob.objects.latest("pk")

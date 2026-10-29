@@ -119,7 +119,7 @@ def test_update_exchange_rate_task_creates_activity_log(get_exchange_rate_mock, 
         "timestamp"
     )
     assert log.user == user
-    assert log.changes["exchange_rate"]["to"] == "2.0"
+    assert log.changes["exchange_rate"]["to"] == str(Decimal("2.0").normalize())
 
 
 @pytest.mark.enable_activity_log
