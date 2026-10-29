@@ -248,7 +248,6 @@ def test_edit_latest_tp_purposes_are_editable(
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
@@ -271,9 +270,80 @@ def test_edit_non_latest_tp_purposes_not_editable(
         Permissions.TARGETING_UPDATE,
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
         browser.wait_for_element_visible('[data-cy="filters-program-cycle-autocomplete"]')
         browser.assert_element_absent('[data-cy="input-payment-plan-purposes"]')
+
+
+def test_edit_tp_without_cycle_list_permission_keeps_its_cycle(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    targeting_tp: PaymentPlan,
+) -> None:
+    program = targeting_tp.program_cycle.program
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.TARGETING_VIEW_DETAILS,
+        Permissions.TARGETING_UPDATE,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+    ):
+        browser.login(username="noperm_user")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{targeting_tp.id}")
+        cycle_input = '[data-cy="filters-program-cycle-autocomplete"] input'
+        browser.assert_value(cycle_input, CYCLE_TITLE)
+        assert not browser.find_element(cycle_input).is_enabled()
+
+        browser.set_value('input[name="name"]', "Renamed TP")
+        browser.wait_for_element_clickable('[data-cy="button-save"]').click()
+
+        browser.wait_for_element_absent('[data-cy="edit-target-population-form"]', timeout=20)
+        browser.assert_text("Renamed TP", 'h5[data-cy="page-header-title"]')
+        targeting_tp.refresh_from_db()
+        assert targeting_tp.name == "Renamed TP"
+        assert targeting_tp.program_cycle.title == CYCLE_TITLE
+
+
+def test_create_tp_without_cycle_list_permission_shows_permission_denied(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    targeting_tp: PaymentPlan,
+) -> None:
+    program = targeting_tp.program_cycle.program
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.TARGETING_VIEW_LIST,
+        Permissions.TARGETING_CREATE,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    ):
+        browser.login(username="noperm_user")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/create")
+        browser.wait_for_text("Permission Denied")
+        browser.assert_text("PM_PROGRAMME_CYCLE_VIEW_LIST")
+        browser.assert_element_absent('[data-cy="filters-program-cycle-autocomplete"]')
+
+
+def test_duplicate_hidden_without_cycle_list_permission(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    targeting_tp: PaymentPlan,
+) -> None:
+    program = targeting_tp.program_cycle.program
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.TARGETING_VIEW_DETAILS,
+        Permissions.TARGETING_DUPLICATE,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    ):
+        browser.login(username="noperm_user")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/{targeting_tp.id}")
+        browser.wait_for_element_visible('h5[data-cy="page-header-title"]')
+        browser.assert_element_absent('[data-cy="button-target-population-duplicate"]')

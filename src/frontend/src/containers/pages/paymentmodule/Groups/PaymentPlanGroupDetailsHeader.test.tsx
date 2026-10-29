@@ -306,7 +306,7 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     );
   });
 
-  it('rejects without a comment by leaving the comment out', async () => {
+  it('rejects without a comment by sending a blank comment', async () => {
     mockUsePermissions.mockReturnValue([
       PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
     ]);
@@ -326,7 +326,7 @@ describe('PaymentPlanGroupDetailsHeader', () => {
         businessAreaSlug: 'afghanistan',
         programCode: 'test-program',
         id: 'group-1',
-        requestBody: {},
+        requestBody: { comment: '' },
       }),
     );
   });

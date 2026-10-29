@@ -64,6 +64,17 @@ def test_get_last_approval_process_date_in_approval(user, program_cycle):
     assert modified_data.modified_by == user
 
 
+@pytest.fixture
+def removed_payment_plan_without_owner(program_cycle):
+    return PaymentPlanFactory(program_cycle=program_cycle, is_removed=True, payment_plan_group=None)
+
+
+def test_last_approval_process_of_plan_without_owner_is_its_own(removed_payment_plan_without_owner):
+    approval_process = ApprovalProcessFactory(payment_plan=removed_payment_plan_without_owner)
+
+    assert removed_payment_plan_without_owner.last_approval_process == approval_process
+
+
 def test_get_last_approval_process_date_in_approval_without_process(user, program_cycle):
     payment_plan = PaymentPlanFactory(program_cycle=program_cycle, status=PaymentPlan.Status.IN_APPROVAL)
     modified_data = payment_plan._get_last_approval_process_data()

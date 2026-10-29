@@ -7,9 +7,10 @@ def generate_rule_formulas() -> None:
     rule_1 = RuleFactory(
         name="Test Formula for Targeting 011",
         definition="result.value=211",
-        description="",
+        description="Gives every household a fixed vulnerability score of 211",
         language="python",
         type="TARGETING",
+        enabled=True,
         flags={"individual_data_needed": False},
     )
     rule_1.allowed_business_areas.set([afghanistan])
@@ -20,6 +21,7 @@ def generate_rule_formulas() -> None:
         description="",
         language="python",
         type="TARGETING",
+        enabled=True,
         flags={"individual_data_needed": False},
     )
     rule_2.allowed_business_areas.set([afghanistan])
@@ -27,9 +29,10 @@ def generate_rule_formulas() -> None:
     rule_3 = RuleFactory(
         name="Test Formula for Payment Plan 033",
         definition="result.value=210",
-        description="",
+        description="Gives every household a fixed entitlement of 210",
         language="python",
         type="PAYMENT_PLAN",
+        enabled=True,
         flags={"individual_data_needed": False},
     )
     rule_3.allowed_business_areas.set([afghanistan])
@@ -40,6 +43,7 @@ def generate_rule_formulas() -> None:
         description="",
         language="python",
         type="PAYMENT_PLAN",
+        enabled=True,
         flags={"individual_data_needed": False},
     )
     rule_4.allowed_business_areas.set([afghanistan])

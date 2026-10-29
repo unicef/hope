@@ -6,7 +6,6 @@ import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentP
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
-import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -83,7 +82,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
       <PaymentPlanAcceptanceProcess paymentPlan={paymentPlan} />
       <ExcludeSection paymentPlan={paymentPlan} />
-      <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

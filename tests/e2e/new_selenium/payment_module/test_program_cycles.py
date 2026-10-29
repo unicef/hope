@@ -1,7 +1,7 @@
 import pytest
 
 from e2e.new_selenium.conftest import grant_permission
-from extras.test_utils.selenium import HopeTestBrowser
+from extras.test_utils.selenium import HopeTestBrowser, ui_date
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, ProgramCycle, User
 
@@ -66,8 +66,8 @@ def test_program_cycle_details_shows_status_and_dates(
 
         browser.wait_for_text("Test Programme Cycle 001", 'h5[data-cy="page-header-title"]')
         browser.assert_text("Active", STATUS)
-        browser.assert_text(active_cycle.start_date.strftime("%-d %b %Y"), 'div[data-cy="label-Start Date"]')
-        browser.assert_text(active_cycle.end_date.strftime("%-d %b %Y"), 'div[data-cy="label-End Date"]')
+        browser.assert_text(ui_date(active_cycle.start_date), 'div[data-cy="label-Start Date"]')
+        browser.assert_text(ui_date(active_cycle.end_date), 'div[data-cy="label-End Date"]')
         # Without PM_VIEW_LIST the payment plans table is hidden instead of the page.
         browser.assert_elements_absent("table", 'h1[data-cy="access-denied-title"]')
 

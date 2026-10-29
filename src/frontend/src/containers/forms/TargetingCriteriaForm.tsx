@@ -46,6 +46,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import type { FspChoices } from '@restgenerated/models/FspChoices';
 import { restQueryKey } from '@utils/queryKeys';
+import { responsiveValue } from 'src/responsive';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -576,7 +577,7 @@ export const TargetingCriteriaForm = ({
                         flexDirection: 'column',
                       }}
                     >
-                      <ButtonBox style={{ width: '600px' }}>
+                      <Box sx={{ width: responsiveValue('100%', '600px') }}>
                         <Button
                           data-cy="button-payment-channel-rule"
                           onClick={() => handlePaymentChannelButtonClick()}
@@ -594,7 +595,7 @@ export const TargetingCriteriaForm = ({
                             <Box>(Delivery mechanism and FSP requirements)</Box>
                           </Box>
                         </Button>
-                      </ButtonBox>
+                      </Box>
                       <Collapse in={openPaymentChannelCollapse}>
                         <Box
                           sx={{

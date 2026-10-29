@@ -293,7 +293,7 @@ def test_bulk_update_priority_with_closed_ticket_raises(
 
 
 def test_bulk_update_urgency_with_invalid_urgency_raises(business_area: BusinessArea) -> None:
-    with pytest.raises(ValidationError, match="Invalid priority"):
+    with pytest.raises(ValidationError, match="Invalid urgency"):
         BulkActionService().bulk_set_urgency([], 999, business_area.slug)
 
 

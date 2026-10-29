@@ -14,6 +14,7 @@ from extras.test_utils.factories.payment import (
     AccountTypeFactory,
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
@@ -994,6 +995,64 @@ def test_sync_record(
     assert payment_plan.total_undelivered_quantity == Decimal("100.00")
     assert payment_plan.total_undelivered_quantity_usd == Decimal("0.00")
     assert change_payment_instruction_status_mock.call_count == 2
+
+
+@pytest.fixture
+def instruction_managed_payment_gateway_setup(payment_gateway_setup: dict) -> dict:
+    payment_plan = payment_gateway_setup["payment_plan"]
+    payment_plan.follow_up_instruction = FollowUpInstructionFactory(
+        program=payment_plan.program_cycle.program,
+        business_area=payment_plan.business_area,
+        financial_service_provider=payment_gateway_setup["fsp"],
+        currency=payment_plan.currency,
+    )
+    payment_plan.payment_plan_group = None
+    payment_plan.save(update_fields=["follow_up_instruction", "payment_plan_group"])
+    first_payment, second_payment = payment_gateway_setup["payments"]
+    first_payment.status = Payment.STATUS_ERROR
+    first_payment.save(update_fields=["status"])
+    second_payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
+    second_payment.save(update_fields=["status"])
+    PaymentPlanSplit.objects.filter(payment_plan=payment_plan).update(sent_to_payment_gateway=True)
+    return payment_gateway_setup
+
+
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+    return_value="FINALIZED",
+)
+@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+@mock.patch(
+    "hope.apps.payment.services.payment_gateway.get_quantity_in_usd",
+    return_value=100.00,
+)
+def test_sync_record_finishes_reconciled_instruction_managed_plan_on_its_own(
+    get_quantity_in_usd_mock: Any,
+    get_record_mock: Any,
+    get_exchange_rate_mock: Any,
+    change_payment_instruction_status_mock: Any,
+    instruction_managed_payment_gateway_setup: dict,
+) -> None:
+    payment = instruction_managed_payment_gateway_setup["payments"][0]
+    payment_plan = instruction_managed_payment_gateway_setup["payment_plan"]
+    get_record_mock.return_value = PaymentRecordData(
+        id=1,
+        remote_id=str(payment.id),
+        created="2023-10-10",
+        modified="2023-10-11",
+        record_code="1",
+        parent="1",
+        status="TRANSFERRED_TO_BENEFICIARY",
+        auth_code="1",
+        payout_amount=float(payment.entitlement_quantity),
+        fsp_code="1",
+    )
+
+    PaymentGatewayService().sync_record(payment)
+
+    payment_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.FINISHED
 
 
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)

@@ -32,6 +32,7 @@ import { showApiErrorMessages } from '@utils/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import type { PaymentPlanExcludeBeneficiaries } from '@restgenerated/models/PaymentPlanExcludeBeneficiaries';
+import { responsiveValue } from 'src/responsive';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -369,10 +370,10 @@ function ExcludeSection({
                 component={FormikTextField}
               />
             </Grid>
-            <Grid size={{ xs: 6 }}>
+            <Grid size={responsiveValue(12, 6)}>
               <Box
                 sx={{
-                  mr: 2,
+                  mr: responsiveValue(0, 2),
                 }}
               >
                 <StyledTextField
@@ -437,6 +438,8 @@ function ExcludeSection({
             <Box
               sx={{
                 display: 'flex',
+                flexWrap: responsiveValue('wrap', 'nowrap'),
+                gap: responsiveValue(2, 0),
                 justifyContent: 'space-between',
               }}
             >
@@ -468,7 +471,7 @@ function ExcludeSection({
               >
                 {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
-                    <Grid size={{ xs: 8 }}>
+                    <Grid size={responsiveValue(12, 8)}>
                       <Box
                         sx={{
                           display: 'flex',
@@ -518,7 +521,7 @@ function ExcludeSection({
                   </Box>
                 )}
                 {renderInputAndApply()}
-                <Grid container size={{ xs: 6 }}>
+                <Grid container size={responsiveValue(12, 6)}>
                   {errors?.map((formError) => (
                     <Grid key={formError} size={{ xs: 12 }}>
                       <FormHelperText key={formError} error>
@@ -530,7 +533,7 @@ function ExcludeSection({
                 <Grid
                   container
                   sx={{ flexDirection: 'column' }}
-                  size={{ xs: 3 }}
+                  size={responsiveValue(12, 3)}
                 >
                   {excludedIds.map((id) => (
                     <Grid key={id} size={{ xs: 12 }}>

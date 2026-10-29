@@ -1,6 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -31,6 +32,7 @@ import { ExportGroupSummaryPdfButton } from './actions/ExportGroupSummaryPdfButt
 import { LinkedGroupsTable } from './LinkedGroupsTable';
 import type { PaymentPlanGroupDetail } from './types';
 import { isGroupBackgroundActionBusy, planTypeDisplayLabel } from './utils';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 const initialFilter = {
   search: '',
@@ -117,13 +119,13 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
             <Typography variant="h6">{t('Details')}</Typography>
           </Title>
           <OverviewContainer>
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 3 }}>
+            <ResponsiveGridContainer spacing={6}>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Name')}>
                   {group?.name ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Cycle')}>
                   {group?.cycle ? (
                     <BlackLink
@@ -135,16 +137,16 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                     '-'
                   )}
                 </LabelizedField>
-              </Grid>
+              </ResponsiveGrid>
               {group?.planType && group.planType !== PlanTypeEnum.REGULAR && (
-                <Grid size={{ xs: 3 }}>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Type')}>
                     {t(planTypeDisplayLabel(group.planType))}
                   </LabelizedField>
-                </Grid>
+                </ResponsiveGrid>
               )}
               {group?.sourceGroup && (
-                <Grid size={{ xs: 3 }}>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Created from')}>
                     <BlackLink
                       to={`/${baseUrl}/payment-module/groups/${group.sourceGroup.id}`}
@@ -153,44 +155,44 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                       {group.sourceGroup.unicefId ?? group.sourceGroup.name}
                     </BlackLink>
                   </LabelizedField>
-                </Grid>
+                </ResponsiveGrid>
               )}
-              <Grid size={{ xs: 3 }}>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('FSP')}>
                   {group?.financialServiceProvider?.name ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Currency')}>
                   {group?.currency ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Dispersion Start Date')}>
                   {group?.dispersionStartDate ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Dispersion End Date')}>
                   {group?.dispersionEndDate ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Entitled (USD)')}>
                   {group?.totalEntitledQuantityUsd ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Delivered (USD)')}>
                   {group?.totalDeliveredQuantityUsd ?? '-'}
                 </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Undelivered (USD)')}>
                   {group?.totalUndeliveredQuantityUsd ?? '-'}
                 </LabelizedField>
-              </Grid>
-            </Grid>
+              </ResponsiveGrid>
+            </ResponsiveGridContainer>
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
@@ -219,6 +221,13 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         ].includes(group.status) && (
           <FundsCommitmentSection group={group} programCode={programId} />
         )}
+      {group && (
+        <SupportingDocumentsSection
+          key={group.id}
+          ownerPath={`payment-plan-groups/${group.id}`}
+          supportingDocuments={group.supportingDocuments}
+        />
+      )}
       {group?.linkedGroups && (
         <LinkedGroupsTable linkedGroups={group.linkedGroups} />
       )}

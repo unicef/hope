@@ -7,11 +7,10 @@ from hope.apps.account.permissions import Permissions
 from hope.apps.grievance.models import GrievanceTicket
 from hope.models import BusinessArea, Household, PaymentPlan, PaymentPlanGroup, User
 
-from .conftest import CYCLE_TITLE, GROUP_NAME, PURPOSE_NAME
+from .conftest import CYCLE_TITLE, GROUP_NAME, HOUSEHOLDS_COUNT, PURPOSE_NAME
 
 pytestmark = pytest.mark.django_db()
 
-HOUSEHOLDS_COUNT = '[data-cy="total-number-of-households-count"]'
 HOUSEHOLD_SIZE = "What is the Household size?"
 CREATE_PERMISSIONS = (
     Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
@@ -19,6 +18,7 @@ CREATE_PERMISSIONS = (
     Permissions.TARGETING_VIEW_DETAILS,
     Permissions.TARGETING_CREATE,
     Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+    Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
 )
 
@@ -58,6 +58,17 @@ def save_new_tp(browser: HopeTestBrowser, name: str) -> PaymentPlan:
 
 def targeted_household_ids(tp: PaymentPlan) -> set[str]:
     return set(tp.payment_items.values_list("household__unicef_id", flat=True))
+
+
+@pytest.fixture
+def smallest_household_in_adjudication(sized_households: list[Household]) -> Household:
+    smallest = sized_households[0]
+    TicketNeedsAdjudicationDetailsFactory(
+        ticket__business_area=smallest.business_area,
+        ticket__status=GrievanceTicket.STATUS_IN_PROGRESS,
+        golden_records_individual=smallest.head_of_household,
+    )
+    return smallest
 
 
 def test_household_size_rule_targets_only_matching_households(
@@ -109,13 +120,8 @@ def test_exclude_active_adjudication_ticket_flag_drops_household(
     business_area: BusinessArea,
     targeting_group: PaymentPlanGroup,
     sized_households: list[Household],
+    smallest_household_in_adjudication: Household,
 ) -> None:
-    flagged = sized_households[0]
-    TicketNeedsAdjudicationDetailsFactory(
-        ticket__business_area=business_area,
-        ticket__status=GrievanceTicket.STATUS_IN_PROGRESS,
-        golden_records_individual=flagged.head_of_household,
-    )
     with grant_permission(user_with_no_permissions, business_area, *CREATE_PERMISSIONS):
         browser.login(username="noperm_user")
         open_new_tp_form(browser, targeting_group, "Without adjudication")
@@ -125,7 +131,7 @@ def test_exclude_active_adjudication_ticket_flag_drops_household(
         tp = save_new_tp(browser, "Without adjudication")
 
         browser.wait_for_text("2", HOUSEHOLDS_COUNT)
-        browser.assert_text_not_visible(flagged.unicef_id, "table")
+        browser.assert_text_not_visible(smallest_household_in_adjudication.unicef_id, "table")
         assert targeted_household_ids(tp) == {household.unicef_id for household in sized_households[1:]}
 
 
@@ -144,8 +150,8 @@ def test_exclude_household_id_in_standard_programme(
         Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
-        Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{built_tp.id}")

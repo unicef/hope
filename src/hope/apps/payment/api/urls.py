@@ -4,13 +4,14 @@ from rest_framework_nested.routers import NestedDefaultRouter
 from hope.apps.core.api.urls import get_business_area_nested_router
 from hope.apps.payment.api.views import (
     FinancialInstitutionViewSet,
+    FollowUpInstructionSupportingDocumentViewSet,
     FollowUpInstructionViewSet,
     PaymentGlobalViewSet,
     PaymentPlanGlobalViewSet,
+    PaymentPlanGroupSupportingDocumentViewSet,
     PaymentPlanGroupViewSet,
     PaymentPlanManagerialViewSet,
     PaymentPlanPurposeViewSet,
-    PaymentPlanSupportingDocumentViewSet,
     PaymentPlanViewSet,
     PaymentVerificationRecordViewSet,
     PaymentVerificationViewSet,
@@ -71,14 +72,27 @@ program_nested_router.register(
 
 payment_plans_nested_router = NestedDefaultRouter(program_nested_router, r"payment-plans", lookup="payment_plan")
 payment_plans_nested_router.register(
-    r"supporting-documents",
-    PaymentPlanSupportingDocumentViewSet,
-    basename="supporting-documents",
-)
-payment_plans_nested_router.register(
     r"payments",
     PaymentViewSet,
     basename="payments",
+)
+
+payment_plan_groups_nested_router = NestedDefaultRouter(
+    program_nested_router, r"payment-plan-groups", lookup="payment_plan_group"
+)
+payment_plan_groups_nested_router.register(
+    r"supporting-documents",
+    PaymentPlanGroupSupportingDocumentViewSet,
+    basename="payment-plan-group-supporting-documents",
+)
+
+follow_up_instructions_nested_router = NestedDefaultRouter(
+    program_nested_router, r"follow-up-instructions", lookup="follow_up_instruction"
+)
+follow_up_instructions_nested_router.register(
+    r"supporting-documents",
+    FollowUpInstructionSupportingDocumentViewSet,
+    basename="follow-up-instruction-supporting-documents",
 )
 
 payment_verification_nested_router = NestedDefaultRouter(
@@ -99,5 +113,7 @@ urlpatterns = [
     path("", include(business_area_nested_router.urls)),
     path("", include(program_nested_router.urls)),
     path("", include(payment_plans_nested_router.urls)),
+    path("", include(payment_plan_groups_nested_router.urls)),
+    path("", include(follow_up_instructions_nested_router.urls)),
     path("", include(payment_verification_nested_router.urls)),
 ]

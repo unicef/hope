@@ -1,7 +1,6 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -23,6 +22,7 @@ import type { ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 import { PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from '../../../../../programContext';
 import type { PaymentPlanGroupDetail } from '../types';
@@ -68,7 +68,7 @@ export function AbortGroupButton({
   const validationSchema = Yup.object().shape({
     comment: Yup.string()
       .min(4, 'Too short')
-      .max(255, 'Too long')
+      .max(COMMENT_MAX_LENGTH, 'Too long')
       .required('Abort Reason is required'),
   });
 
@@ -76,14 +76,12 @@ export function AbortGroupButton({
     <Formik
       initialValues={{ comment: '' }}
       onSubmit={(values, { resetForm }) => {
-        abort(values.comment);
-        resetForm({});
+        abort(values.comment, { onSuccess: () => resetForm() });
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => (
+      {({ submitForm, resetForm }) => (
         <>
-          {dialogOpen && <AutoSubmitFormOnEnter />}
           <Box sx={{ p: 2 }}>
             <Button
               color="secondary"
@@ -98,7 +96,10 @@ export function AbortGroupButton({
           </Box>
           <Dialog
             open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -115,6 +116,7 @@ export function AbortGroupButton({
                   <Field
                     name="comment"
                     multiline
+                    minRows={3}
                     fullWidth
                     variant="filled"
                     label={t('Abort Reason')}
@@ -126,7 +128,14 @@ export function AbortGroupButton({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setDialogOpen(false);
+                  }}
+                >
+                  CANCEL
+                </Button>
                 <LoadingButton
                   loading={isPending}
                   type="submit"

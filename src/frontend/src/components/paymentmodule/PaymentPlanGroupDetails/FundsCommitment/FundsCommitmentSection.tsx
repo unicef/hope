@@ -11,7 +11,6 @@ import {
   FormControl,
   Tooltip,
   Typography,
-  Grid,
 } from '@mui/material';
 import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import { t } from 'i18next';
@@ -22,6 +21,11 @@ import { restQueryKey } from '@utils/queryKeys';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { formatFigure, showApiErrorMessages } from '@utils/utils';
+import {
+  responsiveValue,
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+} from 'src/responsive';
 
 interface FundsCommitmentSectionProps {
   group: PaymentPlanGroupDetail;
@@ -117,7 +121,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   return (
     <Box
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
     >
       <ContainerColumnWithBorder>
@@ -215,44 +219,44 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                 {t('Funds Commitment Number')}: {header.fundsCommitmentNumber}
               </Typography>
-              <Grid container spacing={3} sx={{ mb: 3 }}>
-                <Grid size={3}>
+              <ResponsiveGridContainer spacing={3} sx={{ mb: 3 }}>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Vendor')} value={header.vendorId} />
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField
                     label={t('Posting Date')}
                     value={header.postingDate}
                   />
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField
                     label={t('Document Reference')}
                     value={header.documentReference}
                   />
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField label={t('Status')} value={header.fcStatus} />
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField
                     label={t('Total Amount USD')}
                     value={formatFigure(header.totalAmountUsd)}
                   />
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField
                     label={t('Total Amount Local')}
                     value={formatFigure(header.totalAmountLocal)}
                   />
-                </Grid>
-                <Grid size={3}>
+                </ResponsiveGrid>
+                <ResponsiveGrid size="quarter" mobileSize="half">
                   <LabelizedField
                     label={t('Currency')}
                     value={header.currency}
                   />
-                </Grid>
-              </Grid>
+                </ResponsiveGrid>
+              </ResponsiveGridContainer>
               {header.fundsCommitmentItems.map((item, itemIndex) => (
                 <Box key={item.recSerialNumber} sx={{ mb: 4 }}>
                   <Typography
@@ -261,62 +265,62 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                   >
                     {t('Item')} #{item.fundsCommitmentItem}
                   </Typography>
-                  <Grid container spacing={3}>
-                    <Grid size={3}>
+                  <ResponsiveGridContainer spacing={3}>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Business Area')}
                         value={item.businessArea}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('WBS Element')}
                         value={item.wbsElement}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Grant Number')}
                         value={item.grantNumber}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Currency Code')}
                         value={item.currencyCode}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Commitment Amount Local')}
                         value={formatFigure(item.commitmentAmountLocal)}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Commitment Amount USD')}
                         value={formatFigure(item.commitmentAmountUsd)}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Total Open Amount Local')}
                         value={formatFigure(item.totalOpenAmountLocal)}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Total Open Amount USD')}
                         value={formatFigure(item.totalOpenAmountUsd)}
                       />
-                    </Grid>
-                    <Grid size={3}>
+                    </ResponsiveGrid>
+                    <ResponsiveGrid size="quarter" mobileSize="half">
                       <LabelizedField
                         label={t('Sponsor')}
                         value={`${item.sponsor ?? '-'} ${item.sponsorName ?? '-'}`}
                       />
-                    </Grid>
-                  </Grid>
+                    </ResponsiveGrid>
+                  </ResponsiveGridContainer>
                   {itemIndex < header.fundsCommitmentItems.length - 1 && (
                     <Box
                       sx={{

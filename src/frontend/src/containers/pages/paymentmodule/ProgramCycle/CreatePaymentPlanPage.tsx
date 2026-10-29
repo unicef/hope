@@ -125,7 +125,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
             loadingCreate={loadingCreate}
           />
           <PaymentPlanTargeting
-            allTargetPopulations={allTargetPopulationsData}
+            targetPopulations={allTargetPopulationsData.results}
             loading={loadingTargetPopulations}
           />
           <PaymentPlanParameters

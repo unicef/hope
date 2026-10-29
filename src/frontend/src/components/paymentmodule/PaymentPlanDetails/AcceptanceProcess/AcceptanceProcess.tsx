@@ -10,6 +10,7 @@ import { Title } from '@core/Title';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
+import { responsiveValue } from 'src/responsive';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -44,7 +45,7 @@ function AcceptanceProcess({
   return (
     <Box
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
       data-cy="acceptance-process"
     >
@@ -52,6 +53,8 @@ function AcceptanceProcess({
         <Box
           sx={{
             display: 'flex',
+            flexWrap: responsiveValue('wrap', 'nowrap'),
+            gap: responsiveValue(2, 0),
             justifyContent: 'space-between',
             mt: 4,
           }}

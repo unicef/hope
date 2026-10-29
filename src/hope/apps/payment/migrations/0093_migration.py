@@ -2,46 +2,26 @@
 
 from django.conf import settings
 from django.db import migrations, models
-from django.db.models import Count, Exists, F, OuterRef, Q, Subquery
+from django.db.models import Count, Exists, F, Max, Min, OuterRef, Q, Subquery
 import django.db.models.deletion
 
-OWNER_FIELDS = ("payment_plan_group", "follow_up_instruction")
 
-
-def copy_flag_from_payment_plans(apps, schema_editor):
-    """Give every group and Follow-Up Instruction the use_payment_gateway flag of its payment plans.
-
-    A group is sent to the payment gateway as one, so its plans must agree on the flag; a group or
-    instruction whose plans disagree stops the migration until the plans are fixed.
-    """
+def copy_dates_from_payment_plans(apps, schema_editor):
+    """Use the earliest start and latest end from each owner's plans."""
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
-    owner_models = {
-        "payment_plan_group": apps.get_model("payment", "PaymentPlanGroup"),
-        "follow_up_instruction": apps.get_model("payment", "FollowUpInstruction"),
-    }
     database_alias = schema_editor.connection.alias
-    plans = PaymentPlan.objects.using(database_alias).filter(is_removed=False)
-    mixed = {
-        owner_field: list(
-            plans.filter(**{f"{owner_field}__isnull": False})
-            .values(f"{owner_field}__unicef_id")
-            .annotate(flags=Count("use_payment_gateway", distinct=True))
-            .filter(flags__gt=1)
-            .values_list(f"{owner_field}__unicef_id", flat=True)
+    for owner_model, owner_field in (
+        (apps.get_model("payment", "PaymentPlanGroup"), "payment_plan_group"),
+        (apps.get_model("payment", "FollowUpInstruction"), "follow_up_instruction"),
+    ):
+        plans = (
+            PaymentPlan.objects.using(database_alias)
+            .filter(**{owner_field: OuterRef("pk")}, is_removed=False)
+            .values(owner_field)
         )
-        for owner_field in OWNER_FIELDS
-    }
-    if any(mixed.values()):
-        raise RuntimeError(
-            "Payment plans of one group or Follow-Up Instruction have different use_payment_gateway values; "
-            f"set them to the same value first. Groups: {mixed['payment_plan_group']}. "
-            f"Follow-Up Instructions: {mixed['follow_up_instruction']}."
-        )
-    for owner_field, owner_model in owner_models.items():
         owner_model.objects.using(database_alias).update(
-            use_payment_gateway=Exists(
-                plans.filter(**{owner_field: OuterRef("pk")}, use_payment_gateway=True),
-            )
+            dispersion_start_date=Subquery(plans.annotate(value=Min("dispersion_start_date")).values("value")[:1]),
+            dispersion_end_date=Subquery(plans.annotate(value=Max("dispersion_end_date")).values("value")[:1]),
         )
 
 
@@ -117,19 +97,23 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="followupinstruction",
-            name="use_payment_gateway",
-            field=models.BooleanField(
-                default=False,
-                help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
-            ),
+            name="dispersion_end_date",
+            field=models.DateField(blank=True, help_text="Dispersion End Date", null=True),
+        ),
+        migrations.AddField(
+            model_name="followupinstruction",
+            name="dispersion_start_date",
+            field=models.DateField(blank=True, help_text="Dispersion Start Date", null=True),
         ),
         migrations.AddField(
             model_name="paymentplangroup",
-            name="use_payment_gateway",
-            field=models.BooleanField(
-                default=False,
-                help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
-            ),
+            name="dispersion_end_date",
+            field=models.DateField(blank=True, help_text="Dispersion End Date", null=True),
+        ),
+        migrations.AddField(
+            model_name="paymentplangroup",
+            name="dispersion_start_date",
+            field=models.DateField(blank=True, help_text="Dispersion Start Date", null=True),
         ),
         migrations.AddField(
             model_name="followupinstruction",
@@ -179,13 +163,11 @@ class Migration(migrations.Migration):
                 to=settings.AUTH_USER_MODEL,
             ),
         ),
-        migrations.RunPython(copy_flag_from_payment_plans, migrations.RunPython.noop),
+        migrations.RunPython(copy_dates_from_payment_plans, migrations.RunPython.noop),
         migrations.RunPython(copy_exchange_rates_from_payment_plans, copy_exchange_rates_to_payment_plans),
         migrations.RemoveField(model_name="paymentplan", name="exchange_rate"),
         migrations.RemoveField(model_name="paymentplan", name="custom_exchange_rate"),
         migrations.RemoveField(model_name="paymentplan", name="custom_exchange_rate_set_by"),
-        migrations.RemoveField(
-            model_name="paymentplan",
-            name="use_payment_gateway",
-        ),
+        migrations.RemoveField(model_name="paymentplan", name="dispersion_end_date"),
+        migrations.RemoveField(model_name="paymentplan", name="dispersion_start_date"),
     ]

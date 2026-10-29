@@ -25,6 +25,7 @@ from extras.test_utils.factories.payment import (
 )
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     AcceptanceProcessThreshold,
     Approval,
@@ -354,6 +355,12 @@ def test_assign_currency_sets_it_on_the_group(cycle, currency, delivery_mechanis
     assert group.currency == currency
 
 
+def test_assign_currency_none_clears_it_on_the_group(open_group):
+    PaymentPlanGroupService(open_group).assign_currency(None)
+
+    assert open_group.currency is None
+
+
 @pytest.fixture
 def user():
     return UserFactory()
@@ -499,6 +506,21 @@ def test_approve_rejects_group_in_wrong_status(locked_group, user):
     assert error.value.detail[0] == "Not possible to create APPROVE for Payment Plan Group within status LOCKED"
 
 
+@pytest.fixture
+def group_in_approval_without_approval_process(cycle):
+    return PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.IN_APPROVAL)
+
+
+def test_approve_rejects_group_without_approval_process(group_in_approval_without_approval_process, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group_in_approval_without_approval_process).acceptance_process(
+            PaymentPlan.Action.APPROVE.value, user
+        )
+    assert error.value.detail[0] == (
+        f"Approval Process object not found for Payment Plan Group {group_in_approval_without_approval_process.pk}"
+    )
+
+
 @patch("hope.apps.payment.services.payment_plan_services.config")
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
 def test_second_approval_by_same_user_rejected(mock_notify, mock_config, group_in_approval, user):
@@ -523,6 +545,49 @@ def test_reject_returns_group_and_plans_to_locked(mock_notify, group_in_approval
     assert locked_payment_plan.status == PaymentPlan.Status.LOCKED_FSP
     assert group_in_approval.approval_process.get().approvals.filter(type=Approval.REJECT).exists()
     mock_notify.assert_not_called()
+
+
+@patch("hope.apps.payment.services.payment_plan_services.config")
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_reject_by_user_who_already_approved_rejected(mock_notify, mock_config, group_in_approval, user):
+    mock_config.PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS = False
+    approval_process = group_in_approval.approval_process.get()
+    approval_process.approval_number_required = 2
+    approval_process.save(update_fields=["approval_number_required"])
+    PaymentPlanGroupService(group_in_approval).acceptance_process(PaymentPlan.Action.APPROVE.value, user)
+
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group_in_approval).acceptance_process(PaymentPlan.Action.REJECT.value, user)
+    assert error.value.detail[0] == "Can't create REJECT. User have already created APPROVAL"
+
+
+@pytest.fixture
+def plan_sent_to_vision(group_in_review, locked_payment_plan):
+    locked_payment_plan.refresh_from_db()
+    locked_payment_plan.internal_data = {
+        "vision": {
+            "sent": True,
+            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
+            "vision_id": "VISION-1",
+            "fc_numbers": ["FC123"],
+        }
+    }
+    locked_payment_plan.save(update_fields=["internal_data"])
+    return locked_payment_plan
+
+
+@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_reject_invalidates_vision_attempt_and_tells_vision(
+    mock_notify, mock_notify_vision, group_in_review, plan_sent_to_vision, user, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanGroupService(group_in_review).acceptance_process(PaymentPlan.Action.REJECT.value, user, "no")
+
+    plan_sent_to_vision.refresh_from_db()
+    assert plan_sent_to_vision.status == PaymentPlan.Status.LOCKED_FSP
+    assert plan_sent_to_vision.vision_data == {"status": VisionStatus.NOT_SENT.value}
+    mock_notify_vision.assert_called_once_with(plan_sent_to_vision, str(user.pk), "REJECTED")
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
@@ -747,6 +812,18 @@ def test_send_back_to_finished_moves_group_and_plans(mock_notify, ready_group, l
     assert mock_notify.call_args.args[1] == PaymentPlan.Action.SEND_BACK_TO_FINISHED.value
 
 
+def test_send_back_to_finished_rejects_group_not_ready_for_closure(finished_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(finished_group).send_back_to_finished(user)
+    assert error.value.detail[0] == "Send Back is possible only within Status READY_FOR_CLOSURE"
+
+
+def test_close_rejects_group_not_ready_for_closure(finished_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(finished_group).close("all paid", user)
+    assert error.value.detail[0] == "Close Payment Plan Group is possible only within Status READY_FOR_CLOSURE"
+
+
 def test_close_requires_comment_when_no_plan_was_verified(ready_group, user):
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(ready_group).close(None, user)
@@ -789,20 +866,27 @@ def test_abort_rejects_open_group(open_group, locked_payment_plan, user):
     assert error.value.detail[0] == "Abort Payment Plan Group is not possible within Status OPEN"
 
 
-@patch("hope.apps.payment.services.payment_plan_services.payment_plan_full_rebuild_async_task")
-def test_reactivate_abort_reopens_group_and_plans(
-    mock_rebuild, group_in_approval, locked_payment_plan, user, django_capture_on_commit_callbacks
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task")
+def test_reactivate_abort_reopens_group_and_queues_its_plans_payees_refresh(
+    mock_refresh, group_in_approval, locked_payment_plan, user, django_capture_on_commit_callbacks
 ):
     PaymentPlanGroupService(group_in_approval).abort(None, user)
 
     with django_capture_on_commit_callbacks(execute=True):
-        PaymentPlanGroupService(group_in_approval).reactivate_abort()
+        PaymentPlanGroupService(group_in_approval).reactivate_abort(str(user.pk))
 
     group_in_approval.refresh_from_db()
     locked_payment_plan.refresh_from_db()
     assert group_in_approval.status == PaymentPlanGroup.Status.OPEN
-    assert locked_payment_plan.status == PaymentPlan.Status.OPEN
-    mock_rebuild.assert_called_once_with(locked_payment_plan, True)
+    assert locked_payment_plan.status == PaymentPlan.Status.ABORTED
+    assert locked_payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    mock_refresh.assert_called_once_with(locked_payment_plan, str(user.pk))
+
+
+def test_reactivate_abort_rejects_group_not_aborted(group_in_approval, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(group_in_approval).reactivate_abort(str(user.pk))
+    assert error.value.detail[0] == "Reactivate Aborted Payment Plan Group is possible only within Status ABORTED"
 
 
 @pytest.fixture
@@ -843,6 +927,21 @@ def test_create_second_follow_up_numbers_the_name(accepted_group, follow_up_grou
     )
 
     assert second_follow_up_group.name == f"{accepted_group.name} Follow Up 2"
+
+
+@pytest.fixture
+def group_named_like_next_follow_up(cycle, accepted_group):
+    return PaymentPlanGroupFactory(cycle=cycle, name=f"{accepted_group.name} Follow Up 1")
+
+
+def test_create_follow_up_rejected_when_its_name_is_taken_in_the_cycle(
+    accepted_group, failed_payment, group_named_like_next_follow_up, user
+):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(accepted_group).create_linked_group(
+            PaymentPlan.PlanType.FOLLOW_UP, user, date(2099, 1, 1), date(2099, 12, 31)
+        )
+    assert error.value.detail[0] == f"A group named '{accepted_group.name} Follow Up 1' already exists in this cycle."
 
 
 def test_create_follow_up_rejected_without_unsuccessful_payments(accepted_group, delivered_payment, user):

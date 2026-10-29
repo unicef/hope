@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
 import { BlackLink } from '@core/BlackLink';
@@ -12,6 +11,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import type { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import { ResponsiveGrid } from 'src/responsive';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackDetail;
@@ -26,7 +26,7 @@ function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
     baseUrl,
   );
   return (
-    <Grid size={{ xs: 4 }}>
+    <ResponsiveGrid size="third">
       {feedback.linkedGrievanceId ? (
         <Box
           sx={{
@@ -47,7 +47,7 @@ function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
           </ContainerColumnWithBorder>
         </Box>
       ) : null}
-    </Grid>
+    </ResponsiveGrid>
   );
 }
 export default withErrorBoundary(LinkedGrievance, 'LinkedGrievance');

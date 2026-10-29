@@ -29,7 +29,7 @@ from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.models.approval import Approval
+from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
 from hope.models.household import Household
@@ -249,6 +249,8 @@ class PaymentPlan(
             "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "Send to Payment Gateway Error",
         )
+        REBUILDING = "REBUILDING", "Rebuilding"
+        REBUILD_ERROR = "REBUILD_ERROR", "Rebuild Error"
 
         @staticmethod
         def get_choices() -> list[tuple[str, str]]:
@@ -260,6 +262,7 @@ class PaymentPlan(
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        BackgroundActionStatus.REBUILD_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -439,7 +442,7 @@ class PaymentPlan(
         blank=True,
     )
     abort_comment = models.CharField(
-        max_length=255,
+        max_length=COMMENT_MAX_LENGTH,
         blank=True,
         help_text="Reason for aborting",
     )

@@ -4,20 +4,20 @@
         "Content-Type": "application/json",
         "Vary": "Accept, Cookie, origin",
         "Allow": "GET, POST",
-        "ETag": "3581beeef28b523c4e69eb6cbe4746c8",
+        "ETag": "92455dfb60b798a7748068b519e5b5aa",
         "Cache-Control": "private, no-cache",
-        "X-Hope-Backend-Version": "None",
+        "X-Frame-Options": "SAMEORIGIN",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "same-origin",
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": "898"
+        "Content-Length": "926"
     },
     "data": {
-        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/p3a9/payment-plans/?limit=50&offset=50",
+        "next": "http://testserver/api/rest/business-areas/business-area-0/programs/pf-i/payment-plans/?limit=50&offset=50",
         "previous": null,
         "results": [
             {
-                "id": "13182a64-1484-4cba-a551-51edae97458a",
+                "id": "deb01862-9373-40ba-99a3-b4c4d79cf717",
                 "unicef_id": "PP-BA0000-25-00000001",
                 "name": null,
                 "status": "OPEN",
@@ -38,14 +38,14 @@
                 "created_at": "2025-01-01T00:00:00Z",
                 "updated_at": "2025-01-01T00:00:00Z",
                 "program": {
-                    "id": "242ca25d-29c0-4b50-8e5a-1880fd1dc044",
-                    "code": "p3a9",
+                    "id": "fa8df7b1-cfc3-44ae-9042-0fb87d0d8e7e",
+                    "code": "pf-i",
                     "name": "Program 0",
                     "status": "ACTIVE",
                     "screen_beneficiary": false
                 },
                 "payment_plan_group": {
-                    "id": "3d712672-2820-4d59-adfa-ab99883848f1",
+                    "id": "24fa35bc-b9cf-43a3-aa4d-336fd64d31d0",
                     "unicef_id": "PPG-2",
                     "name": "Default Group",
                     "vision_managed": false

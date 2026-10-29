@@ -80,6 +80,7 @@ from hope.models import (
     ProgramCycle,
     log_create,
 )
+from hope.models.approval import COMMENT_MAX_LENGTH
 from hope.models.payment_plan_purpose import PaymentPlanPurpose
 
 logger = logging.getLogger(__name__)
@@ -148,11 +149,12 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: dict) -> dict:
-        payment_plan = self.context["payment_plan"]
-        data["payment_plan"] = payment_plan
+        # The view passes the owner: {"payment_plan_group": group} or {"follow_up_instruction": instruction}.
+        owner = self.context["owner"]
+        data.update(owner)
         data["created_by"] = self.context["request"].user
 
-        if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
+        if PaymentPlanSupportingDocument.objects.filter(**owner).count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
             raise serializers.ValidationError(
                 f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} "
                 f"supporting documents."
@@ -183,7 +185,7 @@ class XlsxErrorSerializer(serializers.Serializer):
 
 
 class AcceptanceProcessSerializer(serializers.Serializer):
-    comment = serializers.CharField(required=False)
+    comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
 class PaymentPlanGroupDeliveryExportSerializer(serializers.Serializer):
@@ -958,6 +960,7 @@ class FollowUpInstructionDetailSerializer(OwnerExchangeRateSerializerMixin, Foll
     custom_exchange_rate = serializers.BooleanField(read_only=True)
     payment_plans = FollowUpInstructionChildPaymentPlanSummarySerializer(many=True, read_only=True)
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     closed_by = serializers.SerializerMethodField()
     export_pdf_file_summary = serializers.SerializerMethodField()
 
@@ -965,6 +968,7 @@ class FollowUpInstructionDetailSerializer(OwnerExchangeRateSerializerMixin, Foll
         fields = FollowUpInstructionListSerializer.Meta.fields + (  # type: ignore[assignment]
             "payment_plans",
             "approval_process",
+            "supporting_documents",
             "abort_comment",
             "closure_comment",
             "closed_by",
@@ -1019,7 +1023,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
-    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
@@ -1059,7 +1062,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
             "can_delete",
-            "supporting_documents",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
             "approval_process",
@@ -1241,14 +1243,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @extend_schema_field(ApprovalProcessSerializer(many=True))
     def get_approval_process(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        # A grouped plan's approvals are read from its group; a Follow-Up Instruction child shows its instruction's.
-        if not obj.follow_up_instruction_id:
+        # A plan is approved together with its group, or with its Follow-Up Instruction; it shows their approvals.
+        owner = obj.follow_up_instruction if obj.follow_up_instruction_id else obj.payment_plan_group
+        if owner is None:
             return []
-        return list(
-            ApprovalProcessSerializer(
-                obj.follow_up_instruction.approval_process.all(), many=True, context=self.context
-            ).data
-        )
+        return list(ApprovalProcessSerializer(owner.approval_process.all(), many=True, context=self.context).data)
 
     def get_bank_reconciliation_success(self, obj: PaymentPlan) -> int:
         summary = self._payments_summary(obj)
@@ -1273,7 +1272,7 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
             (PaymentPlan.Action.REVIEW.value, PaymentPlan.Action.REVIEW.label),
         ]
     )
-    comment = serializers.CharField(required=False, allow_blank=True)
+    comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False, allow_blank=True)
 
 
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
@@ -1965,7 +1964,7 @@ class AssignFundsCommitmentsSerializer(serializers.Serializer):
 
 
 class PaymentPlanAbortSerializer(serializers.Serializer):
-    abort_comment = serializers.CharField(max_length=255, required=False)
+    abort_comment = serializers.CharField(max_length=COMMENT_MAX_LENGTH, required=False)
 
 
 class PaymentPlanCloseSerializer(serializers.Serializer):
@@ -2157,6 +2156,7 @@ class PaymentPlanGroupDetailSerializer(
     available_funds_commitments = serializers.SerializerMethodField()
     can_assign_funds_commitments = serializers.BooleanField(read_only=True)
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     closed_by = serializers.SerializerMethodField()
     total_entitled_quantity_usd = serializers.SerializerMethodField()
     total_delivered_quantity_usd = serializers.SerializerMethodField()
@@ -2191,6 +2191,7 @@ class PaymentPlanGroupDetailSerializer(
             "admin_url",
             "background_action_status",
             "approval_process",
+            "supporting_documents",
             "abort_comment",
             "closure_comment",
             "closed_by",

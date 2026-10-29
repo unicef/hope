@@ -258,7 +258,10 @@ class PaymentPlanSupportingDocumentFactory(DjangoModelFactory):
         model = PaymentPlanSupportingDocument
 
     title = factory.Sequence(lambda n: f"Supporting Document {n}")
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    follow_up_instruction = None
+    payment_plan_group = factory.LazyAttribute(
+        lambda obj: None if obj.follow_up_instruction else PaymentPlanGroupFactory()
+    )
     file = factory.Sequence(
         lambda n: SimpleUploadedFile(f"supporting_doc_{n}.pdf", b"abc", content_type="application/pdf")
     )

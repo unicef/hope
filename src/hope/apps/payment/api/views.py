@@ -211,6 +211,12 @@ logger = logging.getLogger(__name__)
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
+REJECT_PERMISSION_BY_STATUS: dict[str | None, Permissions] = {
+    PaymentPlan.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+    PaymentPlan.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+    PaymentPlan.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+}
+
 
 class ScopedPaymentPlanMixin:
     payment_plan_url_kwarg = "payment_plan_pk"
@@ -1305,6 +1311,8 @@ class FollowUpInstructionViewSet(
         "mark_as_released": [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
         "delivery_export_xlsx": [Permissions.PM_VIEW_LIST],
         "delivery_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
+        "ready_for_closure": [Permissions.PM_MARK_READY_FOR_CLOSURE],
+        "send_back_to_finished": [Permissions.PM_MARK_READY_FOR_CLOSURE],
         "close": [Permissions.PM_CLOSE_FINISHED],
         "abort": [Permissions.PM_ABORT],
         "reactivate_abort": [Permissions.PM_REACTIVATE_ABORT],
@@ -1425,6 +1433,9 @@ class FollowUpInstructionViewSet(
     @transaction.atomic
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instruction = self.get_object()
+        reject_permission = REJECT_PERMISSION_BY_STATUS.get(instruction.status)
+        if reject_permission and not request.user.has_perm(reject_permission.value, instruction.program):
+            raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         user = self._request_user(request)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1521,6 +1532,22 @@ class FollowUpInstructionViewSet(
         file.seek(0)
         instruction = FollowUpInstructionService(instruction=instruction).import_delivery_xlsx(
             self._request_user(request), file
+        )
+        return self._detail_response(instruction)
+
+    @extend_schema(request=None, responses={200: FollowUpInstructionDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="ready-for-closure")
+    def ready_for_closure(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = FollowUpInstructionService(instruction=self.get_object()).ready_for_closure(
+            self._request_user(request)
+        )
+        return self._detail_response(instruction)
+
+    @extend_schema(request=None, responses={200: FollowUpInstructionDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="send-back-to-finished")
+    def send_back_to_finished(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        instruction = FollowUpInstructionService(instruction=self.get_object()).send_back_to_finished(
+            self._request_user(request)
         )
         return self._detail_response(instruction)
 
@@ -2051,11 +2078,12 @@ class AccountAttachmentViewSet(ProgramVisibilityMixin, mixins.CreateModelMixin, 
         )
 
 
-class PaymentPlanSupportingDocumentViewSet(
-    ProgramMixin, ScopedPaymentPlanMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
-):
+class SupportingDocumentViewSet(ProgramMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+    """Upload, delete and download the supporting documents of a group or a Follow-Up Instruction."""
+
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
+    owner_field: str
 
     permissions_by_action = {
         "create": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
@@ -2064,33 +2092,35 @@ class PaymentPlanSupportingDocumentViewSet(
         "download": [Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT],
     }
 
+    @cached_property
+    def owner(self) -> PaymentPlanGroup | FollowUpInstruction:
+        raise NotImplementedError
+
     def get_queryset(self) -> QuerySet:
-        return PaymentPlanSupportingDocument.objects.filter(payment_plan=self.payment_plan)
+        return PaymentPlanSupportingDocument.objects.filter(**{self.owner_field: self.owner})
 
     def get_object(self) -> PaymentPlanSupportingDocument:
         return get_object_or_404(self.get_queryset(), id=self.kwargs.get("file_id"))
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()
-        context["payment_plan"] = self.payment_plan
+        context["owner"] = {self.owner_field: self.owner}
         return context
 
     @transaction.atomic
     def perform_create(self, serializer: Any) -> None:
         document = serializer.save()
-        log_payment_plan_supporting_document(document.payment_plan, self.request.user, document.title, created=True)
+        log_payment_plan_supporting_document(self.owner, self.request.user, document.title, created=True)
 
     @transaction.atomic
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         document = self.get_object()
-        payment_plan = document.payment_plan
         title = document.title
         document.delete()
-        log_payment_plan_supporting_document(payment_plan, request.user, title, created=False)
+        log_payment_plan_supporting_document(self.owner, request.user, title, created=False)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
-    @transaction.atomic
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         document = self.get_object()
         file = document.file
@@ -2099,6 +2129,26 @@ class PaymentPlanSupportingDocumentViewSet(
             file.open(),
             as_attachment=True,
             content_type=file_mimetype or "application/octet-stream",
+        )
+
+
+class PaymentPlanGroupSupportingDocumentViewSet(SupportingDocumentViewSet):
+    owner_field = "payment_plan_group"
+
+    @cached_property
+    def owner(self) -> PaymentPlanGroup:
+        return get_object_or_404(
+            PaymentPlanGroup, pk=self.kwargs.get("payment_plan_group_pk"), cycle__program=self.program
+        )
+
+
+class FollowUpInstructionSupportingDocumentViewSet(SupportingDocumentViewSet):
+    owner_field = "follow_up_instruction"
+
+    @cached_property
+    def owner(self) -> FollowUpInstruction:
+        return get_object_or_404(
+            FollowUpInstruction, pk=self.kwargs.get("follow_up_instruction_pk"), program=self.program
         )
 
 
@@ -2769,11 +2819,7 @@ class PaymentPlanGroupViewSet(
     @action(detail=True, methods=["post"])
     def reject(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan_group = self.get_object()
-        reject_permission = {
-            PaymentPlanGroup.Status.IN_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
-            PaymentPlanGroup.Status.IN_AUTHORIZATION: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            PaymentPlanGroup.Status.IN_REVIEW: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-        }.get(payment_plan_group.status)
+        reject_permission = REJECT_PERMISSION_BY_STATUS.get(payment_plan_group.status)
         if reject_permission and not request.user.has_perm(reject_permission.value, payment_plan_group.cycle.program):
             raise PermissionDenied(detail={"required_permissions": [reject_permission.value]})
         return self._run_acceptance_action(request, PaymentPlan.Action.REJECT)
@@ -2812,7 +2858,7 @@ class PaymentPlanGroupViewSet(
     @extend_schema(request=None, responses={200: PaymentPlanGroupDetailSerializer})
     @action(detail=True, methods=["post"], url_path="reactivate-abort")
     def reactivate_abort(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._run_status_action(request, lambda service: service.reactivate_abort())
+        return self._run_status_action(request, lambda service: service.reactivate_abort(str(request.user.pk)))
 
     def _run_acceptance_action(self, request: Request, plan_action: "PaymentPlan.Action") -> Response:
         serializer = self.get_serializer(data=request.data)

@@ -1,6 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ExportInstructionSummaryPdfButton } from '@containers/pages/paymentmodule/FollowUpInstructions/actions/ExportInstructionSummaryPdfButton';
 import { ChildPaymentPlansTable } from '@containers/pages/paymentmodule/FollowUpInstructions/ChildPaymentPlansTable';
 import { FollowUpInstructionDetailsHeader } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionDetailsHeader';
@@ -134,6 +135,11 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
         headerAction={
           <ExportInstructionSummaryPdfButton instruction={instruction} />
         }
+      />
+      <SupportingDocumentsSection
+        key={instruction.id}
+        ownerPath={`follow-up-instructions/${instruction.id}`}
+        supportingDocuments={instruction.supportingDocuments}
       />
       <ChildPaymentPlansTable paymentPlans={instruction.paymentPlans} />
     </Box>

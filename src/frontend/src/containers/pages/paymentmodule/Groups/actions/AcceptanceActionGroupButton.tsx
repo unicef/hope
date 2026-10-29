@@ -1,7 +1,6 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '@core/ErrorButton';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
@@ -27,6 +26,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../../programContext';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 import type { PaymentPlanGroupDetail } from '../types';
 
 export type GroupAcceptanceAction =
@@ -136,8 +136,7 @@ export function AcceptanceActionGroupButton({
         businessAreaSlug: businessArea,
         programCode: programId,
         id: group.id,
-        // The API rejects a blank comment, so leave it out when empty.
-        requestBody: comment ? { comment } : {},
+        requestBody: { comment },
       }),
     onSuccess: async () => {
       showMessage(t(config.successMessage));
@@ -156,7 +155,9 @@ export function AcceptanceActionGroupButton({
   });
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(COMMENT_MAX_LENGTH, 'Too long'),
   });
   const showLastActionNote = config.isLastAction(group.approvalProcess?.[0]);
 
@@ -164,14 +165,12 @@ export function AcceptanceActionGroupButton({
     <Formik
       initialValues={{ comment: '' }}
       onSubmit={(values, { resetForm }) => {
-        mutate(values.comment);
-        resetForm({});
+        mutate(values.comment, { onSuccess: () => resetForm() });
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => (
+      {({ submitForm, resetForm }) => (
         <>
-          {dialogOpen && <AutoSubmitFormOnEnter />}
           <Box sx={{ p: 2 }}>
             {action === 'reject' ? (
               <ErrorButton
@@ -195,7 +194,10 @@ export function AcceptanceActionGroupButton({
           </Box>
           <Dialog
             open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -215,6 +217,7 @@ export function AcceptanceActionGroupButton({
                   <Field
                     name="comment"
                     multiline
+                    minRows={3}
                     fullWidth
                     variant="filled"
                     label="Comment (optional)"
@@ -225,7 +228,14 @@ export function AcceptanceActionGroupButton({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setDialogOpen(false);
+                  }}
+                >
+                  CANCEL
+                </Button>
                 <LoadingButton
                   loading={isPending}
                   type="submit"

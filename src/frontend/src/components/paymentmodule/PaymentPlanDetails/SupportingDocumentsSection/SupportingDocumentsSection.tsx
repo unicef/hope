@@ -38,9 +38,14 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanSupportingDocument } from '@restgenerated/models/PaymentPlanSupportingDocument';
 import { showApiErrorMessages } from '@utils/utils';
 import { getErrorMessage } from '@utils/errors';
+import {
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+  responsiveValue,
+} from 'src/responsive';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -54,12 +59,15 @@ const StyledBox = styled(Box)`
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanDetail;
+  /** The group or Follow-Up Instruction part of the URL, e.g. `payment-plan-groups/<id>`. */
+  ownerPath: string;
+  supportingDocuments: PaymentPlanSupportingDocument[];
 }
 
 export const SupportingDocumentsSection = ({
   initialOpen = false,
-  paymentPlan,
+  ownerPath,
+  supportingDocuments,
 }: SupportingDocumentsSectionProps): ReactElement => {
   const permissions = usePermissions();
   const confirm = useConfirmation();
@@ -70,9 +78,7 @@ export const SupportingDocumentsSection = ({
     useDownloadSupportingDocument();
 
   const { businessArea, programId } = useBaseUrl();
-  const [documents, setDocuments] = useState(
-    paymentPlan?.supportingDocuments || [],
-  );
+  const [documents, setDocuments] = useState(supportingDocuments);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [isExpanded, setIsExpanded] = useState(initialOpen);
@@ -101,20 +107,20 @@ export const SupportingDocumentsSection = ({
       mutationFn: ({
         _businessArea,
         _programId,
-        paymentPlanId,
+        _ownerPath,
         file,
         _title,
       }: {
         _businessArea: string;
         _programId: string;
-        paymentPlanId: string;
+        _ownerPath: string;
         file: File;
         _title: string;
       }) =>
         uploadSupportingDocument(
           _businessArea,
           _programId,
-          paymentPlanId,
+          _ownerPath,
           file,
           _title,
         ),
@@ -168,23 +174,18 @@ export const SupportingDocumentsSection = ({
     mutate({
       _businessArea: businessArea,
       _programId: programId,
-      paymentPlanId: paymentPlan.id,
+      _ownerPath: ownerPath,
       file: fileToImport,
       _title: title,
     });
   };
 
-  const handleRemove = async (
-    _businessArea: string,
-    _programId: string,
-    paymentPlanId: string,
-    fileId: number,
-  ) => {
+  const handleRemove = async (fileId: number) => {
     try {
       await deleteSupportingDocument(
-        _businessArea,
-        _programId,
-        paymentPlanId,
+        businessArea,
+        programId,
+        ownerPath,
         fileId.toString(),
       );
       setDocuments(documents.filter((doc) => doc.id !== fileId));
@@ -208,7 +209,7 @@ export const SupportingDocumentsSection = ({
     downloadSupportingDocument({
       businessAreaSlug: businessArea,
       programId,
-      paymentPlanId: paymentPlan.id,
+      ownerPath,
       fileId: fileId.toString(),
       fileName: fileName,
     });
@@ -227,6 +228,7 @@ export const SupportingDocumentsSection = ({
       <Box
         sx={{
           display: 'flex',
+          flexWrap: responsiveValue('wrap', 'nowrap'),
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
@@ -276,9 +278,9 @@ export const SupportingDocumentsSection = ({
             mt: 2,
           }}
         >
-          <Grid container spacing={3}>
+          <ResponsiveGridContainer spacing={3}>
             {documents.map((doc) => (
-              <Grid size={3} key={doc.id}>
+              <ResponsiveGrid size="quarter" key={doc.id}>
                 <GreyBox
                   data-cy="document-item"
                   sx={{
@@ -326,14 +328,7 @@ export const SupportingDocumentsSection = ({
                               title: confirmationModalTitle,
                               content: confirmationText,
                               type: 'error',
-                            }).then(() =>
-                              handleRemove(
-                                businessArea,
-                                programId,
-                                paymentPlan.id,
-                                doc.id,
-                              ),
-                            )
+                            }).then(() => handleRemove(doc.id))
                           }
                         >
                           <DeleteIcon />
@@ -342,9 +337,9 @@ export const SupportingDocumentsSection = ({
                     </Box>
                   </Box>
                 </GreyBox>
-              </Grid>
+              </ResponsiveGrid>
             ))}
-          </Grid>
+          </ResponsiveGridContainer>
         </Box>
       </Collapse>
       {canUploadFile && (

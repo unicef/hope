@@ -292,11 +292,6 @@ class XlsxPaymentPlanGroupDeliveryImportService:
                 flow = PaymentPlanFlow(payment_plan)
                 flow.background_action_status_none()
                 payment_plan.update_money_fields()
-                if payment_plan.is_instruction_managed:
-                    if payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.ACCEPTED:
-                        flow.status_finished()
-                    elif not payment_plan.is_reconciled and payment_plan.status == PaymentPlan.Status.FINISHED:
-                        flow.status_reopen_for_reconciliation()
                 payment_plan.save()
                 log_payment_plan_change(payment_plan, old_payment_plan, user_id)
                 PaymentPlanService(payment_plan).recalculate_signatures_in_batch()

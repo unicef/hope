@@ -313,17 +313,40 @@ class FollowUpInstructionService:
         return instruction
 
     @transaction.atomic
-    def close(self, user: "User", closure_comment: str | None) -> FollowUpInstruction:
+    def ready_for_closure(self, user: "User") -> FollowUpInstruction:
         instruction = self._locked_for_update()
-        self._validate_child_payment_plans_statuses(
-            {PaymentPlan.Status.FINISHED},
-            "Close instruction",
-        )
+        self._validate_child_payment_plans_statuses({PaymentPlan.Status.FINISHED}, "Mark as Ready for Closure")
         for payment_plan in self._get_child_payment_plans():
             old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
-            service = PaymentPlanService(payment_plan)
-            service.ready_for_closure()
-            updated_payment_plan = service.close(closure_comment=closure_comment, user_id=str(user.pk))
+            updated_payment_plan = PaymentPlanService(payment_plan).ready_for_closure()
+            self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
+        send_follow_up_instruction_notification_emails_async_task(
+            instruction, PaymentPlan.Action.MARK_READY_FOR_CLOSURE.value, str(user.pk), timezone.now().isoformat()
+        )
+        return instruction
+
+    @transaction.atomic
+    def send_back_to_finished(self, user: "User") -> FollowUpInstruction:
+        instruction = self._locked_for_update()
+        self._validate_child_payment_plans_statuses({PaymentPlan.Status.READY_FOR_CLOSURE}, "Send Back")
+        for payment_plan in self._get_child_payment_plans():
+            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+            updated_payment_plan = PaymentPlanService(payment_plan).send_back_to_finished()
+            self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
+        send_follow_up_instruction_notification_emails_async_task(
+            instruction, PaymentPlan.Action.SEND_BACK_TO_FINISHED.value, str(user.pk), timezone.now().isoformat()
+        )
+        return instruction
+
+    @transaction.atomic
+    def close(self, user: "User", closure_comment: str | None) -> FollowUpInstruction:
+        instruction = self._locked_for_update()
+        self._validate_child_payment_plans_statuses({PaymentPlan.Status.READY_FOR_CLOSURE}, "Close instruction")
+        for payment_plan in self._get_child_payment_plans():
+            old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+            updated_payment_plan = PaymentPlanService(payment_plan).close(
+                closure_comment=closure_comment, user_id=str(user.pk)
+            )
             self._log_payment_plan_change(updated_payment_plan, user, old_payment_plan)
         instruction.closure_comment = closure_comment
         instruction.closed_by = user

@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
@@ -9,6 +9,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import type { ReactElement } from 'react';
 import type { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface LookUpLinkedTicketsFiltersProps {
   filter;
@@ -52,22 +53,21 @@ export function LookUpLinkedTicketsFilters({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid
-        container
+      <ResponsiveGridContainer
         spacing={3}
         sx={{
           alignItems: 'flex-end',
         }}
       >
-        <Grid size={{ xs: 3 }}>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy="filters-search"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -80,16 +80,16 @@ export function LookUpLinkedTicketsFilters({
               </MenuItem>
             ))}
           </SelectFilter>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <SearchTextField
             label={t('FSP')}
             value={filter.fsp}
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
             data-cy="filters-fsp"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label="From"
@@ -97,16 +97,16 @@ export function LookUpLinkedTicketsFilters({
             value={filter.createdAtRangeMin}
             dataCy="filters-creation-date-from"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <DatePickerFilter
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
             dataCy="filters-creation-date-to"
           />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
+        </ResponsiveGrid>
+        <ResponsiveGrid size="quarter">
           <AdminAreaAutocomplete
             level={2}
             name="admin2"
@@ -118,8 +118,8 @@ export function LookUpLinkedTicketsFilters({
             setAppliedFilter={setAppliedFilter}
             dataCy="filters-admin"
           />
-        </Grid>
-      </Grid>
+        </ResponsiveGrid>
+      </ResponsiveGridContainer>
     </FiltersSection>
   );
 }

@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { responsiveValue } from 'src/responsive';
 
 const OptionDetails = styled(Box)`
   margin-left: 32px;
@@ -156,7 +157,7 @@ function ConversionToUsd({
   return (
     <Box
       sx={{
-        m: 5,
+        m: responsiveValue(2, 5),
       }}
     >
       <ContainerColumnWithBorder>

@@ -1820,6 +1820,34 @@ def test_export_without_eligible_payments_returns_400(
     assert group.background_action_status is None
 
 
+@pytest.fixture
+def accepted_group_without_plans(cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    group.status = PaymentPlanGroup.Status.ACCEPTED
+    group.save(update_fields=["status"])
+    return group
+
+
+def test_export_group_without_payment_plans_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    accepted_group_without_plans: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, accepted_group_without_plans.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Export requires at least one payment plan in the group." in str(response.json())
+    mocked_task.assert_not_called()
+
+
 def test_export_without_resolvable_template_returns_400(
     client: Any,
     user: Any,
@@ -3423,6 +3451,65 @@ def test_approve_group_with_permission_returns_200(
     assert response.json()["approval_process"][0]["actions"]["approval"][0]["comment"] == "looks right"
 
 
+def test_approve_group_with_2000_character_comment_keeps_the_comment(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "approve"),
+        {"comment": "line one\n" + "a" * 1991},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["approval_process"][0]["actions"]["approval"][0]["comment"] == "line one\n" + "a" * 1991
+
+
+def test_approve_group_with_too_long_comment_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "approve"),
+        {"comment": "a" * 2001},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "comment" in response.json()
+    group_in_approval_with_plan.refresh_from_db()
+    assert group_in_approval_with_plan.status == PaymentPlanGroup.Status.IN_APPROVAL
+
+
+def test_approve_group_with_empty_comment_returns_200(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "approve"),
+        {"comment": ""},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == PaymentPlanGroup.Status.IN_AUTHORIZATION
+
+
 def test_reject_group_in_approval_with_approve_permission_returns_200(
     client: Any,
     user: Any,
@@ -3624,6 +3711,47 @@ def test_abort_group_with_permission_returns_200(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["status"] == PaymentPlanGroup.Status.ABORTED
     assert response.json()["abort_comment"] == "wrong list"
+
+
+def test_abort_group_with_2000_character_comment_keeps_the_comment(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ABORT], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "abort"),
+        {"abort_comment": "a" * 2000},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    group_in_approval_with_plan.refresh_from_db()
+    assert group_in_approval_with_plan.abort_comment == "a" * 2000
+
+
+def test_abort_group_with_too_long_comment_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    group_in_approval_with_plan: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_ABORT], business_area, program=program)
+
+    response = client.post(
+        _group_action_url(business_area.slug, program.code, group_in_approval_with_plan.id, "abort"),
+        {"abort_comment": "a" * 2001},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "abort_comment" in response.json()
+    group_in_approval_with_plan.refresh_from_db()
+    assert group_in_approval_with_plan.status == PaymentPlanGroup.Status.IN_APPROVAL
 
 
 def test_reactivate_aborted_group_with_permission_returns_200(

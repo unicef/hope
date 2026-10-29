@@ -1,4 +1,4 @@
-import { Paper, styled } from '@mui/material';
+import { Box, Paper, styled } from '@mui/material';
 import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import TablePagination from '@mui/material/TablePagination';
@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PAGINATION_SX, responsiveValue } from 'src/responsive';
 import type { ActivityLogEntry } from './types';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
@@ -68,7 +69,7 @@ export function ActivityLogTable({
 
   return (
     <PaperContainer data-cy="activity-log-container">
-      <Toolbar>
+      <Toolbar sx={{ mx: responsiveValue(4, 6) }}>
         <Typography variant="h6" data-cy="activity-log-title">
           {t('Activity Log')}
         </Typography>
@@ -83,26 +84,32 @@ export function ActivityLogTable({
         </Button>
       </Toolbar>
       <Collapse in={expanded}>
-        <Table data-cy="activity-log-table">
-          <Row>
-            {headCells.map((item) => (
-              <HeadingCell
-                data-cy={`heading-cell-${item.id}`}
-                key={item.id}
-                style={{ flex: item.weight || 1 }}
-              >
-                {item.label}
-              </HeadingCell>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table
+            data-cy="activity-log-table"
+            sx={{ minWidth: responsiveValue('800px', '0') }}
+          >
+            <Row>
+              {headCells.map((item) => (
+                <HeadingCell
+                  data-cy={`heading-cell-${item.id}`}
+                  key={item.id}
+                  style={{ flex: item.weight || 1 }}
+                >
+                  {item.label}
+                </HeadingCell>
+              ))}
+              <ButtonPlaceHolder />
+            </Row>
+            {logEntries.map((value) => (
+              <LogRow data-cy="log-row" key={value.id} logEntry={value} />
             ))}
-            <ButtonPlaceHolder />
-          </Row>
-          {logEntries.map((value) => (
-            <LogRow data-cy="log-row" key={value.id} logEntry={value} />
-          ))}
-        </Table>
+          </Table>
+        </Box>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
+          sx={PAGINATION_SX}
           data-cy="pagination"
           count={totalCount}
           rowsPerPage={rowsPerPage}

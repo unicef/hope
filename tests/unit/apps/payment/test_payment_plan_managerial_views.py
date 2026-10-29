@@ -368,6 +368,32 @@ def test_bulk_action_rejects_unsupported_action(
     assert managerial_context["group1"].status == PaymentPlanGroup.Status.IN_APPROVAL
 
 
+def test_bulk_action_rejects_too_long_comment(
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+        managerial_context["business_area"],
+        managerial_context["program1"],
+    )
+
+    response = managerial_context["client"].post(
+        managerial_context["bulk_url"],
+        data={
+            "ids": [managerial_context["group1"].id],
+            "action": PaymentPlan.Action.APPROVE.value,
+            "comment": "a" * 2001,
+        },
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "comment" in response.json()
+    managerial_context["group1"].refresh_from_db()
+    assert managerial_context["group1"].status == PaymentPlanGroup.Status.IN_APPROVAL
+
+
 def test_bulk_action_without_stage_permission_returns_403_and_changes_nothing(
     managerial_context: dict[str, Any],
     create_user_role_with_permissions: Any,

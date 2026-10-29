@@ -9,6 +9,7 @@ import type {
 } from './types';
 import {
   Table,
+  TableContainer,
   TableCell,
   TableHead,
   TableRow,
@@ -28,6 +29,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
+import { responsiveValue } from 'src/responsive';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: string[];
@@ -167,71 +169,73 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
 
   return (
     <BaseSection title={title} buttons={buttons}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell padding="checkbox" style={{ width: '10%' }}>
-              <Box sx={{ flex: 1 }}>
-                <Checkbox
-                  checked={allSelected && selectedAuthorized.length > 0}
-                  onClick={handleSelectAllAuthorized}
-                  data-cy="select-all-authorization"
-                />
-              </Box>
-            </TableCell>
-            {columns.map((column) => (
-              <TableCell key={column.field}>
-                {column.field === 'program' ? (
-                  <ProgramSelect
-                    selectedProgram={selectedProgram}
-                    setSelectedProgram={setSelectedProgram}
-                    programs={programs}
-                    dataCy="program-select-authorization"
+      <TableContainer>
+        <Table sx={{ minWidth: responsiveValue<number | string>(700, 'auto') }}>
+          <TableHead>
+            <TableRow>
+              <TableCell padding="checkbox" style={{ width: '10%' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Checkbox
+                    checked={allSelected && selectedAuthorized.length > 0}
+                    onClick={handleSelectAllAuthorized}
+                    data-cy="select-all-authorization"
                   />
-                ) : (
-                  <TableSortLabel
-                    active={sortField === column.field}
-                    direction={sortDirection}
-                    onClick={() => handleSort(column.field)}
-                  >
-                    {column.headerName}
-                  </TableSortLabel>
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedRows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAuthorized.includes(row.id)}
-                  onChange={() =>
-                    handleSelect(
-                      selectedAuthorized,
-                      setSelectedAuthorized,
-                      row.id,
-                    )
-                  }
-                  data-cy="select-authorization"
-                />
+                </Box>
               </TableCell>
               {columns.map((column) => (
-                <TableCell
-                  key={column.field}
-                  align="left"
-                  data-cy="column-field-authorization"
-                >
-                  {column.renderCell
-                    ? column.renderCell({ value: row[column.field], row })
-                    : row[column.field]}
+                <TableCell key={column.field}>
+                  {column.field === 'program' ? (
+                    <ProgramSelect
+                      selectedProgram={selectedProgram}
+                      setSelectedProgram={setSelectedProgram}
+                      programs={programs}
+                      dataCy="program-select-authorization"
+                    />
+                  ) : (
+                    <TableSortLabel
+                      active={sortField === column.field}
+                      direction={sortDirection}
+                      onClick={() => handleSort(column.field)}
+                    >
+                      {column.headerName}
+                    </TableSortLabel>
+                  )}
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {sortedRows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedAuthorized.includes(row.id)}
+                    onChange={() =>
+                      handleSelect(
+                        selectedAuthorized,
+                        setSelectedAuthorized,
+                        row.id,
+                      )
+                    }
+                    data-cy="select-authorization"
+                  />
+                </TableCell>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.field}
+                    align="left"
+                    data-cy="column-field-authorization"
+                  >
+                    {column.renderCell
+                      ? column.renderCell({ value: row[column.field], row })
+                      : row[column.field]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </BaseSection>
   );
 };

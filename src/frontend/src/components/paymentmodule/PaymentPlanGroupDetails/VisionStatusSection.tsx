@@ -1,11 +1,16 @@
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import { Alert, Box, Grid, Typography } from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  responsiveValue,
+  ResponsiveGrid,
+  ResponsiveGridContainer,
+} from 'src/responsive';
 
 const errorStatuses = new Set([
   'SEND_FAILED',
@@ -35,7 +40,7 @@ export function VisionStatusSection({
       : 'info';
 
   return (
-    <Box sx={{ m: 5 }}>
+    <Box sx={{ m: responsiveValue(2, 5) }}>
       <ContainerColumnWithBorder>
         <Box sx={{ mt: 4 }}>
           <Title>
@@ -48,22 +53,22 @@ export function VisionStatusSection({
             ? `: ${t(vision.errorCode.replaceAll('_', ' '))}`
             : ''}
         </Alert>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 6 }}>
+        <ResponsiveGridContainer spacing={3}>
+          <ResponsiveGrid size="half">
             <LabelizedField
               label={t('Vision Payment Plan ID')}
               value={vision.visionId ?? '-'}
             />
-          </Grid>
-          <Grid size={{ xs: 6 }}>
+          </ResponsiveGrid>
+          <ResponsiveGrid size="half">
             <LabelizedField
               label={t('Funds Commitment Numbers')}
               value={
                 vision.fcNumbers.length ? vision.fcNumbers.join(', ') : '-'
               }
             />
-          </Grid>
-        </Grid>
+          </ResponsiveGrid>
+        </ResponsiveGridContainer>
       </ContainerColumnWithBorder>
     </Box>
   );

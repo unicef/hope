@@ -678,7 +678,7 @@ def test_override_reconciliation_ignores_payment_for_empty_quantity(
         assert payment_plan.status == PaymentPlan.Status.FINISHED
 
 
-def test_group_reconciliation_preserves_closed_plan_and_aborts_when_closed_quantity_changes(
+def test_group_reconciliation_finishes_group_only_when_every_payment_is_reconciled(
     browser: HopeTestBrowser,
     user_with_no_permissions: User,
     business_area: BusinessArea,
@@ -705,54 +705,28 @@ def test_group_reconciliation_preserves_closed_plan_and_aborts_when_closed_quant
 
         first_payment.refresh_from_db()
         second_payment.refresh_from_db()
+        group.refresh_from_db()
         first_plan.refresh_from_db()
         second_plan.refresh_from_db()
         assert first_payment.delivered_quantity == Decimal("50.00")
         assert second_payment.delivered_quantity is None
-        assert first_plan.status == PaymentPlan.Status.FINISHED
+        assert group.status == PaymentPlanGroup.Status.ACCEPTED
+        assert first_plan.status == PaymentPlan.Status.ACCEPTED
         assert second_plan.status == PaymentPlan.Status.ACCEPTED
 
-        first_plan_flow = PaymentPlanFlow(first_plan)
-        first_plan_flow.status_ready_for_closure()
-        first_plan_flow.status_close()
-        first_plan.save()
         _set_delivered_quantities(mixed_reconciliation_file, {str(second_payment.unicef_id): 75})
         browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
 
         _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
         _submit_group_reconciliation(browser)
 
-        first_payment.refresh_from_db()
         second_payment.refresh_from_db()
+        group.refresh_from_db()
         first_plan.refresh_from_db()
         second_plan.refresh_from_db()
-        assert first_payment.delivered_quantity == Decimal("50.00")
         assert second_payment.delivered_quantity == Decimal("75.00")
-        assert first_plan.status == PaymentPlan.Status.CLOSED
-        assert second_plan.status == PaymentPlan.Status.FINISHED
-
-        _set_delivered_quantities(
-            mixed_reconciliation_file,
-            {
-                str(first_payment.unicef_id): 60,
-                str(second_payment.unicef_id): 80,
-            },
-        )
-        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group.id}")
-
-        _open_group_reconciliation_dialog(browser, mixed_reconciliation_file)
-        _enable_reconciliation_override(browser)
-        browser.wait_for_element_clickable('[data-cy="button-delivery-import-xlsx-group-submit"]')
-        browser.click('[data-cy="button-delivery-import-xlsx-group-submit"]')
-        browser.wait_for_text("The entire file cannot be imported.")
-
-        first_payment.refresh_from_db()
-        second_payment.refresh_from_db()
-        first_plan.refresh_from_db()
-        second_plan.refresh_from_db()
-        assert first_payment.delivered_quantity == Decimal("50.00")
-        assert second_payment.delivered_quantity == Decimal("75.00")
-        assert first_plan.status == PaymentPlan.Status.CLOSED
+        assert group.status == PaymentPlanGroup.Status.FINISHED
+        assert first_plan.status == PaymentPlan.Status.FINISHED
         assert second_plan.status == PaymentPlan.Status.FINISHED
 
 
@@ -993,3 +967,35 @@ def test_group_details_overview_shows_totals_and_links_to_cycle(
         browser.wait_for_element_clickable('div[data-cy="label-Cycle"] a').click()
         browser.wait_for_text(cycle.title, 'h5[data-cy="page-header-title"]')
         browser.wait_for_element_visible('div[data-cy="label-Frequency of Payment"]')
+
+
+def test_upload_supporting_document_to_group(
+    browser: HopeTestBrowser,
+    user_with_no_permissions: User,
+    business_area: BusinessArea,
+    group_with_totals: PaymentPlanGroup,
+) -> None:
+    program = group_with_totals.cycle.program
+
+    with grant_permission(
+        user_with_no_permissions,
+        business_area,
+        Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        Permissions.PM_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
+        Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT,
+    ):
+        browser.login(username="noperm_user")
+        browser.open(f"/{business_area.slug}/programs/{program.code}/payment-module/groups/{group_with_totals.id}")
+        browser.wait_for_text("No documents uploaded", '[data-cy="supporting-documents-empty"]')
+
+        browser.wait_for_element_clickable('button[data-cy="upload-file-button"]').click()
+        browser.choose_file('[data-cy="file-input"]', f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+        browser.type('div[data-cy="title-input"] input', "Signed contract")
+        browser.click('button[data-cy="button-import-submit"]')
+        browser.wait_for_text("File uploaded successfully")
+        browser.click('button[data-cy="expand-button"]')
+
+        browser.wait_for_text("Signed contract", '[data-cy="document-item"]')
+
+    assert list(group_with_totals.documents.values_list("title", flat=True)) == ["Signed contract"]

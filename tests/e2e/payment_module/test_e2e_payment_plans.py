@@ -466,8 +466,6 @@ class TestSmokePaymentModule:
         )
         assert "-" in page_payment_module_details.get_label_related_follow_up_payment_plans().text
         assert "CREATE" in page_payment_module_details.get_button_create_exclusions().text
-        assert "Supporting Documents" in page_payment_module_details.get_supporting_documents_title().text
-        assert "No documents uploaded" in page_payment_module_details.get_supporting_documents_empty().text
         assert "0" in page_payment_module_details.get_label_female_children().text
         assert "0" in page_payment_module_details.get_label_female_adults().text
         assert "0" in page_payment_module_details.get_label_male_children().text
@@ -679,20 +677,3 @@ class TestPaymentPlans:
         page_new_payment_plan.get_button_save_payment_plan().click()
 
         assert "Target Population is required" in page_new_payment_plan.get_input_target_population().text
-
-    def test_payment_plan_supporting_documents(
-        self,
-        create_payment_plan_lock: PaymentPlan,
-        page_payment_module: PaymentModule,
-        page_payment_module_details: PaymentModuleDetails,
-    ) -> None:
-        page_payment_module.open_payment_plan(create_payment_plan_lock)
-        page_payment_module_details.get_upload_file_button().click()
-        page_payment_module_details.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
-        page_payment_module_details.get_title_input().find_element(By.TAG_NAME, "input").send_keys("title input")
-        page_payment_module_details.get_button_import_submit().click()
-        # The uploaded document renders inside a collapsed section; expand it first, then
-        # wait for the item. This also awaits the upload request, so teardown's flush
-        # (TRUNCATE) does not deadlock against the request's row locks.
-        page_payment_module_details.get_expand_supporting_documents_button().click()
-        assert page_payment_module_details.get_supporting_document_item()

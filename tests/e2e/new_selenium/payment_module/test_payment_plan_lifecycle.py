@@ -128,7 +128,7 @@ def test_reactivate_aborted_payment_plan_group(
 ) -> None:
     group = aborted_targeted_group
     payment_plan = group.payment_plans.get()
-    old_payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
+    payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
     with grant_permission(
         user_with_no_permissions, business_area, *GROUP_VIEW_PERMISSIONS, Permissions.PM_REACTIVATE_ABORT
     ):
@@ -142,9 +142,10 @@ def test_reactivate_aborted_payment_plan_group(
     assert group.status == PaymentPlanGroup.Status.OPEN
     assert payment_plan.status == PaymentPlan.Status.OPEN
     assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
-    new_payment_ids = set(payment_plan.payment_items.values_list("id", flat=True))
-    assert len(new_payment_ids) == 3
-    assert new_payment_ids.isdisjoint(old_payment_ids)
+    assert payment_plan.background_action_status is None
+    assert set(payment_plan.payment_items.values_list("id", flat=True)) == payment_ids
+    assert len(payment_ids) == 3
+    assert not payment_plan.payment_items.filter(entitlement_quantity__isnull=False).exists()
 
 
 def test_split_payment_plan_group_by_records(

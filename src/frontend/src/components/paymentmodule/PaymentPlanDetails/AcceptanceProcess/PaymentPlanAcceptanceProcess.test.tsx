@@ -7,14 +7,6 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock('@hooks/usePaymentPlanGroup', () => ({
-  usePaymentPlanGroup: (groupId: string | undefined) => ({
-    data: groupId
-      ? { approvalProcess: [{ sentForApprovalDate: 'group-approval' }] }
-      : undefined,
-  }),
-}));
-
 vi.mock('./AcceptanceProcessRow', () => ({
   AcceptanceProcessRow: ({ acceptanceProcess }: any) => (
     <div data-cy={acceptanceProcess.sentForApprovalDate} />
@@ -47,7 +39,7 @@ describe('PaymentPlanAcceptanceProcess', () => {
             status: PaymentPlanStatusEnum.IN_AUTHORIZATION,
             isInstructionManaged: false,
             paymentPlanGroup: { id: 'group-1' },
-            approvalProcess: [],
+            approvalProcess: [{ sentForApprovalDate: 'group-approval' }],
           } as any
         }
       />,

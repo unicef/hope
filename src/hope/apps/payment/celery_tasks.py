@@ -1749,6 +1749,79 @@ def payment_plan_full_rebuild_async_task(payment_plan: PaymentPlan, update_money
     )
 
 
+def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.services.payment_plan_services import PaymentPlanService
+    from hope.models import PaymentPlan
+
+    payment_plan_id = job.config["payment_plan_id"]
+
+    with cache.lock(
+        f"{PAYMENT_PLAN_FULL_REBUILD_LOCK_PREFIX}{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        if payment_plan.status != PaymentPlan.Status.ABORTED:
+            logger.warning(f"Payment plan {payment_plan_id} is no longer aborted, skipping the payees refresh.")
+            return
+        old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+        flow = PaymentPlanFlow(payment_plan)
+        flow.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
+        try:
+            with transaction.atomic():
+                PaymentPlanService(payment_plan).refresh_payees()
+                flow = PaymentPlanFlow(payment_plan)
+                flow.build_status_ok()
+                flow.status_reactivate_abort()
+                flow.background_action_status_none()
+                payment_plan.save(
+                    update_fields=(
+                        "build_status",
+                        "built_at",
+                        "status",
+                        "status_date",
+                        "background_action_status",
+                        "updated_at",
+                    )
+                )
+                log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
+        except Exception:
+            logger.exception("Payment plan payees refresh failed")
+            flow = PaymentPlanFlow(payment_plan)
+            flow.build_status_failed()
+            payment_plan.save(update_fields=("build_status", "built_at"))
+            raise
+
+
+def mark_payment_plan_rebuild_error(job: AsyncRetryJob, _exception: Exception) -> None:
+    from hope.models import PaymentPlan
+
+    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
+    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
+    flow = PaymentPlanFlow(payment_plan)
+    flow.background_action_status_rebuild_error()
+    payment_plan.save(update_fields=("background_action_status", "updated_at"))
+    log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
+
+
+def payment_plan_refresh_payees_async_task(payment_plan: PaymentPlan, user_id: str | None = None) -> None:
+    payment_plan_id = str(payment_plan.id)
+    AsyncRetryJob.queue_task(
+        instance=payment_plan,
+        job_name=payment_plan_refresh_payees_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.payment_plan_refresh_payees_async_task_action",
+        config={
+            "payment_plan_id": payment_plan_id,
+            "user_id": user_id,
+            "on_failure_action": "hope.apps.payment.celery_tasks.mark_payment_plan_rebuild_error",
+        },
+        group_key="payment",
+        description=f"Refresh payees of reactivated payment plan {payment_plan_id}",
+    )
+
+
 class CheckRapidProVerificationTask:
     def execute(self) -> None:
         from hope.models import PaymentVerificationPlan

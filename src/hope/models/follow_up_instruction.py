@@ -11,7 +11,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from hope.apps.activity_log.utils import create_mapping_dict
-from hope.models.approval import Approval
+from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
 from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
@@ -32,6 +32,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         IN_REVIEW = "IN_REVIEW"
         ACCEPTED = "ACCEPTED"
         FINISHED = "FINISHED"
+        READY_FOR_CLOSURE = "READY_FOR_CLOSURE"
         CLOSED = "CLOSED"
         ABORTED = "ABORTED"
 
@@ -52,6 +53,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
         Status.CLOSED,
         Status.ABORTED,
     )
@@ -131,7 +133,7 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         on_delete=models.SET_NULL,
         help_text="Generated summary PDF",
     )
-    abort_comment = models.CharField(max_length=255, blank=True, default="")
+    abort_comment = models.CharField(max_length=COMMENT_MAX_LENGTH, blank=True, default="")
     closure_comment = models.TextField(null=True, blank=True)
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
