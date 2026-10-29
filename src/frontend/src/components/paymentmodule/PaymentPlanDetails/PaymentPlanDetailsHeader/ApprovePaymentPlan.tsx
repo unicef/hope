@@ -1,7 +1,6 @@
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -26,6 +25,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
+import { COMMENT_MAX_LENGTH } from 'src/config';
 import { PERMISSIONS } from 'src/config/permissions';
 
 export interface ApprovePaymentPlanProps {
@@ -81,7 +81,9 @@ export function ApprovePaymentPlan({
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
+    comment: Yup.string()
+      .min(4, 'Too short')
+      .max(COMMENT_MAX_LENGTH, 'Too long'),
   });
 
   const shouldShowLastApproverMessage = (): boolean => {
@@ -98,21 +100,22 @@ export function ApprovePaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        approve({
-          businessAreaSlug: businessArea,
-          id: paymentPlan.id,
-          programCode: programId,
-          requestBody: {
-            comment: values.comment,
+        approve(
+          {
+            businessAreaSlug: businessArea,
+            id: paymentPlan.id,
+            programCode: programId,
+            requestBody: {
+              comment: values.comment,
+            },
           },
-        });
-        resetForm({});
+          { onSuccess: () => resetForm() },
+        );
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => (
+      {({ submitForm, resetForm }) => (
         <>
-          {approveDialogOpen && <AutoSubmitFormOnEnter />}
           <Box
             sx={{
               p: 2,
@@ -131,7 +134,10 @@ export function ApprovePaymentPlan({
           </Box>
           <Dialog
             open={approveDialogOpen}
-            onClose={() => setApproveDialogOpen(false)}
+            onClose={() => {
+              resetForm();
+              setApproveDialogOpen(false);
+            }}
             scroll="paper"
             aria-labelledby="form-dialog-title"
             maxWidth="md"
@@ -165,6 +171,7 @@ export function ApprovePaymentPlan({
                   <Field
                     name="comment"
                     multiline
+                    minRows={3}
                     fullWidth
                     variant="filled"
                     label="Comment (optional)"
@@ -175,7 +182,12 @@ export function ApprovePaymentPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setApproveDialogOpen(false)}>
+                <Button
+                  onClick={() => {
+                    resetForm();
+                    setApproveDialogOpen(false);
+                  }}
+                >
                   CANCEL
                 </Button>
                 <LoadingButton

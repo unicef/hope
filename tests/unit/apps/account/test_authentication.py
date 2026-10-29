@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from social_core.exceptions import InvalidEmail
+from social_core.exceptions import AuthResponseError
 
 from extras.test_utils.factories import (
     BusinessAreaFactory,
@@ -279,17 +279,29 @@ def test_require_email_returns_none_when_new_user_with_email_in_details(mock_str
     assert result is None
 
 
-def test_require_email_raises_invalid_email_when_new_user_without_email(mock_strategy: MagicMock) -> None:
-    with pytest.raises(InvalidEmail):
-        require_email(mock_strategy, {}, user=None, is_new=True)
+@pytest.mark.parametrize(
+    "details",
+    [
+        {},
+        {"email": ""},
+    ],
+)
+def test_require_email_raises_response_error_when_new_user_has_no_email(
+    mock_strategy: MagicMock,
+    mock_backend: MagicMock,
+    details: dict[str, str],
+) -> None:
+    with pytest.raises(AuthResponseError) as exc_info:
+        require_email(
+            mock_strategy,
+            details,
+            backend=mock_backend,
+            user=None,
+            is_new=True,
+        )
 
-
-def test_require_email_raises_invalid_email_when_new_user_with_empty_email_string(mock_strategy: MagicMock) -> None:
-    with pytest.raises(InvalidEmail):
-        require_email(mock_strategy, {"email": ""}, user=None, is_new=True)
-
-
-# --- create_user tests ---
+    assert exc_info.value.code == "profile_email_missing"
+    assert exc_info.value.stage == "pipeline"
 
 
 def test_create_user_returns_is_new_false_when_user_exists(

@@ -284,7 +284,7 @@ class TestPeople:
         row1 = page_grievance_details_page.get_rows()[1].text.split(" ")
         assert "Preferred Language" in f"{row1[0]} {row1[1]}"
         assert "English" in row1[-1]
-        page_grievance_details_page.get_button_assign_to_me().click()
+        page_grievance_details_page.assign_to_me()
         page_grievance_details_page.get_button_set_in_progress().click()
         page_grievance_details_page.get_button_send_for_approval().click()
         page_grievance_details_page.get_button_close_ticket()
