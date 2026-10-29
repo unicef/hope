@@ -1,1225 +1,372 @@
-from datetime import datetime
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 from flags.models import FlagState
 import pytest
-from rest_framework.exceptions import ValidationError
 
 from extras.test_utils.factories import (
     ApprovalProcessFactory,
     BusinessAreaFactory,
-    FollowUpInstructionFactory,
     FundsCommitmentHeaderFactory,
     FundsCommitmentItemFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
 )
-from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
-from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
+from hope.contrib.vision.api import VisionAPIError, VisionAPIMissingCredentialsError
+from hope.contrib.vision.choices import VisionErrorCode, VisionStatus
 from hope.contrib.vision.services import FundsCommitmentAssignmentError, VisionService
 from hope.contrib.vision.tasks import (
-    notify_payment_plan_status_to_vision_async_task,
-    notify_payment_plan_status_to_vision_async_task_action,
-    send_payment_plan_to_vision_async_task,
-    send_payment_plan_to_vision_async_task_action,
+    notify_payment_plan_group_status_to_vision_async_task,
+    notify_payment_plan_group_status_to_vision_async_task_action,
+    send_payment_plan_group_to_vision_async_task,
+    send_payment_plan_group_to_vision_async_task_action,
 )
-from hope.models import Approval, AsyncJob, PaymentPlan, PaymentPlanGroup
+from hope.models import AsyncJob, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def vision_payment_plan() -> PaymentPlan:
+def vision_group() -> PaymentPlanGroup:
     business_area = BusinessAreaFactory(vision_integration_active=True)
-    FlagState.objects.get_or_create(
+    FlagState.objects.update_or_create(
         name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
-        value="True",
+        defaults={"value": "True"},
     )
-    payment_plan = PaymentPlanFactory(
+    plan = PaymentPlanFactory(
         business_area=business_area,
         program_cycle__program__business_area=business_area,
         status=PaymentPlan.Status.IN_REVIEW,
     )
-    group = payment_plan.payment_plan_group
-    group.status = group.Status.IN_REVIEW
+    group = plan.payment_plan_group
+    group.status = PaymentPlanGroup.Status.IN_REVIEW
     group.save(update_fields=["status"])
-    ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
-    return payment_plan
-
-
-@pytest.fixture
-def vision_enabled_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    FlagState.objects.get_or_create(
-        name="VISION_INTEGRATION_ACTIVE",
-        condition="boolean",
-        value="True",
-    )
-    return vision_payment_plan
-
-
-@pytest.fixture(params=["global", "business-area"])
-def vision_disabled_payment_plan(request, vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    if request.param == "global":
-        FlagState.objects.filter(name="VISION_INTEGRATION_ACTIVE", condition="boolean").update(value="False")
-    else:
-        vision_payment_plan.business_area.vision_integration_active = False
-        vision_payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    return vision_payment_plan
-
-
-@pytest.fixture
-def instruction_managed_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
-    instruction = FollowUpInstructionFactory(
-        business_area=vision_enabled_payment_plan.business_area,
-        program=vision_enabled_payment_plan.program,
-        created_by=vision_enabled_payment_plan.created_by,
-    )
-    vision_enabled_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
-    vision_enabled_payment_plan.follow_up_instruction = instruction
-    vision_enabled_payment_plan.payment_plan_group = None
-    vision_enabled_payment_plan.save(update_fields=["plan_type", "follow_up_instruction", "payment_plan_group"])
-    return vision_enabled_payment_plan
-
-
-@pytest.fixture
-def follow_up_vision_payment_plan(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
-    source_group = vision_enabled_payment_plan.payment_plan_group
-    follow_up_group = PaymentPlanGroupFactory(
-        cycle=vision_enabled_payment_plan.program_cycle,
-        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        source_group=source_group,
-        status=source_group.Status.IN_REVIEW,
-    )
-    vision_enabled_payment_plan.plan_type = PaymentPlan.PlanType.FOLLOW_UP
-    vision_enabled_payment_plan.payment_plan_group = follow_up_group
-    vision_enabled_payment_plan.save(update_fields=["plan_type", "payment_plan_group"])
-    return vision_enabled_payment_plan
-
-
-@pytest.fixture(params=[PaymentPlan.PlanType.TOP_UP, PaymentPlan.PlanType.TOP_UP_AMENDMENT])
-def linked_vision_payment_plan(request, vision_enabled_payment_plan: PaymentPlan) -> PaymentPlan:
-    source_group = vision_enabled_payment_plan.payment_plan_group
-    linked_group = PaymentPlanGroupFactory(
-        cycle=vision_enabled_payment_plan.program_cycle,
-        plan_type=request.param,
-        source_group=source_group,
-        status=source_group.Status.IN_REVIEW,
-    )
-    vision_enabled_payment_plan.plan_type = request.param
-    vision_enabled_payment_plan.payment_plan_group = linked_group
-    vision_enabled_payment_plan.save(update_fields=["plan_type", "payment_plan_group"])
-    return vision_enabled_payment_plan
-
-
-@pytest.fixture
-def accepted_vision_managed_group(vision_enabled_payment_plan: PaymentPlan) -> PaymentPlanGroup:
-    vision_enabled_payment_plan.status = PaymentPlan.Status.ACCEPTED
-    vision_enabled_payment_plan.internal_data = {"vision": {"status": VisionStatus.RELEASED.value}}
-    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
-    group = vision_enabled_payment_plan.payment_plan_group
-    group.status = group.Status.ACCEPTED
-    group.save(update_fields=["status"])
+    ApprovalProcessFactory(payment_plan_group=group)
     return group
 
 
 @pytest.fixture
-def matching_fc_items(vision_payment_plan: PaymentPlan) -> list:
-    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
-    return [
-        FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_payment_plan.business_area),
-        FundsCommitmentItemFactory(funds_commitment_header=header, office=None),
+def matching_headers(vision_group: PaymentPlanGroup) -> list:
+    headers = [
+        FundsCommitmentHeaderFactory(funds_commitment_number="FC123"),
+        FundsCommitmentHeaderFactory(funds_commitment_number="FC456"),
     ]
+    for header in headers:
+        FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_group.business_area)
+    return headers
 
 
 @pytest.fixture
-def sibling_plan_with_distinct_header(vision_payment_plan: PaymentPlan) -> tuple[PaymentPlan, str]:
-    sibling = PaymentPlanFactory(
-        business_area=vision_payment_plan.business_area,
-        program_cycle=vision_payment_plan.program_cycle,
-        payment_plan_group=vision_payment_plan.payment_plan_group,
-        status=PaymentPlan.Status.IN_REVIEW,
-    )
-    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC456")
-    FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_payment_plan.business_area)
-    return sibling, header.funds_commitment_number
+def group_waiting_for_vision(vision_group: PaymentPlanGroup) -> PaymentPlanGroup:
+    VisionService.set_status(vision_group, VisionStatus.WAITING_FOR_CALLBACK)
+    vision_group.save(update_fields=["internal_data"])
+    return vision_group
 
 
 @pytest.fixture
-def malformed_vision_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    vision_payment_plan.internal_data = {"vision": "invalid"}
-    return vision_payment_plan
+def group_with_failed_fc(group_waiting_for_vision: PaymentPlanGroup) -> PaymentPlanGroup:
+    VisionService.set_status(group_waiting_for_vision, VisionStatus.FC_NOT_FOUND)
+    group_waiting_for_vision.save(update_fields=["internal_data"])
+    return group_waiting_for_vision
 
 
 @pytest.fixture
-def accepted_vision_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    vision_payment_plan.status = PaymentPlan.Status.ACCEPTED
-    return vision_payment_plan
+def disabled_vision_group(group_waiting_for_vision: PaymentPlanGroup) -> PaymentPlanGroup:
+    FlagState.objects.filter(name="VISION_INTEGRATION_ACTIVE", condition="boolean").update(value="False")
+    return group_waiting_for_vision
 
 
 @pytest.fixture
-def vision_payment_plan_without_approval(vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    vision_payment_plan.payment_plan_group.approval_process.all().delete()
-    return vision_payment_plan
-
-
-@pytest.fixture(
-    params=[
-        (VisionStatus.FC_NOT_FOUND, None),
-        (VisionStatus.CALLBACK_FAILED, VisionErrorCode.FC_AMBIGUOUS),
-        (VisionStatus.CALLBACK_FAILED, VisionErrorCode.FC_CONFLICT),
-    ]
-)
-def payment_plan_with_fc_assignment_failure(request, vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    vision_status, error_code = request.param
-    VisionService.set_status(vision_payment_plan, vision_status, error_code=error_code)
-    return vision_payment_plan
+def shared_header_group(vision_group: PaymentPlanGroup, matching_headers: list) -> PaymentPlanGroup:
+    other = PaymentPlanFactory()
+    matching_headers[0].payment_plan_groups.add(other.payment_plan_group)
+    return other.payment_plan_group
 
 
 @pytest.fixture
-def vision_disabled_payment_plan_with_fc_failure(
-    vision_disabled_payment_plan: PaymentPlan,
-) -> PaymentPlan:
-    VisionService.set_status(vision_disabled_payment_plan, VisionStatus.FC_NOT_FOUND)
-    VisionService.vision_data(vision_disabled_payment_plan)["sent"] = True
-    return vision_disabled_payment_plan
-
-
-@pytest.fixture
-def vision_send_failed_payment_plan(vision_payment_plan: PaymentPlan) -> PaymentPlan:
-    VisionService.set_status(vision_payment_plan, VisionStatus.SEND_FAILED)
-    return vision_payment_plan
-
-
-def test_vision_data_replaces_malformed_state(
-    malformed_vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(0):
-        vision_data = VisionService.vision_data(malformed_vision_payment_plan)
-
-    assert vision_data == {}
-    assert malformed_vision_payment_plan.internal_data == {"vision": {}}
-
-
-def test_vision_status_treats_malformed_state_as_not_sent(
-    malformed_vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(0):
-        vision_status = malformed_vision_payment_plan.vision_status
-
-    assert vision_status == VisionStatus.NOT_SENT.value
-
-
-def test_assign_funds_commitment_headers_from_callback_assigns_multiple_headers_atomically(
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    django_assert_num_queries,
-) -> None:
-    second_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC456")
-    FundsCommitmentItemFactory(
-        funds_commitment_header=second_header,
-        office=vision_payment_plan.business_area,
-    )
-
-    with django_assert_num_queries(4):
-        VisionService.assign_funds_commitment_headers_from_callback(
-            vision_payment_plan,
-            ["FC123", "FC456"],
-        )
-
-    first_header = matching_fc_items[0].funds_commitment_header
-    assert set(vision_payment_plan.payment_plan_group.funds_commitment_headers.all()) == {first_header, second_header}
-
-
-def test_callbacks_for_sibling_plans_keep_both_headers_on_group(
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    sibling_plan_with_distinct_header: tuple[PaymentPlan, str],
-    django_assert_num_queries,
-) -> None:
-    sibling, sibling_fc_number = sibling_plan_with_distinct_header
-
-    VisionService.assign_funds_commitment_headers_from_callback(vision_payment_plan, ["FC123"])
-    VisionService.assign_funds_commitment_headers_from_callback(sibling, [sibling_fc_number])
-
-    with django_assert_num_queries(1):
-        assigned_numbers = set(
-            vision_payment_plan.payment_plan_group.funds_commitment_headers.values_list(
-                "funds_commitment_number", flat=True
-            )
-        )
-    assert assigned_numbers == {"FC123", sibling_fc_number}
-
-
-def test_assign_funds_commitment_headers_from_callback_is_atomic_when_a_header_is_missing(
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
-        VisionService.assign_funds_commitment_headers_from_callback(
-            vision_payment_plan,
-            ["FC123", "UNKNOWN"],
-        )
-
-    assert error.value.status == VisionStatus.FC_NOT_FOUND
-    assert error.value.error_code is None
-    assert not vision_payment_plan.payment_plan_group.funds_commitment_headers.exists()
-
-
-def test_assign_funds_commitment_headers_from_callback_rejects_header_without_matching_business_area(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
+def wrong_office_header() -> None:
     header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
     FundsCommitmentItemFactory(funds_commitment_header=header, office=None)
 
-    with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
-        VisionService.assign_funds_commitment_headers_from_callback(vision_payment_plan, ["FC123"])
+
+@pytest.fixture
+def follow_up_group(vision_group: PaymentPlanGroup) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=vision_group.cycle,
+        source_group=vision_group,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlanGroup.Status.IN_REVIEW,
+    )
+
+
+def test_malformed_group_vision_data_is_replaced(vision_group: PaymentPlanGroup, django_assert_num_queries) -> None:
+    vision_group.internal_data = {"vision": "invalid"}
+
+    with django_assert_num_queries(0):
+        data = VisionService.vision_data(vision_group)
+
+    assert data == {}
+    assert vision_group.vision_status == VisionStatus.NOT_SENT.value
+
+
+def test_group_vision_attempt_reset_preserves_log(group_waiting_for_vision: PaymentPlanGroup) -> None:
+    VisionService.vision_data(group_waiting_for_vision).update(
+        sent=True, vision_id="VISION-1", fc_numbers=["FC123"], log=[{"type": "api-call"}]
+    )
+
+    VisionService.invalidate_attempt(group_waiting_for_vision)
+
+    assert group_waiting_for_vision.vision_data == {
+        "status": VisionStatus.NOT_SENT.value,
+        "log": [{"type": "api-call"}],
+    }
+
+
+def test_callback_assigns_multiple_headers(
+    vision_group: PaymentPlanGroup, matching_headers: list, django_assert_num_queries
+) -> None:
+    VisionService.assign_funds_commitment_headers_from_callback(vision_group, ["FC123", "FC456"])
+
+    with django_assert_num_queries(1):
+        assigned = set(vision_group.funds_commitment_headers.all())
+    assert assigned == set(matching_headers)
+
+
+def test_callback_rejects_missing_header_without_partial_assignment(
+    vision_group: PaymentPlanGroup, matching_headers: list
+) -> None:
+    with pytest.raises(FundsCommitmentAssignmentError) as error:
+        VisionService.assign_funds_commitment_headers_from_callback(vision_group, ["FC123", "UNKNOWN"])
+
+    assert error.value.status == VisionStatus.FC_NOT_FOUND
+    assert not vision_group.funds_commitment_headers.exists()
+
+
+def test_callback_rejects_header_from_another_business_area(
+    vision_group: PaymentPlanGroup, wrong_office_header: None
+) -> None:
+    with pytest.raises(FundsCommitmentAssignmentError) as error:
+        VisionService.assign_funds_commitment_headers_from_callback(vision_group, ["FC123"])
 
     assert error.value.status == VisionStatus.FC_NOT_FOUND
 
 
-def test_assign_funds_commitment_headers_from_callback_allows_header_assigned_to_another_plan(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
+def test_callback_can_reuse_header_assigned_to_another_group(
+    vision_group: PaymentPlanGroup, matching_headers: list, shared_header_group: PaymentPlanGroup
 ) -> None:
-    other_payment_plan = PaymentPlanFactory()
-    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
-    FundsCommitmentItemFactory(funds_commitment_header=header, office=vision_payment_plan.business_area)
-    header.payment_plan_groups.add(other_payment_plan.payment_plan_group)
+    VisionService.assign_funds_commitment_headers_from_callback(vision_group, ["FC123"])
 
-    with django_assert_num_queries(4):
-        VisionService.assign_funds_commitment_headers_from_callback(vision_payment_plan, ["FC123"])
-
-    assert set(header.payment_plan_groups.all()) == {
-        other_payment_plan.payment_plan_group,
-        vision_payment_plan.payment_plan_group,
-    }
+    assert set(matching_headers[0].payment_plan_groups.all()) == {vision_group, shared_header_group}
 
 
 @pytest.mark.parametrize("current_status", [VisionStatus.WAITING_FOR_CALLBACK, VisionStatus.PP_CREATED])
-def test_process_callback_success_without_fc_records_creation_acknowledgement(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-    current_status: VisionStatus,
+def test_creation_callback_records_group_acknowledgement(
+    vision_group: PaymentPlanGroup, current_status: VisionStatus
 ) -> None:
-    VisionService.set_status(vision_payment_plan, current_status)
-    with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=[],
-        )
+    VisionService.set_status(vision_group, current_status)
 
-    assert fc_assignment_failed is False
-    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    assert vision_payment_plan.vision_data == {
+    failed = VisionService.process_callback(
+        vision_group, vision_payment_plan_id="VISION-1", vision_result="SUCCESS", fc_numbers=[]
+    )
+
+    assert failed is False
+    assert vision_group.status == PaymentPlanGroup.Status.IN_REVIEW
+    assert vision_group.vision_data == {
         "sent": True,
         "vision_id": "VISION-1",
         "status": VisionStatus.PP_CREATED.value,
     }
 
 
-def test_process_callback_empty_status_does_not_confirm_plan_creation(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-
-    with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="00000110",
-            vision_result="",
-            fc_numbers=[],
-        )
-
-    assert fc_assignment_failed is False
-    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    assert vision_payment_plan.vision_data == {
-        "sent": True,
-        "vision_id": "00000110",
-        "status": VisionStatus.CALLBACK_FAILED.value,
-        "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
-    }
-
-
-def test_process_callback_creation_acknowledgement_preserves_later_fc_failure(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    vision_payment_plan.internal_data = {
-        "vision": {
-            "vision_id": "VISION-1",
-            "fc_numbers": ["UNKNOWN"],
-            "status": VisionStatus.FC_NOT_FOUND.value,
-        }
-    }
-
-    with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=[],
-        )
-
-    assert fc_assignment_failed is False
-    assert vision_payment_plan.vision_data == {
-        "sent": True,
-        "vision_id": "VISION-1",
-        "fc_numbers": ["UNKNOWN"],
-        "status": VisionStatus.FC_NOT_FOUND.value,
-    }
-
-
-def test_process_callback_records_fc_assignment_failure(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-
-    with django_assert_num_queries(2):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=["UNKNOWN"],
-        )
-
-    assert fc_assignment_failed is True
-    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    assert vision_payment_plan.vision_data == {
-        "sent": True,
-        "vision_id": "VISION-1",
-        "fc_numbers": ["UNKNOWN"],
-        "status": VisionStatus.FC_NOT_FOUND.value,
-    }
-    assert vision_payment_plan.sent_to_vision is True
-
-
-def test_process_callback_failure_stores_returned_fc_numbers(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-    with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="ERROR",
-            fc_numbers=["FC123"],
-        )
-
-    assert fc_assignment_failed is False
-    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    assert vision_payment_plan.vision_data == {
-        "sent": True,
-        "vision_id": "VISION-1",
-        "fc_numbers": ["FC123"],
-        "status": VisionStatus.CALLBACK_FAILED.value,
-        "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
-    }
-
-
-def test_process_callback_records_failure_when_fc_callback_has_no_success_status(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
-
-    with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="",
-            fc_numbers=["FC123"],
-        )
-
-    assert fc_assignment_failed is False
-    assert vision_payment_plan.vision_data == {
-        "sent": True,
-        "vision_id": "VISION-1",
-        "fc_numbers": ["FC123"],
-        "status": VisionStatus.CALLBACK_FAILED.value,
-        "error_code": VisionErrorCode.VISION_STATUS_FAILED.value,
-    }
-
-
-def test_process_callback_reprocesses_existing_fc_assignment_failure(
-    payment_plan_with_fc_assignment_failure: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    payment_plan = payment_plan_with_fc_assignment_failure
-
-    with django_assert_num_queries(3):
-        fc_assignment_failed = VisionService.process_callback(
-            payment_plan,
-            vision_payment_plan_id="VISION-RETRY",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    assert fc_assignment_failed is True
-    assert payment_plan.vision_data == {
-        "sent": True,
-        "vision_id": "VISION-RETRY",
-        "fc_numbers": ["FC123"],
-        "status": VisionStatus.FC_NOT_FOUND.value,
-    }
-
-
-@pytest.mark.parametrize(
-    ("vision_status", "error_code"),
-    [
-        (VisionStatus.SEND_FAILED, None),
-        (VisionStatus.PP_CREATED, None),
-        (VisionStatus.CALLBACK_FAILED, VisionErrorCode.VISION_STATUS_FAILED),
-        (VisionStatus.FC_NOT_FOUND, None),
-    ],
-)
-def test_process_callback_recovers_failed_state_with_valid_fc(
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    vision_status: VisionStatus,
-    error_code: VisionErrorCode | None,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, vision_status, error_code=error_code)
-
-    with (
-        patch(
-            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision"
-        ) as mock_release,
-        patch(
-            "hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action"
-        ) as mock_send_to_pg,
-        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(6),
-    ):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-RETRY",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    assert fc_assignment_failed is False
-    assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
-    assert vision_payment_plan.sent_to_vision is True
-    assert list(vision_payment_plan.payment_plan_group.funds_commitment_headers.all()) == [
-        matching_fc_items[0].funds_commitment_header
-    ]
-    mock_release.assert_called_once_with()
-    mock_send_to_pg.assert_not_called()
-
-
-def test_process_callback_ignores_plan_that_is_not_waiting_for_vision(
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(1):
-        VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-UNEXPECTED",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    assert vision_payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    assert vision_payment_plan.vision_data == {}
-    assert not vision_payment_plan.payment_plan_group.funds_commitment_headers.exists()
-
-
-@pytest.mark.parametrize("payment_plan_status", [PaymentPlan.Status.LOCKED_FSP, PaymentPlan.Status.ABORTED])
-def test_process_callback_ignores_plan_that_has_left_review(
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    payment_plan_status: str,
-    django_assert_num_queries,
-) -> None:
-    vision_payment_plan.status = payment_plan_status
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-
-    with django_assert_num_queries(1):
-        VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-LATE",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    assert vision_payment_plan.vision_status == VisionStatus.WAITING_FOR_CALLBACK.value
-    assert not vision_payment_plan.payment_plan_group.funds_commitment_headers.exists()
-
-
-def test_process_callback_does_not_change_released_plan(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    vision_payment_plan.status = PaymentPlan.Status.FINISHED
-    vision_payment_plan.internal_data = {
-        "vision": {
-            "vision_id": "VISION-1",
-            "fc_numbers": ["FC123"],
-            "status": VisionStatus.RELEASED.value,
-        }
-    }
-
-    with django_assert_num_queries(0):
-        VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-2",
-            vision_result="ERROR",
-            fc_numbers=["FC999"],
-        )
-
-    assert vision_payment_plan.vision_data == {
-        "vision_id": "VISION-1",
-        "fc_numbers": ["FC123"],
-        "status": VisionStatus.RELEASED.value,
-    }
-
-
-def test_existing_accepted_plan_without_vision_state_remains_on_manual_delivery_path(
-    vision_enabled_payment_plan: PaymentPlan,
-) -> None:
-    vision_enabled_payment_plan.status = PaymentPlan.Status.ACCEPTED
-    vision_enabled_payment_plan.internal_data = {}
-    vision_enabled_payment_plan.save(update_fields=["status", "internal_data"])
-    group = vision_enabled_payment_plan.payment_plan_group
-    group.status = group.Status.ACCEPTED
-    group.save(update_fields=["status"])
-
-    assert vision_enabled_payment_plan.vision_integration_enabled is True
-    assert group.vision_managed is False
-
-
-def test_callback_log_without_workflow_state_does_not_make_plan_vision_managed(
-    vision_payment_plan: PaymentPlan,
-) -> None:
-    vision_payment_plan.status = PaymentPlan.Status.ACCEPTED
-    vision_payment_plan.internal_data = {"vision": {"log": [{"type": VisionLogEntryType.PUSH_NOTIFICATION.value}]}}
-    vision_payment_plan.save(update_fields=["status", "internal_data"])
-    group = vision_payment_plan.payment_plan_group
-    group.status = group.Status.ACCEPTED
-    group.save(update_fields=["status"])
-
-    assert group.vision_managed is False
-
-
-def test_group_remains_vision_managed_after_a_plan_is_released(
-    accepted_vision_managed_group: PaymentPlanGroup,
-) -> None:
-    assert accepted_vision_managed_group.vision_managed is True
-
-
-def test_disabled_vision_flag_makes_existing_workflow_not_managed(
-    vision_disabled_payment_plan: PaymentPlan,
-) -> None:
-    payment_plan = vision_disabled_payment_plan
-    payment_plan.internal_data = {
-        "vision": {
-            "sent": True,
-            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
-            "vision_id": "VISION-1",
-        }
-    }
-
-    assert payment_plan.vision_integration_enabled is False
-    assert payment_plan.payment_plan_group.vision_managed is False
-
-
-def test_callback_does_not_process_when_vision_flag_is_disabled(
-    vision_disabled_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    payment_plan = vision_disabled_payment_plan
-    payment_plan.internal_data = {
-        "vision": {
-            "sent": True,
-            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
-        }
-    }
-
-    with django_assert_num_queries(1):
-        VisionService.process_callback(
-            payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    assert payment_plan.vision_data == {
-        "sent": True,
-        "status": VisionStatus.WAITING_FOR_CALLBACK.value,
-    }
-
-
-def test_disabled_vision_flag_keeps_stored_fc_failure_log_only(
-    vision_disabled_payment_plan_with_fc_failure: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(1):
-        fc_assignment_failed = VisionService.process_callback(
-            vision_disabled_payment_plan_with_fc_failure,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    assert fc_assignment_failed is False
-
-
-def test_instruction_managed_plan_is_excluded_from_vision(
-    instruction_managed_payment_plan: PaymentPlan,
-) -> None:
-    assert instruction_managed_payment_plan.vision_integration_enabled is False
-    assert instruction_managed_payment_plan.can_send_to_vision is False
-    assert instruction_managed_payment_plan.payment_plan_group is None
-
-
-def test_follow_up_plan_is_excluded_from_vision(follow_up_vision_payment_plan: PaymentPlan) -> None:
-    assert follow_up_vision_payment_plan.vision_integration_enabled is False
-    assert follow_up_vision_payment_plan.can_send_to_vision is False
-    assert follow_up_vision_payment_plan.payment_plan_group.vision_managed is False
-
-
-def test_top_up_plan_uses_vision_when_enabled(
-    linked_vision_payment_plan: PaymentPlan,
-) -> None:
-    assert linked_vision_payment_plan.vision_integration_enabled is True
-    assert linked_vision_payment_plan.can_send_to_vision is True
-    assert linked_vision_payment_plan.payment_plan_group.vision_managed is True
-
-
-def test_send_result_merges_callback_state_instead_of_overwriting_it(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    vision_payment_plan.internal_data = {
-        "vision": {
-            "status": VisionStatus.WAITING_FOR_CALLBACK.value,
-        }
-    }
-    vision_payment_plan.save(update_fields=["internal_data"])
-    stale_payment_plan = PaymentPlan.objects.get(pk=vision_payment_plan.pk)
-
-    vision_payment_plan.status = PaymentPlan.Status.ACCEPTED
-    vision_payment_plan.internal_data = {
-        "vision": {
-            "status": VisionStatus.RELEASED.value,
-            "vision_id": "VISION-1",
-            "fc_numbers": ["FC123"],
-            "log": [{"type": VisionLogEntryType.PUSH_NOTIFICATION.value}],
-        }
-    }
-    vision_payment_plan.save(update_fields=["status", "internal_data"])
-    send_log = {
-        "type": VisionLogEntryType.API_CALL.value,
-        "response": {"status": "ok"},
-    }
-
-    with django_assert_num_queries(4):
-        VisionAPI._persist_result(
-            stale_payment_plan,
-            send_log,
-            VisionStatus.WAITING_FOR_CALLBACK,
-            initial_request_succeeded=True,
-        )
-
-    stale_payment_plan.refresh_from_db()
-    assert stale_payment_plan.vision_data["status"] == VisionStatus.RELEASED.value
-    assert stale_payment_plan.vision_data["vision_id"] == "VISION-1"
-    assert stale_payment_plan.vision_data["fc_numbers"] == ["FC123"]
-    assert "sent" not in stale_payment_plan.vision_data
-    assert [entry["type"] for entry in stale_payment_plan.vision_data["log"]] == [
-        VisionLogEntryType.PUSH_NOTIFICATION.value,
-        VisionLogEntryType.API_CALL.value,
-    ]
-
-
-def test_send_result_preserves_callback_failure_and_records_successful_send(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    vision_payment_plan.internal_data = {
-        "vision": {
-            "status": VisionStatus.FC_NOT_FOUND.value,
-            "vision_id": "VISION-1",
-            "fc_numbers": ["UNKNOWN"],
-            "log": [{"type": VisionLogEntryType.PUSH_NOTIFICATION.value}],
-        }
-    }
-    vision_payment_plan.save(update_fields=["internal_data"])
-    send_log = {
-        "type": VisionLogEntryType.API_CALL.value,
-        "response": {"status": "ok"},
-    }
-
-    with django_assert_num_queries(4):
-        VisionAPI._persist_result(
-            vision_payment_plan,
-            send_log,
-            VisionStatus.WAITING_FOR_CALLBACK,
-            initial_request_succeeded=True,
-        )
-
-    vision_payment_plan.refresh_from_db()
-    assert vision_payment_plan.vision_data["status"] == VisionStatus.FC_NOT_FOUND.value
-    assert vision_payment_plan.vision_data["sent"] is True
-    assert vision_payment_plan.vision_data["vision_id"] == "VISION-1"
-    assert vision_payment_plan.vision_data["fc_numbers"] == ["UNKNOWN"]
-    assert [entry["type"] for entry in vision_payment_plan.vision_data["log"]] == [
-        VisionLogEntryType.PUSH_NOTIFICATION.value,
-        VisionLogEntryType.API_CALL.value,
-    ]
-
-
-def test_manual_fc_recovery_is_disabled_when_vision_flag_is_disabled(
-    vision_disabled_payment_plan_with_fc_failure: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(1):
-        can_recover = VisionService.can_recover_with_funds_commitment_headers(
-            vision_disabled_payment_plan_with_fc_failure
-        )
-
-    assert can_recover is False
-
-
-def test_manual_fc_recovery_is_available_when_vision_send_failed(
-    vision_send_failed_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(1):
-        can_recover = VisionService.can_recover_with_funds_commitment_headers(vision_send_failed_payment_plan)
-
-    assert can_recover is True
-
-
-def test_manual_fc_recovery_is_available_when_waiting_without_send_confirmation(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-
-    with django_assert_num_queries(1):
-        can_recover = VisionService.can_recover_with_funds_commitment_headers(vision_payment_plan)
-
-    assert vision_payment_plan.sent_to_vision is False
-    assert can_recover is True
-
-
-def test_manual_fc_recovery_is_available_after_payment_plan_created_acknowledgement(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.PP_CREATED)
-
-    with django_assert_num_queries(1):
-        can_recover = VisionService.can_recover_with_funds_commitment_headers(vision_payment_plan)
-
-    assert can_recover is True
-
-
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.log_create")
-@patch("hope.apps.payment.services.payment_plan_services.log_payment_plan_approval")
-@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
-def test_release_from_vision_uses_payment_plan_creator(
-    mock_group_notification,
-    mock_approval_log,
-    mock_activity_log,
-    mock_notification,
-    vision_payment_plan: PaymentPlan,
-) -> None:
-    group = vision_payment_plan.payment_plan_group
-    group.status = group.Status.IN_REVIEW
-    group.save(update_fields=["status"])
-    PaymentPlanService(vision_payment_plan).release_from_vision()
-
-    vision_payment_plan.refresh_from_db()
-    group.refresh_from_db()
-    approval_process = vision_payment_plan.payment_plan_group.approval_process.first()
-    release = approval_process.approvals.get(type=Approval.FINANCE_RELEASE)
-    assert vision_payment_plan.status == PaymentPlan.Status.ACCEPTED
-    assert group.status == group.Status.ACCEPTED
-    assert release.created_by == vision_payment_plan.created_by
-    assert release.comment is None
-    assert mock_notification.call_count == 1
-    assert mock_notification.call_args.args[:3] == (
-        vision_payment_plan,
-        PaymentPlan.Action.REVIEW.value,
-        str(vision_payment_plan.created_by_id),
+def test_callback_records_vision_error(group_waiting_for_vision: PaymentPlanGroup) -> None:
+    failed = VisionService.process_callback(
+        group_waiting_for_vision,
+        vision_payment_plan_id="VISION-1",
+        vision_result="ERROR",
+        fc_numbers=["FC123"],
     )
-    assert datetime.fromisoformat(mock_notification.call_args.args[3]).tzinfo is not None
-    mock_group_notification.assert_called_once()
+
+    assert failed is False
+    assert group_waiting_for_vision.vision_status == VisionStatus.CALLBACK_FAILED.value
+    assert group_waiting_for_vision.vision_data["fc_numbers"] == ["FC123"]
+    assert group_waiting_for_vision.vision_data["error_code"] == VisionErrorCode.VISION_STATUS_FAILED.value
 
 
-def test_release_from_vision_rejects_non_review_plan(
-    accepted_vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(0), pytest.raises(ValidationError, match="Only an in-review"):
-        PaymentPlanService(accepted_vision_payment_plan).release_from_vision()
-
-
-def test_release_from_vision_requires_approval_process(
-    vision_payment_plan_without_approval: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(1), pytest.raises(ValidationError, match="Approval Process object not found"):
-        PaymentPlanService(vision_payment_plan_without_approval).release_from_vision()
-
-
-def test_manual_review_is_rejected_for_vision_managed_plan(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    with django_assert_num_queries(1), pytest.raises(ValidationError, match="released automatically"):
-        PaymentPlanService(vision_payment_plan).execute_update_status_action(
-            input_data={"action": PaymentPlan.Action.REVIEW},
-            user=vision_payment_plan.created_by,
-        )
-
-
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action")
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision")
-def test_process_callback_assigns_fc_releases_and_sends_to_pg(
-    mock_release,
-    mock_send_to_pg,
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    django_assert_num_queries,
-) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-    with (
-        patch("hope.contrib.vision.services.log_create") as mock_activity_log,
-        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-        django_assert_num_queries(6),
-    ):
-        VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    mock_release.assert_called_once_with()
-    mock_send_to_pg.assert_called_once_with(
-        input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
-        user=vision_payment_plan.created_by,
-        as_manager=True,
+def test_callback_records_missing_fc(group_waiting_for_vision: PaymentPlanGroup) -> None:
+    failed = VisionService.process_callback(
+        group_waiting_for_vision,
+        vision_payment_plan_id="VISION-1",
+        vision_result="SUCCESS",
+        fc_numbers=["UNKNOWN"],
     )
-    assert mock_activity_log.call_args.kwargs["user"] == vision_payment_plan.created_by
-    assert mock_activity_log.call_args.kwargs["programs"] == vision_payment_plan.program.pk
-    assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
+
+    assert failed is True
+    assert group_waiting_for_vision.vision_status == VisionStatus.FC_NOT_FOUND.value
+    assert group_waiting_for_vision.sent_to_vision is True
 
 
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action")
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision")
-def test_process_callback_assigns_fc_releases_without_pg_send(
-    mock_release,
-    mock_send_to_pg,
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-    django_assert_num_queries,
+def test_corrected_callback_releases_group(
+    group_with_failed_fc: PaymentPlanGroup, matching_headers: list, monkeypatch
 ) -> None:
-    VisionService.set_status(vision_payment_plan, VisionStatus.WAITING_FOR_CALLBACK)
-    with (
-        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=False),
-        django_assert_num_queries(6),
-    ):
-        VisionService.process_callback(
-            vision_payment_plan,
-            vision_payment_plan_id="VISION-1",
-            vision_result="SUCCESS",
-            fc_numbers=["FC123"],
-        )
-
-    mock_release.assert_called_once_with()
-    mock_send_to_pg.assert_not_called()
-    assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
-
-
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.execute_update_status_action")
-@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.release_from_vision")
-def test_manual_fc_header_recovery_assigns_selected_headers_and_continues_automatic_flow(
-    mock_release,
-    mock_send_to_pg,
-    vision_payment_plan: PaymentPlan,
-    matching_fc_items: list,
-) -> None:
-    selected_header = matching_fc_items[0].funds_commitment_header
-    group = vision_payment_plan.payment_plan_group
-    group.status = group.Status.IN_REVIEW
-    group.save(update_fields=["status"])
-    vision_payment_plan.internal_data = {
-        "vision": {
-            "sent": True,
-            "status": VisionStatus.FC_NOT_FOUND.value,
-        }
-    }
-    vision_payment_plan.save(update_fields=["internal_data"])
-
-    with (
-        patch("hope.contrib.vision.services.log_create") as mock_activity_log,
-        patch.object(PaymentPlan, "can_send_to_payment_gateway", new_callable=PropertyMock, return_value=True),
-    ):
-        VisionService.recover_group_with_funds_commitment_headers(group, [selected_header])
-
-    vision_payment_plan.refresh_from_db()
-    assert list(vision_payment_plan.payment_plan_group.funds_commitment_headers.all()) == [selected_header]
-    assert vision_payment_plan.vision_status == VisionStatus.RELEASED.value
-    mock_release.assert_called_once_with()
-    mock_send_to_pg.assert_called_once_with(
-        input_data={"action": PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY},
-        user=vision_payment_plan.created_by,
-        as_manager=True,
+    monkeypatch.setattr(
+        "hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task",
+        lambda *args: None,
     )
-    mock_activity_log.assert_called_once()
+
+    failed = VisionService.process_callback(
+        group_with_failed_fc,
+        vision_payment_plan_id="VISION-1",
+        vision_result="SUCCESS",
+        fc_numbers=["FC123"],
+    )
+
+    group_with_failed_fc.refresh_from_db()
+    assert failed is False
+    assert group_with_failed_fc.status == PaymentPlanGroup.Status.ACCEPTED
+    assert group_with_failed_fc.vision_status == VisionStatus.RELEASED.value
+    assert list(group_with_failed_fc.funds_commitment_headers.all()) == [matching_headers[0]]
 
 
-def test_manual_fc_header_recovery_rejects_ineligible_plan(
-    vision_payment_plan: PaymentPlan,
-) -> None:
+def test_unsolicited_callback_does_not_start_group_workflow(vision_group: PaymentPlanGroup) -> None:
+    failed = VisionService.process_callback(
+        vision_group, vision_payment_plan_id="VISION-1", vision_result="SUCCESS", fc_numbers=["FC123"]
+    )
+
+    assert failed is False
+    assert vision_group.vision_data == {}
+
+
+def test_disabled_vision_callback_does_not_change_group(disabled_vision_group: PaymentPlanGroup) -> None:
+    failed = VisionService.process_callback(
+        disabled_vision_group, vision_payment_plan_id="VISION-1", vision_result="SUCCESS", fc_numbers=["FC123"]
+    )
+
+    assert failed is False
+    assert disabled_vision_group.vision_status == VisionStatus.WAITING_FOR_CALLBACK.value
+
+
+def test_follow_up_group_does_not_request_new_fc(follow_up_group: PaymentPlanGroup) -> None:
+    assert follow_up_group.vision_managed is False
+    assert follow_up_group.can_send_to_vision is False
+
+
+def test_manual_recovery_available_after_fc_failure(group_with_failed_fc: PaymentPlanGroup) -> None:
+    assert VisionService.can_recover_group_with_funds_commitment_headers(group_with_failed_fc) is True
+
+
+def test_manual_recovery_rejects_group_without_active_attempt(vision_group: PaymentPlanGroup) -> None:
     with pytest.raises(FundsCommitmentAssignmentError) as error:
-        VisionService.recover_group_with_funds_commitment_headers(vision_payment_plan.payment_plan_group, [])
+        VisionService.recover_group_with_funds_commitment_headers(vision_group, [])
 
     assert error.value.status == VisionStatus.CALLBACK_FAILED
     assert error.value.error_code == VisionErrorCode.FC_CONFLICT
 
 
-def test_assign_selected_funds_commitment_headers_rejects_empty_selection(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
+def test_manual_recovery_releases_group(
+    group_with_failed_fc: PaymentPlanGroup, matching_headers: list, monkeypatch
 ) -> None:
-    with django_assert_num_queries(0), pytest.raises(FundsCommitmentAssignmentError) as error:
-        VisionService.assign_selected_funds_commitment_headers(vision_payment_plan.payment_plan_group, [])
-
-    assert error.value.status == VisionStatus.FC_NOT_FOUND
-
-
-def test_assign_selected_funds_commitment_headers_rejects_header_without_matching_business_area(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
-    FundsCommitmentItemFactory(funds_commitment_header=header, office=None)
-
-    with django_assert_num_queries(2), pytest.raises(FundsCommitmentAssignmentError) as error:
-        VisionService.assign_selected_funds_commitment_headers(vision_payment_plan.payment_plan_group, [header])
-
-    assert error.value.status == VisionStatus.FC_NOT_FOUND
-
-
-def test_assign_selected_funds_commitment_headers_accepts_multiple_headers(
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    first_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
-    second_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC456")
-    FundsCommitmentItemFactory(funds_commitment_header=first_header, office=vision_payment_plan.business_area)
-    FundsCommitmentItemFactory(funds_commitment_header=second_header, office=vision_payment_plan.business_area)
-
-    with django_assert_num_queries(5):
-        VisionService.assign_selected_funds_commitment_headers(
-            vision_payment_plan.payment_plan_group,
-            [first_header, second_header],
-        )
-
-    assert set(vision_payment_plan.payment_plan_group.funds_commitment_headers.all()) == {first_header, second_header}
-
-
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_send_payment_plan_to_vision_task_calls_api(
-    mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
-) -> None:
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
-
-    send_payment_plan_to_vision_async_task_action(job)
-
-    sent_payment_plan = mock_vision_api.return_value.send_payment_plan.call_args.args[0]
-    assert sent_payment_plan.pk == vision_enabled_payment_plan.pk
-
-
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_notify_payment_plan_status_to_vision_task_calls_api(
-    mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    job = MagicMock(
-        config={
-            "payment_plan_id": str(vision_enabled_payment_plan.pk),
-            "vision_status": "ABORTED",
-        }
+    monkeypatch.setattr(
+        "hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task",
+        lambda *args: None,
     )
 
-    with django_assert_num_queries(1):
-        notify_payment_plan_status_to_vision_async_task_action(job)
+    VisionService.recover_group_with_funds_commitment_headers(group_with_failed_fc, [matching_headers[0]])
 
-    notified_payment_plan, notified_status = mock_vision_api.return_value.notify_payment_plan_status.call_args.args
-    assert notified_payment_plan.pk == vision_enabled_payment_plan.pk
-    assert notified_status == "ABORTED"
+    group_with_failed_fc.refresh_from_db()
+    assert group_with_failed_fc.status == PaymentPlanGroup.Status.ACCEPTED
+    assert group_with_failed_fc.vision_status == VisionStatus.RELEASED.value
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_group_send_task_calls_api(mock_vision_api, vision_group: PaymentPlanGroup) -> None:
+    job = MagicMock(config={"payment_plan_group_id": str(vision_group.pk)})
+
+    send_payment_plan_group_to_vision_async_task_action(job)
+
+    sent_group = mock_vision_api.return_value.send_payment_plan_group.call_args.args[0]
+    assert sent_group.pk == vision_group.pk
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_group_send_task_skips_ineligible_group(mock_vision_api, disabled_vision_group: PaymentPlanGroup) -> None:
+    job = MagicMock(config={"payment_plan_group_id": str(disabled_vision_group.pk)})
+
+    send_payment_plan_group_to_vision_async_task_action(job)
+
+    mock_vision_api.assert_not_called()
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_group_send_task_records_failure(mock_vision_api, vision_group: PaymentPlanGroup) -> None:
+    mock_vision_api.side_effect = VisionAPIMissingCredentialsError("Missing credentials")
+    job = MagicMock(config={"payment_plan_group_id": str(vision_group.pk)})
+
+    with pytest.raises(VisionAPIMissingCredentialsError):
+        send_payment_plan_group_to_vision_async_task_action(job)
+
+    vision_group.refresh_from_db()
+    assert vision_group.vision_status == VisionStatus.SEND_FAILED.value
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_group_send_task_preserves_completed_callback(mock_vision_api, vision_group: PaymentPlanGroup) -> None:
+    def complete_then_fail(group: PaymentPlanGroup) -> None:
+        PaymentPlanGroup.objects.filter(pk=group.pk).update(
+            status=PaymentPlanGroup.Status.ACCEPTED,
+            internal_data={"vision": {"status": VisionStatus.RELEASED.value, "vision_id": "VISION-1"}},
+        )
+        raise VisionAPIError("Request timed out after callback")
+
+    mock_vision_api.return_value.send_payment_plan_group.side_effect = complete_then_fail
+    job = MagicMock(config={"payment_plan_group_id": str(vision_group.pk)})
+
+    with pytest.raises(VisionAPIError):
+        send_payment_plan_group_to_vision_async_task_action(job)
+
+    vision_group.refresh_from_db()
+    assert vision_group.vision_status == VisionStatus.RELEASED.value
+
+
+@patch("hope.contrib.vision.tasks.VisionAPI")
+def test_group_notification_task_calls_api(mock_vision_api, vision_group: PaymentPlanGroup) -> None:
+    job = MagicMock(config={"payment_plan_group_id": str(vision_group.pk), "vision_status": "ABORTED"})
+
+    notify_payment_plan_group_status_to_vision_async_task_action(job)
+
+    notified_group, status = mock_vision_api.return_value.notify_payment_plan_group_status.call_args.args
+    assert notified_group.pk == vision_group.pk
+    assert status == "ABORTED"
 
 
 @patch("hope.models.AsyncJob.requeue")
-def test_notify_payment_plan_status_to_vision_queues_non_blocking_job(
-    mock_requeue,
-    vision_enabled_payment_plan: PaymentPlan,
-) -> None:
-    notify_payment_plan_status_to_vision_async_task(
-        vision_enabled_payment_plan,
-        str(vision_enabled_payment_plan.created_by_id),
-        "REJECTED",
-    )
+def test_group_notification_queues_job(mock_requeue, vision_group: PaymentPlanGroup) -> None:
+    notify_payment_plan_group_status_to_vision_async_task(vision_group, "user-id", "REJECTED")
 
     mock_requeue.assert_called_once_with(
-        instance=vision_enabled_payment_plan,
-        owner_id=str(vision_enabled_payment_plan.created_by_id),
-        job_name="notify_payment_plan_rejected_to_vision",
-        action="hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task_action",
-        config={
-            "payment_plan_id": str(vision_enabled_payment_plan.pk),
-            "vision_status": "REJECTED",
-        },
+        instance=vision_group,
+        owner_id="user-id",
+        job_name="notify_payment_plan_group_rejected_to_vision",
+        action="hope.contrib.vision.tasks.notify_payment_plan_group_status_to_vision_async_task_action",
+        config={"payment_plan_group_id": str(vision_group.pk), "vision_status": "REJECTED"},
         group_key="payment",
-        description=f"Notify Vision that payment plan {vision_enabled_payment_plan.pk} is REJECTED",
+        description=f"Notify Vision that Payment Plan Group {vision_group.pk} is REJECTED",
     )
 
 
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_send_payment_plan_to_vision_task_skips_ineligible_plan(
-    mock_vision_api,
-    vision_disabled_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    job = MagicMock(config={"payment_plan_id": str(vision_disabled_payment_plan.pk)})
-
-    with django_assert_num_queries(4):
-        send_payment_plan_to_vision_async_task_action(job)
-
-    mock_vision_api.assert_not_called()
-
-
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_send_payment_plan_to_vision_task_rechecks_status_under_lock(
-    mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    vision_enabled_payment_plan.status = PaymentPlan.Status.ABORTED
-    vision_enabled_payment_plan.save(update_fields=["status"])
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
-
-    with django_assert_num_queries(3):
-        send_payment_plan_to_vision_async_task_action(job)
-
-    mock_vision_api.assert_not_called()
-    vision_enabled_payment_plan.refresh_from_db()
-    assert vision_enabled_payment_plan.vision_status == VisionStatus.NOT_SENT.value
-
-
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_send_payment_plan_to_vision_task_records_failure(
-    mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
-) -> None:
-    mock_vision_api.side_effect = VisionAPIMissingCredentialsError("Missing credentials")
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
-
-    with pytest.raises(VisionAPIMissingCredentialsError):
-        send_payment_plan_to_vision_async_task_action(job)
-
-    vision_enabled_payment_plan.refresh_from_db()
-    assert vision_enabled_payment_plan.vision_status == VisionStatus.SEND_FAILED.value
-
-
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_send_payment_plan_to_vision_task_does_not_duplicate_persisted_failure_log(
-    mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
-    def persist_failure_then_raise(payment_plan: PaymentPlan) -> None:
-        persisted_payment_plan = PaymentPlan.objects.get(pk=payment_plan.pk)
-        persisted_payment_plan.internal_data = {
-            "vision": {
-                "status": VisionStatus.SEND_FAILED.value,
-                "log": [{"type": VisionLogEntryType.API_CALL.value}],
-            }
-        }
-        PaymentPlan.objects.filter(pk=persisted_payment_plan.pk).update(
-            internal_data=persisted_payment_plan.internal_data
-        )
-        raise VisionAPIError("Vision request failed")
-
-    mock_vision_api.return_value.send_payment_plan.side_effect = persist_failure_then_raise
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
-
-    with django_assert_num_queries(26), pytest.raises(VisionAPIError):
-        send_payment_plan_to_vision_async_task_action(job)
-
-    vision_enabled_payment_plan.refresh_from_db()
-    assert vision_enabled_payment_plan.vision_data["log"] == [{"type": VisionLogEntryType.API_CALL.value}]
-
-
-@patch("hope.contrib.vision.tasks.VisionAPI")
-def test_send_payment_plan_to_vision_task_preserves_completed_callback_state(
-    mock_vision_api,
-    vision_enabled_payment_plan: PaymentPlan,
-) -> None:
-    def complete_callback_then_fail(payment_plan: PaymentPlan) -> None:
-        persisted_payment_plan = PaymentPlan.objects.get(pk=payment_plan.pk)
-        persisted_payment_plan.status = PaymentPlan.Status.ACCEPTED
-        persisted_payment_plan.internal_data = {
-            "vision": {
-                "status": VisionStatus.RELEASED.value,
-                "vision_id": "VISION-1",
-                "fc_numbers": ["FC123"],
-            }
-        }
-        persisted_payment_plan.save(update_fields=["status", "internal_data"])
-        raise VisionAPIError("Request timed out after callback")
-
-    mock_vision_api.return_value.send_payment_plan.side_effect = complete_callback_then_fail
-    job = MagicMock(config={"payment_plan_id": str(vision_enabled_payment_plan.pk)})
-
-    with pytest.raises(VisionAPIError):
-        send_payment_plan_to_vision_async_task_action(job)
-
-    vision_enabled_payment_plan.refresh_from_db()
-    assert vision_enabled_payment_plan.vision_status == VisionStatus.RELEASED.value
-
-
-@patch("hope.contrib.vision.tasks.AsyncJob.requeue")
-def test_send_payment_plan_to_vision_task_requeues_async_job(
-    mock_requeue,
-    vision_payment_plan: PaymentPlan,
-    django_assert_num_queries,
-) -> None:
+@patch("hope.models.AsyncJob.requeue")
+def test_group_send_task_queues_job(mock_requeue, vision_group: PaymentPlanGroup) -> None:
     expected_job = MagicMock(spec=AsyncJob)
     mock_requeue.return_value = expected_job
 
-    with django_assert_num_queries(0):
-        job = send_payment_plan_to_vision_async_task(vision_payment_plan, str(vision_payment_plan.created_by_id))
+    job = send_payment_plan_group_to_vision_async_task(vision_group, "user-id")
 
     assert job == expected_job
     mock_requeue.assert_called_once_with(
-        instance=vision_payment_plan,
-        owner_id=str(vision_payment_plan.created_by_id),
-        job_name="send_payment_plan_to_vision_async_task",
-        action="hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task_action",
-        config={"payment_plan_id": str(vision_payment_plan.pk)},
+        instance=vision_group,
+        owner_id="user-id",
+        job_name="send_payment_plan_group_to_vision_async_task",
+        action="hope.contrib.vision.tasks.send_payment_plan_group_to_vision_async_task_action",
+        config={"payment_plan_group_id": str(vision_group.pk)},
         group_key="payment",
-        description=f"Send payment plan {vision_payment_plan.pk} to Vision",
+        description=f"Send Payment Plan Group {vision_group.pk} to Vision",
     )

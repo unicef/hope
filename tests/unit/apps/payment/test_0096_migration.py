@@ -19,7 +19,7 @@ from hope.models import AcceptanceProcessThreshold, ApprovalProcess, FollowUpIns
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0096_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0095_migration")
 
 
 @pytest.fixture

@@ -848,7 +848,8 @@ def _run_owner_exchange_rate_recalculation(
         exchange_date = owner.currency_exchange_date
         rate = owner.exchange_rate
         if job.config["fetch_unore_rate"] and not owner.custom_exchange_rate:
-            rate = get_owner_unore_exchange_rate(owner, exchange_date)
+            unore_rate = get_owner_unore_exchange_rate(owner, exchange_date)
+            rate = Decimal(str(unore_rate)) if unore_rate is not None else None
         # The exchange-rate feed returns None when it has no rate for this date.
         if rate is None or rate <= 0:
             raise ValueError("A positive exchange rate is required to recalculate owner payments")

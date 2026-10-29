@@ -12,14 +12,6 @@
     },
     "data": [
         {
-            "name": "Applying Custom Exchange Rate",
-            "value": "APPLYING_CUSTOM_EXCHANGE_RATE"
-        },
-        {
-            "name": "Applying Custom Exchange Rate Error",
-            "value": "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR"
-        },
-        {
             "name": "Exclude Beneficiaries Error",
             "value": "EXCLUDE_BENEFICIARIES_ERROR"
         },
@@ -40,16 +32,28 @@
             "value": "XLSX_IMPORT_ERROR"
         },
         {
-            "name": "Importing Entitlements flat amount",
-            "value": "IMPORTING_ENTITLEMENTS"
-        },
-        {
             "name": "Importing Entitlements XLSX file",
             "value": "XLSX_IMPORTING_ENTITLEMENTS"
         },
         {
+            "name": "Importing Entitlements flat amount",
+            "value": "IMPORTING_ENTITLEMENTS"
+        },
+        {
+            "name": "Importing FSP Extra Fields XLSX file",
+            "value": "XLSX_IMPORTING_FSP_EXTRA_FIELDS"
+        },
+        {
             "name": "Importing Reconciliation XLSX file",
             "value": "XLSX_IMPORTING_RECONCILIATION"
+        },
+        {
+            "name": "Rebuild Error",
+            "value": "REBUILD_ERROR"
+        },
+        {
+            "name": "Rebuilding",
+            "value": "REBUILDING"
         },
         {
             "name": "Rule Engine Errored",

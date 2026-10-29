@@ -424,32 +424,36 @@ def test_can_send_to_vision(payment_plan, status, flag_enabled, sent_to_vision, 
         condition="boolean",
         value=str(flag_enabled),
     )
-    payment_plan.status = status
+    group = payment_plan.payment_plan_group
+    group.status = (
+        PaymentPlanGroup.Status.IN_REVIEW if status == PaymentPlan.Status.IN_REVIEW else PaymentPlanGroup.Status.OPEN
+    )
     payment_plan.business_area.vision_integration_active = True
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    payment_plan.internal_data = {"vision": {"sent": sent_to_vision}}
-    payment_plan.save(update_fields=["status", "internal_data"])
-    assert can_send_to_vision(payment_plan) is expected
+    group.internal_data = {"vision": {"sent": sent_to_vision}}
+    group.save(update_fields=["status", "internal_data"])
+    assert can_send_to_vision(group) is expected
 
 
-@patch("hope.admin.payment_plan.send_payment_plan_to_vision_async_task")
+@patch("hope.admin.payment_plan.send_payment_plan_group_to_vision_async_task")
 def test_send_to_vision_post_queues_async_task(mock_send, admin_client, payment_plan) -> None:
     FlagState.objects.get_or_create(
         name="VISION_INTEGRATION_ACTIVE",
         condition="boolean",
         value="True",
     )
-    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    group = payment_plan.payment_plan_group
+    group.status = PaymentPlanGroup.Status.IN_REVIEW
     payment_plan.business_area.vision_integration_active = True
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    payment_plan.save(update_fields=["status"])
-    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
+    group.save(update_fields=["status"])
+    url = reverse("admin:payment_paymentplangroup_send_to_vision", args=[group.pk])
     response = admin_client.post(url)
     assert response.status_code == 302
-    mock_send.assert_called_once_with(payment_plan, str(response.wsgi_request.user.pk))
+    mock_send.assert_called_once_with(group, str(response.wsgi_request.user.pk))
     messages = list(get_messages(response.wsgi_request))
     assert len(messages) == 1
-    assert "Sending Payment Plan to Vision started" in str(messages[0])
+    assert "Sending Payment Plan Group to Vision started" in str(messages[0])
 
 
 def test_send_to_vision_get_confirmation(admin_client, payment_plan) -> None:
@@ -458,14 +462,15 @@ def test_send_to_vision_get_confirmation(admin_client, payment_plan) -> None:
         condition="boolean",
         value="True",
     )
-    payment_plan.status = PaymentPlan.Status.IN_REVIEW
+    group = payment_plan.payment_plan_group
+    group.status = PaymentPlanGroup.Status.IN_REVIEW
     payment_plan.business_area.vision_integration_active = True
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    payment_plan.save(update_fields=["status"])
-    url = reverse("admin:payment_paymentplan_send_to_vision", args=[payment_plan.pk])
+    group.save(update_fields=["status"])
+    url = reverse("admin:payment_paymentplangroup_send_to_vision", args=[group.pk])
     response = admin_client.get(url)
     assert response.status_code == 200
-    assert "Do you confirm to send this payment plan to Vision?" in response.content.decode("utf-8")
+    assert "Do you confirm sending this Payment Plan Group to Vision?" in response.content.decode("utf-8")
 
 
 @pytest.fixture

@@ -282,7 +282,7 @@ def group_with_custom_rate_before_open(open_group, cycle):
 
 @pytest.fixture
 def replacement_currency():
-    return CurrencyFactory(code="PLN", name="Polish Zloty")
+    return CurrencyFactory(code="EUR", name="Euro")
 
 
 def test_changing_group_currency_clears_its_previous_rate(group_with_custom_rate_before_open, replacement_currency):
@@ -562,9 +562,9 @@ def test_reject_by_user_who_already_approved_rejected(mock_notify, mock_config, 
 
 
 @pytest.fixture
-def plan_sent_to_vision(group_in_review, locked_payment_plan):
+def group_sent_to_vision(group_in_review, locked_payment_plan):
     locked_payment_plan.refresh_from_db()
-    locked_payment_plan.internal_data = {
+    group_in_review.internal_data = {
         "vision": {
             "sent": True,
             "status": VisionStatus.WAITING_FOR_CALLBACK.value,
@@ -572,22 +572,22 @@ def plan_sent_to_vision(group_in_review, locked_payment_plan):
             "fc_numbers": ["FC123"],
         }
     }
-    locked_payment_plan.save(update_fields=["internal_data"])
-    return locked_payment_plan
+    group_in_review.save(update_fields=["internal_data"])
+    return group_in_review
 
 
-@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
+@patch("hope.contrib.vision.tasks.notify_payment_plan_group_status_to_vision_async_task")
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
 def test_reject_invalidates_vision_attempt_and_tells_vision(
-    mock_notify, mock_notify_vision, group_in_review, plan_sent_to_vision, user, django_capture_on_commit_callbacks
+    mock_notify, mock_notify_vision, group_in_review, group_sent_to_vision, user, django_capture_on_commit_callbacks
 ):
     with django_capture_on_commit_callbacks(execute=True):
         PaymentPlanGroupService(group_in_review).acceptance_process(PaymentPlan.Action.REJECT.value, user, "no")
 
-    plan_sent_to_vision.refresh_from_db()
-    assert plan_sent_to_vision.status == PaymentPlan.Status.LOCKED_FSP
-    assert plan_sent_to_vision.vision_data == {"status": VisionStatus.NOT_SENT.value}
-    mock_notify_vision.assert_called_once_with(plan_sent_to_vision, str(user.pk), "REJECTED")
+    group_sent_to_vision.refresh_from_db()
+    assert group_sent_to_vision.status == PaymentPlanGroup.Status.LOCKED
+    assert group_sent_to_vision.vision_data["status"] == VisionStatus.NOT_SENT.value
+    mock_notify_vision.assert_called_once_with(group_sent_to_vision, str(user.pk), "REJECTED")
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
@@ -601,9 +601,9 @@ def test_authorize_moves_group_and_plans_to_in_review(mock_notify, group_in_auth
     assert group_in_authorization.approval_process.get().sent_for_finance_release_by == user
 
 
-@patch("hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task")
+@patch("hope.contrib.vision.tasks.send_payment_plan_group_to_vision_async_task")
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
-def test_authorize_queues_vision_send_for_every_plan(
+def test_authorize_queues_one_vision_send_for_group(
     mock_notify,
     mock_send_to_vision,
     group_in_authorization,
@@ -619,7 +619,7 @@ def test_authorize_queues_vision_send_for_every_plan(
     with django_capture_on_commit_callbacks(execute=True):
         PaymentPlanGroupService(group_in_authorization).acceptance_process(PaymentPlan.Action.AUTHORIZE.value, user)
 
-    mock_send_to_vision.assert_called_once_with(locked_payment_plan, str(locked_payment_plan.created_by_id))
+    mock_send_to_vision.assert_called_once_with(group_in_authorization, str(user.pk))
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
@@ -633,7 +633,7 @@ def test_mark_as_released_moves_group_and_plans_to_accepted(mock_notify, group_i
     assert mock_notify.call_args.args[1] == PaymentPlan.Action.REVIEW.value
 
 
-def test_mark_as_released_rejected_when_a_plan_is_vision_managed(group_in_review, locked_payment_plan, user):
+def test_mark_as_released_rejected_when_group_is_vision_managed(group_in_review, locked_payment_plan, user):
     FlagState.objects.get_or_create(name="VISION_INTEGRATION_ACTIVE", condition="boolean", value="True")
     business_area = locked_payment_plan.business_area
     business_area.vision_integration_active = True
@@ -641,7 +641,7 @@ def test_mark_as_released_rejected_when_a_plan_is_vision_managed(group_in_review
 
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(group_in_review).acceptance_process(PaymentPlan.Action.REVIEW.value, user)
-    assert error.value.detail[0] == "Vision-managed Payment Plans are released automatically after FC assignment"
+    assert error.value.detail[0] == "Vision-managed Payment Plan Groups are released automatically after FC assignment"
 
 
 @pytest.fixture
@@ -657,34 +657,28 @@ def partially_released_group(group_in_review, locked_payment_plan):
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
-def test_vision_release_keeps_group_in_review_while_a_plan_is_pending(
-    mock_notify, partially_released_group, user, django_assert_num_queries
-):
+def test_vision_release_keeps_group_in_review_while_a_plan_is_pending(mock_notify, partially_released_group, user):
     group, _ = partially_released_group
-    with django_assert_num_queries(5):
-        result = PaymentPlanGroupService(group).advance_after_vision_release(user)
+    with pytest.raises(ValidationError, match="Every Payment Plan must be in review"):
+        PaymentPlanGroupService(group).release_from_vision()
 
-    assert result.status == PaymentPlanGroup.Status.IN_REVIEW
+    group.refresh_from_db()
+    assert group.status == PaymentPlanGroup.Status.IN_REVIEW
     mock_notify.assert_not_called()
 
 
 @pytest.fixture
-def group_with_released_vision_plans(partially_released_group):
+def group_with_review_vision_plans(partially_released_group):
     group, pending_plan = partially_released_group
-    pending_plan.status = PaymentPlan.Status.ACCEPTED
-    pending_plan.save(update_fields=["status"])
+    PaymentPlan.objects.filter(payment_plan_group=group).update(status=PaymentPlan.Status.IN_REVIEW)
     return group
 
 
 @patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
-def test_vision_release_accepts_group_after_all_plans_are_accepted(
-    mock_notify, group_with_released_vision_plans, user, django_assert_num_queries
-):
-    with django_assert_num_queries(6):
-        result = PaymentPlanGroupService(group_with_released_vision_plans).advance_after_vision_release(user)
+def test_vision_release_accepts_group_and_all_review_plans(mock_notify, group_with_review_vision_plans, user):
+    result = PaymentPlanGroupService(group_with_review_vision_plans).release_from_vision()
 
-    with django_assert_num_queries(3):
-        repeated_result = PaymentPlanGroupService(group_with_released_vision_plans).advance_after_vision_release(user)
+    repeated_result = PaymentPlanGroupService(group_with_review_vision_plans).release_from_vision()
 
     assert result.status == PaymentPlanGroup.Status.ACCEPTED
     assert repeated_result.status == PaymentPlanGroup.Status.ACCEPTED

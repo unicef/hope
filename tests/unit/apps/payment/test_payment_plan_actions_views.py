@@ -1335,7 +1335,7 @@ def test_assign_funds_commitments_validation_errors(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment Plan Group must be in review" in response.json()
+    assert "Payment Plan Group must be in review" in response.json()[0]
 
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()

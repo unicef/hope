@@ -2547,9 +2547,9 @@ def vision_authorization_context():
     return payment_plan, approval_process
 
 
-@patch("hope.contrib.vision.tasks.send_payment_plan_to_vision_async_task")
+@patch("hope.contrib.vision.tasks.send_payment_plan_group_to_vision_async_task")
 @patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-def test_authorization_queues_vision_send_after_commit(
+def test_plan_authorization_does_not_queue_group_vision_send(
     mock_notification,
     mock_send_to_vision,
     vision_authorization_context,
@@ -2570,7 +2570,7 @@ def test_authorization_queues_vision_send_after_commit(
 
     payment_plan.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
-    mock_send_to_vision.assert_called_once_with(payment_plan, str(payment_plan.created_by_id))
+    mock_send_to_vision.assert_not_called()
 
 
 def test_ready_for_closure_moves_plan_to_ready_for_closure(

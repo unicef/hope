@@ -39,7 +39,10 @@ def test_can_send_to_vision_returns_true_when_in_review(program_cycle, enable_vi
     )
     payment_plan.business_area.vision_integration_active = True
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    assert payment_plan.can_send_to_vision is True
+    group = payment_plan.payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
+    assert group.can_send_to_vision is True
 
 
 def test_can_send_to_vision_returns_false_when_not_accepted(program_cycle) -> None:
@@ -51,7 +54,7 @@ def test_can_send_to_vision_returns_false_when_not_accepted(program_cycle) -> No
     )
     payment_plan.business_area.vision_integration_active = True
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    assert payment_plan.can_send_to_vision is False
+    assert payment_plan.payment_plan_group.can_send_to_vision is False
 
 
 def test_can_send_to_vision_returns_false_when_flag_disabled(program_cycle) -> None:
@@ -63,7 +66,7 @@ def test_can_send_to_vision_returns_false_when_flag_disabled(program_cycle) -> N
     )
     payment_plan.business_area.vision_integration_active = True
     payment_plan.business_area.save(update_fields=["vision_integration_active"])
-    assert payment_plan.can_send_to_vision is False
+    assert payment_plan.payment_plan_group.can_send_to_vision is False
 
 
 def test_has_payments_reconciliation_overdue_raises_type_error_when_dispersion_start_date_is_none(program_cycle):
