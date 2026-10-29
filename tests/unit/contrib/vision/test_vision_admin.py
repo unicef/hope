@@ -17,10 +17,10 @@ from extras.test_utils.factories import (
     FundsCommitmentItemFactory,
 )
 from hope.admin.funds_commitment_header import FundsCommitmentHeaderAdmin, FundsCommitmentItemInline
-from hope.admin.payment_plan import FundsCommitmentHeaderInline as PaymentPlanFundsCommitmentHeaderInline
+from hope.admin.payment_plan import FundsCommitmentHeaderInline as PaymentPlanGroupFundsCommitmentHeaderInline
 from hope.contrib.vision.choices import VisionStatus
 from hope.contrib.vision.models import FundsCommitmentHeader
-from hope.models import PaymentPlan
+from hope.models import PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
@@ -72,12 +72,17 @@ def _create_payment_plan(afghanistan, admin_user, program_cycle, status=PaymentP
 
     afghanistan.vision_integration_active = True
     afghanistan.save(update_fields=["vision_integration_active"])
-    return PaymentPlanFactory(
+    payment_plan = PaymentPlanFactory(
         status=status,
         program_cycle=program_cycle,
         business_area=afghanistan,
         created_by=admin_user,
     )
+    if status == PaymentPlan.Status.IN_REVIEW:
+        group = payment_plan.payment_plan_group
+        group.status = PaymentPlanGroup.Status.IN_REVIEW
+        group.save(update_fields=["status"])
+    return payment_plan
 
 
 @pytest.fixture
@@ -210,18 +215,23 @@ def test_manual_fc_header_recovery_shows_warning_and_available_header(
         office=afghanistan,
     )
 
-    change_response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]))
+    change_response = admin_client.get(
+        reverse("admin:payment_paymentplangroup_change", args=[payment_plan.payment_plan_group_id])
+    )
     action_response = admin_client.get(
-        reverse("admin:payment_paymentplan_assign_vision_funds_commitment_headers", args=[payment_plan.pk])
+        reverse(
+            "admin:payment_paymentplangroup_assign_vision_funds_commitment_headers",
+            args=[payment_plan.payment_plan_group_id],
+        )
     )
 
     assert change_response.status_code == 200
     assert 'id="btn-assign_vision_funds_commitment_headers"' in change_response.content.decode()
     assert action_response.status_code == 200
     content = " ".join(action_response.content.decode().split())
-    assert "Assigning these FC headers will automatically release the Payment Plan" in content
-    assert "immediately send it to Payment Gateway if" in content
-    assert "it is a PG plan" in content
+    assert "Assigning these FC headers to the Payment Plan Group will automatically release all pending" in content
+    assert "immediately send each Payment Gateway plan to Payment Gateway" in content
+    assert 'id="id_payment_plan"' not in content
     assert 'id="id_funds_commitment_headers"' in content
     assert "FC123" in content
 
@@ -230,17 +240,22 @@ def test_manual_fc_header_recovery_is_available_after_vision_send_failed(
     send_failed_payment_plan,
     admin_client,
 ) -> None:
-    response = admin_client.get(reverse("admin:payment_paymentplan_change", args=[send_failed_payment_plan.pk]))
+    response = admin_client.get(
+        reverse("admin:payment_paymentplangroup_change", args=[send_failed_payment_plan.payment_plan_group_id])
+    )
     action_response = admin_client.get(
-        reverse("admin:payment_paymentplan_assign_vision_funds_commitment_headers", args=[send_failed_payment_plan.pk])
+        reverse(
+            "admin:payment_paymentplangroup_assign_vision_funds_commitment_headers",
+            args=[send_failed_payment_plan.payment_plan_group_id],
+        )
     )
 
     assert response.status_code == 200
     assert 'id="btn-assign_vision_funds_commitment_headers"' in response.content.decode()
     assert action_response.status_code == 200
     content = action_response.content.decode()
-    assert "HOPE could not confirm that this Payment Plan was successfully sent to Vision" in content
-    assert "The request may have failed, or" in content
+    assert "every Payment Plan in this group" in content
+    assert "A request may have" in content
     assert "processing may have stopped before confirmation was recorded" in content
 
 
@@ -249,12 +264,15 @@ def test_manual_fc_header_recovery_is_available_while_waiting_without_send_confi
     admin_client,
 ) -> None:
     response = admin_client.get(
-        reverse("admin:payment_paymentplan_change", args=[waiting_without_send_confirmation_payment_plan.pk])
+        reverse(
+            "admin:payment_paymentplangroup_change",
+            args=[waiting_without_send_confirmation_payment_plan.payment_plan_group_id],
+        )
     )
     action_response = admin_client.get(
         reverse(
-            "admin:payment_paymentplan_assign_vision_funds_commitment_headers",
-            args=[waiting_without_send_confirmation_payment_plan.pk],
+            "admin:payment_paymentplangroup_assign_vision_funds_commitment_headers",
+            args=[waiting_without_send_confirmation_payment_plan.payment_plan_group_id],
         )
     )
 
@@ -262,8 +280,8 @@ def test_manual_fc_header_recovery_is_available_while_waiting_without_send_confi
     assert 'id="btn-assign_vision_funds_commitment_headers"' in response.content.decode()
     assert action_response.status_code == 200
     content = action_response.content.decode()
-    assert "HOPE could not confirm that this Payment Plan was successfully sent to Vision" in content
-    assert "The request may have failed, or" in content
+    assert "every Payment Plan in this group" in content
+    assert "A request may have" in content
     assert "processing may have stopped before confirmation was recorded" in content
 
 
@@ -273,24 +291,18 @@ def test_manual_fc_header_recovery_does_not_warn_after_payment_plan_created_ackn
 ) -> None:
     action_response = admin_client.get(
         reverse(
-            "admin:payment_paymentplan_assign_vision_funds_commitment_headers",
-            args=[payment_plan_created_payment_plan.pk],
+            "admin:payment_paymentplangroup_assign_vision_funds_commitment_headers",
+            args=[payment_plan_created_payment_plan.payment_plan_group_id],
         )
     )
 
     assert action_response.status_code == 200
     content = action_response.content.decode()
-    assert "HOPE could not confirm that this Payment Plan was successfully sent to Vision" not in content
+    assert "HOPE could not confirm that every Payment Plan in this group" not in content
 
 
-@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
-@patch("hope.apps.payment.services.payment_plan_services.update_exchange_rate_on_release_payments_async_task")
-def test_manual_fc_header_recovery_assigns_headers_and_releases_plan(
-    mock_exchange_rate_task,
-    mock_notification_task,
-    vision_admin_context,
-    django_capture_on_commit_callbacks,
-) -> None:
+@pytest.fixture
+def recoverable_group_with_two_headers(vision_admin_context):
     payment_plan = _create_payment_plan(
         vision_admin_context["business_area"],
         vision_admin_context["user"],
@@ -303,32 +315,103 @@ def test_manual_fc_header_recovery_assigns_headers_and_releases_plan(
         }
     }
     payment_plan.save(update_fields=["internal_data"])
+    from extras.test_utils.factories.payment import PaymentPlanFactory
+
+    sibling_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.IN_REVIEW,
+        program_cycle=vision_admin_context["program_cycle"],
+        payment_plan_group=payment_plan.payment_plan_group,
+        business_area=vision_admin_context["business_area"],
+        created_by=vision_admin_context["user"],
+        internal_data={"vision": {"sent": True, "status": VisionStatus.FC_NOT_FOUND.value}},
+    )
     ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
     funds_commitment_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC123")
+    second_header = FundsCommitmentHeaderFactory(funds_commitment_number="FC456")
     FundsCommitmentItemFactory(
         funds_commitment_header=funds_commitment_header,
         office=vision_admin_context["business_area"],
     )
+    FundsCommitmentItemFactory(funds_commitment_header=second_header, office=vision_admin_context["business_area"])
+    return payment_plan, sibling_plan, funds_commitment_header, second_header
+
+
+@pytest.fixture
+def group_with_unrecoverable_pending_plan(recoverable_group_with_two_headers):
+    payment_plan, sibling_plan, funds_commitment_header, second_header = recoverable_group_with_two_headers
+    sibling_plan.internal_data = {"vision": {"status": VisionStatus.NOT_SENT.value}}
+    sibling_plan.save(update_fields=["internal_data"])
+    return payment_plan, sibling_plan, funds_commitment_header, second_header
+
+
+def test_manual_fc_header_recovery_waits_for_every_pending_plan(
+    vision_admin_context, group_with_unrecoverable_pending_plan, django_assert_num_queries
+) -> None:
+    payment_plan, sibling_plan, funds_commitment_header, second_header = group_with_unrecoverable_pending_plan
+    group = payment_plan.payment_plan_group
+    action_url = reverse("admin:payment_paymentplangroup_assign_vision_funds_commitment_headers", args=[group.pk])
+
+    change_response = vision_admin_context["client"].get(
+        reverse("admin:payment_paymentplangroup_change", args=[group.pk])
+    )
+    action_response = vision_admin_context["client"].post(
+        action_url,
+        {"funds_commitment_headers": [funds_commitment_header.pk, second_header.pk]},
+    )
+
+    assert 'id="btn-assign_vision_funds_commitment_headers"' not in change_response.content.decode()
+    assert action_response.status_code == 200
+    assert "Vision recovery is no longer available" in action_response.content.decode()
+    payment_plan.refresh_from_db()
+    sibling_plan.refresh_from_db()
+    assert payment_plan.status == PaymentPlan.Status.IN_REVIEW
+    assert sibling_plan.status == PaymentPlan.Status.IN_REVIEW
+    with django_assert_num_queries(1):
+        assert not group.funds_commitment_headers.exists()
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_group_services.recalculate_owner_exchange_rate_async_task")
+def test_manual_fc_header_recovery_assigns_multiple_headers_and_releases_group(
+    mock_exchange_rate_task,
+    mock_notification_task,
+    mock_group_notification_task,
+    vision_admin_context,
+    recoverable_group_with_two_headers,
+    django_capture_on_commit_callbacks,
+) -> None:
+    payment_plan, sibling_plan, funds_commitment_header, second_header = recoverable_group_with_two_headers
     action_url = reverse(
-        "admin:payment_paymentplan_assign_vision_funds_commitment_headers",
-        args=[payment_plan.pk],
+        "admin:payment_paymentplangroup_assign_vision_funds_commitment_headers",
+        args=[payment_plan.payment_plan_group_id],
     )
 
     with django_capture_on_commit_callbacks(execute=True):
         response = vision_admin_context["client"].post(
             action_url,
             {
-                "funds_commitment_headers": [funds_commitment_header.pk],
+                "funds_commitment_headers": [funds_commitment_header.pk, second_header.pk],
             },
         )
 
     assert response.status_code == 302
     payment_plan.refresh_from_db()
+    sibling_plan.refresh_from_db()
+    payment_plan.payment_plan_group.refresh_from_db()
     assert payment_plan.status == PaymentPlan.Status.ACCEPTED
+    assert sibling_plan.status == PaymentPlan.Status.ACCEPTED
+    assert payment_plan.payment_plan_group.status == PaymentPlanGroup.Status.ACCEPTED
     assert payment_plan.vision_status == VisionStatus.RELEASED.value
-    assert list(payment_plan.funds_commitment_headers.all()) == [funds_commitment_header]
+    assert sibling_plan.vision_status == VisionStatus.RELEASED.value
+    assert set(payment_plan.payment_plan_group.funds_commitment_headers.all()) == {
+        funds_commitment_header,
+        second_header,
+    }
     mock_exchange_rate_task.assert_called_once()
-    mock_notification_task.assert_called_once()
+    assert mock_exchange_rate_task.call_args.args[0].pk == payment_plan.payment_plan_group_id
+    assert mock_notification_task.call_count == 2
+    mock_group_notification_task.assert_called_once()
 
 
 @pytest.fixture
@@ -357,7 +440,7 @@ def payment_plan_with_funds_commitment_header(
         vision_admin_context["user"],
         vision_admin_context["program_cycle"],
     )
-    funds_commitment_header_for_admin.payment_plans.add(payment_plan)
+    funds_commitment_header_for_admin.payment_plan_groups.add(payment_plan.payment_plan_group)
     return payment_plan, funds_commitment_header_for_admin
 
 
@@ -393,7 +476,7 @@ def test_funds_commitment_header_admin_displays_derived_fields(
     assert header.currency == "USD"
 
 
-def test_payment_plan_funds_commitment_header_inline_displays_details_and_link(
+def test_payment_plan_group_funds_commitment_header_inline_displays_details_and_link(
     admin_user,
     payment_plan_with_funds_commitment_header: tuple[PaymentPlan, FundsCommitmentHeader],
     django_assert_num_queries,
@@ -401,11 +484,11 @@ def test_payment_plan_funds_commitment_header_inline_displays_details_and_link(
     payment_plan, header = payment_plan_with_funds_commitment_header
     request = RequestFactory().get("/")
     request.user = admin_user
-    inline = PaymentPlanFundsCommitmentHeaderInline(PaymentPlan, admin.site)
+    inline = PaymentPlanGroupFundsCommitmentHeaderInline(type(payment_plan.payment_plan_group), admin.site)
 
     with django_assert_num_queries(2):
         assignment = inline.get_queryset(request).get(
-            paymentplan=payment_plan,
+            paymentplangroup=payment_plan.payment_plan_group,
             fundscommitmentheader=header,
         )
 

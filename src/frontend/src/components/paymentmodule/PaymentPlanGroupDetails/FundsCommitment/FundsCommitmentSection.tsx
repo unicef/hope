@@ -3,7 +3,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { Title } from '@components/core/Title';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Autocomplete,
   TextField,
@@ -12,9 +12,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import { t } from 'i18next';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -29,16 +28,17 @@ import {
 } from 'src/responsive';
 
 interface FundsCommitmentSectionProps {
-  paymentPlan: PaymentPlanDetail;
+  group: PaymentPlanGroupDetail;
+  programCode: string;
 }
 
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
-  paymentPlan,
+  group,
+  programCode,
 }) => {
-  const visionManaged = paymentPlan.visionManaged;
   const initialFundsCommitments = useMemo(
-    () => paymentPlan.fundsCommitments || [],
-    [paymentPlan.fundsCommitments],
+    () => group.fundsCommitments || [],
+    [group.fundsCommitments],
   );
 
   const queryClient = useQueryClient();
@@ -52,11 +52,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       }: {
         fundsCommitmentNumbers: string[];
       }) => {
-        return RestService.restBusinessAreasProgramsPaymentPlansAssignFundsCommitmentsCreate(
+        return RestService.restBusinessAreasProgramsPaymentPlanGroupsAssignFundsCommitmentsCreate(
           {
             businessAreaSlug: businessArea,
-            programCode: paymentPlan.program.code,
-            id: paymentPlan.id,
+            programCode,
+            id: group.id,
             requestBody: { fundsCommitmentNumbers },
           },
         );
@@ -64,7 +64,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+            RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
           ),
         });
       },
@@ -73,6 +73,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   const [selectedFundsCommitments, setSelectedFundsCommitments] = useState(
     initialFundsCommitments,
   );
+  useEffect(() => {
+    setSelectedFundsCommitments(initialFundsCommitments);
+  }, [initialFundsCommitments]);
 
   const canAssignFunds = hasPermissions(
     PERMISSIONS.PM_ASSIGN_FUNDS_COMMITMENTS,
@@ -80,8 +83,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   );
 
   const availableFundsCommitments = useMemo(
-    () => paymentPlan?.availableFundsCommitments || [],
-    [paymentPlan],
+    () => group.availableFundsCommitments || [],
+    [group.availableFundsCommitments],
   );
   const handleSubmit = async () => {
     if (selectedFundsCommitments.length > 0) {
@@ -94,7 +97,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         showMessage(t('Funds commitment headers assigned successfully'));
         await queryClient.invalidateQueries({
           queryKey: restQueryKey(
-            RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+            RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve,
           ),
         });
       } catch (e) {
@@ -131,77 +134,76 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
             <Typography variant="h6">{t('Funds Commitment')}</Typography>
           </Title>
         </Box>
-        {paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW &&
-          !visionManaged && (
-            <React.Fragment>
-              <Box
-                sx={{
-                  mt: 2,
-                }}
+        {group.canAssignFundsCommitments && (
+          <React.Fragment>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
+              <FormControl fullWidth size="small">
+                <Autocomplete
+                  multiple
+                  value={selectedFundsCommitments}
+                  onChange={(_event, newValue) =>
+                    setSelectedFundsCommitments(newValue)
+                  }
+                  options={availableFundsCommitments}
+                  getOptionLabel={(option) =>
+                    option?.fundsCommitmentNumber || ''
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={t('Funds Commitment Headers')}
+                    />
+                  )}
+                  renderOption={(props, option) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <li key={key} {...optionProps}>
+                        {option.fundsCommitmentNumber}
+                      </li>
+                    );
+                  }}
+                  isOptionEqualToValue={(option, value) =>
+                    option.fundsCommitmentNumber ===
+                    value?.fundsCommitmentNumber
+                  }
+                  noOptionsText={t('No options')}
+                  clearOnEscape
+                />
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                mt: 3,
+              }}
+            >
+              <Tooltip
+                title={!canAssignFunds ? t('Permission Denied') : ''}
+                arrow
               >
-                <FormControl fullWidth size="small">
-                  <Autocomplete
-                    multiple
-                    value={selectedFundsCommitments}
-                    onChange={(_event, newValue) =>
-                      setSelectedFundsCommitments(newValue)
+                <span>
+                  <LoadingButton
+                    variant="contained"
+                    loading={loadingAssign}
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={
+                      loadingAssign ||
+                      !canAssignFunds ||
+                      selectedFundsCommitments.length === 0 ||
+                      isAlreadyAssigned
                     }
-                    options={availableFundsCommitments}
-                    getOptionLabel={(option) =>
-                      option?.fundsCommitmentNumber || ''
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label={t('Funds Commitment Headers')}
-                      />
-                    )}
-                    renderOption={(props, option) => {
-                      const { key, ...optionProps } = props;
-                      return (
-                        <li key={key} {...optionProps}>
-                          {option.fundsCommitmentNumber}
-                        </li>
-                      );
-                    }}
-                    isOptionEqualToValue={(option, value) =>
-                      option.fundsCommitmentNumber ===
-                      value?.fundsCommitmentNumber
-                    }
-                    noOptionsText={t('No options')}
-                    clearOnEscape
-                  />
-                </FormControl>
-              </Box>
-              <Box
-                sx={{
-                  mt: 3,
-                }}
-              >
-                <Tooltip
-                  title={!canAssignFunds ? t('Permission Denied') : ''}
-                  arrow
-                >
-                  <span>
-                    <LoadingButton
-                      variant="contained"
-                      loading={loadingAssign}
-                      color="primary"
-                      onClick={handleSubmit}
-                      disabled={
-                        loadingAssign ||
-                        !canAssignFunds ||
-                        selectedFundsCommitments.length === 0 ||
-                        isAlreadyAssigned
-                      }
-                    >
-                      {t('Assign Funds Commitments')}
-                    </LoadingButton>
-                  </span>
-                </Tooltip>
-              </Box>
-            </React.Fragment>
-          )}
+                  >
+                    {t('Assign Funds Commitments')}
+                  </LoadingButton>
+                </span>
+              </Tooltip>
+            </Box>
+          </React.Fragment>
+        )}
         {initialFundsCommitments.length > 0 ? (
           initialFundsCommitments.map((header, headerIndex) => (
             <Box

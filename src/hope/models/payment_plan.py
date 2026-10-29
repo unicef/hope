@@ -21,7 +21,6 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
@@ -30,7 +29,6 @@ from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.contrib.vision.choices import VisionStatus
 from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
@@ -53,6 +51,8 @@ if TYPE_CHECKING:
     from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
     from hope.models.approval_process import ApprovalProcess
     from hope.models.currency import Currency
+    from hope.models.follow_up_instruction import FollowUpInstruction
+    from hope.models.payment_plan_group import PaymentPlanGroup
     from hope.models.payment_verification_plan import PaymentVerificationPlan
     from hope.models.program import Program
     from hope.models.user import User
@@ -127,7 +127,6 @@ class PaymentPlan(
             "closed_by",
             "reconciliation_import_file",
             "flat_amount_value",
-            "exchange_rate",
             "total_entitled_quantity",
             "total_entitled_quantity_usd",
             "total_delivered_quantity",
@@ -229,14 +228,6 @@ class PaymentPlan(
             "IMPORTING_ENTITLEMENTS",
             "Importing Entitlements flat amount",
         )
-        APPLYING_CUSTOM_EXCHANGE_RATE = (
-            "APPLYING_CUSTOM_EXCHANGE_RATE",
-            "Applying Custom Exchange Rate",
-        )
-        APPLYING_CUSTOM_EXCHANGE_RATE_ERROR = (
-            "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR",
-            "Applying Custom Exchange Rate Error",
-        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -271,7 +262,6 @@ class PaymentPlan(
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
-        BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
         BackgroundActionStatus.REBUILD_ERROR,
     ]
 
@@ -488,25 +478,6 @@ class PaymentPlan(
         help_text="Build Status for celery task [sys]",
     )
     built_at = models.DateTimeField(null=True, blank=True, help_text="Built at [sys]")
-    exchange_rate = models.DecimalField(
-        decimal_places=8,
-        blank=True,
-        null=True,
-        max_digits=15,
-        help_text="Exchange Rate [sys]",
-    )
-    custom_exchange_rate = models.BooleanField(
-        default=False,
-        help_text="Custom Exchange Rate flag [sys]",
-    )
-    custom_exchange_rate_set_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-        help_text="User who set the custom exchange rate [sys]",
-    )
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
     female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
@@ -1071,6 +1042,27 @@ class PaymentPlan(
         return self.follow_up_instruction.use_payment_gateway if self.follow_up_instruction_id else False
 
     @property
+    def exchange_rate_owner(self) -> "PaymentPlanGroup | FollowUpInstruction | None":
+        if self.payment_plan_group_id:
+            return self.payment_plan_group
+        return self.follow_up_instruction if self.follow_up_instruction_id else None
+
+    @property
+    def exchange_rate(self) -> Decimal | None:
+        owner = self.exchange_rate_owner
+        return owner.exchange_rate if owner else None
+
+    @property
+    def custom_exchange_rate(self) -> bool:
+        owner = self.exchange_rate_owner
+        return owner.custom_exchange_rate if owner else False
+
+    @property
+    def custom_exchange_rate_set_by(self) -> "User | None":
+        owner = self.exchange_rate_owner
+        return owner.custom_exchange_rate_set_by if owner else None
+
+    @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
@@ -1107,20 +1099,8 @@ class PaymentPlan(
 
     @property
     def currency_exchange_date(self) -> date:
-        if (
-            self.status
-            in [
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-                PaymentPlan.Status.READY_FOR_CLOSURE,
-                PaymentPlan.Status.CLOSED,
-            ]
-            and (process := self.last_approval_process)
-            and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
-        ):
-            return approval.created_at.date()
-        now = timezone.now().date()
-        return min(now, self.dispersion_end_date) if self.dispersion_end_date else now
+        owner = self.exchange_rate_owner
+        return owner.currency_exchange_date if owner else timezone.now().date()
 
     @property
     def can_create_payment_verification_plan(self) -> int:
@@ -1207,45 +1187,6 @@ class PaymentPlan(
             sent_to_payment_gateway=False,
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-
-    @property
-    def vision_integration_enabled(self) -> bool:
-        # Follow-Up plans reuse funds reserved for the source plan and do not require a new Vision commitment.
-        if self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
-            return False
-        return bool(flag_state("VISION_INTEGRATION_ACTIVE")) and self.business_area.vision_integration_active
-
-    @property
-    def vision_status(self) -> str:
-        vision_data = (self.internal_data or {}).get("vision", {})
-        if not isinstance(vision_data, dict):
-            return VisionStatus.NOT_SENT.value
-        return str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
-
-    @property
-    def vision_data(self) -> dict[str, Any]:
-        vision_data = (self.internal_data or {}).get("vision", {})
-        return vision_data if isinstance(vision_data, dict) else {}
-
-    @property
-    def vision_managed(self) -> bool:
-        return self.vision_integration_enabled and (
-            self.status == PaymentPlan.Status.IN_REVIEW or self.vision_status != VisionStatus.NOT_SENT.value
-        )
-
-    @property
-    def can_send_to_vision(self) -> bool:
-        return (
-            self.status == PaymentPlan.Status.IN_REVIEW
-            and self.vision_integration_enabled
-            and self.vision_status in {VisionStatus.NOT_SENT.value, VisionStatus.SEND_FAILED.value}
-            and not self.sent_to_vision
-        )
-
-    @property
-    def sent_to_vision(self) -> bool:
-        vision_data = (self.internal_data or {}).get("vision", {})
-        return isinstance(vision_data, dict) and bool(vision_data.get("sent"))
 
     @property
     def has_payments_reconciliation_overdue(self) -> bool:

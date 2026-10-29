@@ -2,7 +2,8 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { Alert, Box, Typography } from '@mui/material';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,10 +12,6 @@ import {
   ResponsiveGridContainer,
 } from 'src/responsive';
 
-interface VisionStatusSectionProps {
-  paymentPlan: PaymentPlanDetail;
-}
-
 const errorStatuses = new Set([
   'SEND_FAILED',
   'CALLBACK_FAILED',
@@ -22,16 +19,23 @@ const errorStatuses = new Set([
 ]);
 
 export function VisionStatusSection({
-  paymentPlan,
-}: VisionStatusSectionProps): ReactElement | null {
+  group,
+}: {
+  group: PaymentPlanGroupDetail;
+}): ReactElement | null {
   const { t } = useTranslation();
-  if (!paymentPlan.visionManaged) return null;
+  if (
+    group.vision.status === 'NOT_SENT' &&
+    (!group.visionManaged ||
+      group.status !== PaymentPlanGroupStatusEnum.IN_REVIEW)
+  ) {
+    return null;
+  }
 
-  const vision = paymentPlan.vision;
-  const status = vision.status;
-  const severity = errorStatuses.has(status)
+  const vision = group.vision;
+  const severity = errorStatuses.has(vision.status)
     ? 'error'
-    : status === 'FC_ASSOCIATED' || status === 'RELEASED'
+    : vision.status === 'FC_ASSOCIATED' || vision.status === 'RELEASED'
       ? 'success'
       : 'info';
 
@@ -44,7 +48,7 @@ export function VisionStatusSection({
           </Title>
         </Box>
         <Alert severity={severity} sx={{ mb: 3 }}>
-          {t(status.replaceAll('_', ' '))}
+          {t(vision.status.replaceAll('_', ' '))}
           {vision.errorCode
             ? `: ${t(vision.errorCode.replaceAll('_', ' '))}`
             : ''}

@@ -31,7 +31,9 @@ from hope.apps.payment.utils import (
     calculate_counts,
     from_received_to_status,
     generate_cache_key,
+    get_owner_unore_exchange_rate,
     get_quantity_in_usd,
+    log_follow_up_instruction_change,
     log_payment_plan_change,
     log_payment_plan_group_change,
     normalize_score,
@@ -460,76 +462,6 @@ def payment_plan_set_entitlement_flat_amount_async_task(payment_plan: PaymentPla
     )
 
 
-def payment_plan_apply_custom_exchange_rate_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import Payment, PaymentPlan
-
-    payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-
-    try:
-        bulk_size = 1000
-        updates = []
-        with transaction.atomic():
-            for payment in payment_plan.eligible_payments.only(
-                "id",
-                "entitlement_quantity",
-                "delivered_quantity",
-            ).iterator(chunk_size=bulk_size):
-                payment.entitlement_quantity_usd = get_quantity_in_usd(
-                    amount=payment.entitlement_quantity,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
-                )
-                payment.delivered_quantity_usd = get_quantity_in_usd(
-                    amount=payment.delivered_quantity,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
-                )
-                updates.append(payment)
-
-                if len(updates) >= bulk_size:
-                    Payment.objects.bulk_update(
-                        updates,
-                        ["entitlement_quantity_usd", "delivered_quantity_usd"],
-                        batch_size=bulk_size,
-                    )
-                    updates.clear()
-
-            if updates:
-                Payment.objects.bulk_update(
-                    updates,
-                    ["entitlement_quantity_usd", "delivered_quantity_usd"],
-                    batch_size=bulk_size,
-                )
-            flow = PaymentPlanFlow(payment_plan)
-            flow.background_action_status_none()
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
-            payment_plan.update_money_fields()
-            # invalidate cache for program cycle list
-            payment_plan.program_cycle.save()
-    except Exception:
-        logger.exception("PaymentPlan Apply Custom Exchange Rate Error")
-        flow = PaymentPlanFlow(payment_plan)
-        flow.background_action_status_applying_custom_exchange_rate_error()
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
-        raise
-
-
-def payment_plan_apply_custom_exchange_rate_async_task(payment_plan: PaymentPlan) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {"payment_plan_id": payment_plan_id}
-    AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        job_name=payment_plan_apply_custom_exchange_rate_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Apply custom exchange rate for payment plan {payment_plan_id}",
-    )
-
-
 def import_payment_plan_fsp_extra_fields_from_xlsx_async_task_action(job: AsyncRetryJob) -> bool:
     from hope.apps.payment.xlsx.xlsx_payment_plan_fsp_extra_fields_import_service import (
         XlsxPaymentPlanFspExtraFieldsImportService,
@@ -893,56 +825,119 @@ def payment_plan_apply_engine_rule_async_task(
     )
 
 
-def update_exchange_rate_on_release_payments_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import Payment, PaymentPlan
-
-    payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
-
-    payment_plan.exchange_rate = payment_plan.get_exchange_rate()
-    payment_plan.save(update_fields=["exchange_rate"])
-    log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
-    payment_plan.refresh_from_db(fields=["exchange_rate"])
-    bulk_size = 1000
-    updates = []
-    currency_exchange_date = payment_plan.currency_exchange_date
+def _run_owner_exchange_rate_recalculation(
+    job: AsyncRetryJob, owner_model: type[PaymentPlanGroup] | type[FollowUpInstruction]
+) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+    from hope.models import Payment
 
     with transaction.atomic():
-        for payment in payment_plan.eligible_payments.only(
-            "id",
-            "entitlement_quantity",
-            "parent_id",
-        ).iterator(chunk_size=bulk_size):
-            payment.entitlement_quantity_usd = get_quantity_in_usd(
-                amount=payment.entitlement_quantity,
-                currency=payment_plan.currency,
-                exchange_rate=payment_plan.exchange_rate,
-                currency_exchange_date=currency_exchange_date,
+        owner = owner_model.objects.select_for_update().select_related("currency").get(pk=job.object_id)
+        if owner.background_action_status != owner.BackgroundActionStatus.RECALCULATING:
+            raise NonRetriableTaskError("The owner recalculation was superseded by another background action")
+        plans = list(
+            owner.payment_plans.select_related("program_cycle", "payment_plan_group", "follow_up_instruction").order_by(
+                "created_at"
             )
-            updates.append(payment)
-            if len(updates) >= bulk_size:
-                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"], batch_size=bulk_size)
-                updates.clear()
+        )
+        if not plans:
+            owner.background_action_status = None
+            owner.save(update_fields=["background_action_status", "updated_at"])
+            return
+        set_sentry_business_area_tag(owner.business_area.name)
+        exchange_date = owner.currency_exchange_date
+        rate = owner.exchange_rate
+        if job.config["fetch_unore_rate"] and not owner.custom_exchange_rate:
+            rate = get_owner_unore_exchange_rate(owner, exchange_date)
+        # The exchange-rate feed returns None when it has no rate for this date.
+        if rate is None or rate <= 0:
+            raise ValueError("A positive exchange rate is required to recalculate owner payments")
+        if owner.exchange_rate != rate:
+            old_owner = copy_model_object(owner)
+            owner.exchange_rate = rate
+            owner.save(update_fields=["exchange_rate", "updated_at"])
+            owner.refresh_from_db(fields=["exchange_rate"])
+            if isinstance(owner, PaymentPlanGroup):
+                log_payment_plan_group_change(owner, cast("PaymentPlanGroup", old_owner), job.config.get("user_id"))
+            else:
+                log_follow_up_instruction_change(
+                    owner, cast("FollowUpInstruction", old_owner), job.config.get("user_id")
+                )
+        rate = owner.exchange_rate
 
-        if updates:
-            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"], batch_size=bulk_size)
-        payment_plan.update_money_fields()
-        payment_plan.program_cycle.save()
+        bulk_size = 1000
+        cycles = {}
+        usd_fields = ["entitlement_quantity_usd", "delivered_quantity_usd"]
+        for plan in plans:
+            updates = []
+            for payment in plan.eligible_payments.only("id", "entitlement_quantity", "delivered_quantity").iterator(
+                chunk_size=bulk_size
+            ):
+                payment.entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=payment.entitlement_quantity,
+                    currency=owner.currency,
+                    exchange_rate=rate,
+                    currency_exchange_date=exchange_date,
+                )
+                payment.delivered_quantity_usd = get_quantity_in_usd(
+                    amount=payment.delivered_quantity,
+                    currency=owner.currency,
+                    exchange_rate=rate,
+                    currency_exchange_date=exchange_date,
+                )
+                updates.append(payment)
+                if len(updates) >= bulk_size:
+                    Payment.objects.bulk_update(updates, usd_fields, batch_size=bulk_size)
+                    updates.clear()
+            Payment.objects.bulk_update(updates, usd_fields, batch_size=bulk_size)
+            plan.update_money_fields()
+            cycles[plan.program_cycle_id] = plan.program_cycle
+        for cycle in cycles.values():
+            cycle.save()
+        owner.background_action_status = None
+        owner.save(update_fields=["background_action_status", "updated_at"])
 
 
-def update_exchange_rate_on_release_payments_async_task(payment_plan: PaymentPlan, user_id: str | None = None) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {"payment_plan_id": payment_plan_id, "user_id": user_id}
-    AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        owner_id=user_id,
-        job_name=update_exchange_rate_on_release_payments_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Update exchange rate on release payments for {payment_plan_id}",
-    )
+def recalculate_owner_exchange_rate_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+
+    owner_model = cast("type[PaymentPlanGroup] | type[FollowUpInstruction]", job.content_type.model_class())
+    try:
+        _run_owner_exchange_rate_recalculation(job, owner_model)
+    except NonRetriableTaskError:
+        raise
+    except Exception as error:
+        with transaction.atomic():
+            owner = owner_model.objects.select_for_update().get(pk=job.object_id)
+            if owner.background_action_status == owner.BackgroundActionStatus.RECALCULATING:
+                owner.background_action_status = owner.BackgroundActionStatus.RECALCULATING_ERROR
+                owner.save(update_fields=["background_action_status", "updated_at"])
+        raise NonRetriableTaskError(str(error)) from error
+
+
+def recalculate_owner_exchange_rate_async_task(
+    owner: PaymentPlanGroup | FollowUpInstruction, user_id: str | None = None, *, fetch_unore_rate: bool = True
+) -> PaymentPlanGroup | FollowUpInstruction:
+    config = {
+        "user_id": user_id,
+        "fetch_unore_rate": fetch_unore_rate,
+    }
+    with transaction.atomic():
+        locked_owner = type(owner).objects.select_for_update().get(pk=owner.pk)
+        if locked_owner.background_action_status not in (None, *locked_owner.BACKGROUND_ACTION_ERROR_STATES):
+            raise ValidationError("Another owner background action is in progress")
+        locked_owner.background_action_status = locked_owner.BackgroundActionStatus.RECALCULATING
+        locked_owner.save(update_fields=["background_action_status", "updated_at"])
+        AsyncRetryJob.queue_task(
+            instance=locked_owner,
+            owner_id=user_id,
+            job_name=recalculate_owner_exchange_rate_async_task.__name__,
+            action="hope.apps.payment.celery_tasks.recalculate_owner_exchange_rate_async_task_action",
+            config=config,
+            group_key="payment",
+            description=f"Recalculate Payment Plan data for {owner._meta.verbose_name} {owner.pk}",
+        )
+    return locked_owner
 
 
 def remove_old_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJob) -> None:

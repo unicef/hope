@@ -565,6 +565,7 @@ def generate_reconciled_payment_plan() -> None:
             "financial_service_provider": fsp_1,
             "dispersion_start_date": now,
             "dispersion_end_date": now + timedelta(days=14),
+            "exchange_rate": 234.6742,
         },
     )
     payment_plan = PaymentPlan.objects.update_or_create(
@@ -579,7 +580,6 @@ def generate_reconciled_payment_plan() -> None:
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         plan_type=PaymentPlan.PlanType.REGULAR,
-        exchange_rate=234.6742,
         delivery_mechanism=dm_cash,
     )[0]
     payment_plan.payment_plan_purposes.add(purpose)

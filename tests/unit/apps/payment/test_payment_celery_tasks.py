@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -34,7 +34,7 @@ from extras.test_utils.factories import (
     UserFactory,
     WesternUnionPaymentPlanReportFactory,
 )
-from hope.apps.core.celery_tasks import async_retry_job_task
+from hope.apps.core.celery_tasks import NonRetriableTaskError, async_retry_job_task
 from hope.apps.household.const import ROLE_PRIMARY
 from hope.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_async_task,
@@ -55,8 +55,6 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_group_delivery_from_xlsx_async_task_action,
     import_payment_plan_payment_list_from_xlsx_async_task,
     notify_payment_plan_group_reconciliation_import_failure,
-    payment_plan_apply_custom_exchange_rate_async_task,
-    payment_plan_apply_custom_exchange_rate_async_task_action,
     payment_plan_apply_engine_rule_async_task,
     payment_plan_apply_engine_rule_async_task_action,
     payment_plan_apply_steficon_hh_selection_async_task,
@@ -79,6 +77,7 @@ from hope.apps.payment.celery_tasks import (
     periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
+    recalculate_owner_exchange_rate_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task,
     remove_old_cash_plan_payment_verification_xlsx_async_task_action,
     remove_old_payment_plan_payment_list_xlsx_async_task,
@@ -92,8 +91,6 @@ from hope.apps.payment.celery_tasks import (
     send_to_payment_gateway_async_task,
     send_to_payment_gateway_async_task_action,
     send_western_union_report_email_notifications_async_task,
-    update_exchange_rate_on_release_payments_async_task,
-    update_exchange_rate_on_release_payments_async_task_action,
 )
 from hope.apps.payment.services import western_union_reports_service
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -142,6 +139,23 @@ def user():
 @pytest.fixture
 def payment_plan():
     return PaymentPlanFactory()
+
+
+@pytest.fixture
+def owner_with_two_payment_plans():
+    group = PaymentPlanGroupFactory(
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"), exchange_rate=Decimal("1.00000000")
+    )
+    first = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, payment_plan_group=group, program_cycle=group.cycle)
+    second = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, payment_plan_group=group, program_cycle=group.cycle)
+    first_payment = PaymentFactory(
+        parent=first,
+        entitlement_quantity=Decimal("100.00"),
+        delivered_quantity=Decimal("20.00"),
+        delivered_quantity_usd=Decimal("9.00"),
+    )
+    second_payment = PaymentFactory(parent=second, entitlement_quantity=Decimal("80.00"))
+    return group, first_payment, second_payment
 
 
 @pytest.fixture
@@ -367,22 +381,10 @@ def payment_plan_group_with_accepted_plan():
             "payment_plan_set_entitlement_flat_amount_async_task",
         ),
         (
-            payment_plan_apply_custom_exchange_rate_async_task,
-            AsyncRetryJob,
-            lambda payment_plan, user, rule: (payment_plan,),
-            "payment_plan_apply_custom_exchange_rate_async_task",
-        ),
-        (
             payment_plan_apply_engine_rule_async_task,
             AsyncRetryJob,
             lambda payment_plan, user, rule: (payment_plan, rule),
             "payment_plan_apply_engine_rule_async_task",
-        ),
-        (
-            update_exchange_rate_on_release_payments_async_task,
-            AsyncRetryJob,
-            lambda payment_plan, user, rule: (payment_plan,),
-            "update_exchange_rate_on_release_payments_async_task",
         ),
         (
             prepare_child_payment_plan_async_task,
@@ -1028,15 +1030,17 @@ def test_get_sync_run_rapid_pro_task_action_executes_check(mock_execute: Mock) -
 
 @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
-@patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate")
+@patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate")
 def test_update_exchange_rate_on_release_payments_success(
     mock_get_exchange_rate: Mock,
     mock_update_money_fields: Mock,
     mock_get_quantity_in_usd: Mock,
 ) -> None:
+    group = PaymentPlanGroupFactory(exchange_rate=Decimal("0.1"))
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=0.1,
+        program_cycle=group.cycle,
+        payment_plan_group=group,
     )
     payment_plan.refresh_from_db()
     assert payment_plan.exchange_rate == Decimal("0.10000000")
@@ -1045,7 +1049,7 @@ def test_update_exchange_rate_on_release_payments_success(
     mock_get_exchange_rate.return_value = 1.25
     mock_get_quantity_in_usd.return_value = 125.0
 
-    queue_and_run_retry_task(update_exchange_rate_on_release_payments_async_task, payment_plan=payment_plan)
+    queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=payment_plan.payment_plan_group)
     payment_plan.refresh_from_db()
     assert payment_plan.exchange_rate == 1.25
 
@@ -1055,49 +1059,80 @@ def test_update_exchange_rate_on_release_payments_success(
     mock_update_money_fields.assert_called_once()
 
 
-@patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-def test_update_exchange_rate_on_release_payments_exception_triggers_retry(
-    mock_retry: Mock, mock_logger: Mock, payment_plan
+@patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate", return_value=2.0)
+def test_release_recalculates_all_plans_using_one_owner_rate(
+    mock_unore_rate: Mock, owner_with_two_payment_plans
 ) -> None:
-    mock_retry.side_effect = Retry("retry")
+    group, first_payment, second_payment = owner_with_two_payment_plans
+    first_currency_id = first_payment.currency_id
 
-    with patch.object(PaymentPlan, "get_exchange_rate", side_effect=Exception("test")):
-        with pytest.raises(Retry):
-            queue_and_run_retry_task(update_exchange_rate_on_release_payments_async_task, payment_plan=payment_plan)
+    queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=group)
 
-    mock_logger.exception.assert_not_called()
-    mock_retry.assert_called_once()
+    group.refresh_from_db()
+    first_payment.refresh_from_db()
+    second_payment.refresh_from_db()
+    assert group.exchange_rate == Decimal("2.00000000")
+    assert group.background_action_status is None
+    assert first_payment.entitlement_quantity_usd == Decimal("50.00")
+    assert second_payment.entitlement_quantity_usd == Decimal("40.00")
+    assert first_payment.delivered_quantity_usd == Decimal("10.00")
+    assert first_payment.currency_id == first_currency_id
+    mock_unore_rate.assert_called_once()
 
 
-@patch("hope.models.Payment.objects.bulk_update")
-@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd", return_value=Decimal("125.00"))
-@patch("hope.apps.payment.celery_tasks.get_object_or_404")
-def test_update_exchange_rate_on_release_payments_action_bulk_updates_in_chunks(
-    mock_get_object_or_404: Mock,
-    mock_get_quantity_in_usd: Mock,
-    mock_bulk_update: Mock,
-) -> None:
-    bulk_update_calls: list[tuple[int, list[str], int | None]] = []
-    payments = [Mock(entitlement_quantity=Decimal("100.00")) for _ in range(1000)]
-    payment_plan = Mock()
-    payment_plan.business_area.name = "Test BA"
-    payment_plan.currency = "PLN"
-    payment_plan.exchange_rate = Decimal("1.25")
-    payment_plan.currency_exchange_date = timezone.now().date()
-    payment_plan.get_exchange_rate.return_value = Decimal("1.25")
-    payment_plan.eligible_payments.only.return_value.iterator.return_value = payments
-    payment_plan.program_cycle = Mock()
-    mock_get_object_or_404.return_value = payment_plan
-    mock_bulk_update.side_effect = lambda objs, fields, batch_size=None: bulk_update_calls.append(
-        (len(objs), fields, batch_size)
+def test_stored_owner_rate_recalculates_delivered_usd(owner_with_two_payment_plans) -> None:
+    group, first_payment, _ = owner_with_two_payment_plans
+
+    queue_and_run_retry_task(
+        recalculate_owner_exchange_rate_async_task,
+        owner=group,
+        fetch_unore_rate=False,
     )
 
-    update_exchange_rate_on_release_payments_async_task_action(Mock(config={"payment_plan_id": "payment-plan-id"}))
+    first_payment.refresh_from_db()
+    assert first_payment.entitlement_quantity_usd == Decimal("100.00")
+    assert first_payment.delivered_quantity_usd == Decimal("20.00")
 
-    mock_get_quantity_in_usd.assert_called()
-    mock_bulk_update.assert_called_once()
-    assert bulk_update_calls == [(1000, ["entitlement_quantity_usd"], 1000)]
+
+@patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate", return_value=None)
+def test_missing_unore_rate_marks_owner_error(mock_unore_rate: Mock, owner_with_two_payment_plans) -> None:
+    group, first_payment, _ = owner_with_two_payment_plans
+
+    with pytest.raises(NonRetriableTaskError, match="positive exchange rate"):
+        queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=group)
+
+    group.refresh_from_db()
+    first_payment.refresh_from_db()
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    assert first_payment.entitlement_quantity_usd is None
+    mock_unore_rate.assert_called_once()
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_owner_rate_recalculation_marks_owner_busy_before_queue(mock_queue: Mock, owner_with_two_payment_plans) -> None:
+    group, _, _ = owner_with_two_payment_plans
+
+    recalculate_owner_exchange_rate_async_task(group)
+
+    group.refresh_from_db()
+    job = AsyncRetryJob.objects.latest("pk")
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING
+    assert "on_failure_action" not in job.config
+    mock_queue.assert_called_once()
+
+
+@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
+def test_owner_rate_recalculation_failure_sets_error_without_retry(mock_retry: Mock, payment_plan) -> None:
+    with patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate", side_effect=Exception("test")):
+        with pytest.raises(NonRetriableTaskError, match="test"):
+            queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=payment_plan.payment_plan_group)
+
+    mock_retry.assert_not_called()
+    payment_plan.payment_plan_group.refresh_from_db()
+    assert (
+        payment_plan.payment_plan_group.background_action_status
+        == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    )
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService")
@@ -1173,11 +1208,14 @@ def test_payment_plan_apply_engine_rule_failure_if_rule_commit_not_released(mock
 def test_payment_plan_apply_engine_rule_action_updates_payments_and_entitlement_date(
     mock_get_quantity_in_usd: Mock,
 ) -> None:
+    group = PaymentPlanGroupFactory(
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"), exchange_rate=Decimal("2.00000000")
+    )
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
+        program_cycle=group.cycle,
+        payment_plan_group=group,
         background_action_status=PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
-        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
-        exchange_rate=Decimal("2.00000000"),
     )
     payment = PaymentFactory(parent=payment_plan, entitlement_quantity=Decimal(0))
     rule = RuleFactory(name="test_rule", type=Rule.TYPE_PAYMENT_PLAN)
@@ -1519,7 +1557,7 @@ def test_remove_old_cash_plan_payment_verification_xlsx() -> None:
         file_temp.flush()
     pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
     payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=pp)
-    creation_time = timezone.now() - datetime.timedelta(days=99)
+    creation_time = timezone.now() - dt.timedelta(days=99)
     FileTempFactory(
         object_id=payment_verification_plan.pk,
         content_type=get_content_type_for_model(payment_verification_plan),
@@ -1546,7 +1584,7 @@ def test_remove_old_payment_plan_payment_list_xlsx(payment_plan) -> None:
     with NamedTemporaryFile(delete=False) as file_temp:
         file_temp.write(file_content)
         file_temp.flush()
-    creation_time = timezone.now() - datetime.timedelta(days=99)
+    creation_time = timezone.now() - dt.timedelta(days=99)
     FileTempFactory(
         object_id=payment_plan.pk,
         content_type=get_content_type_for_model(payment_plan),
@@ -1653,11 +1691,13 @@ def test_payment_plan_set_entitlement_flat_amount_task(
     mock_update_money_fields: Mock,
     user,
 ) -> None:
+    group = PaymentPlanGroupFactory(exchange_rate=Decimal("2.00"))
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
+        program_cycle=group.cycle,
+        payment_plan_group=group,
         background_action_status=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
         flat_amount_value=1.22,
-        exchange_rate=2.00,
     )
     payment_plan.refresh_from_db()
     payment_1 = PaymentFactory(
@@ -1689,11 +1729,13 @@ def test_payment_plan_set_entitlement_flat_amount_error_get_quantity_in_usd(
     mock_logger: Mock,
     user,
 ) -> None:
+    group = PaymentPlanGroupFactory(exchange_rate=Decimal("1.0"))
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
+        program_cycle=group.cycle,
+        payment_plan_group=group,
         background_action_status=PaymentPlan.BackgroundActionStatus.IMPORTING_ENTITLEMENTS,
         flat_amount_value=1.12,
-        exchange_rate=1.0,
     )
     mock_retry.side_effect = Retry("retry")
     mock_payment_plan_get_quantity_in_usd.side_effect = Exception("exchange error")
@@ -1705,66 +1747,6 @@ def test_payment_plan_set_entitlement_flat_amount_error_get_quantity_in_usd(
     assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
 
     mock_logger.exception.assert_called_once_with("PaymentPlan Error set entitlement flat amount")
-
-
-@patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
-def test_payment_plan_apply_custom_exchange_rate_task(
-    mock_update_money_fields: Mock,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("2.00"),
-        custom_exchange_rate=True,
-    )
-    payment_1 = PaymentFactory(
-        parent=payment_plan,
-        status=Payment.STATUS_PENDING,
-        entitlement_quantity=Decimal("100.00"),
-        delivered_quantity=Decimal("40.00"),
-        entitlement_quantity_usd=Decimal("1.00"),
-        delivered_quantity_usd=Decimal("1.00"),
-    )
-
-    queue_and_run_retry_task(payment_plan_apply_custom_exchange_rate_async_task, payment_plan)
-
-    payment_plan.refresh_from_db(fields=["exchange_rate"])
-    payment_1.refresh_from_db()
-    assert payment_plan.exchange_rate == Decimal("2.00")
-    assert payment_1.entitlement_quantity_usd == Decimal("50.00")
-    assert payment_1.delivered_quantity_usd == Decimal("20.00")
-    mock_update_money_fields.assert_called_once()
-
-
-@patch("hope.apps.payment.celery_tasks.PaymentPlanFlow")
-@patch("hope.models.Payment.objects.bulk_update")
-@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd", return_value=Decimal("10.00"))
-@patch("hope.apps.payment.celery_tasks.get_object_or_404")
-def test_payment_plan_apply_custom_exchange_rate_action_bulk_updates_in_chunks(
-    mock_get_object_or_404: Mock,
-    mock_get_quantity_in_usd: Mock,
-    mock_bulk_update: Mock,
-    mock_flow_cls: Mock,
-) -> None:
-    bulk_update_calls: list[tuple[int, list[str], int | None]] = []
-    payments = [Mock(entitlement_quantity=Decimal("100.00"), delivered_quantity=Decimal("40.00")) for _ in range(1000)]
-    payment_plan = Mock()
-    payment_plan.business_area.name = "Test BA"
-    payment_plan.currency = "PLN"
-    payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.currency_exchange_date = timezone.now().date()
-    payment_plan.eligible_payments.only.return_value.iterator.return_value = payments
-    payment_plan.program_cycle = Mock()
-    mock_get_object_or_404.return_value = payment_plan
-    mock_bulk_update.side_effect = lambda objs, fields, batch_size=None: bulk_update_calls.append(
-        (len(objs), fields, batch_size)
-    )
-
-    payment_plan_apply_custom_exchange_rate_async_task_action(Mock(config={"payment_plan_id": "payment-plan-id"}))
-
-    mock_get_quantity_in_usd.assert_called()
-    mock_bulk_update.assert_called_once()
-    assert bulk_update_calls == [(1000, ["entitlement_quantity_usd", "delivered_quantity_usd"], 1000)]
-    mock_flow_cls.return_value.background_action_status_none.assert_called_once()
 
 
 @patch("hope.apps.payment.celery_tasks.XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file")
@@ -1797,60 +1779,30 @@ def test_send_password_action_raises_when_group_has_no_export_file(user: Any) ->
         send_payment_plan_group_delivery_xlsx_password_async_task_action(job)
 
 
-@patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")
-@patch("hope.apps.payment.celery_tasks.logger")
-@patch("hope.apps.core.celery_tasks.async_retry_job_task.retry")
-@patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
-def test_payment_plan_apply_custom_exchange_rate_retry_on_error(
-    mock_get_quantity_in_usd: Mock,
-    mock_retry: Mock,
-    mock_logger: Mock,
-    mock_get_unore_exchange_rate: Mock,
-) -> None:
-    payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.IN_REVIEW,
-        background_action_status=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
-        custom_exchange_rate=True,
-    )
-    PaymentFactory(parent=payment_plan, status=Payment.STATUS_PENDING)
-    mock_retry.side_effect = Retry("retry")
-    mock_get_quantity_in_usd.side_effect = Exception("exchange error")
-
-    with pytest.raises(Retry):
-        queue_and_run_retry_task(payment_plan_apply_custom_exchange_rate_async_task, payment_plan)
-
-    payment_plan.refresh_from_db(fields=["background_action_status"])
-    assert (
-        payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR
-    )
-    mock_get_unore_exchange_rate.assert_not_called()
-    mock_logger.exception.assert_called_once_with("PaymentPlan Apply Custom Exchange Rate Error")
-    mock_retry.assert_called_once()
-
-
-@patch("hope.models.payment_plan.PaymentPlan.get_unore_exchange_rate")
+@patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate")
 @patch("hope.apps.payment.celery_tasks.get_quantity_in_usd")
 @patch("hope.models.payment_plan.PaymentPlan.update_money_fields")
 def test_update_exchange_rate_on_release_payments_uses_custom_exchange_rate(
     mock_update_money_fields: Mock,
     mock_get_quantity_in_usd: Mock,
-    mock_get_unore_exchange_rate: Mock,
+    mock_get_owner_unore_exchange_rate: Mock,
 ) -> None:
+    group = PaymentPlanGroupFactory(exchange_rate=Decimal("1.25000000"), custom_exchange_rate=True)
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.25000000"),
-        custom_exchange_rate=True,
+        program_cycle=group.cycle,
+        payment_plan_group=group,
     )
     payment = PaymentFactory(parent=payment_plan, entitlement_quantity=100)
     mock_get_quantity_in_usd.return_value = 80.0
 
-    queue_and_run_retry_task(update_exchange_rate_on_release_payments_async_task, payment_plan=payment_plan)
+    queue_and_run_retry_task(recalculate_owner_exchange_rate_async_task, owner=payment_plan.payment_plan_group)
 
-    payment_plan.refresh_from_db(fields=["exchange_rate"])
+    payment_plan.payment_plan_group.refresh_from_db(fields=["exchange_rate"])
     payment.refresh_from_db()
     assert payment_plan.exchange_rate == Decimal("1.25000000")
     assert payment.entitlement_quantity_usd == 80.0
-    mock_get_unore_exchange_rate.assert_not_called()
+    mock_get_owner_unore_exchange_rate.assert_not_called()
     mock_update_money_fields.assert_called_once()
 
 
@@ -2542,9 +2494,9 @@ def test_send_payment_notification_emails_action_sends_email() -> None:
 
 def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:
     with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
-        lower_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+        lower_bound = dt.datetime.now() - dt.timedelta(days=31)
         periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
-        upper_bound = datetime.datetime.now() - datetime.timedelta(days=31)
+        upper_bound = dt.datetime.now() - dt.timedelta(days=31)
 
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]
@@ -2554,9 +2506,9 @@ def test_wu_ftp_sync_uses_default_31_day_lookback_window() -> None:
 @override_config(WU_FTP_SYNC_LOOKBACK_DAYS=7)
 def test_wu_ftp_sync_respects_configured_lookback_window() -> None:
     with patch.object(western_union_reports_service, "WesternUnionReportsService") as mock_service_cls:
-        lower_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+        lower_bound = dt.datetime.now() - dt.timedelta(days=7)
         periodic_sync_payment_plan_invoices_western_union_ftp_async_task_action()
-        upper_bound = datetime.datetime.now() - datetime.timedelta(days=7)
+        upper_bound = dt.datetime.now() - dt.timedelta(days=7)
 
     mock_service_cls.return_value.process_files_since.assert_called_once()
     called_since = mock_service_cls.return_value.process_files_since.call_args[0][0]

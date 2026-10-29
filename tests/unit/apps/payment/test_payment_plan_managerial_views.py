@@ -329,7 +329,7 @@ def test_bulk_release_skips_vision_managed_group(
     create_user_role_with_permissions: Any,
 ) -> None:
     group = vision_managerial_context["group1"]
-    assert all(payment_plan.vision_managed for payment_plan in group.payment_plans.all())
+    assert group.vision_managed is True
     create_user_role_with_permissions(
         vision_managerial_context["user"],
         [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],

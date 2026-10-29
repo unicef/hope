@@ -4,6 +4,7 @@ from typing import Any, Callable
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from flags.models import FlagState
 import openpyxl
 import pytest
 from rest_framework import status
@@ -75,7 +76,9 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
     client = api_client(user)
     cycle = ProgramCycleFactory(program=program)
     currency = CurrencyFactory(code="USD")
-    instruction = FollowUpInstructionFactory(program=program, business_area=business_area, created_by=user)
+    instruction = FollowUpInstructionFactory(
+        program=program, business_area=business_area, created_by=user, exchange_rate=Decimal("1.00")
+    )
     return {
         "business_area": business_area,
         "user": user,
@@ -85,6 +88,29 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
         "currency": currency,
         "instruction": instruction,
     }
+
+
+@pytest.fixture
+def vision_enabled_follow_up_review_context(follow_up_context: dict[str, Any]) -> dict[str, Any]:
+    FlagState.objects.update_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        defaults={"value": "True"},
+    )
+    business_area = follow_up_context["business_area"]
+    business_area.vision_integration_active = True
+    business_area.save(update_fields=["vision_integration_active"])
+    instruction = follow_up_context["instruction"]
+    instruction.status = FollowUpInstruction.Status.IN_REVIEW
+    instruction.save(update_fields=["status"])
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.IN_REVIEW,
+        follow_up_instruction=instruction,
+        program_cycle=follow_up_context["cycle"],
+        currency=follow_up_context["currency"],
+    )
+    ApprovalProcessFactory(follow_up_instruction=instruction)
+    return {**follow_up_context, "payment_plan": payment_plan}
 
 
 @pytest.fixture
@@ -743,6 +769,30 @@ def test_follow_up_instruction_mark_as_released(
     assert pp.status == PaymentPlan.Status.ACCEPTED
 
 
+def test_follow_up_instruction_mark_as_released_with_vision_enabled(
+    vision_enabled_follow_up_review_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    ctx = vision_enabled_follow_up_review_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW], ctx["business_area"], ctx["program"]
+    )
+    url = reverse(
+        "api:payments:follow-up-instructions-mark-as-released",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url, {"comment": "released"}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    ctx["payment_plan"].refresh_from_db()
+    assert ctx["payment_plan"].status == PaymentPlan.Status.ACCEPTED
+
+
 def test_follow_up_instruction_delivery_export_xlsx(
     follow_up_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -857,7 +907,6 @@ def test_follow_up_instruction_delivery_import_xlsx(
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        exchange_rate=Decimal("1.00"),
     )
     payment = PaymentFactory(
         parent=pp,

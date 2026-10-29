@@ -22,6 +22,7 @@ from extras.test_utils.factories.payment import (
     FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanSplitFactory,
 )
 from extras.test_utils.factories.program import ProgramCycleFactory, ProgramFactory
@@ -189,9 +190,13 @@ def test_currency_exchange_date():
 
     payment_plan.status = PaymentPlan.Status.ACCEPTED
     payment_plan.save()
+    group = payment_plan.payment_plan_group
+    group.status = group.Status.ACCEPTED
+    group.save(update_fields=["status"])
 
-    approval_process = ApprovalProcessFactory(payment_plan_group=payment_plan.payment_plan_group)
+    approval_process = ApprovalProcessFactory(payment_plan_group=group)
     approval = ApprovalFactory(approval_process=approval_process, type=Approval.FINANCE_RELEASE)
+    assert group.currency_exchange_date == approval.created_at.date()
     assert str(payment_plan.currency_exchange_date) == str(approval.created_at.date())
 
 
@@ -447,16 +452,22 @@ def test_get_exchange_rate_for_usdc_currency():
 
 
 def test_get_exchange_rate_returns_db_value_when_custom_flag_is_set():
-    payment_plan = PaymentPlanFactory(
-        currency=CurrencyFactory(code="PLN", name="Polish Zloty"), custom_exchange_rate=True, exchange_rate=1.25
+    group = PaymentPlanGroupFactory(
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
+        custom_exchange_rate=True,
+        exchange_rate=Decimal("1.25"),
     )
+    payment_plan = PaymentPlanFactory(program_cycle=group.cycle, payment_plan_group=group)
     assert payment_plan.get_exchange_rate() == 1.25
 
 
 def test_get_exchange_rate_fetches_unore_rate_when_custom_flag_is_not_set():
-    payment_plan = PaymentPlanFactory(
-        currency=CurrencyFactory(code="PLN", name="Polish Zloty"), custom_exchange_rate=False, exchange_rate=1.25
+    group = PaymentPlanGroupFactory(
+        currency=CurrencyFactory(code="PLN", name="Polish Zloty"),
+        custom_exchange_rate=False,
+        exchange_rate=Decimal("1.25"),
     )
+    payment_plan = PaymentPlanFactory(program_cycle=group.cycle, payment_plan_group=group)
     payment_plan.get_unore_exchange_rate = Mock(return_value=2.5)
 
     assert payment_plan.get_exchange_rate() == 2.5

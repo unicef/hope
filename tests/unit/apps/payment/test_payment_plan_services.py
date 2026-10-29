@@ -590,8 +590,9 @@ def draft_payment_plan(payment_plan_base: PaymentPlan) -> PaymentPlan:
     payment_plan_group.dispersion_end_date = parse_date("2026-10-31")
     payment_plan_group.save(update_fields=["currency", "dispersion_start_date", "dispersion_end_date"])
     payment_plan_base.status = PaymentPlan.Status.DRAFT
-    payment_plan_base.exchange_rate = None
-    payment_plan_base.save(update_fields=["status", "exchange_rate"])
+    payment_plan_group.exchange_rate = None
+    payment_plan_group.save(update_fields=["exchange_rate"])
+    payment_plan_base.save(update_fields=["status"])
     return payment_plan_base
 
 

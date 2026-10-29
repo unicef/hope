@@ -1,4 +1,3 @@
-from decimal import Decimal
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from django.contrib import admin
@@ -11,11 +10,11 @@ from flags.models import FlagState
 import pytest
 
 from extras.test_utils.factories import (
-    CurrencyFactory,
     DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanGroupFactory,
@@ -37,6 +36,7 @@ from hope.models import (
     AsyncJobModel,
     AsyncRetryJob,
     FinancialServiceProvider,
+    FollowUpInstruction,
     LogEntry,
     PaymentPlan,
     PaymentPlanGroup,
@@ -235,29 +235,30 @@ def test_payment_plan_get_sync_with_payment_gateway_confirmation(admin_client, p
     assert "Do you confirm to Sync with Payment Gateway?" in response.content.decode("utf-8")
 
 
-def test_payment_plan_get_recalculate_exchange_rate_confirmation(admin_client, payment_plan) -> None:
-    payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.save(update_fields=["exchange_rate"])
-    url = reverse(
-        "admin:payment_paymentplan_recalculate_exchange_rate",
-        args=[payment_plan.pk],
-    )
+@pytest.fixture
+def group_recalculation_error(payment_plan):
+    group = payment_plan.payment_plan_group
+    group.status = PaymentPlanGroup.Status.OPEN
+    group.exchange_rate = None
+    group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.RECALCULATING_ERROR
+    group.save(update_fields=["status", "exchange_rate", "background_action_status"])
+    return group
+
+
+def test_group_get_retry_usd_recalculation_confirmation(admin_client, group_recalculation_error) -> None:
+    url = reverse("admin:payment_paymentplangroup_retry_usd_recalculation", args=[group_recalculation_error.pk])
     response = admin_client.get(url)
 
     assert response.status_code == 200
-    assert "Do you confirm to recalculate USD values based on provided exchange rate?" in response.content.decode(
-        "utf-8"
-    )
+    assert "Retry USD recalculation for every Payment Plan in this group?" in response.content.decode("utf-8")
 
 
-@patch("hope.admin.payment_plan.PaymentPlan.update_money_fields")
-def test_payment_plan_post_recalculate_exchange_rate_with_permission(
-    mock_update_money_fields,
+@patch("hope.admin.payment_plan.recalculate_owner_exchange_rate_async_task")
+def test_group_post_retry_usd_recalculation_with_permission(
+    mock_recalculate,
     staff_user,
     staff_client,
-    payment_plan,
-    delivery_mechanism,
-    financial_service_provider,
+    group_recalculation_error,
 ) -> None:
     content_type = ContentType.objects.get_for_model(PaymentPlan)
     permission, _ = Permission.objects.get_or_create(
@@ -265,81 +266,67 @@ def test_payment_plan_post_recalculate_exchange_rate_with_permission(
         codename="recalculate_exchange_rate",
         defaults={"name": "Can recalculate USD values based on exchange rate"},
     )
+    group_content_type = ContentType.objects.get_for_model(PaymentPlanGroup)
     base_permissions = Permission.objects.filter(
-        content_type=content_type,
-        codename__in=["view_paymentplan", "change_paymentplan"],
+        content_type=group_content_type,
+        codename__in=["view_paymentplangroup", "change_paymentplangroup"],
     )
     staff_user.user_permissions.set([*base_permissions, permission])
 
-    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    payment_plan.payment_plan_group.save(update_fields=["currency"])
-    payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.save(update_fields=["exchange_rate"])
-    payment = PaymentFactory(
-        parent=payment_plan,
-        delivery_type=delivery_mechanism,
-        financial_service_provider=financial_service_provider,
-        entitlement_quantity=Decimal("100.00"),
-        delivered_quantity=Decimal("40.00"),
-        entitlement_quantity_usd=Decimal("1.00"),
-        delivered_quantity_usd=Decimal("1.00"),
-    )
-    url = reverse(
-        "admin:payment_paymentplan_recalculate_exchange_rate",
-        args=[payment_plan.pk],
-    )
+    url = reverse("admin:payment_paymentplangroup_retry_usd_recalculation", args=[group_recalculation_error.pk])
 
     response = staff_client.post(url)
-    payment.refresh_from_db()
 
-    mock_update_money_fields.assert_called_once()
-    assert payment.entitlement_quantity_usd == Decimal("50.00")
-    assert payment.delivered_quantity_usd == Decimal("20.00")
+    mock_recalculate.assert_called_once_with(group_recalculation_error, str(staff_user.pk), fetch_unore_rate=True)
     assert response.status_code == 302
-    assert reverse("admin:payment_paymentplan_change", args=[payment_plan.pk]) in response["Location"]
+    assert reverse("admin:payment_paymentplangroup_change", args=[group_recalculation_error.pk]) in response["Location"]
 
 
-@patch("hope.admin.payment_plan.PaymentPlan.update_money_fields")
-def test_payment_plan_post_recalculate_exchange_rate_without_permission(
-    mock_update_money_fields,
+@patch("hope.admin.payment_plan.recalculate_owner_exchange_rate_async_task")
+def test_group_post_retry_usd_recalculation_without_permission(
+    mock_recalculate,
     staff_user,
     staff_client,
-    payment_plan,
-    delivery_mechanism,
-    financial_service_provider,
+    group_recalculation_error,
 ) -> None:
-    content_type = ContentType.objects.get_for_model(PaymentPlan)
+    content_type = ContentType.objects.get_for_model(PaymentPlanGroup)
     base_permissions = Permission.objects.filter(
         content_type=content_type,
-        codename__in=["view_paymentplan", "change_paymentplan"],
+        codename__in=["view_paymentplangroup", "change_paymentplangroup"],
     )
     staff_user.user_permissions.set(base_permissions)
 
-    payment_plan.payment_plan_group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
-    payment_plan.payment_plan_group.save(update_fields=["currency"])
-    payment_plan.exchange_rate = Decimal("2.00")
-    payment_plan.save(update_fields=["exchange_rate"])
-    payment = PaymentFactory(
-        parent=payment_plan,
-        delivery_type=delivery_mechanism,
-        financial_service_provider=financial_service_provider,
-        entitlement_quantity=Decimal("100.00"),
-        delivered_quantity=Decimal("40.00"),
-        entitlement_quantity_usd=Decimal("1.00"),
-        delivered_quantity_usd=Decimal("1.00"),
-    )
-    url = reverse(
-        "admin:payment_paymentplan_recalculate_exchange_rate",
-        args=[payment_plan.pk],
-    )
+    url = reverse("admin:payment_paymentplangroup_retry_usd_recalculation", args=[group_recalculation_error.pk])
 
     response = staff_client.post(url)
-    payment.refresh_from_db()
 
-    mock_update_money_fields.assert_not_called()
-    assert payment.entitlement_quantity_usd == Decimal("1.00")
-    assert payment.delivered_quantity_usd == Decimal("1.00")
+    mock_recalculate.assert_not_called()
     assert response.status_code == 403
+
+
+@pytest.fixture
+def instruction_recalculation_error():
+    return FollowUpInstructionFactory(
+        background_action_status=FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR,
+        exchange_rate=None,
+    )
+
+
+@patch("hope.admin.follow_up_instruction.recalculate_owner_exchange_rate_async_task")
+def test_instruction_post_retry_usd_recalculation_queues_owner_job(
+    mock_recalculate,
+    admin_client,
+    admin_user,
+    instruction_recalculation_error,
+) -> None:
+    url = reverse(
+        "admin:payment_followupinstruction_retry_usd_recalculation", args=[instruction_recalculation_error.pk]
+    )
+
+    response = admin_client.post(url)
+
+    mock_recalculate.assert_called_once_with(instruction_recalculation_error, str(admin_user.pk), fetch_unore_rate=True)
+    assert response.status_code == 302
 
 
 def test_payment_plan_related_configs_button(admin_client, payment_plan) -> None:

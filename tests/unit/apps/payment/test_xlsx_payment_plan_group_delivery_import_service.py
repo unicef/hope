@@ -810,7 +810,12 @@ def test_validate_skips_fully_blank_rows(group_two_plans_one_fsp):
 @pytest.fixture
 def group_with_finished_usd_plan(program_cycle, business_area, fsp, delivery_mechanism, template):
     currency = CurrencyFactory(code="USD", name="US Dollar")
-    group = PaymentPlanGroupFactory(cycle=program_cycle, status=PaymentPlanGroup.Status.FINISHED)
+    group = PaymentPlanGroupFactory(
+        cycle=program_cycle,
+        status=PaymentPlanGroup.Status.FINISHED,
+        currency=currency,
+        exchange_rate=Decimal("1.00"),
+    )
     payment_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         payment_plan_group=group,
@@ -818,8 +823,6 @@ def group_with_finished_usd_plan(program_cycle, business_area, fsp, delivery_mec
         financial_service_provider=fsp,
         delivery_mechanism=delivery_mechanism,
         status=PaymentPlan.Status.FINISHED,
-        currency=currency,
-        exchange_rate=Decimal("1.00"),
     )
     payment = PaymentFactory(
         parent=payment_plan,

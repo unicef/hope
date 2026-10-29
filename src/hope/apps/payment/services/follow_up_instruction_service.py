@@ -11,6 +11,7 @@ from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.payment.celery_tasks import (
     create_follow_up_instruction_delivery_xlsx_async_task,
     import_follow_up_instruction_reconciliation_from_xlsx_async_task,
+    recalculate_owner_exchange_rate_async_task,
     send_follow_up_instruction_notification_emails_async_task,
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow
@@ -303,6 +304,8 @@ class FollowUpInstructionService:
                 old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
                 PaymentPlanService(payment_plan).apply_acceptance_stage(approval_type, user)
                 self._log_payment_plan_change(payment_plan, user, old_payment_plan)
+            if approval_type == Approval.FINANCE_RELEASE:
+                transaction.on_commit(lambda: recalculate_owner_exchange_rate_async_task(instruction, str(user.pk)))
             if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
                 send_follow_up_instruction_notification_emails_async_task(
                     instruction, notification_action.value, str(user.pk), timezone.now().isoformat()

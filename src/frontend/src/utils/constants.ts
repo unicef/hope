@@ -71,10 +71,6 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
     'XLSX Import Error',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
     'XLSX Importing FSP Extra Fields',
-  [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
-    'Applying Custom Exchange Rate',
-  [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
-    'Custom Exchange Rate Error',
 };
 
 export const GRIEVANCE_TICKET_STATES = {
@@ -339,7 +335,6 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: PaymentPlanDetailBac
     PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.REBUILD_ERROR,

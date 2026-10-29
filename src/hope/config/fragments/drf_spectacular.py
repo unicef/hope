@@ -11,6 +11,9 @@ SPECTACULAR_SETTINGS = {
         "PaymentPlanStatusEnum": "hope.models.payment_plan.PaymentPlan.Status",
         "PlanTypeEnum": "hope.models.payment_plan.PaymentPlan.PlanType",
         "PaymentPlanGroupStatusEnum": "hope.models.payment_plan_group.PaymentPlanGroup.Status",
+        "FollowUpInstructionBackgroundActionStatusEnum": (
+            "hope.models.follow_up_instruction.FollowUpInstruction.BackgroundActionStatus"
+        ),
         "PaymentStatusEnum": "hope.models.payment.Payment.STATUS_CHOICE",
         "ProgramStatusEnum": "hope.models.program.Program.STATUS_CHOICE",
         "GrievanceTicketStatusEnum": "hope.apps.grievance.models.GrievanceTicket.STATUS_CHOICES",

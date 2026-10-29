@@ -36,9 +36,11 @@ from hope.apps.household.const import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
 )
+from hope.apps.payment.celery_tasks import recalculate_owner_exchange_rate_async_task
 from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
 from hope.apps.payment.services.top_up_amount_service import parse_top_up_amount_file
+from hope.apps.payment.utils import get_owner_unore_exchange_rate
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.payment.xlsx.xlsx_payment_plan_delivery_import_service import (
     NULL_DELIVERY_POLICIES,
@@ -854,7 +856,9 @@ class FollowUpInstructionChildPaymentPlanSummarySerializer(serializers.ModelSeri
 
 class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
-    background_action_status = serializers.CharField(read_only=True)
+    background_action_status = serializers.ChoiceField(
+        choices=FollowUpInstruction.BackgroundActionStatus.choices, read_only=True, allow_null=True
+    )
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
     currency = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
     currency_vision_code = serializers.CharField(source="currency.vision_code", read_only=True, allow_null=True)
@@ -925,7 +929,35 @@ class FollowUpInstructionListSerializer(AdminUrlSerializerMixin, serializers.Mod
         return self._payments_summary(obj)["total_undelivered_quantity_usd"]
 
 
-class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
+class OwnerExchangeRateSerializerMixin(serializers.Serializer):
+    unore_exchange_rate = serializers.SerializerMethodField()
+    unore_exchange_rate_unavailable = serializers.SerializerMethodField()
+
+    def _resolve_unore_exchange_rate(self, obj: PaymentPlanGroup | FollowUpInstruction) -> tuple[float | None, bool]:
+        if not hasattr(self, "_owner_unore_exchange_rate_cache"):
+            rate: float | None = None
+            unavailable = False
+            if obj.currency:
+                try:
+                    rate = get_owner_unore_exchange_rate(obj)
+                except Exception as error:  # noqa: BLE001
+                    logger.warning(
+                        "Failed to fetch UNORE exchange rate for %s %s: %s", type(obj).__name__, obj.pk, error
+                    )
+                    unavailable = True
+            self._owner_unore_exchange_rate_cache = (rate, unavailable)
+        return self._owner_unore_exchange_rate_cache
+
+    def get_unore_exchange_rate(self, obj: PaymentPlanGroup | FollowUpInstruction) -> float | None:
+        return self._resolve_unore_exchange_rate(obj)[0]
+
+    def get_unore_exchange_rate_unavailable(self, obj: PaymentPlanGroup | FollowUpInstruction) -> bool:
+        return self._resolve_unore_exchange_rate(obj)[1]
+
+
+class FollowUpInstructionDetailSerializer(OwnerExchangeRateSerializerMixin, FollowUpInstructionListSerializer):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
+    custom_exchange_rate = serializers.BooleanField(read_only=True)
     payment_plans = FollowUpInstructionChildPaymentPlanSummarySerializer(many=True, read_only=True)
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
@@ -941,6 +973,10 @@ class FollowUpInstructionDetailSerializer(FollowUpInstructionListSerializer):
             "closure_comment",
             "closed_by",
             "export_pdf_file_summary",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "unore_exchange_rate",
+            "unore_exchange_rate_unavailable",
         )
 
     @staticmethod
@@ -962,6 +998,8 @@ class VisionStateSerializer(serializers.Serializer):
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
+    custom_exchange_rate = serializers.BooleanField(read_only=True)
     start_date = UTCDateField(read_only=True, allow_null=True)
     end_date = UTCDateField(read_only=True, allow_null=True)
     background_action_status_display = serializers.CharField(source="get_background_action_status_display")
@@ -984,16 +1022,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     excluded_individuals = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    vision_integration_enabled = serializers.BooleanField(read_only=True)
-    vision_managed = serializers.BooleanField(read_only=True)
-    vision = serializers.SerializerMethodField()
     can_delete = serializers.BooleanField()
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
-    funds_commitments = serializers.SerializerMethodField()
-    available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
     closed_by = serializers.SerializerMethodField()
@@ -1028,9 +1061,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "excluded_individuals",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
-            "vision_integration_enabled",
-            "vision_managed",
-            "vision",
             "can_delete",
             "total_households_count_with_valid_phone_no",
             "financial_service_provider",
@@ -1050,8 +1080,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "unore_exchange_rate",
             "unore_exchange_rate_unavailable",
             "eligible_payments_count",
-            "funds_commitments",
-            "available_funds_commitments",
             "payment_verification_plans",
             "payment_verification_summary",
             "admin_url",
@@ -1233,39 +1261,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
-
-    @extend_schema_field(FundsCommitmentSerializer(many=True))
-    def get_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        headers = obj.funds_commitment_headers.with_derived_fields().prefetch_related(
-            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
-        )
-        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
-
-    @extend_schema_field(FundsCommitmentSerializer(many=True))
-    def get_available_funds_commitments(self, obj: PaymentPlan) -> list[dict[str, Any]]:
-        if obj.vision_managed:
-            return []
-
-        headers = (
-            FundsCommitmentHeader.objects.with_derived_fields()
-            .filter(funds_commitment_items__office_id=obj.business_area_id)
-            .distinct()
-            .prefetch_related(
-                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
-            )
-        )
-
-        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
-
-    @extend_schema_field(VisionStateSerializer)
-    def get_vision(self, obj: PaymentPlan) -> dict[str, Any]:
-        vision_data = obj.vision_data
-        return {
-            "status": obj.vision_status,
-            "vision_id": vision_data.get("vision_id"),
-            "fc_numbers": vision_data.get("fc_numbers", []),
-            "error_code": vision_data.get("error_code"),
-        }
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
@@ -1915,18 +1910,18 @@ class ApplyFlatAmountEntitlementSerializer(serializers.Serializer):
 
 
 class ApplyCustomExchangeRateSerializer(serializers.Serializer):
-    unore_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
-    custom_exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, required=False, allow_null=True)
-    version = serializers.IntegerField(required=False)
+    unore_exchange_rate = serializers.DecimalField(
+        max_digits=15, decimal_places=8, min_value=Decimal("0.00000001"), required=False
+    )
+    custom_exchange_rate = serializers.DecimalField(
+        max_digits=15, decimal_places=8, min_value=Decimal("0.00000001"), required=False
+    )
+    updated_at = serializers.DateTimeField(required=True)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        if attrs.get("custom_exchange_rate") is None and attrs.get("unore_exchange_rate") is None:
+        if ("unore_exchange_rate" in attrs) == ("custom_exchange_rate" in attrs):
             raise serializers.ValidationError(
-                {
-                    api_settings.NON_FIELD_ERRORS_KEY: [
-                        "One of custom_exchange_rate or unore_exchange_rate must be provided."
-                    ]
-                }
+                {api_settings.NON_FIELD_ERRORS_KEY: ["Choose UNORE or provide a positive custom exchange rate."]}
             )
         return attrs
 
@@ -2118,6 +2113,14 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
         return value
 
     def update(self, instance: PaymentPlanGroup, validated_data: dict) -> PaymentPlanGroup:
+        currency_changed = "currency" in validated_data and validated_data["currency"] != instance.currency
+        dates_changed = (
+            "dispersion_start_date" in validated_data
+            and validated_data["dispersion_start_date"] != instance.dispersion_start_date
+        ) or (
+            "dispersion_end_date" in validated_data
+            and validated_data["dispersion_end_date"] != instance.dispersion_end_date
+        )
         service = PaymentPlanGroupService(instance)
         if "financial_service_provider" in validated_data:
             service.assign_financial_service_provider(validated_data.pop("financial_service_provider"))
@@ -2128,10 +2131,30 @@ class PaymentPlanGroupUpdateSerializer(PaymentPlanGroupConfigurationMixin, seria
                 validated_data.pop("dispersion_start_date", instance.dispersion_start_date),
                 validated_data.pop("dispersion_end_date", instance.dispersion_end_date),
             )
-        return super().update(instance, validated_data)
+        group = super().update(instance, validated_data)
+        if (
+            group.currency_id
+            and (currency_changed or (dates_changed and not group.custom_exchange_rate))
+            and group.payment_plans.exists()
+        ):
+            if not group.can_start_background_action:
+                raise serializers.ValidationError(
+                    "Wait for the current group action to finish before changing the rate"
+                )
+            group = cast("PaymentPlanGroup", recalculate_owner_exchange_rate_async_task(group))
+        return group
 
 
-class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroupListSerializer):
+class PaymentPlanGroupDetailSerializer(
+    OwnerExchangeRateSerializerMixin, AdminUrlSerializerMixin, PaymentPlanGroupListSerializer
+):
+    exchange_rate = serializers.DecimalField(max_digits=15, decimal_places=8, allow_null=True, read_only=True)
+    custom_exchange_rate = serializers.BooleanField(read_only=True)
+    vision_managed = serializers.BooleanField(read_only=True)
+    vision = serializers.SerializerMethodField()
+    funds_commitments = serializers.SerializerMethodField()
+    available_funds_commitments = serializers.SerializerMethodField()
+    can_assign_funds_commitments = serializers.BooleanField(read_only=True)
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True, source="documents")
     closed_by = serializers.SerializerMethodField()
@@ -2155,6 +2178,16 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
 
     class Meta(PaymentPlanGroupListSerializer.Meta):
         fields = PaymentPlanGroupListSerializer.Meta.fields + [
+            "vision_managed",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "unore_exchange_rate",
+            "unore_exchange_rate_unavailable",
+            "updated_at",
+            "vision",
+            "funds_commitments",
+            "available_funds_commitments",
+            "can_assign_funds_commitments",
             "admin_url",
             "background_action_status",
             "approval_process",
@@ -2181,6 +2214,37 @@ class PaymentPlanGroupDetailSerializer(AdminUrlSerializerMixin, PaymentPlanGroup
             "can_create_top_up",
             "can_create_top_up_amendment",
         ]
+
+    @extend_schema_field(VisionStateSerializer)
+    def get_vision(self, obj: PaymentPlanGroup) -> dict[str, Any]:
+        data = obj.vision_data
+        return {
+            "status": obj.vision_status,
+            "vision_id": data.get("vision_id"),
+            "fc_numbers": data.get("fc_numbers", []),
+            "error_code": data.get("error_code"),
+        }
+
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_funds_commitments(self, obj: PaymentPlanGroup) -> list[dict[str, Any]]:
+        headers = obj.funds_commitment_source_group.funds_commitment_headers.with_derived_fields().prefetch_related(
+            Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
+        )
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
+
+    @extend_schema_field(FundsCommitmentSerializer(many=True))
+    def get_available_funds_commitments(self, obj: PaymentPlanGroup) -> list[dict[str, Any]]:
+        if not obj.can_assign_funds_commitments:
+            return []
+        headers = (
+            FundsCommitmentHeader.objects.with_derived_fields()
+            .filter(funds_commitment_items__office_id=obj.cycle.program.business_area_id)
+            .distinct()
+            .prefetch_related(
+                Prefetch("funds_commitment_items", queryset=FundsCommitmentItem.objects.select_related("office"))
+            )
+        )
+        return [dict(FundsCommitmentSerializer(header).data) for header in headers]
 
     @staticmethod
     def get_split_choices(obj: PaymentPlanGroup) -> list[dict[str, Any]]:

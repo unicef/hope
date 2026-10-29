@@ -21,12 +21,9 @@ import { restQueryKey } from '@utils/queryKeys';
 import { PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import Entitlement from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { PaymentPlanAcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/PaymentPlanAcceptanceProcess';
 import PaymentVerificationSummarySection from '@components/paymentmodule/PaymentPlanDetails/PaymentVerificationSummarySection/PaymentVerificationSummarySection';
-import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
-import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanDetails/VisionStatusSection/VisionStatusSection';
 import { FspExtraFields } from '@components/paymentmodule/PaymentPlanDetails/FspExtraFields/FspExtraFields';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
@@ -54,14 +51,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
-      const visionProcessing =
-        data?.visionManaged &&
-        ['NOT_SENT', 'WAITING_FOR_CALLBACK', 'PP_CREATED'].includes(
-          data.vision.status,
-        );
-      if (visionProcessing) {
-        return 60000;
-      }
       if (
         data?.backgroundActionStatus !== null &&
         !PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES.includes(
@@ -99,10 +88,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatusEnum.READY_FOR_CLOSURE ||
     status === PaymentPlanStatusEnum.CLOSED;
 
-  const shouldDisplayFundsCommitment =
-    status === PaymentPlanStatusEnum.IN_REVIEW ||
-    status === PaymentPlanStatusEnum.ACCEPTED ||
-    status === PaymentPlanStatusEnum.FINISHED;
   return (
     <Box
       sx={{
@@ -115,13 +100,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      <VisionStatusSection paymentPlan={paymentPlan} />
       <PaymentPlanAcceptanceProcess paymentPlan={paymentPlan} />
       {shouldDisplayVerificationSummary && (
         <PaymentVerificationSummarySection paymentPlan={paymentPlan} />
-      )}
-      {shouldDisplayFundsCommitment && (
-        <FundsCommitmentSection paymentPlan={paymentPlan} />
       )}
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
@@ -131,7 +112,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           <FspExtraFields paymentPlan={paymentPlan} permissions={permissions} />
         )}
       <ExcludeSection paymentPlan={paymentPlan} />
-      <ConversionToUsd paymentPlan={paymentPlan} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}

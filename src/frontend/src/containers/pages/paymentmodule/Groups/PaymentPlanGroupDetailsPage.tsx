@@ -1,5 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -24,9 +25,12 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanGroupDetails/FundsCommitment/FundsCommitmentSection';
+import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanGroupDetails/VisionStatusSection';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { ExportGroupSummaryPdfButton } from './actions/ExportGroupSummaryPdfButton';
 import { LinkedGroupsTable } from './LinkedGroupsTable';
+import type { PaymentPlanGroupDetail } from './types';
 import { isGroupBackgroundActionBusy, planTypeDisplayLabel } from './utils';
 import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
@@ -38,6 +42,12 @@ const initialFilter = {
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
 };
+
+const isVisionReviewActive = (group: PaymentPlanGroupDetail | null): boolean =>
+  group !== null &&
+  group.status === PaymentPlanGroupStatusEnum.IN_REVIEW &&
+  'visionManaged' in group &&
+  group.visionManaged === true;
 
 const PaymentPlanGroupDetailsPage = (): ReactElement => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -62,17 +72,23 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,
-    // Poll while the group is exporting/importing an XLSX so the page reflects
-    // the result (export_file populated, status cleared) without a manual refresh.
-    refetchInterval: (query) =>
-      isGroupBackgroundActionBusy(query.state.data ?? null) ? 3000 : false,
+    refetchInterval: (query) => {
+      const currentGroup = query.state.data ?? null;
+      if (isGroupBackgroundActionBusy(currentGroup)) return 3000;
+      return isVisionReviewActive(currentGroup) ? 60000 : false;
+    },
     refetchIntervalInBackground: true,
   });
 
   const wasBusy = useRef(false);
+  const wasVisionReviewActive = useRef(false);
   useEffect(() => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
-    if (wasBusy.current && !isBusy) {
+    const visionReviewActive = isVisionReviewActive(group ?? null);
+    if (
+      (wasBusy.current && !isBusy) ||
+      (wasVisionReviewActive.current && !visionReviewActive)
+    ) {
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansList,
@@ -80,6 +96,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
       });
     }
     wasBusy.current = isBusy;
+    wasVisionReviewActive.current = visionReviewActive;
   }, [group, queryClient]);
 
   if (permissions === null) return null;
@@ -188,6 +205,22 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         }
         headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
       />
+      {group && (
+        <ConversionToUsd
+          owner={group}
+          ownerType="group"
+          permissions={permissions}
+        />
+      )}
+      {group && <VisionStatusSection group={group} />}
+      {group &&
+        [
+          PaymentPlanGroupStatusEnum.IN_REVIEW,
+          PaymentPlanGroupStatusEnum.ACCEPTED,
+          PaymentPlanGroupStatusEnum.FINISHED,
+        ].includes(group.status) && (
+          <FundsCommitmentSection group={group} programCode={programId} />
+        )}
       {group && (
         <SupportingDocumentsSection
           key={group.id}

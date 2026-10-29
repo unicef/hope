@@ -333,7 +333,7 @@ def two_cycles_a_b(program: Any) -> dict:
 
 
 @pytest.fixture
-def e2e_import_setup(business_area: Any, cycle: Any, accepted_group: Any) -> dict:
+def e2e_import_setup(business_area: Any, cycle: Any) -> dict:
     fsp_one = FinancialServiceProviderFactory(name="E2E FSP One", vision_vendor_number="999111111")
     fsp_two = FinancialServiceProviderFactory(name="E2E FSP Two", vision_vendor_number="999222222")
     dm_one = DeliveryMechanismFactory(code="e2e-cash", name="E2ECash", payment_gateway_id="e2e-cash")
@@ -348,7 +348,12 @@ def e2e_import_setup(business_area: Any, cycle: Any, accepted_group: Any) -> dic
         delivery_mechanism=dm_two,
         xlsx_template=FinancialServiceProviderXlsxTemplateFactory(columns=["payment_id", "delivered_quantity"]),
     )
-    group = accepted_group
+    group = PaymentPlanGroupFactory(
+        cycle=cycle,
+        status=PaymentPlanGroup.Status.ACCEPTED,
+        exchange_rate=Decimal("1.0"),
+        custom_exchange_rate=True,
+    )
     plan_one = PaymentPlanFactory(
         business_area=business_area,
         program_cycle=cycle,
@@ -356,8 +361,6 @@ def e2e_import_setup(business_area: Any, cycle: Any, accepted_group: Any) -> dic
         status=PaymentPlan.Status.ACCEPTED,
         financial_service_provider=fsp_one,
         delivery_mechanism=dm_one,
-        exchange_rate=Decimal("1.0"),
-        custom_exchange_rate=True,
     )
     plan_two = PaymentPlanFactory(
         business_area=business_area,
@@ -366,8 +369,6 @@ def e2e_import_setup(business_area: Any, cycle: Any, accepted_group: Any) -> dic
         status=PaymentPlan.Status.ACCEPTED,
         financial_service_provider=fsp_two,
         delivery_mechanism=dm_two,
-        exchange_rate=Decimal("1.0"),
-        custom_exchange_rate=True,
     )
     payment_one = PaymentFactory(
         parent=plan_one,
@@ -1228,6 +1229,42 @@ def test_update_group_dispersion_dates_succeeds(
     group.refresh_from_db()
     assert group.dispersion_start_date == date(2099, 2, 1)
     assert group.dispersion_end_date == date(2099, 2, 28)
+
+
+@pytest.fixture
+def group_with_rate_and_open_plan(cycle):
+    group = cycle.payment_plan_groups.first()
+    group.currency = CurrencyFactory(code="PLN", name="Polish Zloty")
+    group.exchange_rate = Decimal("1.25000000")
+    group.save(update_fields=["currency", "exchange_rate"])
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=group, status=PaymentPlan.Status.OPEN)
+    return group
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_update_group_dates_queues_one_owner_rate_refresh(
+    mock_queue,
+    group_with_rate_and_open_plan,
+    client,
+    user,
+    business_area,
+    program,
+    create_user_role_with_permissions,
+) -> None:
+    create_user_role_with_permissions(user, [Permissions.PM_PAYMENT_PLAN_GROUP_UPDATE], business_area, program=program)
+    group = group_with_rate_and_open_plan
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = client.put(
+            _detail_url(business_area.slug, program.code, group.id),
+            {"name": group.name, "dispersion_start_date": "2099-02-01", "dispersion_end_date": "2099-02-28"},
+        )
+
+    group.refresh_from_db()
+    assert response.status_code == status.HTTP_200_OK
+    assert group.exchange_rate is None
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING
+    mock_queue.assert_called_once()
 
 
 def test_update_group_dispersion_dates_rejected_when_group_is_locked(

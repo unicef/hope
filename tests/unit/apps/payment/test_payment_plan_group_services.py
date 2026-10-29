@@ -271,6 +271,44 @@ def test_assign_currency_rejected_when_a_payment_plan_is_opened(cycle, currency)
     assert error.value.detail[0] == "Currency can be changed only before any Payment Plan in the group is opened."
 
 
+@pytest.fixture
+def group_with_custom_rate_before_open(open_group, cycle):
+    open_group.exchange_rate = Decimal("1.25000000")
+    open_group.custom_exchange_rate = True
+    open_group.save(update_fields=["exchange_rate", "custom_exchange_rate"])
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=open_group, status=PaymentPlan.Status.TP_OPEN)
+    return open_group
+
+
+@pytest.fixture
+def replacement_currency():
+    return CurrencyFactory(code="PLN", name="Polish Zloty")
+
+
+def test_changing_group_currency_clears_its_previous_rate(group_with_custom_rate_before_open, replacement_currency):
+    PaymentPlanGroupService(group_with_custom_rate_before_open).assign_currency(replacement_currency)
+
+    assert group_with_custom_rate_before_open.currency == replacement_currency
+    assert group_with_custom_rate_before_open.exchange_rate is None
+    assert group_with_custom_rate_before_open.custom_exchange_rate is False
+
+
+@pytest.fixture
+def group_with_unore_rate_and_open_plan(open_group, cycle):
+    open_group.exchange_rate = Decimal("1.25000000")
+    open_group.save(update_fields=["exchange_rate"])
+    PaymentPlanFactory(program_cycle=cycle, payment_plan_group=open_group, status=PaymentPlan.Status.OPEN)
+    return open_group
+
+
+def test_changing_group_dates_clears_the_previous_unore_rate(group_with_unore_rate_and_open_plan):
+    PaymentPlanGroupService(group_with_unore_rate_and_open_plan).assign_dispersion_dates(
+        date(2099, 2, 1), date(2099, 2, 28)
+    )
+
+    assert group_with_unore_rate_and_open_plan.exchange_rate is None
+
+
 def test_assign_currency_usdc_rejected_with_non_digital_delivery_mechanism(cycle, delivery_mechanism):
     group = PaymentPlanGroupFactory(cycle=cycle)
     PaymentPlanFactory(
@@ -604,6 +642,54 @@ def test_mark_as_released_rejected_when_a_plan_is_vision_managed(group_in_review
     with pytest.raises(ValidationError) as error:
         PaymentPlanGroupService(group_in_review).acceptance_process(PaymentPlan.Action.REVIEW.value, user)
     assert error.value.detail[0] == "Vision-managed Payment Plans are released automatically after FC assignment"
+
+
+@pytest.fixture
+def partially_released_group(group_in_review, locked_payment_plan):
+    locked_payment_plan.status = PaymentPlan.Status.ACCEPTED
+    locked_payment_plan.save(update_fields=["status"])
+    pending_plan = PaymentPlanFactory(
+        program_cycle=locked_payment_plan.program_cycle,
+        payment_plan_group=group_in_review,
+        status=PaymentPlan.Status.IN_REVIEW,
+    )
+    return group_in_review, pending_plan
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_vision_release_keeps_group_in_review_while_a_plan_is_pending(
+    mock_notify, partially_released_group, user, django_assert_num_queries
+):
+    group, _ = partially_released_group
+    with django_assert_num_queries(5):
+        result = PaymentPlanGroupService(group).advance_after_vision_release(user)
+
+    assert result.status == PaymentPlanGroup.Status.IN_REVIEW
+    mock_notify.assert_not_called()
+
+
+@pytest.fixture
+def group_with_released_vision_plans(partially_released_group):
+    group, pending_plan = partially_released_group
+    pending_plan.status = PaymentPlan.Status.ACCEPTED
+    pending_plan.save(update_fields=["status"])
+    return group
+
+
+@patch("hope.apps.payment.services.payment_plan_group_services.send_payment_plan_group_notification_emails_async_task")
+def test_vision_release_accepts_group_after_all_plans_are_accepted(
+    mock_notify, group_with_released_vision_plans, user, django_assert_num_queries
+):
+    with django_assert_num_queries(6):
+        result = PaymentPlanGroupService(group_with_released_vision_plans).advance_after_vision_release(user)
+
+    with django_assert_num_queries(3):
+        repeated_result = PaymentPlanGroupService(group_with_released_vision_plans).advance_after_vision_release(user)
+
+    assert result.status == PaymentPlanGroup.Status.ACCEPTED
+    assert repeated_result.status == PaymentPlanGroup.Status.ACCEPTED
+    mock_notify.assert_called_once()
+    assert mock_notify.call_args.args[:3] == (result, PaymentPlan.Action.REVIEW.value, str(user.pk))
 
 
 @pytest.mark.enable_activity_log

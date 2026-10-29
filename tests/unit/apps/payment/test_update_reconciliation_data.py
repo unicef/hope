@@ -14,6 +14,7 @@ from extras.test_utils.factories import (
     HouseholdFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramFactory,
     UserFactory,
 )
@@ -74,13 +75,17 @@ def program(business_area: Any) -> Program:
 @pytest.fixture
 def payment_plan_context(business_area: Any, user: Any, program: Program) -> dict[str, Any]:
     cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    group = PaymentPlanGroupFactory(
+        cycle=cycle,
         dispersion_start_date=date(2020, 8, 10),
         dispersion_end_date=date(2020, 12, 10),
+        exchange_rate=2.0,
+    )
+    payment_plan = PaymentPlanFactory(
         created_by=user,
         business_area=business_area,
         program_cycle=cycle,
-        exchange_rate=2.0,
+        payment_plan_group=group,
         status=PaymentPlan.Status.ACCEPTED,
     )
     payment_ids = [
@@ -203,14 +208,18 @@ def test_upload_reference_id(
     file_reference_id: BytesIO,
 ) -> None:
     cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    group = PaymentPlanGroupFactory(
+        cycle=cycle,
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
+        exchange_rate=2.0,
+    )
+    payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         business_area=business_area,
         program_cycle=cycle,
+        payment_plan_group=group,
         created_by=user,
-        exchange_rate=2.0,
     )
     approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
     ApprovalFactory(
@@ -258,14 +267,18 @@ def test_upload_transaction_status_blockchain_link(
     file_reference_id: BytesIO,
 ) -> None:
     cycle = program.cycles.first()
-    payment_plan = PaymentPlanFactory(
+    group = PaymentPlanGroupFactory(
+        cycle=cycle,
         dispersion_start_date=date(2024, 2, 10),
         dispersion_end_date=date(2024, 12, 10),
+        exchange_rate=1.0,
+    )
+    payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.ACCEPTED,
         business_area=business_area,
         program_cycle=cycle,
+        payment_plan_group=group,
         created_by=user,
-        exchange_rate=1.0,
     )
     approval_process = ApprovalProcessFactory(payment_plan=payment_plan)
     ApprovalFactory(

@@ -7,7 +7,7 @@ from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import AcceptanceProcessThreshold, FinancialServiceProviderXlsxTemplate
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlan
+    from hope.models import PaymentPlanGroup
 
 
 class VisionFundsCommitmentHeaderAssignmentForm(forms.Form):
@@ -16,10 +16,10 @@ class VisionFundsCommitmentHeaderAssignmentForm(forms.Form):
         label="Funds Commitment Headers",
     )
 
-    def __init__(self, *args: Any, payment_plan: "PaymentPlan", **kwargs: Any) -> None:
+    def __init__(self, *args: Any, payment_plan_group: "PaymentPlanGroup", **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         headers = (
-            FundsCommitmentHeader.objects.filter(funds_commitment_items__office=payment_plan.business_area)
+            FundsCommitmentHeader.objects.filter(funds_commitment_items__office=payment_plan_group.business_area)
             .distinct()
             .order_by("funds_commitment_number")
         )

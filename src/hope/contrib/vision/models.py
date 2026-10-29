@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import OuterRef, Subquery, Sum
 
-from hope.models import BusinessArea, PaymentPlan
+from hope.models import BusinessArea, PaymentPlanGroup
 from hope.models.utils import LongNameIndex
 
 
@@ -36,8 +36,8 @@ class FundsCommitmentHeader(models.Model):
     document_reference = models.CharField(max_length=16, blank=True, null=True)
     fc_status = models.CharField(max_length=1, blank=True, null=True)
     currency = models.CharField(max_length=5, blank=True, null=True)
-    payment_plans = models.ManyToManyField(
-        PaymentPlan,
+    payment_plan_groups = models.ManyToManyField(
+        PaymentPlanGroup,
         blank=True,
         related_name="funds_commitment_headers",
     )

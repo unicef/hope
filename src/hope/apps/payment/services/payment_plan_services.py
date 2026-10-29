@@ -30,7 +30,6 @@ from rest_framework.status import is_client_error
 from viewflow.fsm import NoTransition
 
 from hope.apps.account.permissions import Permissions
-from hope.apps.activity_log.utils import copy_model_object
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.core.utils import chunks
 from hope.apps.household.const import ROLE_ALTERNATE, ROLE_PRIMARY
@@ -41,10 +40,10 @@ from hope.apps.payment.celery_tasks import (
     payment_plan_refresh_payees_async_task,
     prepare_child_payment_plan_async_task,
     prepare_payment_plan_async_task,
+    recalculate_owner_exchange_rate_async_task,
     send_payment_notification_emails_async_task,
     send_payment_plan_reconciliation_overdue_email_async_task,
     send_to_payment_gateway_async_task,
-    update_exchange_rate_on_release_payments_async_task,
 )
 from hope.apps.payment.flows import PaymentPlanFlow
 from hope.apps.payment.services.payment_household_snapshot_service import (
@@ -54,7 +53,6 @@ from hope.apps.payment.utils import get_link, get_quantity_in_usd, log_payment_p
 from hope.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hope.apps.targeting.validators import TargetingCriteriaInputValidator
 from hope.apps.utils.recipients import users_with_permissions
-from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     Approval,
     ApprovalProcess,
@@ -74,7 +72,6 @@ from hope.models import (
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
     User,
-    log_create,
 )
 
 if TYPE_CHECKING:
@@ -277,62 +274,6 @@ class PaymentPlanService:
         self.payment_plan = payment_plan
         return self.payment_plan
 
-    def release_from_vision(self) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.IN_REVIEW:
-            raise ValidationError("Only an in-review Payment Plan can be released by Vision")
-
-        old_payment_plan = copy_model_object(self.payment_plan)
-        approval_process = self.payment_plan.payment_plan_group.approval_process.first()
-        if not approval_process:
-            raise ValidationError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
-
-        # Automatic Vision release uses the required, protected Payment Plan creator as its finance-release actor.
-        release_actor = self.payment_plan.created_by
-        Approval.objects.create(
-            approval_process=approval_process,
-            created_by=release_actor,
-            type=Approval.FINANCE_RELEASE,
-            comment=None,
-        )
-        log_payment_plan_approval(self.payment_plan, release_actor, Approval.FINANCE_RELEASE, None)
-
-        flow = PaymentPlanFlow(self.payment_plan)
-        flow.status_mark_as_reviewed()
-        self.payment_plan.save()
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=release_actor,
-            programs=self.payment_plan.program.pk,
-            old_object=old_payment_plan,
-            new_object=self.payment_plan,
-        )
-
-        release_user_id = str(release_actor.pk)
-        transaction.on_commit(
-            lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
-        )
-        send_payment_notification_emails_async_task(
-            self.payment_plan,
-            PaymentPlan.Action.REVIEW.value,
-            release_user_id,
-            timezone.now().isoformat(),
-        )
-        return self.payment_plan
-
-    def _invalidate_vision_attempt_before_manual_release(self) -> None:
-        has_pending_attempt = (
-            self.payment_plan.sent_to_vision or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value
-        )
-        if not has_pending_attempt or self.payment_plan.vision_integration_enabled:
-            return
-
-        from hope.contrib.vision.services import VisionService
-
-        # Manual release while Vision is disabled replaces the pending automatic workflow. Reset the attempt so that
-        # re-enabling Vision later does not treat the accepted plan as Vision-managed and block manual delivery.
-        VisionService.invalidate_attempt(self.payment_plan)
-
     def tp_lock(self) -> PaymentPlan:
         if self.payment_plan.build_status != PaymentPlan.BuildStatus.BUILD_STATUS_OK:
             raise ValidationError("Can only be locked when Build Status OK")
@@ -385,16 +326,20 @@ class PaymentPlanService:
             raise ValidationError("Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened.")
         if dispersion_end_date <= timezone.now().date():
             raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-        try:
-            self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
-        except RequestException as e:
-            if e.response is not None and is_client_error(e.response.status_code):
-                logger.error("UNORE rejected exchange rate request for PaymentPlan %s: %s", self.payment_plan.pk, e)
-            else:
-                logger.warning("Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", self.payment_plan.pk, e)
-            self.payment_plan.exchange_rate = None
+        if payment_plan_group.exchange_rate is None:
+            try:
+                payment_plan_group.exchange_rate = self.payment_plan.get_exchange_rate()
+            except RequestException as e:
+                if e.response is not None and is_client_error(e.response.status_code):
+                    logger.error("UNORE rejected exchange rate request for PaymentPlan %s: %s", self.payment_plan.pk, e)
+                else:
+                    logger.warning(
+                        "Failed to fetch UNORE exchange rate for PaymentPlan %s: %s", self.payment_plan.pk, e
+                    )
+                payment_plan_group.exchange_rate = None
+            payment_plan_group.save(update_fields=("exchange_rate", "updated_at"))
 
-        self.payment_plan.save(update_fields=("status_date", "status", "exchange_rate", "updated_at"))
+        self.payment_plan.save(update_fields=("status_date", "status", "updated_at"))
         self.payment_plan.program_cycle.set_active()
 
         Payment.objects.filter(parent=self.payment_plan).update(currency=payment_plan_group.currency)
@@ -496,8 +441,12 @@ class PaymentPlanService:
         return self.payment_plan
 
     def acceptance_process(self) -> PaymentPlan | None:
-        if self.action == PaymentPlan.Action.REVIEW.value and self.payment_plan.vision_managed:
-            raise ValidationError("Vision-managed Payment Plans are released automatically after FC assignment")
+        if (
+            self.action == PaymentPlan.Action.REVIEW.value
+            and self.payment_plan.payment_plan_group_id
+            and self.payment_plan.payment_plan_group.vision_managed
+        ):
+            raise ValidationError("This Payment Plan is released through its Vision-managed group")
 
         with transaction.atomic():
             self.payment_plan = (
@@ -566,6 +515,11 @@ class PaymentPlanService:
         user = cast("User", self.user)
         record_stage_reached(approval_process, approval_type, user)
         self.apply_acceptance_stage(approval_type, user)
+        if approval_type == Approval.FINANCE_RELEASE:
+            owner = self.payment_plan.exchange_rate_owner
+            if owner is None:
+                raise ValidationError("A payment plan needs a group or Follow-Up Instruction for its exchange rate")
+            transaction.on_commit(lambda: recalculate_owner_exchange_rate_async_task(owner, str(user.pk)))
         if notification_action := STAGE_REACHED_NOTIFICATION.get(approval_type):
             send_payment_notification_emails_async_task(
                 self.payment_plan, notification_action.value, str(user.id), timezone.now().isoformat()
@@ -577,47 +531,16 @@ class PaymentPlanService:
         Shared by the plan's own acceptance process and by the group's, which walks every plan through it.
         """
         flow = PaymentPlanFlow(self.payment_plan)
-        send_to_vision = False
-        should_notify_vision_of_rejection = False
         if approval_type == Approval.APPROVAL:
             flow.status_approve()
         if approval_type == Approval.AUTHORIZATION:
             flow.status_authorize()
-            send_to_vision = self.payment_plan.vision_integration_enabled
         if approval_type == Approval.FINANCE_RELEASE:
-            self._invalidate_vision_attempt_before_manual_release()
             flow.status_mark_as_reviewed()
-            # AB#272790
-            release_user_id = str(user.pk)
-            transaction.on_commit(
-                lambda: update_exchange_rate_on_release_payments_async_task(self.payment_plan, release_user_id)
-            )
         if approval_type == Approval.REJECT:
-            should_notify_vision_of_rejection = self.payment_plan.sent_to_vision
-            # Reset every started attempt, including local SEND_FAILED state that Vision never received, so a
-            # later authorization starts a clean workflow.
-            if should_notify_vision_of_rejection or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
-                from hope.contrib.vision.services import VisionService
-
-                VisionService.invalidate_attempt(self.payment_plan)
             flow.status_reject()
 
         self.payment_plan.save()
-        if should_notify_vision_of_rejection:
-            from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
-
-            payment_plan = self.payment_plan
-            user_id = str(user.pk)
-            transaction.on_commit(
-                lambda: notify_payment_plan_status_to_vision_async_task(payment_plan, user_id, "REJECTED"),
-                robust=True,
-            )
-        if send_to_vision:
-            from hope.contrib.vision.tasks import send_payment_plan_to_vision_async_task
-
-            payment_plan = self.payment_plan
-            creator_id = str(payment_plan.created_by_id)
-            transaction.on_commit(lambda: send_payment_plan_to_vision_async_task(payment_plan, creator_id))
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
@@ -1170,8 +1093,12 @@ class PaymentPlanService:
             # instead of hitting the payment_plan_and_household unique constraint.
             return
 
-        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
-        self.payment_plan.save(update_fields=["exchange_rate", "updated_at"])
+        exchange_rate_owner = self.payment_plan.exchange_rate_owner
+        if exchange_rate_owner is None:
+            raise ValidationError("A payment plan needs a group or Follow-Up Instruction for its exchange rate.")
+        if exchange_rate_owner.exchange_rate is None:
+            exchange_rate_owner.exchange_rate = self.payment_plan.get_exchange_rate()
+            exchange_rate_owner.save(update_fields=["exchange_rate", "updated_at"])
 
         if not (split := self.payment_plan.splits.first()):
             split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)
@@ -1663,31 +1590,11 @@ class PaymentPlanService:
 
         if self.payment_plan.status not in allowed_statuses:
             raise ValidationError(f"Abort Payment Plan is not possible within Status {self.payment_plan.status}")
-        notify_vision_aborted = self.payment_plan.sent_to_vision
-        if notify_vision_aborted or self.payment_plan.vision_status != VisionStatus.NOT_SENT.value:
-            from hope.contrib.vision.services import VisionService
-
-            VisionService.invalidate_attempt(self.payment_plan)
         flow = PaymentPlanFlow(self.payment_plan)
         flow.status_abort()
         self.payment_plan.abort_comment = abort_comment or ""
-        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment", "internal_data"))
-        self.payment_plan.refresh_from_db(
-            fields=["status", "status_date", "updated_at", "abort_comment", "internal_data"]
-        )
-        if notify_vision_aborted:
-            from hope.contrib.vision.tasks import notify_payment_plan_status_to_vision_async_task
-
-            notification_owner_id = user_id or str(self.payment_plan.created_by_id)
-            payment_plan = self.payment_plan
-            transaction.on_commit(
-                lambda: notify_payment_plan_status_to_vision_async_task(
-                    payment_plan,
-                    notification_owner_id,
-                    "ABORTED",
-                ),
-                robust=True,
-            )
+        self.payment_plan.save(update_fields=("status", "status_date", "updated_at", "abort_comment"))
+        self.payment_plan.refresh_from_db(fields=["status", "status_date", "updated_at", "abort_comment"])
         return self.payment_plan
 
     def reactivate_abort(self, user_id: str | None = None) -> PaymentPlan:

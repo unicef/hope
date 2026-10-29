@@ -10,6 +10,8 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    ProgramCycleFactory,
 )
 from hope.apps.core.api.mixins import BaseAPI
 from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
@@ -44,17 +46,22 @@ def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
             name="Head Vendor Name",
             vision_vendor_number="V100004",
         )
+        cycle = ProgramCycleFactory(program__business_area=business_area)
+        group = PaymentPlanGroupFactory(
+            cycle=cycle,
+            currency=currency,
+            financial_service_provider=financial_service_provider,
+            exchange_rate=exchange_rate,
+        )
         payment_plan = PaymentPlanFactory(
             unicef_id=unicef_id,
             name="Monthly payment plan testing the content length",
             status=PaymentPlan.Status.IN_REVIEW,
             business_area=business_area,
-            program_cycle__program__business_area=business_area,
-            currency=currency,
-            financial_service_provider=financial_service_provider,
+            program_cycle=cycle,
+            payment_plan_group=group,
             total_entitled_quantity="10000.00",
             total_entitled_quantity_usd="10000.00",
-            exchange_rate=exchange_rate,
         )
         PaymentPlan.objects.filter(pk=payment_plan.pk).update(created_at=created_at)
         payment_plan.created_at = created_at
@@ -422,7 +429,7 @@ def test_callback_view_gets_payment_plan_with_related_data(
 
     payment_plan = vision_api_payment_plan_factory(unicef_id="PP-LOOKUP")
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(2):
         selected_payment_plan = PaymentPlanCallbackView._get_payment_plan("PP-LOOKUP")
 
     assert selected_payment_plan.pk == payment_plan.pk

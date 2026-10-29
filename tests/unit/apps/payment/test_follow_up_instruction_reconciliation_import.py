@@ -16,6 +16,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     HouseholdFactory,
     PaymentFactory,
@@ -95,11 +96,14 @@ def delivery_template(fsp, delivery_mechanism):
 
 @pytest.fixture
 def instruction(user, program, business_area):
-    return FollowUpInstruction.objects.create(
+    return FollowUpInstructionFactory(
         business_area=business_area,
         program=program,
         created_by=user,
         background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        exchange_rate=Decimal("1.00"),
+        dispersion_start_date=None,
+        dispersion_end_date=None,
     )
 
 
@@ -114,7 +118,6 @@ def child_payment_plans(instruction, cycle, business_area, currency, delivery_me
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
     )
     plan_two = PaymentPlanFactory(
         program_cycle=cycle,
@@ -125,7 +128,6 @@ def child_payment_plans(instruction, cycle, business_area, currency, delivery_me
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
     )
     return plan_one, plan_two
 
@@ -191,6 +193,18 @@ def instruction_payments(child_payment_plans, fsp, delivery_mechanism, currency)
             },
         )
     return payment_one, payment_two, payment_three
+
+
+def test_instruction_reconciliation_reuses_instruction_rate_and_date(
+    instruction,
+    instruction_payments,
+    django_assert_num_queries,
+):
+    service = XlsxFollowUpInstructionReconciliationImportService(instruction, ContentFile(b"", name="unused.xlsx"))
+    household_id = instruction_payments[0].household.unicef_id
+
+    with django_assert_num_queries(0):
+        service._import_household(household_id, Decimal("0.00"))
 
 
 def _build_reconciliation_file(instruction: FollowUpInstruction) -> bytes:
@@ -343,7 +357,6 @@ def test_import_payment_list_keeps_finished_plan_status(
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.FINISHED,
-        exchange_rate=Decimal("1.00"),
     )
     household = HouseholdFactory(business_area=plan.business_area, program=plan.program)
     payment = PaymentFactory(

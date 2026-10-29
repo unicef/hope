@@ -1,22 +1,29 @@
+from datetime import date
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.backends.postgresql.psycopg_any import NumericRange
-from django.db.models import Exists, OuterRef, Q, Sum, TextField, Value
-from django.db.models.fields.json import KeyTextTransform
+from django.db.models import Exists, OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from flags.state import flag_state
 
 from hope.apps.activity_log.utils import create_mapping_dict
 from hope.contrib.vision.choices import VisionStatus
-from hope.models.approval import COMMENT_MAX_LENGTH
+from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.payment_plan import PaymentPlan, last_approval_step
-from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hope.models.utils import (
+    AdminUrlMixin,
+    InternalDataFieldModel,
+    LongNameIndex,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -26,7 +33,7 @@ if TYPE_CHECKING:
     from hope.models import AcceptanceProcessThreshold, BusinessArea, Program, User
 
 
-class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
+class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalDataFieldModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -36,6 +43,9 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             "source_group",
             "financial_service_provider",
             "use_payment_gateway",
+            "exchange_rate",
+            "custom_exchange_rate",
+            "custom_exchange_rate_set_by",
             "dispersion_start_date",
             "dispersion_end_date",
             "background_action_status",
@@ -62,6 +72,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         CLOSED = "CLOSED", "Closed"
 
     class BackgroundActionStatus(models.TextChoices):
+        RECALCULATING = "RECALCULATING", "Recalculating Payment Plan data"
+        RECALCULATING_ERROR = "RECALCULATING_ERROR", "Payment Plan recalculation error"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
         XLSX_IMPORTING_RECONCILIATION = (
@@ -71,6 +83,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
+        BackgroundActionStatus.RECALCULATING_ERROR,
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
     ]
@@ -122,6 +135,18 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         default=False,
         help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
     )
+    exchange_rate = models.DecimalField(
+        decimal_places=8, blank=True, null=True, max_digits=15, help_text="Exchange Rate [sys]"
+    )
+    custom_exchange_rate = models.BooleanField(default=False, help_text="Custom Exchange Rate flag [sys]")
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="User who set the custom exchange rate [sys]",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -168,7 +193,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         blank=True,
         null=True,
         choices=BackgroundActionStatus.choices,
-        help_text="Background Action Status for celery export/import task [sys]",
+        help_text="Background Action Status for asynchronous group tasks [sys]",
     )
     plan_type = models.CharField(
         max_length=20,
@@ -248,6 +273,52 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def business_area(self) -> "BusinessArea":
         return self.cycle.program.business_area
 
+    @property
+    def vision_managed(self) -> bool:
+        if (
+            self.plan_type == PaymentPlan.PlanType.FOLLOW_UP
+            or not flag_state("VISION_INTEGRATION_ACTIVE")
+            or not self.business_area.vision_integration_active
+        ):
+            return False
+        if self.status == self.Status.IN_REVIEW:
+            return self.payment_plans.exists()
+        return self.vision_status != VisionStatus.NOT_SENT.value
+
+    @property
+    def vision_data(self) -> dict:
+        data = (self.internal_data or {}).get("vision", {})
+        return data if isinstance(data, dict) else {}
+
+    @property
+    def vision_status(self) -> str:
+        return str(self.vision_data.get("status") or VisionStatus.NOT_SENT.value)
+
+    @property
+    def sent_to_vision(self) -> bool:
+        return bool(self.vision_data.get("sent"))
+
+    @property
+    def can_send_to_vision(self) -> bool:
+        return (
+            self.status == self.Status.IN_REVIEW
+            and self.vision_managed
+            and self.vision_status in {VisionStatus.NOT_SENT.value, VisionStatus.SEND_FAILED.value}
+            and not self.sent_to_vision
+        )
+
+    @property
+    def can_assign_funds_commitments(self) -> bool:
+        if self.status != self.Status.IN_REVIEW or self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return False
+        return not self.vision_managed and self.payment_plans.exists()
+
+    @property
+    def funds_commitment_source_group(self) -> "PaymentPlanGroup":
+        if self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
+            return cast("PaymentPlanGroup", self.source_group)
+        return self
+
     def plans_qualifying_for_linked_group(self, plan_type: "PaymentPlan.PlanType") -> list[PaymentPlan]:
         """Plans of this group that a linked Follow-Up / Top-Up / Amendment group would get a child plan for."""
         if self.plan_type not in self.LINKED_GROUP_SOURCE_PLAN_TYPES[plan_type]:
@@ -258,6 +329,20 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
         if self.status not in self.CHILD_GROUP_SOURCE_STATUSES:
             return []
         return [plan for plan in payment_plans if plan.eligible_payments_for_child_plan().exists()]
+
+    @property
+    def currency_exchange_date(self) -> date:
+        if self.status in (
+            self.Status.ACCEPTED,
+            self.Status.FINISHED,
+            self.Status.READY_FOR_CLOSURE,
+            self.Status.CLOSED,
+        ):
+            process = self.approval_process.first()
+            if process and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first()):
+                return approval.created_at.date()
+        today = timezone.now().date()
+        return min(today, self.dispersion_end_date) if self.dispersion_end_date else today
 
     @property
     def last_approval_process_date(self) -> "datetime | None":
@@ -289,6 +374,10 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
     def total_entitled_quantity_usd(self) -> Decimal:
         return self.payment_plans.aggregate(total=Coalesce(Sum("total_entitled_quantity_usd"), Decimal(0)))["total"]
 
+    @property
+    def total_entitled_quantity(self) -> Decimal:
+        return self.payment_plans.aggregate(total=Coalesce(Sum("total_entitled_quantity"), Decimal(0)))["total"]
+
     @cached_property
     def acceptance_process_threshold(self) -> "AcceptanceProcessThreshold | None":
         total_entitled_quantity_usd = int(self.total_entitled_quantity_usd)
@@ -314,7 +403,7 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
 
     @property
     def can_start_background_action(self) -> bool:
-        """Whether a new export/import can start: the group is idle or in an error state."""
+        """Whether a new background action can start: the group is idle or in an error state."""
         return (
             self.background_action_status is None
             or self.background_action_status in PaymentPlanGroup.BACKGROUND_ACTION_ERROR_STATES
@@ -350,8 +439,8 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
 
         A plan qualifies when it is ACCEPTED, has an FSP routed through the payment gateway
         (the group's use_payment_gateway is True or the FSP communication_channel is API), still has splits
-        not yet sent to the gateway, and is not already being sent. When both Vision feature flags
-        are active, plans already managed by Vision are also excluded.
+        not yet sent to the gateway, and is not already being sent. With Vision active, plans
+        in a group with Vision status other than NOT_SENT are excluded, except Follow-Up plans.
         """
         from hope.models import FinancialServiceProvider, PaymentPlanSplit
 
@@ -370,27 +459,13 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixi
             & Q(has_unsent_splits=True)
             & ~Q(background_action_status=PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY)
         )
-        if flag_state("VISION_INTEGRATION_ACTIVE"):
-            payment_plans = payment_plans.annotate(
-                # PaymentPlan.vision_status treats missing Vision data as NOT_SENT. Apply the same fallback in SQL;
-                # otherwise PostgreSQL evaluates the negated exclusion against NULL and drops legacy/manual plans.
-                vision_workflow_status=Coalesce(
-                    KeyTextTransform("status", KeyTextTransform("vision", "internal_data")),
-                    Value(VisionStatus.NOT_SENT.value),
-                    output_field=TextField(),
-                )
-            ).exclude(
-                # Group PG sending rules for ACCEPTED plans:
-                # - Released through Vision: exclude it because automatic PG sending was already attempted; failures
-                #   are retried in Django admin.
-                # - Accepted before Vision was enabled, or manually released while Vision was disabled: include it
-                #   because its Vision state is missing or NOT_SENT and no automatic PG send was scheduled.
-                # - Follow-Up plan: include it because the FC was reserved for the source plan and Follow-Ups do not
-                #   use Vision, even if historical Vision data is present.
-                Q(business_area__vision_integration_active=True)
-                & ~Q(vision_workflow_status=VisionStatus.NOT_SENT.value)
-                # Follow-Ups reuse funds reserved for their source plan and never use Vision. They stay on the normal
-                # group PG path even if historical Vision data remains in internal_data.
-                & ~Q(plan_type=PaymentPlan.PlanType.FOLLOW_UP)
-            )
+        # A group accepted while Vision was disabled still has NOT_SENT status and needs manual PG sending.
+        # Groups sent to Vision use automatic PG dispatch; Follow-Up plans remain eligible here, and failed
+        # automatic sends are retried in Django admin.
+        if (
+            self.vision_status != VisionStatus.NOT_SENT.value
+            and flag_state("VISION_INTEGRATION_ACTIVE")
+            and self.business_area.vision_integration_active
+        ):
+            return payment_plans.filter(plan_type=PaymentPlan.PlanType.FOLLOW_UP)
         return payment_plans

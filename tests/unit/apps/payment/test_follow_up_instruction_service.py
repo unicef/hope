@@ -174,7 +174,6 @@ def _create_instruction_child_payment_plan(
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=status,
-        exchange_rate=Decimal("1.00"),
     )
     PaymentFactory(
         parent=payment_plan,

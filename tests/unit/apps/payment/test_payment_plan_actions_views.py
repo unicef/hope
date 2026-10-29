@@ -37,6 +37,7 @@ from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.models import (
     FileTemp,
+    FollowUpInstruction,
     LogEntry,
     Payment,
     PaymentPlan,
@@ -107,8 +108,14 @@ def payment_plan_actions_context(
         "url_import_entitlement_flat_amount": reverse(
             "api:payments:payment-plans-entitlement-flat-amount", kwargs=url_kwargs
         ),
-        "url_custom_exchange_rate": reverse("api:payments:payment-plans-custom-exchange-rate", kwargs=url_kwargs),
-        "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
+        "url_custom_exchange_rate": reverse(
+            "api:payments:payment-plan-groups-custom-exchange-rate",
+            kwargs={**url_kwargs_ba_program, "pk": pp.payment_plan_group_id},
+        ),
+        "url_funds_commitments": reverse(
+            "api:payments:payment-plan-groups-assign-funds-commitments",
+            kwargs={**url_kwargs_ba_program, "pk": pp.payment_plan_group_id},
+        ),
     }
 
 
@@ -666,9 +673,9 @@ def test_exclude_beneficiaries_validation_errors(
     assert "excluded_households_ids" in response_3.json()
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
+@patch("hope.models.async_job.AsyncRetryJob.queue")
 def test_apply_custom_exchange_rate(
-    mock_delay: Mock,
+    mock_queue: Mock,
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -685,29 +692,51 @@ def test_apply_custom_exchange_rate(
         response = payment_plan_actions_context["client"].post(
             payment_plan_actions_context["url_custom_exchange_rate"],
             {
-                "unore_exchange_rate": "2.00000000",
                 "custom_exchange_rate": "1.25000000",
+                "updated_at": payment_plan_actions_context["pp"].payment_plan_group.updated_at.isoformat(),
             },
             format="json",
         )
 
-    payment_plan_actions_context["pp"].refresh_from_db(
-        fields=[
-            "background_action_status",
-            "custom_exchange_rate",
-            "exchange_rate",
-            "custom_exchange_rate_set_by",
-        ]
+    payment_plan_actions_context["pp"].payment_plan_group.refresh_from_db(
+        fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by", "background_action_status"]
     )
     assert response.status_code == status.HTTP_200_OK
-    assert (
-        payment_plan_actions_context["pp"].background_action_status
-        == PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE
-    )
+    assert payment_plan_actions_context["pp"].payment_plan_group.background_action_status == "RECALCULATING"
     assert payment_plan_actions_context["pp"].custom_exchange_rate is True
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("1.25000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by == payment_plan_actions_context["user"]
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
+    mock_queue.assert_called_once()
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_group_exchange_rate_uses_group_status_even_when_child_plan_is_busy(
+    mock_queue: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = payment_plan_actions_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    plan = context["pp"]
+    plan.status = PaymentPlan.Status.ACCEPTED
+    plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    plan.save(update_fields=["status", "background_action_status"])
+    group = plan.payment_plan_group
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "updated_at": group.updated_at.isoformat()},
+            format="json",
+        )
+
+    group.refresh_from_db()
+    assert response.status_code == status.HTTP_200_OK
+    assert group.exchange_rate == Decimal("1.25000000")
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING
+    mock_queue.assert_called_once()
 
 
 def test_apply_custom_exchange_rate_validation_errors(
@@ -720,18 +749,21 @@ def test_apply_custom_exchange_rate_validation_errors(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = PaymentPlanGroup.Status.LOCKED
+    group.save(update_fields=["status"])
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "unore_exchange_rate": "2.00000000",
             "custom_exchange_rate": "1.25000000",
+            "updated_at": group.updated_at.isoformat(),
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan" in response.data
+    assert "Exchange rate can be changed only while the group is OPEN or IN_REVIEW" in response.data
 
 
 def test_apply_custom_exchange_rate_requires_one_rate_value(
@@ -750,19 +782,44 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "unore_exchange_rate": None,
-            "custom_exchange_rate": None,
+            "updated_at": payment_plan_actions_context["pp"].payment_plan_group.updated_at.isoformat(),
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.data["non_field_errors"] == ["One of custom_exchange_rate or unore_exchange_rate must be provided."]
+    assert response.data["non_field_errors"] == ["Choose UNORE or provide a positive custom exchange rate."]
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
+@pytest.mark.parametrize("field", ["custom_exchange_rate", "unore_exchange_rate"])
+@pytest.mark.parametrize("rate", ["0", "-1"])
+def test_apply_custom_exchange_rate_rejects_nonpositive_rate(
+    field: str,
+    rate: str,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    group = payment_plan_actions_context["pp"].payment_plan_group
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_custom_exchange_rate"],
+        {field: rate, "updated_at": group.updated_at.isoformat()},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert field in response.data
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
 def test_apply_unore_exchange_rate_clears_custom_flag(
-    mock_delay: Mock,
+    mock_queue: Mock,
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -773,36 +830,32 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
         payment_plan_actions_context["program_active"],
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_actions_context["pp"].custom_exchange_rate = True
-    payment_plan_actions_context["pp"].exchange_rate = Decimal("1.25000000")
-    payment_plan_actions_context["pp"].custom_exchange_rate_set_by = payment_plan_actions_context["user"]
-    payment_plan_actions_context["pp"].save(
-        update_fields=["status", "custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"]
-    )
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.custom_exchange_rate = True
+    group.exchange_rate = Decimal("1.25000000")
+    group.custom_exchange_rate_set_by = payment_plan_actions_context["user"]
+    group.save(update_fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"])
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = payment_plan_actions_context["client"].post(
             payment_plan_actions_context["url_custom_exchange_rate"],
             {
                 "unore_exchange_rate": "2.00000000",
-                "custom_exchange_rate": None,
+                "updated_at": group.updated_at.isoformat(),
             },
             format="json",
         )
 
-    payment_plan_actions_context["pp"].refresh_from_db(
-        fields=[
-            "background_action_status",
-            "custom_exchange_rate",
-            "exchange_rate",
-            "custom_exchange_rate_set_by",
-        ]
+    payment_plan_actions_context["pp"].payment_plan_group.refresh_from_db(
+        fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by", "background_action_status"]
     )
     assert response.status_code == status.HTTP_200_OK
     assert payment_plan_actions_context["pp"].custom_exchange_rate is False
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("2.00000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by is None
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
+    assert payment_plan_actions_context["pp"].payment_plan_group.background_action_status == "RECALCULATING"
+    mock_queue.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -1182,6 +1235,9 @@ def test_assign_funds_commitments(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
 
     first_header = FundsCommitmentHeaderFactory()
     second_header = FundsCommitmentHeaderFactory()
@@ -1210,10 +1266,56 @@ def test_assign_funds_commitments(
 
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.json()
-        assert set(payment_plan_actions_context["pp"].funds_commitment_headers.all()) == {
+        assert set(group.funds_commitment_headers.all()) == {
             first_header,
             second_header,
         }
+
+
+@pytest.fixture
+def group_with_existing_fc_assignment(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    context = payment_plan_actions_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        context["business_area"],
+        context["program_active"],
+    )
+    context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    context["pp"].save(update_fields=["status"])
+    group = context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
+    original_header = FundsCommitmentHeaderFactory()
+    replacement_header = FundsCommitmentHeaderFactory()
+    FundsCommitmentItemFactory(funds_commitment_header=original_header, office=context["business_area"])
+    FundsCommitmentItemFactory(funds_commitment_header=replacement_header, office=context["business_area"])
+    group.funds_commitment_headers.add(original_header)
+    return {**context, "group": group, "replacement_header": replacement_header}
+
+
+def test_assign_funds_commitments_replaces_group_selection(
+    group_with_existing_fc_assignment: dict[str, Any],
+    django_assert_num_queries,
+) -> None:
+    context = group_with_existing_fc_assignment
+    replacement_header = context["replacement_header"]
+
+    response = context["client"].post(
+        context["url_funds_commitments"],
+        {"funds_commitment_numbers": [replacement_header.funds_commitment_number]},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    with django_assert_num_queries(1):
+        assigned_numbers = list(
+            context["group"].funds_commitment_headers.values_list("funds_commitment_number", flat=True)
+        )
+    assert assigned_numbers == [replacement_header.funds_commitment_number]
 
 
 def test_assign_funds_commitments_validation_errors(
@@ -1233,10 +1335,13 @@ def test_assign_funds_commitments_validation_errors(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment plan must be in review" in response.json()
+    assert "Payment Plan Group must be in review" in response.json()
 
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
         {"funds_commitment_numbers": ["UNKNOWN"]},
@@ -1477,9 +1582,7 @@ def test_entitlement_flat_amount_without_version_skips_concurrency_check(
     assert response.status_code == status.HTTP_200_OK
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
-def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
-    mock_delay: Mock,
+def test_apply_custom_exchange_rate_rejects_stale_owner_timestamp(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -1492,16 +1595,121 @@ def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
 
+    group = payment_plan_actions_context["pp"].payment_plan_group
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "unore_exchange_rate": "2.00000000",
             "custom_exchange_rate": "1.25000000",
-            "version": payment_plan_actions_context["pp"].version,
+            "updated_at": "2020-01-01T00:00:00Z",
         },
         format="json",
     )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "changed" in str(response.data)
+    group.refresh_from_db()
+    assert group.exchange_rate is None
+
+
+@pytest.fixture
+def instruction_exchange_rate_context(payment_plan_actions_context: dict[str, Any]) -> dict[str, Any]:
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_actions_context["program_active"],
+        business_area=payment_plan_actions_context["business_area"],
+        created_by=payment_plan_actions_context["user"],
+        currency=payment_plan_actions_context["pp"].currency,
+    )
+    plan = payment_plan_actions_context["pp"]
+    plan.follow_up_instruction = instruction
+    plan.payment_plan_group = None
+    plan.status = PaymentPlan.Status.OPEN
+    plan.save(update_fields=["follow_up_instruction", "payment_plan_group", "status"])
+    payment_plan_actions_context["instruction"] = instruction
+    payment_plan_actions_context["url_custom_exchange_rate"] = reverse(
+        "api:payments:follow-up-instructions-custom-exchange-rate",
+        kwargs={**payment_plan_actions_context["url_kwargs_ba_program"], "pk": instruction.pk},
+    )
+    return payment_plan_actions_context
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_instruction_custom_exchange_rate_updates_instruction_and_child(
+    mock_queue: Mock,
+    instruction_exchange_rate_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = instruction_exchange_rate_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        context["business_area"],
+        context["program_active"],
+    )
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+            format="json",
+        )
+
+    context["instruction"].refresh_from_db()
+    context["pp"].refresh_from_db()
     assert response.status_code == status.HTTP_200_OK
+    assert context["instruction"].exchange_rate == Decimal("1.25000000")
+    assert context["instruction"].custom_exchange_rate_set_by == context["user"]
+    assert context["instruction"].background_action_status == "RECALCULATING"
+    assert context["pp"].background_action_status is None
+    mock_queue.assert_called_once()
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_instruction_exchange_rate_uses_instruction_status_even_when_child_plan_is_busy(
+    mock_queue: Mock,
+    instruction_exchange_rate_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = instruction_exchange_rate_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    plan = context["pp"]
+    plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    plan.save(update_fields=["background_action_status"])
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+            format="json",
+        )
+
+    context["instruction"].refresh_from_db()
+    assert response.status_code == status.HTTP_200_OK
+    assert context["instruction"].exchange_rate == Decimal("1.25000000")
+    assert context["instruction"].background_action_status == FollowUpInstruction.BackgroundActionStatus.RECALCULATING
+    mock_queue.assert_called_once()
+
+
+def test_instruction_exchange_rate_rejects_released_instruction(
+    instruction_exchange_rate_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = instruction_exchange_rate_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    plan = context["pp"]
+    plan.status = PaymentPlan.Status.ACCEPTED
+    plan.save(update_fields=["status"])
+
+    response = context["client"].post(
+        context["url_custom_exchange_rate"],
+        {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Exchange rate can be changed only while the instruction is OPEN or IN_REVIEW" in response.data
 
 
 def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
@@ -1588,6 +1796,9 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
@@ -1595,4 +1806,4 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "assigned automatically" in str(response.data)
+    assert "managed by Vision" in str(response.data)
