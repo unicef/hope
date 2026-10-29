@@ -19,6 +19,7 @@ from multiselectfield import MultiSelectField
 from sorl.thumbnail import ImageField
 
 from hope.apps.activity_log.utils import create_mapping_dict
+from hope.apps.core.fields import HopeCurrencyField, currency_precision_check
 from hope.apps.household.const import (
     BLANK,
     NON_BENEFICIARY,
@@ -584,12 +585,11 @@ class Household(
         help_text="Beneficiary Program Registration id [sys]",
         db_collation="und-ci-det",
     )
-    total_cash_received_usd = models.DecimalField(
+    total_cash_received_usd = HopeCurrencyField(
         null=True,
-        decimal_places=2,
-        max_digits=64,
         blank=True,
-        help_text="Household cash received usd [sys]",
+        verbose_name="Total cash received in USD",
+        help_text="Sum of delivered payments in USD, with up to 10 decimal places [sys].",
     )
     total_cash_received = models.DecimalField(
         null=True,
@@ -731,6 +731,10 @@ class Household(
                 fields=["originating_id"],
                 condition=Q(is_removed=False) & Q(originating_id__isnull=False),
                 name="originating_id_hh_unique_constraint",
+            ),
+            currency_precision_check(
+                "total_cash_received_usd",
+                name="household_cash_precision",
             ),
         ]
 

@@ -153,7 +153,7 @@ def test_entitlement_xlsx_export_and_import(
         entitlement_column = headers.index("entitlement_quantity")
         rows = list(worksheet.iter_rows(min_row=2))
         assert [row[payment_id_column].value for row in rows] == ["RCPT-ENTITLEMENT-E2E-1", "RCPT-ENTITLEMENT-E2E-2"]
-        assert [row[entitlement_column].value for row in rows] == [10, 30]
+        assert [row[entitlement_column].value for row in rows] == ["10.00", "30.00"]
         rows[0][entitlement_column].value = 70
         rows[1][entitlement_column].value = 90
         upload_path = tmp_path / "entitlement_import.xlsx"

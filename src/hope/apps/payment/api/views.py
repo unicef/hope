@@ -739,7 +739,7 @@ class PaymentVerificationRecordViewSet(
         if received_amount is not None and received_amount != 0 and not received:
             raise ValidationError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
-        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)  # type: ignore[arg-type]
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()

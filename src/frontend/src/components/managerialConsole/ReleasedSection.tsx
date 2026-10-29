@@ -64,7 +64,7 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       field: 'totalEntitledQuantityUsd',
       headerName: t('Total Entitled Quantity (USD)'),
       width: 200,
-      renderCell: (params) => <>{params.value || '-'}</>,
+      renderCell: (params) => <>{params.value ?? '-'}</>,
     },
     {
       field: 'lastApprovalProcessDate',
