@@ -2597,6 +2597,34 @@ def test_export_pdf_payment_plan_group_summary_action_replaces_existing_file_and
     mock_send_email.assert_called_once()
 
 
+@pytest.fixture
+def group_summary_pdf_job_without_email(payment_plan: PaymentPlan, user: Any) -> AsyncRetryJob:
+    payment_plan.business_area.enable_email_notification = False
+    payment_plan.business_area.save(update_fields=["enable_email_notification"])
+    return AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_group_summary_async_task_action",
+        config={"payment_plan_group_id": str(payment_plan.payment_plan_group_id), "user_id": str(user.pk)},
+    )
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.celery_tasks.PaymentPlanGroupPDFExportService.generate_pdf_summary")
+def test_export_pdf_payment_plan_group_summary_action_saves_first_file_without_email(
+    mock_generate_pdf_summary: Mock,
+    mock_send_email: Mock,
+    payment_plan: PaymentPlan,
+    group_summary_pdf_job_without_email: AsyncRetryJob,
+) -> None:
+    mock_generate_pdf_summary.return_value = (b"%PDF-1.4 test", "summary.pdf")
+
+    export_pdf_payment_plan_group_summary_async_task_action(group_summary_pdf_job_without_email)
+
+    payment_plan.payment_plan_group.refresh_from_db(fields=["export_pdf_file_summary"])
+    assert payment_plan.payment_plan_group.export_pdf_file_summary_id is not None
+    mock_send_email.assert_not_called()
+
+
 def test_export_pdf_payment_plan_group_summary_queues_retry_job(django_capture_on_commit_callbacks) -> None:
     payment_plan_group = PaymentPlanGroupFactory()
     user = UserFactory()
@@ -2709,3 +2737,31 @@ def test_export_pdf_follow_up_instruction_summary_queues_retry_job(
     assert job.content_object == follow_up_instruction
     assert job.config == {"follow_up_instruction_id": str(follow_up_instruction.pk), "user_id": str(user.pk)}
     mock_queue.assert_called_once()
+
+
+@pytest.fixture
+def instruction_summary_pdf_job_without_email(follow_up_instruction: Any, user: Any) -> AsyncRetryJob:
+    follow_up_instruction.business_area.enable_email_notification = False
+    follow_up_instruction.business_area.save(update_fields=["enable_email_notification"])
+    return AsyncRetryJob.objects.create(
+        type=AsyncJobModel.JobType.JOB_TASK,
+        action="hope.apps.payment.celery_tasks.export_pdf_follow_up_instruction_summary_async_task_action",
+        config={"follow_up_instruction_id": str(follow_up_instruction.pk), "user_id": str(user.pk)},
+    )
+
+
+@patch("hope.apps.payment.celery_tasks.send_email_notification_on_commit")
+@patch("hope.apps.payment.celery_tasks.FollowUpInstructionPDFExportService.generate_pdf_summary")
+def test_export_pdf_follow_up_instruction_summary_action_saves_first_file_without_email(
+    mock_generate_pdf_summary: Mock,
+    mock_send_email: Mock,
+    follow_up_instruction: Any,
+    instruction_summary_pdf_job_without_email: AsyncRetryJob,
+) -> None:
+    mock_generate_pdf_summary.return_value = (b"%PDF-1.4 test", "summary.pdf")
+
+    export_pdf_follow_up_instruction_summary_async_task_action(instruction_summary_pdf_job_without_email)
+
+    follow_up_instruction.refresh_from_db(fields=["export_pdf_file_summary"])
+    assert follow_up_instruction.export_pdf_file_summary_id is not None
+    mock_send_email.assert_not_called()
