@@ -502,6 +502,17 @@ def payment_plan_with_funds_commitment_header(payment_plan_detail_context: dict[
     return payment_plan_detail_context
 
 
+@pytest.fixture
+def removed_payment_plan_without_owner() -> PaymentPlan:
+    return PaymentPlanFactory(is_removed=True, payment_plan_group=None)
+
+
+def test_payment_plan_detail_serializer_approval_process_is_empty_for_plan_without_owner(
+    removed_payment_plan_without_owner: PaymentPlan,
+) -> None:
+    assert PaymentPlanDetailSerializer().get_approval_process(removed_payment_plan_without_owner) == []
+
+
 def test_payment_plan_detail_serializer_funds_commitments_exposes_header_fields(
     payment_plan_with_funds_commitment_header: dict[str, Any],
     django_assert_num_queries,

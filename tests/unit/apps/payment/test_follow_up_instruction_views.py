@@ -15,6 +15,7 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
+    FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FollowUpInstructionFactory,
@@ -1138,3 +1139,35 @@ def test_follow_up_instruction_detail_returns_its_approval_process(
     assert data["approval_process"][0]["actions"]["approval"][0]["comment"] == "approved once"
     assert data["closed_by"] is None
     assert data["export_pdf_file_summary"] is None
+
+
+@pytest.fixture
+def instruction_with_summary_pdf(follow_up_context: dict[str, Any]) -> Any:
+    instruction = follow_up_context["instruction"]
+    instruction.export_pdf_file_summary = FileTempFactory(
+        file=SimpleUploadedFile("summary.pdf", b"data"), created_by=follow_up_context["user"]
+    )
+    instruction.save(update_fields=["export_pdf_file_summary"])
+    return instruction
+
+
+def test_follow_up_instruction_detail_returns_summary_pdf_url(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    instruction_with_summary_pdf: Any,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_DETAILS], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-detail",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": instruction_with_summary_pdf.pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["export_pdf_file_summary"] == instruction_with_summary_pdf.export_pdf_file_summary.file.url

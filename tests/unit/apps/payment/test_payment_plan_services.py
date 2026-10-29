@@ -2508,6 +2508,24 @@ def test_check_payment_plan_and_update_status_triggers_when_count_meets_required
     mock_flow_cls.return_value.status_approve.assert_called_once()
 
 
+@patch("hope.apps.payment.services.payment_plan_services.send_payment_notification_emails_async_task")
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanFlow")
+def test_check_payment_plan_and_update_status_rejects_without_notification(
+    mock_flow_cls, mock_notify, locked_payment_plan
+):
+    service = PaymentPlanService(payment_plan=locked_payment_plan)
+    service.action = PaymentPlan.Action.REJECT.value
+    service.user = mock.MagicMock()
+    approval_process = mock.MagicMock()
+    approval_process.approvals.filter.return_value.count.return_value = 1
+
+    with patch.object(service, "get_required_number_by_approval_type", return_value=1):
+        service.check_payment_plan_and_update_status(approval_process)
+
+    mock_flow_cls.return_value.status_reject.assert_called_once()
+    mock_notify.assert_not_called()
+
+
 @pytest.fixture
 def vision_authorization_context():
     business_area = BusinessAreaFactory(vision_integration_active=True)

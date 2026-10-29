@@ -1783,6 +1783,34 @@ def test_export_without_eligible_payments_returns_400(
     assert group.background_action_status is None
 
 
+@pytest.fixture
+def accepted_group_without_plans(cycle: Any) -> Any:
+    group = cycle.payment_plan_groups.first()
+    group.status = PaymentPlanGroup.Status.ACCEPTED
+    group.save(update_fields=["status"])
+    return group
+
+
+def test_export_group_without_payment_plans_returns_400(
+    client: Any,
+    user: Any,
+    business_area: Any,
+    program: Any,
+    accepted_group_without_plans: Any,
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        user, [Permissions.PM_PAYMENT_PLAN_GROUP_EXPORT_XLSX], business_area, program=program
+    )
+
+    with patch("hope.apps.payment.api.views.export_payment_plan_group_delivery_xlsx_async_task") as mocked_task:
+        response = client.post(_export_url(business_area.slug, program.code, accepted_group_without_plans.id))
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Export requires at least one payment plan in the group." in str(response.json())
+    mocked_task.assert_not_called()
+
+
 def test_export_without_resolvable_template_returns_400(
     client: Any,
     user: Any,

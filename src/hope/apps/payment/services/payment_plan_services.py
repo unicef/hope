@@ -986,16 +986,6 @@ class PaymentPlanService:
         delivery_mechanism = self.payment_plan.delivery_mechanism
         if currency is not None and delivery_mechanism is not None:
             self.validate_currency_for_delivery_mechanism(currency, delivery_mechanism)
-        current_fsp_id = self.payment_plan.payment_plan_group.financial_service_provider_id
-        if (
-            payment_plan_group.financial_service_provider_id != current_fsp_id
-            and not self.payment_plan.is_population_open()
-        ):
-            # Payments carry the FSP from the build; only a TP_OPEN plan can be rebuilt.
-            raise ValidationError(
-                "Target Population can be moved to a group with a different Financial Service Provider only "
-                "within Open status"
-            )
         self.payment_plan.payment_plan_group = payment_plan_group
 
     def _validate_pp_status(
