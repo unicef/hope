@@ -9,27 +9,25 @@ from django.db.models.lookups import LessThan
 
 import hope.apps.core.fields
 
-PAYMENT_PLAN_COLUMNS = (
-    "total_entitled_quantity_usd",
-    "total_entitled_quantity_revised_usd",
-    "total_delivered_quantity_usd",
-    "total_undelivered_quantity_usd",
+PAYMENT_COLUMNS = (
+    "entitlement_quantity_usd",
+    "delivered_quantity_usd",
 )
 
 
-def payment_plan_currency_precision_constraint() -> models.CheckConstraint:
+def payment_currency_precision_constraint() -> models.CheckConstraint:
     condition = models.Q()
-    for column in PAYMENT_PLAN_COLUMNS:
+    for column in PAYMENT_COLUMNS:
         condition &= models.Q(**{f"{column}__isnull": True}) | (
             models.Q(**{f"{column}__gte": Decimal(0)}) & models.Q(LessThan(Abs(column), Decimal(100000000000000000000)))
         )
-    return models.CheckConstraint(condition=condition, name="payment_plan_currency_precision")
+    return models.CheckConstraint(condition=condition, name="payment_currency_precision")
 
 
-def change_payment_plan_columns(apps, schema_editor):
+def change_payment_columns(apps, schema_editor):
     connection = schema_editor.connection
-    table = schema_editor.quote_name(apps.get_model("payment", "PaymentPlan")._meta.db_table)
-    columns = [schema_editor.quote_name(name) for name in PAYMENT_PLAN_COLUMNS]
+    table = schema_editor.quote_name(apps.get_model("payment", "Payment")._meta.db_table)
+    columns = [schema_editor.quote_name(name) for name in PAYMENT_COLUMNS]
     alterations = ", ".join(f"ALTER COLUMN {column} TYPE numeric" for column in columns)
     precision_checks = " AND ".join(
         f"({column} IS NULL OR ({column} >= 0 AND abs({column}) < 100000000000000000000))" for column in columns
@@ -39,7 +37,7 @@ def change_payment_plan_columns(apps, schema_editor):
         cursor.execute("SET LOCAL statement_timeout = '30s'")
         cursor.execute(f"ALTER TABLE {table} {alterations}")
         cursor.execute(
-            f"ALTER TABLE {table} ADD CONSTRAINT {schema_editor.quote_name('payment_plan_currency_precision')} "
+            f"ALTER TABLE {table} ADD CONSTRAINT {schema_editor.quote_name('payment_currency_precision')} "
             f"CHECK ({precision_checks}) NOT VALID"
         )
 
@@ -51,63 +49,37 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.SeparateDatabaseAndState(
-            database_operations=[migrations.RunPython(change_payment_plan_columns)],
+            database_operations=[migrations.RunPython(change_payment_columns)],
             state_operations=[
                 migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_delivered_quantity_usd",
+                    model_name="payment",
+                    name="delivered_quantity_usd",
                     field=hope.apps.core.fields.HopeCurrencyField(
                         blank=True,
                         decimal_places=10,
-                        help_text="Sum of delivered payments in USD, with up to 10 decimal places [sys].",
+                        help_text="Delivered amount converted to USD, with up to 10 decimal places.",
                         max_digits=30,
                         null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Total delivered quantity in USD",
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
+                        verbose_name="Delivered quantity in USD",
                     ),
                 ),
                 migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_entitled_quantity_revised_usd",
+                    model_name="payment",
+                    name="entitlement_quantity_usd",
                     field=hope.apps.core.fields.HopeCurrencyField(
                         blank=True,
                         decimal_places=10,
-                        help_text="Revised entitlement total in USD, with up to 10 decimal places [sys].",
+                        help_text="Entitlement amount converted to USD, with up to 10 decimal places.",
                         max_digits=30,
                         null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Revised total entitled quantity in USD",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_entitled_quantity_usd",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Sum of payment entitlements converted to USD, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Total entitled quantity in USD",
-                    ),
-                ),
-                migrations.AlterField(
-                    model_name="paymentplan",
-                    name="total_undelivered_quantity_usd",
-                    field=hope.apps.core.fields.HopeCurrencyField(
-                        blank=True,
-                        decimal_places=10,
-                        help_text="Entitled amount remaining in USD, with up to 10 decimal places [sys].",
-                        max_digits=30,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal(0))],
-                        verbose_name="Total undelivered quantity in USD",
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.00"))],
+                        verbose_name="Entitlement quantity in USD",
                     ),
                 ),
                 migrations.AddConstraint(
-                    model_name="paymentplan",
-                    constraint=payment_plan_currency_precision_constraint(),
+                    model_name="payment",
+                    constraint=payment_currency_precision_constraint(),
                 ),
             ],
         ),
