@@ -246,14 +246,11 @@ To add a detector:
 | `tests/unit/apps/registration_data/test_deduplicate_collisions.py` | Collided individuals excluded from deduplication. |
 | `tests/unit/api/test_lax_collision_integration.py` | End-to-end LAX upload and merge with a collision. |
 
-Run the relevant files with the `tests` tox environment:
+Run the relevant files with the `tests` tox environment. The `tests` environment replaces its
+whole default command when arguments follow `--`, so `pytest` and its flags must be repeated:
 
 ```bash
-tox -e tests -- tests/unit/apps/program/test_collision_detector.py
-tox -e tests -- tests/unit/apps/program/test_collision_detectors.py
-tox -e tests -- tests/unit/apps/registration_data/test_rdi_merge_collision.py
-tox -e tests -- tests/unit/apps/registration_data/test_deduplicate_collisions.py
-tox -e tests -- tests/unit/api/test_lax_collision_integration.py
+tox -e tests -- pytest -q --no-migrations --randomly-seed=42 --create-db -n auto --dist=loadgroup tests/unit/apps/program/test_collision_detector.py tests/unit/apps/program/test_collision_detectors.py tests/unit/apps/registration_data/test_rdi_merge_collision.py tests/unit/apps/registration_data/test_deduplicate_collisions.py tests/unit/api/test_lax_collision_integration.py
 ```
 
 The LAX integration and RDI merge tests use Elasticsearch fixtures; start the local services

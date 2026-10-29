@@ -48,8 +48,10 @@ how the data enters HOPE:
 | Ingestion API upload, including Country Workspace and LAX pushes | While the household is uploaded | The existing household's own fields are updated; no second household is created |
 
 When the collision is resolved at upload time, the member-level merge described below does
-not run. The existing household keeps its members until another import or merge changes
-them.
+not run. Only an XLSX or Kobo RDI merge performs the full merge. In the LAX push flow, the
+pushed individuals remain in the population without a household; in a nested upload, the
+members are not created. The existing household keeps its current members until an XLSX or
+Kobo RDI merge changes them.
 
 ## What happens during a full merge
 
@@ -106,7 +108,7 @@ This preserves the audit trail of what the member was before the merge.
 | No collision is detected for an incoming household | The incoming household has no identification key, or its key differs from the existing household | Check the key in the import file or API payload |
 | No collision is detected | The household belongs to a different programme | Confirm the programme on both records |
 | The merge stops with `Cannot merge households with individuals with no identification key` | At least one member in either household has no individual identification key | Populate the missing individual keys, then run the merge again |
-| Members are missing after an upload resolved the collision | The upload-shortcut path updates only the household's own fields | Run a subsequent registration data import and merge, or correct the members directly |
+| Members are not in the existing household after an upload resolved the collision | API uploads (Country Workspace, LAX) resolve the collision at upload time and never run the member-level merge | Only an XLSX or Kobo RDI merge runs the full merge. LAX individuals stay in the population without a household; nested-upload members are not created. Re-import the household through an XLSX or Kobo RDI, or add the members manually |
 
 ## Next steps
 
