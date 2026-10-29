@@ -14,8 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import type { ApplyCustomExchangeRate } from '@restgenerated/models/ApplyCustomExchangeRate';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
+import type { PaymentPlanGroupDetail } from '@restgenerated/models/PaymentPlanGroupDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
@@ -36,12 +36,14 @@ const OptionDetails = styled(Box)`
 type ExchangeRateOption = 'unore' | 'custom';
 
 interface ConversionToUsdProps {
-  paymentPlan: PaymentPlanDetail;
+  owner: PaymentPlanGroupDetail | FollowUpInstructionDetail;
+  ownerType: 'group' | 'instruction';
   permissions: string[];
 }
 
 function ConversionToUsd({
-  paymentPlan,
+  owner,
+  ownerType,
   permissions,
 }: ConversionToUsdProps): ReactElement {
   const { t } = useTranslation();
@@ -50,54 +52,58 @@ function ConversionToUsd({
   const { businessArea, programId } = useBaseUrl();
   const queryClient = useQueryClient();
   const unoreExchangeRate =
-    paymentPlan.unoreExchangeRate != null
-      ? String(paymentPlan.unoreExchangeRate)
-      : paymentPlan.exchangeRate;
+    owner.unoreExchangeRate != null ? String(owner.unoreExchangeRate) : '';
   const [selectedOption, setSelectedOption] = useState<ExchangeRateOption>(
-    paymentPlan.customExchangeRate ? 'custom' : 'unore',
+    owner.customExchangeRate ? 'custom' : 'unore',
   );
   const [customExchangeRate, setCustomExchangeRate] = useState<string>(
-    paymentPlan.customExchangeRate ? (paymentPlan.exchangeRate ?? '') : '',
+    owner.customExchangeRate ? (owner.exchangeRate ?? '') : '',
   );
 
   useEffect(() => {
-    setSelectedOption(paymentPlan.customExchangeRate ? 'custom' : 'unore');
+    setSelectedOption(owner.customExchangeRate ? 'custom' : 'unore');
     setCustomExchangeRate(
-      paymentPlan.customExchangeRate ? (paymentPlan.exchangeRate ?? '') : '',
+      owner.customExchangeRate ? (owner.exchangeRate ?? '') : '',
     );
-  }, [
-    paymentPlan.customExchangeRate,
-    paymentPlan.exchangeRate,
-    paymentPlan.id,
-  ]);
+  }, [owner.customExchangeRate, owner.exchangeRate, owner.id]);
 
   const { mutate: applyExchangeRate, isPending } = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       businessAreaSlug,
       id,
+      ownerType,
       programCode,
       requestBody,
     }: {
       businessAreaSlug: string;
       id: string;
+      ownerType: 'group' | 'instruction';
       programCode: string;
       requestBody: ApplyCustomExchangeRate;
-    }) =>
-      RestService.restBusinessAreasProgramsPaymentPlansCustomExchangeRateCreate(
-        {
-          businessAreaSlug,
-          id,
-          programCode,
-          requestBody,
-        },
-      ),
+    }) => {
+      const params = { businessAreaSlug, id, programCode, requestBody };
+      await (ownerType === 'group'
+        ? RestService.restBusinessAreasProgramsPaymentPlanGroupsCustomExchangeRateCreate(
+            params,
+          )
+        : RestService.restBusinessAreasProgramsFollowUpInstructionsCustomExchangeRateCreate(
+            params,
+          ));
+    },
     onSuccess: () => {
       showMessage(
         t('Exchange rate is being applied, please wait until completed'),
       );
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
-          RestService.restBusinessAreasProgramsPaymentPlansRetrieve,
+          ownerType === 'group'
+            ? RestService.restBusinessAreasProgramsPaymentPlanGroupsRetrieve
+            : RestService.restBusinessAreasProgramsFollowUpInstructionsRetrieve,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
         ),
       });
     },
@@ -111,8 +117,7 @@ function ConversionToUsd({
     permissions,
   );
   const isSupportedStatus =
-    paymentPlan.status === PaymentPlanStatusEnum.OPEN ||
-    paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW;
+    owner.status === 'OPEN' || owner.status === 'IN_REVIEW';
   const isCustomExchangeRateReadOnly =
     !canApplyCustomExchangeRate || !isActiveProgram || !isSupportedStatus;
   const exchangeRateToApply =
@@ -122,17 +127,19 @@ function ConversionToUsd({
     selectedOption === 'custom'
       ? {
           customExchangeRate: exchangeRateToApply,
-          version: paymentPlan.version,
+          updatedAt: owner.updatedAt,
         }
       : {
           unoreExchangeRate: exchangeRateToApply,
-          version: paymentPlan.version,
+          updatedAt: owner.updatedAt,
         };
   const isApplyDisabled =
     !canApplyCustomExchangeRate ||
     !isActiveProgram ||
     !isSupportedStatus ||
-    !exchangeRateToApply;
+    owner.backgroundActionStatus === 'RECALCULATING' ||
+    !exchangeRateToApply ||
+    Number(exchangeRateToApply) <= 0;
   const areOptionsDisabled =
     !canApplyCustomExchangeRate || !isActiveProgram || !isSupportedStatus;
 
@@ -141,8 +148,8 @@ function ConversionToUsd({
       ? t('1 USD = {{rate}} {{currency}}', {
           rate: exchangeRate,
           currency: formatCurrencyCode(
-            paymentPlan.currency,
-            paymentPlan.currencyVisionCode,
+            owner.currency,
+            owner.currencyVisionCode,
           ),
         })
       : t('Exchange rate is unavailable');
@@ -178,7 +185,8 @@ function ConversionToUsd({
                 onClick={() => {
                   applyExchangeRate({
                     businessAreaSlug: businessArea,
-                    id: paymentPlan.id,
+                    id: owner.id,
+                    ownerType,
                     programCode: programId,
                     requestBody,
                   });
@@ -188,7 +196,16 @@ function ConversionToUsd({
               </LoadingButton>
             </Box>
           </Title>
-          {paymentPlan.unoreExchangeRateUnavailable && (
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {ownerType === 'instruction'
+              ? t(
+                  'This exchange rate applies to all plans in this Follow-Up Instruction.',
+                )
+              : t(
+                  'This exchange rate applies to all plans in this Payment Plan Group.',
+                )}
+          </Typography>
+          {owner.unoreExchangeRateUnavailable && (
             <Box
               sx={{
                 mb: 3,
@@ -200,6 +217,11 @@ function ConversionToUsd({
                 )}
               </Alert>
             </Box>
+          )}
+          {owner.backgroundActionStatus === 'RECALCULATING_ERROR' && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {t('Exchange rate recalculation failed. Please try again.')}
+            </Alert>
           )}
           <RadioGroup
             value={selectedOption}
@@ -241,7 +263,7 @@ function ConversionToUsd({
                 slotProps={{
                   htmlInput: {
                     step: '0.00000001',
-                    min: '0',
+                    min: '0.00000001',
                     readOnly: isCustomExchangeRateReadOnly,
                   },
                 }}

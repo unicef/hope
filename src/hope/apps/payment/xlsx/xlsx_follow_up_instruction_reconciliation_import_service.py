@@ -39,6 +39,8 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
     def __init__(self, instruction: FollowUpInstruction, file: IO[bytes]) -> None:
         self.instruction = instruction
         self.file = file
+        self.exchange_rate = Decimal(instruction.exchange_rate or 0)
+        self.currency_exchange_date = instruction.currency_exchange_date
         self.errors: list[XlsxError] = []
         self.required_columns = [self.HOUSEHOLD_IDENTIFIER_HEADER, "delivered_quantity"]
         self.xlsx_headers: list[str] = []
@@ -245,8 +247,8 @@ class XlsxFollowUpInstructionReconciliationImportService(XlsxImportBaseService):
             delivered_quantity_usd = get_quantity_in_usd(
                 amount=delivered_quantity_value,
                 currency=payment.currency,
-                exchange_rate=Decimal(payment.parent.exchange_rate or 0),
-                currency_exchange_date=payment.parent.currency_exchange_date,
+                exchange_rate=self.exchange_rate,
+                currency_exchange_date=self.currency_exchange_date,
             )
             if (
                 payment.delivered_quantity != delivered_quantity_value

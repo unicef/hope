@@ -21,7 +21,6 @@ from extras.test_utils.factories import (
     PaymentVerificationSummaryFactory,
     ProgramFactory,
     RuleCommitFactory,
-    TargetingCriteriaRuleFactory,
     UserFactory,
 )
 from hope.apps.account.permissions import Permissions
@@ -84,7 +83,7 @@ def attacker_purpose(attacker_payment_plan: PaymentPlan) -> PaymentPlanPurpose:
 
 @pytest.fixture
 def victim_document(victim_payment_plan: PaymentPlan) -> PaymentPlanSupportingDocument:
-    return PaymentPlanSupportingDocumentFactory(payment_plan=victim_payment_plan)
+    return PaymentPlanSupportingDocumentFactory(payment_plan_group=victim_payment_plan.payment_plan_group)
 
 
 @pytest.fixture
@@ -167,10 +166,10 @@ def test_download_supporting_document_without_permission_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-download",
+        "api:payments:payment-plan-group-supporting-documents-download",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_document.payment_plan.id),
+            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -186,10 +185,10 @@ def test_download_supporting_document_from_other_business_area_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-download",
+        "api:payments:payment-plan-group-supporting-documents-download",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_document.payment_plan.id),
+            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -205,10 +204,10 @@ def test_delete_supporting_document_from_other_business_area_is_denied(
     victim_document: PaymentPlanSupportingDocument,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-detail",
+        "api:payments:payment-plan-group-supporting-documents-detail",
         kwargs={
             **cross_ba_kwargs,
-            "payment_plan_pk": str(victim_document.payment_plan.id),
+            "payment_plan_group_pk": str(victim_document.payment_plan_group.id),
             "file_id": str(victim_document.id),
         },
     )
@@ -226,14 +225,14 @@ def test_upload_supporting_document_to_other_business_area_is_denied(
     upload_file: SimpleUploadedFile,
 ) -> None:
     url = reverse(
-        "api:payments:supporting-documents-list",
-        kwargs={**cross_ba_kwargs, "payment_plan_pk": str(victim_payment_plan.id)},
+        "api:payments:payment-plan-group-supporting-documents-list",
+        kwargs={**cross_ba_kwargs, "payment_plan_group_pk": str(victim_payment_plan.payment_plan_group.id)},
     )
 
     response = api_client.post(url, {"title": "cross ba", "file": upload_file}, format="multipart")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
-    assert not victim_payment_plan.documents.exists()
+    assert not victim_payment_plan.payment_plan_group.documents.exists()
 
 
 def test_retrieve_payment_plan_from_other_business_area_is_denied(
@@ -336,7 +335,6 @@ def test_create_payment_plan_from_other_business_area_target_population_is_denie
             "target_population_id": str(victim_target_population.id),
             "dispersion_start_date": "2050-01-01",
             "dispersion_end_date": "2050-02-01",
-            "currency": "PLN",
         },
         format="json",
     )
@@ -605,45 +603,26 @@ def victim_fsp(victim_business_area: BusinessArea) -> Any:
     return fsp
 
 
-def test_create_target_population_with_fsp_of_other_business_area_is_denied(
+def test_create_payment_plan_group_with_fsp_of_other_business_area_is_denied(
     api_client: APIClient,
     cross_ba_kwargs: dict[str, str],
     attacker_payment_plan: PaymentPlan,
-    attacker_purpose: PaymentPlanPurpose,
     victim_fsp: Any,
 ) -> None:
-    household = HouseholdFactory(
-        business_area=attacker_payment_plan.business_area,
-        program=attacker_payment_plan.program,
-        create_role=False,
-    )
-    url = reverse("api:payments:target-populations-list", kwargs=cross_ba_kwargs)
+    url = reverse("api:payments:payment-plan-groups-list", kwargs=cross_ba_kwargs)
 
     response = api_client.post(
         url,
         {
-            "name": "target population with a foreign fsp",
-            "program_cycle_id": str(attacker_payment_plan.program_cycle.id),
-            "payment_plan_group_id": str(PaymentPlanGroupFactory(cycle=attacker_payment_plan.program_cycle).id),
-            "payment_plan_purposes": [str(attacker_purpose.id)],
-            "fsp_id": str(victim_fsp.id),
-            "delivery_mechanism_code": victim_fsp.delivery_mechanisms.first().code,
-            "rules": [
-                {
-                    "household_filters_blocks": [],
-                    "household_ids": household.unicef_id,
-                    "individual_ids": "",
-                    "individuals_filters_blocks": [],
-                }
-            ],
-            "flag_exclude_if_on_sanction_list": False,
-            "flag_exclude_if_active_adjudication_ticket": False,
+            "name": "group with a foreign fsp",
+            "cycle": str(attacker_payment_plan.program_cycle.id),
+            "financial_service_provider": str(victim_fsp.id),
         },
         format="json",
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
-    assert not PaymentPlan.objects.filter(name="target population with a foreign fsp").exists()
+    assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
+    assert not PaymentPlanGroup.objects.filter(name="group with a foreign fsp").exists()
 
 
 @pytest.fixture
@@ -679,48 +658,6 @@ def test_move_target_population_into_cycle_of_other_business_area_is_denied(
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
     attacker_target_population.refresh_from_db()
     assert attacker_target_population.program_cycle_id == own_cycle_id
-
-
-def test_update_target_population_with_fsp_of_other_business_area_keeps_the_old_rules(
-    api_client: APIClient,
-    cross_ba_kwargs: dict[str, str],
-    attacker_payment_plan: PaymentPlan,
-    attacker_target_population: PaymentPlan,
-    victim_fsp: Any,
-) -> None:
-    """The foreign fsp is rejected after the rules are rewritten, so the whole update must roll back."""
-    old_rule = TargetingCriteriaRuleFactory(payment_plan=attacker_target_population, household_ids="HH-0000001")
-    household = HouseholdFactory(
-        business_area=attacker_payment_plan.business_area,
-        program=attacker_payment_plan.program,
-        create_role=False,
-    )
-    url = reverse(
-        "api:payments:target-populations-detail",
-        kwargs={**cross_ba_kwargs, "pk": str(attacker_target_population.id)},
-    )
-
-    response = api_client.patch(
-        url,
-        {
-            "fsp_id": str(victim_fsp.id),
-            "delivery_mechanism_code": victim_fsp.delivery_mechanisms.first().code,
-            "rules": [
-                {
-                    "household_filters_blocks": [],
-                    "household_ids": household.unicef_id,
-                    "individual_ids": "",
-                    "individuals_filters_blocks": [],
-                }
-            ],
-        },
-        format="json",
-    )
-
-    assert response.status_code == status.HTTP_404_NOT_FOUND, response.status_code
-    assert list(attacker_target_population.rules.values_list("id", flat=True)) == [old_rule.id]
-    attacker_target_population.refresh_from_db()
-    assert attacker_target_population.financial_service_provider is None
 
 
 @pytest.fixture

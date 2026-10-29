@@ -6,8 +6,8 @@ import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceP
 import { GreyInfoCard } from './GreyInfoCard';
 import { UniversalMoment } from '@core/UniversalMoment';
 import type { ReactElement } from 'react';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
+import type { AcceptanceProcessClosure } from './AcceptanceProcess';
 import { responsiveValue, ResponsiveGrid } from 'src/responsive';
 
 const StyledBox = styled(Box)`
@@ -23,13 +23,15 @@ const GreyBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
-  paymentPlan: PaymentPlanDetail;
+  acceptanceProcess: ApprovalProcess;
+  closure: AcceptanceProcessClosure | null;
+  showDivider: boolean;
 }
 
 export function AcceptanceProcessRow({
   acceptanceProcess,
-  paymentPlan,
+  closure,
+  showDivider,
 }: AcceptanceProcessRowProps): ReactElement {
   const { t } = useTranslation();
   const {
@@ -42,8 +44,6 @@ export function AcceptanceProcessRow({
     sentForFinanceReleaseBy,
     rejectedOn,
   } = acceptanceProcess;
-
-  const { approvalProcess } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
     switch (stage) {
@@ -59,8 +59,6 @@ export function AcceptanceProcessRow({
     }
   };
 
-  const isClosed = paymentPlan.status === PaymentPlanStatusEnum.CLOSED;
-
   return (
     <StyledBox
       sx={{
@@ -69,7 +67,7 @@ export function AcceptanceProcessRow({
     >
       <AcceptanceProcessStepper
         acceptanceProcess={acceptanceProcess}
-        paymentPlan={paymentPlan}
+        isClosed={!!closure}
       />
       <Grid container>
         <ResponsiveGrid size="quarter">
@@ -103,7 +101,7 @@ export function AcceptanceProcessRow({
           )}
         </ResponsiveGrid>
         <ResponsiveGrid size="quarter">
-          {isClosed && (
+          {closure && (
             <Box
               sx={{
                 display: 'flex',
@@ -119,7 +117,7 @@ export function AcceptanceProcessRow({
                   p: 3,
                 }}
               >
-                {t('Closed by')} {paymentPlan.closedBy}
+                {t('Closed by')} {closure.closedBy}
                 <Box
                   sx={{
                     ml: 1,
@@ -127,7 +125,7 @@ export function AcceptanceProcessRow({
                 >
                   <GreyText>
                     {t('on')}{' '}
-                    <UniversalMoment>{paymentPlan.statusDate}</UniversalMoment>
+                    <UniversalMoment>{closure.closedDate}</UniversalMoment>
                   </GreyText>
                 </Box>
               </GreyBox>
@@ -146,7 +144,7 @@ export function AcceptanceProcessRow({
           </Grid>
         )}
       </Grid>
-      {approvalProcess.length > 1 && <DividerLine />}
+      {showDivider && <DividerLine />}
     </StyledBox>
   );
 }

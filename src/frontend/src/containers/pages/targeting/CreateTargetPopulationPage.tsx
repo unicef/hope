@@ -58,7 +58,6 @@ const CreateTargetPopulationPage = (): ReactElement => {
     individualIds: '',
     alternativeCollectorsIds: '',
     deliveryMechanism: '',
-    fsp: '',
     paymentPlanPurposes: [] as string[],
   };
   const queryClient = useQueryClient();
@@ -134,12 +133,11 @@ const CreateTargetPopulationPage = (): ReactElement => {
       value: Yup.string().required('Programme Cycle is required'),
     }),
     paymentPlanGroupId: Yup.object().shape({
-      value: Yup.string().required('Payment Plan Group is required'),
+      value: Yup.string().required('Payment Plan is required'),
     }),
   });
 
   const handleSubmit = async (values: any): Promise<void> => {
-    const fsp = values.criterias[0]?.fsp || null;
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
       programCycleId: values.programCycleId.value,
@@ -147,7 +145,6 @@ const CreateTargetPopulationPage = (): ReactElement => {
       name: values.name,
       excludedIds: values.excludedIds,
       exclusionReason: values.exclusionReason,
-      fspId: fsp,
       deliveryMechanismCode: deliveryMechanism,
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
@@ -312,6 +309,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                       screenBeneficiary={screenBeneficiary}
                       isStandardDctType={isStandardDctType}
                       isSocialDctType={isSocialDctType}
+                      paymentPlanGroupId={values.paymentPlanGroupId?.value}
                       isEdit
                     />
                   )}

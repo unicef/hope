@@ -45,7 +45,7 @@ export function FollowUpPaymentPlanDetails({
         <OverviewContainer>
           <ResponsiveGridContainer spacing={6}>
             <ResponsiveGrid size="quarter" mobileSize="half">
-              <LabelizedField label={t('Main Payment Plan')}>
+              <LabelizedField label={t('Main Payment Plan Component')}>
                 <BlackLink
                   to={`/${baseUrl}/payment-module/payment-plans/${sourcePaymentPlanId}`}
                 >

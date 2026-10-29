@@ -7,7 +7,7 @@ from hope.contrib.vision.models import FundsCommitmentHeader
 from hope.models import AcceptanceProcessThreshold, FinancialServiceProviderXlsxTemplate
 
 if TYPE_CHECKING:
-    from hope.models import PaymentPlan, PaymentPlanGroup
+    from hope.models import PaymentPlanGroup
 
 
 class VisionFundsCommitmentHeaderAssignmentForm(forms.Form):
@@ -16,10 +16,10 @@ class VisionFundsCommitmentHeaderAssignmentForm(forms.Form):
         label="Funds Commitment Headers",
     )
 
-    def __init__(self, *args: Any, payment_plan: "PaymentPlan", **kwargs: Any) -> None:
+    def __init__(self, *args: Any, payment_plan_group: "PaymentPlanGroup", **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         headers = (
-            FundsCommitmentHeader.objects.filter(funds_commitment_items__office=payment_plan.business_area)
+            FundsCommitmentHeader.objects.filter(funds_commitment_items__office=payment_plan_group.business_area)
             .distinct()
             .order_by("funds_commitment_number")
         )
@@ -44,21 +44,9 @@ class AcceptanceProcessThresholdForm(forms.ModelForm):
         ]
 
 
-class BatchReexportForm(forms.Form):
-    export_tag = forms.ChoiceField(choices=[], label="Batch to re-export")
+class GroupReexportForm(forms.Form):
     template = forms.ModelChoiceField(
         queryset=FinancialServiceProviderXlsxTemplate.objects.all(),
         required=False,
         label="FSP XLSX Template (optional override)",
     )
-
-    def __init__(self, *args: Any, payment_plan_group: "PaymentPlanGroup | None" = None, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        if payment_plan_group is not None:
-            tags = (
-                payment_plan_group.payment_plans.filter(export_tag__isnull=False)
-                .values_list("export_tag", flat=True)
-                .distinct()
-                .order_by("export_tag")
-            )
-            self.fields["export_tag"].choices = [(t, f"Batch {t}") for t in tags]

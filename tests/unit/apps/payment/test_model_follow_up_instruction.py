@@ -1,8 +1,11 @@
+from datetime import date
 from decimal import Decimal
 
 import pytest
 
 from extras.test_utils.factories import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
@@ -16,7 +19,7 @@ from extras.test_utils.factories import (
     UserFactory,
 )
 from hope.apps.payment.flows import FollowUpInstructionFlow
-from hope.models import FollowUpInstruction, PaymentPlan
+from hope.models import Approval, FollowUpInstruction, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -56,6 +59,39 @@ def fsp(delivery_mechanism):
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.add(delivery_mechanism)
     return fsp
+
+
+@pytest.fixture
+def released_instruction(user, business_area, program, cycle):
+    instruction = FollowUpInstructionFactory(
+        created_by=user,
+        business_area=business_area,
+        program=program,
+        dispersion_end_date=date(2000, 11, 11),
+    )
+    plan = PaymentPlanFactory(
+        program_cycle=cycle,
+        business_area=business_area,
+        follow_up_instruction=instruction,
+        payment_plan_group=None,
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+        status=PaymentPlan.Status.ACCEPTED,
+    )
+    process = ApprovalProcessFactory(follow_up_instruction=instruction)
+    approval = ApprovalFactory(approval_process=process, type=Approval.FINANCE_RELEASE)
+    return instruction, plan, approval
+
+
+def test_instruction_currency_exchange_date_uses_finance_release(released_instruction, django_assert_num_queries):
+    instruction, plan, approval = released_instruction
+
+    with django_assert_num_queries(3):
+        instruction_exchange_date = instruction.currency_exchange_date
+    with django_assert_num_queries(3):
+        plan_exchange_date = plan.currency_exchange_date
+
+    assert instruction_exchange_date == approval.created_at.date()
+    assert plan_exchange_date == instruction_exchange_date
 
 
 def test_follow_up_instruction_status_uses_child_payment_plan_precedence(
@@ -227,3 +263,36 @@ def test_follow_up_instruction_flow_xlsx_import_error_from_importing_reconciliat
     )
     FollowUpInstructionFlow(instruction).background_action_status_xlsx_import_error()
     assert instruction.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR
+
+
+@pytest.fixture
+def recalculation_failed_instruction() -> FollowUpInstruction:
+    return FollowUpInstructionFactory(
+        background_action_status=FollowUpInstruction.BackgroundActionStatus.RECALCULATING_ERROR
+    )
+
+
+def test_follow_up_instruction_flow_can_export_after_recalculation_error(
+    recalculation_failed_instruction: FollowUpInstruction, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(0):
+        FollowUpInstructionFlow(recalculation_failed_instruction).background_action_status_xlsx_exporting()
+
+    assert (
+        recalculation_failed_instruction.background_action_status
+        == FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING
+    )
+
+
+def test_follow_up_instruction_flow_can_import_after_recalculation_error(
+    recalculation_failed_instruction: FollowUpInstruction, django_assert_num_queries
+) -> None:
+    with django_assert_num_queries(0):
+        FollowUpInstructionFlow(
+            recalculation_failed_instruction
+        ).background_action_status_xlsx_importing_reconciliation()
+
+    assert (
+        recalculation_failed_instruction.background_action_status
+        == FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION
+    )

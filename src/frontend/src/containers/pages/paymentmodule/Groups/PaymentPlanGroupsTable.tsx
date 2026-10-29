@@ -8,19 +8,22 @@ import { usePersistedCount } from '@hooks/usePersistedCount';
 import type { CountResponse } from '@restgenerated/models/CountResponse';
 import type { PaginatedPaymentPlanGroupListList } from '@restgenerated/models/PaginatedPaymentPlanGroupListList';
 import type { PaymentPlanGroupList } from '@restgenerated/models/PaymentPlanGroupList';
+import type { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentPlanGroupsTableProps {
-  filter?: { search?: string; cycle?: string };
+  filter?: { search?: string; cycle?: string; status?: string[] };
 }
 
 export const PaymentPlanGroupsTable = ({
   filter,
 }: PaymentPlanGroupsTableProps): ReactElement => {
+  const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const filterVariables = useMemo(
     () => ({
@@ -28,8 +31,11 @@ export const PaymentPlanGroupsTable = ({
       programCode: programId,
       search: filter?.search || undefined,
       cycle: filter?.cycle || undefined,
+      status: filter?.status?.length
+        ? (filter.status as PaymentPlanGroupStatusEnum[])
+        : undefined,
     }),
-    [businessArea, programId, filter?.search, filter?.cycle],
+    [businessArea, programId, filter?.search, filter?.cycle, filter?.status],
   );
   const table = useTableState({ resetPageOn: filterVariables });
   const { page } = table;
@@ -68,7 +74,7 @@ export const PaymentPlanGroupsTable = ({
 
   return (
     <UniversalRestTable
-      title="Groups"
+      title={t('Payment Plans')}
       headCells={headCells}
       tableState={table}
       data={data}

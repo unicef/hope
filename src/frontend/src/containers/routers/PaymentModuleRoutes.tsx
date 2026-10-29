@@ -1,16 +1,12 @@
 import { useRoutes, Navigate } from 'react-router-dom';
-import EditFollowUpPaymentPlanPage from '@containers/pages/paymentmodule/EditFollowUpPaymentPlanPage';
-import EditPaymentPlanPage from '@containers/pages/paymentmodule/EditPaymentPlanPage';
 import FollowUpPaymentPlanDetailsPage from '@containers/pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import PaymentDetailsPage from '@containers/pages/paymentmodule/PaymentDetailsPage';
-import PaymentModulePage from '@containers/pages/paymentmodule/PaymentModulePage';
 import CreatePaymentPlanPage from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
 import PaymentPlanDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
 import ProgramCycleDetailsPage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsPage';
 import ProgramCyclePage from '@containers/pages/paymentmodule/ProgramCycle/ProgramCyclePage';
 import PaymentPlanGroupsPage from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupsPage';
 import PaymentPlanGroupDetailsPage from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsPage';
-import BatchDetailsPage from '@containers/pages/paymentmodule/Groups/BatchDetailsPage';
 import FollowUpInstructionListPage from '@containers/pages/paymentmodule/FollowUpInstructionListPage';
 import FollowUpInstructionDetailsPage from '@containers/pages/paymentmodule/FollowUpInstructionDetailsPage';
 import type { ReactElement } from 'react';
@@ -22,7 +18,7 @@ export const PaymentModuleRoutes = (): ReactElement => {
       children: [
         {
           path: '',
-          element: <PaymentModulePage />,
+          element: <Navigate to="../groups" replace />,
         },
         {
           path: ':paymentPlanId',
@@ -30,10 +26,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
             {
               path: '',
               element: <PaymentPlanDetailsPage />,
-            },
-            {
-              path: 'edit',
-              element: <EditPaymentPlanPage />,
             },
           ],
         },
@@ -46,10 +38,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
           path: '',
           element: <FollowUpPaymentPlanDetailsPage />,
         },
-        {
-          path: 'edit',
-          element: <EditFollowUpPaymentPlanPage />,
-        },
       ],
     },
     {
@@ -58,10 +46,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
         {
           path: '',
           element: <FollowUpPaymentPlanDetailsPage />,
-        },
-        {
-          path: 'edit',
-          element: <EditFollowUpPaymentPlanPage />,
         },
       ],
     },
@@ -82,10 +66,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
             {
               path: '',
               element: <PaymentPlanGroupDetailsPage />,
-            },
-            {
-              path: 'batches/:tag',
-              element: <BatchDetailsPage />,
             },
           ],
         },
@@ -135,10 +115,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
                     {
                       path: '',
                       element: <PaymentPlanDetailsPage />,
-                    },
-                    {
-                      path: 'edit',
-                      element: <EditPaymentPlanPage />,
                     },
                   ],
                 },

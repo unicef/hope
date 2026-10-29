@@ -129,7 +129,7 @@ class PaymentPlanCallbackAckSerializer(serializers.Serializer):
         return {vision_callback_external_field_name(field_name): value for field_name, value in data.items()}
 
 
-class PaymentPlanPayloadSerializer(serializers.Serializer):
+class PaymentPlanGroupPayloadSerializer(serializers.Serializer):
     business_area = serializers.CharField(source="business_area.code")
     vendor_number = serializers.CharField(source="financial_service_provider.vision_vendor_number")
     payplan_sno = serializers.CharField(source="unicef_id")

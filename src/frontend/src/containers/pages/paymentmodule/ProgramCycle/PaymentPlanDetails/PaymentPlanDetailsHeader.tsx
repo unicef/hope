@@ -1,16 +1,10 @@
-import { AcceptedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
-import { FinishedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/FinishedPaymentPlanHeaderButtons';
-import { ReadyForClosurePaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/ReadyForClosurePaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
-import { InAuthorizationPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
-import { InReviewPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
-import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
 import type { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import {
@@ -21,7 +15,6 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
-import { AbortedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AbortedPaymentPlanHeaderButtons';
 import { responsiveValue } from 'src/responsive';
 
 interface PaymentPlanDetailsHeaderProps {
@@ -33,9 +26,9 @@ export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
-  const visionManaged = paymentPlan.visionManaged;
   const { isInstructionManaged } = paymentPlan;
   const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
@@ -56,45 +49,16 @@ export const PaymentPlanDetailsHeader = ({
     });
   }
 
+  if (paymentPlan.paymentPlanGroup) {
+    breadCrumbsItems.push({
+      title: paymentPlan.paymentPlanGroup.name,
+      to: `/${baseUrl}/payment-module/groups/${paymentPlan.paymentPlanGroup.id}`,
+    });
+  }
+
   const canRemove =
     hasPermissions(PERMISSIONS.PM_CREATE, permissions) && paymentPlan.canDelete;
-  const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canLock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-  const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
-  const canSendForApproval = hasPermissions(
-    PERMISSIONS.PM_SEND_FOR_APPROVAL,
-    permissions,
-  );
-  const canApprove = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-    permissions,
-  );
-  const canAuthorize = hasPermissions(
-    PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-    permissions,
-  );
-  const canMarkAsReleased =
-    hasPermissions(
-      PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-      permissions,
-    ) && !visionManaged;
-  const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway &&
-    !visionManaged;
-
-  const canClose = hasPermissions(PERMISSIONS.PM_CLOSE_FINISHED, permissions);
-  const canMarkReadyForClosure = hasPermissions(
-    PERMISSIONS.PM_MARK_READY_FOR_CLOSURE,
-    permissions,
-  );
-  const canAbort = hasPermissions(PERMISSIONS.PM_ABORT, permissions);
-  const canReactivate = hasPermissions(
-    PERMISSIONS.PM_REACTIVATE_ABORT,
-    permissions,
-  );
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -103,7 +67,6 @@ export const PaymentPlanDetailsHeader = ({
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canRemove={canRemove}
-          canEdit={canEdit}
           canLock={canLock}
         />
       );
@@ -113,100 +76,11 @@ export const PaymentPlanDetailsHeader = ({
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}
-          permissions={permissions}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.LOCKED_FSP:
-      buttons = isInstructionManaged ? null : (
-        <LockedFspPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canUnlock={canUnlock}
-          canSendForApproval={canSendForApproval}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.IN_APPROVAL:
-      buttons = isInstructionManaged ? null : (
-        <InApprovalPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReject={hasPermissions(
-            PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-            permissions,
-          )}
-          canApprove={canApprove}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.IN_AUTHORIZATION:
-      buttons = isInstructionManaged ? null : (
-        <InAuthorizationPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReject={hasPermissions(
-            PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            permissions,
-          )}
-          canAuthorize={canAuthorize}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.IN_REVIEW:
-      buttons = isInstructionManaged ? null : (
-        <InReviewPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReject={hasPermissions(
-            PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            permissions,
-          )}
-          canMarkAsReleased={canMarkAsReleased}
-          canAbort={canAbort}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.ACCEPTED:
-      buttons = (
-        <AcceptedPaymentPlanHeaderButtons
-          isInstructionManaged={isInstructionManaged}
-          canSplit={canSplit}
-          paymentPlan={paymentPlan}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.FINISHED:
-      buttons = (
-        <FinishedPaymentPlanHeaderButtons
-          isInstructionManaged={isInstructionManaged}
-          canSendToPaymentGateway={canSendToPaymentGateway}
-          canSplit={canSplit}
-          paymentPlan={paymentPlan}
-          canMarkReadyForClosure={canMarkReadyForClosure}
-        />
-      );
-      break;
-    case PaymentPlanStatusEnum.READY_FOR_CLOSURE:
-      buttons = (
-        <ReadyForClosurePaymentPlanHeaderButtons
-          isInstructionManaged={isInstructionManaged}
-          paymentPlan={paymentPlan}
-          canSendBack={canMarkReadyForClosure}
-          canClose={canClose}
         />
       );
       break;
     case PaymentPlanStatusEnum.CLOSED:
       buttons = null;
-      break;
-    case PaymentPlanStatusEnum.ABORTED:
-      buttons = isInstructionManaged ? null : (
-        <AbortedPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
-          canReactivate={canReactivate}
-        />
-      );
       break;
     default:
       break;
@@ -223,7 +97,7 @@ export const PaymentPlanDetailsHeader = ({
             alignItems: 'center',
           }}
         >
-          {t('Payment Plan')} ID:{' '}
+          {t('Payment Plan Component')} ID:{' '}
           <Box
             sx={{
               ml: 1,

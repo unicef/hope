@@ -18,6 +18,7 @@ CREATE_PERMISSIONS = (
     Permissions.TARGETING_VIEW_DETAILS,
     Permissions.TARGETING_CREATE,
     Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+    Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
 )
 
@@ -150,6 +151,7 @@ def test_exclude_household_id_in_standard_programme(
         Permissions.TARGETING_VIEW_DETAILS,
         Permissions.TARGETING_UPDATE,
         Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_LIST,
+        Permissions.PM_PAYMENT_PLAN_GROUP_VIEW_DETAIL,
     ):
         browser.login(username="noperm_user")
         browser.open(f"/{business_area.slug}/programs/{program.code}/target-population/edit-tp/{built_tp.id}")

@@ -1,4 +1,8 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import { ExportInstructionSummaryPdfButton } from '@containers/pages/paymentmodule/FollowUpInstructions/actions/ExportInstructionSummaryPdfButton';
 import { ChildPaymentPlansTable } from '@containers/pages/paymentmodule/FollowUpInstructions/ChildPaymentPlansTable';
 import { FollowUpInstructionDetailsHeader } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionDetailsHeader';
 import { FollowUpInstructionSummary } from '@containers/pages/paymentmodule/FollowUpInstructions/FollowUpInstructionSummary';
@@ -8,25 +12,28 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
-import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { FollowUpInstructionBackgroundActionStatusEnum } from '@restgenerated/models/FollowUpInstructionBackgroundActionStatusEnum';
 import type { FollowUpInstructionDetail } from '@restgenerated/models/FollowUpInstructionDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import { isPermissionDeniedError } from '@utils/utils';
-import type { ReactElement } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const errorStatuses = [
-  PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
-  PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+  FollowUpInstructionBackgroundActionStatusEnum.RECALCULATING_ERROR,
+  FollowUpInstructionBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+  FollowUpInstructionBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
 ];
 
 const FollowUpInstructionDetailsPage = (): ReactElement => {
   const { instructionId } = useParams<{ instructionId: string }>();
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+  const wasRateRecalculating = useRef(false);
 
   const {
     data: instruction,
@@ -52,9 +59,7 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
       const data = query.state.data;
       if (
         data?.backgroundActionStatus &&
-        !errorStatuses.includes(
-          data.backgroundActionStatus as PaymentPlanBackgroundActionStatusEnum,
-        )
+        !errorStatuses.includes(data.backgroundActionStatus)
       ) {
         return 3000;
       }
@@ -62,6 +67,20 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
     },
     refetchIntervalInBackground: true,
   });
+
+  useEffect(() => {
+    const rateRecalculating =
+      instruction?.backgroundActionStatus ===
+      FollowUpInstructionBackgroundActionStatusEnum.RECALCULATING;
+    if (wasRateRecalculating.current && !rateRecalculating) {
+      queryClient.invalidateQueries({
+        queryKey: restQueryKey(
+          RestService.restBusinessAreasProgramsPaymentPlansList,
+        ),
+      });
+    }
+    wasRateRecalculating.current = rateRecalculating;
+  }, [instruction, queryClient]);
 
   if (isLoading) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -98,6 +117,30 @@ const FollowUpInstructionDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <FollowUpInstructionSummary instruction={instruction} />
+      <ConversionToUsd
+        owner={instruction}
+        ownerType="instruction"
+        permissions={permissions}
+      />
+      <AcceptanceProcess
+        approvalProcess={instruction.approvalProcess}
+        closure={
+          instruction.status === 'CLOSED'
+            ? {
+                closedBy: instruction.closedBy,
+                closedDate: instruction.updatedAt,
+              }
+            : null
+        }
+        headerAction={
+          <ExportInstructionSummaryPdfButton instruction={instruction} />
+        }
+      />
+      <SupportingDocumentsSection
+        key={instruction.id}
+        ownerPath={`follow-up-instructions/${instruction.id}`}
+        supportingDocuments={instruction.supportingDocuments}
+      />
       <ChildPaymentPlansTable paymentPlans={instruction.paymentPlans} />
     </Box>
   );

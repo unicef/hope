@@ -1,18 +1,22 @@
 from decimal import Decimal
 import io
 from typing import Any, Callable
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from flags.models import FlagState
 import openpyxl
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
+    ApprovalFactory,
     ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
     DeliveryMechanismFactory,
+    FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FollowUpInstructionFactory,
@@ -72,7 +76,9 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
     client = api_client(user)
     cycle = ProgramCycleFactory(program=program)
     currency = CurrencyFactory(code="USD")
-    instruction = FollowUpInstructionFactory(program=program, business_area=business_area, created_by=user)
+    instruction = FollowUpInstructionFactory(
+        program=program, business_area=business_area, created_by=user, exchange_rate=Decimal("1.00")
+    )
     return {
         "business_area": business_area,
         "user": user,
@@ -82,6 +88,27 @@ def follow_up_context(api_client: Callable, business_area: Any) -> dict[str, Any
         "currency": currency,
         "instruction": instruction,
     }
+
+
+@pytest.fixture
+def vision_enabled_follow_up_review_context(follow_up_context: dict[str, Any]) -> dict[str, Any]:
+    FlagState.objects.update_or_create(
+        name="VISION_INTEGRATION_ACTIVE",
+        condition="boolean",
+        defaults={"value": "True"},
+    )
+    business_area = follow_up_context["business_area"]
+    business_area.vision_integration_active = True
+    business_area.save(update_fields=["vision_integration_active"])
+    instruction = follow_up_context["instruction"]
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.IN_REVIEW,
+        follow_up_instruction=instruction,
+        program_cycle=follow_up_context["cycle"],
+        currency=follow_up_context["currency"],
+    )
+    ApprovalProcessFactory(follow_up_instruction=instruction)
+    return {**follow_up_context, "payment_plan": payment_plan}
 
 
 @pytest.fixture
@@ -239,7 +266,7 @@ def test_follow_up_instruction_reject(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-reject",
         kwargs={
@@ -403,6 +430,39 @@ def test_follow_up_instruction_abort(
     assert response.status_code == status.HTTP_200_OK
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.ABORTED
+
+
+@pytest.fixture
+def locked_instruction_plan(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        follow_up_instruction=follow_up_context["instruction"],
+        program_cycle=follow_up_context["cycle"],
+        currency=follow_up_context["currency"],
+    )
+
+
+def test_follow_up_instruction_abort_with_2000_character_comment_keeps_the_comment(
+    follow_up_context: dict[str, Any],
+    locked_instruction_plan: PaymentPlan,
+    create_user_role_with_permissions: Any,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_ABORT], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-abort",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url, {"abort_comment": "a" * 2000}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    ctx["instruction"].refresh_from_db()
+    assert ctx["instruction"].abort_comment == "a" * 2000
 
 
 def test_follow_up_instruction_reactivate_abort(
@@ -628,7 +688,7 @@ def test_follow_up_instruction_approve(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-approve",
         kwargs={
@@ -659,7 +719,7 @@ def test_follow_up_instruction_authorize(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-authorize",
         kwargs={
@@ -690,7 +750,7 @@ def test_follow_up_instruction_mark_as_released(
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
     )
-    ApprovalProcessFactory(payment_plan=pp)
+    ApprovalProcessFactory(follow_up_instruction=ctx["instruction"])
     url = reverse(
         "api:payments:follow-up-instructions-mark-as-released",
         kwargs={
@@ -705,6 +765,30 @@ def test_follow_up_instruction_mark_as_released(
     assert response.status_code == status.HTTP_200_OK
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.ACCEPTED
+
+
+def test_follow_up_instruction_mark_as_released_with_vision_enabled(
+    vision_enabled_follow_up_review_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    ctx = vision_enabled_follow_up_review_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW], ctx["business_area"], ctx["program"]
+    )
+    url = reverse(
+        "api:payments:follow-up-instructions-mark-as-released",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url, {"comment": "released"}, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    ctx["payment_plan"].refresh_from_db()
+    assert ctx["payment_plan"].status == PaymentPlan.Status.ACCEPTED
 
 
 def test_follow_up_instruction_delivery_export_xlsx(
@@ -821,7 +905,6 @@ def test_follow_up_instruction_delivery_import_xlsx(
         delivery_mechanism=delivery_mechanism,
         financial_service_provider=fsp,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
-        exchange_rate=Decimal("1.00"),
     )
     payment = PaymentFactory(
         parent=pp,
@@ -873,7 +956,7 @@ def test_follow_up_instruction_close(
         ctx["user"], [Permissions.PM_CLOSE_FINISHED], ctx["business_area"], ctx["program"]
     )
     pp = PaymentPlanFactory(
-        status=PaymentPlan.Status.FINISHED,
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
         follow_up_instruction=ctx["instruction"],
         program_cycle=ctx["cycle"],
         currency=ctx["currency"],
@@ -890,8 +973,248 @@ def test_follow_up_instruction_close(
         },
     )
 
-    response = ctx["client"].get(url)
+    response = ctx["client"].post(url, {"closure_comment": "no verification needed"}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
     pp.refresh_from_db()
     assert pp.status == PaymentPlan.Status.CLOSED
+    assert response.json()["closure_comment"] == "no verification needed"
+    assert response.json()["closed_by"] == f"{ctx['user'].first_name} {ctx['user'].last_name}"
+
+
+@pytest.fixture
+def finished_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.FINISHED,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+def test_follow_up_instruction_ready_for_closure(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    finished_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_MARK_READY_FOR_CLOSURE], ctx["business_area"], ctx["program"]
+    )
+    url = reverse(
+        "api:payments:follow-up-instructions-ready-for-closure",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["status"] == FollowUpInstruction.Status.READY_FOR_CLOSURE
+    finished_instruction_child.refresh_from_db()
+    assert finished_instruction_child.status == PaymentPlan.Status.READY_FOR_CLOSURE
+
+
+def test_follow_up_instruction_ready_for_closure_requires_permission(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    finished_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_LIST], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-ready-for-closure",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url)
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.fixture
+def ready_for_closure_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.READY_FOR_CLOSURE,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+def test_follow_up_instruction_send_back_to_finished(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    ready_for_closure_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_MARK_READY_FOR_CLOSURE], ctx["business_area"], ctx["program"]
+    )
+    url = reverse(
+        "api:payments:follow-up-instructions-send-back-to-finished",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].post(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    ready_for_closure_instruction_child.refresh_from_db()
+    assert ready_for_closure_instruction_child.status == PaymentPlan.Status.FINISHED
+
+
+@pytest.fixture
+def in_review_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.IN_REVIEW,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+@patch("hope.apps.payment.api.views.export_pdf_follow_up_instruction_summary_async_task")
+def test_follow_up_instruction_export_pdf_queues_the_summary(
+    mock_export: Any,
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    in_review_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_EXPORT_PDF_SUMMARY], ctx["business_area"], ctx["program"]
+    )
+
+    url = reverse(
+        "api:payments:follow-up-instructions-export-pdf-payment-plan-summary",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    mock_export.assert_called_once_with(ctx["instruction"], str(ctx["user"].pk))
+
+
+@pytest.fixture
+def locked_instruction_child(follow_up_context: dict[str, Any]) -> PaymentPlan:
+    ctx = follow_up_context
+    return PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        follow_up_instruction=ctx["instruction"],
+        program_cycle=ctx["cycle"],
+        currency=ctx["currency"],
+        plan_type=PaymentPlan.PlanType.FOLLOW_UP,
+    )
+
+
+def test_follow_up_instruction_export_pdf_outside_review_returns_400(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    locked_instruction_child: PaymentPlan,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(
+        ctx["user"], [Permissions.PM_EXPORT_PDF_SUMMARY], ctx["business_area"], ctx["program"]
+    )
+
+    url = reverse(
+        "api:payments:follow-up-instructions-export-pdf-payment-plan-summary",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": ctx["instruction"].pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Export PDF is possible only within Status IN_REVIEW, ACCEPTED or FINISHED, got LOCKED" in str(
+        response.json()
+    )
+
+
+@pytest.fixture
+def instruction_with_approval(follow_up_context: dict[str, Any], in_review_instruction_child: PaymentPlan) -> Any:
+    approval_process = ApprovalProcessFactory(follow_up_instruction=follow_up_context["instruction"])
+    ApprovalFactory(approval_process=approval_process, comment="approved once")
+    return follow_up_context["instruction"]
+
+
+def test_follow_up_instruction_detail_returns_its_approval_process(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    instruction_with_approval: Any,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_DETAILS], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-detail",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": instruction_with_approval.pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["approval_process"][0]["actions"]["approval"][0]["comment"] == "approved once"
+    assert data["closed_by"] is None
+    assert data["export_pdf_file_summary"] is None
+
+
+@pytest.fixture
+def instruction_with_summary_pdf(follow_up_context: dict[str, Any]) -> Any:
+    instruction = follow_up_context["instruction"]
+    instruction.export_pdf_file_summary = FileTempFactory(
+        file=SimpleUploadedFile("summary.pdf", b"data"), created_by=follow_up_context["user"]
+    )
+    instruction.save(update_fields=["export_pdf_file_summary"])
+    return instruction
+
+
+def test_follow_up_instruction_detail_returns_summary_pdf_url(
+    follow_up_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+    instruction_with_summary_pdf: Any,
+) -> None:
+    ctx = follow_up_context
+    create_user_role_with_permissions(ctx["user"], [Permissions.PM_VIEW_DETAILS], ctx["business_area"], ctx["program"])
+    url = reverse(
+        "api:payments:follow-up-instructions-detail",
+        kwargs={
+            "business_area_slug": ctx["business_area"].slug,
+            "program_code": ctx["program"].code,
+            "pk": instruction_with_summary_pdf.pk,
+        },
+    )
+
+    response = ctx["client"].get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["export_pdf_file_summary"] == instruction_with_summary_pdf.export_pdf_file_summary.file.url

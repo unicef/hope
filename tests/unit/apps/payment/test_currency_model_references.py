@@ -12,7 +12,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.activity_log.utils import create_diff
 from hope.apps.payment.services.payment_household_snapshot_service import create_payment_plan_snapshot_data
-from hope.models import Household, Payment, PaymentPlan
+from hope.models import Household, Payment, PaymentPlan, PaymentPlanGroup
 from hope.models.currency import Currency
 
 pytestmark = pytest.mark.django_db
@@ -177,13 +177,16 @@ def test_payment_signature_survives_redenomination_renaming_the_code(
     assert payment_on_syp01_before_redenomination.signature_hash == signature_before
 
 
-def test_payment_plan_activity_log_diff_reports_currency_code(
+def test_payment_plan_group_activity_log_diff_reports_currency_code(
     payment_plan_usd: PaymentPlan,
     payment_plan_pln: PaymentPlan,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(2):
-        diff = create_diff(payment_plan_usd, payment_plan_pln, PaymentPlan.ACTIVITY_LOG_MAPPING)
+    group_usd = payment_plan_usd.payment_plan_group
+    group_pln = payment_plan_pln.payment_plan_group
+
+    with django_assert_num_queries(0):
+        diff = create_diff(group_usd, group_pln, PaymentPlanGroup.ACTIVITY_LOG_MAPPING)
 
     assert "currency" in diff
     assert diff["currency"]["from"] == "USD"
@@ -196,10 +199,14 @@ def payment_plan_deprecated_syp(deprecated_syp: Currency) -> PaymentPlan:
     return PaymentPlanFactory(currency=deprecated_syp)
 
 
-def test_payment_plan_activity_log_diff_reports_variant_change_within_the_same_code(
+def test_payment_plan_group_activity_log_diff_reports_variant_change_within_the_same_code(
     payment_plan_deprecated_syp: PaymentPlan, payment_plan_syp: PaymentPlan
 ) -> None:
-    diff = create_diff(payment_plan_deprecated_syp, payment_plan_syp, PaymentPlan.ACTIVITY_LOG_MAPPING)
+    diff = create_diff(
+        payment_plan_deprecated_syp.payment_plan_group,
+        payment_plan_syp.payment_plan_group,
+        PaymentPlanGroup.ACTIVITY_LOG_MAPPING,
+    )
 
     assert "currency" not in diff
     assert diff["currency_vision_code"] == {"from": "SYP", "to": "SYP01"}

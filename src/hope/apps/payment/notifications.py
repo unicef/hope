@@ -14,7 +14,7 @@ from hope.apps.payment.xlsx.xlsx_error import XlsxError
 from hope.apps.utils.external_urls import frontend_url
 from hope.apps.utils.mailjet import MailjetClient
 from hope.apps.utils.recipients import users_with_permissions
-from hope.models import PaymentPlan, PaymentPlanGroup, User
+from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup, User
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +127,8 @@ class PaymentNotification:
     ACTION_MARK_READY_FOR_CLOSURE = PaymentPlan.Action.MARK_READY_FOR_CLOSURE.name
     ACTION_SEND_BACK_TO_FINISHED = PaymentPlan.Action.SEND_BACK_TO_FINISHED.name
 
+    PAGE_PATHS = {PaymentPlanGroup: "groups", FollowUpInstruction: "follow-up-instructions"}
+
     ACTION_TO_RECIPIENTS_PERMISSIONS_MAP = {
         ACTION_SEND_FOR_APPROVAL: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
         ACTION_APPROVE: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
@@ -171,12 +173,13 @@ class PaymentNotification:
 
     def __init__(
         self,
-        payment_plan: PaymentPlan,
+        payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
         action: str,
         action_user: User,
         action_date: datetime,
     ) -> None:
         self.payment_plan = payment_plan
+        self.page_path = self.PAGE_PATHS.get(type(payment_plan), "payment-plans")
         self.action = action
         self.action_user = action_user
         self.action_date = action_date
@@ -256,7 +259,7 @@ class PaymentNotification:
             "action_name": self.action_name,
             "payment_plan_url": frontend_url(
                 f"{self.payment_plan.business_area.slug}/programs/"
-                f"{self.payment_plan.program.code}/payment-module/payment-plans/"
+                f"{self.payment_plan.program.code}/payment-module/{self.page_path}/"
                 f"{self.payment_plan.id}"
             ),
             "payment_plan_id": self.payment_plan.unicef_id,

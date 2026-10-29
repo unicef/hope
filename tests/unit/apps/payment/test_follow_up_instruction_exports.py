@@ -13,6 +13,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FollowUpInstructionFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     HouseholdFactory,
     PaymentFactory,
@@ -78,11 +79,14 @@ def fsp(delivery_mechanism):
 
 @pytest.fixture
 def instruction(user, program, business_area):
-    return FollowUpInstruction.objects.create(
+    return FollowUpInstructionFactory(
         business_area=business_area,
         program=program,
         created_by=user,
         background_action_status=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
+        exchange_rate=Decimal("1.00"),
+        dispersion_start_date=None,
+        dispersion_end_date=None,
     )
 
 
@@ -97,7 +101,6 @@ def child_payment_plans(instruction, cycle, business_area, currency, delivery_me
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
     )
     plan_two = PaymentPlanFactory(
         program_cycle=cycle,
@@ -108,7 +111,6 @@ def child_payment_plans(instruction, cycle, business_area, currency, delivery_me
         follow_up_instruction=instruction,
         plan_type=PaymentPlan.PlanType.FOLLOW_UP,
         status=PaymentPlan.Status.ACCEPTED,
-        exchange_rate=Decimal("1.00"),
     )
     return plan_one, plan_two
 
@@ -193,17 +195,17 @@ def delivery_template(fsp, delivery_mechanism):
 
 
 @pytest.fixture
-def child_payment_plans_in_inactive_currency(child_payment_plans, currency_syp_deprecated):
-    PaymentPlan.objects.filter(pk__in=[plan.pk for plan in child_payment_plans]).update(
-        currency=currency_syp_deprecated
-    )
+def child_payment_plans_in_inactive_currency(instruction, child_payment_plans, currency_syp_deprecated):
+    instruction.currency = currency_syp_deprecated
+    instruction.save(update_fields=["currency"])
     return child_payment_plans
 
 
 @pytest.fixture
-def instruction_payments_in_redenominated_currency(instruction_payments, child_payment_plans, currency_syp):
-    """Plans and payments in the active SYP, whose vision_code (SYP01) differs from the ISO code FSPs understand."""
-    PaymentPlan.objects.filter(pk__in=[plan.pk for plan in child_payment_plans]).update(currency=currency_syp)
+def instruction_payments_in_redenominated_currency(instruction, instruction_payments, currency_syp):
+    """Instruction and payments in the active SYP: its vision_code (SYP01) differs from the ISO code FSPs understand."""
+    instruction.currency = currency_syp
+    instruction.save(update_fields=["currency"])
     Payment.objects.filter(pk__in=[payment.pk for payment in instruction_payments]).update(currency=currency_syp)
     return instruction_payments
 
@@ -425,9 +427,8 @@ def test_delivery_export_marks_xlsx_export_error_on_exception(
 
 
 def test_get_source_headers_raises_when_child_plan_has_no_fsp(instruction, child_payment_plans) -> None:
-    plan, _ = child_payment_plans
-    plan.financial_service_provider = None
-    plan.save(update_fields=["financial_service_provider"])
+    instruction.financial_service_provider = None
+    instruction.save(update_fields=["financial_service_provider"])
 
     with pytest.raises(
         ValueError, match="Child Payment Plans must define Financial Service Provider and Delivery Mechanism."

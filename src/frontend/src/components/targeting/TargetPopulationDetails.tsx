@@ -66,7 +66,7 @@ function TargetPopulationDetails({
           <ResponsiveGrid size="third" mobileSize="half">
             <LabelizedField
               dataCy="payment-plan-group-name"
-              label={t('Payment Plan Group')}
+              label={t('Payment Plan')}
               value={targetPopulation.paymentPlanGroup?.name ?? '-'}
             />
           </ResponsiveGrid>

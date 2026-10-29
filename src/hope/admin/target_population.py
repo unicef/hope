@@ -13,7 +13,6 @@ from hope.models import PaymentPlan, TargetPopulation
 # Django appends them back to the form after the form fields are resolved.
 HIDDEN_FIELDS = (
     "follow_up_instruction",
-    "use_payment_gateway",
     "background_action_status",
     "dispersion_start_date",
     "dispersion_end_date",
@@ -28,8 +27,6 @@ HIDDEN_FIELDS = (
     "is_cash_assist",
     "imported_file",
     "export_file_entitlement",
-    "export_file_delivery",
-    "export_pdf_file_summary",
     "reconciliation_import_file",
 )
 

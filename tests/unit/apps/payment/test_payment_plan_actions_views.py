@@ -17,10 +17,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from extras.test_utils.factories import (
-    ApprovalProcessFactory,
     BusinessAreaFactory,
     CurrencyFactory,
-    DeliveryMechanismFactory,
     FileTempFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -30,23 +28,20 @@ from extras.test_utils.factories import (
     PartnerFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanSplitFactory,
     ProgramFactory,
     RuleCommitFactory,
     UserFactory,
 )
-from extras.test_utils.factories.payment import PaymentVerificationPlanFactory, PaymentVerificationSummaryFactory
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanViewSet
 from hope.apps.payment.xlsx.xlsx_error import XlsxError
-from hope.contrib.vision.choices import VisionStatus
 from hope.models import (
     FileTemp,
-    FinancialServiceProvider,
+    FollowUpInstruction,
     LogEntry,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
+    PaymentPlanGroup,
     Program,
     Rule,
 )
@@ -81,6 +76,8 @@ def payment_plan_actions_context(
         created_at=timezone.datetime(2022, 2, 24, tzinfo=dt_timezone.utc),
         currency=currency_pln,
     )
+    pp.payment_plan_group.currency = currency_pln
+    pp.payment_plan_group.save(update_fields=["currency"])
     purpose = pp.payment_plan_purposes.first()
     url_kwargs = {
         "business_area_slug": business_area.slug,
@@ -106,35 +103,19 @@ def payment_plan_actions_context(
         "url_unlock": reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs),
         "url_exclude_hh": reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs),
         "url_apply_steficon": reverse("api:payments:payment-plans-apply-engine-formula", kwargs=url_kwargs),
-        "url_lock_fsp": reverse("api:payments:payment-plans-lock-fsp", kwargs=url_kwargs),
-        "url_unlock_fsp": reverse("api:payments:payment-plans-unlock-fsp", kwargs=url_kwargs),
         "url_export_entitlement_xlsx": reverse("api:payments:payment-plans-entitlement-export-xlsx", kwargs=url_kwargs),
         "url_import_entitlement_xlsx": reverse("api:payments:payment-plans-entitlement-import-xlsx", kwargs=url_kwargs),
         "url_import_entitlement_flat_amount": reverse(
             "api:payments:payment-plans-entitlement-flat-amount", kwargs=url_kwargs
         ),
-        "url_custom_exchange_rate": reverse("api:payments:payment-plans-custom-exchange-rate", kwargs=url_kwargs),
-        "url_send_for_approval": reverse("api:payments:payment-plans-send-for-approval", kwargs=url_kwargs),
-        "url_approval_process_reject": reverse("api:payments:payment-plans-reject", kwargs=url_kwargs),
-        "url_approval_process_approve": reverse("api:payments:payment-plans-approve", kwargs=url_kwargs),
-        "url_approval_process_authorize": reverse("api:payments:payment-plans-authorize", kwargs=url_kwargs),
-        "url_approval_process_mark_as_released": reverse(
-            "api:payments:payment-plans-mark-as-released", kwargs=url_kwargs
+        "url_custom_exchange_rate": reverse(
+            "api:payments:payment-plan-groups-custom-exchange-rate",
+            kwargs={**url_kwargs_ba_program, "pk": pp.payment_plan_group_id},
         ),
-        "url_send_to_payment_gate_way": reverse(
-            "api:payments:payment-plans-send-to-payment-gateway", kwargs=url_kwargs
+        "url_funds_commitments": reverse(
+            "api:payments:payment-plan-groups-assign-funds-commitments",
+            kwargs={**url_kwargs_ba_program, "pk": pp.payment_plan_group_id},
         ),
-        "url_export_pdf_payment_plan_summary": reverse(
-            "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
-        ),
-        "url_pp_split": reverse("api:payments:payment-plans-split", kwargs=url_kwargs),
-        "url_create_follow_up": reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs),
-        "url_funds_commitments": reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs),
-        "url_pp_close": reverse("api:payments:payment-plans-close", kwargs=url_kwargs),
-        "url_pp_ready_for_closure": reverse("api:payments:payment-plans-ready-for-closure", kwargs=url_kwargs),
-        "url_pp_send_back_to_finished": reverse("api:payments:payment-plans-send-back-to-finished", kwargs=url_kwargs),
-        "url_pp_abort": reverse("api:payments:payment-plans-abort", kwargs=url_kwargs),
-        "url_pp_reactivate_abort": reverse("api:payments:payment-plans-reactivate-abort", kwargs=url_kwargs),
     }
 
 
@@ -455,12 +436,7 @@ def test_create_pp(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
-    data = {
-        "dispersion_start_date": "2025-02-01",
-        "dispersion_end_date": "2099-03-01",
-        "currency": "USD",
-        "target_population_id": str(payment_plan_actions_context["pp"].id),
-    }
+    data = {"target_population_id": str(payment_plan_actions_context["pp"].id)}
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
         data,
@@ -471,11 +447,11 @@ def test_create_pp(
     if expected_status == status.HTTP_201_CREATED:
         resp_data = response.json()
         assert "id" in resp_data
-        assert resp_data["currency"] == "USD"
+        assert resp_data["currency"] == "PLN"
         assert resp_data["status"] == "OPEN"
 
 
-def test_create_pp_validation_errors(
+def test_create_pp_rejects_group_without_dispersion_dates(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -485,15 +461,18 @@ def test_create_pp_validation_errors(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
+    PaymentPlanGroup.objects.filter(pk=payment_plan_actions_context["pp"].payment_plan_group_id).update(
+        dispersion_start_date=None, dispersion_end_date=None
+    )
+
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
         {"target_population_id": str(payment_plan_actions_context["pp"].pk)},
         format="json",
     )
+
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "dispersion_start_date" in response.json()
-    assert "dispersion_end_date" in response.json()
-    assert "currency" in response.json()
+    assert "Payment Plan Group needs Dispersion Dates before a Payment Plan can be opened." in response.json()
 
 
 @pytest.mark.parametrize(
@@ -694,9 +673,9 @@ def test_exclude_beneficiaries_validation_errors(
     assert "excluded_households_ids" in response_3.json()
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
+@patch("hope.models.async_job.AsyncRetryJob.queue")
 def test_apply_custom_exchange_rate(
-    mock_delay: Mock,
+    mock_queue: Mock,
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -713,29 +692,51 @@ def test_apply_custom_exchange_rate(
         response = payment_plan_actions_context["client"].post(
             payment_plan_actions_context["url_custom_exchange_rate"],
             {
-                "unore_exchange_rate": "2.00000000",
                 "custom_exchange_rate": "1.25000000",
+                "updated_at": payment_plan_actions_context["pp"].payment_plan_group.updated_at.isoformat(),
             },
             format="json",
         )
 
-    payment_plan_actions_context["pp"].refresh_from_db(
-        fields=[
-            "background_action_status",
-            "custom_exchange_rate",
-            "exchange_rate",
-            "custom_exchange_rate_set_by",
-        ]
+    payment_plan_actions_context["pp"].payment_plan_group.refresh_from_db(
+        fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by", "background_action_status"]
     )
     assert response.status_code == status.HTTP_200_OK
-    assert (
-        payment_plan_actions_context["pp"].background_action_status
-        == PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE
-    )
+    assert payment_plan_actions_context["pp"].payment_plan_group.background_action_status == "RECALCULATING"
     assert payment_plan_actions_context["pp"].custom_exchange_rate is True
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("1.25000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by == payment_plan_actions_context["user"]
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
+    mock_queue.assert_called_once()
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_group_exchange_rate_uses_group_status_even_when_child_plan_is_busy(
+    mock_queue: Mock,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = payment_plan_actions_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    plan = context["pp"]
+    plan.status = PaymentPlan.Status.ACCEPTED
+    plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    plan.save(update_fields=["status", "background_action_status"])
+    group = plan.payment_plan_group
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "updated_at": group.updated_at.isoformat()},
+            format="json",
+        )
+
+    group.refresh_from_db()
+    assert response.status_code == status.HTTP_200_OK
+    assert group.exchange_rate == Decimal("1.25000000")
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.RECALCULATING
+    mock_queue.assert_called_once()
 
 
 def test_apply_custom_exchange_rate_validation_errors(
@@ -748,18 +749,21 @@ def test_apply_custom_exchange_rate_validation_errors(
         payment_plan_actions_context["business_area"],
         payment_plan_actions_context["program_active"],
     )
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = PaymentPlanGroup.Status.LOCKED
+    group.save(update_fields=["status"])
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "unore_exchange_rate": "2.00000000",
             "custom_exchange_rate": "1.25000000",
+            "updated_at": group.updated_at.isoformat(),
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "User can only set custom exchange rate for OPEN/IN_REVIEW Payment Plan" in response.data
+    assert "Exchange rate can be changed only while the group is OPEN or IN_REVIEW" in response.data
 
 
 def test_apply_custom_exchange_rate_requires_one_rate_value(
@@ -778,19 +782,44 @@ def test_apply_custom_exchange_rate_requires_one_rate_value(
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "unore_exchange_rate": None,
-            "custom_exchange_rate": None,
+            "updated_at": payment_plan_actions_context["pp"].payment_plan_group.updated_at.isoformat(),
         },
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.data["non_field_errors"] == ["One of custom_exchange_rate or unore_exchange_rate must be provided."]
+    assert response.data["non_field_errors"] == ["Choose UNORE or provide a positive custom exchange rate."]
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
+@pytest.mark.parametrize("field", ["custom_exchange_rate", "unore_exchange_rate"])
+@pytest.mark.parametrize("rate", ["0", "-1"])
+def test_apply_custom_exchange_rate_rejects_nonpositive_rate(
+    field: str,
+    rate: str,
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    create_user_role_with_permissions(
+        payment_plan_actions_context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        payment_plan_actions_context["business_area"],
+        payment_plan_actions_context["program_active"],
+    )
+    group = payment_plan_actions_context["pp"].payment_plan_group
+
+    response = payment_plan_actions_context["client"].post(
+        payment_plan_actions_context["url_custom_exchange_rate"],
+        {field: rate, "updated_at": group.updated_at.isoformat()},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert field in response.data
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
 def test_apply_unore_exchange_rate_clears_custom_flag(
-    mock_delay: Mock,
+    mock_queue: Mock,
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -801,36 +830,32 @@ def test_apply_unore_exchange_rate_clears_custom_flag(
         payment_plan_actions_context["program_active"],
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_actions_context["pp"].custom_exchange_rate = True
-    payment_plan_actions_context["pp"].exchange_rate = Decimal("1.25000000")
-    payment_plan_actions_context["pp"].custom_exchange_rate_set_by = payment_plan_actions_context["user"]
-    payment_plan_actions_context["pp"].save(
-        update_fields=["status", "custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"]
-    )
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.custom_exchange_rate = True
+    group.exchange_rate = Decimal("1.25000000")
+    group.custom_exchange_rate_set_by = payment_plan_actions_context["user"]
+    group.save(update_fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by"])
+    payment_plan_actions_context["pp"].save(update_fields=["status"])
 
     with TestCase.captureOnCommitCallbacks(execute=True):
         response = payment_plan_actions_context["client"].post(
             payment_plan_actions_context["url_custom_exchange_rate"],
             {
                 "unore_exchange_rate": "2.00000000",
-                "custom_exchange_rate": None,
+                "updated_at": group.updated_at.isoformat(),
             },
             format="json",
         )
 
-    payment_plan_actions_context["pp"].refresh_from_db(
-        fields=[
-            "background_action_status",
-            "custom_exchange_rate",
-            "exchange_rate",
-            "custom_exchange_rate_set_by",
-        ]
+    payment_plan_actions_context["pp"].payment_plan_group.refresh_from_db(
+        fields=["custom_exchange_rate", "exchange_rate", "custom_exchange_rate_set_by", "background_action_status"]
     )
     assert response.status_code == status.HTTP_200_OK
     assert payment_plan_actions_context["pp"].custom_exchange_rate is False
     assert payment_plan_actions_context["pp"].exchange_rate == Decimal("2.00000000")
     assert payment_plan_actions_context["pp"].custom_exchange_rate_set_by is None
-    mock_delay.assert_called_once_with(payment_plan_actions_context["pp"])
+    assert payment_plan_actions_context["pp"].payment_plan_group.background_action_status == "RECALCULATING"
+    mock_queue.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -926,78 +951,6 @@ def test_apply_engine_formula_pp_validation_errors(
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "engine_formula_rule_id" in response_3.data
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_pp_fsp_lock(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
-    payment_plan_actions_context["pp"].financial_service_provider = FinancialServiceProviderFactory()
-    payment_plan_actions_context["pp"].delivery_mechanism = DeliveryMechanismFactory()
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"], entitlement_quantity=999)
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_lock_fsp"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan FSP locked"}
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_pp_fsp_unlock(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED_FSP
-    payment_plan_actions_context["pp"].save()
-
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_unlock_fsp"])
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan FSP unlocked"}
-
-
-def test_pp_fsp_unlock_returns_400_when_fsp_is_not_locked(
-    locked_payment_plan_actions_context: dict[str, Any],
-) -> None:
-    payment_plan = locked_payment_plan_actions_context["pp"]
-
-    response = locked_payment_plan_actions_context["client"].get(locked_payment_plan_actions_context["url_unlock_fsp"])
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == ["Unlock FSP is not allowed when the Payment Plan status is Locked."]
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.LOCKED
 
 
 @pytest.mark.parametrize(
@@ -1264,450 +1217,6 @@ def test_pp_entitlement_import_xlsx_status_invalid(
 @pytest.mark.parametrize(
     ("permissions", "expected_status"),
     [
-        ([Permissions.PM_SEND_FOR_APPROVAL], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_send_for_approval(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED_FSP
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_for_approval"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "IN_APPROVAL"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status", "payment_plan_status"),
-    [
-        (
-            [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PM_VIEW_LIST],
-            status.HTTP_200_OK,
-            PaymentPlan.Status.IN_APPROVAL,
-        ),
-        (
-            [Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE, Permissions.PM_VIEW_LIST],
-            status.HTTP_200_OK,
-            PaymentPlan.Status.IN_AUTHORIZATION,
-        ),
-        (
-            [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW, Permissions.PM_VIEW_LIST],
-            status.HTTP_200_OK,
-            PaymentPlan.Status.IN_REVIEW,
-        ),
-        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.IN_APPROVAL),
-        (
-            [Permissions.PM_VIEW_LIST],
-            status.HTTP_403_FORBIDDEN,
-            PaymentPlan.Status.IN_APPROVAL,
-        ),
-        (
-            [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE, Permissions.PM_VIEW_LIST],
-            status.HTTP_400_BAD_REQUEST,
-            PaymentPlan.Status.LOCKED,
-        ),
-    ],
-)
-def test_approval_process_reject(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    payment_plan_status: PaymentPlan.Status,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = payment_plan_status
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_reject"],
-        {"comment": "test123"},
-        format="json",
-    )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "LOCKED_FSP"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_approval_process_approve(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_approve"],
-        {"comment": "test123"},
-        format="json",
-    )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "IN_AUTHORIZATION"
-
-
-@pytest.mark.parametrize(
-    ("comment_length", "expected_status"),
-    [
-        (2000, status.HTTP_200_OK),
-        (2001, status.HTTP_400_BAD_REQUEST),
-    ],
-)
-def test_approval_process_approve_comment_length(
-    payment_plan_actions_context: dict[str, Any],
-    comment_length: int,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    approval_process = ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
-    payment_plan_actions_context["pp"].save()
-    comment = "line one\n" + "a" * (comment_length - len("line one\n"))
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_approve"],
-        {"comment": comment},
-        format="json",
-    )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert approval_process.approvals.get().comment == comment
-    else:
-        assert "comment" in response.json()
-
-
-def test_approval_process_approve_empty_comment(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_approve"],
-        {"comment": ""},
-        format="json",
-    )
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()["status"] == "IN_AUTHORIZATION"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_approval_process_authorize(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_AUTHORIZATION
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_authorize"],
-        {"comment": "test123"},
-        format="json",
-    )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "IN_REVIEW"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_approval_process_mark_as_released(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_actions_context["pp"].save()
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_mark_as_released"],
-        {"comment": "test123"},
-        format="json",
-    )
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "ACCEPTED"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_SEND_TO_PAYMENT_GATEWAY], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_pp_send_to_payment_gateway(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="123",
-    )
-    PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"])
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].financial_service_provider = fsp
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"])
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_send_to_payment_gate_way"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json()["status"] == "ACCEPTED"
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_SPLIT], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_split(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    fsp = FinancialServiceProviderFactory(
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-        payment_gateway_id="123",
-    )
-    split = PaymentPlanSplitFactory(payment_plan=payment_plan_actions_context["pp"], sent_to_payment_gateway=True)
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_APPROVAL
-    payment_plan_actions_context["pp"].financial_service_provider = fsp
-    payment_plan_actions_context["pp"].save()
-    data = {"payments_no": 1, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS}
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_split"],
-        data,
-        format="json",
-    )
-
-    if expected_status == status.HTTP_200_OK:
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment plan is already sent to payment gateway" in response.data
-
-        split.sent_to_payment_gateway = False
-        split.save()
-        response_2 = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            data,
-            format="json",
-        )
-        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment plan must be accepted to make a split" in response_2.data
-
-        payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-        payment_plan_actions_context["pp"].save()
-        payment_plan_actions_context["pp"].eligible_payments.delete()
-        response_3 = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
-            format="json",
-        )
-        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Payment Number is required for split by records" in response_3.data
-
-        response_missing_split_type = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            {"payments_no": 1},
-            format="json",
-        )
-        assert response_missing_split_type.status_code == status.HTTP_400_BAD_REQUEST
-        assert "split_type is required" in response_missing_split_type.data
-
-        fsp_api = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="123",
-        )
-        PaymentFactory.create_batch(
-            3,
-            parent=payment_plan_actions_context["pp"],
-            status=Payment.STATUS_PENDING,
-            financial_service_provider=fsp_api,
-        )
-        with patch.object(PaymentPlanSplit, "MAX_CHUNKS", 2):
-            response_4 = payment_plan_actions_context["client"].post(
-                payment_plan_actions_context["url_pp_split"],
-                data,
-                format="json",
-            )
-            assert response_4.status_code == status.HTTP_400_BAD_REQUEST
-            assert "Cannot split Payment Plan into more than 2 parts" in response_4.data
-
-        with patch.object(PaymentPlanSplit, "MIN_NO_OF_PAYMENTS_IN_CHUNK", 1):
-            response_ok = payment_plan_actions_context["client"].post(
-                payment_plan_actions_context["url_pp_split"],
-                {"payments_no": 1, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
-                format="json",
-            )
-            assert response_ok.status_code == status.HTTP_200_OK
-        assert "id" in response_ok.data
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_EXPORT_PDF_SUMMARY], status.HTTP_200_OK),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_export_pdf_payment_plan_summary(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.LOCKED
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"])
-    response = payment_plan_actions_context["client"].get(
-        payment_plan_actions_context["url_export_pdf_payment_plan_summary"]
-    )
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert "id" in response.json()
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
-        ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
-        ([], status.HTTP_403_FORBIDDEN),
-    ],
-)
-def test_create_follow_up(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_FORCE_FAILED)
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_create_follow_up"],
-        {
-            "dispersion_start_date": "2024-01-01",
-            "dispersion_end_date": "2099-12-31",
-        },
-        format="json",
-    )
-    assert response.status_code == expected_status
-
-    if expected_status == status.HTTP_201_CREATED:
-        data = response.json()
-        assert "id" in data
-        assert data["plan_type"] == PaymentPlan.PlanType.FOLLOW_UP
-        assert "id" in data["source_payment_plan"]
-        assert data["name"] == "DRAFT PP Follow Up"
-        assert data["dispersion_start_date"] == "2024-01-01"
-        assert data["dispersion_end_date"] == "2099-12-31"
-        assert data["currency"] == "PLN"
-        purpose = payment_plan_actions_context["purpose"]
-        assert data["payment_plan_purposes"] == [{"id": str(purpose.id), "name": purpose.name}]
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status"),
-    [
         ([Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], status.HTTP_200_OK),
         ([], status.HTTP_403_FORBIDDEN),
     ],
@@ -1726,6 +1235,9 @@ def test_assign_funds_commitments(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
 
     first_header = FundsCommitmentHeaderFactory()
     second_header = FundsCommitmentHeaderFactory()
@@ -1754,10 +1266,56 @@ def test_assign_funds_commitments(
 
     if expected_status == status.HTTP_200_OK:
         assert "id" in response.json()
-        assert set(payment_plan_actions_context["pp"].funds_commitment_headers.all()) == {
+        assert set(group.funds_commitment_headers.all()) == {
             first_header,
             second_header,
         }
+
+
+@pytest.fixture
+def group_with_existing_fc_assignment(
+    payment_plan_actions_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    context = payment_plan_actions_context
+    create_user_role_with_permissions(
+        context["user"],
+        [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
+        context["business_area"],
+        context["program_active"],
+    )
+    context["pp"].status = PaymentPlan.Status.IN_REVIEW
+    context["pp"].save(update_fields=["status"])
+    group = context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
+    original_header = FundsCommitmentHeaderFactory()
+    replacement_header = FundsCommitmentHeaderFactory()
+    FundsCommitmentItemFactory(funds_commitment_header=original_header, office=context["business_area"])
+    FundsCommitmentItemFactory(funds_commitment_header=replacement_header, office=context["business_area"])
+    group.funds_commitment_headers.add(original_header)
+    return {**context, "group": group, "replacement_header": replacement_header}
+
+
+def test_assign_funds_commitments_replaces_group_selection(
+    group_with_existing_fc_assignment: dict[str, Any],
+    django_assert_num_queries,
+) -> None:
+    context = group_with_existing_fc_assignment
+    replacement_header = context["replacement_header"]
+
+    response = context["client"].post(
+        context["url_funds_commitments"],
+        {"funds_commitment_numbers": [replacement_header.funds_commitment_number]},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    with django_assert_num_queries(1):
+        assigned_numbers = list(
+            context["group"].funds_commitment_headers.values_list("funds_commitment_number", flat=True)
+        )
+    assert assigned_numbers == [replacement_header.funds_commitment_number]
 
 
 def test_assign_funds_commitments_validation_errors(
@@ -1777,10 +1335,13 @@ def test_assign_funds_commitments_validation_errors(
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "Payment plan must be in review" in response.json()
+    assert "Payment Plan Group must be in review" in response.json()[0]
 
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save()
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
         {"funds_commitment_numbers": ["UNKNOWN"]},
@@ -1842,341 +1403,6 @@ def test_fsp_xlsx_template_list(
     assert results[1]["name"] == "XLSX_2"
 
 
-@pytest.mark.parametrize(
-    ("permissions", "expected_status", "pp_status"),
-    [
-        ([Permissions.PM_MARK_READY_FOR_CLOSURE], status.HTTP_200_OK, PaymentPlan.Status.FINISHED),
-        ([Permissions.PM_MARK_READY_FOR_CLOSURE], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
-        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.FINISHED),
-    ],
-)
-def test_pp_ready_for_closure(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-    pp_status: str,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = pp_status
-    pp.save()
-
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_pp_ready_for_closure"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan marked as ready for closure"}
-        pp.refresh_from_db()
-        assert pp.status == PaymentPlan.Status.READY_FOR_CLOSURE
-
-    if expected_status == status.HTTP_400_BAD_REQUEST:
-        assert response.json()[0] == (
-            f"Mark as Ready for Closure is possible only within Status {PaymentPlan.Status.FINISHED}"
-        )
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status", "pp_status"),
-    [
-        (
-            [Permissions.PM_MARK_READY_FOR_CLOSURE],
-            status.HTTP_200_OK,
-            PaymentPlan.Status.READY_FOR_CLOSURE,
-        ),
-        ([Permissions.PM_MARK_READY_FOR_CLOSURE], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.FINISHED),
-        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.READY_FOR_CLOSURE),
-    ],
-)
-def test_pp_send_back_to_finished(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-    pp_status: str,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = pp_status
-    pp.save()
-
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_pp_send_back_to_finished"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan sent back to finished"}
-        pp.refresh_from_db()
-        assert pp.status == PaymentPlan.Status.FINISHED
-
-    if expected_status == status.HTTP_400_BAD_REQUEST:
-        assert response.json()[0] == (
-            f"Send Back is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
-        )
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status", "pp_status"),
-    [
-        ([Permissions.PM_CLOSE_FINISHED], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.FINISHED),
-        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.READY_FOR_CLOSURE),
-    ],
-)
-def test_pp_close(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-    pp_status: str,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = pp_status
-    pp.save()
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
-    )
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_400_BAD_REQUEST:
-        assert response.json()[0] == (
-            f"Close Payment Plan is possible only within Status {PaymentPlan.Status.READY_FOR_CLOSURE}"
-        )
-
-
-def test_pp_close_success(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_CLOSE_FINISHED],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
-    pp.save()
-    PaymentVerificationSummaryFactory(payment_plan=pp)
-    PaymentVerificationPlanFactory(payment_plan=pp, responded_count=1)
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"message": "Payment Plan closed"}
-    pp.refresh_from_db()
-    assert pp.status == PaymentPlan.Status.CLOSED
-    assert pp.closed_by == payment_plan_actions_context["user"]
-
-
-def test_pp_close_requires_comment_when_no_verification(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_CLOSE_FINISHED],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
-    pp.save()
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()[0] == "Closure comment is required when no payment verification was carried out."
-
-
-def test_pp_close_with_comment_when_no_verification(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_CLOSE_FINISHED],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
-    pp.save()
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_close"],
-        data={"closure_comment": "No verification was done due to operational constraints."},
-        content_type="application/json",
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    pp.refresh_from_db()
-    assert pp.status == PaymentPlan.Status.CLOSED
-    assert pp.closure_comment == "No verification was done due to operational constraints."
-    assert pp.closed_by == payment_plan_actions_context["user"]
-
-
-def test_pp_close_verification_plan_with_no_responses_requires_comment(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_CLOSE_FINISHED],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    pp = payment_plan_actions_context["pp"]
-    pp.status = PaymentPlan.Status.READY_FOR_CLOSURE
-    pp.save()
-    PaymentVerificationSummaryFactory(payment_plan=pp)
-    PaymentVerificationPlanFactory(payment_plan=pp, responded_count=0)
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_close"], data={}, content_type="application/json"
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()[0] == "Closure comment is required when no payment verification was carried out."
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status", "pp_status"),
-    [
-        ([Permissions.PM_ABORT], status.HTTP_200_OK, PaymentPlan.Status.IN_REVIEW),
-        ([Permissions.PM_ABORT], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.ACCEPTED),
-        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.OPEN),
-    ],
-)
-def test_pp_abort(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-    pp_status: str,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = pp_status
-    payment_plan_actions_context["pp"].save()
-    payment_plan_actions_context["pp"].refresh_from_db()
-
-    assert payment_plan_actions_context["pp"].status == pp_status
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_abort"],
-        {"abort_comment": "test comment"},
-        format="json",
-    )
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan aborted"}
-        payment_plan_actions_context["pp"].refresh_from_db()
-        assert payment_plan_actions_context["pp"].status == PaymentPlan.Status.ABORTED
-        assert payment_plan_actions_context["pp"].abort_comment == "test comment"
-
-    if expected_status == status.HTTP_400_BAD_REQUEST:
-        assert response.json()[0] == f"Abort Payment Plan is not possible within Status {pp_status}"
-
-
-@pytest.mark.parametrize(
-    ("comment_length", "expected_status"),
-    [
-        (2000, status.HTTP_200_OK),
-        (2001, status.HTTP_400_BAD_REQUEST),
-    ],
-)
-def test_pp_abort_comment_length(
-    payment_plan_actions_context: dict[str, Any],
-    comment_length: int,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ABORT],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_actions_context["pp"].save()
-    comment = "a" * comment_length
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_pp_abort"],
-        {"abort_comment": comment},
-        format="json",
-    )
-    assert response.status_code == expected_status
-    payment_plan_actions_context["pp"].refresh_from_db()
-    if expected_status == status.HTTP_200_OK:
-        assert payment_plan_actions_context["pp"].abort_comment == comment
-    else:
-        assert "abort_comment" in response.json()
-        assert payment_plan_actions_context["pp"].status == PaymentPlan.Status.IN_REVIEW
-
-
-@pytest.mark.parametrize(
-    ("permissions", "expected_status", "pp_status"),
-    [
-        ([Permissions.PM_REACTIVATE_ABORT], status.HTTP_200_OK, PaymentPlan.Status.ABORTED),
-        ([Permissions.PM_REACTIVATE_ABORT], status.HTTP_400_BAD_REQUEST, PaymentPlan.Status.OPEN),
-        ([], status.HTTP_403_FORBIDDEN, PaymentPlan.Status.ABORTED),
-    ],
-)
-def test_pp_reactivate_abort(
-    payment_plan_actions_context: dict[str, Any],
-    permissions: list,
-    expected_status: int,
-    create_user_role_with_permissions: Any,
-    pp_status: str,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        permissions,
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = pp_status
-    payment_plan_actions_context["pp"].save()
-    payment_plan_actions_context["pp"].refresh_from_db()
-
-    assert payment_plan_actions_context["pp"].status == pp_status
-    response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_pp_reactivate_abort"])
-
-    assert response.status_code == expected_status
-    if expected_status == status.HTTP_200_OK:
-        assert response.json() == {"message": "Payment Plan reactivate abort"}
-
-    if expected_status == status.HTTP_400_BAD_REQUEST:
-        assert (
-            response.json()[0]
-            == f"Reactivate Aborted Payment Plan is possible only within Status {PaymentPlan.Status.ABORTED}"
-        )
-
-
 def test_create_pp_without_target_population_id_returns_400(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
@@ -2189,7 +1415,7 @@ def test_create_pp_without_target_population_id_returns_400(
     )
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_list"],
-        {"dispersion_start_date": "2025-02-01", "dispersion_end_date": "2099-03-01", "currency": "USD"},
+        {},
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2356,9 +1582,7 @@ def test_entitlement_flat_amount_without_version_skips_concurrency_check(
     assert response.status_code == status.HTTP_200_OK
 
 
-@patch("hope.apps.payment.api.views.payment_plan_apply_custom_exchange_rate_async_task")
-def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
-    mock_delay: Mock,
+def test_apply_custom_exchange_rate_rejects_stale_owner_timestamp(
     payment_plan_actions_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
@@ -2371,41 +1595,121 @@ def test_apply_custom_exchange_rate_with_version_runs_concurrency_check(
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
 
+    group = payment_plan_actions_context["pp"].payment_plan_group
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_custom_exchange_rate"],
         {
-            "unore_exchange_rate": "2.00000000",
             "custom_exchange_rate": "1.25000000",
-            "version": payment_plan_actions_context["pp"].version,
+            "updated_at": "2020-01-01T00:00:00Z",
         },
         format="json",
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "changed" in str(response.data)
+    group.refresh_from_db()
+    assert group.exchange_rate is None
 
 
-def test_split_with_split_type_no_split_skips_records_branch(
-    payment_plan_actions_context: dict[str, Any],
+@pytest.fixture
+def instruction_exchange_rate_context(payment_plan_actions_context: dict[str, Any]) -> dict[str, Any]:
+    instruction = FollowUpInstructionFactory(
+        program=payment_plan_actions_context["program_active"],
+        business_area=payment_plan_actions_context["business_area"],
+        created_by=payment_plan_actions_context["user"],
+        currency=payment_plan_actions_context["pp"].currency,
+    )
+    plan = payment_plan_actions_context["pp"]
+    plan.follow_up_instruction = instruction
+    plan.payment_plan_group = None
+    plan.status = PaymentPlan.Status.OPEN
+    plan.save(update_fields=["follow_up_instruction", "payment_plan_group", "status"])
+    payment_plan_actions_context["instruction"] = instruction
+    payment_plan_actions_context["url_custom_exchange_rate"] = reverse(
+        "api:payments:follow-up-instructions-custom-exchange-rate",
+        kwargs={**payment_plan_actions_context["url_kwargs_ba_program"], "pk": instruction.pk},
+    )
+    return payment_plan_actions_context
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_instruction_custom_exchange_rate_updates_instruction_and_child(
+    mock_queue: Mock,
+    instruction_exchange_rate_context: dict[str, Any],
     create_user_role_with_permissions: Any,
 ) -> None:
+    context = instruction_exchange_rate_context
     create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SPLIT],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
+        context["user"],
+        [Permissions.PM_CUSTOM_EXCHANGE_RATE],
+        context["business_area"],
+        context["program_active"],
     )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].save()
-    PaymentFactory(parent=payment_plan_actions_context["pp"], status=Payment.STATUS_PENDING)
 
-    with patch("hope.apps.payment.api.views.PaymentPlanService") as mock_service_cls:
-        mock_service_cls.return_value.split.return_value = None
-        response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_split"],
-            {"split_type": PaymentPlanSplit.SplitType.NO_SPLIT},
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
             format="json",
         )
+
+    context["instruction"].refresh_from_db()
+    context["pp"].refresh_from_db()
     assert response.status_code == status.HTTP_200_OK
-    mock_service_cls.return_value.split.assert_called_once_with(PaymentPlanSplit.SplitType.NO_SPLIT, None)
+    assert context["instruction"].exchange_rate == Decimal("1.25000000")
+    assert context["instruction"].custom_exchange_rate_set_by == context["user"]
+    assert context["instruction"].background_action_status == "RECALCULATING"
+    assert context["pp"].background_action_status is None
+    mock_queue.assert_called_once()
+
+
+@patch("hope.models.async_job.AsyncRetryJob.queue")
+def test_instruction_exchange_rate_uses_instruction_status_even_when_child_plan_is_busy(
+    mock_queue: Mock,
+    instruction_exchange_rate_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = instruction_exchange_rate_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    plan = context["pp"]
+    plan.background_action_status = PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING
+    plan.save(update_fields=["background_action_status"])
+
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        response = context["client"].post(
+            context["url_custom_exchange_rate"],
+            {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+            format="json",
+        )
+
+    context["instruction"].refresh_from_db()
+    assert response.status_code == status.HTTP_200_OK
+    assert context["instruction"].exchange_rate == Decimal("1.25000000")
+    assert context["instruction"].background_action_status == FollowUpInstruction.BackgroundActionStatus.RECALCULATING
+    mock_queue.assert_called_once()
+
+
+def test_instruction_exchange_rate_rejects_released_instruction(
+    instruction_exchange_rate_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> None:
+    context = instruction_exchange_rate_context
+    create_user_role_with_permissions(
+        context["user"], [Permissions.PM_CUSTOM_EXCHANGE_RATE], context["business_area"], context["program_active"]
+    )
+    plan = context["pp"]
+    plan.status = PaymentPlan.Status.ACCEPTED
+    plan.save(update_fields=["status"])
+
+    response = context["client"].post(
+        context["url_custom_exchange_rate"],
+        {"custom_exchange_rate": "1.25000000", "updated_at": context["instruction"].updated_at.isoformat()},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Exchange rate can be changed only while the instruction is OPEN or IN_REVIEW" in response.data
 
 
 def test_fsp_xlsx_template_list_without_pagination_returns_flat_response(
@@ -2454,7 +1758,8 @@ def test_get_object_raises_for_instruction_managed_blocked_action(
     )
     pp = payment_plan_actions_context["pp"]
     pp.follow_up_instruction = instruction
-    pp.save(update_fields=["follow_up_instruction"])
+    pp.payment_plan_group = None
+    pp.save(update_fields=["follow_up_instruction", "payment_plan_group"])
 
     response = payment_plan_actions_context["client"].get(payment_plan_actions_context["url_lock"])
 
@@ -2474,172 +1779,8 @@ def _enable_vision_flag(payment_plan_actions_context: dict[str, Any]) -> None:
 
 
 @pytest.fixture
-def vision_reject_approval_process(payment_plan_actions_context: dict[str, Any]) -> None:
-    ApprovalProcessFactory(payment_plan=payment_plan_actions_context["pp"])
-
-
-@pytest.fixture
 def vision_enabled_payment_plan_actions(payment_plan_actions_context: dict[str, Any]) -> None:
     _enable_vision_flag(payment_plan_actions_context)
-
-
-def test_mark_as_released_is_blocked_for_vision_managed_plan(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    _enable_vision_flag(payment_plan_actions_context)
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
-    payment_plan_actions_context["pp"].save(update_fields=["status"])
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_mark_as_released"],
-        {"comment": "release"},
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "released automatically after FC assignment" in str(response.data)
-
-
-def test_mark_as_released_is_allowed_after_vision_flags_are_disabled(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    vision_reject_approval_process: None,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan = payment_plan_actions_context["pp"]
-    payment_plan.status = PaymentPlan.Status.IN_REVIEW
-    payment_plan.internal_data = {"vision": {"sent": True, "status": "WAITING_FOR_CALLBACK"}}
-    payment_plan.save(update_fields=["status", "internal_data"])
-
-    response = payment_plan_actions_context["client"].post(
-        payment_plan_actions_context["url_approval_process_mark_as_released"],
-        {"comment": "release"},
-    )
-
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.ACCEPTED
-    assert payment_plan.vision_data == {"status": VisionStatus.NOT_SENT.value}
-
-    _enable_vision_flag(payment_plan_actions_context)
-    assert payment_plan.vision_managed is False
-
-
-@pytest.mark.parametrize(
-    "vision_status",
-    [
-        VisionStatus.WAITING_FOR_CALLBACK,
-        VisionStatus.PP_CREATED,
-        VisionStatus.SEND_FAILED,
-        VisionStatus.CALLBACK_FAILED,
-        VisionStatus.FC_NOT_FOUND,
-    ],
-)
-@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
-def test_reject_invalidates_vision_attempt(
-    mock_notify_vision_status,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    vision_status: VisionStatus,
-    vision_reject_approval_process: None,
-    vision_enabled_payment_plan_actions: None,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW, Permissions.PM_VIEW_LIST],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan = payment_plan_actions_context["pp"]
-    payment_plan.status = PaymentPlan.Status.IN_REVIEW
-    payment_plan.internal_data = {
-        "vision": {
-            "sent": True,
-            "status": vision_status.value,
-            "vision_id": "VISION-1",
-            "fc_numbers": ["FC123"],
-            "error_code": "ERROR",
-            "log": [{"type": "api-call"}],
-        }
-    }
-    payment_plan.save(update_fields=["status", "internal_data"])
-
-    with django_capture_on_commit_callbacks(execute=True):
-        response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_approval_process_reject"],
-            {"comment": "reject"},
-        )
-
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.LOCKED_FSP
-    assert payment_plan.vision_data == {
-        "status": VisionStatus.NOT_SENT.value,
-        "log": [{"type": "api-call"}],
-    }
-    mock_notify_vision_status.assert_called_once_with(
-        payment_plan,
-        str(payment_plan_actions_context["user"].pk),
-        "REJECTED",
-    )
-
-
-@patch("hope.contrib.vision.tasks.notify_payment_plan_status_to_vision_async_task")
-def test_abort_invalidates_vision_attempt(
-    mock_notify_vision_status,
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-    vision_enabled_payment_plan_actions: None,
-    django_capture_on_commit_callbacks: Any,
-) -> None:
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_ABORT],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan = payment_plan_actions_context["pp"]
-    payment_plan.status = PaymentPlan.Status.IN_REVIEW
-    payment_plan.internal_data = {
-        "vision": {
-            "sent": True,
-            "status": VisionStatus.PP_CREATED.value,
-            "log": [{"type": "api-call"}],
-        }
-    }
-    payment_plan.save(update_fields=["status", "internal_data"])
-
-    with django_capture_on_commit_callbacks(execute=True):
-        response = payment_plan_actions_context["client"].post(
-            payment_plan_actions_context["url_pp_abort"],
-            {"abort_comment": "Cancelled during Vision processing"},
-            format="json",
-        )
-
-    assert response.status_code == status.HTTP_200_OK
-    payment_plan.refresh_from_db()
-    assert payment_plan.status == PaymentPlan.Status.ABORTED
-    assert payment_plan.vision_data == {
-        "status": VisionStatus.NOT_SENT.value,
-        "log": [{"type": "api-call"}],
-    }
-    mock_notify_vision_status.assert_called_once_with(
-        payment_plan,
-        str(payment_plan_actions_context["user"].pk),
-        "ABORTED",
-    )
 
 
 def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
@@ -2655,6 +1796,9 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     )
     payment_plan_actions_context["pp"].status = PaymentPlan.Status.IN_REVIEW
     payment_plan_actions_context["pp"].save(update_fields=["status"])
+    group = payment_plan_actions_context["pp"].payment_plan_group
+    group.status = group.Status.IN_REVIEW
+    group.save(update_fields=["status"])
 
     response = payment_plan_actions_context["client"].post(
         payment_plan_actions_context["url_funds_commitments"],
@@ -2662,27 +1806,4 @@ def test_manual_fc_assignment_is_blocked_for_vision_managed_plan(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "assigned automatically" in str(response.data)
-
-
-def test_manual_pg_send_is_blocked_for_vision_managed_plan(
-    payment_plan_actions_context: dict[str, Any],
-    create_user_role_with_permissions: Any,
-) -> None:
-    _enable_vision_flag(payment_plan_actions_context)
-    create_user_role_with_permissions(
-        payment_plan_actions_context["user"],
-        [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
-        payment_plan_actions_context["business_area"],
-        payment_plan_actions_context["program_active"],
-    )
-    payment_plan_actions_context["pp"].status = PaymentPlan.Status.ACCEPTED
-    payment_plan_actions_context["pp"].internal_data = {"vision": {"sent": True, "status": VisionStatus.RELEASED.value}}
-    payment_plan_actions_context["pp"].save(update_fields=["status", "internal_data"])
-
-    response = payment_plan_actions_context["client"].get(
-        payment_plan_actions_context["url_send_to_payment_gate_way"],
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "only be sent to Payment Gateway automatically" in str(response.data)
+    assert "managed by Vision" in str(response.data)

@@ -49,6 +49,8 @@ class PaymentPlanGroupFactory(DjangoModelFactory):
 
     cycle = factory.SubFactory(ProgramCycleFactory)
     name = factory.Sequence(lambda n: f"Payment Plan Group {n}")
+    dispersion_start_date = factory.LazyFunction(date.today)
+    dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
 
 
 class FollowUpInstructionFactory(DjangoModelFactory):
@@ -59,6 +61,19 @@ class FollowUpInstructionFactory(DjangoModelFactory):
     business_area = factory.SelfAttribute("program.business_area")
     created_by = factory.SubFactory(UserFactory)
     background_action_status = None
+    dispersion_start_date = factory.LazyFunction(date.today)
+    dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
+
+
+def _set_owner_dispersion_date(payment_plan, create, field, extracted, default):
+    """Dispersion dates live on the plan's group or instruction; a plan's owner without dates gets the default."""
+    owner = payment_plan.payment_plan_group or payment_plan.follow_up_instruction
+    if not create or owner is None:
+        return
+    value = extracted if extracted is not None else getattr(owner, field) or default
+    if getattr(owner, field) != value:
+        setattr(owner, field, value)
+        owner.save(update_fields=[field])
 
 
 class PaymentPlanFactory(DjangoModelFactory):
@@ -67,14 +82,46 @@ class PaymentPlanFactory(DjangoModelFactory):
 
     status_date = factory.LazyFunction(timezone.now)
     status = PaymentPlan.Status.OPEN
-    dispersion_start_date = factory.LazyFunction(date.today)
-    dispersion_end_date = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     program_cycle = factory.SubFactory(ProgramCycleFactory)
+    follow_up_instruction = None
     payment_plan_group = factory.LazyAttribute(
-        lambda obj: obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+        lambda obj: (
+            None
+            if obj.follow_up_instruction
+            else obj.program_cycle.payment_plan_groups.first() or PaymentPlanGroupFactory(cycle=obj.program_cycle)
+        )
     )
     created_by = factory.SubFactory(UserFactory)
     business_area = factory.LazyAttribute(lambda obj: obj.program_cycle.program.business_area)
+
+    @factory.post_generation
+    def currency(self, create, extracted, **kwargs):
+        if create and extracted is not None:
+            owner = self.payment_plan_group or self.follow_up_instruction
+            owner.currency = extracted
+            owner.save(update_fields=["currency"])
+
+    @factory.post_generation
+    def financial_service_provider(self, create, extracted, **kwargs):
+        if create and extracted is not None:
+            owner = self.payment_plan_group or self.follow_up_instruction
+            owner.financial_service_provider = extracted
+            owner.save(update_fields=["financial_service_provider"])
+
+    @factory.post_generation
+    def dispersion_start_date(self, create, extracted, **kwargs):
+        _set_owner_dispersion_date(self, create, "dispersion_start_date", extracted, date.today())
+
+    @factory.post_generation
+    def dispersion_end_date(self, create, extracted, **kwargs):
+        _set_owner_dispersion_date(self, create, "dispersion_end_date", extracted, date.today() + timedelta(days=30))
+
+    @factory.post_generation
+    def use_payment_gateway(self, create, extracted, **kwargs):
+        owner = self.payment_plan_group or self.follow_up_instruction
+        if create and extracted is not None and owner is not None and owner.use_payment_gateway != extracted:
+            owner.use_payment_gateway = extracted
+            owner.save(update_fields=["use_payment_gateway"])
 
     @factory.post_generation
     def create_payment_verification_summary(self, create, extracted, **kwargs):
@@ -113,7 +160,11 @@ class ApprovalProcessFactory(DjangoModelFactory):
     class Meta:
         model = ApprovalProcess
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    payment_plan_group = None
+    follow_up_instruction = None
+    payment_plan = factory.LazyAttribute(
+        lambda obj: None if obj.payment_plan_group or obj.follow_up_instruction else PaymentPlanFactory()
+    )
 
 
 class ApprovalFactory(DjangoModelFactory):
@@ -207,7 +258,10 @@ class PaymentPlanSupportingDocumentFactory(DjangoModelFactory):
         model = PaymentPlanSupportingDocument
 
     title = factory.Sequence(lambda n: f"Supporting Document {n}")
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    follow_up_instruction = None
+    payment_plan_group = factory.LazyAttribute(
+        lambda obj: None if obj.follow_up_instruction else PaymentPlanGroupFactory()
+    )
     file = factory.Sequence(
         lambda n: SimpleUploadedFile(f"supporting_doc_{n}.pdf", b"abc", content_type="application/pdf")
     )

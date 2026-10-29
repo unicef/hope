@@ -5,6 +5,7 @@ from viewflow import fsm
 
 from hope.models.follow_up_instruction import FollowUpInstruction
 from hope.models.payment_plan import PaymentPlan
+from hope.models.payment_plan_group import PaymentPlanGroup
 
 
 class PaymentPlanFlow:
@@ -114,41 +115,6 @@ class PaymentPlanFlow:
         conditions=[lambda obj: obj.payment_plan.status == obj.payment_plan.Status.LOCKED],
     )
     def background_action_status_importing_entitlements(self) -> None:
-        pass
-
-    @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
-        conditions=[
-            lambda obj: (
-                obj.payment_plan.status
-                in [
-                    obj.payment_plan.Status.OPEN,
-                    obj.payment_plan.Status.IN_REVIEW,
-                ]
-            )
-        ],
-    )
-    def background_action_status_applying_custom_exchange_rate(self) -> None:
-        pass
-
-    @background_action_status.transition(
-        source=[
-            PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE,
-            PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-        ],
-        target=PaymentPlan.BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
-        conditions=[
-            lambda obj: (
-                obj.payment_plan.status
-                in [
-                    obj.payment_plan.Status.OPEN,
-                    obj.payment_plan.Status.IN_REVIEW,
-                ]
-            )
-        ],
-    )
-    def background_action_status_applying_custom_exchange_rate_error(self) -> None:
         pass
 
     @background_action_status.transition(
@@ -540,6 +506,125 @@ class PaymentPlanFlow:
         self.payment_plan.status_date = timezone.now()
 
 
+class PaymentPlanGroupFlow:
+    status = fsm.State(PaymentPlanGroup.Status)
+
+    def __init__(self, payment_plan_group: "PaymentPlanGroup"):
+        self.payment_plan_group = payment_plan_group
+
+    @status.setter()
+    def _set_status(self, value: str) -> None:
+        self.payment_plan_group.status = value
+
+    @status.getter()
+    def _get_status(self) -> str:
+        return self.payment_plan_group.status
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.OPEN,
+        target=PaymentPlanGroup.Status.LOCKED,
+    )
+    def status_lock(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.LOCKED,
+        target=PaymentPlanGroup.Status.OPEN,
+    )
+    def status_unlock(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.LOCKED,
+        target=PaymentPlanGroup.Status.IN_APPROVAL,
+    )
+    def status_send_for_approval(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_APPROVAL,
+        target=PaymentPlanGroup.Status.IN_AUTHORIZATION,
+    )
+    def status_approve(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_AUTHORIZATION,
+        target=PaymentPlanGroup.Status.IN_REVIEW,
+    )
+    def status_authorize(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.IN_REVIEW,
+        target=PaymentPlanGroup.Status.ACCEPTED,
+    )
+    def status_mark_as_reviewed(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ],
+        target=PaymentPlanGroup.Status.LOCKED,
+    )
+    def status_reject(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.ACCEPTED,
+            PaymentPlanGroup.Status.FINISHED,
+            PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+        ],
+        target=PaymentPlanGroup.Status.FINISHED,
+    )
+    def status_finished(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.FINISHED,
+        target=PaymentPlanGroup.Status.ACCEPTED,
+    )
+    def status_reopen_for_reconciliation(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.FINISHED,
+        target=PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+    )
+    def status_ready_for_closure(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.READY_FOR_CLOSURE,
+        target=PaymentPlanGroup.Status.CLOSED,
+    )
+    def status_close(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=[
+            PaymentPlanGroup.Status.LOCKED,
+            PaymentPlanGroup.Status.IN_APPROVAL,
+            PaymentPlanGroup.Status.IN_AUTHORIZATION,
+            PaymentPlanGroup.Status.IN_REVIEW,
+        ],
+        target=PaymentPlanGroup.Status.ABORTED,
+    )
+    def status_abort(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+    @status.transition(
+        source=PaymentPlanGroup.Status.ABORTED,
+        target=PaymentPlanGroup.Status.OPEN,
+    )
+    def status_reactivate_abort(self) -> None:
+        self.payment_plan_group.status_date = timezone.now()
+
+
 class FollowUpInstructionFlow:
     background_action_status = fsm.State(FollowUpInstruction.BackgroundActionStatus)
 
@@ -556,39 +641,39 @@ class FollowUpInstructionFlow:
         return self.instruction.background_action_status
 
     @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
+        source=[None] + list(FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES),
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
     )
     def background_action_status_xlsx_exporting(self) -> None:
         pass
 
     @background_action_status.transition(
         source=[
-            PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-            PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORTING,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR,
         ],
-        target=PaymentPlan.BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_EXPORT_ERROR,
     )
     def background_action_status_xlsx_export_error(self) -> None:
         pass
 
     @background_action_status.transition(
-        source=[None] + list(PaymentPlan.BACKGROUND_ACTION_ERROR_STATES),
-        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        source=[None] + list(FollowUpInstruction.BACKGROUND_ACTION_ERROR_STATES),
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
     )
     def background_action_status_xlsx_importing_reconciliation(self) -> None:
         pass
 
     @background_action_status.transition(
         source=[
-            PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-            PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+            FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORT_ERROR,
         ],
-        target=PaymentPlan.BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        target=FollowUpInstruction.BackgroundActionStatus.XLSX_IMPORT_ERROR,
     )
     def background_action_status_xlsx_import_error(self) -> None:
         pass
 
-    @background_action_status.transition(source=[None] + list(PaymentPlan.BackgroundActionStatus))
+    @background_action_status.transition(source=[None] + list(FollowUpInstruction.BackgroundActionStatus))
     def background_action_status_none(self) -> None:
         self.instruction.background_action_status = None

@@ -12,6 +12,7 @@ from hope.apps.activity_log.utils import create_diff
 from hope.apps.core.exchange_rates import ExchangeRates
 from hope.apps.utils.external_urls import frontend_url
 from hope.models import (
+    FollowUpInstruction,
     LogEntry,
     Payment,
     PaymentPlan,
@@ -103,10 +104,26 @@ def log_payment_plan_group_change(
     )
 
 
-def _log_payment_plan_event(
-    payment_plan: PaymentPlan, user: "AbstractBaseUser | AnonymousUser | None", changes: dict[str, Any]
+def log_follow_up_instruction_change(
+    instruction: FollowUpInstruction,
+    old_instruction: FollowUpInstruction,
+    user_id: str | None,
 ) -> None:
-    """Attach a free-form activity-log entry to a PaymentPlan (events the field-diff cannot express)."""
+    _log_update(
+        instruction,
+        create_diff(old_instruction, instruction, FollowUpInstruction.ACTIVITY_LOG_MAPPING),
+        business_area=instruction.business_area,
+        program_pk=instruction.program_id,
+        user_id=user_id,
+    )
+
+
+def _log_payment_plan_event(
+    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
+    user: "AbstractBaseUser | AnonymousUser | None",
+    changes: dict[str, Any],
+) -> None:
+    """Attach a free-form activity-log entry to a plan, group or instruction (events the field-diff cannot express)."""
     log = LogEntry.objects.create(
         action=LogEntry.UPDATE,
         content_object=payment_plan,
@@ -120,7 +137,7 @@ def _log_payment_plan_event(
 
 
 def log_payment_plan_approval(
-    payment_plan: PaymentPlan,
+    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     approval_type: str,
     comment: str | None,
@@ -137,13 +154,13 @@ def log_payment_plan_approval(
 
 
 def log_payment_plan_supporting_document(
-    payment_plan: PaymentPlan,
+    payment_plan: PaymentPlan | PaymentPlanGroup | FollowUpInstruction,
     user: "AbstractBaseUser | AnonymousUser | None",
     title: str,
     *,
     created: bool,
 ) -> None:
-    """Record upload/removal of a PaymentPlan supporting (compliance) document."""
+    """Record upload/removal of a supporting (compliance) document on a plan, group or instruction."""
     changes = {"supporting_document": {"from": None, "to": title} if created else {"from": title, "to": None}}
     _log_payment_plan_event(payment_plan, user, changes)
 
@@ -308,6 +325,17 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def get_owner_unore_exchange_rate(
+    owner: PaymentPlanGroup | FollowUpInstruction, exchange_date: datetime.date | None = None
+) -> float | None:
+    if owner.currency is None:
+        return None
+    if owner.currency.code == "USDC":
+        return 1.0
+    date = exchange_date or owner.currency_exchange_date
+    return ExchangeRates().get_exchange_rate_for_currency_code(owner.currency.vision_code, date)
 
 
 def inactive_currency_reason(payment_plan: PaymentPlan) -> str | None:

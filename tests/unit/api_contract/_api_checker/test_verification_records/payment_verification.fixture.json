@@ -79,11 +79,8 @@
                     "program_cycle": "bc857d24-a581-406b-8031-cd93ded0513f",
                     "payment_plan_group": "f45bdafc-e7b7-49fd-b386-62c27f335260",
                     "delivery_mechanism": null,
-                    "financial_service_provider": null,
                     "imported_file": null,
                     "export_file_entitlement": null,
-                    "export_file_delivery": null,
-                    "export_pdf_file_summary": null,
                     "reconciliation_import_file": null,
                     "steficon_rule": null,
                     "steficon_rule_targeting": null,
@@ -94,9 +91,6 @@
                     "name": null,
                     "start_date": null,
                     "end_date": null,
-                    "currency": null,
-                    "dispersion_start_date": "2025-01-01",
-                    "dispersion_end_date": "2025-01-31",
                     "excluded_ids": null,
                     "exclusion_reason": null,
                     "vulnerability_score_min": null,
@@ -107,10 +101,6 @@
                     "background_action_status": null,
                     "build_status": null,
                     "built_at": null,
-                    "exchange_rate": null,
-                    "custom_exchange_rate": false,
-                    "use_payment_gateway": false,
-                    "custom_exchange_rate_set_by": null,
                     "female_children_count": 0,
                     "male_children_count": 0,
                     "female_adults_count": 0,
@@ -292,7 +282,9 @@
                     "unicef_id": "PPG-2",
                     "cycle": "bc857d24-a581-406b-8031-cd93ded0513f",
                     "name": "Default Group",
-                    "background_action_status": null
+                    "background_action_status": null,
+                    "dispersion_start_date": "2025-01-01",
+                    "dispersion_end_date": "2025-01-31"
                 }
             },
             {

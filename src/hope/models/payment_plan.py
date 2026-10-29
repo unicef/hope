@@ -21,7 +21,6 @@ from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from flags.state import flag_state
 from model_utils.models import SoftDeletableModel
 
 from hope.apps.activity_log.utils import create_mapping_dict
@@ -30,7 +29,6 @@ from hope.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hope.apps.household.const import FEMALE, MALE, NON_BENEFICIARY
 from hope.apps.targeting.services.targeting_service import TargetingCriteriaQueryingBase
 from hope.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
-from hope.contrib.vision.choices import VisionStatus
 from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.financial_service_provider import FinancialServiceProvider
@@ -51,6 +49,10 @@ from hope.models.utils import (
 if TYPE_CHECKING:
     from hope.apps.core.exchange_rates.api import ExchangeRateClient
     from hope.models.acceptance_process_threshold import AcceptanceProcessThreshold
+    from hope.models.approval_process import ApprovalProcess
+    from hope.models.currency import Currency
+    from hope.models.follow_up_instruction import FollowUpInstruction
+    from hope.models.payment_plan_group import PaymentPlanGroup
     from hope.models.payment_verification_plan import PaymentVerificationPlan
     from hope.models.program import Program
     from hope.models.user import User
@@ -60,6 +62,27 @@ if TYPE_CHECKING:
 class ModifiedData:
     modified_date: datetime
     modified_by: Optional["User"] = None
+
+
+def last_approval_step(approval_process: "ApprovalProcess | None", status: str, fallback: datetime) -> ModifiedData:
+    """Who took the approval step that led to ``status`` on a group (or an instruction-managed plan), and when."""
+    if approval_process:
+        if status == PaymentPlan.Status.IN_APPROVAL:
+            return ModifiedData(
+                approval_process.sent_for_approval_date,  # type: ignore[arg-type]
+                approval_process.sent_for_approval_by,
+            )
+        approval_type_by_status: dict[str, str] = {
+            PaymentPlan.Status.IN_AUTHORIZATION: Approval.APPROVAL,
+            PaymentPlan.Status.IN_REVIEW: Approval.AUTHORIZATION,
+            PaymentPlan.Status.ACCEPTED: Approval.FINANCE_RELEASE,
+        }
+        approval_type = approval_type_by_status.get(status)
+        if approval_type and (
+            approval := approval_process.approvals.filter(type=approval_type).order_by("created_at").last()
+        ):
+            return ModifiedData(approval.created_at, approval.created_by)
+    return ModifiedData(fallback)
 
 
 class PaymentPlan(
@@ -77,22 +100,17 @@ class PaymentPlan(
             "created_by",
             "status",
             "status_date",
-            "dispersion_start_date",
-            "dispersion_end_date",
             "start_date",
             "end_date",
             "background_action_status",
             "imported_file_date",
             "imported_file",
             "export_file_entitlement",
-            "export_file_delivery",
-            "export_pdf_file_summary",
             "steficon_rule",
             "steficon_applied_date",
             "steficon_rule_targeting",
             "steficon_targeting_applied_date",
             "exclusion_reason",
-            "financial_service_provider",
             "delivery_mechanism",
             "source_payment_plan",
             "currency_exchange_date",
@@ -109,8 +127,6 @@ class PaymentPlan(
             "closed_by",
             "reconciliation_import_file",
             "flat_amount_value",
-            "use_payment_gateway",
-            "exchange_rate",
             "total_entitled_quantity",
             "total_entitled_quantity_usd",
             "total_delivered_quantity",
@@ -125,8 +141,6 @@ class PaymentPlan(
             "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
-            "currency.code": "currency",
-            "currency.vision_code": "currency_vision_code",
         },
     )
 
@@ -214,14 +228,6 @@ class PaymentPlan(
             "IMPORTING_ENTITLEMENTS",
             "Importing Entitlements flat amount",
         )
-        APPLYING_CUSTOM_EXCHANGE_RATE = (
-            "APPLYING_CUSTOM_EXCHANGE_RATE",
-            "Applying Custom Exchange Rate",
-        )
-        APPLYING_CUSTOM_EXCHANGE_RATE_ERROR = (
-            "APPLYING_CUSTOM_EXCHANGE_RATE_ERROR",
-            "Applying Custom Exchange Rate Error",
-        )
         XLSX_IMPORTING_RECONCILIATION = (
             "XLSX_IMPORTING_RECONCILIATION",
             "Importing Reconciliation XLSX file",
@@ -256,7 +262,6 @@ class PaymentPlan(
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
-        BackgroundActionStatus.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
         BackgroundActionStatus.REBUILD_ERROR,
     ]
 
@@ -314,12 +319,6 @@ class PaymentPlan(
         help_text="Payment plan purposes",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider",
-        blank=True,
-        null=True,
-        on_delete=models.PROTECT,
-    )
     imported_file = models.ForeignKey(
         FileTemp,
         null=True,
@@ -335,22 +334,6 @@ class PaymentPlan(
         related_name="+",
         on_delete=models.SET_NULL,
         help_text="Export File Entitlement",
-    )
-    export_file_delivery = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Export File Delivery",
-    )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
-    export_pdf_file_summary = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="Export PDF File Summary",
     )
     reconciliation_import_file = models.ForeignKey(
         FileTemp,
@@ -442,16 +425,6 @@ class PaymentPlan(
         null=True,
         help_text="Payment Plan end date",
     )
-    currency = models.ForeignKey(
-        "core.Currency",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="payment_plans",
-        help_text="Currency",
-    )
-    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
-    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
     excluded_ids = models.TextField(blank=True, null=True, help_text="Targeting level exclusion IDs")
     exclusion_reason = models.TextField(blank=True, null=True, help_text="Exclusion reason (Targeting level)")
     vulnerability_score_min = models.DecimalField(
@@ -505,29 +478,6 @@ class PaymentPlan(
         help_text="Build Status for celery task [sys]",
     )
     built_at = models.DateTimeField(null=True, blank=True, help_text="Built at [sys]")
-    exchange_rate = models.DecimalField(
-        decimal_places=8,
-        blank=True,
-        null=True,
-        max_digits=15,
-        help_text="Exchange Rate [sys]",
-    )
-    custom_exchange_rate = models.BooleanField(
-        default=False,
-        help_text="Custom Exchange Rate flag [sys]",
-    )
-    use_payment_gateway = models.BooleanField(
-        default=False,
-        help_text="Send this payment plan through the payment gateway regardless of the FSP communication channel",
-    )
-    custom_exchange_rate_set_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-        help_text="User who set the custom exchange rate [sys]",
-    )
     female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
     male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
     female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
@@ -611,11 +561,6 @@ class PaymentPlan(
         default=PlanType.REGULAR,
         help_text="Payment Plan type [sys]",
     )
-    export_tag = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True,
-        help_text="Group delivery export batch number; set when the plan is included in a group export [sys]",
-    )
     exclude_household_error = models.TextField(
         blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
     )
@@ -654,8 +599,10 @@ class PaymentPlan(
         )
         constraints = [
             models.CheckConstraint(
-                condition=Q(is_removed=True) | Q(payment_plan_group__isnull=False),
-                name="payment_plan_group_required_unless_removed",
+                condition=Q(is_removed=True)
+                | Q(payment_plan_group__isnull=False, follow_up_instruction__isnull=True)
+                | Q(payment_plan_group__isnull=True, follow_up_instruction__isnull=False),
+                name="payment_plan_in_group_or_instruction_unless_removed",
             ),
         ]
         indexes = [
@@ -701,7 +648,6 @@ class PaymentPlan(
                 opclasses=["varchar_pattern_ops"],
                 name="payment_paymentplan_plan_type_b827c7b8_like",
             ),
-            LongNameIndex(fields=["export_tag"], name="payment_paymentplan_export_tag_ff34093c"),
         ]
 
     @property
@@ -826,35 +772,9 @@ class PaymentPlan(
         # Storage delete is not transactional: delete the file when the transaction commits
         transaction.on_commit(lambda: file_field.delete(save=False))
 
-    def remove_export_file_delivery(self) -> None:
-        # The batch export shares one FileTemp across every plan in the batch (same export_tag).
-        # Detach this plan and hard-delete the file only once no other plan still references it.
-        file_temp_id = self.export_file_delivery_id
-        self.export_file_delivery = None
-        if (
-            not file_temp_id
-            or PaymentPlan.all_objects.filter(export_file_delivery_id=file_temp_id).exclude(pk=self.pk).exists()
-        ):
-            return
-        file_temp = FileTemp.objects.filter(pk=file_temp_id).first()
-        if file_temp is not None:
-            file_field = file_temp.file
-            file_temp.delete()
-            # Storage delete is not transactional: delete the file when the transaction commits
-            transaction.on_commit(lambda: file_field.delete(save=False))
-
     def remove_export_files(self) -> None:
-        # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
             self.remove_export_file_entitlement()
-        # remove export_file_delivery (use the cached id: the FileTemp is shared across the batch
-        # and a sibling may already have deleted it, so don't dereference the FK just to test presence)
-        if (
-            self.status
-            in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED, PaymentPlan.Status.READY_FOR_CLOSURE)
-            and self.export_file_delivery_id
-        ):
-            self.remove_export_file_delivery()
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
@@ -927,22 +847,6 @@ class PaymentPlan(
         return self.eligible_payments.exclude(household__withdrawn=True).exclude(Exists(amended_households))
 
     @property
-    def can_create_top_up(self) -> bool:
-        return (
-            self.plan_type == PaymentPlan.PlanType.REGULAR
-            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
-            and self.eligible_payments_for_top_up().exists()
-        )
-
-    @property
-    def can_create_top_up_amendment(self) -> bool:
-        return (
-            self.plan_type == PaymentPlan.PlanType.TOP_UP
-            and self.status in PaymentPlan.CHILD_PLAN_SOURCE_STATUSES
-            and self.eligible_payments_for_top_up_amendment().exists()
-        )
-
-    @property
     def has_newer_sibling_plan(self) -> bool:
         return PaymentPlan.objects.filter(
             source_payment_plan=self.source_payment_plan,
@@ -969,29 +873,17 @@ class PaymentPlan(
             return self.eligible_payments_for_top_up_amendment()
         return self.eligible_payments_for_top_up()
 
+    @property
+    def last_approval_process(self) -> "ApprovalProcess | None":
+        """The approval process of the plan's group or Follow-Up Instruction, which approves all its plans together."""
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.approval_process.first()
+        if self.follow_up_instruction_id:
+            return self.follow_up_instruction.approval_process.first()
+        return self.approval_process.first()
+
     def _get_last_approval_process_data(self) -> ModifiedData:
-        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
-        if approval_process:
-            if self.status == PaymentPlan.Status.IN_APPROVAL:
-                return ModifiedData(
-                    approval_process.sent_for_approval_date,  # type: ignore[arg-type]
-                    approval_process.sent_for_approval_by,
-                )
-            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
-                approval = approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last()
-                if approval:
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.IN_REVIEW:
-                approval = approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
-                if approval:
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.ACCEPTED and (
-                approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
-                .order_by("created_at")
-                .last()
-            ):
-                return ModifiedData(approval.created_at, approval.created_by)
-        return ModifiedData(self.updated_at)
+        return last_approval_step(self.last_approval_process, self.status, self.updated_at)
 
     # from generic pp
     def get_exchange_rate(
@@ -1120,6 +1012,57 @@ class PaymentPlan(
         return self.is_payment_gateway and not has_blocking_payments
 
     @property
+    def financial_service_provider(self) -> "FinancialServiceProvider | None":
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.financial_service_provider
+        return self.follow_up_instruction.financial_service_provider if self.follow_up_instruction_id else None
+
+    @property
+    def currency(self) -> "Currency | None":
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.currency
+        return self.follow_up_instruction.currency if self.follow_up_instruction_id else None
+
+    @property
+    def dispersion_start_date(self) -> date | None:
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.dispersion_start_date
+        return self.follow_up_instruction.dispersion_start_date if self.follow_up_instruction_id else None
+
+    @property
+    def dispersion_end_date(self) -> date | None:
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.dispersion_end_date
+        return self.follow_up_instruction.dispersion_end_date if self.follow_up_instruction_id else None
+
+    @property
+    def use_payment_gateway(self) -> bool:
+        if self.payment_plan_group_id:
+            return self.payment_plan_group.use_payment_gateway
+        return self.follow_up_instruction.use_payment_gateway if self.follow_up_instruction_id else False
+
+    @property
+    def exchange_rate_owner(self) -> "PaymentPlanGroup | FollowUpInstruction | None":
+        if self.payment_plan_group_id:
+            return self.payment_plan_group
+        return self.follow_up_instruction if self.follow_up_instruction_id else None
+
+    @property
+    def exchange_rate(self) -> Decimal | None:
+        owner = self.exchange_rate_owner
+        return owner.exchange_rate if owner else None
+
+    @property
+    def custom_exchange_rate(self) -> bool:
+        owner = self.exchange_rate_owner
+        return owner.custom_exchange_rate if owner else False
+
+    @property
+    def custom_exchange_rate_set_by(self) -> "User | None":
+        owner = self.exchange_rate_owner
+        return owner.custom_exchange_rate_set_by if owner else None
+
+    @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
         if not getattr(self, "financial_service_provider", None):
             return False
@@ -1156,20 +1099,8 @@ class PaymentPlan(
 
     @property
     def currency_exchange_date(self) -> date:
-        if (
-            self.status
-            in [
-                PaymentPlan.Status.ACCEPTED,
-                PaymentPlan.Status.FINISHED,
-                PaymentPlan.Status.READY_FOR_CLOSURE,
-                PaymentPlan.Status.CLOSED,
-            ]
-            and (process := self.approval_process.first())
-            and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first())
-        ):
-            return approval.created_at.date()
-        now = timezone.now().date()
-        return min(now, self.dispersion_end_date) if self.dispersion_end_date else now
+        owner = self.exchange_rate_owner
+        return owner.currency_exchange_date if owner else timezone.now().date()
 
     @property
     def can_create_payment_verification_plan(self) -> int:
@@ -1256,49 +1187,6 @@ class PaymentPlan(
             sent_to_payment_gateway=False,
         ).exists()
         return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-
-    @property
-    def vision_integration_enabled(self) -> bool:
-        # Follow-Up plans reuse funds reserved for the source plan and do not require a new Vision commitment.
-        if self.plan_type == PaymentPlan.PlanType.FOLLOW_UP:
-            return False
-        return bool(flag_state("VISION_INTEGRATION_ACTIVE")) and self.business_area.vision_integration_active
-
-    @property
-    def vision_status(self) -> str:
-        vision_data = (self.internal_data or {}).get("vision", {})
-        if not isinstance(vision_data, dict):
-            return VisionStatus.NOT_SENT.value
-        return str(vision_data.get("status") or VisionStatus.NOT_SENT.value)
-
-    @property
-    def vision_data(self) -> dict[str, Any]:
-        vision_data = (self.internal_data or {}).get("vision", {})
-        return vision_data if isinstance(vision_data, dict) else {}
-
-    @property
-    def vision_managed(self) -> bool:
-        return self.vision_integration_enabled and (
-            self.status == PaymentPlan.Status.IN_REVIEW or self.vision_status != VisionStatus.NOT_SENT.value
-        )
-
-    @property
-    def can_manually_send_to_payment_gateway(self) -> bool:
-        return self.can_send_to_payment_gateway and not self.vision_managed
-
-    @property
-    def can_send_to_vision(self) -> bool:
-        return (
-            self.status == PaymentPlan.Status.IN_REVIEW
-            and self.vision_integration_enabled
-            and self.vision_status in {VisionStatus.NOT_SENT.value, VisionStatus.SEND_FAILED.value}
-            and not self.sent_to_vision
-        )
-
-    @property
-    def sent_to_vision(self) -> bool:
-        vision_data = (self.internal_data or {}).get("vision", {})
-        return isinstance(vision_data, dict) and bool(vision_data.get("sent"))
 
     @property
     def has_payments_reconciliation_overdue(self) -> bool:

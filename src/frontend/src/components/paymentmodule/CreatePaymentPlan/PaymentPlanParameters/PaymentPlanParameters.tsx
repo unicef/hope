@@ -1,89 +1,52 @@
+import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
+import { usePaymentPlanGroup } from '@hooks/usePaymentPlanGroup';
 import { Typography } from '@mui/material';
-import { CalendarTodayRounded } from '@mui/icons-material';
-import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
-import { FormikDateField } from '@shared/Formik/FormikDateField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { tomorrow } from '@utils/utils';
-import { Field } from 'formik';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 interface PaymentPlanParametersProps {
-  values;
-  paymentPlan?;
-  cycles?: Array<{ id: string; title: string | null }>;
-  cycleDisabled?: boolean;
+  // Currency and dispersion dates are set on the group; shown here read-only.
+  paymentPlanGroupId?: string;
 }
 
 export const PaymentPlanParameters = ({
-  values,
-  paymentPlan,
-  cycles,
-  cycleDisabled = false,
+  paymentPlanGroupId,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
+  const { data: paymentPlanGroup } = usePaymentPlanGroup(paymentPlanGroupId);
+  const groupValue = (value: string | null | undefined): string => {
+    if (!paymentPlanGroup) return '-';
+    return value ?? t('Not set on the Payment Plan');
+  };
   return (
     <PaperContainer>
       <Title>
         <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
       <ResponsiveGridContainer spacing={3}>
-        {cycles && (
-          <ResponsiveGrid size="quarter">
-            <Field
-              name="programCycle"
-              label={t('Cycle')}
-              fullWidth
-              variant="outlined"
-              required
-              choices={cycles.map((c) => ({
-                value: c.id,
-                name: c.title ?? c.id,
-              }))}
-              component={FormikSelectField}
-              disableClearable
-              disabled={cycleDisabled}
-              data-cy="input-program-cycle"
-            />
-          </ResponsiveGrid>
-        )}
         <ResponsiveGrid size="quarter" mobileSize="half">
-          <Field
-            name="dispersionStartDate"
+          <LabelizedField
             label={t('Dispersion Start Date')}
-            component={FormikDateField}
-            required
-            fullWidth
-            decoratorEnd={<CalendarTodayRounded color="disabled" />}
-            dataCy="input-dispersion-start-date"
-            tooltip={t('The first day from which payments could be delivered.')}
-          />
+            dataCy="group-dispersion-start-date"
+          >
+            {groupValue(paymentPlanGroup?.dispersionStartDate)}
+          </LabelizedField>
         </ResponsiveGrid>
         <ResponsiveGrid size="quarter" mobileSize="half">
-          <Field
-            name="dispersionEndDate"
+          <LabelizedField
             label={t('Dispersion End Date')}
-            component={FormikDateField}
-            required
-            minDate={tomorrow}
-            disabled={!values.dispersionStartDate}
-            initialFocusedDate={values.dispersionStartDate}
-            fullWidth
-            decoratorEnd={<CalendarTodayRounded color="disabled" />}
-            dataCy="input-dispersion-end-date"
-            tooltip={t('The last day on which payments could be delivered.')}
-          />
+            dataCy="group-dispersion-end-date"
+          >
+            {groupValue(paymentPlanGroup?.dispersionEndDate)}
+          </LabelizedField>
         </ResponsiveGrid>
-        <ResponsiveGrid size="quarter">
-          <Field
-            name="currency"
-            component={FormikCurrencyAutocomplete}
-            required
-            disabled={paymentPlan?.planType === 'FOLLOW_UP'}
-          />
+        <ResponsiveGrid size="quarter" mobileSize="half">
+          <LabelizedField label={t('Currency')} dataCy="group-currency">
+            {groupValue(paymentPlanGroup?.currency)}
+          </LabelizedField>
         </ResponsiveGrid>
       </ResponsiveGridContainer>
     </PaperContainer>

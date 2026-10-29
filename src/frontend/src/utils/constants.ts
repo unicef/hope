@@ -1,4 +1,5 @@
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
 import { PaymentPlanDetailBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanDetailBackgroundActionStatusEnum';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import type { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
@@ -38,6 +39,22 @@ export const PAYMENT_PLAN_STATES = {
   ['ASSIGNED']: 'Assigned',
 };
 
+export const PAYMENT_PLAN_GROUP_STATES: Record<
+  PaymentPlanGroupStatusEnum,
+  string
+> = {
+  [PaymentPlanGroupStatusEnum.OPEN]: 'Open',
+  [PaymentPlanGroupStatusEnum.LOCKED]: 'Locked',
+  [PaymentPlanGroupStatusEnum.IN_APPROVAL]: 'In Approval',
+  [PaymentPlanGroupStatusEnum.IN_AUTHORIZATION]: 'In Authorization',
+  [PaymentPlanGroupStatusEnum.IN_REVIEW]: 'In Review',
+  [PaymentPlanGroupStatusEnum.ACCEPTED]: 'Accepted',
+  [PaymentPlanGroupStatusEnum.ABORTED]: 'Aborted',
+  [PaymentPlanGroupStatusEnum.FINISHED]: 'Finished',
+  [PaymentPlanGroupStatusEnum.READY_FOR_CLOSURE]: 'Ready for Closure',
+  [PaymentPlanGroupStatusEnum.CLOSED]: 'Closed',
+};
+
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
   [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
     'Entitlement Formula Run',
@@ -54,10 +71,6 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
     'XLSX Import Error',
   [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_FSP_EXTRA_FIELDS]:
     'XLSX Importing FSP Extra Fields',
-  [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE]:
-    'Applying Custom Exchange Rate',
-  [PaymentPlanBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR]:
-    'Custom Exchange Rate Error',
 };
 
 export const GRIEVANCE_TICKET_STATES = {
@@ -322,7 +335,6 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_ERROR_STATUSES: PaymentPlanDetailBac
     PaymentPlanDetailBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
-    PaymentPlanDetailBackgroundActionStatusEnum.APPLYING_CUSTOM_EXCHANGE_RATE_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.SEND_TO_PAYMENT_GATEWAY_ERROR,
     PaymentPlanDetailBackgroundActionStatusEnum.REBUILD_ERROR,

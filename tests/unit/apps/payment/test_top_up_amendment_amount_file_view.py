@@ -18,6 +18,7 @@ from extras.test_utils.factories import (
     PaymentFactory,
     PaymentHouseholdSnapshotFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     PaymentPlanPurposeFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -26,7 +27,7 @@ from extras.test_utils.factories import (
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.services.top_up_amount_service import TopUpAmountTemplateService
 from hope.apps.payment.xlsx.xlsx_payment_plan_base_service import XlsxPaymentPlanBaseService
-from hope.models import Payment, PaymentPlan, Program
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, Program
 
 pytestmark = pytest.mark.django_db
 
@@ -50,6 +51,13 @@ def amendment_context(api_client: Callable, create_user_role_with_permissions: A
         currency=CurrencyFactory(code="USD"),
         payment_plan_purposes=[purpose],
     )
+    top_up_group = PaymentPlanGroupFactory(
+        cycle=cycle,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        source_group=regular_pp.payment_plan_group,
+        status=PaymentPlanGroup.Status.ACCEPTED,
+        currency=regular_pp.currency,
+    )
     top_up_pp = PaymentPlanFactory(
         name="Standard PP Top Up",
         business_area=business_area,
@@ -57,7 +65,7 @@ def amendment_context(api_client: Callable, create_user_role_with_permissions: A
         plan_type=PaymentPlan.PlanType.TOP_UP,
         status=PaymentPlan.Status.ACCEPTED,
         source_payment_plan=regular_pp,
-        currency=regular_pp.currency,
+        payment_plan_group=top_up_group,
         payment_plan_purposes=[purpose],
     )
     payments = [PaymentFactory(parent=top_up_pp, status=Payment.STATUS_PENDING) for _ in range(3)]
@@ -71,20 +79,20 @@ def amendment_context(api_client: Callable, create_user_role_with_permissions: A
     url_kwargs = {
         "business_area_slug": business_area.slug,
         "program_code": program.code,
-        "pk": top_up_pp.pk,
+        "pk": top_up_group.pk,
     }
     return {
         "top_up_pp": top_up_pp,
         "payments": payments,
         "client": api_client(user),
-        "template_url": reverse("api:payments:payment-plans-top-up-amount-template", kwargs=url_kwargs),
-        "create_url": reverse("api:payments:payment-plans-create-top-up-amendment", kwargs=url_kwargs),
+        "template_url": reverse("api:payments:payment-plan-groups-top-up-amount-template", kwargs=url_kwargs),
+        "create_url": reverse("api:payments:payment-plan-groups-create-top-up-amendment", kwargs=url_kwargs),
     }
 
 
 def _amount_file(source_pp: PaymentPlan, amounts_by_payment_id: dict[str, str | None]) -> SimpleUploadedFile:
     """Build a filled-in amount template. Payment ids missing from the mapping are left blank."""
-    workbook = TopUpAmountTemplateService(source_pp).generate_workbook()
+    workbook = TopUpAmountTemplateService([source_pp]).generate_workbook()
     worksheet = workbook.active
     headers = [cell.value for cell in worksheet[1]]
     payment_id_column = headers.index(XlsxPaymentPlanBaseService.COLUMN_PAYMENT_ID) + 1
@@ -101,7 +109,7 @@ def _amount_file(source_pp: PaymentPlan, amounts_by_payment_id: dict[str, str | 
 def test_amendment_amount_template_arrange_top_up_source_act_get_assert_lists_its_own_payments(
     amendment_context: dict[str, Any],
 ) -> None:
-    """Asked on a Top-Up, the shared template endpoint lists that Top-Up's amendable payments."""
+    """Asked on a Top-Up group, the shared template endpoint lists that round's amendable payments."""
     response = amendment_context["client"].get(amendment_context["template_url"])
 
     assert response.status_code == status.HTTP_200_OK
@@ -146,6 +154,6 @@ def test_create_amendment_arrange_zero_amount_in_file_act_post_assert_row_left_o
         )
 
     assert response.status_code == status.HTTP_201_CREATED
-    amendment = PaymentPlan.objects.get(pk=response.json()["id"])
+    amendment = PaymentPlan.objects.get(payment_plan_group_id=response.json()["id"])
     assert list(amendment.payment_items.values_list("source_payment_id", flat=True)) == [funded.id]
     assert set(amendment_context["top_up_pp"].eligible_payments_for_top_up_amendment()) == {zeroed, skipped}

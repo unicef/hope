@@ -1,0 +1,129 @@
+{
+    "status_code": 200,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "GET, DELETE",
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "3023"
+    },
+    "data": {
+        "id": "deb01862-9373-40ba-99a3-b4c4d79cf717",
+        "unicef_id": "PP-BA0000-25-00000001",
+        "name": null,
+        "status": "OPEN",
+        "total_households_count": 0,
+        "total_individuals_count": 0,
+        "currency": null,
+        "currency_vision_code": null,
+        "excluded_ids": null,
+        "total_entitled_quantity": null,
+        "total_delivered_quantity": null,
+        "total_undelivered_quantity": null,
+        "dispersion_start_date": "2025-01-01",
+        "dispersion_end_date": "2025-01-31",
+        "plan_type": "REGULAR",
+        "follow_ups": [],
+        "top_ups": [],
+        "created_by": " ",
+        "created_at": "2025-01-01T00:00:00Z",
+        "updated_at": "2025-01-01T00:00:00Z",
+        "program": {
+            "id": "fa8df7b1-cfc3-44ae-9042-0fb87d0d8e7e",
+            "code": "pf-i",
+            "name": "Program 0",
+            "status": "ACTIVE",
+            "screen_beneficiary": false
+        },
+        "payment_plan_group": {
+            "id": "24fa35bc-b9cf-43a3-aa4d-336fd64d31d0",
+            "unicef_id": "PPG-1",
+            "name": "Default Group"
+        },
+        "version": 1735688653315201,
+        "background_action_status": null,
+        "background_action_status_display": null,
+        "start_date": null,
+        "end_date": null,
+        "program_cycle": {
+            "id": "ed6a9c67-3b48-4f5b-bb99-b36d2d4ec34a",
+            "title": "Programme Cycle 0"
+        },
+        "is_payment_gateway": false,
+        "is_instruction_managed": false,
+        "has_payment_list_export_file": false,
+        "imported_file_name": "",
+        "imported_file_date": null,
+        "payments_conflicts_count": 0,
+        "delivery_mechanism": null,
+        "volume_by_delivery_mechanism": [
+            {
+                "id": "deb01862-9373-40ba-99a3-b4c4d79cf717",
+                "delivery_mechanism": null,
+                "volume": null,
+                "volume_usd": null
+            }
+        ],
+        "exclusion_reason": null,
+        "exclude_household_error": null,
+        "bank_reconciliation_success": 0,
+        "bank_reconciliation_error": 0,
+        "can_create_payment_verification_plan": false,
+        "available_payment_records_count": 0,
+        "reconciliation_summary": {
+            "delivered_fully": 0,
+            "delivered_partially": 0,
+            "not_delivered": 0,
+            "unsuccessful": 0,
+            "pending": 0,
+            "pending_breakdown": {
+                "pending": 0,
+                "sent_to_payment_gateway": 0,
+                "sent_to_fsp": 0
+            },
+            "reconciled": 0,
+            "number_of_payments": 0
+        },
+        "excluded_households": [],
+        "excluded_individuals": [],
+        "total_withdrawn_households_count": 0,
+        "unsuccessful_payments_count": 0,
+        "can_delete": true,
+        "total_households_count_with_valid_phone_no": 0,
+        "financial_service_provider": null,
+        "approval_process": [],
+        "total_entitled_quantity_usd": null,
+        "total_entitled_quantity_revised_usd": null,
+        "total_delivered_quantity_usd": null,
+        "total_undelivered_quantity_usd": null,
+        "male_children_count": 0,
+        "female_children_count": 0,
+        "male_adults_count": 0,
+        "female_adults_count": 0,
+        "steficon_rule": null,
+        "source_payment_plan": null,
+        "exchange_rate": null,
+        "custom_exchange_rate": false,
+        "unore_exchange_rate": null,
+        "unore_exchange_rate_unavailable": false,
+        "eligible_payments_count": 0,
+        "payment_verification_plans": [],
+        "payment_verification_summary": null,
+        "admin_url": "/api/unicorn/payment/paymentplan/deb01862-9373-40ba-99a3-b4c4d79cf717/change/",
+        "abort_comment": "",
+        "closure_comment": null,
+        "closed_by": null,
+        "status_date": "2025-01-01T00:00:00Z",
+        "flat_amount_value": null,
+        "payment_plan_purposes": [
+            {
+                "id": "0714079e-7e64-4ed2-8449-3f605a596240",
+                "name": "Purpose 0"
+            }
+        ]
+    },
+    "content_type": "application/json"
+}

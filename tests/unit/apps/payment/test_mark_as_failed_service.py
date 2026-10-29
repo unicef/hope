@@ -74,7 +74,9 @@ def test_mark_as_failed_and_revert_update_household_cash_received() -> None:
     fsp_xlsx = FinancialServiceProviderFactory(
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
     )
-    payment_plan = PaymentPlanFactory(financial_service_provider=fsp_xlsx, exchange_rate=Decimal("2.00"))
+    payment_plan = PaymentPlanFactory(financial_service_provider=fsp_xlsx)
+    payment_plan.payment_plan_group.exchange_rate = Decimal("2.00")
+    payment_plan.payment_plan_group.save(update_fields=["exchange_rate"])
     payment = PaymentFactory(
         parent=payment_plan,
         status=Payment.STATUS_DISTRIBUTION_SUCCESS,

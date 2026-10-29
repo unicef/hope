@@ -1,4 +1,3 @@
-import datetime
 from decimal import Decimal
 
 from django.utils import timezone
@@ -9,7 +8,7 @@ from extras.test_utils.selenium import HopeTestBrowser
 from hope.apps.account.permissions import Permissions
 from hope.models import BusinessArea, Payment, PaymentPlan, User
 
-from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan, payment_plan_url
+from .conftest import PM_VIEW_PERMISSIONS, _lifecycle_payment_plan
 
 pytestmark = pytest.mark.django_db()
 
@@ -20,8 +19,6 @@ MARK_AS_FAILED_SUBMIT = 'button[data-cy="button-mark-as-failed-submit"]'
 REVERT = 'button[data-cy="button-revert-mark-as-failed"]'
 REVERT_SUBMIT = 'button[data-cy="button-revert-mark-as-failed-submit"]'
 DELIVERED_QUANTITY_INPUT = 'input[data-cy="input-deliveredQuantity"]'
-CREATE_FOLLOW_UP = 'button[data-cy="button-create-followup"]'
-CHILD_PLAN_SUBMIT = 'button[data-cy="button-submit"]'
 
 
 def program_url(payment_plan: PaymentPlan) -> str:
@@ -40,7 +37,7 @@ def first_payment(payment_plan: PaymentPlan) -> Payment:
 
 def _delivered_payment_plan(business_area: BusinessArea, status: str, force_failed_count: int = 0) -> PaymentPlan:
     """Released plan with 3 fully delivered payments, the first `force_failed_count` of them marked failed."""
-    payment_plan = _lifecycle_payment_plan(business_area, status)
+    payment_plan = _lifecycle_payment_plan(business_area, status, status)
     for index, payment in enumerate(payment_plan.payment_items.order_by("unicef_id")):
         failed = index < force_failed_count
         payment.status = Payment.STATUS_FORCE_FAILED if failed else Payment.STATUS_DISTRIBUTION_SUCCESS
@@ -124,36 +121,6 @@ def test_revert_mark_as_failed(
     assert payment.household.total_cash_received == Decimal("4.00")
 
 
-def test_create_follow_up_from_force_failed_payment(
-    browser: HopeTestBrowser,
-    user_with_no_permissions: User,
-    business_area: BusinessArea,
-    payment_plan_with_force_failed_payment: PaymentPlan,
-) -> None:
-    source = payment_plan_with_force_failed_payment
-    failed_payment = first_payment(source)
-    start_date = datetime.date.today() + datetime.timedelta(days=10)
-    end_date = start_date + datetime.timedelta(days=20)
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS, Permissions.PM_CREATE):
-        browser.login(username="noperm_user")
-        browser.open(payment_plan_url(source))
-        browser.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
-        browser.wait_for_element_clickable(CREATE_FOLLOW_UP).click()
-        browser.fill_date('input[name="dispersionStartDate"]', start_date.isoformat())
-        browser.wait_for_element_clickable('input[name="dispersionEndDate"]')
-        browser.fill_date('input[name="dispersionEndDate"]', end_date.isoformat())
-        browser.wait_for_element_clickable(CHILD_PLAN_SUBMIT).click()
-        browser.wait_for_text("Payment Plan Created")
-
-        follow_up = PaymentPlan.objects.get(source_payment_plan=source, plan_type=PaymentPlan.PlanType.FOLLOW_UP)
-        browser.wait_for_text(follow_up.unicef_id)
-        assert f"followup-payment-plans/{follow_up.id}" in browser.get_current_url()
-
-    assert list(follow_up.payment_items.values_list("household_id", "is_follow_up", "entitlement_quantity")) == [
-        (failed_payment.household_id, True, failed_payment.entitlement_quantity)
-    ]
-
-
 DELIVERED_PLAN_FIXTURES = pytest.mark.parametrize(
     "payment_plan_fixture",
     [
@@ -191,17 +158,3 @@ def test_mark_as_failed_hidden_without_permission(
     with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
         open_payment_as(browser, payment, "DELIVERED FULLY")
         browser.assert_element_absent(MARK_AS_FAILED)
-
-
-def test_create_follow_up_needs_pm_create(
-    browser: HopeTestBrowser,
-    user_with_no_permissions: User,
-    business_area: BusinessArea,
-    payment_plan_with_force_failed_payment: PaymentPlan,
-) -> None:
-    source = payment_plan_with_force_failed_payment
-    with grant_permission(user_with_no_permissions, business_area, *PM_VIEW_PERMISSIONS):
-        browser.login(username="noperm_user")
-        browser.open(payment_plan_url(source))
-        browser.wait_for_text(source.unicef_id, '[data-cy="pp-unicef-id"]')
-        assert not browser.wait_for_element_visible(CREATE_FOLLOW_UP).is_enabled()

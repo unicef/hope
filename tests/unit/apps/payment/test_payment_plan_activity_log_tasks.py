@@ -14,7 +14,7 @@ from hope.apps.core.celery_tasks import async_retry_job_task
 from hope.apps.payment.celery_tasks import (
     log_payment_plan_change,
     payment_plan_exclude_beneficiaries_async_task,
-    update_exchange_rate_on_release_payments_async_task,
+    recalculate_owner_exchange_rate_async_task,
 )
 from hope.models import AsyncRetryJob, DataCollectingType, LogEntry, PaymentPlan, User
 
@@ -93,9 +93,8 @@ def test_exclude_beneficiaries_task_creates_activity_log(payment_plan, household
 def test_log_payment_plan_change_captures_business_fields(payment_plan, user) -> None:
     old_payment_plan = copy_model_object(payment_plan)
     payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
-    payment_plan.exchange_rate = Decimal("1.2345")
     payment_plan.total_delivered_quantity = Decimal("500.00")
-    payment_plan.save(update_fields=["status", "exchange_rate", "total_delivered_quantity"])
+    payment_plan.save(update_fields=["status", "total_delivered_quantity"])
 
     log_payment_plan_change(payment_plan, old_payment_plan, str(user.pk))
 
@@ -104,22 +103,23 @@ def test_log_payment_plan_change_captures_business_fields(payment_plan, user) ->
     assert log.user == user
     assert log.changes["status"]["to"] == PaymentPlan.Status.TP_STEFICON_COMPLETED
     # create_diff() normalizes Decimals before stringifying
-    assert log.changes["exchange_rate"]["to"] == str(Decimal("1.2345").normalize())
     assert log.changes["total_delivered_quantity"]["to"] == str(Decimal("500.00").normalize())
 
 
 @pytest.mark.enable_activity_log
-@mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
+@mock.patch("hope.apps.payment.celery_tasks.get_owner_unore_exchange_rate", return_value=2.0)
 def test_update_exchange_rate_task_creates_activity_log(get_exchange_rate_mock, payment_plan, user) -> None:
     queue_and_run_retry_task(
-        update_exchange_rate_on_release_payments_async_task,
-        payment_plan=payment_plan,
+        recalculate_owner_exchange_rate_async_task,
+        owner=payment_plan.payment_plan_group,
         user_id=str(user.pk),
     )
 
-    log = LogEntry.objects.filter(object_id=payment_plan.pk, action=LogEntry.UPDATE).latest("timestamp")
+    log = LogEntry.objects.filter(object_id=payment_plan.payment_plan_group_id, action=LogEntry.UPDATE).latest(
+        "timestamp"
+    )
     assert log.user == user
-    assert log.changes["exchange_rate"]["to"] == "2.0"
+    assert log.changes["exchange_rate"]["to"] == str(Decimal("2.0").normalize())
 
 
 @pytest.mark.enable_activity_log

@@ -56,7 +56,7 @@ export function DeletePaymentPlanGroup({
   const handleDelete = async (): Promise<void> => {
     try {
       await deleteGroup();
-      showMessage(t('Group Deleted'));
+      showMessage(t('Payment Plan Deleted'));
       navigate(`/${baseUrl}/payment-module/groups`);
     } catch (e) {
       showApiErrorMessages(e, showMessage);
@@ -93,7 +93,7 @@ export function DeletePaymentPlanGroup({
         maxWidth="md"
       >
         <DialogTitleWrapper>
-          <DialogTitle>{t('Delete Group')}</DialogTitle>
+          <DialogTitle>{t('Delete Payment Plan')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
@@ -102,7 +102,7 @@ export function DeletePaymentPlanGroup({
                 p: 5,
               }}
             >
-              {t('Are you sure you want to remove this Group?')}
+              {t('Are you sure you want to remove this Payment Plan?')}
             </Box>
           </DialogContainer>
         </DialogContent>

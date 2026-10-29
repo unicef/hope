@@ -1,4 +1,7 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import AcceptanceProcess from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
+import { ConversionToUsd } from '@components/paymentmodule/PaymentPlanDetails/ConversionToUsd';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -10,8 +13,10 @@ import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PaymentPlanGroupStatusEnum } from '@restgenerated/models/PaymentPlanGroupStatusEnum';
+import { PlanTypeEnum } from '@restgenerated/models/PlanTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
-import { Box, Grid, Link, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restQueryKey } from '@utils/queryKeys';
 import type { ReactElement } from 'react';
@@ -20,9 +25,14 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlanGroupDetailsHeader } from '@containers/pages/paymentmodule/Groups/PaymentPlanGroupDetailsHeader';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanGroupDetails/FundsCommitment/FundsCommitmentSection';
+import { VisionStatusSection } from '@components/paymentmodule/PaymentPlanGroupDetails/VisionStatusSection';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { batchPlanTypeLabel, isGroupBackgroundActionBusy } from './utils';
-import { ResponsiveGrid, ResponsiveGridContainer, responsiveValue } from 'src/responsive';
+import { ExportGroupSummaryPdfButton } from './actions/ExportGroupSummaryPdfButton';
+import { LinkedGroupsTable } from './LinkedGroupsTable';
+import type { PaymentPlanGroupDetail } from './types';
+import { isGroupBackgroundActionBusy, planTypeDisplayLabel } from './utils';
+import { ResponsiveGrid, ResponsiveGridContainer } from 'src/responsive';
 
 const initialFilter = {
   search: '',
@@ -32,6 +42,12 @@ const initialFilter = {
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
 };
+
+const isVisionReviewActive = (group: PaymentPlanGroupDetail | null): boolean =>
+  group !== null &&
+  group.status === PaymentPlanGroupStatusEnum.IN_REVIEW &&
+  'visionManaged' in group &&
+  group.visionManaged === true;
 
 const PaymentPlanGroupDetailsPage = (): ReactElement => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -56,17 +72,23 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
         programCode: programId,
       }),
     enabled: !!groupId && !!businessArea && !!programId,
-    // Poll while the group is exporting/importing an XLSX so the page reflects
-    // the result (export_file populated, status cleared) without a manual refresh.
-    refetchInterval: (query) =>
-      isGroupBackgroundActionBusy(query.state.data ?? null) ? 3000 : false,
+    refetchInterval: (query) => {
+      const currentGroup = query.state.data ?? null;
+      if (isGroupBackgroundActionBusy(currentGroup)) return 3000;
+      return isVisionReviewActive(currentGroup) ? 60000 : false;
+    },
     refetchIntervalInBackground: true,
   });
 
   const wasBusy = useRef(false);
+  const wasVisionReviewActive = useRef(false);
   useEffect(() => {
     const isBusy = isGroupBackgroundActionBusy(group ?? null);
-    if (wasBusy.current && !isBusy) {
+    const visionReviewActive = isVisionReviewActive(group ?? null);
+    if (
+      (wasBusy.current && !isBusy) ||
+      (wasVisionReviewActive.current && !visionReviewActive)
+    ) {
       queryClient.invalidateQueries({
         queryKey: restQueryKey(
           RestService.restBusinessAreasProgramsPaymentPlansList,
@@ -74,6 +96,7 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
       });
     }
     wasBusy.current = isBusy;
+    wasVisionReviewActive.current = visionReviewActive;
   }, [group, queryClient]);
 
   if (permissions === null) return null;
@@ -115,6 +138,45 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
                   )}
                 </LabelizedField>
               </ResponsiveGrid>
+              {group?.planType && group.planType !== PlanTypeEnum.REGULAR && (
+                <ResponsiveGrid size="quarter" mobileSize="half">
+                  <LabelizedField label={t('Type')}>
+                    {t(planTypeDisplayLabel(group.planType))}
+                  </LabelizedField>
+                </ResponsiveGrid>
+              )}
+              {group?.sourceGroup && (
+                <ResponsiveGrid size="quarter" mobileSize="half">
+                  <LabelizedField label={t('Created from')}>
+                    <BlackLink
+                      to={`/${baseUrl}/payment-module/groups/${group.sourceGroup.id}`}
+                      data-cy="source-group-link"
+                    >
+                      {group.sourceGroup.unicefId ?? group.sourceGroup.name}
+                    </BlackLink>
+                  </LabelizedField>
+                </ResponsiveGrid>
+              )}
+              <ResponsiveGrid size="quarter" mobileSize="half">
+                <LabelizedField label={t('FSP')}>
+                  {group?.financialServiceProvider?.name ?? '-'}
+                </LabelizedField>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
+                <LabelizedField label={t('Currency')}>
+                  {group?.currency ?? '-'}
+                </LabelizedField>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
+                <LabelizedField label={t('Dispersion Start Date')}>
+                  {group?.dispersionStartDate ?? '-'}
+                </LabelizedField>
+              </ResponsiveGrid>
+              <ResponsiveGrid size="quarter" mobileSize="half">
+                <LabelizedField label={t('Dispersion End Date')}>
+                  {group?.dispersionEndDate ?? '-'}
+                </LabelizedField>
+              </ResponsiveGrid>
               <ResponsiveGrid size="quarter" mobileSize="half">
                 <LabelizedField label={t('Total Entitled (USD)')}>
                   {group?.totalEntitledQuantityUsd ?? '-'}
@@ -134,50 +196,46 @@ const PaymentPlanGroupDetailsPage = (): ReactElement => {
           </OverviewContainer>
         </ContainerColumnWithBorder>
       </Grid>
-      {group?.batches && group.batches.length > 0 && (
-        <Grid size={{ xs: 12 }} data-cy="batches-section">
-          <ContainerColumnWithBorder>
-            <Title>
-              <Typography variant="h6">{t('Batches')}</Typography>
-            </Title>
-            {group.batches.map((batch) => (
-              <Box
-                key={batch.exportTag}
-                sx={{
-                  display: 'flex',
-                  flexWrap: responsiveValue('wrap', 'nowrap'),
-                  alignItems: 'center',
-                  gap: 2,
-                  py: 1,
-                }}
-              >
-                <BlackLink
-                  to={`/${baseUrl}/payment-module/groups/${groupId}/batches/${encodeURIComponent(String(batch.exportTag))}`}
-                >
-                  {t('Batch')} #{batch.exportTag}
-                  {batchPlanTypeLabel(batch.planType) &&
-                    ` ${t(batchPlanTypeLabel(batch.planType))}`}
-                </BlackLink>
-                {batch.exportFileLink ? (
-                  <Link
-                    href={`/api/download-payment-plan-group-batch/${groupId}/${batch.exportTag}`}
-                    download
-                    underline="hover"
-                    data-cy={`batch-download-link-${batch.exportTag}`}
-                  >
-                    {t('Download')}
-                  </Link>
-                ) : null}
-              </Box>
-            ))}
-          </ContainerColumnWithBorder>
-        </Grid>
+      <AcceptanceProcess
+        approvalProcess={group?.approvalProcess}
+        closure={
+          group?.status === PaymentPlanGroupStatusEnum.CLOSED
+            ? { closedBy: group.closedBy, closedDate: group.statusDate }
+            : null
+        }
+        headerAction={<ExportGroupSummaryPdfButton group={group ?? null} />}
+      />
+      {group && (
+        <ConversionToUsd
+          owner={group}
+          ownerType="group"
+          permissions={permissions}
+        />
+      )}
+      {group && <VisionStatusSection group={group} />}
+      {group &&
+        [
+          PaymentPlanGroupStatusEnum.IN_REVIEW,
+          PaymentPlanGroupStatusEnum.ACCEPTED,
+          PaymentPlanGroupStatusEnum.FINISHED,
+        ].includes(group.status) && (
+          <FundsCommitmentSection group={group} programCode={programId} />
+        )}
+      {group && (
+        <SupportingDocumentsSection
+          key={group.id}
+          ownerPath={`payment-plan-groups/${group.id}`}
+          supportingDocuments={group.supportingDocuments}
+        />
+      )}
+      {group?.linkedGroups && (
+        <LinkedGroupsTable linkedGroups={group.linkedGroups} />
       )}
       <TableWrapper>
         <PaymentPlansTable
           filter={filter}
           canViewDetails
-          title={t('Payment Plans')}
+          title={t('Payment Plan Components')}
           paymentPlanGroupId={groupId}
         />
       </TableWrapper>

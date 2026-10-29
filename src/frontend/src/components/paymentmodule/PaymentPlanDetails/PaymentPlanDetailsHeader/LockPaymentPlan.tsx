@@ -55,7 +55,7 @@ export function LockPaymentPlan({
         programCode,
       }),
     onSuccess: async () => {
-      showMessage(t('Payment Plan has been locked.'));
+      showMessage(t('Payment Plan Component has been locked.'));
       setLockDialogOpen(false);
       await queryClient.invalidateQueries({
         queryKey: restQueryKey(
@@ -99,7 +99,7 @@ export function LockPaymentPlan({
         maxWidth="md"
       >
         <DialogTitleWrapper>
-          <DialogTitle>{t('Lock Payment Plan')}</DialogTitle>
+          <DialogTitle>{t('Lock Payment Plan Component')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
@@ -127,7 +127,7 @@ export function LockPaymentPlan({
                   {paymentPlan.paymentsConflictsCount === 1
                     ? t(beneficiaryGroup?.groupLabel)
                     : t(beneficiaryGroup?.groupLabelPlural)}{' '}
-                  {t('that will be ignored in this Payment Plan.')}
+                  {t('that will be ignored in this Payment Plan Component.')}
                 </GreyText>
               </Box>
             )}

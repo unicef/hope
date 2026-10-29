@@ -16,7 +16,7 @@ pytestmark = pytest.mark.django_db()
 def _select_autocomplete_option(browser: HopeTestBrowser, label: str) -> None:
     # Append with send_keys; browser.type() clears the field first, which on a
     # MUI multi-autocomplete backspaces away an already-selected chip.
-    el = browser.find_element('input[aria-label="Payment Plan Groups"]')
+    el = browser.find_element('input[aria-label="Payment Plans"]')
     el.send_keys(label)
     browser.wait_for_element_visible('li[role="option"]')
     browser.click('li[role="option"]')
@@ -74,7 +74,7 @@ def test_follow_up_instruction_full_flow(
     login.wait_for_text("Follow-up Instructions")
     login.wait_for_element_clickable('[data-cy="button-create-follow-up-instruction"]')
     login.click('[data-cy="button-create-follow-up-instruction"]')
-    login.wait_for_element_visible('input[aria-label="Payment Plan Groups"]')
+    login.wait_for_element_visible('input[aria-label="Payment Plans"]')
     _select_autocomplete_option(login, group_one.unicef_id or group_one.name)
     _select_autocomplete_option(login, group_two.unicef_id or group_two.name)
     _fill_date(login, "dispersionStartDate", "2027-01-01")
@@ -217,13 +217,50 @@ def test_follow_up_instruction_full_flow(
     login.wait_for_text("0.00", '[data-cy="summary-total-undelivered"]')
     login.wait_for_element_visible('[data-cy="button-reconciliation-export"]')
     login.wait_for_element_visible('[data-cy="button-reconciliation-import"]')
-    login.wait_for_element_visible('[data-cy="button-close"]')
+    login.wait_for_element_visible('[data-cy="button-set-ready-for-closure"]')
+    login.assert_element_absent('[data-cy="button-close"]')
     login.assert_element_absent('[data-cy="button-mark-as-released"]')
+
+    # --- Ready for closure, send back, ready again ---
+    login.click('[data-cy="button-set-ready-for-closure"]')
+    login.wait_for_text("Follow-up Instruction set ready for closure")
+    login.wait_for_text("READY FOR CLOSURE", '[data-cy="plan-status-0"]')
+    login.wait_for_element_visible('[data-cy="button-close"]')
+    login.click('[data-cy="button-send-back"]')
+    login.wait_for_text("Follow-up Instruction sent back")
+    login.wait_for_text("FINISHED", '[data-cy="plan-status-0"]')
+    login.assert_element_absent('[data-cy="button-close"]')
+    login.click('[data-cy="button-set-ready-for-closure"]')
+    login.wait_for_text("READY FOR CLOSURE", '[data-cy="plan-status-1"]')
 
     # --- Close ---
     login.click('[data-cy="button-close"]')
+    login.type('textarea[name="comment"]', "Paid out, no verification")
+    login.click('[data-cy="button-close-confirm"]')
     login.wait_for_text("Follow-up Instruction closed")
     login.wait_for_text("CLOSED")
     login.assert_element_absent('[data-cy="button-close"]')
     login.assert_element_absent('[data-cy="button-reconciliation-export"]')
     login.assert_element_absent('[data-cy="button-reconciliation-import"]')
+
+
+def test_upload_supporting_document_to_follow_up_instruction(
+    login: HopeTestBrowser,
+    business_area: BusinessArea,
+    fi_program: Program,
+    fi_instruction: FollowUpInstruction,
+) -> None:
+    login.open(
+        f"/{business_area.slug}/programs/{fi_program.code}/payment-module/follow-up-instructions/{fi_instruction.id}"
+    )
+    login.wait_for_text("No documents uploaded", '[data-cy="supporting-documents-empty"]')
+
+    login.wait_for_element_clickable('button[data-cy="upload-file-button"]').click()
+    login.choose_file('[data-cy="file-input"]', f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+    login.type('div[data-cy="title-input"] input', "Instruction contract")
+    login.click('button[data-cy="button-import-submit"]')
+    login.wait_for_text("File uploaded successfully")
+    login.click('button[data-cy="expand-button"]')
+
+    login.wait_for_text("Instruction contract", '[data-cy="document-item"]')
+    assert list(fi_instruction.documents.values_list("title", flat=True)) == ["Instruction contract"]

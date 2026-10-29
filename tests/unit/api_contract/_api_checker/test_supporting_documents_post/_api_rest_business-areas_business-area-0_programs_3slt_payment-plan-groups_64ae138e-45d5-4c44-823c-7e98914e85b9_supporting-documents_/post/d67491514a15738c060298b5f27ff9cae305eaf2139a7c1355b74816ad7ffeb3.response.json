@@ -1,0 +1,21 @@
+{
+    "status_code": 201,
+    "headers": {
+        "Content-Type": "application/json",
+        "Vary": "Accept, Cookie, origin",
+        "Allow": "POST, OPTIONS",
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": "139"
+    },
+    "data": {
+        "id": 1,
+        "title": "Test Document",
+        "file": "test.pdf",
+        "uploaded_at": "2025-01-01T00:00:00Z",
+        "created_by": "aa5053e5-107f-43a8-ab8b-701bffee33dd"
+    },
+    "content_type": "application/json"
+}

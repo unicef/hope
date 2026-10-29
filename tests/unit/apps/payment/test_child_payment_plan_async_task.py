@@ -10,7 +10,6 @@ Two review findings are pinned here:
   payments; it must be marked ``build_status=FAILED`` instead of left silently ``OPEN``.
 """
 
-from datetime import timedelta
 from types import SimpleNamespace
 from typing import Any
 from unittest import mock
@@ -22,13 +21,14 @@ from extras.test_utils.factories import (
     BusinessAreaFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,
     UserFactory,
 )
 from hope.apps.payment.celery_tasks import prepare_child_payment_plan_async_task_action
 from hope.apps.payment.services.payment_plan_services import PaymentPlanService
-from hope.models import Payment, PaymentPlan, ProgramCycle, User
+from hope.models import Payment, PaymentPlan, PaymentPlanGroup, ProgramCycle, User
 
 pytestmark = pytest.mark.django_db
 
@@ -71,6 +71,13 @@ def source_payment(regular_pp: PaymentPlan) -> Payment:
     return PaymentFactory(parent=regular_pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
 
 
+@pytest.fixture
+def top_up_group(cycle: ProgramCycle, regular_pp: PaymentPlan) -> PaymentPlanGroup:
+    return PaymentPlanGroupFactory(
+        cycle=cycle, plan_type=PaymentPlan.PlanType.TOP_UP, source_group=regular_pp.payment_plan_group
+    )
+
+
 @freeze_time("2023-10-10")
 @mock.patch("hope.models.payment_plan.PaymentPlan.get_exchange_rate", return_value=2.0)
 def test_action_arrange_copied_top_up_act_run_again_assert_idempotent(
@@ -78,10 +85,9 @@ def test_action_arrange_copied_top_up_act_run_again_assert_idempotent(
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,
+    top_up_group: Any,
 ) -> None:
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
     _run_copy_action(top_up_pp)
     count_after_first_run = top_up_pp.payment_items.count()
 
@@ -98,10 +104,9 @@ def test_action_arrange_eligible_payments_act_run_assert_build_status_ok(
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,
+    top_up_group: Any,
 ) -> None:
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
 
     _run_copy_action(top_up_pp)
 
@@ -131,10 +136,9 @@ def test_action_arrange_plan_deleted_act_run_assert_copy_skipped(
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,
+    top_up_group: Any,
 ) -> None:
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
-    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    top_up_pp = PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
     PaymentPlanService(payment_plan=top_up_pp).delete()
 
     result = _run_copy_action(top_up_pp)
@@ -150,11 +154,10 @@ def test_action_arrange_eligible_consumed_by_sibling_act_run_assert_build_status
     user: User,
     regular_pp: PaymentPlan,
     source_payment: Payment,
+    top_up_group: Any,
 ) -> None:
-    start = regular_pp.dispersion_start_date + timedelta(days=1)
-    end = regular_pp.dispersion_end_date + timedelta(days=1)
-    first_top_up = PaymentPlanService(regular_pp).create_top_up(user, start, end)
-    second_top_up = PaymentPlanService(regular_pp).create_top_up(user, start, end)
+    first_top_up = PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
+    second_top_up = PaymentPlanService(regular_pp).create_top_up(user, payment_plan_group=top_up_group)
     _run_copy_action(first_top_up)
 
     _run_copy_action(second_top_up)

@@ -10,13 +10,15 @@ from extras.test_utils.factories import (
     CurrencyFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
+    PaymentPlanGroupFactory,
+    ProgramCycleFactory,
 )
 from hope.apps.core.api.mixins import BaseAPI
-from hope.contrib.api.serializers.vision import PaymentPlanPayloadSerializer
+from hope.contrib.api.serializers.vision import PaymentPlanGroupPayloadSerializer
 from hope.contrib.vision.api import VisionAPI, VisionAPIError, VisionAPIMissingCredentialsError
 from hope.contrib.vision.choices import VisionErrorCode, VisionLogEntryType, VisionStatus
 from hope.contrib.vision.services import VisionService
-from hope.models import PaymentPlan
+from hope.models import PaymentPlan, PaymentPlanGroup
 
 
 @pytest.fixture(autouse=True)
@@ -29,43 +31,50 @@ def mock_vision_env_vars(settings) -> None:
 
 
 @pytest.fixture
-def vision_api_payment_plan_factory(db) -> Callable[..., PaymentPlan]:
-    def create_payment_plan(
+def vision_api_group_factory(db) -> Callable[..., PaymentPlanGroup]:
+    def create_group(
         *,
         unicef_id: str = "PP001",
         currency_code: str = "USD",
         currency_vision_code: str | None = None,
         created_at: datetime = datetime(2025, 1, 1),
         exchange_rate: Decimal | None = Decimal("1.25000000"),
-    ) -> PaymentPlan:
+    ) -> PaymentPlanGroup:
         business_area = BusinessAreaFactory(code="FI01")
         currency = CurrencyFactory(code=currency_code, vision_code=currency_vision_code or currency_code)
         financial_service_provider = FinancialServiceProviderFactory(
             name="Head Vendor Name",
             vision_vendor_number="V100004",
         )
-        payment_plan = PaymentPlanFactory(
+        cycle = ProgramCycleFactory(program__business_area=business_area)
+        group = PaymentPlanGroupFactory(
+            cycle=cycle,
             unicef_id=unicef_id,
+            name="Monthly payment plan testing the content length",
+            status=PaymentPlanGroup.Status.IN_REVIEW,
+            currency=currency,
+            financial_service_provider=financial_service_provider,
+            exchange_rate=exchange_rate,
+        )
+        PaymentPlanFactory(
             name="Monthly payment plan testing the content length",
             status=PaymentPlan.Status.IN_REVIEW,
             business_area=business_area,
-            program_cycle__program__business_area=business_area,
-            currency=currency,
-            financial_service_provider=financial_service_provider,
+            program_cycle=cycle,
+            payment_plan_group=group,
             total_entitled_quantity="10000.00",
             total_entitled_quantity_usd="10000.00",
-            exchange_rate=exchange_rate,
         )
-        PaymentPlan.objects.filter(pk=payment_plan.pk).update(created_at=created_at)
-        payment_plan.created_at = created_at
-        return payment_plan
+        PaymentPlanGroup.objects.filter(pk=group.pk).update(created_at=created_at)
+        group.created_at = created_at
+        return group
 
-    return create_payment_plan
+    return create_group
 
 
 @pytest.fixture
-def payment_plan_without_exchange_rate(vision_api_payment_plan_factory) -> PaymentPlan:
-    return vision_api_payment_plan_factory(exchange_rate=None)
+def group_without_exchange_rate(vision_api_group_factory) -> PaymentPlanGroup:
+    return vision_api_group_factory(exchange_rate=None)
 
 
 def test_missing_vision_url_raises_error(settings) -> None:
@@ -139,11 +148,11 @@ def test_acquire_token_missing_credentials_raises_error(mock_post, settings) -> 
     mock_post.assert_not_called()
 
 
-def _make_mock_payment_plan(**overrides) -> MagicMock:
+def _make_mock_group(**overrides) -> MagicMock:
     defaults = {
         "unicef_id": "PP001",
         "name": "Monthly payment plan testing the content length",
-        "status": PaymentPlan.Status.IN_REVIEW,
+        "status": PaymentPlanGroup.Status.IN_REVIEW,
         "business_area_id": "ba-1",
         "currency_id": "usd-1",
         "total_entitled_quantity": "10000.00",
@@ -166,11 +175,11 @@ def _make_mock_payment_plan(**overrides) -> MagicMock:
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_plan_factory) -> None:
+def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_group_factory) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
     api = VisionAPI()
-    pp = vision_api_payment_plan_factory(unicef_id="PP001")
-    result = api.send_payment_plan(pp)
+    pp = vision_api_group_factory(unicef_id="PP001")
+    result = api.send_payment_plan_group(pp)
     assert result == {"status": "ok"}
     mock_acquire_token.assert_called_once()
     mock_post.assert_called_once_with(
@@ -190,11 +199,11 @@ def test_send_payment_plan(mock_post, mock_acquire_token, vision_api_payment_pla
 
 
 def test_payment_plan_payload_includes_null_exchange_rate(
-    payment_plan_without_exchange_rate,
+    group_without_exchange_rate,
     django_assert_num_queries,
 ) -> None:
-    with django_assert_num_queries(0):
-        payload = PaymentPlanPayloadSerializer(payment_plan_without_exchange_rate).data
+    with django_assert_num_queries(2):
+        payload = PaymentPlanGroupPayloadSerializer(group_without_exchange_rate).data
 
     assert payload["exchangeRate"] is None
 
@@ -204,15 +213,15 @@ def test_payment_plan_payload_includes_null_exchange_rate(
 def test_send_payment_plan_with_different_currency(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
 ) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
     api = VisionAPI()
-    pp = vision_api_payment_plan_factory(
+    pp = vision_api_group_factory(
         unicef_id="PP003",
         currency_code="EUR",
     )
-    result = api.send_payment_plan(pp)
+    result = api.send_payment_plan_group(pp)
     assert result == {"status": "ok"}
     mock_post.assert_called_once_with(
         "https://test.example.com/ps/ezcash/PaymentPlan",
@@ -232,31 +241,29 @@ def test_send_payment_plan_with_different_currency(
 
 @patch("hope.contrib.vision.api.VisionAPI._acquire_token")
 @patch("hope.contrib.vision.api.VisionAPI._post")
-def test_send_payment_plan_sends_vision_code_not_code(
-    mock_post, mock_acquire_token, vision_api_payment_plan_factory
-) -> None:
+def test_send_payment_plan_sends_vision_code_not_code(mock_post, mock_acquire_token, vision_api_group_factory) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
     api = VisionAPI()
-    pp = vision_api_payment_plan_factory(
+    pp = vision_api_group_factory(
         unicef_id="PP004",
         currency_code="SYP",
         currency_vision_code="SYP01",
         created_at=datetime(2025, 3, 1),
     )
-    result = api.send_payment_plan(pp)
+    result = api.send_payment_plan_group(pp)
     assert result == {"status": "ok"}
     sent_payload = mock_post.call_args[0][1]
     assert sent_payload["currency"] == "SYP01"
 
 
-def test_vision_api_error_is_raised(vision_api_payment_plan_factory) -> None:
+def test_vision_api_error_is_raised(vision_api_group_factory) -> None:
     with patch("hope.contrib.vision.api.VisionAPI._acquire_token"):
         with patch("hope.contrib.vision.api.VisionAPI._post") as mock_post:
             mock_post.side_effect = BaseAPI.APIError("boom")
             api = VisionAPI()
-            pp = vision_api_payment_plan_factory()
+            pp = vision_api_group_factory()
             with pytest.raises(VisionAPIError):
-                api.send_payment_plan(pp)
+                api.send_payment_plan_group(pp)
             pp.refresh_from_db(fields=["internal_data"])
             assert "vision" in pp.internal_data
             entry = pp.internal_data["vision"]["log"][0]
@@ -266,16 +273,16 @@ def test_vision_api_error_is_raised(vision_api_payment_plan_factory) -> None:
             assert pp.vision_status == "SEND_FAILED"
 
 
-def test_send_payment_plan_logs_4xx_error(vision_api_payment_plan_factory) -> None:
+def test_send_payment_plan_logs_4xx_error(vision_api_group_factory) -> None:
     with patch("hope.contrib.vision.api.VisionAPI._acquire_token"):
         with patch("hope.contrib.vision.api.VisionAPI._post") as mock_post:
             mock_post.side_effect = BaseAPI.APIError(
                 'VisionAPI Invalid response: <Response [400]>, b\'{"error": "bad request"}\', https://test.example.com/ps/ezcash/PaymentPlan'
             )
             api = VisionAPI()
-            pp = vision_api_payment_plan_factory()
+            pp = vision_api_group_factory()
             with pytest.raises(VisionAPIError):
-                api.send_payment_plan(pp)
+                api.send_payment_plan_group(pp)
             pp.refresh_from_db(fields=["internal_data"])
             assert "vision" in pp.internal_data
             assert len(pp.internal_data["vision"]["log"]) == 1
@@ -288,15 +295,15 @@ def test_send_payment_plan_logs_4xx_error(vision_api_payment_plan_factory) -> No
 
 def test_send_payment_plan_persists_missing_credentials_failure(
     settings,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
     django_assert_num_queries,
 ) -> None:
     settings.VISION_CLIENT_ID = ""
     api = VisionAPI()
-    payment_plan = vision_api_payment_plan_factory()
+    payment_plan = vision_api_group_factory()
 
-    with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
-        api.send_payment_plan(payment_plan)
+    with django_assert_num_queries(6), pytest.raises(VisionAPIMissingCredentialsError):
+        api.send_payment_plan_group(payment_plan)
 
     payment_plan.refresh_from_db(fields=["internal_data"])
     assert payment_plan.vision_status == VisionStatus.SEND_FAILED.value
@@ -308,14 +315,14 @@ def test_send_payment_plan_persists_missing_credentials_failure(
 def test_send_payment_plan_logs_payload_and_response(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
 ) -> None:
     mock_post.return_value = ({"status": "ok", "messageId": "msg-42"}, 200)
     api = VisionAPI()
-    pp = vision_api_payment_plan_factory(unicef_id="PP042")
+    pp = vision_api_group_factory(unicef_id="PP042")
     VisionService.set_status(pp, VisionStatus.WAITING_FOR_CALLBACK)
     pp.save(update_fields=["internal_data"])
-    result = api.send_payment_plan(pp)
+    result = api.send_payment_plan_group(pp)
     pp.refresh_from_db(fields=["internal_data"])
     assert result == {"status": "ok", "messageId": "msg-42"}
     assert "vision" in pp.internal_data
@@ -335,11 +342,11 @@ def test_send_payment_plan_logs_payload_and_response(
 def test_notify_payment_plan_status_uses_payment_plan_endpoint_without_changing_workflow_state(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
     django_assert_num_queries,
 ) -> None:
     mock_post.return_value = ({"status": "ok"}, 200)
-    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-STATUS")
+    payment_plan = vision_api_group_factory(unicef_id="PP-STATUS")
     payment_plan.internal_data = {
         "vision": {
             "status": VisionStatus.NOT_SENT.value,
@@ -348,8 +355,8 @@ def test_notify_payment_plan_status_uses_payment_plan_endpoint_without_changing_
     }
     payment_plan.save(update_fields=["internal_data"])
 
-    with django_assert_num_queries(4):
-        response = VisionAPI().notify_payment_plan_status(payment_plan, "REJECTED")
+    with django_assert_num_queries(6):
+        response = VisionAPI().notify_payment_plan_group_status(payment_plan, "REJECTED")
 
     payment_plan.refresh_from_db(fields=["internal_data"])
     assert response == {"status": "ok"}
@@ -363,14 +370,14 @@ def test_notify_payment_plan_status_uses_payment_plan_endpoint_without_changing_
 
 def test_notify_payment_plan_status_logs_missing_credentials_without_changing_workflow_state(
     settings,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
     django_assert_num_queries,
 ) -> None:
     settings.VISION_CLIENT_ID = ""
-    payment_plan = vision_api_payment_plan_factory()
+    payment_plan = vision_api_group_factory()
 
-    with django_assert_num_queries(4), pytest.raises(VisionAPIMissingCredentialsError):
-        VisionAPI().notify_payment_plan_status(payment_plan, "ABORTED")
+    with django_assert_num_queries(6), pytest.raises(VisionAPIMissingCredentialsError):
+        VisionAPI().notify_payment_plan_group_status(payment_plan, "ABORTED")
 
     payment_plan.refresh_from_db(fields=["internal_data"])
     assert payment_plan.vision_status == VisionStatus.NOT_SENT.value
@@ -384,14 +391,14 @@ def test_notify_payment_plan_status_logs_missing_credentials_without_changing_wo
 def test_notify_payment_plan_status_logs_api_error(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
     django_assert_num_queries,
 ) -> None:
     mock_post.side_effect = BaseAPI.APIError("status update failed")
-    payment_plan = vision_api_payment_plan_factory()
+    payment_plan = vision_api_group_factory()
 
-    with django_assert_num_queries(4), pytest.raises(VisionAPIError, match="status update failed"):
-        VisionAPI().notify_payment_plan_status(payment_plan, "REJECTED")
+    with django_assert_num_queries(6), pytest.raises(VisionAPIError, match="status update failed"):
+        VisionAPI().notify_payment_plan_group_status(payment_plan, "REJECTED")
 
     payment_plan.refresh_from_db(fields=["internal_data"])
     assert payment_plan.vision_status == VisionStatus.NOT_SENT.value
@@ -403,43 +410,44 @@ def test_notify_payment_plan_status_logs_api_error(
 def test_send_payment_plan_already_sent_raises_error(
     mock_post,
     mock_acquire_token,
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
 ) -> None:
     api = VisionAPI()
-    pp = vision_api_payment_plan_factory(unicef_id="PP042")
+    pp = vision_api_group_factory(unicef_id="PP042")
     pp.internal_data = {"vision": {"sent": True}}
     with pytest.raises(VisionAPIError):
-        api.send_payment_plan(pp)
+        api.send_payment_plan_group(pp)
     mock_acquire_token.assert_not_called()
     mock_post.assert_not_called()
 
 
 def test_callback_view_gets_payment_plan_with_related_data(
-    vision_api_payment_plan_factory,
+    vision_api_group_factory,
     django_assert_num_queries,
 ) -> None:
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    payment_plan = vision_api_payment_plan_factory(unicef_id="PP-LOOKUP")
+    payment_plan = vision_api_group_factory(unicef_id="PP-LOOKUP")
 
+    payment_plan.refresh_from_db(fields=["unicef_id"])
     with django_assert_num_queries(1):
-        selected_payment_plan = PaymentPlanCallbackView._get_payment_plan("PP-LOOKUP")
+        selected_payment_plan = PaymentPlanCallbackView._get_payment_plan_group(payment_plan.unicef_id)
 
     assert selected_payment_plan.pk == payment_plan.pk
-    assert selected_payment_plan.business_area_id == payment_plan.business_area_id
+    assert selected_payment_plan.business_area == payment_plan.business_area
     assert selected_payment_plan.created_by_id == payment_plan.created_by_id
-    assert "business_area" in selected_payment_plan._state.fields_cache
+    assert "cycle" in selected_payment_plan._state.fields_cache
     assert "created_by" in selected_payment_plan._state.fields_cache
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_success_without_fc_acknowledges_plan_creation(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP-0060-26-00000454")
+    mock_pp = _make_mock_group(unicef_id="PP-0060-26-00000454")
     mock_get.return_value = mock_pp
     mock_user = MagicMock()
     mock_token = MagicMock()
@@ -487,13 +495,13 @@ def test_callback_view_success_without_fc_acknowledges_plan_creation(mock_get, m
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP-0060-24-0000002a")
+    mock_pp = _make_mock_group(unicef_id="PP-0060-24-0000002a")
     mock_get.return_value = mock_pp
     mock_user = MagicMock()
     mock_token = MagicMock()
@@ -539,13 +547,13 @@ def test_callback_view_empty_status_does_not_confirm_plan_creation(mock_get, moc
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP044")
+    mock_pp = _make_mock_group(unicef_id="PP044")
     mock_get.return_value = mock_pp
     mock_user = MagicMock()
     mock_token = MagicMock()
@@ -591,13 +599,13 @@ def test_callback_view_success_with_fc_numbers(mock_get, mock_log_entry) -> None
 
 @pytest.mark.parametrize("current_status", [VisionStatus.WAITING_FOR_CALLBACK, VisionStatus.PP_CREATED])
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_success_missing_vision_payplan_sno(mock_get, mock_log_entry, current_status) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP045")
+    mock_pp = _make_mock_group(unicef_id="PP045")
     mock_pp.vision_status = current_status.value
     mock_get.return_value = mock_pp
     mock_user = MagicMock()
@@ -636,13 +644,13 @@ def test_callback_view_success_missing_vision_payplan_sno(mock_get, mock_log_ent
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_missing_vision_id_preserves_released_state(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP045")
+    mock_pp = _make_mock_group(unicef_id="PP045")
     mock_pp.internal_data = {"vision": {"status": "RELEASED"}}
     mock_pp.vision_status = "RELEASED"
     mock_get.return_value = mock_pp
@@ -672,12 +680,12 @@ def test_callback_view_missing_vision_id_preserves_released_state(mock_get, mock
 @pytest.mark.parametrize(
     ("payment_plan_status", "vision_status"),
     [
-        (PaymentPlan.Status.LOCKED_FSP, VisionStatus.WAITING_FOR_CALLBACK),
-        (PaymentPlan.Status.ABORTED, VisionStatus.PP_CREATED),
+        (PaymentPlanGroup.Status.LOCKED, VisionStatus.WAITING_FOR_CALLBACK),
+        (PaymentPlanGroup.Status.ABORTED, VisionStatus.PP_CREATED),
     ],
 )
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_missing_vision_id_preserves_plan_after_review(
     mock_get, mock_log_entry, payment_plan_status, vision_status
 ) -> None:
@@ -685,7 +693,7 @@ def test_callback_view_missing_vision_id_preserves_plan_after_review(
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP045", status=payment_plan_status)
+    mock_pp = _make_mock_group(unicef_id="PP045", status=payment_plan_status)
     mock_pp.internal_data = {"vision": {"status": vision_status.value}}
     mock_pp.vision_status = vision_status.value
     mock_get.return_value = mock_pp
@@ -708,14 +716,13 @@ def test_callback_view_missing_vision_id_preserves_plan_after_review(
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_not_found_returns_404(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
-    from hope.models import PaymentPlan
 
-    mock_get.side_effect = PaymentPlan.DoesNotExist
+    mock_get.side_effect = PaymentPlanGroup.DoesNotExist
     mock_user = MagicMock()
     mock_token = MagicMock()
     mock_token.grants = ["API_VISION_PP_CREATE"]
@@ -736,18 +743,18 @@ def test_callback_view_not_found_returns_404(mock_get, mock_log_entry) -> None:
         "status": "KO",
         "messageId": "abc123",
         "payplanSno": "UNKNOWN",
-        "message": "Payment plan not found",
+        "message": "Payment Plan Group not found",
     }
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    mock_pp = _make_mock_payment_plan(unicef_id="PP043")
+    mock_pp = _make_mock_group(unicef_id="PP043")
     mock_get.return_value = mock_pp
     mock_user = MagicMock()
     mock_token = MagicMock()
@@ -793,7 +800,7 @@ def test_callback_view_non_success_status(mock_get, mock_log_entry) -> None:
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_unauthenticated(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory
 
@@ -814,7 +821,7 @@ def test_callback_view_unauthenticated(mock_get, mock_log_entry) -> None:
 
 
 @patch("hope.models.APILogEntry.objects.create")
-@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan")
+@patch("hope.contrib.vision.views.PaymentPlanCallbackView._get_payment_plan_group")
 def test_callback_view_missing_payplan_sno(mock_get, mock_log_entry) -> None:
     from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -857,7 +864,7 @@ def test_callback_view_missing_payplan_sno(mock_get, mock_log_entry) -> None:
 def test_callback_view_fc_failure_message(vision_data, expected_message, django_assert_num_queries) -> None:
     from hope.contrib.vision.views import PaymentPlanCallbackView
 
-    payment_plan = PaymentPlan(internal_data={"vision": vision_data})
+    payment_plan = PaymentPlanGroup(internal_data={"vision": vision_data})
 
     with django_assert_num_queries(0):
         message = PaymentPlanCallbackView._fc_failure_message(payment_plan)

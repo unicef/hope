@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from decimal import Decimal
 from functools import partial
 import logging
@@ -23,14 +23,17 @@ from hope.apps.core.utils import (
 from hope.apps.payment.flows import FollowUpInstructionFlow, PaymentPlanFlow
 from hope.apps.payment.notifications import PaymentPlanGroupReconciliationImportNotification
 from hope.apps.payment.pdf.payment_plan_export_pdf_service import (
-    PaymentPlanPDFExportService,
+    FollowUpInstructionPDFExportService,
+    PaymentPlanGroupPDFExportService,
 )
 from hope.apps.payment.utils import (
     bulk_log_payment_changes,
     calculate_counts,
     from_received_to_status,
     generate_cache_key,
+    get_owner_unore_exchange_rate,
     get_quantity_in_usd,
+    log_follow_up_instruction_change,
     log_payment_plan_change,
     log_payment_plan_group_change,
     normalize_score,
@@ -129,7 +132,7 @@ def remove_old_cash_plan_payment_verification_xlsx_async_task_action(job: AsyncR
     from hope.models import FileTemp
 
     past_days = int(job.config.get("past_days", 30))
-    days = datetime.datetime.now() - datetime.timedelta(days=past_days)
+    days = dt.datetime.now() - dt.timedelta(days=past_days)
     ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
     files_qs = FileTemp.objects.filter(content_type=ct, created__lte=days)
     removed_count = files_qs.count()
@@ -249,7 +252,7 @@ def create_follow_up_instruction_delivery_xlsx_async_task(
 def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob) -> None:
     from hope.apps.core.celery_tasks import NonRetriableTaskError
     from hope.apps.payment.xlsx.xlsx_payment_plan_group_delivery_export_service import (
-        EmptyDeliveryExportError,
+        UnexportablePaymentPlansError,
         XlsxPaymentPlanGroupDeliveryExportService,
     )
     from hope.models import PaymentPlanGroup, User
@@ -265,15 +268,10 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
         )
         old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
         user = User.objects.get(pk=job.config["user_id"])
-        export_tag = job.config.get("export_tag")
         fsp_xlsx_template_id = job.config.get("fsp_xlsx_template_id")
-        plan_type = job.config.get("plan_type")
         try:
             service = XlsxPaymentPlanGroupDeliveryExportService(
-                payment_plan_group,
-                fsp_xlsx_template_id=fsp_xlsx_template_id,
-                export_tag=export_tag,
-                plan_type=plan_type,
+                payment_plan_group, fsp_xlsx_template_id=fsp_xlsx_template_id
             )
             if service.payment_plans and service.payment_generate_token_and_order_numbers:
                 program = payment_plan_group.cycle.program
@@ -291,13 +289,9 @@ def export_payment_plan_group_delivery_xlsx_async_task_action(job: AsyncRetryJob
                 payment_plan_group.background_action_status = None
                 payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
                 log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, job.config["user_id"])
-            if (
-                service.applied_export_tag is not None
-                and payment_plan_group.cycle.program.business_area.enable_email_notification
-            ):
+            if payment_plan_group.cycle.program.business_area.enable_email_notification:
                 send_email_notification(service, user)
-        except EmptyDeliveryExportError as exc:
-            # Nothing was exportable (every plan skipped).
+        except UnexportablePaymentPlansError as exc:
             logger.warning(f"{exc} {' '.join(exc.skipped_reasons)}")
             payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.XLSX_EXPORT_ERROR
             payment_plan_group.save(update_fields=["background_action_status", "updated_at"])
@@ -317,20 +311,11 @@ def export_payment_plan_group_delivery_xlsx_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
     fsp_xlsx_template_id: str | None = None,
-    export_tag: int | None = None,
-    plan_type: str | None = None,
 ) -> None:
     payment_plan_group_id = str(payment_plan_group.id)
     config: dict = {"payment_plan_group_id": payment_plan_group_id, "user_id": user_id}
     if fsp_xlsx_template_id is not None:
         config["fsp_xlsx_template_id"] = fsp_xlsx_template_id
-    if plan_type is not None:
-        config["plan_type"] = plan_type
-    if export_tag is not None:
-        config["export_tag"] = export_tag
-        description = f"Re-export payment plan group delivery xlsx batch {export_tag} for {payment_plan_group_id}"
-    else:
-        description = f"Export payment plan group delivery xlsx for {payment_plan_group_id}"
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
         job_name=export_payment_plan_group_delivery_xlsx_async_task.__name__,
@@ -338,33 +323,29 @@ def export_payment_plan_group_delivery_xlsx_async_task(
         instance=payment_plan_group,
         config=config,
         group_key="payment",
-        description=description,
+        description=f"Export payment plan group delivery xlsx for {payment_plan_group_id}",
     )
 
 
 def send_payment_plan_group_delivery_xlsx_password_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import PaymentPlanGroup, User
 
-    group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    group = PaymentPlanGroup.objects.select_related("export_file_delivery").get(id=job.config["payment_plan_group_id"])
     user = User.objects.get(pk=job.config["user_id"])
-    export_tag = job.config["export_tag"]
 
-    plan = group.payment_plans.filter(export_tag=export_tag, export_file_delivery__isnull=False).first()
-    if plan is None:
-        raise Exception(f"No exported batch file found for group {group.id} with export_tag={export_tag}.")
-    label = f"Payment Plan Group {group.unicef_id} Batch {export_tag} Payment List"
-    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, plan.export_file_delivery, label)
+    if group.export_file_delivery is None:
+        raise Exception(f"No exported payment list file found for group {group.id}.")
+    label = f"Payment Plan Group {group.unicef_id} Payment List"
+    XlsxPaymentPlanDeliveryExportService.send_delivery_passwords_for_file(user, group.export_file_delivery, label)
 
 
 def send_payment_plan_group_delivery_xlsx_password_async_task(
     payment_plan_group: "PaymentPlanGroup",
     user_id: str,
-    export_tag: int,
 ) -> None:
     config = {
         "payment_plan_group_id": str(payment_plan_group.id),
         "user_id": user_id,
-        "export_tag": export_tag,
     }
     AsyncRetryJob.queue_task(
         program=payment_plan_group.cycle.program,
@@ -373,7 +354,7 @@ def send_payment_plan_group_delivery_xlsx_password_async_task(
         action="hope.apps.payment.celery_tasks.send_payment_plan_group_delivery_xlsx_password_async_task_action",
         config=config,
         group_key="payment",
-        description=f"Send group delivery xlsx password for group {payment_plan_group.id} batch {export_tag}",
+        description=f"Send group delivery xlsx password for group {payment_plan_group.id}",
     )
 
 
@@ -478,76 +459,6 @@ def payment_plan_set_entitlement_flat_amount_async_task(payment_plan: PaymentPla
         config=config,
         group_key="payment",
         description=f"Set payment plan entitlement flat amount for {payment_plan_id}",
-    )
-
-
-def payment_plan_apply_custom_exchange_rate_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import Payment, PaymentPlan
-
-    payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-
-    try:
-        bulk_size = 1000
-        updates = []
-        with transaction.atomic():
-            for payment in payment_plan.eligible_payments.only(
-                "id",
-                "entitlement_quantity",
-                "delivered_quantity",
-            ).iterator(chunk_size=bulk_size):
-                payment.entitlement_quantity_usd = get_quantity_in_usd(
-                    amount=payment.entitlement_quantity,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
-                )
-                payment.delivered_quantity_usd = get_quantity_in_usd(
-                    amount=payment.delivered_quantity,
-                    currency=payment_plan.currency,
-                    exchange_rate=payment_plan.exchange_rate,
-                    currency_exchange_date=payment_plan.currency_exchange_date,
-                )
-                updates.append(payment)
-
-                if len(updates) >= bulk_size:
-                    Payment.objects.bulk_update(
-                        updates,
-                        ["entitlement_quantity_usd", "delivered_quantity_usd"],
-                        batch_size=bulk_size,
-                    )
-                    updates.clear()
-
-            if updates:
-                Payment.objects.bulk_update(
-                    updates,
-                    ["entitlement_quantity_usd", "delivered_quantity_usd"],
-                    batch_size=bulk_size,
-                )
-            flow = PaymentPlanFlow(payment_plan)
-            flow.background_action_status_none()
-            payment_plan.save(update_fields=["background_action_status", "updated_at"])
-            payment_plan.update_money_fields()
-            # invalidate cache for program cycle list
-            payment_plan.program_cycle.save()
-    except Exception:
-        logger.exception("PaymentPlan Apply Custom Exchange Rate Error")
-        flow = PaymentPlanFlow(payment_plan)
-        flow.background_action_status_applying_custom_exchange_rate_error()
-        payment_plan.save(update_fields=["background_action_status", "updated_at"])
-        raise
-
-
-def payment_plan_apply_custom_exchange_rate_async_task(payment_plan: PaymentPlan) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {"payment_plan_id": payment_plan_id}
-    AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        job_name=payment_plan_apply_custom_exchange_rate_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.payment_plan_apply_custom_exchange_rate_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Apply custom exchange rate for payment plan {payment_plan_id}",
     )
 
 
@@ -914,63 +825,127 @@ def payment_plan_apply_engine_rule_async_task(
     )
 
 
-def update_exchange_rate_on_release_payments_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import Payment, PaymentPlan
-
-    payment_plan = get_object_or_404(PaymentPlan, id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
-    old_payment_plan = cast("PaymentPlan", copy_model_object(payment_plan))
-
-    payment_plan.exchange_rate = payment_plan.get_exchange_rate()
-    payment_plan.save(update_fields=["exchange_rate"])
-    log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
-    payment_plan.refresh_from_db(fields=["exchange_rate"])
-    bulk_size = 1000
-    updates = []
-    currency_exchange_date = payment_plan.currency_exchange_date
+def _run_owner_exchange_rate_recalculation(
+    job: AsyncRetryJob, owner_model: type[PaymentPlanGroup] | type[FollowUpInstruction]
+) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+    from hope.models import Payment
 
     with transaction.atomic():
-        for payment in payment_plan.eligible_payments.only(
-            "id",
-            "entitlement_quantity",
-            "parent_id",
-        ).iterator(chunk_size=bulk_size):
-            payment.entitlement_quantity_usd = get_quantity_in_usd(
-                amount=payment.entitlement_quantity,
-                currency=payment_plan.currency,
-                exchange_rate=payment_plan.exchange_rate,
-                currency_exchange_date=currency_exchange_date,
+        owner = owner_model.objects.select_for_update(of=("self",)).select_related("currency").get(pk=job.object_id)
+        if owner.background_action_status != owner.BackgroundActionStatus.RECALCULATING:
+            raise NonRetriableTaskError("The owner recalculation was superseded by another background action")
+        plans = list(
+            owner.payment_plans.select_related("program_cycle", "payment_plan_group", "follow_up_instruction").order_by(
+                "created_at"
             )
-            updates.append(payment)
-            if len(updates) >= bulk_size:
-                Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"], batch_size=bulk_size)
-                updates.clear()
+        )
+        if not plans:
+            owner.background_action_status = None
+            owner.save(update_fields=["background_action_status", "updated_at"])
+            return
+        set_sentry_business_area_tag(owner.business_area.name)
+        exchange_date = owner.currency_exchange_date
+        rate = owner.exchange_rate
+        if job.config["fetch_unore_rate"] and not owner.custom_exchange_rate:
+            unore_rate = get_owner_unore_exchange_rate(owner, exchange_date)
+            rate = Decimal(str(unore_rate)) if unore_rate is not None else None
+        # The exchange-rate feed returns None when it has no rate for this date.
+        if rate is None or rate <= 0:
+            raise ValueError("A positive exchange rate is required to recalculate owner payments")
+        if owner.exchange_rate != rate:
+            old_owner = copy_model_object(owner)
+            owner.exchange_rate = rate
+            owner.save(update_fields=["exchange_rate", "updated_at"])
+            owner.refresh_from_db(fields=["exchange_rate"])
+            if isinstance(owner, PaymentPlanGroup):
+                log_payment_plan_group_change(owner, cast("PaymentPlanGroup", old_owner), job.config.get("user_id"))
+            else:
+                log_follow_up_instruction_change(
+                    owner, cast("FollowUpInstruction", old_owner), job.config.get("user_id")
+                )
+        rate = owner.exchange_rate
 
-        if updates:
-            Payment.objects.bulk_update(updates, ["entitlement_quantity_usd"], batch_size=bulk_size)
-        payment_plan.update_money_fields()
-        payment_plan.program_cycle.save()
+        bulk_size = 1000
+        cycles = {}
+        usd_fields = ["entitlement_quantity_usd", "delivered_quantity_usd"]
+        for plan in plans:
+            updates = []
+            for payment in plan.eligible_payments.only("id", "entitlement_quantity", "delivered_quantity").iterator(
+                chunk_size=bulk_size
+            ):
+                payment.entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=payment.entitlement_quantity,
+                    currency=owner.currency,
+                    exchange_rate=rate,
+                    currency_exchange_date=exchange_date,
+                )
+                payment.delivered_quantity_usd = get_quantity_in_usd(
+                    amount=payment.delivered_quantity,
+                    currency=owner.currency,
+                    exchange_rate=rate,
+                    currency_exchange_date=exchange_date,
+                )
+                updates.append(payment)
+                if len(updates) >= bulk_size:
+                    Payment.objects.bulk_update(updates, usd_fields, batch_size=bulk_size)
+                    updates.clear()
+            Payment.objects.bulk_update(updates, usd_fields, batch_size=bulk_size)
+            plan.update_money_fields()
+            cycles[plan.program_cycle_id] = plan.program_cycle
+        for cycle in cycles.values():
+            cycle.save()
+        owner.background_action_status = None
+        owner.save(update_fields=["background_action_status", "updated_at"])
 
 
-def update_exchange_rate_on_release_payments_async_task(payment_plan: PaymentPlan, user_id: str | None = None) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {"payment_plan_id": payment_plan_id, "user_id": user_id}
-    AsyncRetryJob.queue_task(
-        instance=payment_plan,
-        owner_id=user_id,
-        job_name=update_exchange_rate_on_release_payments_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.update_exchange_rate_on_release_payments_async_task_action",
-        config=config,
-        group_key="payment",
-        description=f"Update exchange rate on release payments for {payment_plan_id}",
-    )
+def recalculate_owner_exchange_rate_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.core.celery_tasks import NonRetriableTaskError
+
+    owner_model = cast("type[PaymentPlanGroup] | type[FollowUpInstruction]", job.content_type.model_class())
+    try:
+        _run_owner_exchange_rate_recalculation(job, owner_model)
+    except NonRetriableTaskError:
+        raise
+    except Exception as error:
+        with transaction.atomic():
+            owner = owner_model.objects.select_for_update().get(pk=job.object_id)
+            if owner.background_action_status == owner.BackgroundActionStatus.RECALCULATING:
+                owner.background_action_status = owner.BackgroundActionStatus.RECALCULATING_ERROR
+                owner.save(update_fields=["background_action_status", "updated_at"])
+        raise NonRetriableTaskError(str(error)) from error
+
+
+def recalculate_owner_exchange_rate_async_task(
+    owner: PaymentPlanGroup | FollowUpInstruction, user_id: str | None = None, *, fetch_unore_rate: bool = True
+) -> PaymentPlanGroup | FollowUpInstruction:
+    config = {
+        "user_id": user_id,
+        "fetch_unore_rate": fetch_unore_rate,
+    }
+    with transaction.atomic():
+        locked_owner = type(owner).objects.select_for_update().get(pk=owner.pk)
+        if locked_owner.background_action_status not in (None, *locked_owner.BACKGROUND_ACTION_ERROR_STATES):
+            raise ValidationError("Another owner background action is in progress")
+        locked_owner.background_action_status = locked_owner.BackgroundActionStatus.RECALCULATING
+        locked_owner.save(update_fields=["background_action_status", "updated_at"])
+        AsyncRetryJob.queue_task(
+            instance=locked_owner,
+            owner_id=user_id,
+            job_name=recalculate_owner_exchange_rate_async_task.__name__,
+            action="hope.apps.payment.celery_tasks.recalculate_owner_exchange_rate_async_task_action",
+            config=config,
+            group_key="payment",
+            description=f"Recalculate Payment Plan data for {owner._meta.verbose_name} {owner.pk}",
+        )
+    return locked_owner
 
 
 def remove_old_payment_plan_payment_list_xlsx_async_task_action(job: AsyncRetryJob) -> None:
     from hope.models import FileTemp, PaymentPlan
 
     past_days = int(job.config.get("past_days", 30))
-    days = datetime.datetime.now() - datetime.timedelta(days=past_days)
+    days = dt.datetime.now() - dt.timedelta(days=past_days)
     file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
     removed_count = file_qs.count()
     if not removed_count:
@@ -1279,50 +1254,89 @@ def payment_plan_exclude_beneficiaries_async_task(
     )
 
 
-def export_pdf_payment_plan_summary_async_task_action(job: AsyncRetryJob) -> None:
-    from hope.models import FileTemp, PaymentPlan, User
+def export_pdf_payment_plan_group_summary_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.models import FileTemp, PaymentPlanGroup, User
 
-    payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
-    set_sentry_business_area_tag(payment_plan.business_area.name)
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    set_sentry_business_area_tag(payment_plan_group.business_area.name)
     user = User.objects.get(pk=job.config["user_id"])
 
     with transaction.atomic():
-        if payment_plan.export_pdf_file_summary:
-            payment_plan.export_pdf_file_summary.file.delete()
-            payment_plan.export_pdf_file_summary.delete()
-            payment_plan.export_pdf_file_summary = None
+        if payment_plan_group.export_pdf_file_summary:
+            payment_plan_group.export_pdf_file_summary.file.delete()
+            payment_plan_group.export_pdf_file_summary.delete()
+            payment_plan_group.export_pdf_file_summary = None
 
-        service = PaymentPlanPDFExportService(payment_plan)
+        service = PaymentPlanGroupPDFExportService(payment_plan_group)
         pdf, filename = service.generate_pdf_summary()
 
         file_pdf_obj = FileTemp(
-            object_id=payment_plan.pk,
-            content_type=get_content_type_for_model(payment_plan),
+            object_id=payment_plan_group.pk,
+            content_type=get_content_type_for_model(payment_plan_group),
             created_by=user,
         )
         file_pdf_obj.file.save(filename, ContentFile(pdf))
 
-        payment_plan.export_pdf_file_summary = file_pdf_obj
-        payment_plan.save()
+        payment_plan_group.export_pdf_file_summary = file_pdf_obj
+        payment_plan_group.save(update_fields=["export_pdf_file_summary", "updated_at"])
 
-        if payment_plan.business_area.enable_email_notification:
+        if payment_plan_group.business_area.enable_email_notification:
             send_email_notification_on_commit(service, user)
 
 
-def export_pdf_payment_plan_summary_async_task(payment_plan: PaymentPlan, user_id: str) -> None:
-    payment_plan_id = str(payment_plan.id)
-    config = {
-        "payment_plan_id": payment_plan_id,
-        "user_id": user_id,
-    }
+def export_pdf_payment_plan_group_summary_async_task(payment_plan_group: PaymentPlanGroup, user_id: str) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
     AsyncRetryJob.queue_task(
-        instance=payment_plan,
+        instance=payment_plan_group,
         owner_id=user_id,
-        job_name=export_pdf_payment_plan_summary_async_task.__name__,
-        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_summary_async_task_action",
-        config=config,
+        job_name=export_pdf_payment_plan_group_summary_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_pdf_payment_plan_group_summary_async_task_action",
+        config={"payment_plan_group_id": payment_plan_group_id, "user_id": user_id},
         group_key="payment",
-        description=f"Export payment plan summary pdf for {payment_plan_id}",
+        description=f"Export payment plan group summary pdf for {payment_plan_group_id}",
+    )
+
+
+def export_pdf_follow_up_instruction_summary_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.models import FileTemp, FollowUpInstruction, User
+
+    instruction = FollowUpInstruction.objects.get(id=job.config["follow_up_instruction_id"])
+    set_sentry_business_area_tag(instruction.business_area.name)
+    user = User.objects.get(pk=job.config["user_id"])
+
+    with transaction.atomic():
+        if instruction.export_pdf_file_summary:
+            instruction.export_pdf_file_summary.file.delete()
+            instruction.export_pdf_file_summary.delete()
+            instruction.export_pdf_file_summary = None
+
+        service = FollowUpInstructionPDFExportService(instruction)
+        pdf, filename = service.generate_pdf_summary()
+
+        file_pdf_obj = FileTemp(
+            object_id=instruction.pk,
+            content_type=get_content_type_for_model(instruction),
+            created_by=user,
+        )
+        file_pdf_obj.file.save(filename, ContentFile(pdf))
+
+        instruction.export_pdf_file_summary = file_pdf_obj
+        instruction.save(update_fields=["export_pdf_file_summary", "updated_at"])
+
+        if instruction.business_area.enable_email_notification:
+            send_email_notification_on_commit(service, user)
+
+
+def export_pdf_follow_up_instruction_summary_async_task(instruction: FollowUpInstruction, user_id: str) -> None:
+    instruction_id = str(instruction.id)
+    AsyncRetryJob.queue_task(
+        instance=instruction,
+        owner_id=user_id,
+        job_name=export_pdf_follow_up_instruction_summary_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.export_pdf_follow_up_instruction_summary_async_task_action",
+        config={"follow_up_instruction_id": instruction_id, "user_id": user_id},
+        group_key="payment",
+        description=f"Export follow-up instruction summary pdf for {instruction_id}",
     )
 
 
@@ -1441,8 +1455,84 @@ def send_payment_notification_emails_async_task_action(job: AsyncJob) -> None:
         payment_plan,
         job.config["action"],
         action_user,
-        datetime.datetime.fromisoformat(job.config["action_date"]),
+        dt.datetime.fromisoformat(job.config["action_date"]),
     ).send_email_notification()
+
+
+def send_payment_plan_group_notification_emails_async_task_action(job: AsyncJob) -> None:
+    from hope.apps.payment.notifications import PaymentNotification
+    from hope.models import PaymentPlanGroup, User
+
+    payment_plan_group = PaymentPlanGroup.objects.get(id=job.config["payment_plan_group_id"])
+    action_user = User.objects.get(id=job.config["action_user_id"])
+    set_sentry_business_area_tag(payment_plan_group.business_area.name)
+    PaymentNotification(
+        payment_plan_group,
+        job.config["action"],
+        action_user,
+        dt.datetime.fromisoformat(job.config["action_date"]),
+    ).send_email_notification()
+
+
+def send_payment_plan_group_notification_emails_async_task(
+    payment_plan_group: PaymentPlanGroup,
+    action: str,
+    action_user_id: str,
+    action_date: str,
+) -> None:
+    payment_plan_group_id = str(payment_plan_group.id)
+    AsyncJob.queue_task(
+        instance=payment_plan_group,
+        owner_id=action_user_id,
+        job_name=send_payment_plan_group_notification_emails_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.send_payment_plan_group_notification_emails_async_task_action",
+        config={
+            "payment_plan_group_id": payment_plan_group_id,
+            "action": action,
+            "action_user_id": action_user_id,
+            "action_date": action_date,
+        },
+        group_key="payment",
+        description=f"Send payment notification emails for group {payment_plan_group_id}",
+    )
+
+
+def send_follow_up_instruction_notification_emails_async_task_action(job: AsyncJob) -> None:
+    from hope.apps.payment.notifications import PaymentNotification
+    from hope.models import FollowUpInstruction, User
+
+    instruction = FollowUpInstruction.objects.get(id=job.config["follow_up_instruction_id"])
+    action_user = User.objects.get(id=job.config["action_user_id"])
+    set_sentry_business_area_tag(instruction.business_area.name)
+    PaymentNotification(
+        instruction,
+        job.config["action"],
+        action_user,
+        dt.datetime.fromisoformat(job.config["action_date"]),
+    ).send_email_notification()
+
+
+def send_follow_up_instruction_notification_emails_async_task(
+    instruction: FollowUpInstruction,
+    action: str,
+    action_user_id: str,
+    action_date: str,
+) -> None:
+    instruction_id = str(instruction.id)
+    AsyncJob.queue_task(
+        instance=instruction,
+        owner_id=action_user_id,
+        job_name=send_follow_up_instruction_notification_emails_async_task.__name__,
+        action="hope.apps.payment.celery_tasks.send_follow_up_instruction_notification_emails_async_task_action",
+        config={
+            "follow_up_instruction_id": instruction_id,
+            "action": action,
+            "action_user_id": action_user_id,
+            "action_date": action_date,
+        },
+        group_key="payment",
+        description=f"Send payment notification emails for follow-up instruction {instruction_id}",
+    )
 
 
 def send_payment_notification_emails_async_task(

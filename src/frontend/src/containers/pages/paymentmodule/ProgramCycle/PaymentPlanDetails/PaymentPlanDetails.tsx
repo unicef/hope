@@ -41,7 +41,6 @@ export const PaymentPlanDetails = ({
     followUps,
     topUps,
     program,
-    exportTag,
     paymentPlanGroup,
   } = paymentPlan;
 
@@ -85,25 +84,12 @@ export const PaymentPlanDetails = ({
                 </LabelizedField>
               </ResponsiveGrid>
               <ResponsiveGrid size="quarter" mobileSize="half">
-                <LabelizedField label={t('Group')}>
+                <LabelizedField label={t('Payment Plan')}>
                   {paymentPlanGroup ? (
                     <BlackLink
                       to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}`}
                     >
                       {paymentPlanGroup.name}
-                    </BlackLink>
-                  ) : (
-                    '-'
-                  )}
-                </LabelizedField>
-              </ResponsiveGrid>
-              <ResponsiveGrid size="quarter" mobileSize="half">
-                <LabelizedField label={t('Export Batch')}>
-                  {exportTag && paymentPlanGroup?.id ? (
-                    <BlackLink
-                      to={`/${baseUrl}/payment-module/groups/${paymentPlanGroup.id}/batches/${exportTag}`}
-                    >
-                      {exportTag}
                     </BlackLink>
                   ) : (
                     '-'
@@ -178,7 +164,7 @@ export const PaymentPlanDetails = ({
               </ResponsiveGrid>
               {paymentPlan.sourcePaymentPlan && (
                 <ResponsiveGrid size="quarter" mobileSize="half">
-                  <LabelizedField label={t('Main Payment Plan')}>
+                  <LabelizedField label={t('Main Payment Plan Component')}>
                     <BlackLink
                       to={`/${baseUrl}/payment-module/payment-plans/${paymentPlan.sourcePaymentPlan.id}`}
                     >

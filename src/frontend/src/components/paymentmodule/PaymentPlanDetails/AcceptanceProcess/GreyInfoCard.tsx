@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MessageDialog } from './MessageDialog';
 import type { ReactElement } from 'react';
-import type { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import type { ApprovalProcess } from '@restgenerated/models/ApprovalProcess';
 import { responsiveValue } from 'src/responsive';
 
 const GreyText = styled.div`
@@ -28,7 +28,7 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanDetail['approvalProcess'][number]['actions'];
+  approvals: ApprovalProcess['actions'];
   author?: string;
 }
 

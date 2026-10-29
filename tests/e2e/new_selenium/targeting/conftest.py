@@ -156,11 +156,13 @@ def built_tp(
 
 @pytest.fixture
 def locked_tp(built_tp: PaymentPlan) -> PaymentPlan:
-    # Mark Ready needs an FSP and delivery mechanism on the target population.
+    # Mark Ready needs an FSP on the group and a delivery mechanism on the target population.
+    group = built_tp.payment_plan_group
+    group.financial_service_provider = FinancialServiceProviderFactory()
+    group.save(update_fields=["financial_service_provider"])
     built_tp.status = PaymentPlan.Status.TP_LOCKED
-    built_tp.financial_service_provider = FinancialServiceProviderFactory()
     built_tp.delivery_mechanism = DeliveryMechanismFactory()
-    built_tp.save(update_fields=["status", "financial_service_provider", "delivery_mechanism"])
+    built_tp.save(update_fields=["status", "delivery_mechanism"])
     return built_tp
 
 

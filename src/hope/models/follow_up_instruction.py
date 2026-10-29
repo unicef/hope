@@ -1,16 +1,28 @@
+from datetime import date
 from decimal import Decimal
-from typing import Any
+from functools import cached_property
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.db import models
+from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models import Count, Sum
+from django.db.models.functions import Coalesce
+from django.utils import timezone
 
+from hope.apps.activity_log.utils import create_mapping_dict
+from hope.models.approval import COMMENT_MAX_LENGTH, Approval
 from hope.models.file_temp import FileTemp
 from hope.models.payment import Payment
 from hope.models.utils import AdminUrlMixin, LongNameIndex, TimeStampedUUIDModel, UnicefIdentifiedModel
 
+if TYPE_CHECKING:
+    from hope.models import AcceptanceProcessThreshold
+
 
 class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlMixin):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(["exchange_rate", "custom_exchange_rate", "custom_exchange_rate_set_by"])
+
     class Status:
         OPEN = "OPEN"
         LOCKED = "LOCKED"
@@ -20,10 +32,13 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         IN_REVIEW = "IN_REVIEW"
         ACCEPTED = "ACCEPTED"
         FINISHED = "FINISHED"
+        READY_FOR_CLOSURE = "READY_FOR_CLOSURE"
         CLOSED = "CLOSED"
         ABORTED = "ABORTED"
 
     class BackgroundActionStatus(models.TextChoices):
+        RECALCULATING = "RECALCULATING", "Recalculating Payment Plan data"
+        RECALCULATING_ERROR = "RECALCULATING_ERROR", "Payment Plan recalculation error"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX"
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation from XLSX"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Error while exporting XLSX"
@@ -38,10 +53,13 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         Status.IN_REVIEW,
         Status.ACCEPTED,
         Status.FINISHED,
+        Status.READY_FOR_CLOSURE,
         Status.CLOSED,
         Status.ABORTED,
     )
+    SUMMARY_PDF_STATUSES = (Status.IN_REVIEW, Status.ACCEPTED, Status.FINISHED)
     BACKGROUND_ACTION_ERROR_STATES = (
+        BackgroundActionStatus.RECALCULATING_ERROR,
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
     )
@@ -52,6 +70,38 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="created_follow_up_instructions",
+    )
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider",
+        on_delete=models.PROTECT,
+        related_name="follow_up_instructions",
+        null=True,
+        blank=True,
+    )
+    currency = models.ForeignKey(
+        "core.Currency",
+        on_delete=models.PROTECT,
+        related_name="follow_up_instructions",
+        null=True,
+        blank=True,
+    )
+    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
+    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
+    use_payment_gateway = models.BooleanField(
+        default=False,
+        help_text="Send the payment plans through the payment gateway regardless of the FSP communication channel",
+    )
+    exchange_rate = models.DecimalField(
+        decimal_places=8, blank=True, null=True, max_digits=15, help_text="Exchange Rate [sys]"
+    )
+    custom_exchange_rate = models.BooleanField(default=False, help_text="Custom Exchange Rate flag [sys]")
+    custom_exchange_rate_set_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="User who set the custom exchange rate [sys]",
     )
     background_action_status = models.CharField(
         max_length=255,
@@ -74,6 +124,23 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
         related_name="+",
         on_delete=models.SET_NULL,
         help_text="Reconciliation Import File",
+    )
+    export_pdf_file_summary = models.ForeignKey(
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Generated summary PDF",
+    )
+    abort_comment = models.CharField(max_length=COMMENT_MAX_LENGTH, blank=True, default="")
+    closure_comment = models.TextField(null=True, blank=True)
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -105,6 +172,42 @@ class FollowUpInstruction(TimeStampedUUIDModel, UnicefIdentifiedModel, AdminUrlM
             if candidate in statuses:
                 return candidate
         return statuses[0]
+
+    @property
+    def currency_exchange_date(self) -> date:
+        if self.status in (self.Status.ACCEPTED, self.Status.FINISHED, self.Status.CLOSED):
+            process = self.approval_process.first()
+            if process and (approval := process.approvals.filter(type=Approval.FINANCE_RELEASE).first()):
+                return approval.created_at.date()
+        today = timezone.now().date()
+        return min(today, self.dispersion_end_date) if self.dispersion_end_date else today
+
+    @property
+    def total_entitled_quantity_usd(self) -> Decimal:
+        return self.payment_plans.aggregate(total=Coalesce(Sum("total_entitled_quantity_usd"), Decimal(0)))["total"]
+
+    @cached_property
+    def acceptance_process_threshold(self) -> "AcceptanceProcessThreshold | None":
+        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd)
+        return self.business_area.acceptance_process_thresholds.filter(
+            payments_range_usd__contains=NumericRange(
+                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
+            )
+        ).first()
+
+    @property
+    def approval_number_required(self) -> int:
+        return self.acceptance_process_threshold.approval_number_required if self.acceptance_process_threshold else 1
+
+    @property
+    def authorization_number_required(self) -> int:
+        threshold = self.acceptance_process_threshold
+        return threshold.authorization_number_required if threshold else 1
+
+    @property
+    def finance_release_number_required(self) -> int:
+        threshold = self.acceptance_process_threshold
+        return threshold.finance_release_number_required if threshold else 1
 
     @property
     def export_file_link(self) -> str | None:

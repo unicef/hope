@@ -77,14 +77,12 @@ const EditTargetPopulation = ({
   const targetingCriteriaCopy =
     paymentPlan.rules.map((rule) => ({
       ...rule,
-      fsp: undefined,
       deliveryMechanism: undefined,
     })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
       paymentPlan.deliveryMechanism?.code;
-    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
   }
 
   const initialValues = {
@@ -193,7 +191,7 @@ const EditTargetPopulation = ({
       values.programCycleId.value !== paymentPlan.programCycle.id &&
       !values.paymentPlanGroupId?.value
     ) {
-      errors.paymentPlanGroupId = { value: 'Payment Plan Group is required' };
+      errors.paymentPlanGroupId = { value: 'Payment Plan is required' };
     }
     return errors;
   };
@@ -217,7 +215,6 @@ const EditTargetPopulation = ({
       const requestBody: PatchedTargetPopulationCreate = {
         excludedIds: values.excludedIds,
         exclusionReason: values.exclusionReason,
-        fspId: values.targetingCriteria[0]?.fsp || null,
         deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
         ...((values.programCycleId.value !== paymentPlan.programCycle.id ||
           (values.paymentPlanGroupId?.value &&
@@ -326,7 +323,7 @@ const EditTargetPopulation = ({
                   }}
                 >
                   <TextField
-                    label={t('Group')}
+                    label={t('Payment Plan')}
                     value={values.paymentPlanGroupId?.name || ''}
                     disabled
                     fullWidth
@@ -412,6 +409,7 @@ const EditTargetPopulation = ({
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
                   targetPopulation={paymentPlan}
+                  paymentPlanGroupId={values.paymentPlanGroupId?.value}
                   data-cy="add-filter-targeting-criteria-display"
                 />
               )}
