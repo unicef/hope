@@ -25,6 +25,7 @@ from hope.apps.household.documents import (
 )
 from hope.apps.registration_data.celery_tasks import deduplicate_documents_for_rdi
 from hope.apps.registration_data.services.deduplication_engine import (
+    BiographicDeduplicationEngineService,
     BiometricDeduplicationEngineService,
 )
 from hope.apps.registration_data.signals import rdi_merged
@@ -119,9 +120,12 @@ class RdiMergeTask:
     def _create_adjudication_tickets_from_deduplication_engine_findings(
         self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list
     ) -> None:
+        if not obj_hct.is_coming_from_cw:
+            return
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = BiometricDeduplicationEngineService()
             dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
+        BiographicDeduplicationEngineService().create_grievance_tickets_for_biographic_duplicates(obj_hct)
 
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
@@ -225,7 +229,12 @@ class RdiMergeTask:
                         .order_by("pk")
                     )
 
-                    if not obj_hct.business_area.postpone_deduplication and len(individuals):
+                    # CW RDIs take biographic findings from HDE; only legacy RDIs are deduplicated against HOPE ES.
+                    if (
+                        not obj_hct.is_coming_from_cw
+                        and not obj_hct.business_area.postpone_deduplication
+                        and len(individuals)
+                    ):
                         self._run_deduplication(obj_hct, individuals, registration_data_import_id)
 
                     # SANCTION LIST CHECK

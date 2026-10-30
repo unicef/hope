@@ -713,6 +713,32 @@ def test_fetch_findings_and_merge_rdi_updates_rdi_counters_and_individual_dedup_
     assert pending_c.biometric_deduplication_golden_record_status == DUPLICATE
 
 
+@patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
+@patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")
+def test_fetch_findings_and_merge_rdi_stores_biographic_statistics_before_merge(
+    mock_get_findings: mock.Mock,
+    mock_rdi_merge: mock.Mock,
+    mock_get_biographic_findings: Mock,
+    cw_rdi: RegistrationDataImport,
+    two_pending_individuals: tuple[Individual, Individual],
+    biographic_findings_for_two_pending_individuals: list[dict],
+) -> None:
+    ind_a, ind_b = two_pending_individuals
+    mock_get_findings.return_value = []
+    mock_get_biographic_findings.return_value = biographic_findings_for_two_pending_individuals
+
+    queue_and_run_retry_task(fetch_findings_and_merge_rdi, registration_data_import=cw_rdi)
+
+    cw_rdi.refresh_from_db()
+    assert (cw_rdi.batch_duplicates, cw_rdi.batch_unique) == (2, 0)
+    ind_a.refresh_from_db()
+    ind_b.refresh_from_db()
+    assert (ind_a.deduplication_batch_status, ind_b.deduplication_batch_status) == (
+        DUPLICATE_IN_BATCH,
+        DUPLICATE_IN_BATCH,
+    )
+
+
 @pytest.mark.usefixtures("mock_get_biographic_findings")
 @patch("hope.apps.registration_data.tasks.fetch_findings_and_merge_rdi.RdiMergeTask")
 @patch("hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biometric_findings")

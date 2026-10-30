@@ -272,7 +272,6 @@ def expected_population_golden_record_statuses() -> dict[str, str]:
     }
 
 
-@pytest.mark.xfail(reason="AB#346504, test will pass when all subtasks will be done")
 def test_cw_rdi_complete_with_biographic_findings_creates_grouped_tickets_and_stores_statistics(
     token_api_client: APIClient,
     user_business_area: BusinessArea,
@@ -345,8 +344,7 @@ def test_cw_rdi_complete_with_biographic_findings_creates_grouped_tickets_and_st
         "hope.apps.registration_data.api.deduplication_engine.DeduplicationEngineAPI.get_rdi_biographic_findings",
         return_value=hde_biographic_findings,
     ) as mock_biographic_findings:
-        # TODO: set the real count once the CW biographic flow is implemented.
-        with django_assert_num_queries(0):
+        with django_assert_num_queries(278):
             with django_capture_on_commit_callbacks(execute=True):
                 complete_resp = token_api_client.post(
                     reverse("api:rdi-complete", args=[user_business_area.slug, rdi_id]), {}, format="json"

@@ -1,5 +1,8 @@
+from collections import defaultdict
+from collections.abc import Iterable
 import logging
 from typing import Any
+from uuid import UUID
 
 from django.db.models import Q, QuerySet
 
@@ -14,9 +17,11 @@ from hope.apps.registration_data.api.deduplication_engine import (
     BiometricHDEFinding,
     DeduplicationEngineAPI,
 )
+from hope.apps.registration_data.utils import post_process_dedupe_results
 from hope.models import (
     BiographicDedupeSimilarityPair,
     BiometricDedupeSimilarityPair,
+    Individual,
     PendingIndividual,
     Program,
     RegistrationDataImport,
@@ -187,3 +192,118 @@ class BiographicDeduplicationEngineService:
 
     def get_rdi_biographic_findings(self, rdi_country_workspace_id: str) -> list[dict]:
         return self.api.get_rdi_biographic_findings(rdi_country_workspace_id)
+
+    def store_biographic_deduplication_statistics(self, rdi: RegistrationDataImport) -> None:
+        # Setup
+        rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
+        rdi_individuals_ids = set(rdi_individuals.values_list("id", flat=True))
+
+        population_pairs = BiographicDedupeSimilarityPair.objects.for_rdi_against_population(rdi).select_related(
+            "individual1__household__admin2", "individual2__household__admin2"
+        )
+        batch_pairs = BiographicDedupeSimilarityPair.objects.for_rdi_against_batch(rdi).select_related(
+            "individual1__household__admin2", "individual2__household__admin2"
+        )
+
+        population_pairs_by_individual = defaultdict(list)
+        for pair in population_pairs:
+            rdi_side_id = pair.individual1_id if pair.individual1_id in rdi_individuals_ids else pair.individual2_id
+            population_pairs_by_individual[rdi_side_id].append(pair)
+
+        batch_pairs_by_individual = defaultdict(list)
+        for pair in batch_pairs:
+            batch_pairs_by_individual[pair.individual1_id].append(pair)
+            batch_pairs_by_individual[pair.individual2_id].append(pair)
+
+        # Let's mark individuals in population, outside incoming RDI
+        # as duplicates. We'll use this information later on when
+        # counting other statistics.
+        #
+        # in legacy flow it's being done here: deduplicate.py:143-145
+        self.mark_population_individuals_as_duplicates(
+            self._get_population_matches_outside_rdi_ids(population_pairs, rdi_individuals_ids)
+        )
+
+        individuals_to_bulk_update = []
+        for individual in rdi_individuals:
+            # Looking at legacy biographic deduplication we're interested ONLY in
+            # deduplication_golden_record_status
+            #   DUPLICATE           - individual has duplicates within population
+            #   NEEDS_ADJUDICATION  - Possible duplicate - we drop this in cw flow
+            #   UNIQUE              - no duplicates found
+            #
+            # deduplication_golden_record_results
+            #   JSON Field containing information about duplicates found in population.
+            #   Data points reported here are described in
+            #   BiographicDedupeSimilarityPair.serialize_for_individual
+            #
+            # deduplication_batch_status
+            #   See DEDUPLICATION_BATCH_STATUS_CHOICE.
+            #   (NOT_PROCESSED, "Not Processed")        - All records are processed instant in CW flow
+            #   (SIMILAR_IN_BATCH, "Similar in RDI"),   - ? Not sure, I think we need only DUPLICATE and UNIQUE
+            #
+            # deduplication_batch_results
+            #   Same case as with deduplication_golden_record_results
+            #
+            self._set_golden_record_results(individual, population_pairs_by_individual[individual.id])
+            self._set_batch_results(individual, batch_pairs_by_individual[individual.id])
+            post_process_dedupe_results(individual)  # this part needs to be checked if it should stay
+            individuals_to_bulk_update.append(individual)
+
+        PendingIndividual.objects.bulk_update(
+            individuals_to_bulk_update,
+            (
+                "deduplication_golden_record_results",
+                "deduplication_golden_record_status",
+                "deduplication_batch_results",
+                "deduplication_batch_status",
+            ),
+            batch_size=1000,
+        )
+
+        rdi.golden_record_duplicates = self.count_individuals(rdi, "deduplication_golden_record_status", DUPLICATE)
+        rdi.golden_record_unique = self.count_individuals(rdi, "deduplication_golden_record_status", UNIQUE)
+        rdi.batch_duplicates = self.count_individuals(rdi, "deduplication_batch_status", DUPLICATE_IN_BATCH)
+        rdi.batch_unique = self.count_individuals(rdi, "deduplication_batch_status", UNIQUE_IN_BATCH)
+        rdi.save(update_fields=["golden_record_duplicates", "golden_record_unique", "batch_duplicates", "batch_unique"])
+
+    def _get_population_matches_outside_rdi_ids(
+        self, similarity_pairs: Iterable[BiographicDedupeSimilarityPair], rdi_individuals_ids: set[UUID]
+    ) -> set[UUID]:
+        population_individual_ids: set[UUID] = set()
+        for pair in similarity_pairs:
+            for individual_id in (pair.individual1_id, pair.individual2_id):
+                if individual_id and individual_id not in rdi_individuals_ids:
+                    population_individual_ids.add(individual_id)
+        return population_individual_ids
+
+    def _set_golden_record_results(
+        self, individual: PendingIndividual, population_pairs: list[BiographicDedupeSimilarityPair]
+    ) -> None:
+        golden_results = BiographicDedupeSimilarityPair.serialize_for_individual(individual, population_pairs)
+        individual.deduplication_golden_record_results = golden_results
+        individual.deduplication_golden_record_status = DUPLICATE if golden_results["duplicates"] else UNIQUE
+
+    def _set_batch_results(
+        self, individual: PendingIndividual, batch_pairs: list[BiographicDedupeSimilarityPair]
+    ) -> None:
+        batch_results = BiographicDedupeSimilarityPair.serialize_for_individual(individual, batch_pairs)
+        individual.deduplication_batch_results = batch_results
+        individual.deduplication_batch_status = DUPLICATE_IN_BATCH if batch_results["duplicates"] else UNIQUE_IN_BATCH
+
+    def mark_population_individuals_as_duplicates(self, ids: set[UUID]) -> None:
+        Individual.objects.filter(id__in=ids).update(deduplication_golden_record_status=DUPLICATE)
+
+    def count_individuals(self, rdi: RegistrationDataImport, status_field: str, status: str) -> int:
+        return PendingIndividual.objects.filter(registration_data_import=rdi, **{status_field: status}).count()
+
+    def create_grievance_tickets_for_biographic_duplicates(self, rdi: RegistrationDataImport) -> None:
+        from hope.apps.grievance.services.needs_adjudication_ticket_services import (
+            create_needs_adjudication_tickets_for_biographic,
+        )
+
+        # After merge this covers RDI-vs-population and intra-batch pairs. No score-0 filter: it's biometric-only.
+        deduplication_pairs = BiographicDedupeSimilarityPair.objects.for_rdi_against_population(
+            rdi, rdi_merged=True
+        ).select_related("individual1__household__admin2", "individual2__household__admin2")
+        create_needs_adjudication_tickets_for_biographic(deduplication_pairs, rdi)

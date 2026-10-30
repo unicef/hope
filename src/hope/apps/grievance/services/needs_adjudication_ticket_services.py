@@ -1,6 +1,7 @@
+from collections import defaultdict
 from decimal import Decimal
 import logging
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence, cast
 from uuid import UUID
 
 from django.contrib.auth.models import AbstractUser
@@ -27,6 +28,7 @@ from hope.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
 from hope.models import (
+    BiographicDedupeSimilarityPair,
     BiometricDedupeSimilarityPair,
     BusinessArea,
     Household,
@@ -406,6 +408,70 @@ def create_needs_adjudication_tickets_for_biometrics(
 
     for ticket in new_tickets:
         ticket.linked_tickets.set([t for t in new_tickets if t != ticket])
+
+
+def _group_pairs_by_main_individual(
+    pairs: QuerySet[BiographicDedupeSimilarityPair], rdi: RegistrationDataImport
+) -> dict[Individual, list[BiographicDedupeSimilarityPair]]:
+    # Every RDI side of a pair gets it, so batch-mates see each other both ways, as in legacy ES dedup.
+    pairs_by_main_individual = defaultdict(list)
+    for pair in pairs:
+        if pair.individual1 is None or pair.individual2 is None:
+            continue
+        for individual in (pair.individual1, pair.individual2):
+            if individual.registration_data_import_id == rdi.id:
+                pairs_by_main_individual[individual].append(pair)
+    return pairs_by_main_individual
+
+
+def create_grouped_grievance_tickets_from_hde_findings_with_details(
+    main_individual: Individual,
+    pairs: list[BiographicDedupeSimilarityPair],
+    business_area: BusinessArea,
+    registration_data_import: RegistrationDataImport,
+) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
+    issue_type = GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY
+    # Pairs come from _group_pairs_by_main_individual, so both sides are set.
+    possible_duplicates: list[Individual] = [
+        cast("Individual", pair.individual2 if pair.individual1_id == main_individual.id else pair.individual1)
+        for pair in pairs
+    ]
+    # However `_needs_adjudication_ticket_exists` works we must keep the same behaviour.
+    # There are some edge cases, tough where tickets might be sentenced as "exist" and
+    # at the same time will require creating a ticket, but we agree with this.
+    if _needs_adjudication_ticket_exists({main_individual, *possible_duplicates}, issue_type):
+        return None, None
+
+    ticket = _create_needs_adjudication_ticket(main_individual, business_area, issue_type, registration_data_import)
+
+    # Legacy golden_records shape, built from the HDE pairs instead of the stored dedup results.
+    golden_records = BiographicDedupeSimilarityPair.serialize_for_individual(main_individual, pairs)["duplicates"]
+    score_min, score_max = _get_min_max_score(golden_records)
+
+    ticket_details = _create_needs_adjudication_details(
+        ticket=ticket,
+        main_individual=main_individual,
+        possible_duplicate=None,
+        possible_duplicates=possible_duplicates,
+        is_multiple_duplicates_version=True,
+        extra_data={"golden_records": golden_records, "possible_duplicate": None},
+        score_min=score_min,
+        score_max=score_max,
+    )
+    return ticket, ticket_details
+
+
+def create_needs_adjudication_tickets_for_biographic(
+    deduplication_pairs: QuerySet[BiographicDedupeSimilarityPair],
+    rdi: RegistrationDataImport,
+) -> None:
+    for main_individual, pairs in _group_pairs_by_main_individual(deduplication_pairs, rdi).items():
+        create_grouped_grievance_tickets_from_hde_findings_with_details(
+            main_individual=main_individual,
+            pairs=pairs,
+            business_area=rdi.program.business_area,
+            registration_data_import=rdi,
+        )
 
 
 def mark_as_duplicate_individual(
