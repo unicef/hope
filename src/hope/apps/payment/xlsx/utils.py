@@ -4,11 +4,6 @@ from openpyxl.worksheet.worksheet import Worksheet
 def get_last_data_row(ws: Worksheet) -> int:
     """Return the last row holding a value, ignoring trailing styled-but-empty cells.
 
-    https://dev.azure.com/unicef/ICTD-HCT-MIS/_workitems/edit/349154 raised an issue where
-    uploading XLSX file with empty, but formatted rows caused the system to read the entire
-    file into memory, resulting in a memory error.
-    This function returns last row with a value, ignoring trailing styled-but-empty cells.
-
     ``ws.max_row`` also counts formatted empty cells, and
     ``ws.iter_rows()`` creates and stores a Cell for every coordinate it visits, so iterating up to
     ``max_row`` can materialise millions of cells. openpyxl has no public API to find the last
