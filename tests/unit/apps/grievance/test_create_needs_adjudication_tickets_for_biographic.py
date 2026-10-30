@@ -11,7 +11,7 @@ from extras.test_utils.factories import (
     RegistrationDataImportFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
-from hope.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets_for_biographic,
 )
@@ -138,6 +138,35 @@ def population_pair_of_rdi_individual_lower_id(
 
 
 @pytest.fixture
+def rdi_individual_higher_id(program: Program, rdi: RegistrationDataImport) -> Individual:
+    return IndividualFactory(
+        id="44444444-4444-4444-4444-444444444444",
+        program=program,
+        business_area=program.business_area,
+        registration_data_import=rdi,
+    )
+
+
+@pytest.fixture
+def intra_batch_cluster_pairs(
+    program: Program,
+    rdi_individual: Individual,
+    rdi_individual_lower_id: Individual,
+    rdi_individual_higher_id: Individual,
+    intra_batch_pair: BiographicDedupeSimilarityPair,
+) -> list[BiographicDedupeSimilarityPair]:
+    return [
+        intra_batch_pair,
+        BiographicDeduplicationEngineSimilarityPairFactory(
+            program=program, individual1=rdi_individual_lower_id, individual2=rdi_individual_higher_id
+        ),
+        BiographicDeduplicationEngineSimilarityPairFactory(
+            program=program, individual1=rdi_individual, individual2=rdi_individual_higher_id
+        ),
+    ]
+
+
+@pytest.fixture
 def pair_with_missing_individual(program: Program, rdi_individual: Individual) -> BiographicDedupeSimilarityPair:
     return BiographicDeduplicationEngineSimilarityPairFactory(
         program=program,
@@ -224,7 +253,21 @@ def test_create_needs_adjudication_tickets_for_biographic_stores_golden_records_
     assert ticket_details.is_multiple_duplicates_version is True
 
 
-def test_create_needs_adjudication_tickets_for_biographic_intra_batch_pair_makes_lower_id_individual_main(
+def test_create_needs_adjudication_tickets_for_biographic_intra_batch_cluster_creates_one_ticket(
+    rdi: RegistrationDataImport,
+    rdi_individual: Individual,
+    rdi_individual_lower_id: Individual,
+    rdi_individual_higher_id: Individual,
+    intra_batch_cluster_pairs: list[BiographicDedupeSimilarityPair],
+) -> None:
+    create_needs_adjudication_tickets_for_biographic(BiographicDedupeSimilarityPair.objects.all(), rdi)
+
+    ticket_details = GrievanceTicket.objects.get().ticket_details
+    assert ticket_details.golden_records_individual == rdi_individual_lower_id
+    assert set(ticket_details.possible_duplicates.all()) == {rdi_individual, rdi_individual_higher_id}
+
+
+def test_create_needs_adjudication_tickets_for_biographic_intra_batch_pair_creates_one_ticket(
     rdi: RegistrationDataImport,
     rdi_individual: Individual,
     rdi_individual_lower_id: Individual,
@@ -276,7 +319,7 @@ def test_create_needs_adjudication_tickets_for_biographic_links_tickets_of_diffe
     assert list(ticket_2.linked_tickets.all()) == [ticket_1]
 
 
-def test_create_needs_adjudication_tickets_for_biographic_main_in_intra_batch_pair_gets_separate_ticket(
+def test_create_needs_adjudication_tickets_for_biographic_groups_intra_batch_and_population_matches_in_one_ticket(
     rdi: RegistrationDataImport,
     rdi_individual: Individual,
     rdi_individual_lower_id: Individual,
@@ -284,16 +327,8 @@ def test_create_needs_adjudication_tickets_for_biographic_main_in_intra_batch_pa
     population_pair: BiographicDedupeSimilarityPair,
     intra_batch_pair: BiographicDedupeSimilarityPair,
 ) -> None:
-    # Pairs (rdi_individual, population) and (rdi_individual_lower_id, rdi_individual) are not merged
-    # into one group: each main individual gets its own ticket.
     create_needs_adjudication_tickets_for_biographic(BiographicDedupeSimilarityPair.objects.all(), rdi)
 
-    assert GrievanceTicket.objects.count() == 2
-    assert list(
-        TicketNeedsAdjudicationDetails.objects.get(golden_records_individual=rdi_individual).possible_duplicates.all()
-    ) == [population_individual]
-    assert list(
-        TicketNeedsAdjudicationDetails.objects.get(
-            golden_records_individual=rdi_individual_lower_id
-        ).possible_duplicates.all()
-    ) == [rdi_individual]
+    ticket_details = GrievanceTicket.objects.get().ticket_details
+    assert ticket_details.golden_records_individual == rdi_individual
+    assert set(ticket_details.possible_duplicates.all()) == {population_individual, rdi_individual_lower_id}

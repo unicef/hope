@@ -410,21 +410,17 @@ def create_needs_adjudication_tickets_for_biometrics(
         ticket.linked_tickets.set([t for t in new_tickets if t != ticket])
 
 
-def _pick_main_individual(individual1: Individual, individual2: Individual, rdi: RegistrationDataImport) -> Individual:
-    # Against population the RDI side is main; intra-batch (both in RDI) individual1 is main.
-    if individual1.registration_data_import_id == rdi.id:
-        return individual1
-    return individual2
-
-
 def _group_pairs_by_main_individual(
     pairs: QuerySet[BiographicDedupeSimilarityPair], rdi: RegistrationDataImport
 ) -> dict[Individual, list[BiographicDedupeSimilarityPair]]:
+    # Every RDI side of a pair gets it, so batch-mates see each other both ways, as in legacy ES dedup.
     pairs_by_main_individual = defaultdict(list)
     for pair in pairs:
         if pair.individual1 is None or pair.individual2 is None:
             continue
-        pairs_by_main_individual[_pick_main_individual(pair.individual1, pair.individual2, rdi)].append(pair)
+        for individual in (pair.individual1, pair.individual2):
+            if individual.registration_data_import_id == rdi.id:
+                pairs_by_main_individual[individual].append(pair)
     return pairs_by_main_individual
 
 
