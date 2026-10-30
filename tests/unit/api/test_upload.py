@@ -2,6 +2,7 @@ import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from extras.test_utils.factories import HouseholdFactory
 from hope.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hope.apps.household.const import (
     HEAD,
@@ -12,9 +13,81 @@ from hope.apps.household.const import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
 )
-from hope.models import Currency, DocumentType, PendingHousehold, PendingIndividual, Program, RegistrationDataImport
+from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
+from hope.models import (
+    Currency,
+    DocumentType,
+    Household,
+    PendingHousehold,
+    PendingIndividual,
+    Program,
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def collision_program(program: Program) -> Program:
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["collision_detector"])
+    return program
+
+
+@pytest.fixture
+def existing_collision_household(collision_program: Program) -> Household:
+    return HouseholdFactory(
+        business_area=collision_program.business_area,
+        program=collision_program,
+        identification_key="HH-KEY-001",
+        village="old village",
+    )
+
+
+def test_upload_colliding_household_is_saved_as_pending_for_merge(
+    token_api_client: APIClient,
+    upload_url: str,
+    collision_program: Program,
+    existing_collision_household: Household,
+    afghanistan_country: None,
+    mock_elasticsearch: None,
+) -> None:
+    payload = {
+        "name": "aaaa",
+        "program": str(collision_program.id),
+        "households": [
+            {
+                "residence_status": "IDP",
+                "village": "new village",
+                "country": "AF",
+                "identification_key": "HH-KEY-001",
+                "members": [
+                    {
+                        "relationship": HEAD,
+                        "role": ROLE_PRIMARY,
+                        "full_name": "John Doe",
+                        "birth_date": "2000-01-01",
+                        "sex": "MALE",
+                        "identification_key": "IND-KEY-001",
+                    },
+                ],
+                "size": 1,
+            }
+        ],
+    }
+
+    response = token_api_client.post(upload_url, payload, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+    data = response.json()
+    assert data["households"] == 1
+    assert data["individuals"] == 1
+    pending_hh = PendingHousehold.objects.get(registration_data_import_id=data["id"])
+    assert pending_hh.identification_key == "HH-KEY-001"
+    assert pending_hh.head_of_household.full_name == "John Doe"
+    existing_collision_household.refresh_from_db()
+    assert existing_collision_household.village == "old village"
+    assert not RegistrationDataImport.objects.get(id=data["id"]).extra_hh_rdis.exists()
 
 
 def test_upload_single_household_with_head_as_primary(

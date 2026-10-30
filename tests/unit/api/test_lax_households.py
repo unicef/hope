@@ -179,24 +179,6 @@ def existing_collision_household(business_area: BusinessArea, collision_program:
 
 
 @pytest.fixture
-def existing_collision_household_a(business_area: BusinessArea, collision_program: Program) -> Household:
-    return HouseholdFactory(
-        business_area=business_area,
-        program=collision_program,
-        identification_key="COLLISION-KEY-A",
-    )
-
-
-@pytest.fixture
-def existing_collision_household_b(business_area: BusinessArea, collision_program: Program) -> Household:
-    return HouseholdFactory(
-        business_area=business_area,
-        program=collision_program,
-        identification_key="COLLISION-KEY-B",
-    )
-
-
-@pytest.fixture
 def household_image_flex_attribute() -> FlexibleAttribute:
     return FlexibleAttributeFactory(
         name="household_photo_h_f",
@@ -393,7 +375,7 @@ def test_household_with_admin_areas(
     assert household.admin4 == admin4
 
 
-def test_collision_detected_household_added_to_extra_rdis(
+def test_colliding_household_is_saved_as_pending_for_merge(
     api_client: APIClient,
     lax_households_url: str,
     afghanistan_country: Country,
@@ -414,65 +396,15 @@ def test_collision_detected_household_added_to_extra_rdis(
         "identification_key": "COLLISION-KEY-001",
     }
 
-    hh_count_before = PendingHousehold.objects.count()
     response = api_client.post(lax_households_url, [household_data], format="json")
 
     assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-    assert response.data["processed"] == 1
     assert response.data["accepted"] == 1
-    assert response.data["errors"] == 0
-    assert PendingHousehold.objects.count() == hh_count_before
-    rdi.refresh_from_db()
-    assert rdi.extra_hh_rdis.filter(id=existing_collision_household.id).exists()
-
-
-def test_collision_only_batch_returns_early(
-    api_client: APIClient,
-    lax_households_url: str,
-    afghanistan_country: Country,
-    head_of_household: PendingIndividual,
-    primary_collector: PendingIndividual,
-    second_hoh: PendingIndividual,
-    existing_collision_household_a: Household,
-    existing_collision_household_b: Household,
-    rdi: RegistrationDataImport,
-) -> None:
-    households_data = [
-        {
-            "country": "AF",
-            "country_origin": "AF",
-            "size": 1,
-            "consent_sharing": ["UNICEF"],
-            "village": "Village A",
-            "head_of_household_id": head_of_household.unicef_id,
-            "primary_collector_id": primary_collector.unicef_id,
-            "members": [head_of_household.unicef_id],
-            "identification_key": "COLLISION-KEY-A",
-        },
-        {
-            "country": "AF",
-            "country_origin": "AF",
-            "size": 1,
-            "consent_sharing": ["UNICEF"],
-            "village": "Village B",
-            "head_of_household_id": second_hoh.unicef_id,
-            "primary_collector_id": primary_collector.unicef_id,
-            "members": [second_hoh.unicef_id],
-            "identification_key": "COLLISION-KEY-B",
-        },
-    ]
-
-    hh_count_before = PendingHousehold.objects.count()
-    response = api_client.post(lax_households_url, households_data, format="json")
-
-    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
-    assert response.data["processed"] == 2
-    assert response.data["accepted"] == 2
-    assert response.data["errors"] == 0
-    assert PendingHousehold.objects.count() == hh_count_before
-    rdi.refresh_from_db()
-    assert rdi.extra_hh_rdis.filter(id=existing_collision_household_a.id).exists()
-    assert rdi.extra_hh_rdis.filter(id=existing_collision_household_b.id).exists()
+    pending_hh = PendingHousehold.objects.get(registration_data_import=rdi, identification_key="COLLISION-KEY-001")
+    head_of_household.refresh_from_db()
+    assert head_of_household.household == pending_hh
+    assert existing_collision_household.village != "Test Village"
+    assert not rdi.extra_hh_rdis.exists()
 
 
 def test_create_household_with_consent_sign_stores_image_file(

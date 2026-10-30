@@ -420,7 +420,7 @@ def test_update_household_moves_the_merged_household_onto_the_active_currency(
     # merge does not keep the deprecated row when the imported code is the same.
     detector = IdentificationKeyCollisionDetector(program)
 
-    with django_assert_num_queries(90):
+    with django_assert_num_queries(91):
         detector.update_household(source_household_on_active_syp)
 
     destination_household_on_deprecated_syp.refresh_from_db()

@@ -4,7 +4,6 @@ import logging
 import uuid
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.forms import model_to_dict
 
 from hope.apps.household.const import HEAD, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN, ROLE_ALTERNATE, ROLE_PRIMARY
 from hope.apps.periodic_data_update.utils import populate_pdu_with_null_values
@@ -12,7 +11,6 @@ from hope.models import (
     AccountAttachment,
     Country,
     DocumentType,
-    Household,
     PendingAccount,
     PendingDocument,
     PendingHousehold,
@@ -83,44 +81,6 @@ class PhotoMixin:
 
 
 class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
-    # Fields that must never be overwritten when updating an existing household on collision.
-    _COLLISION_EXCLUDE_FIELDS = {
-        "id",
-        "pk",
-        "unicef_id",
-        "created_at",
-        "program_id",
-        "updated_at",
-        "household_collection_id",
-        "household_collection",
-        "rdi_merge_status",
-        "extra_rdis",
-        "representatives",
-        "registration_data_import",
-        "registration_data_import_id",
-        "head_of_household",
-        "head_of_household_id",
-    }
-
-    def _manage_collision(self, household: Household, registration_data_import: RegistrationDataImport) -> str | None:
-        """Detect a collision and, when found, update the existing household's scalar fields.
-
-        Returns the existing household's id string when a collision is found, None otherwise.
-        """
-        program = registration_data_import.program
-        collided_id = program.collision_detector.detect_collision(household)
-        if collided_id is None:
-            return None
-
-        # Update the existing (merged) household with the incoming scalar data.
-        exclude = list(self._COLLISION_EXCLUDE_FIELDS)
-        data = model_to_dict(household, exclude=exclude)
-        # Drop any None-valued keys to avoid overwriting real data with NULL.
-        data = {k: v for k, v in data.items() if v is not None}
-        Household.objects.filter(pk=collided_id).update(**data)
-
-        return collided_id
-
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: dict) -> PendingIndividual:
         photo = self.get_photo(member_data.pop("photo", None))
         documents = member_data.pop("documents", [])
@@ -154,7 +114,6 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
 
     def save_households(self, rdi: RegistrationDataImport, households_data: list[dict]) -> Totals:
         totals = Totals(0, 0)
-        household_ids_to_add_extra_rdis = []
         for household_data in households_data:
             totals.households += 1
             members: list[dict] = household_data.pop("members")
@@ -171,14 +130,8 @@ class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
                 **household_data,
             )
 
-            if collided_household_id := self._manage_collision(hh, rdi):
-                totals.individuals += len(members)
-                household_ids_to_add_extra_rdis.append(collided_household_id)
-                continue
-
             hh.save()
             for member_data in members:
                 self.save_member(rdi, hh, member_data)
                 totals.individuals += 1
-        rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)  # type: ignore[arg-type]
         return totals
