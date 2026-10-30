@@ -465,19 +465,13 @@ def create_needs_adjudication_tickets_for_biographic(
     deduplication_pairs: QuerySet[BiographicDedupeSimilarityPair],
     rdi: RegistrationDataImport,
 ) -> None:
-    new_tickets = []
     for main_individual, pairs in _group_pairs_by_main_individual(deduplication_pairs, rdi).items():
-        ticket, _ = create_grouped_grievance_tickets_from_hde_findings_with_details(
+        create_grouped_grievance_tickets_from_hde_findings_with_details(
             main_individual=main_individual,
             pairs=pairs,
             business_area=rdi.program.business_area,
             registration_data_import=rdi,
         )
-        if ticket:
-            new_tickets.append(ticket)
-
-    for ticket in new_tickets:
-        ticket.linked_tickets.set([t for t in new_tickets if t != ticket])
 
 
 def mark_as_duplicate_individual(

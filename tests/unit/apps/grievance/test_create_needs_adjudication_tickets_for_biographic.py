@@ -307,16 +307,15 @@ def test_create_needs_adjudication_tickets_for_biographic_skips_individuals_with
     assert list(GrievanceTicket.objects.all()) == [open_biographical_ticket_for_population_pair]
 
 
-def test_create_needs_adjudication_tickets_for_biographic_links_tickets_of_different_main_individuals(
+def test_create_needs_adjudication_tickets_for_biographic_does_not_link_tickets_of_different_main_individuals(
     rdi: RegistrationDataImport,
     population_pair: BiographicDedupeSimilarityPair,
     population_pair_of_rdi_individual_lower_id: BiographicDedupeSimilarityPair,
 ) -> None:
     create_needs_adjudication_tickets_for_biographic(BiographicDedupeSimilarityPair.objects.all(), rdi)
 
-    ticket_1, ticket_2 = GrievanceTicket.objects.all()
-    assert list(ticket_1.linked_tickets.all()) == [ticket_2]
-    assert list(ticket_2.linked_tickets.all()) == [ticket_1]
+    assert GrievanceTicket.objects.count() == 2
+    assert not GrievanceTicket.linked_tickets.through.objects.exists()
 
 
 def test_create_needs_adjudication_tickets_for_biographic_groups_intra_batch_and_population_matches_in_one_ticket(
