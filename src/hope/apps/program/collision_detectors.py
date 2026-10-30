@@ -125,6 +125,10 @@ class AbstractCollisionDetector:
             "household",
             "household_id",
         }
+        # the pending source row is cascade-deleted with its household at the end of update_household;
+        # free its unique ids first so copying them onto the destination does not trip
+        # country_workspace_id_ind_unique_constraint / originating_id_ind_unique_constraint
+        Individual.all_objects.filter(pk=individual_source.pk).update(country_workspace_id=None, originating_id=None)
         self._update_db_instance(individual_source, individual_destination, exclude)
 
     def _update_household(
