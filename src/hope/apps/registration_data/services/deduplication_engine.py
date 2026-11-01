@@ -169,7 +169,9 @@ class DeduplicationEngineService:
 
         return qs.distinct()
 
-    def create_grievance_tickets_for_biometric_duplicates(self, rdi: RegistrationDataImport) -> None:
+    def create_grievance_tickets_for_biometric_duplicates(
+        self, rdi: RegistrationDataImport, moved_biometric_pair_ids: list | None = None
+    ) -> None:
         # create tickets only against merged individuals
         from hope.apps.grievance.services.biometric_photo_ticket import (
             create_biometrics_photo_data_change_tickets,
@@ -178,8 +180,10 @@ class DeduplicationEngineService:
             create_needs_adjudication_tickets_for_biometrics,
         )
 
-        deduplication_pairs = self.get_duplicates_for_rdi_against_population(
-            rdi, rdi_merged=True, exclude_not_valid=False
+        rdi_pairs = self.get_duplicates_for_rdi_against_population(rdi, rdi_merged=True, exclude_not_valid=False)
+        # Pairs moved onto existing individuals by the collision merge: those individuals keep their old RDI.
+        deduplication_pairs = BiometricDedupeSimilarityPair.objects.filter(
+            Q(pk__in=rdi_pairs.values("pk")) | Q(pk__in=moved_biometric_pair_ids or [])
         )
 
         photo_error_codes = BiometricDedupeSimilarityPair.StatusCode.photo_error_codes()

@@ -58,7 +58,9 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    def _process_collisions(self, obj_hct: RegistrationDataImport, household_ids: list) -> tuple[list, list, list]:
+    def _process_collisions(
+        self, obj_hct: RegistrationDataImport, household_ids: list
+    ) -> tuple[list, list, list, list]:
         collision_detector = obj_hct.program.collision_detector
 
         household_ids_to_exclude = []
@@ -72,14 +74,15 @@ class RdiMergeTask:
         # acquire all collision-target locks up front in one pk-ordered statement, to avoid
         # deadlocks; the writes below can then run in any order
         evaluate_qs(Household.objects.filter(id__in=collided_ids).select_for_update().only("pk").order_by("pk"))
+        moved_biometric_pair_ids = []
         for ids in chunks(household_ids_to_exclude, 1000):
             for household in PendingHousehold.objects.filter(id__in=ids):
-                collision_detector.update_household(household)
+                moved_biometric_pair_ids += collision_detector.update_household(household)
 
         obj_hct.extra_hh_rdis.add(*collided_ids)
 
         households_to_merge_ids = list(set(household_ids) - set(household_ids_to_exclude))
-        return households_to_merge_ids, household_ids_to_exclude, list(collided_ids)
+        return households_to_merge_ids, household_ids_to_exclude, list(collided_ids), moved_biometric_pair_ids
 
     def _update_merge_statuses(self, households_to_merge_ids: list, individuals_to_merge_ids: list) -> None:
         dmds = PendingAccount.objects.filter(individual_id__in=individuals_to_merge_ids).select_related(
@@ -117,11 +120,11 @@ class RdiMergeTask:
                     cache.delete(key)
 
     def _create_adjudication_tickets_from_deduplication_engine_findings(
-        self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list
+        self, obj_hct: RegistrationDataImport, individuals_to_merge_ids: list, moved_biometric_pair_ids: list
     ) -> None:
         if obj_hct.program is not None and obj_hct.program.biometric_deduplication_enabled:
             dedupe_service = DeduplicationEngineService()
-            dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct)
+            dedupe_service.create_grievance_tickets_for_biometric_duplicates(obj_hct, moved_biometric_pair_ids)
 
     def _run_deduplication(
         self, obj_hct: RegistrationDataImport, individuals: QuerySet, registration_data_import_id: str
@@ -180,8 +183,8 @@ class RdiMergeTask:
 
             try:
                 with transaction.atomic():
-                    households_to_merge_ids, household_ids_to_exclude, collided_ids = self._process_collisions(
-                        obj_hct, household_ids
+                    households_to_merge_ids, household_ids_to_exclude, collided_ids, moved_biometric_pair_ids = (
+                        self._process_collisions(obj_hct, household_ids)
                     )
                     individuals_to_merge_ids = list(
                         Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
@@ -240,7 +243,7 @@ class RdiMergeTask:
 
                     deduplicate_documents_for_rdi(str(obj_hct.id))
                     self._create_adjudication_tickets_from_deduplication_engine_findings(
-                        obj_hct, individuals_to_merge_ids
+                        obj_hct, individuals_to_merge_ids, moved_biometric_pair_ids
                     )
 
                     obj_hct.status = RegistrationDataImport.MERGED

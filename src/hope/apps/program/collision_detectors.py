@@ -1,12 +1,13 @@
 from typing import TYPE_CHECKING, Any
 
 from django.db import models
+from django.db.models import Q
 from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from strategy_field.registry import Registry
 
 from hope.apps.household.const import REMOVED_BY_COLLISION
-from hope.models import Household, Individual, IndividualRoleInHousehold
+from hope.models import BiometricDedupeSimilarityPair, Household, Individual, IndividualRoleInHousehold
 
 if TYPE_CHECKING:
     from hope.models import Program
@@ -127,6 +128,34 @@ class AbstractCollisionDetector:
         }
         self._update_db_instance(individual_source, individual_destination, exclude)
 
+    def _move_biometric_pairs(self, individual_destination: Individual, individual_source: Individual) -> list[int]:
+        """Re-point the source's biometric pairs at the destination before the source is cascade-deleted.
+
+        Self-pairs (source vs destination) are dropped; a pair the destination already has is kept as is,
+        so its ticket history is not duplicated. Returns ids of the moved pairs.
+        """
+        moved_pair_ids = []
+        pairs = BiometricDedupeSimilarityPair.objects.filter(
+            Q(individual1=individual_source) | Q(individual2=individual_source)
+        )
+        for pair in pairs:
+            other_id = pair.individual2_id if pair.individual1_id == individual_source.id else pair.individual1_id
+            if other_id == individual_destination.id:
+                continue
+            if other_id is None:
+                individual1_id, individual2_id = individual_destination.id, None
+            else:
+                individual1_id, individual2_id = sorted([individual_destination.id, other_id], key=str)
+            if BiometricDedupeSimilarityPair.objects.filter(
+                individual1_id=individual1_id, individual2_id=individual2_id
+            ).exists():
+                continue
+            BiometricDedupeSimilarityPair.objects.filter(pk=pair.pk).update(
+                individual1_id=individual1_id, individual2_id=individual2_id
+            )
+            moved_pair_ids.append(pair.pk)
+        return moved_pair_ids
+
     def _update_household(
         self,
         household_destination: Household,
@@ -237,8 +266,8 @@ class NoopCollisionDetector(AbstractCollisionDetector):
         pass
 
     @atomic
-    def update_household(self, household_to_merge: Household) -> None:
-        pass
+    def update_household(self, household_to_merge: Household) -> list[int]:
+        return []
 
 
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
@@ -265,7 +294,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         return self.unique_identification_keys_dict.get(household.identification_key, None)
 
     @atomic
-    def update_household(self, household_to_merge: Household) -> None:
+    def update_household(self, household_to_merge: Household) -> list[int]:
         """Update an existing household with data from another household based on matching identification keys.
 
         This method performs the following steps:
@@ -292,11 +321,11 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         """
         # 1. Sanity check - household_to_merge must have an identification key
         if not household_to_merge.identification_key:
-            return
+            return []
         # 2. Get the old household id that has the same identification key. If there is no such household, return
         old_household_id = self.detect_collision(household_to_merge)
         if old_household_id is None:
-            return
+            return []
         old_household = Household.objects.get(id=old_household_id)
         old_individuals = Household.objects.get(id=old_household_id).individuals.all()
         individuals_to_merge = household_to_merge.individuals(manager="all_objects").all()
@@ -343,6 +372,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         old_household.head_of_household = None
         old_household.save()
         # 7. Update the individuals in the old household with the new ones
+        moved_biometric_pair_ids = []
         for key in identification_keys_to_update:
             individual_original = old_individuals_by_identification_key[key]
             individual_source = individuals_to_merge_by_identification_key[key]
@@ -350,6 +380,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             self._update_individual_identities(individual_original, individual_source)
             self._update_accounts(individual_original, individual_source)
             self._update_individual(individual_original, individual_source)
+            moved_biometric_pair_ids += self._move_biometric_pairs(individual_original, individual_source)
         # 8. Process individuals that are in the old household but not in the new household
         for individual in individuals_to_remove:
             self._process_removed_individual(individual, old_household_id, old_head_of_household_id)
@@ -381,6 +412,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             household_to_merge,
             updated_head_of_household,
         )
+        return moved_biometric_pair_ids
 
 
 collision_detectors_registry: Registry = Registry(AbstractCollisionDetector)

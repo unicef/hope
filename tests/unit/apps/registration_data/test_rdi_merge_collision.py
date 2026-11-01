@@ -1,11 +1,13 @@
 import datetime
 from unittest.mock import patch
 
+from django.test.utils import override_settings
 import pytest
 
 from extras.test_utils.factories import (
     AreaFactory,
     AreaTypeFactory,
+    BiometricDeduplicationEngineSimilarityPairFactory,
     BusinessAreaFactory,
     CountryFactory,
     HouseholdFactory,
@@ -15,10 +17,18 @@ from extras.test_utils.factories import (
     ProgramFactory,
     RegistrationDataImportFactory,
 )
+from hope.apps.grievance.models import GrievanceTicket
 from hope.apps.household.const import MALE, REMOVED_BY_COLLISION
 from hope.apps.program.collision_detectors import IdentificationKeyCollisionDetector
 from hope.apps.registration_data.tasks.rdi_merge import RdiMergeTask
-from hope.models import Household, Individual, Program, RegistrationDataImport
+from hope.models import (
+    BiometricDedupeSimilarityPair,
+    BusinessArea,
+    Household,
+    Individual,
+    Program,
+    RegistrationDataImport,
+)
 from hope.models.utils import MergeStatusModel
 
 pytestmark = [
@@ -168,6 +178,40 @@ def merged_household(
     household.save(update_fields=["flex_fields"])
 
     return (household, (ind1, ind2))
+
+
+@pytest.fixture
+def population_lookalike(program: Program, merged_rdi: RegistrationDataImport) -> Individual:
+    return IndividualFactory(
+        business_area=program.business_area,
+        program=program,
+        registration_data_import=merged_rdi,
+        household=None,
+    )
+
+
+@pytest.fixture
+def biometric_pairs_of_collided_individual(
+    program: Program,
+    pending_household: tuple[Household, Individual],
+    merged_household: tuple[Household, tuple[Individual, Individual]],
+    population_lookalike: Individual,
+) -> list[BiometricDedupeSimilarityPair]:
+    program.business_area.ingest_source = BusinessArea.IngestSource.COUNTRY_WORKSPACE_ONLY
+    program.business_area.save(update_fields=["ingest_source"])
+    program.biometric_deduplication_enabled = True
+    program.collision_detector = IdentificationKeyCollisionDetector
+    program.save(update_fields=["biometric_deduplication_enabled", "collision_detector"])
+    _, pending_individual = pending_household
+    _, (_, merged_individual) = merged_household
+    return [
+        BiometricDeduplicationEngineSimilarityPairFactory(
+            program=program, individual1=pending_individual, individual2=merged_individual
+        ),
+        BiometricDeduplicationEngineSimilarityPairFactory(
+            program=program, individual1=pending_individual, individual2=population_lookalike
+        ),
+    ]
 
 
 @pytest.fixture
@@ -321,7 +365,7 @@ def test_process_collisions_multiple_households(
     program.save(update_fields=["collision_detector"])
     household_ids = [pending_household_one.id, pending_household_two.id, pending_household_three.id]
 
-    households_to_merge_ids, household_ids_to_exclude, collided_ids = RdiMergeTask()._process_collisions(
+    households_to_merge_ids, household_ids_to_exclude, collided_ids, _ = RdiMergeTask()._process_collisions(
         in_review_rdi, household_ids
     )
 
@@ -365,7 +409,7 @@ def test_process_collisions_detection_query_count(
     household_ids = [pending_household_one.id, pending_household_two.id, pending_household_three.id]
 
     with django_assert_num_queries(2):
-        households_to_merge_ids, household_ids_to_exclude, collided_ids = RdiMergeTask()._process_collisions(
+        households_to_merge_ids, household_ids_to_exclude, collided_ids, _ = RdiMergeTask()._process_collisions(
             in_review_rdi, household_ids
         )
 
@@ -486,3 +530,30 @@ def test_merge_schedules_recalculation_for_collided_households(
 
     scheduled_ids = mock_recalculate.call_args.args[0]
     assert str(merged_household_obj.id) in scheduled_ids
+
+
+@override_settings(
+    DEDUPLICATION_ENGINE_API_KEY="dedup_api_key",
+    DEDUPLICATION_ENGINE_API_URL="http://dedup-fake-url.com",
+)
+def test_merge_rdi_with_collision_creates_biometric_ticket_for_existing_individual_from_moved_pair(
+    merged_household: tuple[Household, tuple[Individual, Individual]],
+    population_lookalike: Individual,
+    in_review_rdi: RegistrationDataImport,
+    biometric_pairs_of_collided_individual: list[BiometricDedupeSimilarityPair],
+    django_capture_on_commit_callbacks,
+) -> None:
+    # The pending individual's pairs move to the existing individual it collided with; the pair against
+    # that existing individual itself becomes a self-pair and is dropped.
+    _, (_, merged_individual) = merged_household
+
+    with django_capture_on_commit_callbacks(execute=True):
+        RdiMergeTask().execute(str(in_review_rdi.id))
+
+    ticket_details = GrievanceTicket.objects.get(
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
+    ).ticket_details
+    assert {ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all()} == {
+        merged_individual,
+        population_lookalike,
+    }
