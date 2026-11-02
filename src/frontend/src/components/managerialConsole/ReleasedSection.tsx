@@ -1,9 +1,11 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { BlackLink } from '@components/core/BlackLink';
+import { FlagTooltip } from '@components/core/FlagTooltip';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import SearchIcon from '@mui/icons-material/Search';
 import {
+  Box,
   InputAdornment,
   Table,
   TableBody,
@@ -51,12 +53,24 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       headerName: t('Payment Plan ID'),
       width: 200,
       renderCell: (params) => (
-        <BlackLink
-          to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
-          newTab={true}
-        >
-          {params.value}
-        </BlackLink>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <BlackLink
+            to={`/${businessArea}/programs/${params.row.programCode}/payment-module/${params.row.planType === 'FOLLOW_UP' ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+            newTab={true}
+          >
+            {params.value}
+          </BlackLink>
+          {params.row.hasPaymentsReconciliationOverdue && (
+            <Box sx={{ display: 'flex' }} data-cy="reconciliation-overdue-flag">
+              <FlagTooltip
+                message={t(
+                  'Reconciliation overdue: exceeded {{days}}-day reconciliation window',
+                  { days: params.row.reconciliationWindowInDays },
+                )}
+              />
+            </Box>
+          )}
+        </Box>
       ),
     },
     { field: 'program', headerName: t('Programme Name'), width: 200 },
@@ -76,20 +90,6 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       field: 'lastApprovalProcessBy',
       headerName: t('Released by'),
       width: 200,
-    },
-    {
-      field: 'hasPaymentsReconciliationOverdue',
-      headerName: t('Payments Reconciliation Overdue'),
-      width: 100,
-      renderCell: (params) => (
-        <>
-          {params.value ? (
-            <span style={{ color: 'red', fontWeight: 600 }}>YES</span>
-          ) : (
-            ''
-          )}
-        </>
-      ),
     },
   ];
 

@@ -42,7 +42,8 @@
                 "last_approval_process_by": null,
                 "admin_url": "/api/unicorn/payment/paymentplan/e53ab80c-d61e-43e5-99fd-b37bbc18f0b0/change/",
                 "screen_beneficiary": false,
-                "has_payments_reconciliation_overdue": false
+                "has_payments_reconciliation_overdue": false,
+                "reconciliation_window_in_days": 0
             }
         ]
     },

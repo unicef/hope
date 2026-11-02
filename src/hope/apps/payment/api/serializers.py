@@ -418,6 +418,9 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_code = serializers.CharField(source="program_cycle.program.code", read_only=True)
+    reconciliation_window_in_days = serializers.IntegerField(
+        source="program_cycle.program.reconciliation_window_in_days", read_only=True
+    )
     program_cycle_id = serializers.UUIDField(read_only=True)
     last_approval_process_date = serializers.DateTimeField(read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
@@ -453,6 +456,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "admin_url",
             "screen_beneficiary",
             "has_payments_reconciliation_overdue",
+            "reconciliation_window_in_days",
         )
 
     @staticmethod

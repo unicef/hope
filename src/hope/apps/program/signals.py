@@ -9,6 +9,7 @@ from hope.api.caches import (
     increment_business_area_and_program_version,
     increment_cache_key,
 )
+from hope.apps.payment.api.caches import invalidate_managerial_payment_plan_list_cache
 from hope.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
@@ -62,6 +63,8 @@ def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dic
         increment_cache_key(version_key)
 
     transaction.on_commit(_increment)
+    # programme settings (e.g. reconciliation window) are rendered in the managerial list
+    invalidate_managerial_payment_plan_list_cache(business_area_slug)
 
 
 @receiver([post_save, post_delete], sender=ProgramCycle)

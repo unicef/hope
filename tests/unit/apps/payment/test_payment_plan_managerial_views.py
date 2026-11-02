@@ -1,4 +1,4 @@
-from datetime import timezone as dt_timezone
+from datetime import timedelta, timezone as dt_timezone
 import json
 from typing import Any, Callable
 
@@ -19,6 +19,7 @@ from extras.test_utils.factories import (
     FileTempFactory,
     FollowUpInstructionFactory,
     PartnerFactory,
+    PaymentFactory,
     PaymentPlanFactory,
     ProgramCycleFactory,
     ProgramFactory,
@@ -26,7 +27,7 @@ from extras.test_utils.factories import (
 )
 from hope.apps.account.permissions import Permissions
 from hope.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hope.models import Approval, PaymentPlan
+from hope.models import Approval, Payment, PaymentPlan
 
 pytestmark = pytest.mark.django_db
 
@@ -194,6 +195,87 @@ def test_list_payment_plans(
         assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
         assert etag_second_call == etag
         assert len(ctx.captured_queries) == 6
+
+
+def _make_released_plan(
+    managerial_context: dict[str, Any], days_since_dispersion: int, delivered_quantity: Any = None
+) -> PaymentPlan:
+    payment_plan = PaymentPlanFactory(
+        program_cycle=managerial_context["program1"].cycles.first(),
+        business_area=managerial_context["business_area"],
+        status=PaymentPlan.Status.ACCEPTED,
+        dispersion_start_date=timezone.now().date() - timedelta(days=days_since_dispersion),
+        created_by=managerial_context["user"],
+    )
+    PaymentFactory(parent=payment_plan, delivered_quantity=delivered_quantity)
+    return payment_plan
+
+
+@pytest.fixture
+def reconciliation_context(
+    managerial_context: dict[str, Any],
+    create_user_role_with_permissions: Any,
+) -> dict[str, Any]:
+    program = managerial_context["program1"]
+    program.reconciliation_window_in_days = 10
+    program.save(update_fields=["reconciliation_window_in_days"])
+    create_user_role_with_permissions(
+        managerial_context["user"],
+        [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+        managerial_context["business_area"],
+        program=program,
+    )
+    return managerial_context
+
+
+def _list_by_id(managerial_context: dict[str, Any]) -> dict[str, dict]:
+    cache.clear()
+    response = managerial_context["client"].get(managerial_context["url"], {"status": PaymentPlan.Status.ACCEPTED})
+    assert response.status_code == status.HTTP_200_OK
+    return {row["id"]: row for row in response.json()["results"]}
+
+
+def test_list_payment_plans_reconciliation_overdue_flag(reconciliation_context: dict[str, Any]) -> None:
+    overdue = _make_released_plan(reconciliation_context, days_since_dispersion=20)
+    within_window = _make_released_plan(reconciliation_context, days_since_dispersion=5)
+    reconciled = _make_released_plan(reconciliation_context, days_since_dispersion=20, delivered_quantity=100)
+    failed = _make_released_plan(reconciliation_context, days_since_dispersion=20)
+    failed.payment_items.update(status=Payment.STATUS_ERROR)
+
+    rows = _list_by_id(reconciliation_context)
+
+    assert rows[str(overdue.id)]["has_payments_reconciliation_overdue"] is True
+    assert rows[str(overdue.id)]["reconciliation_window_in_days"] == 10
+    assert rows[str(within_window.id)]["has_payments_reconciliation_overdue"] is False
+    assert rows[str(reconciled.id)]["has_payments_reconciliation_overdue"] is False
+    assert rows[str(failed.id)]["has_payments_reconciliation_overdue"] is False
+
+
+def test_list_payment_plans_reconciliation_overdue_flag_off_without_window(
+    reconciliation_context: dict[str, Any],
+) -> None:
+    program = reconciliation_context["program1"]
+    program.reconciliation_window_in_days = 0
+    program.save(update_fields=["reconciliation_window_in_days"])
+    payment_plan = _make_released_plan(reconciliation_context, days_since_dispersion=20)
+
+    rows = _list_by_id(reconciliation_context)
+
+    assert rows[str(payment_plan.id)]["has_payments_reconciliation_overdue"] is False
+
+
+def test_list_payment_plans_reconciliation_overdue_does_not_query_payments_per_plan(
+    reconciliation_context: dict[str, Any],
+) -> None:
+    for _ in range(3):
+        _make_released_plan(reconciliation_context, days_since_dispersion=20)
+
+    with CaptureQueriesContext(connection) as ctx:
+        rows = _list_by_id(reconciliation_context)
+
+    assert len(rows) == 3
+    assert all(row["has_payments_reconciliation_overdue"] for row in rows.values())
+    assert not [q for q in ctx.captured_queries if q["sql"].startswith('SELECT 1 AS "a" FROM "payment_payment"')]
 
 
 def test_list_payment_plans_approval_process_data(
