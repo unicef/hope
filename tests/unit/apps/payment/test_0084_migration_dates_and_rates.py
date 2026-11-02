@@ -14,7 +14,7 @@ from hope.models import FollowUpInstruction, PaymentPlan, PaymentPlanGroup
 
 pytestmark = pytest.mark.django_db
 
-migration_module = importlib.import_module("hope.apps.payment.migrations.0093_migration")
+migration_module = importlib.import_module("hope.apps.payment.migrations.0084_migration")
 
 
 @pytest.fixture
@@ -24,11 +24,9 @@ def schema_editor() -> BaseDatabaseSchemaEditor:
 
 @pytest.fixture
 def historical_apps(settings: Any) -> Apps:
-    """The models the data step runs with: 0092 plus the four new fields, the plan columns not yet dropped."""
+    """The models the data step runs with: 0083 adds the owner fields, the plan columns are dropped only in 0085."""
     settings.MIGRATION_MODULES = {}
-    state = MigrationLoader(connection).project_state(("payment", "0092_migration"))
-    for operation in migration_module.Migration.operations[:4]:
-        operation.state_forwards("payment", state)
+    state = MigrationLoader(connection).project_state(("payment", "0083_migration"))
     with connection.cursor() as cursor:
         cursor.execute(
             'ALTER TABLE "payment_paymentplan" ADD COLUMN "dispersion_start_date" date NULL, '

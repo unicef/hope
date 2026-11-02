@@ -24,12 +24,12 @@ from hope.apps.core.utils import check_concurrency_version_in_mutation, to_choic
 from hope.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdSmallSerializer,
+    IndividualSmallSerializer,
 )
 from hope.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualIdNameSerializer,
     IndividualListSerializer,
-    IndividualSmallSerializer,
 )
 from hope.apps.household.const import (
     ROLE_ALTERNATE,
