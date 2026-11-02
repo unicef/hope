@@ -76,6 +76,8 @@ reconciliation data and returns the Payment to the sent-to-FSP state.
 
 **Ignore rows with empty/null delivered_quantity** leaves the Payment unchanged.
 
+If the file contains both empty and non-empty delivered_quantity values, HOPE processes each row according to the selected option. Empty rows are either reset or left unchanged, while non-empty values overwrite the existing reconciliation data. The related Payment results are recalculated accordingly.
+
 If a reset makes a FINISHED Payment Plan incomplete, HOPE moves the plan back to ACCEPTED. Its totals are recalculated.
 
 !!! warning
