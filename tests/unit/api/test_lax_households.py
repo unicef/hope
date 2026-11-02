@@ -1,10 +1,3 @@
-import os
-import tempfile
-from typing import Any
-from unittest.mock import patch
-
-from django.core.files.storage import default_storage
-from django.test.utils import override_settings
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -475,14 +468,13 @@ def test_collision_only_batch_returns_early(
     assert rdi.extra_hh_rdis.filter(id=existing_collision_household_b.id).exists()
 
 
-def test_create_household_with_consent_sign_stores_image_file(
+def test_create_household_with_consent_sign_references_stored_file(
     api_client: APIClient,
     lax_households_url: str,
     afghanistan_country: Country,
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
-    program: Program,
-    base64_image: str,
+    stored_image: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -493,7 +485,7 @@ def test_create_household_with_consent_sign_stores_image_file(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "consent_sign": base64_image,
+        "consent_sign": stored_image,
     }
 
     response = api_client.post(lax_households_url, [household_data], format="json")
@@ -502,22 +494,15 @@ def test_create_household_with_consent_sign_stores_image_file(
     assert response.data["accepted"] == 1
 
     household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
-    programme_code = program.code
-    assert household.consent_sign.name.startswith(
-        f"{program.start_date.year}/{program.business_area.slug}/{programme_code}/{programme_code}"
-    )
-    assert household.consent_sign.name.endswith(".png")
-    assert default_storage.exists(household.consent_sign.name)
+    assert household.consent_sign.name == stored_image
 
 
-def test_consent_sign_cleanup_on_failure(
+def test_create_household_with_missing_consent_sign_file_returns_error(
     api_client: APIClient,
     lax_households_url: str,
     afghanistan_country: Country,
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
-    rdi: RegistrationDataImport,
-    base64_image: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -528,35 +513,44 @@ def test_consent_sign_cleanup_on_failure(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "consent_sign": base64_image,
+        "consent_sign": "cw_files/does_not_exist.png",
     }
 
-    with tempfile.TemporaryDirectory() as media_root:
-        with override_settings(MEDIA_ROOT=media_root):
+    response = api_client.post(lax_households_url, [household_data], format="json")
 
-            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
-                pre_cleanup_files = []
-                for root, _, files in os.walk(media_root):
-                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
-                assert len(pre_cleanup_files) > 0
-                raise RuntimeError("forced failure for consent sign cleanup test")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0]["consent_sign"] == [
+        "File 'cw_files/does_not_exist.png' does not exist in storage."
+    ]
 
-            with patch(
-                "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
-                side_effect=fail_after_files_exist,
-            ):
-                response = api_client.post(lax_households_url, [household_data], format="json")
 
-            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-            assert response.json() == {
-                "detail": "Failed to create lax households.",
-                "rdi_id": str(rdi.id),
-            }
+def test_create_household_with_empty_consent_sign(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id],
+        "consent_sign": "",
+    }
 
-            leftover_files = []
-            for root, _, files in os.walk(media_root):
-                leftover_files.extend(os.path.join(root, f) for f in files)
-            assert leftover_files == []
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
+    household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
+    assert not household.consent_sign
 
 
 def test_household_with_image_flex_field(
@@ -566,7 +560,7 @@ def test_household_with_image_flex_field(
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
     household_image_flex_attribute: FlexibleAttribute,
-    base64_image: str,
+    stored_image: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -577,7 +571,7 @@ def test_household_with_image_flex_field(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "household_photo": base64_image,
+        "household_photo": stored_image,
     }
 
     response = api_client.post(lax_households_url, [household_data], format="json")
@@ -586,20 +580,16 @@ def test_household_with_image_flex_field(
     assert response.data["accepted"] == 1
 
     household = PendingHousehold.objects.get(id=response.data["results"][0]["pk"])
-    assert "household_photo" in household.flex_fields
-    assert not household.flex_fields["household_photo"].startswith(base64_image[:20])
-    assert default_storage.exists(household.flex_fields["household_photo"])
+    assert household.flex_fields["household_photo"] == stored_image
 
 
-def test_household_image_flex_field_cleanup_on_failure(
+def test_household_with_missing_image_flex_field_file_returns_error(
     api_client: APIClient,
     lax_households_url: str,
     afghanistan_country: Country,
     head_of_household: PendingIndividual,
     primary_collector: PendingIndividual,
-    rdi: RegistrationDataImport,
     household_image_flex_attribute: FlexibleAttribute,
-    base64_image: str,
 ) -> None:
     household_data = {
         "country": "AF",
@@ -610,35 +600,43 @@ def test_household_image_flex_field_cleanup_on_failure(
         "head_of_household_id": head_of_household.unicef_id,
         "primary_collector_id": primary_collector.unicef_id,
         "members": [head_of_household.unicef_id],
-        "household_photo": base64_image,
+        "household_photo": "cw_files/does_not_exist.png",
     }
 
-    with tempfile.TemporaryDirectory() as media_root:
-        with override_settings(MEDIA_ROOT=media_root):
+    response = api_client.post(lax_households_url, [household_data], format="json")
 
-            def fail_after_files_exist(*args: Any, **kwargs: Any) -> None:
-                pre_cleanup_files = []
-                for root, _, files in os.walk(media_root):
-                    pre_cleanup_files.extend(os.path.join(root, f) for f in files)
-                assert len(pre_cleanup_files) > 0
-                raise RuntimeError("forced failure for image flex field cleanup test")
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 0
+    assert response.data["errors"] == 1
+    assert response.data["results"][0] == {
+        "flex_fields": {"household_photo": ["File 'cw_files/does_not_exist.png' does not exist in storage."]}
+    }
 
-            with patch(
-                "hope.api.endpoints.rdi.lax.PendingHousehold.objects.bulk_create",
-                side_effect=fail_after_files_exist,
-            ):
-                response = api_client.post(lax_households_url, [household_data], format="json")
 
-            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-            assert response.json() == {
-                "detail": "Failed to create lax households.",
-                "rdi_id": str(rdi.id),
-            }
+def test_household_with_empty_image_flex_field(
+    api_client: APIClient,
+    lax_households_url: str,
+    afghanistan_country: Country,
+    head_of_household: PendingIndividual,
+    primary_collector: PendingIndividual,
+    household_image_flex_attribute: FlexibleAttribute,
+) -> None:
+    household_data = {
+        "country": "AF",
+        "country_origin": "AF",
+        "size": 1,
+        "consent_sharing": ["UNICEF"],
+        "village": "Test Village",
+        "head_of_household_id": head_of_household.unicef_id,
+        "primary_collector_id": primary_collector.unicef_id,
+        "members": [head_of_household.unicef_id],
+        "household_photo": "",
+    }
 
-            leftover_files = []
-            for root, _, files in os.walk(media_root):
-                leftover_files.extend(os.path.join(root, f) for f in files)
-            assert leftover_files == []
+    response = api_client.post(lax_households_url, [household_data], format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED, str(response.json())
+    assert response.data["accepted"] == 1
 
 
 def test_household_create_validation_facility_area(
