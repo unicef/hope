@@ -92,6 +92,21 @@ describe('PaymentPlanGroupDetailsHeader', () => {
     ).toBe('XLSX IMPORTING RECONCILIATION');
   });
 
+  it('hides Reactivate while the aborted group rebuilds its plans', () => {
+    mockUsePermissions.mockReturnValue([PERMISSIONS.PM_REACTIVATE_ABORT]);
+    renderHeader(
+      PaymentPlanGroupDetailBackgroundActionStatusEnum.REBUILDING,
+      PaymentPlanGroupStatusEnum.ABORTED,
+    );
+
+    expect(
+      screen.getByTestId('group-background-action-status').textContent,
+    ).toBe('REBUILDING');
+    expect(
+      screen.queryByTestId('button-reactivate-payment-plan-group'),
+    ).toBeNull();
+  });
+
   it('shows no background action status when the group is idle', () => {
     renderHeader(null);
 

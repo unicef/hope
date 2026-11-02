@@ -3777,7 +3777,8 @@ def test_reactivate_aborted_group_with_permission_returns_200(
     response = client.post(url)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["status"] == PaymentPlanGroup.Status.OPEN
+    assert response.json()["status"] == PaymentPlanGroup.Status.ABORTED
+    assert response.json()["background_action_status"] == PaymentPlanGroup.BackgroundActionStatus.REBUILDING
 
 
 @pytest.fixture

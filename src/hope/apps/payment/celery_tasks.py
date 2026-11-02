@@ -1751,6 +1751,7 @@ def payment_plan_full_rebuild_async_task(payment_plan: PaymentPlan, update_money
 
 
 def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
+    from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
     from hope.apps.payment.services.payment_plan_services import PaymentPlanService
     from hope.models import PaymentPlan
 
@@ -1788,6 +1789,10 @@ def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
                     )
                 )
                 log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
+                if payment_plan.payment_plan_group_id:
+                    PaymentPlanGroupService.open_after_payees_refresh(
+                        payment_plan.payment_plan_group_id, job.config.get("user_id")
+                    )
         except Exception:
             logger.exception("Payment plan payees refresh failed")
             flow = PaymentPlanFlow(payment_plan)
@@ -1797,6 +1802,7 @@ def payment_plan_refresh_payees_async_task_action(job: AsyncRetryJob) -> None:
 
 
 def mark_payment_plan_rebuild_error(job: AsyncRetryJob, _exception: Exception) -> None:
+    from hope.apps.payment.services.payment_plan_group_services import PaymentPlanGroupService
     from hope.models import PaymentPlan
 
     payment_plan = PaymentPlan.objects.get(id=job.config["payment_plan_id"])
@@ -1805,6 +1811,8 @@ def mark_payment_plan_rebuild_error(job: AsyncRetryJob, _exception: Exception) -
     flow.background_action_status_rebuild_error()
     payment_plan.save(update_fields=("background_action_status", "updated_at"))
     log_payment_plan_change(payment_plan, old_payment_plan, job.config.get("user_id"))
+    if payment_plan.payment_plan_group_id:
+        PaymentPlanGroupService.mark_rebuild_error(payment_plan.payment_plan_group_id, job.config.get("user_id"))
 
 
 def payment_plan_refresh_payees_async_task(payment_plan: PaymentPlan, user_id: str | None = None) -> None:

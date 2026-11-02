@@ -31,6 +31,7 @@ import { SendForApprovalGroupButton } from './actions/SendForApprovalGroupButton
 import { SendToPaymentGatewayGroupButton } from './actions/SendToPaymentGatewayGroupButton';
 import { SplitGroupButton } from './actions/SplitGroupButton';
 import type { PaymentPlanGroupDetail } from './types';
+import { isGroupBackgroundActionBusy } from './utils';
 import { responsiveValue } from 'src/responsive';
 import { HeaderActions } from '@core/HeaderActions';
 
@@ -102,7 +103,8 @@ function ClosureButtons({
   }
   switch (group.status) {
     case PaymentPlanGroupStatusEnum.ABORTED:
-      return can(PERMISSIONS.PM_REACTIVATE_ABORT) ? (
+      return can(PERMISSIONS.PM_REACTIVATE_ABORT) &&
+        !isGroupBackgroundActionBusy(group) ? (
         <GroupClosureActionButton group={group} action="reactivate" />
       ) : null;
     case PaymentPlanGroupStatusEnum.FINISHED:

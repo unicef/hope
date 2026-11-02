@@ -942,7 +942,7 @@ def test_abort_rejects_open_group(open_group, locked_payment_plan, user):
 
 
 @patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task")
-def test_reactivate_abort_reopens_group_and_queues_its_plans_payees_refresh(
+def test_reactivate_abort_keeps_group_rebuilding_while_its_plans_refresh_payees(
     mock_refresh, group_in_approval, locked_payment_plan, user, django_capture_on_commit_callbacks
 ):
     PaymentPlanGroupService(group_in_approval).abort(None, user)
@@ -952,10 +952,110 @@ def test_reactivate_abort_reopens_group_and_queues_its_plans_payees_refresh(
 
     group_in_approval.refresh_from_db()
     locked_payment_plan.refresh_from_db()
-    assert group_in_approval.status == PaymentPlanGroup.Status.OPEN
+    assert group_in_approval.status == PaymentPlanGroup.Status.ABORTED
+    assert group_in_approval.background_action_status == PaymentPlanGroup.BackgroundActionStatus.REBUILDING
     assert locked_payment_plan.status == PaymentPlan.Status.ABORTED
     assert locked_payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
     mock_refresh.assert_called_once_with(locked_payment_plan, str(user.pk))
+
+
+@pytest.fixture
+def aborted_group_with_top_up_plan(cycle):
+    group = PaymentPlanGroupFactory(cycle=cycle, status=PaymentPlanGroup.Status.ABORTED)
+    PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=group,
+        plan_type=PaymentPlan.PlanType.TOP_UP,
+        status=PaymentPlan.Status.ABORTED,
+    )
+    return group
+
+
+def test_reactivate_abort_opens_group_when_no_plan_refreshes_payees(aborted_group_with_top_up_plan, user):
+    PaymentPlanGroupService(aborted_group_with_top_up_plan).reactivate_abort(str(user.pk))
+
+    aborted_group_with_top_up_plan.refresh_from_db()
+    assert aborted_group_with_top_up_plan.status == PaymentPlanGroup.Status.OPEN
+    assert aborted_group_with_top_up_plan.background_action_status is None
+    assert aborted_group_with_top_up_plan.payment_plans.get().status == PaymentPlan.Status.OPEN
+
+
+@pytest.fixture
+def rebuilding_group(cycle):
+    return PaymentPlanGroupFactory(
+        cycle=cycle,
+        status=PaymentPlanGroup.Status.ABORTED,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.REBUILDING,
+    )
+
+
+def test_reactivate_abort_rejects_group_still_rebuilding(rebuilding_group, user):
+    with pytest.raises(ValidationError) as error:
+        PaymentPlanGroupService(rebuilding_group).reactivate_abort(str(user.pk))
+    assert error.value.detail[0] == "Another background action is already in progress."
+
+
+@pytest.fixture
+def rebuild_error_group(cycle):
+    return PaymentPlanGroupFactory(
+        cycle=cycle,
+        status=PaymentPlanGroup.Status.ABORTED,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.REBUILD_ERROR,
+    )
+
+
+@pytest.fixture
+def failed_rebuild_plan(cycle, rebuild_error_group):
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=rebuild_error_group,
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILD_ERROR,
+    )
+
+
+@pytest.fixture
+def still_rebuilding_plan(cycle, rebuild_error_group):
+    return PaymentPlanFactory(
+        program_cycle=cycle,
+        payment_plan_group=rebuild_error_group,
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILDING,
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.payment_plan_refresh_payees_async_task")
+def test_reactivate_abort_after_rebuild_error_retries_only_the_failed_plan(
+    mock_refresh,
+    rebuild_error_group,
+    failed_rebuild_plan,
+    still_rebuilding_plan,
+    user,
+    django_capture_on_commit_callbacks,
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        PaymentPlanGroupService(rebuild_error_group).reactivate_abort(str(user.pk))
+
+    rebuild_error_group.refresh_from_db()
+    failed_rebuild_plan.refresh_from_db()
+    assert rebuild_error_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.REBUILDING
+    assert failed_rebuild_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILDING
+    mock_refresh.assert_called_once_with(failed_rebuild_plan, str(user.pk))
+
+
+def test_mark_rebuild_error_marks_rebuilding_group(rebuilding_group, user):
+    PaymentPlanGroupService.mark_rebuild_error(rebuilding_group.pk, str(user.pk))
+
+    rebuilding_group.refresh_from_db()
+    assert rebuilding_group.status == PaymentPlanGroup.Status.ABORTED
+    assert rebuilding_group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.REBUILD_ERROR
+
+
+def test_mark_rebuild_error_leaves_group_that_is_not_rebuilding(open_group, user):
+    PaymentPlanGroupService.mark_rebuild_error(open_group.pk, str(user.pk))
+
+    open_group.refresh_from_db()
+    assert open_group.background_action_status is None
 
 
 def test_reactivate_abort_rejects_group_not_aborted(group_in_approval, user):

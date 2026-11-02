@@ -37,6 +37,8 @@ from hope.models import (
 )
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from hope.models import User
 
 ACTION_TO_STATUSES = {
@@ -527,19 +529,63 @@ class PaymentPlanGroupService:
 
     @transaction.atomic
     def reactivate_abort(self, user_id: str | None = None) -> PaymentPlanGroup:
+        """Reactivate the plans; the group stays ABORTED and REBUILDING while a regular plan refreshes its payees.
+
+        After a failed refresh (REBUILD_ERROR) the call is repeated; plans still rebuilding are left to finish.
+        """
         payment_plan_group = self._locked_for_update()
         if payment_plan_group.status != PaymentPlanGroup.Status.ABORTED:
             raise ValidationError(
                 "Reactivate Aborted Payment Plan Group is possible only within Status "
                 f"{PaymentPlanGroup.Status.ABORTED}"
             )
-        for payment_plan in self._payment_plans(payment_plan_group):
-            PaymentPlanService(payment_plan).reactivate_abort(user_id)
-        flow = PaymentPlanGroupFlow(payment_plan_group)
-        flow.status_reactivate_abort()
-        payment_plan_group.save(update_fields=("status", "status_date", "updated_at"))
+        if not payment_plan_group.can_start_background_action:
+            raise ValidationError("Another background action is already in progress.")
+        payment_plans = self._payment_plans(payment_plan_group)
+        for payment_plan in payment_plans:
+            if (
+                payment_plan.status == PaymentPlan.Status.ABORTED
+                and payment_plan.background_action_status != PaymentPlan.BackgroundActionStatus.REBUILDING
+            ):
+                PaymentPlanService(payment_plan).reactivate_abort(user_id)
+        if any(payment_plan.status == PaymentPlan.Status.ABORTED for payment_plan in payment_plans):
+            payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.REBUILDING
+            payment_plan_group.save(update_fields=("background_action_status", "updated_at"))
+        else:
+            self._open_reactivated(payment_plan_group)
         self.payment_plan_group = payment_plan_group
         return payment_plan_group
+
+    @staticmethod
+    @transaction.atomic
+    def open_after_payees_refresh(payment_plan_group_id: "UUID", user_id: str | None = None) -> None:
+        """Open a rebuilding group once none of its plans is still ABORTED."""
+        payment_plan_group = PaymentPlanGroup.objects.select_for_update().get(pk=payment_plan_group_id)
+        if payment_plan_group.background_action_status != PaymentPlanGroup.BackgroundActionStatus.REBUILDING:
+            return
+        if payment_plan_group.payment_plans.filter(status=PaymentPlan.Status.ABORTED).exists():
+            return
+        old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
+        PaymentPlanGroupService._open_reactivated(payment_plan_group)
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, user_id)
+
+    @staticmethod
+    @transaction.atomic
+    def mark_rebuild_error(payment_plan_group_id: "UUID", user_id: str | None = None) -> None:
+        payment_plan_group = PaymentPlanGroup.objects.select_for_update().get(pk=payment_plan_group_id)
+        if payment_plan_group.background_action_status != PaymentPlanGroup.BackgroundActionStatus.REBUILDING:
+            return
+        old_payment_plan_group = cast("PaymentPlanGroup", copy_model_object(payment_plan_group))
+        payment_plan_group.background_action_status = PaymentPlanGroup.BackgroundActionStatus.REBUILD_ERROR
+        payment_plan_group.save(update_fields=("background_action_status", "updated_at"))
+        log_payment_plan_group_change(payment_plan_group, old_payment_plan_group, user_id)
+
+    @staticmethod
+    def _open_reactivated(payment_plan_group: PaymentPlanGroup) -> None:
+        flow = PaymentPlanGroupFlow(payment_plan_group)
+        flow.status_reactivate_abort()
+        payment_plan_group.background_action_status = None
+        payment_plan_group.save(update_fields=("status", "status_date", "background_action_status", "updated_at"))
 
     @staticmethod
     def _transition_stage(payment_plan_group: PaymentPlanGroup, approval_type: str) -> None:

@@ -85,11 +85,14 @@ class PaymentPlanGroup(TimeStampedUUIDModel, UnicefIdentifiedModel, InternalData
             "Importing FSP Extra Fields XLSX file",
         )
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
+        REBUILDING = "REBUILDING", "Rebuilding"
+        REBUILD_ERROR = "REBUILD_ERROR", "Rebuild Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.RECALCULATING_ERROR,
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        BackgroundActionStatus.REBUILD_ERROR,
     ]
 
     CHILD_GROUP_SOURCE_STATUSES = (Status.ACCEPTED, Status.FINISHED)

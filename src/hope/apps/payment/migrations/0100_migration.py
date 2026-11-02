@@ -22,6 +22,8 @@ class Migration(migrations.Migration):
                     ("XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"),
                     ("XLSX_IMPORTING_FSP_EXTRA_FIELDS", "Importing FSP Extra Fields XLSX file"),
                     ("XLSX_IMPORT_ERROR", "Import XLSX file Error"),
+                    ("REBUILDING", "Rebuilding"),
+                    ("REBUILD_ERROR", "Rebuild Error"),
                 ],
                 default=None,
                 help_text="Background Action Status for asynchronous group tasks [sys]",

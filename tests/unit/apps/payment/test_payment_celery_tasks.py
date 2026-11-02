@@ -54,6 +54,7 @@ from hope.apps.payment.celery_tasks import (
     import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task,
     import_payment_plan_group_fsp_extra_fields_from_xlsx_async_task_action,
     import_payment_plan_payment_list_from_xlsx_async_task,
+    mark_payment_plan_rebuild_error,
     notify_payment_plan_group_reconciliation_import_failure,
     payment_plan_apply_engine_rule_async_task,
     payment_plan_apply_engine_rule_async_task_action,
@@ -632,6 +633,73 @@ def test_refresh_payees_task_logs_reactivation(
     assert log.changes["status"] == {"from": "ABORTED", "to": "OPEN"}
     assert log.changes["background_action_status"] == {"from": "REBUILDING", "to": None}
     assert list(log.programs.values_list("pk", flat=True)) == [rebuilding_regular_plan.program.pk]
+
+
+@pytest.fixture
+def rebuilding_group_plan() -> PaymentPlan:
+    group = PaymentPlanGroupFactory(
+        status=PaymentPlanGroup.Status.ABORTED,
+        background_action_status=PaymentPlanGroup.BackgroundActionStatus.REBUILDING,
+    )
+    return PaymentPlanFactory(
+        program_cycle=group.cycle,
+        payment_plan_group=group,
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILDING,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+    )
+
+
+@pytest.fixture
+def second_rebuilding_group_plan(rebuilding_group_plan: PaymentPlan) -> PaymentPlan:
+    return PaymentPlanFactory(
+        program_cycle=rebuilding_group_plan.program_cycle,
+        payment_plan_group=rebuilding_group_plan.payment_plan_group,
+        status=PaymentPlan.Status.ABORTED,
+        background_action_status=PaymentPlan.BackgroundActionStatus.REBUILDING,
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+    )
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_refresh_payees_task_opens_group_after_its_last_plan(
+    mock_refresh_payees: Mock,
+    rebuilding_group_plan: PaymentPlan,
+) -> None:
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, rebuilding_group_plan)
+
+    group = rebuilding_group_plan.payment_plan_group
+    group.refresh_from_db()
+    assert group.status == PaymentPlanGroup.Status.OPEN
+    assert group.background_action_status is None
+
+
+@patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
+def test_refresh_payees_task_keeps_group_rebuilding_while_another_plan_is_aborted(
+    mock_refresh_payees: Mock,
+    rebuilding_group_plan: PaymentPlan,
+    second_rebuilding_group_plan: PaymentPlan,
+) -> None:
+    queue_and_run_retry_task(payment_plan_refresh_payees_async_task, rebuilding_group_plan)
+
+    group = rebuilding_group_plan.payment_plan_group
+    group.refresh_from_db()
+    rebuilding_group_plan.refresh_from_db()
+    assert rebuilding_group_plan.status == PaymentPlan.Status.OPEN
+    assert group.status == PaymentPlanGroup.Status.ABORTED
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.REBUILDING
+
+
+def test_mark_payment_plan_rebuild_error_marks_its_group(rebuilding_group_plan: PaymentPlan) -> None:
+    job = AsyncRetryJob(config={"payment_plan_id": str(rebuilding_group_plan.id), "user_id": None})
+
+    mark_payment_plan_rebuild_error(job, Exception("refresh failed"))
+
+    group = rebuilding_group_plan.payment_plan_group
+    group.refresh_from_db()
+    rebuilding_group_plan.refresh_from_db()
+    assert rebuilding_group_plan.background_action_status == PaymentPlan.BackgroundActionStatus.REBUILD_ERROR
+    assert group.background_action_status == PaymentPlanGroup.BackgroundActionStatus.REBUILD_ERROR
 
 
 @patch("hope.apps.payment.services.payment_plan_services.PaymentPlanService.refresh_payees")
